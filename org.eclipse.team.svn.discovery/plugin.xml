@@ -21,7 +21,6 @@
          point="org.eclipse.team.svn.core.connectorDiscovery">
          
       <!--   SVN Kit   -->
-      
       <connectorDescriptor
             categoryId="org.eclipse.team.svn.discovery.svn.connectors"
             description="SVN connector based on SVNKit 1.10.4 library (http://svnkit.com/). Compatible with SVN from version 1.7 up to 1.10. Pure Java. Supported platforms: All."
@@ -30,9 +29,9 @@
             kind="task"
             license="TMate Open Source License"
             name="SVN Kit 1.10.4"
-            provider="Polarion"
-            siteUrl="http://community.polarion.com/projects/subversive/download/eclipse/6.1/neon-site/">
-         <icon image32="images/Polarion.png">
+            provider="osspit.org"
+            siteUrl="https://osspit.org/eclipse/subversive-connectors/">
+         <icon image32="images/Subversive.png">
          </icon>
          <overview
                summary="SVN Kit connector for the Eclipse Subversive. Compatible with SVN version 1.7 up to 1.10. SVNKit is written in Java and does not require any additional binaries or native applications. It is portable and there is no need for OS specific code."
