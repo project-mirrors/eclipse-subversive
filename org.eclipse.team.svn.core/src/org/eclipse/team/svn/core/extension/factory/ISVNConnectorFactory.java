@@ -73,6 +73,10 @@ public interface ISVNConnectorFactory {
 		 * SVN 1.9 compatible API is supported by the connector
 		 */
 		public static final int SVNAPI_1_9_x = 9;
+		/**
+		 * SVN 1.10 compatible API is supported by the connector
+		 */
+		public static final int SVNAPI_1_10_x = 10;
 	}
 	
 	/**
