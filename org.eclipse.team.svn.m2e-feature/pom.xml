@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-	Copyright (c) 2022 ArSysOp and others
+	Copyright (c) 2022, 2023 ArSysOp
 
 	This program and the accompanying materials are made available under the
 	terms of the Eclipse Public License 2.0 which is available at
@@ -10,6 +10,7 @@
 
 	Contributors:
 		Alexander Fedorov (ArSysOp) - initial API and implementation
+		Alexander Fedorov (ArSysOp) - ongoing support
 -->
 <project
     xmlns="http://maven.apache.org/POM/4.0.0"
@@ -19,13 +20,13 @@
 	<modelVersion>4.0.0</modelVersion>
 
     <artifactId>org.eclipse.team.svn.m2e</artifactId>
-    <version>4.8.0-SNAPSHOT</version>
+    <version>5.0.0-SNAPSHOT</version>
     <packaging>eclipse-feature</packaging>
 
     <parent>
         <groupId>org.eclipse.team.svn.features</groupId>
         <artifactId>org.eclipse.team.svn.features</artifactId>
-        <version>4.8.0-SNAPSHOT</version>
+        <version>5.0.0-SNAPSHOT</version>
         <relativePath>../features</relativePath>
     </parent>
 </project>
