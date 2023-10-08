@@ -50,7 +50,7 @@
 		<module>../../features/org.eclipse.team.svn.mylyn-feature</module>
 
 		<module>../../org.eclipse.team.svn.pde.build</module>
-		<module>../../org.eclipse.team.svn.pde.build-feature</module>
+		<module>../../features/org.eclipse.team.svn.pde.build-feature</module>
 
 		<module>../../releng/org.eclipse.team.svn.repository</module>
 	</modules>
