@@ -27,7 +27,7 @@
 		<module>../../releng/org.eclipse.team.svn.target</module>
 
 		<module>../../org.eclipse.team.svn</module>
-		<module>../../org.eclipse.team.svn.core</module>
+		<module>../../bundles/org.eclipse.team.svn.core</module>
 		<module>../../features/org.eclipse.team.svn.core-feature</module>
 		<module>../../org.eclipse.team.svn.discovery</module>
 		<module>../../org.eclipse.team.svn.help</module>
