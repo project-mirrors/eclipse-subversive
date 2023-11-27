@@ -30,7 +30,7 @@
 		<module>../../features/org.eclipse.team.svn.core-feature</module>
 
 		<module>../../bundles/org.eclipse.team.svn</module>
-		<module>../../org.eclipse.team.svn.help</module>
+		<module>../../bundles/org.eclipse.team.svn.help</module>
 		<module>../../org.eclipse.team.svn.ui</module>
 		<module>../../org.eclipse.team.svn.ui.startup</module>
 		<module>../../features/org.eclipse.team.svn-feature</module>
