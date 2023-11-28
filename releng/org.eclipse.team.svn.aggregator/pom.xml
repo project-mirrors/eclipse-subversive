@@ -46,7 +46,7 @@
 		<module>../../org.eclipse.team.svn.ui.nl1</module>
 		<module>../../features/org.eclipse.team.svn.nl1-feature</module>
 
-		<module>../../org.eclipse.team.svn.m2e</module>
+		<module>../../bundles/org.eclipse.team.svn.m2e</module>
 		<module>../../features/org.eclipse.team.svn.m2e-feature</module>
 
 		<module>../../bundles/org.eclipse.team.svn.mylyn</module>
