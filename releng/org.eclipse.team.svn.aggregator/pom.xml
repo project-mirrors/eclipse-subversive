@@ -38,7 +38,7 @@
 		<!--FIXME: AF: include to a feature -->
 		<module>../../bundles/org.eclipse.team.svn.discovery</module>
 
-		<module>../../org.eclipse.team.svn.ui.capabilities</module>
+		<module>../../bundles/org.eclipse.team.svn.ui.capabilities</module>
 		<module>../../features/org.eclipse.team.svn.ui.capabilities-feature</module>
 
 		<module>../../org.eclipse.team.svn.nl1</module>
