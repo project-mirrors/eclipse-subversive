@@ -56,17 +56,11 @@
       <import plugin="org.eclipse.ui.navigator"/>
       <import plugin="org.eclipse.ui.forms"/>
       <import plugin="org.eclipse.ui.browser"/>
+      <import feature="org.eclipse.team.svn.core" version="5.0.0.qualifier"/>
    </requires>
 
    <plugin
          id="org.eclipse.team.svn"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.eclipse.team.svn.core"
          download-size="0"
          install-size="0"
          version="0.0.0"
