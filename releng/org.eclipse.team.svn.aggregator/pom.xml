@@ -41,11 +41,6 @@
 		<module>../../bundles/org.eclipse.team.svn.ui.capabilities</module>
 		<module>../../features/org.eclipse.team.svn.ui.capabilities-feature</module>
 
-		<module>../../org.eclipse.team.svn.nl1</module>
-		<module>../../org.eclipse.team.svn.core.nl1</module>
-		<module>../../org.eclipse.team.svn.ui.nl1</module>
-		<module>../../features/org.eclipse.team.svn.nl1-feature</module>
-
 		<module>../../bundles/org.eclipse.team.svn.m2e</module>
 		<module>../../features/org.eclipse.team.svn.m2e-feature</module>
 
@@ -57,6 +52,11 @@
 
 		<module>../../bundles/org.eclipse.team.svn.resource.ignore.rules.jdt</module>
 		<module>../../features/org.eclipse.team.svn.resource.ignore.rules.jdt-feature</module>
+
+		<module>../../org.eclipse.team.svn.nl1</module>
+		<module>../../org.eclipse.team.svn.core.nl1</module>
+		<module>../../org.eclipse.team.svn.ui.nl1</module>
+		<module>../../nls/org.eclipse.team.svn.nl1-feature</module>
 
 		<module>../../releng/org.eclipse.team.svn.repository</module>
 	</modules>
