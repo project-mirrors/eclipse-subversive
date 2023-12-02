@@ -16,14 +16,19 @@
       label="%featureName"
       version="5.0.0.qualifier"
       provider-name="%providerName"
-      colocation-affinity="org.eclipse.team.svn">
-   <install-handler/>
+      colocation-affinity="org.eclipse.team.svn"
+      license-feature="org.eclipse.license"
+      license-feature-version="2.0.2">
 
    <description>
-      Integration with M2E http://www.eclipse.org/m2e Installation is possible only if M2E is already installed or installed in one step with Eclipse Subversive.
+      %description
    </description>
 
-   <license url="license.html">
+   <copyright>
+      %copyright
+   </copyright>
+
+   <license url="%licenseURL">
       %license
    </license>
 
