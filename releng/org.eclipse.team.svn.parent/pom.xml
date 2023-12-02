@@ -50,8 +50,8 @@
 	</organization>
 
 	<issueManagement>
-		<system>Bugzilla</system>
-		<url>https://bugs.eclipse.org/bugs/</url>
+		<system>GitLab</system>
+		<url>https://gitlab.eclipse.org/eclipse/subversive/subversive/-/issues/</url>
 	</issueManagement>
 
 	<pluginRepositories>
