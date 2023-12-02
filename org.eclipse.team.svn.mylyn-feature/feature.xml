@@ -16,14 +16,19 @@
       label="%featureName"
       version="5.0.0.qualifier"
       provider-name="%providerName"
-      colocation-affinity="org.eclipse.team.svn">
-   <install-handler/>
+      colocation-affinity="org.eclipse.team.svn"
+      license-feature="org.eclipse.license"
+      license-feature-version="2.0.2">
 
-   <description>
-      Integration with Mylyn http://www.eclipse.org/mylyn Installation is possible only if Mylyn is already installed or installed in one step with Eclipse Subversive.
+   <description url="https://eclipse.dev/subversive/">
+      %description
    </description>
 
-   <license url="license.html">
+   <copyright>
+      %copyright
+   </copyright>
+
+   <license url="%licenseURL">
       %license
    </license>
 
@@ -42,8 +47,8 @@
 
    <plugin
          id="org.eclipse.team.svn.mylyn"
-         download-size="20"
-         install-size="20"
+         download-size="0"
+         install-size="0"
          version="0.0.0"
          unpack="false"/>
 
