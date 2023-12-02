@@ -31,9 +31,7 @@
 		<required-java-version>11</required-java-version>
 		<required-maven-version>3.6.3</required-maven-version>
 		<tycho.version>2.7.5</tycho.version>
-<!--
-		<tycho.scmUrl>scm:svn:https://dev.eclipse.org/svnroot/technology/org.eclipse.subversive/</tycho.scmUrl>
--->
+		<tycho.scmUrl>https://gitlab.eclipse.org/eclipse/subversive/subversive.git</tycho.scmUrl>
 		<tycho-snapshot-repo.url>https://repo.eclipse.org/content/repositories/tycho-snapshots/</tycho-snapshot-repo.url>
 		<cbi-jdt-repo.url>https://repo.eclipse.org/content/repositories/eclipse-staging/</cbi-jdt-repo.url>
 		<eclipse-repo.url>https://repo.eclipse.org/content/repositories/cbi/</eclipse-repo.url>
