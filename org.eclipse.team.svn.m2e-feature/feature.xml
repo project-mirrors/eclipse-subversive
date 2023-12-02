@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+	Copyright (c) 2023 Contributors to the Eclipse Foundation
+
+	This program and the accompanying materials are made available under the
+	terms of the Eclipse Public License 2.0 which is available at
+	https://www.eclipse.org/legal/epl-2.0/.
+
+	SPDX-License-Identifier: EPL-2.0
+
+	Contributors:
+		See git history
+-->
+<feature
+      id="org.eclipse.team.svn.m2e"
+      label="%featureName"
+      version="5.0.0.qualifier"
+      provider-name="%providerName"
+      colocation-affinity="org.eclipse.team.svn">
+   <install-handler/>
+
+   <description>
+      Integration with M2E http://www.eclipse.org/m2e Installation is possible only if M2E is already installed or installed in one step with Eclipse Subversive.
+   </description>
+
+   <license url="license.html">
+      %license
+   </license>
+
+   <url>
+      <update label="%updateSiteName" url="http://download.eclipse.org/technology/subversive/4.8/update-site/"/>
+      <discovery label="%discoverySiteName" url="http://download.eclipse.org/technology/subversive/4.8/update-site/"/>
+   </url>
+
+   <requires>
+      <import feature="org.eclipse.team.svn"/>
+   </requires>
+
+   <plugin
+         id="org.eclipse.team.svn.m2e"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+</feature>
