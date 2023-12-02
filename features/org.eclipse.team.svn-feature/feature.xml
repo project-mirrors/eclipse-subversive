@@ -16,14 +16,19 @@
       label="%featureName"
       version="5.0.0.qualifier"
       provider-name="%providerName"
-      plugin="org.eclipse.team.svn">
-   <install-handler/>
+      plugin="org.eclipse.team.svn"
+      license-feature="org.eclipse.license"
+      license-feature-version="2.0.2">
 
    <description>
-      The Eclipse Team Provider for the Subversion version control system. For instructions about installing SVN connectors visit http://www.eclipse.org/subversive/downloads.php
+      %description
    </description>
 
-   <license url="license.html">
+   <copyright>
+      %copyright
+   </copyright>
+
+   <license url="%licenseURL">
       %license
    </license>
 
