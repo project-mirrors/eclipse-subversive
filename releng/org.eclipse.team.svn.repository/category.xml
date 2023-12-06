@@ -57,10 +57,6 @@
 		</description>
 	</category-def>
 	<feature
-		id="org.eclipse.team.svn.resource.ignore.rules.jdt">
-		<category name="org.eclipse.team.svn.integrations.category" />
-	</feature>
-	<feature
 		id="org.eclipse.team.svn.mylyn">
 		<category name="org.eclipse.team.svn.integrations.category" />
 	</feature>
@@ -123,10 +119,6 @@
 			Eclipse Subversive Team Provider integration for third party tools Developer Resources.
 		</description>
 	</category-def>
-	<feature
-		id="org.eclipse.team.svn.resource.ignore.rules.jdt.source">
-		<category name="org.eclipse.team.svn.integrations.category.source" />
-	</feature>
 	<feature
 		id="org.eclipse.team.svn.mylyn.source">
 		<category name="org.eclipse.team.svn.integrations.category.source" />
