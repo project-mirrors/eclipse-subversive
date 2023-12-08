@@ -12,14 +12,14 @@
 		See git history
 -->
 <feature
-      id="org.eclipse.team.svn.nl1"
+      id="org.eclipse.team.svn.nl1.feature"
       label="%featureName"
       version="5.0.0.qualifier"
       provider-name="%providerName"
       plugin="org.eclipse.team.svn.nl1"
-      colocation-affinity="org.eclipse.team.svn"
       license-feature="org.eclipse.license"
-      license-feature-version="2.0.2">
+      license-feature-version="2.0.2"
+      colocation-affinity="org.eclipse.team.svn">
 
    <description url="https://eclipse.dev/subversive/">
       %description

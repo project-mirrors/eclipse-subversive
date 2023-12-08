@@ -35,7 +35,7 @@
 		<category name="org.eclipse.team.svn.category" />
 	</feature>
 	<feature
-		id="org.eclipse.team.svn.nl1">
+		id="org.eclipse.team.svn.nl1.feature">
 		<category name="org.eclipse.team.svn.category" />
 	</feature>
 	<category-def
@@ -98,7 +98,7 @@
 		<category name="org.eclipse.team.svn.category.source" />
 	</feature>
 	<feature
-		id="org.eclipse.team.svn.nl1.source">
+		id="org.eclipse.team.svn.nl1.feature.source">
 		<category name="org.eclipse.team.svn.category.source" />
 	</feature>
 	<category-def
