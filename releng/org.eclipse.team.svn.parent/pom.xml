@@ -30,10 +30,6 @@
 		<required-maven-version>3.6.3</required-maven-version>
 		<tycho.version>2.7.5</tycho.version>
 		<tycho.scmUrl>https://gitlab.eclipse.org/eclipse/subversive/subversive.git</tycho.scmUrl>
-		<maven.build.timestamp.format>yyyyMMdd-HHmm</maven.build.timestamp.format>
-		<buildTimestamp>${maven.build.timestamp}</buildTimestamp>
-		<buildId>${buildTimestamp}</buildId>
-		<build.label>${unqualifiedVersion}.${buildQualifier}</build.label>
 	</properties>
 
 	<organization>
