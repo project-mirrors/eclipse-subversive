@@ -24,18 +24,12 @@
 	<packaging>pom</packaging>
 
 	<properties>
-		<cbi-plugins.version>1.1.8-SNAPSHOT</cbi-plugins.version>
-		<jarsigner.version>1.1.5</jarsigner.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<qualifier.format>'v'yyyyMMdd-HHmm</qualifier.format>
 		<required-java-version>11</required-java-version>
 		<required-maven-version>3.6.3</required-maven-version>
 		<tycho.version>2.7.5</tycho.version>
 		<tycho.scmUrl>https://gitlab.eclipse.org/eclipse/subversive/subversive.git</tycho.scmUrl>
-		<tycho-snapshot-repo.url>https://repo.eclipse.org/content/repositories/tycho-snapshots/</tycho-snapshot-repo.url>
-		<cbi-jdt-repo.url>https://repo.eclipse.org/content/repositories/eclipse-staging/</cbi-jdt-repo.url>
-		<eclipse-repo.url>https://repo.eclipse.org/content/repositories/cbi/</eclipse-repo.url>
-		<cbi-snapshots-repo.url>https://repo.eclipse.org/content/repositories/cbi-snapshots/</cbi-snapshots-repo.url>
 		<maven.build.timestamp.format>yyyyMMdd-HHmm</maven.build.timestamp.format>
 		<buildTimestamp>${maven.build.timestamp}</buildTimestamp>
 		<buildId>${buildTimestamp}</buildId>
@@ -52,75 +46,7 @@
 		<url>https://gitlab.eclipse.org/eclipse/subversive/subversive/-/issues/</url>
 	</issueManagement>
 
-	<pluginRepositories>
-		<pluginRepository>
-			<id>tycho-snapshots</id>
-			<url>${tycho-snapshot-repo.url}</url>
-			<releases>
-				<enabled>true</enabled>
-			</releases>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
-		</pluginRepository>
-
-		<pluginRepository>
-			<id>cbi-jdt</id>
-			<url>${cbi-jdt-repo.url}</url>
-			<releases>
-				<enabled>true</enabled>
-			</releases>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
-		</pluginRepository>
-		<pluginRepository>
-			<id>cbi-snapshots</id>
-			<url>${cbi-snapshots-repo.url}</url>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
-		</pluginRepository>
-		<pluginRepository>
-			<id>eclipse</id>
-			<url>${eclipse-repo.url}</url>
-			<releases>
-				<enabled>true</enabled>
-			</releases>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
-		</pluginRepository>
-	</pluginRepositories>
-
-	<repositories>
-	</repositories>
-
 	<profiles>
-		<!-- Automatic profile for features that shouldn't generate sources -->
-		<profile>
-			<id>feature-no-source</id>
-			<activation>
-				<file>
-				<exists>feature-no-source.properties</exists>
-				</file>
-			</activation>
-			<build>
-				<plugins>
-					<plugin>
-						<groupId>org.eclipse.tycho.extras</groupId>
-						<artifactId>tycho-source-feature-plugin</artifactId>
-						<version>${tycho.version}</version>
-						<executions>
-							<execution>
-								<id>source-feature</id>
-								<phase>none</phase>
-							</execution>
-						</executions>
-					</plugin>
-				</plugins>
-			</build>
-		</profile>
 		<profile>
 			<id>about-mappings</id>
 			<activation>
@@ -141,53 +67,36 @@
 			</build>
 		</profile>
 		<profile>
-			<id>production</id>
-			<activation>
-				<property>
-					<name>PACK_AND_SIGN</name>
-					<value>true</value>
-				</property>
-			</activation>
+			<id>sign</id>
 			<build>
 				<plugins>
 					<plugin>
-						<groupId>org.eclipse.tycho</groupId>
-						<artifactId>target-platform-configuration</artifactId>
-						<configuration>
-							<includePackedArtifacts>true</includePackedArtifacts>
-						</configuration>
-					</plugin>
-					<plugin>
 						<groupId>org.eclipse.cbi.maven.plugins</groupId>
 						<artifactId>eclipse-jarsigner-plugin</artifactId>
+						<version>1.4.2</version>
+						<configuration>
+							<resigningStrategy>DO_NOT_RESIGN</resigningStrategy>
+						</configuration>
 						<executions>
 							<execution>
 								<id>sign</id>
+								<phase>post-integration-test</phase>
 								<goals>
 									<goal>sign</goal>
 								</goals>
-								<phase>verify</phase>
 							</execution>
 						</executions>
-					</plugin>
-					<plugin>
-						<groupId>org.eclipse.tycho</groupId>
-						<artifactId>tycho-p2-plugin</artifactId>
-						<executions>
-							<execution>
-								<id>p2-metadata</id>
-								<goals>
-									<goal>p2-metadata</goal>
-								</goals>
-								<phase>verify</phase>
-							</execution>
-						</executions>
-						<configuration>
-							<defaultP2Metadata>false</defaultP2Metadata>
-						</configuration>
 					</plugin>
 				</plugins>
 			</build>
+			<pluginRepositories>
+				<pluginRepository>
+					<id>eclipse-cbi</id>
+					<name>Eclipse CBI</name>
+					<url>
+						https://repo.eclipse.org/content/repositories/cbi-releases/</url>
+				</pluginRepository>
+			</pluginRepositories>
 		</profile>
 	</profiles>
 

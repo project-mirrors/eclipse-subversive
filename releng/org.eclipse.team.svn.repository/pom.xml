@@ -32,7 +32,7 @@
     <eclipse.repo>https://download.eclipse.org/releases/2023-09</eclipse.repo>
     <justj.tools.repo>https://download.eclipse.org/justj/tools/updates/nightly/latest</justj.tools.repo>
     <org.eclipse.storage.user>genie.subversive</org.eclipse.storage.user>
-    <org.eclipse.justj.p2.manager.args>-remote ${org.eclipse.storage.user}@projects-storage.eclipse.org:/home/data/httpd/download.eclipse.org/subversive</org.eclipse.justj.p2.manager.args>
+    <org.eclipse.justj.p2.manager.args>-remote ${org.eclipse.storage.user}@projects-storage.eclipse.org:/home/data/httpd/download.eclipse.org/technology/subversive</org.eclipse.justj.p2.manager.args>
     <org.eclipse.justj.p2.manager.extra.args></org.eclipse.justj.p2.manager.extra.args>
     <org.eclipse.justj.p2.manager.relative>updates</org.eclipse.justj.p2.manager.relative>
     <org.eclipse.justj.p2.manager.build.url>https://www.eclipse.org/</org.eclipse.justj.p2.manager.build.url>
@@ -103,9 +103,9 @@
                     -timestamp ${build.timestamp}
                     -type ${build.type}
                     -breadcrumb "Subversive https://www.eclipse.org/subversive"
-                    -favicon https://raw.githubusercontent.com/eclipse-mylyn/org.eclipse.mylyn/main/mylyn.commons/org.eclipse.mylyn.commons.core/mylyn.png
+                    -favicon https://gitlab.eclipse.org/eclipse/subversive/subversive/-/raw/main/bundles/org.eclipse.team.svn/Subversive.png?ref_type=heads
                     -xtitle-image https://www.eclipse.org/jetty/common/images/jetty-logo.svg
-                    -body-image https://raw.githubusercontent.com/eclipse-mylyn/org.eclipse.mylyn/main/mylyn.commons/org.eclipse.mylyn.commons.core/mylyn.png
+                    -body-image https://gitlab.eclipse.org/eclipse/subversive/subversive/-/raw/main/bundles/org.eclipse.team.svn/Subversive.png?ref_type=heads
                     ${org.eclipse.justj.p2.manager.extra.args}
                   </appArgLine>
                 </configuration>
