@@ -38,13 +38,13 @@ import org.eclipse.team.svn.ui.panel.remote.RenameResourcePanel;
 public class RenameAction extends AbstractRepositoryTeamAction {
 
 	public RenameAction() {
-		super();
 	}
 
+	@Override
 	public void runImpl(IAction action) {
-		IRepositoryResource[] resources = this.getSelectedRepositoryResources();
+		IRepositoryResource[] resources = getSelectedRepositoryResources();
 		RenameResourcePanel panel = new RenameResourcePanel(resources[0].getName());
-		DefaultDialog dialog = new DefaultDialog(this.getShell(), panel);
+		DefaultDialog dialog = new DefaultDialog(getShell(), panel);
 
 		if (dialog.open() == 0) {
 			RenameResourceOperation mainOp = new RenameResourceOperation(resources[0], panel.getResourceName(),
@@ -56,19 +56,20 @@ public class RenameAction extends AbstractRepositoryTeamAction {
 			op.add(new RefreshRemoteResourcesOperation(SVNUtility.getCommonParents(resources)));
 			op.add(new SetRevisionAuthorNameOperation(mainOp, Options.FORCE), new IActionOperation[] { mainOp });
 
-			this.runScheduled(op);
+			runScheduled(op);
 		}
 	}
 
+	@Override
 	public boolean isEnabled() {
-		IRepositoryResource[] resources = this.getSelectedRepositoryResources();
-		for (int i = 0; i < resources.length; i++) {
-			IRepositoryLocation location = resources[i].getRepositoryLocation();
-			if (resources[i].getUrl().equals(location.getRoot().getUrl())
-					|| resources[i].getSelectedRevision().getKind() != Kind.HEAD
-					|| resources[i] instanceof IRepositoryRoot && (((IRepositoryRoot) resources[i])
-							.getKind() == IRepositoryRoot.KIND_ROOT
-							|| ((IRepositoryRoot) resources[i]).getKind() == IRepositoryRoot.KIND_LOCATION_ROOT)) {
+		IRepositoryResource[] resources = getSelectedRepositoryResources();
+		for (IRepositoryResource element : resources) {
+			IRepositoryLocation location = element.getRepositoryLocation();
+			if (element.getUrl().equals(location.getRoot().getUrl())
+					|| element.getSelectedRevision().getKind() != Kind.HEAD
+					|| element instanceof IRepositoryRoot
+							&& (((IRepositoryRoot) element).getKind() == IRepositoryRoot.KIND_ROOT
+									|| ((IRepositoryRoot) element).getKind() == IRepositoryRoot.KIND_LOCATION_ROOT)) {
 				return false;
 			}
 		}

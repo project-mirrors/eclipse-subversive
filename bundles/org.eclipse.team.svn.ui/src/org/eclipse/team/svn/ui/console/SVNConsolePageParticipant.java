@@ -29,24 +29,29 @@ public class SVNConsolePageParticipant implements IConsolePageParticipant {
 
 	private SVNConsoleRemoveAction consoleRemoveAction;
 
+	@Override
 	public void init(IPageBookViewPage page, IConsole console) {
-		this.consoleRemoveAction = new SVNConsoleRemoveAction();
+		consoleRemoveAction = new SVNConsoleRemoveAction();
 		IActionBars bars = page.getSite().getActionBars();
-		bars.getToolBarManager().appendToGroup(IConsoleConstants.LAUNCH_GROUP, this.consoleRemoveAction);
+		bars.getToolBarManager().appendToGroup(IConsoleConstants.LAUNCH_GROUP, consoleRemoveAction);
 	}
 
+	@Override
 	public void dispose() {
-		this.consoleRemoveAction = null;
+		consoleRemoveAction = null;
 	}
 
+	@Override
 	public void activated() {
 
 	}
 
+	@Override
 	public void deactivated() {
 
 	}
 
+	@Override
 	public Object getAdapter(Class adapter) {
 		return null;
 	}

@@ -34,11 +34,12 @@ public class CommentLogEntryFilter implements ILogEntryFilter {
 		this.commentToAccept = commentToAccept;
 	}
 
+	@Override
 	public boolean accept(SVNLogEntry logEntry) {
-		if (this.commentToAccept == null) {
+		if (commentToAccept == null) {
 			return true;
 		}
-		StringMatcher matcher = new StringMatcher(this.commentToAccept);
+		StringMatcher matcher = new StringMatcher(commentToAccept);
 		String comment = logEntry.message == null ? "" : logEntry.message; //$NON-NLS-1$
 		return matcher.match(comment);
 	}
@@ -48,6 +49,6 @@ public class CommentLogEntryFilter implements ILogEntryFilter {
 	}
 
 	public String getCommentToAccept() {
-		return this.commentToAccept;
+		return commentToAccept;
 	}
 }

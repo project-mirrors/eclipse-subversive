@@ -64,7 +64,7 @@ public class SVNNotification {
 			throw new IllegalArgumentException("Invalid lock kind: " + id); //$NON-NLS-1$
 		}
 
-		private NodeLock(int id) {
+		NodeLock(int id) {
 			this.id = id;
 		}
 	}
@@ -132,7 +132,7 @@ public class SVNNotification {
 			throw new IllegalArgumentException("Invalid node status kind: " + id); //$NON-NLS-1$
 		}
 
-		private NodeStatus(int id) {
+		NodeStatus(int id) {
 			this.id = id;
 		}
 	}
@@ -517,7 +517,7 @@ public class SVNNotification {
 			throw new IllegalArgumentException("Invalid action kind: " + id); //$NON-NLS-1$
 		}
 
-		private PerformedAction(int id) {
+		PerformedAction(int id) {
 			this.id = id;
 		}
 	}

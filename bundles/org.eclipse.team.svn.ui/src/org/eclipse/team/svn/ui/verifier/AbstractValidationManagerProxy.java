@@ -33,28 +33,34 @@ public abstract class AbstractValidationManagerProxy implements IValidationManag
 		this.validationManager = validationManager;
 	}
 
+	@Override
 	public void attachTo(Control cmp, AbstractVerifier verifier) {
-		this.validationManager.attachTo(cmp, this.wrapVerifier(verifier));
+		validationManager.attachTo(cmp, wrapVerifier(verifier));
 	}
 
+	@Override
 	public void detachFrom(Control cmp) {
-		this.validationManager.detachFrom(cmp);
+		validationManager.detachFrom(cmp);
 	}
 
+	@Override
 	public void detachAll() {
-		this.validationManager.detachAll();
+		validationManager.detachAll();
 	}
 
+	@Override
 	public boolean isFilledRight() {
-		return this.validationManager.isFilledRight();
+		return validationManager.isFilledRight();
 	}
 
+	@Override
 	public void validateContent() {
-		this.validationManager.validateContent();
+		validationManager.validateContent();
 	}
 
+	@Override
 	public boolean validateControl(Control cmp) {
-		return this.validationManager.validateControl(cmp);
+		return validationManager.validateControl(cmp);
 	}
 
 	/**
@@ -65,6 +71,7 @@ public abstract class AbstractValidationManagerProxy implements IValidationManag
 	 */
 	protected AbstractVerifier wrapVerifier(AbstractVerifier verifier) {
 		return new AbstractVerifierProxy(verifier) {
+			@Override
 			protected boolean isVerificationEnabled(Control input) {
 				return AbstractValidationManagerProxy.this.isVerificationEnabled(input);
 			}

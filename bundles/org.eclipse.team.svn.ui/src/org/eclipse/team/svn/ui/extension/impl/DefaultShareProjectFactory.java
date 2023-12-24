@@ -31,28 +31,34 @@ public class DefaultShareProjectFactory implements IShareProjectFactory {
 
 	}
 
+	@Override
 	public SelectProjectNamePage getProjectLayoutPage() {
 		return new SelectProjectNamePage();
 	}
 
+	@Override
 	public ShareProjectOperation getShareProjectOperation(IProject[] projects, IRepositoryLocation location,
 			SelectProjectNamePage page, String commitComment) {
 		return new ShareProjectOperation(projects, location, page.getSelectedNames(), page.getRootProjectName(),
 				page.getLayoutType(), page.isManagementFoldersEnabled(), commitComment);
 	}
 
+	@Override
 	public boolean disallowFinishOnAddRepositoryLocation(IProject[] projects) {
 		return false;
 	}
 
+	@Override
 	public boolean disallowFinishOnCommitComment(IProject[] projects) {
 		return false;
 	}
 
+	@Override
 	public boolean disallowFinishOnAlreadyConnected(IProject[] projects) {
 		return false;
 	}
 
+	@Override
 	public boolean disallowFinishOnSelectRepositoryLocation(IProject[] projects) {
 		return false;
 	}

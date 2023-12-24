@@ -22,7 +22,6 @@ import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.team.svn.core.SVNMessages;
 import org.eclipse.team.svn.core.SVNTeamProjectMapper;
 import org.eclipse.team.svn.core.connector.SVNChangeStatus;
-import org.eclipse.team.svn.core.operation.IUnprotectedOperation;
 import org.eclipse.team.svn.core.operation.UnreportableException;
 import org.eclipse.team.svn.core.operation.local.AbstractWorkingCopyOperation;
 import org.eclipse.team.svn.core.resource.IRepositoryContainer;
@@ -48,26 +47,25 @@ public class ReconnectProjectOperation extends AbstractWorkingCopyOperation {
 		this.location = location;
 	}
 
+	@Override
 	public ISchedulingRule getSchedulingRule() {
 		// reconnect always requires root as scheduling rule
 		return ResourcesPlugin.getWorkspace().getRoot();
 	}
 
+	@Override
 	protected void runImpl(IProgressMonitor monitor) throws Exception {
-		IResource[] resources = this.operableData();
+		IResource[] resources = operableData();
 
 		for (int i = 0; i < resources.length && !monitor.isCanceled(); i++) {
 			final IProject project = (IProject) resources[i];
-			this.protectStep(new IUnprotectedOperation() {
-				public void run(IProgressMonitor monitor) throws Exception {
-					SVNChangeStatus st = SVNUtility.getSVNInfoForNotConnected(project);
-					if (st == null) {
-						throw new UnreportableException(SVNMessages.getErrorString("Error_NonSVNPath")); //$NON-NLS-1$
-					}
-					IRepositoryContainer remote = ReconnectProjectOperation.this.location
-							.asRepositoryContainer(SVNUtility.decodeURL(st.url), false);
-					SVNTeamProjectMapper.map(project, remote);
+			this.protectStep(monitor1 -> {
+				SVNChangeStatus st = SVNUtility.getSVNInfoForNotConnected(project);
+				if (st == null) {
+					throw new UnreportableException(SVNMessages.getErrorString("Error_NonSVNPath")); //$NON-NLS-1$
 				}
+				IRepositoryContainer remote = location.asRepositoryContainer(SVNUtility.decodeURL(st.url), false);
+				SVNTeamProjectMapper.map(project, remote);
 			}, monitor, resources.length);
 		}
 	}

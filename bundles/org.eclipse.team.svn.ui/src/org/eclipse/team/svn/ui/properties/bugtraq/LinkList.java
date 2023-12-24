@@ -24,18 +24,17 @@ import java.util.List;
  * @author Alexander Gurov
  */
 public class LinkList {
-	protected ArrayList<LinkPlacement> links = new ArrayList<LinkPlacement>();
+	protected ArrayList<LinkPlacement> links = new ArrayList<>();
 
 	public LinkList() {
-		super();
 	}
 
 	public List<LinkPlacement> getLinks() {
-		return this.links;
+		return links;
 	}
 
 	public boolean hasLinkAt(int offset) {
-		for (LinkPlacement link : this.links) {
+		for (LinkPlacement link : links) {
 			if (link.existAtOffset(offset)) {
 				return true;
 			}
@@ -44,7 +43,7 @@ public class LinkList {
 	}
 
 	public LinkPlacement getLinkAt(int offset) {
-		for (LinkPlacement link : this.links) {
+		for (LinkPlacement link : links) {
 			if (link.existAtOffset(offset)) {
 				return link;
 			}
@@ -60,17 +59,17 @@ public class LinkList {
 		protected String linkText;
 
 		public LinkPlacement(int start, int end, String message) {
-			this.linkText = message.substring(start, end);
+			linkText = message.substring(start, end);
 			this.start = start;
 			this.end = end;
 		}
 
 		protected boolean existAtOffset(int offset) {
-			return (this.start <= offset) && (offset < this.end);
+			return start <= offset && offset < end;
 		}
 
 		public int getStart() {
-			return this.start;
+			return start;
 		}
 
 		public void setStart(int start) {
@@ -78,7 +77,7 @@ public class LinkList {
 		}
 
 		public int getEnd() {
-			return this.end;
+			return end;
 		}
 
 		public void setEnd(int end) {
@@ -86,7 +85,7 @@ public class LinkList {
 		}
 
 		public String getURL() {
-			return this.linkText;
+			return linkText;
 		}
 	}
 

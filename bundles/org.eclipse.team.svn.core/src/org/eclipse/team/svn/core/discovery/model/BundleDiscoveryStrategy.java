@@ -22,6 +22,7 @@ import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.team.svn.core.BaseMessages;
 import org.eclipse.team.svn.core.SVNMessages;
 import org.eclipse.team.svn.core.operation.LoggedOperation;
 import org.osgi.framework.Bundle;
@@ -78,7 +79,7 @@ public class BundleDiscoveryStrategy extends AbstractDiscoveryStrategy {
 							category.setSource(discoverySource);
 							categories.add(category);
 						} else {
-							throw new ValidationException(SVNMessages
+							throw new ValidationException(BaseMessages
 									.format(SVNMessages.BundleDiscoveryStrategy_unexpected_element, element.getName()));
 						}
 					} catch (ValidationException e) {

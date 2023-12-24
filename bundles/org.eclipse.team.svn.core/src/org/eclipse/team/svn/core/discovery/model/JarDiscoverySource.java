@@ -46,9 +46,7 @@ public class JarDiscoverySource extends AbstractDiscoverySource {
 			String prefix = jarFile.toURI().toURL().toExternalForm();
 
 			return new URL("jar:" + prefix + "!/" + URLEncoder.encode(resourceName, "utf-8")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-		} catch (MalformedURLException e) {
-			throw new IllegalStateException(e);
-		} catch (UnsupportedEncodingException e) {
+		} catch (MalformedURLException | UnsupportedEncodingException e) {
 			throw new IllegalStateException(e);
 		}
 	}

@@ -46,29 +46,31 @@ public class MoveResourceOperation extends AbstractActionOperation {
 		this.destination = destination;
 	}
 
+	@Override
 	public ISchedulingRule getSchedulingRule() {
 		return MultiRule.combine(
-				this.source instanceof IProject ? this.source : this.source.getParent(),
-				this.destination instanceof IProject ? this.destination : this.destination.getParent());
+				source instanceof IProject ? source : source.getParent(),
+				destination instanceof IProject ? destination : destination.getParent());
 	}
 
 	public boolean isAllowed() {
 		IRemoteStorage storage = SVNRemoteStorage.instance();
-		String locationSourceUrl = storage.getRepositoryLocation(this.source).getRepositoryRootUrl();
-		String locationDestinationUrl = storage.getRepositoryLocation(this.destination).getRepositoryRootUrl();
+		String locationSourceUrl = storage.getRepositoryLocation(source).getRepositoryRootUrl();
+		String locationDestinationUrl = storage.getRepositoryLocation(destination).getRepositoryRootUrl();
 		return locationSourceUrl.equals(locationDestinationUrl);
 	}
 
+	@Override
 	protected void runImpl(IProgressMonitor monitor) throws Exception {
 		IRemoteStorage storage = SVNRemoteStorage.instance();
-		IRepositoryLocation location = storage.getRepositoryLocation(this.source);
+		IRepositoryLocation location = storage.getRepositoryLocation(source);
 
 		ISVNConnector proxy = location.acquireSVNProxy();
 
-		String srcPath = FileUtility.getWorkingCopyPath(this.source);
-		String dstPath = FileUtility.getWorkingCopyPath(this.destination);
+		String srcPath = FileUtility.getWorkingCopyPath(source);
+		String dstPath = FileUtility.getWorkingCopyPath(destination);
 		try {
-			this.writeToConsole(IConsoleStream.LEVEL_CMD,
+			writeToConsole(IConsoleStream.LEVEL_CMD,
 					"svn move \"" + FileUtility.normalizePath(srcPath) + "\" \"" + FileUtility.normalizePath(dstPath)
 							+ "\"" + ISVNConnector.Options.asCommandLine(
 									ISVNConnector.Options.FORCE | ISVNConnector.Options.ALLOW_MIXED_REVISIONS)
@@ -81,9 +83,10 @@ public class MoveResourceOperation extends AbstractActionOperation {
 		}
 	}
 
+	@Override
 	protected String getShortErrorMessage(Throwable t) {
 		return BaseMessages.format(super.getShortErrorMessage(t),
-				new Object[] { this.source.getName(), this.destination.getParent().getFullPath().toString() });
+				new Object[] { source.getName(), destination.getParent().getFullPath().toString() });
 	}
 
 }

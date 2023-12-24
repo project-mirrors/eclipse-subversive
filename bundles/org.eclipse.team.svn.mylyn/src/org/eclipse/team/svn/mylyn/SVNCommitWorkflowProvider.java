@@ -16,8 +16,6 @@ package org.eclipse.team.svn.mylyn;
 
 import org.eclipse.core.resources.IResource;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.ui.IWorkbenchPart;
-import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.team.svn.core.IStateFilter;
 import org.eclipse.team.svn.core.operation.CompositeOperation;
 import org.eclipse.team.svn.core.utility.FileUtility;
@@ -32,6 +30,8 @@ import org.eclipse.team.svn.ui.panel.local.CommitPanel;
 import org.eclipse.team.svn.ui.synchronize.SVNChangeSetCapability;
 import org.eclipse.team.svn.ui.utility.CommitActionUtility;
 import org.eclipse.team.svn.ui.utility.UIMonitorUtility;
+import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.ui.IWorkbenchWindow;
 
 /**
  * Commit integration for the Mylyn project.
@@ -46,18 +46,22 @@ public class SVNCommitWorkflowProvider /*extends AbstractCommitWorkflowProvider*
 
 	public void commit(final IResource[] resources) {
 		CommitActionUtility commitUtility = new CommitActionUtility(new IResourceSelector() {
+			@Override
 			public IResource[] getSelectedResources() {
 				return resources;
 			}
 
+			@Override
 			public IResource[] getSelectedResourcesRecursive(IStateFilter filter) {
 				return this.getSelectedResources(filter);
 			}
 
+			@Override
 			public IResource[] getSelectedResourcesRecursive(IStateFilter filter, int depth) {
 				return this.getSelectedResources(filter);
 			}
 
+			@Override
 			public IResource[] getSelectedResources(IStateFilter filter) {
 				return FileUtility.getResourcesRecursive(this.getSelectedResources(), filter, IResource.DEPTH_ZERO);
 			}

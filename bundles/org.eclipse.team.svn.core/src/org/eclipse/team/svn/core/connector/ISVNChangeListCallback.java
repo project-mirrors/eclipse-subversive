@@ -32,5 +32,5 @@ public interface ISVNChangeListCallback {
 	 * @param changelist
 	 *            a change list name
 	 */
-	public void next(String path, String changelist);
+	void next(String path, String changelist);
 }

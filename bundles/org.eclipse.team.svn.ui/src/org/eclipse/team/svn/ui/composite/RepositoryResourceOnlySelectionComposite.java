@@ -24,9 +24,9 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
+import org.eclipse.team.svn.core.BaseMessages;
 import org.eclipse.team.svn.core.resource.IRepositoryResource;
 import org.eclipse.team.svn.core.utility.SVNUtility;
 import org.eclipse.team.svn.ui.SVNUIMessages;
@@ -68,7 +68,7 @@ public class RepositoryResourceOnlySelectionComposite extends RepositoryResource
 		super(parent, style, validationManager, historyKey, comboId, baseResource, selectionTitle,
 				selectionDescription);
 
-		this.createControls();
+		createControls();
 	}
 
 	public void setMatchToBaseResource(boolean isMatchToBaseResource) {
@@ -76,7 +76,7 @@ public class RepositoryResourceOnlySelectionComposite extends RepositoryResource
 	}
 
 	public boolean isMatchToBaseResource() {
-		return this.isMatchToBaseResource;
+		return isMatchToBaseResource;
 	}
 
 	private void createControls() {
@@ -86,11 +86,11 @@ public class RepositoryResourceOnlySelectionComposite extends RepositoryResource
 		layout = new GridLayout();
 		layout.numColumns = 2;
 		layout.marginHeight = layout.marginWidth = 0;
-		this.setLayout(layout);
+		setLayout(layout);
 
 		Label urlLabel = new Label(this, SWT.NONE);
 		urlLabel.setLayoutData(new GridData());
-		urlLabel.setText(SVNUIMessages.getString(this.comboId));
+		urlLabel.setText(SVNUIMessages.getString(comboId));
 
 		Composite select = new Composite(this, SWT.NONE);
 		layout = new GridLayout();
@@ -101,37 +101,34 @@ public class RepositoryResourceOnlySelectionComposite extends RepositoryResource
 		data = new GridData(GridData.FILL_HORIZONTAL);
 		select.setLayoutData(data);
 
-		this.urlText = new Combo(select, SWT.NULL);
+		urlText = new Combo(select, SWT.NULL);
 		data = new GridData(GridData.FILL_HORIZONTAL);
 		data.widthHint = IDialogConstants.ENTRY_FIELD_WIDTH;
-		this.urlText.setLayoutData(data);
-		this.urlText.setVisibleItemCount(this.urlHistory.getDepth());
-		this.urlText.setItems(this.urlHistory.getHistory());
+		urlText.setLayoutData(data);
+		urlText.setVisibleItemCount(urlHistory.getDepth());
+		urlText.setItems(urlHistory.getHistory());
 
-		if (this.baseResource != null) {
-			this.urlText.setText(this.baseResource.getUrl());
+		if (baseResource != null) {
+			urlText.setText(baseResource.getUrl());
 		}
 
-		this.url = this.urlText.getText();
+		url = urlText.getText();
 
-		Listener urlTextListener = new Listener() {
-			public void handleEvent(Event e) {
-				RepositoryResourceOnlySelectionComposite.this.url = ((Combo) e.widget).getText();
-			}
-		};
-		this.urlText.addListener(SWT.Selection, urlTextListener);
-		this.urlText.addListener(SWT.Modify, urlTextListener);
+		Listener urlTextListener = e -> RepositoryResourceOnlySelectionComposite.this.url = ((Combo) e.widget).getText();
+		urlText.addListener(SWT.Selection, urlTextListener);
+		urlText.addListener(SWT.Modify, urlTextListener);
 
-		this.verifier = new CompositeVerifier();
-		this.verifier.add(new NonEmptyFieldVerifier(SVNUIMessages.getString(this.comboId + "_Verifier"))); //$NON-NLS-1$
-		this.verifier.add(new URLVerifier(SVNUIMessages.getString(this.comboId + "_Verifier")) { //$NON-NLS-1$
+		verifier = new CompositeVerifier();
+		verifier.add(new NonEmptyFieldVerifier(SVNUIMessages.getString(comboId + "_Verifier"))); //$NON-NLS-1$
+		verifier.add(new URLVerifier(SVNUIMessages.getString(comboId + "_Verifier")) { //$NON-NLS-1$
+			@Override
 			protected String getErrorMessage(Control input) {
 				String error = super.getErrorMessage(input);
 				if (RepositoryResourceOnlySelectionComposite.this.baseResource != null && error == null) {
-					String url = this.getText(input);
+					String url = getText(input);
 					if (RepositoryResourceOnlySelectionComposite.this.getDestination(SVNUtility.asEntryReference(url),
 							true) == null) {
-						error = SVNUIMessages.format(
+						error = BaseMessages.format(
 								SVNUIMessages.RepositoryResourceOnlySelectionComposite_URL_Verifier_Error,
 								new String[] { url,
 										RepositoryResourceOnlySelectionComposite.this.baseResource
@@ -140,10 +137,10 @@ public class RepositoryResourceOnlySelectionComposite extends RepositoryResource
 					}
 
 					//check that resource starts with location
-					if (error == null && RepositoryResourceOnlySelectionComposite.this.isMatchToBaseResource) {
+					if (error == null && isMatchToBaseResource) {
 						String baseResourceUrl = RepositoryResourceOnlySelectionComposite.this.baseResource.getUrl();
 						if (!url.startsWith(baseResourceUrl)) {
-							error = SVNUIMessages.format(
+							error = BaseMessages.format(
 									SVNUIMessages.RepositoryResourceOnlySelectionComposite_URL_Verifier_Error,
 									new String[] { url, baseResourceUrl });
 						}
@@ -152,15 +149,16 @@ public class RepositoryResourceOnlySelectionComposite extends RepositoryResource
 				return error;
 			}
 		});
-		this.verifier.add(new AbsolutePathVerifier(this.comboId));
-		this.validationManager.attachTo(this.urlText, this.verifier);
+		verifier.add(new AbsolutePathVerifier(comboId));
+		validationManager.attachTo(urlText, verifier);
 
-		this.browse = new Button(select, SWT.PUSH);
-		this.browse.setText(SVNUIMessages.Button_Browse);
+		browse = new Button(select, SWT.PUSH);
+		browse.setText(SVNUIMessages.Button_Browse);
 		data = new GridData();
-		data.widthHint = DefaultDialog.computeButtonWidth(this.browse);
-		this.browse.setLayoutData(data);
-		this.browse.addSelectionListener(new SelectionAdapter() {
+		data.widthHint = DefaultDialog.computeButtonWidth(browse);
+		browse.setLayoutData(data);
+		browse.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				RepositoryTreePanel panel = new RepositoryTreePanel(
 						SVNUIMessages.RepositoryResourceOnlySelectionComposite_Select_Title,

@@ -46,29 +46,33 @@ public class LocalPathMatcher implements IPatternMatchListenerDelegate, IPropert
 
 	public void createPattern() {
 		String regExp = "(?:\\s|\")(?:[A-Z]\\:)?(?:[\\\\/][^\\\\/\\:\\?\\*\r\n\"]+)+"; //$NON-NLS-1$
-		this.pattern = Pattern.compile(regExp);
+		pattern = Pattern.compile(regExp);
 	}
 
+	@Override
 	public void connect(TextConsole console) {
 		this.console = console;
-		this.createPattern();
-		this.loadPreferences();
+		createPattern();
+		loadPreferences();
 		SVNTeamUIPlugin.instance().getPreferenceStore().addPropertyChangeListener(this);
 	}
 
+	@Override
 	public void propertyChange(PropertyChangeEvent event) {
 		if (event.getProperty().startsWith(SVNTeamPreferences.CONSOLE_BASE)) {
-			this.loadPreferences();
+			loadPreferences();
 		}
 	}
 
+	@Override
 	public void disconnect() {
-		this.console = null;
+		console = null;
 		SVNTeamUIPlugin.instance().getPreferenceStore().removePropertyChangeListener(this);
 	}
 
+	@Override
 	public void matchFound(PatternMatchEvent event) {
-		if (this.console == null || !this.enabled) {
+		if (console == null || !enabled) {
 			return;
 		}
 		UIMonitorUtility.doTaskBusyDefault(new AddConsoleHyperlinkOperation(event));
@@ -76,7 +80,7 @@ public class LocalPathMatcher implements IPatternMatchListenerDelegate, IPropert
 
 	protected void loadPreferences() {
 		IPreferenceStore store = SVNTeamUIPlugin.instance().getPreferenceStore();
-		this.enabled = SVNTeamPreferences.getConsoleBoolean(store, SVNTeamPreferences.CONSOLE_HYPERLINKS_ENABLED_NAME);
+		enabled = SVNTeamPreferences.getConsoleBoolean(store, SVNTeamPreferences.CONSOLE_HYPERLINKS_ENABLED_NAME);
 	}
 
 	protected class AddConsoleHyperlinkOperation extends AbstractActionOperation {
@@ -87,19 +91,19 @@ public class LocalPathMatcher implements IPatternMatchListenerDelegate, IPropert
 			this.event = event;
 		}
 
+		@Override
 		protected void runImpl(IProgressMonitor monitor) throws Exception {
-			int offset = this.event.getOffset();
-			int length = this.event.getLength();
-			String path = LocalPathMatcher.this.console.getDocument().get(offset, length);
+			int offset = event.getOffset();
+			int length = event.getLength();
+			String path = console.getDocument().get(offset, length);
 			if (path == null) {
 				return;
 			}
 
-			Matcher matcher = LocalPathMatcher.this.pattern.matcher(path);
+			Matcher matcher = pattern.matcher(path);
 			if (matcher.find(0)) {
 				String link = matcher.group(matcher.groupCount()).trim();
-				LocalPathMatcher.this.console.addHyperlink(new LocalFileHyperlink(link),
-						offset + matcher.start(matcher.groupCount()) + 1,
+				console.addHyperlink(new LocalFileHyperlink(link), offset + matcher.start(matcher.groupCount()) + 1,
 						matcher.group(matcher.groupCount()).length() - 1);
 			}
 		}

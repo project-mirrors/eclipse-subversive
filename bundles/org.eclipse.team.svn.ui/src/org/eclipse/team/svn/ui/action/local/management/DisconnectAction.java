@@ -40,13 +40,13 @@ public class DisconnectAction extends AbstractLocalTeamAction {
 	protected static final int OP_LEAVE = 2;
 
 	public DisconnectAction() {
-		super();
 	}
 
+	@Override
 	public void runImpl(IAction action) {
-		int opType = this.selectOperationType();
+		int opType = selectOperationType();
 		if (opType != DisconnectAction.OP_CANCEL) {
-			IProject[] projects = this.getSelectedProjects();
+			IProject[] projects = getSelectedProjects();
 
 			DisconnectOperation mainOp = new DisconnectOperation(projects, opType == DisconnectAction.OP_DROP);
 
@@ -58,16 +58,17 @@ public class DisconnectAction extends AbstractLocalTeamAction {
 					RefreshResourcesOperation.REFRESH_ALL));
 			op.add(new NotifyProjectStatesChangedOperation(projects, ProjectStatesChangedEvent.ST_POST_DISCONNECTED));
 
-			this.runScheduled(op);
+			runScheduled(op);
 		}
 	}
 
+	@Override
 	public boolean isEnabled() {
-		return this.checkForResourcesPresence(IStateFilter.SF_ONREPOSITORY);
+		return checkForResourcesPresence(IStateFilter.SF_ONREPOSITORY);
 	}
 
 	protected int selectOperationType() {
-		DisconnectDialog dialog = new DisconnectDialog(this.getShell(), this.getSelectedProjects());
+		DisconnectDialog dialog = new DisconnectDialog(getShell(), getSelectedProjects());
 		if (dialog.open() == 0) {
 			return dialog.dropSVNFolders() ? DisconnectAction.OP_DROP : DisconnectAction.OP_LEAVE;
 		}

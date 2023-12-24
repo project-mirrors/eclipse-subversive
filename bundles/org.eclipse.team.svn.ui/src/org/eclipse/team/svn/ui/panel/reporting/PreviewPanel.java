@@ -47,90 +47,94 @@ public class PreviewPanel extends AbstractDialogPanel {
 
 	public PreviewPanel(String title, String description, String message, String report, Font font) {
 		super(new String[] { IDialogConstants.OK_LABEL });
-		this.dialogTitle = title;
-		this.dialogDescription = description;
-		this.defaultMessage = message;
+		dialogTitle = title;
+		dialogDescription = description;
+		defaultMessage = message;
 		this.report = report;
 		this.font = font;
 	}
 
+	@Override
 	public void createControlsImpl(Composite parent) {
 		Composite composite = new Composite(parent, SWT.NONE);
 		GridLayout layout = new GridLayout();
 		layout.marginHeight = layout.marginWidth = 0;
 		composite.setLayout(layout);
 		GridData data = new GridData(GridData.FILL_BOTH);
-		Point prefferedSize = this.getPrefferedSize();
+		Point prefferedSize = getPrefferedSize();
 		data.widthHint = prefferedSize.x;
 		data.heightHint = prefferedSize.y;
 		composite.setLayoutData(data);
 
-		this.report = PatternProvider.replaceAll(this.report, "<br>", "\n"); //$NON-NLS-1$ //$NON-NLS-2$
-		this.report = PatternProvider.replaceAll(this.report, "&lt;", "<"); //$NON-NLS-1$ //$NON-NLS-2$
-		this.report = PatternProvider.replaceAll(this.report, "&gt;", ">"); //$NON-NLS-1$ //$NON-NLS-2$
+		report = PatternProvider.replaceAll(report, "<br>", "\n"); //$NON-NLS-1$ //$NON-NLS-2$
+		report = PatternProvider.replaceAll(report, "&lt;", "<"); //$NON-NLS-1$ //$NON-NLS-2$
+		report = PatternProvider.replaceAll(report, "&gt;", ">"); //$NON-NLS-1$ //$NON-NLS-2$
 		StyledText styledText = new StyledText(composite,
 				SWT.H_SCROLL | SWT.V_SCROLL | SWT.MULTI | SWT.BORDER | SWT.WRAP);
 
-		if (this.font != null) {
-			styledText.setFont(this.font);
+		if (font != null) {
+			styledText.setFont(font);
 		}
 
-		List<StyleRange> styledRanges = new ArrayList<StyleRange>();
-		styledRanges = this.getStyleRanges();
-		styledText.setText(this.report);
+		List<StyleRange> styledRanges = new ArrayList<>();
+		styledRanges = getStyleRanges();
+		styledText.setText(report);
 		styledText.setStyleRanges(styledRanges.toArray(new StyleRange[styledRanges.size()]));
 		styledText.setEditable(false);
 		styledText.setLayoutData(data);
 	}
 
+	@Override
 	public void dispose() {
 		super.dispose();
-		if (this.font != null) {
-			this.font.dispose();
+		if (font != null) {
+			font.dispose();
 		}
 	}
 
+	@Override
 	protected void saveChangesImpl() {
 	}
 
+	@Override
 	protected void cancelChangesImpl() {
 	}
 
 	protected List<StyleRange> getStyleRanges() {
-		List<StyleRange> styledRanges = new ArrayList<StyleRange>();
+		List<StyleRange> styledRanges = new ArrayList<>();
 
-		Stack<StyleRange> boldEntries = new Stack<StyleRange>();
-		Stack<StyleRange> italicEntries = new Stack<StyleRange>();
+		Stack<StyleRange> boldEntries = new Stack<>();
+		Stack<StyleRange> italicEntries = new Stack<>();
 
-		for (int i = 0; i < this.report.length(); i++) {
-			if (this.report.charAt(i) == '<' && i < this.report.length() - 2) {
-				if (this.report.charAt(i + 2) == '>') {
+		for (int i = 0; i < report.length(); i++) {
+			if (report.charAt(i) == '<' && i < report.length() - 2) {
+				if (report.charAt(i + 2) == '>') {
 					StyleRange range = new StyleRange();
 					range.start = i;
-					if (this.report.charAt(i + 1) == 'b') {
+					if (report.charAt(i + 1) == 'b') {
 						range.fontStyle = SWT.BOLD;
 						boldEntries.push(range);
-						this.report = this.report.substring(0, i) + this.report.substring(i + 3);
-					} else if (this.report.charAt(i + 1) == 'i') {
+						report = report.substring(0, i) + report.substring(i + 3);
+					} else if (report.charAt(i + 1) == 'i') {
 						range.fontStyle = SWT.ITALIC;
 						italicEntries.push(range);
-						this.report = this.report.substring(0, i) + this.report.substring(i + 3);
+						report = report.substring(0, i) + report.substring(i + 3);
 					}
-				} else if (this.report.charAt(i + 1) == '/') {
-					if (i < this.report.length() - 3 && this.report.charAt(i + 3) == '>') {
-						if (this.report.charAt(i + 2) == 'b') {
+				} else if (report.charAt(i + 1) == '/') {
+					if (i < report.length() - 3 && report.charAt(i + 3) == '>') {
+						if (report.charAt(i + 2) == 'b') {
 							if (boldEntries.size() > 0) {
 								StyleRange range = boldEntries.pop();
 								range.length = i - range.start;
 								styledRanges.add(range);
-								this.report = this.report.substring(0, i) + this.report.substring(i + 4);
+								report = report.substring(0, i) + report.substring(i + 4);
 							}
-						} else if (this.report.charAt(i + 2) == 'i') {
+						} else if (report.charAt(i + 2) == 'i') {
 							if (italicEntries.size() > 0) {
 								StyleRange range = italicEntries.pop();
 								range.length = i - range.start;
 								styledRanges.add(range);
-								this.report = this.report.substring(0, i) + this.report.substring(i + 4);
+								report = report.substring(0, i) + report.substring(i + 4);
 							}
 						}
 					}
@@ -141,6 +145,7 @@ public class PreviewPanel extends AbstractDialogPanel {
 		return styledRanges;
 	}
 
+	@Override
 	public Point getPrefferedSizeImpl() {
 		return new Point(640, 300);
 	}

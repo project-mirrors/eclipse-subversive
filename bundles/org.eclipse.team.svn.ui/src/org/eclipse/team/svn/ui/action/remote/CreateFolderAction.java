@@ -35,15 +35,15 @@ import org.eclipse.team.svn.ui.panel.remote.CreateFolderPanel;
 public class CreateFolderAction extends AbstractRepositoryTeamAction {
 
 	public CreateFolderAction() {
-		super();
 	}
 
+	@Override
 	public void runImpl(IAction action) {
 		CreateFolderPanel panel = new CreateFolderPanel();
-		DefaultDialog dialog = new DefaultDialog(this.getShell(), panel);
+		DefaultDialog dialog = new DefaultDialog(getShell(), panel);
 
 		if (dialog.open() == 0) {
-			IRepositoryResource[] resources = this.getSelectedRepositoryResources();
+			IRepositoryResource[] resources = getSelectedRepositoryResources();
 			String folder = panel.getResourceName();
 			String message = panel.getMessage();
 
@@ -54,12 +54,13 @@ public class CreateFolderAction extends AbstractRepositoryTeamAction {
 			op.add(new RefreshRemoteResourcesOperation(resources));
 			op.add(new SetRevisionAuthorNameOperation(mainOp, Options.FORCE), new IActionOperation[] { mainOp });
 
-			this.runScheduled(op);
+			runScheduled(op);
 		}
 	}
 
+	@Override
 	public boolean isEnabled() {
-		IRepositoryResource[] resources = this.getSelectedRepositoryResources();
+		IRepositoryResource[] resources = getSelectedRepositoryResources();
 		return resources.length == 1 && resources[0].getSelectedRevision().getKind() == Kind.HEAD;
 	}
 

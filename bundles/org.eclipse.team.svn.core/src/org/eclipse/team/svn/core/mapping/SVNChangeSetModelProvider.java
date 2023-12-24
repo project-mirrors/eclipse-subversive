@@ -26,7 +26,6 @@ public class SVNChangeSetModelProvider extends ModelProvider {
 	private static SVNChangeSetModelProvider provider;
 
 	public SVNChangeSetModelProvider() {
-		super();
 	}
 
 	public static SVNChangeSetModelProvider getProvider() {

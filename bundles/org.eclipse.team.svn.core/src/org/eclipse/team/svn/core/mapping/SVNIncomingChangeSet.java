@@ -29,12 +29,13 @@ public class SVNIncomingChangeSet extends DiffChangeSet {
 	protected Date date;
 
 	public SVNIncomingChangeSet() {
-		this.comment = ""; //$NON-NLS-1$
-		this.revision = Long.MIN_VALUE;
-		this.author = ""; //$NON-NLS-1$
-		this.date = null;
+		comment = ""; //$NON-NLS-1$
+		revision = Long.MIN_VALUE;
+		author = ""; //$NON-NLS-1$
+		date = null;
 	}
 
+	@Override
 	public void setName(String name) {
 		super.setName(name);
 	}
@@ -44,7 +45,7 @@ public class SVNIncomingChangeSet extends DiffChangeSet {
 	}
 
 	public Long getRevision() {
-		return this.revision;
+		return revision;
 	}
 
 	public void setAuthor(String author) {
@@ -52,7 +53,7 @@ public class SVNIncomingChangeSet extends DiffChangeSet {
 	}
 
 	public String getAuthor() {
-		return this.author;
+		return author;
 	}
 
 	public void setDate(Date date) {
@@ -60,14 +61,15 @@ public class SVNIncomingChangeSet extends DiffChangeSet {
 	}
 
 	public Date getDate() {
-		return this.date;
+		return date;
 	}
 
 	public void setComment(String comment) {
 		this.comment = comment;
 	}
 
+	@Override
 	public String getComment() {
-		return this.comment;
+		return comment;
 	}
 }

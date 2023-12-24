@@ -21,6 +21,7 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.team.svn.core.BaseMessages;
 import org.eclipse.team.svn.core.utility.FileUtility;
 import org.eclipse.team.svn.ui.SVNUIMessages;
 
@@ -33,21 +34,21 @@ public class NotifyNodeKindChangedDialog extends MessageDialog {
 
 	public NotifyNodeKindChangedDialog(Shell parentShell, IResource[] resources) {
 		super(parentShell, SVNUIMessages.NotifyNodeKindChangedDialog_Title, null,
-				SVNUIMessages.format(SVNUIMessages.NotifyNodeKindChangedDialog_Message,
+				BaseMessages.format(SVNUIMessages.NotifyNodeKindChangedDialog_Message,
 						new String[] { NotifyNodeKindChangedDialog.enumerateParents(resources) }),
 				MessageDialog.WARNING, new String[] { IDialogConstants.OK_LABEL }, 0);
 	}
 
 	protected static String enumerateParents(IResource[] resources) {
-		HashSet<IContainer> parents = new HashSet<IContainer>();
-		for (int i = 0; i < resources.length; i++) {
-			parents.add(resources[i].getParent());
+		HashSet<IContainer> parents = new HashSet<>();
+		for (IResource element : resources) {
+			parents.add(element.getParent());
 		}
 		resources = parents.toArray(new IResource[parents.size()]);
 		FileUtility.reorder(resources, true);
 		String retVal = ""; //$NON-NLS-1$
-		for (int i = 0; i < resources.length; i++) {
-			retVal += "'" + resources[i].getFullPath().toString() + "'\n"; //$NON-NLS-1$ //$NON-NLS-2$
+		for (IResource element : resources) {
+			retVal += "'" + element.getFullPath().toString() + "'\n"; //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		return retVal;
 	}

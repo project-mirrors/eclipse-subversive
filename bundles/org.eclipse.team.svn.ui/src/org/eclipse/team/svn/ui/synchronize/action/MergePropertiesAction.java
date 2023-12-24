@@ -44,10 +44,12 @@ public class MergePropertiesAction extends AbstractSynchronizeModelAction {
 		super(text, configuration);
 	}
 
+	@Override
 	protected boolean needsToSaveDirtyEditors() {
 		return false;
 	}
 
+	@Override
 	protected boolean updateSelection(IStructuredSelection selection) {
 		super.updateSelection(selection);
 		if (selection.size() == 1 && selection.getFirstElement() instanceof SyncInfoModelElement) {
@@ -77,8 +79,9 @@ public class MergePropertiesAction extends AbstractSynchronizeModelAction {
 		return false;
 	}
 
+	@Override
 	protected IActionOperation getOperation(ISynchronizePageConfiguration configuration, IDiffElement[] elements) {
-		IResource resource = this.getSelectedResource();
+		IResource resource = getSelectedResource();
 		AbstractSVNSyncInfo syncInfo = (AbstractSVNSyncInfo) ((SyncInfoModelElement) elements[0]).getSyncInfo();
 		IResourceChange right;
 		IResourceChange ancestor;

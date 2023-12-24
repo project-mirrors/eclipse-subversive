@@ -26,13 +26,14 @@ import org.eclipse.team.svn.ui.operation.RefreshRemoteResourcesOperation;
 public class RefreshAction extends AbstractRepositoryTeamAction {
 
 	public RefreshAction() {
-		super();
 	}
 
+	@Override
 	public void runImpl(IAction action) {
-		this.runBusy(new RefreshRemoteResourcesOperation(this.getSelectedRepositoryResources()));
+		runBusy(new RefreshRemoteResourcesOperation(getSelectedRepositoryResources()));
 	}
 
+	@Override
 	public boolean isEnabled() {
 		return true;
 	}

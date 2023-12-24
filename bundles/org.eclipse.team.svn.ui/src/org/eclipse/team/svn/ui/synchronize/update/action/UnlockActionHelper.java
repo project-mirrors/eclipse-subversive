@@ -35,8 +35,10 @@ public class UnlockActionHelper extends AbstractActionHelper {
 		super(action, configuration);
 	}
 
+	@Override
 	public FastSyncInfoFilter getSyncInfoFilter() {
 		return new FastSyncInfoFilter() {
+			@Override
 			public boolean select(SyncInfo info) {
 				return super.select(info)
 						&& IStateFilter.SF_LOCKED.accept(((AbstractSVNSyncInfo) info).getLocalResource());
@@ -44,9 +46,10 @@ public class UnlockActionHelper extends AbstractActionHelper {
 		};
 	}
 
+	@Override
 	public IActionOperation getOperation() {
-		return LockProposeUtility.performUnlockAction(this.getSyncInfoSelector().getSelectedResources(),
-				this.configuration.getSite().getShell());
+		return LockProposeUtility.performUnlockAction(getSyncInfoSelector().getSelectedResources(),
+				configuration.getSite().getShell());
 	}
 
 }

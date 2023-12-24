@@ -65,23 +65,24 @@ public class BasePaneParticipant extends UpdateParticipant {
 		/* (non-Javadoc)
 		 * @see org.eclipse.team.ui.synchronize.SynchronizePageActionGroup#modelChanged(org.eclipse.team.ui.synchronize.ISynchronizeModelElement)
 		 */
+		@Override
 		public void modelChanged(ISynchronizeModelElement root) {
 			super.modelChanged(root);
 
-			Display.getDefault().asyncExec(new Runnable() {
-				public void run() {
-					if (BasePaneActionGroup.this.validationManager != null) {
-						BasePaneActionGroup.this.validationManager.validateContent();
-					}
+			Display.getDefault().asyncExec(() -> {
+				if (validationManager != null) {
+					validationManager.validateContent();
 				}
 			});
 		}
 
+		@Override
 		public void configureMenuGroups(ISynchronizePageConfiguration configuration) {
 			configuration.addMenuGroup(
 					ISynchronizePageConfiguration.P_CONTEXT_MENU, BasePaneActionGroup.GROUP_SYNC_NORMAL);
 		}
 
+		@Override
 		protected void configureActions(ISynchronizePageConfiguration configuration) {
 			this.appendToGroup(
 					ISynchronizePageConfiguration.P_CONTEXT_MENU, BasePaneActionGroup.GROUP_SYNC_NORMAL,
@@ -89,7 +90,7 @@ public class BasePaneParticipant extends UpdateParticipant {
 
 			//expand all
 			ExpandAllAction expandAllAction = new ExpandAllAction(SVNUIMessages.SynchronizeActionGroup_ExpandAll,
-					configuration, this.getVisibleRootsSelectionProvider());
+					configuration, getVisibleRootsSelectionProvider());
 			expandAllAction
 					.setImageDescriptor(SVNTeamUIPlugin.instance().getImageDescriptor("icons/views/expandall.gif")); //$NON-NLS-1$
 			this.appendToGroup(
@@ -98,14 +99,17 @@ public class BasePaneParticipant extends UpdateParticipant {
 		}
 	}
 
+	@Override
 	protected int getSupportedModes() {
 		return ISynchronizePageConfiguration.OUTGOING_MODE;
 	}
 
+	@Override
 	protected int getDefaultMode() {
 		return ISynchronizePageConfiguration.OUTGOING_MODE;
 	}
 
+	@Override
 	public ChangeSetCapability getChangeSetCapability() {
 		return null; // we don't want that button
 	}
@@ -113,6 +117,7 @@ public class BasePaneParticipant extends UpdateParticipant {
 	/* (non-Javadoc)
 	 * @see org.eclipse.team.ui.synchronize.AbstractSynchronizeParticipant#doesSupportSynchronize()
 	 */
+	@Override
 	public boolean doesSupportSynchronize() {
 		return false;
 	}
@@ -120,6 +125,7 @@ public class BasePaneParticipant extends UpdateParticipant {
 	/* (non-Javadoc)
 	 * @see org.eclipse.team.svn.ui.synchronize.AbstractSVNParticipant#isSetModes()
 	 */
+	@Override
 	protected boolean isSetModes() {
 		return false;
 	}
@@ -127,8 +133,9 @@ public class BasePaneParticipant extends UpdateParticipant {
 	/* (non-Javadoc)
 	 * @see org.eclipse.team.svn.ui.synchronize.update.UpdateParticipant#getActionGroups()
 	 */
+	@Override
 	protected Collection<AbstractSynchronizeActionGroup> getActionGroups() {
-		Collection<AbstractSynchronizeActionGroup> actionGroups = new ArrayList<AbstractSynchronizeActionGroup>();
+		Collection<AbstractSynchronizeActionGroup> actionGroups = new ArrayList<>();
 		return actionGroups;
 	}
 

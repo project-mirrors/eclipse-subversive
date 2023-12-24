@@ -29,15 +29,16 @@ public class CompositeLogEntryFilter implements ILogEntryFilter {
 	protected HashSet<ILogEntryFilter> filtersSet;
 
 	public CompositeLogEntryFilter() {
-		this.filtersSet = new HashSet<ILogEntryFilter>();
+		filtersSet = new HashSet<>();
 	}
 
 	public CompositeLogEntryFilter(ILogEntryFilter[] filters) {
-		this.filtersSet = new HashSet<ILogEntryFilter>(Arrays.asList(filters));
+		filtersSet = new HashSet<>(Arrays.asList(filters));
 	}
 
+	@Override
 	public boolean accept(SVNLogEntry logEntry) {
-		for (ILogEntryFilter current : this.filtersSet) {
+		for (ILogEntryFilter current : filtersSet) {
 			if (!current.accept(logEntry)) {
 				return false;
 			}
@@ -49,13 +50,13 @@ public class CompositeLogEntryFilter implements ILogEntryFilter {
 	 * Adds a filter to filters set
 	 */
 	public void addFilter(ILogEntryFilter filter) {
-		this.filtersSet.add(filter);
+		filtersSet.add(filter);
 	}
 
 	/**
 	 * Removes a filter from filters set
 	 */
 	public void removeFilter(ILogEntryFilter filter) {
-		this.filtersSet.remove(filter);
+		filtersSet.remove(filter);
 	}
 }

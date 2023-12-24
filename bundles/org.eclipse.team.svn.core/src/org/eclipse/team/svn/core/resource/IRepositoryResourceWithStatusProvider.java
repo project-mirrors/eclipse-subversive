@@ -34,11 +34,12 @@ public interface IRepositoryResourceWithStatusProvider extends IRepositoryResour
 			this.url2status = url2status;
 		}
 
+		@Override
 		public Map<String, String> getStatusesMap() {
-			return this.url2status;
+			return url2status;
 		}
 	}
 
-	public Map<String, String> getStatusesMap();
+	Map<String, String> getStatusesMap();
 
 }

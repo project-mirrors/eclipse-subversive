@@ -49,7 +49,6 @@ public abstract class SVNRepositoryResource extends SVNRepositoryBase implements
 
 	// serialization conventional constructor
 	protected SVNRepositoryResource() {
-		super();
 	}
 
 	public SVNRepositoryResource(IRepositoryLocation location, String url, SVNRevision selectedRevision) {
@@ -62,59 +61,68 @@ public abstract class SVNRepositoryResource extends SVNRepositoryBase implements
 		this.info = info;
 	}
 
+	@Override
 	public Information getInfo() {
-		return this.info;
+		return info;
 	}
 
+	@Override
 	public SVNRevision getPegRevision() {
-		return this.pegRevision == null ? SVNRevision.HEAD : this.pegRevision;
+		return pegRevision == null ? SVNRevision.HEAD : pegRevision;
 	}
 
+	@Override
 	public void setPegRevision(SVNRevision pegRevision) {
 		this.pegRevision = pegRevision;
 	}
 
+	@Override
 	public SVNRevision getSelectedRevision() {
-		if (this.selectedRevision == null) {
-			this.selectedRevision = SVNRevision.HEAD;
+		if (selectedRevision == null) {
+			selectedRevision = SVNRevision.HEAD;
 		}
-		return this.selectedRevision;
+		return selectedRevision;
 	}
 
+	@Override
 	public void setSelectedRevision(SVNRevision revision) {
-		this.selectedRevision = revision;
+		selectedRevision = revision;
 	}
 
+	@Override
 	public boolean isInfoCached() {
-		return this.lastRevision != null;
+		return lastRevision != null;
 	}
 
+	@Override
 	public synchronized void refresh() {
-		this.lastRevision = null;
+		lastRevision = null;
 	}
 
 	public void setRevision(long revisionNumber) {
-		this.lastRevision = SVNRevision.fromNumber(revisionNumber);
+		lastRevision = SVNRevision.fromNumber(revisionNumber);
 	}
 
+	@Override
 	public synchronized long getRevision() throws SVNConnectorException {
-		if (this.lastRevision == null) {
-			this.lastRevision = SVNRevision.INVALID_REVISION;
-			ISVNConnector proxy = this.getRepositoryLocation().acquireSVNProxy();
+		if (lastRevision == null) {
+			lastRevision = SVNRevision.INVALID_REVISION;
+			ISVNConnector proxy = getRepositoryLocation().acquireSVNProxy();
 			try {
-				this.getRevisionImpl(proxy);
+				getRevisionImpl(proxy);
 			} finally {
-				this.getRepositoryLocation().releaseSVNProxy(proxy);
+				getRepositoryLocation().releaseSVNProxy(proxy);
 			}
 		}
-		return this.lastRevision.getNumber();
+		return lastRevision.getNumber();
 	}
 
+	@Override
 	public boolean exists() throws SVNConnectorException {
 		try {
-			return this.getRevision() != SVNRevision.INVALID_REVISION_NUMBER;
+			return getRevision() != SVNRevision.INVALID_REVISION_NUMBER;
 		} catch (SVNConnectorException ex) {
-			//FIXME uncomment this when the WI is resolved ("Unknown node kind" exception instead of "Path not found" (PLC-1008)) 
+			//FIXME uncomment this when the WI is resolved ("Unknown node kind" exception instead of "Path not found" (PLC-1008))
 //			if (ex instanceof ClientExceptionEx) {
 //				if (((ClientExceptionEx)ex).getErrorMessage().getErrorCode().equals(SVNErrorCode.RA_DAV_PATH_NOT_FOUND)) {
 //					return false;
@@ -128,58 +136,64 @@ public abstract class SVNRepositoryResource extends SVNRepositoryBase implements
 		}
 	}
 
+	@Override
 	public IRepositoryResource getParent() {
-		String parentUrl = SVNUtility.normalizeURL(this.getUrl());
+		String parentUrl = SVNUtility.normalizeURL(getUrl());
 		int idx = parentUrl.lastIndexOf('/');
 		if (idx == -1) {
 			throw new IllegalArgumentException(parentUrl);
 		}
-		return this.asRepositoryContainer(parentUrl.substring(0, idx), true);
+		return asRepositoryContainer(parentUrl.substring(0, idx), true);
 	}
 
+	@Override
 	public IRepositoryResource getRoot() {
-		if (this.root == null) {
+		if (root == null) {
 			IRepositoryResource parent = this;
 			while (!(parent instanceof IRepositoryRoot)) {
 				parent = parent.getParent();
 			}
-			this.root = (IRepositoryRoot) parent;
+			root = (IRepositoryRoot) parent;
 		}
-		return this.root;
+		return root;
 	}
 
+	@Override
 	public IRepositoryLocation getRepositoryLocation() {
-		return this.location;
+		return location;
 	}
 
+	@Override
 	public boolean equals(Object obj) {
 		if (obj == null || !(obj instanceof IRepositoryResource)) {
 			return false;
 		}
 		IRepositoryResource other = (IRepositoryResource) obj;
-		return super.equals(obj) && this.getSelectedRevision().equals(other.getSelectedRevision())
-				&& this.getPegRevision().equals(other.getPegRevision());
+		return super.equals(obj) && getSelectedRevision().equals(other.getSelectedRevision())
+				&& getPegRevision().equals(other.getPegRevision());
 	}
 
+	@Override
 	public IRepositoryContainer asRepositoryContainer(String url, boolean allowsNull) {
-		IRepositoryContainer retVal = this.getRepositoryLocation()
-				.asRepositoryContainer(url.indexOf('/') != -1 ? url : (this.getUrl() + "/" + url), allowsNull); //$NON-NLS-1$
+		IRepositoryContainer retVal = getRepositoryLocation()
+				.asRepositoryContainer(url.indexOf('/') != -1 ? url : getUrl() + "/" + url, allowsNull); //$NON-NLS-1$
 		if (retVal == null) {
 			return null;
 		}
-		retVal.setPegRevision(this.getPegRevision());
-		retVal.setSelectedRevision(this.getSelectedRevision());
+		retVal.setPegRevision(getPegRevision());
+		retVal.setSelectedRevision(getSelectedRevision());
 		return retVal;
 	}
 
+	@Override
 	public IRepositoryFile asRepositoryFile(String url, boolean allowsNull) {
-		IRepositoryFile retVal = this.getRepositoryLocation()
-				.asRepositoryFile(url.indexOf('/') != -1 ? url : (this.getUrl() + "/" + url), allowsNull); //$NON-NLS-1$
+		IRepositoryFile retVal = getRepositoryLocation()
+				.asRepositoryFile(url.indexOf('/') != -1 ? url : getUrl() + "/" + url, allowsNull); //$NON-NLS-1$
 		if (retVal == null) {
 			return null;
 		}
-		retVal.setPegRevision(this.getPegRevision());
-		retVal.setSelectedRevision(this.getSelectedRevision());
+		retVal.setPegRevision(getPegRevision());
+		retVal.setSelectedRevision(getSelectedRevision());
 		return retVal;
 	}
 

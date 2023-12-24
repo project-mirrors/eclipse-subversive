@@ -32,11 +32,11 @@ import org.eclipse.team.svn.ui.operation.UILoggedOperation;
 public class CompareSelectedAction extends AbstractRepositoryTeamAction {
 
 	public CompareSelectedAction() {
-		super();
 	}
 
+	@Override
 	public void runImpl(IAction action) {
-		IRepositoryResource[] resources = this.getSelectedRepositoryResources();
+		IRepositoryResource[] resources = getSelectedRepositoryResources();
 		try {
 			if (resources[1].getRevision() > resources[0].getRevision()) {
 				IRepositoryResource tmp = resources[1];
@@ -46,11 +46,12 @@ public class CompareSelectedAction extends AbstractRepositoryTeamAction {
 		} catch (SVNConnectorException ex) {
 			UILoggedOperation.reportError("Compare", ex);
 		}
-		this.runScheduled(new CompareRepositoryResourcesOperation(resources[1], resources[0]));
+		runScheduled(new CompareRepositoryResourcesOperation(resources[1], resources[0]));
 	}
 
+	@Override
 	public boolean isEnabled() {
-		IRepositoryResource[] resources = this.getSelectedRepositoryResources();
+		IRepositoryResource[] resources = getSelectedRepositoryResources();
 		if (resources.length != 2) {
 			return false;
 		}

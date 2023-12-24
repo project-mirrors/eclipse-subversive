@@ -37,7 +37,7 @@ import org.eclipse.team.svn.core.utility.SVNUtility;
  * @author Alexander Gurov
  */
 public class RemoteStatusOperation extends AbstractStatusOperation implements ISVNNotificationCallback {
-	protected Map<String, Number> pegRevisions = new HashMap<String, Number>();
+	protected Map<String, Number> pegRevisions = new HashMap<>();
 
 	public RemoteStatusOperation(File[] files, boolean recursive) {
 		super("Operation_UpdateStatusFile", SVNMessages.class, files, recursive); //$NON-NLS-1$
@@ -49,7 +49,7 @@ public class RemoteStatusOperation extends AbstractStatusOperation implements IS
 
 	public SVNRevision getPegRevision(File change) {
 		IPath resourcePath = new Path(change.getAbsolutePath());
-		for (Iterator<?> it = this.pegRevisions.entrySet().iterator(); it.hasNext();) {
+		for (Iterator<?> it = pegRevisions.entrySet().iterator(); it.hasNext();) {
 			Map.Entry entry = (Map.Entry) it.next();
 			IPath rootPath = new Path((String) entry.getKey());
 			if (rootPath.isPrefixOf(resourcePath)) {
@@ -59,12 +59,14 @@ public class RemoteStatusOperation extends AbstractStatusOperation implements IS
 		return null;
 	}
 
+	@Override
 	public void notify(SVNNotification info) {
 		if (info.revision != SVNRevision.INVALID_REVISION_NUMBER) {
-			this.pegRevisions.put(info.path, SVNRevision.fromNumber(info.revision));
+			pegRevisions.put(info.path, SVNRevision.fromNumber(info.revision));
 		}
 	}
 
+	@Override
 	protected void reportStatuses(final ISVNConnector proxy, final ISVNEntryStatusCallback cb, final File current,
 			IProgressMonitor monitor, int tasks) {
 		SVNUtility.addSVNNotifyListener(proxy, this);
@@ -72,6 +74,7 @@ public class RemoteStatusOperation extends AbstractStatusOperation implements IS
 		SVNUtility.removeSVNNotifyListener(proxy, this);
 	}
 
+	@Override
 	protected boolean isRemote() {
 		return true;
 	}

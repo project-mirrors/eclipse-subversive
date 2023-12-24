@@ -23,11 +23,9 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.team.svn.core.resource.SSHSettings;
 import org.eclipse.team.svn.ui.SVNUIMessages;
@@ -84,33 +82,34 @@ public class SSHComposite extends AbstractDynamicComposite implements IPropertie
 		super(parent, style);
 		this.validationManager = validationManager;
 		this.callback = callback;
-		this.credentialsInput = new SSHSettings();
+		credentialsInput = new SSHSettings();
 	}
 
 	public SSHSettings getSSHSettingsDirect() {
 		SSHSettings settings = new SSHSettings();
-		this.getSSHSettingsDirectImpl(settings);
+		getSSHSettingsDirectImpl(settings);
 		return settings;
 	}
 
 	public void setSSHSettingsDirect(SSHSettings settings) {
-		this.savePassphraseCheckBox.setSelection(settings.isPassPhraseSaved());
-		this.privateKeyRadioButton.setSelection(settings.isUseKeyFile());
-		this.passwordRadioButton.setSelection(!settings.isUseKeyFile());
+		savePassphraseCheckBox.setSelection(settings.isPassPhraseSaved());
+		privateKeyRadioButton.setSelection(settings.isUseKeyFile());
+		passwordRadioButton.setSelection(!settings.isUseKeyFile());
 		String text = settings.getPassPhrase();
-		this.passphraseText.setText(text == null ? "" : text); //$NON-NLS-1$
+		passphraseText.setText(text == null ? "" : text); //$NON-NLS-1$
 		text = settings.getPrivateKeyPath();
-		this.privateKeyFileText.setText(text == null ? "" : text); //$NON-NLS-1$
-		this.portText.setText(String.valueOf(settings.getPort()));
+		privateKeyFileText.setText(text == null ? "" : text); //$NON-NLS-1$
+		portText.setText(String.valueOf(settings.getPort()));
 
-		if (this.callback && text != null && text.length() > 0) {
-			this.passphraseText.setFocus();
-			this.passphraseText.selectAll();
+		if (callback && text != null && text.length() > 0) {
+			passphraseText.setFocus();
+			passphraseText.selectAll();
 		}
 
-		this.refreshControlsEnablement();
+		refreshControlsEnablement();
 	}
 
+	@Override
 	public void initialize() {
 		GridLayout layout = null;
 		GridData data = null;
@@ -118,9 +117,9 @@ public class SSHComposite extends AbstractDynamicComposite implements IPropertie
 		layout = new GridLayout();
 		layout.marginHeight = 7;
 		layout.verticalSpacing = 3;
-		this.setLayout(layout);
+		setLayout(layout);
 		data = new GridData(GridData.FILL_BOTH);
-		this.setLayoutData(data);
+		setLayoutData(data);
 
 		Composite sshGroup = new Composite(this, SWT.NONE);
 		data = new GridData(GridData.FILL_HORIZONTAL);
@@ -135,15 +134,16 @@ public class SSHComposite extends AbstractDynamicComposite implements IPropertie
 		Label lblPort = new Label(sshGroup, SWT.NONE);
 		lblPort.setText(SVNUIMessages.SSHComposite_Port);
 
-		this.portText = new Text(sshGroup, SWT.BORDER);
+		portText = new Text(sshGroup, SWT.BORDER);
 		data = new GridData(GridData.FILL_HORIZONTAL);
-		this.portText.setLayoutData(data);
+		portText.setLayoutData(data);
 		CompositeVerifier verifier = new CompositeVerifier();
 		String name = SVNUIMessages.SSHComposite_Port_Verifier;
 		verifier.add(new NonEmptyFieldVerifier(name));
 		verifier.add(new ProxyPortVerifier(name));
-		this.portText.setText(String.valueOf(SSHSettings.SSH_PORT_DEFAULT));
-		this.validationManager.attachTo(this.portText, new AbstractVerifierProxy(verifier) {
+		portText.setText(String.valueOf(SSHSettings.SSH_PORT_DEFAULT));
+		validationManager.attachTo(portText, new AbstractVerifierProxy(verifier) {
+			@Override
 			protected boolean isVerificationEnabled(Control input) {
 				return SSHComposite.this.isVisible();
 			}
@@ -165,25 +165,27 @@ public class SSHComposite extends AbstractDynamicComposite implements IPropertie
 		data.horizontalSpan = 2;
 		inner.setLayoutData(data);
 
-		this.passwordRadioButton = new Button(inner, SWT.RADIO);
+		passwordRadioButton = new Button(inner, SWT.RADIO);
 		data = new GridData(GridData.BEGINNING);
-		this.passwordRadioButton.setLayoutData(data);
-		this.passwordRadioButton.setText(SVNUIMessages.SSHComposite_Password);
+		passwordRadioButton.setLayoutData(data);
+		passwordRadioButton.setText(SVNUIMessages.SSHComposite_Password);
 
-		this.passwordRadioButton.addSelectionListener(new SelectionListener() {
+		passwordRadioButton.addSelectionListener(new SelectionListener() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				SSHComposite.this.refreshControlsEnablement();
 			}
 
+			@Override
 			public void widgetDefaultSelected(SelectionEvent e) {
 			}
 		});
 
-		this.privateKeyRadioButton = new Button(inner, SWT.RADIO);
+		privateKeyRadioButton = new Button(inner, SWT.RADIO);
 		data = new GridData();
-		this.privateKeyRadioButton.setLayoutData(data);
-		this.privateKeyRadioButton.setText(SVNUIMessages.SSHComposite_PrivateKey);
-		this.privateKeyRadioButton.setSelection(false);
+		privateKeyRadioButton.setLayoutData(data);
+		privateKeyRadioButton.setText(SVNUIMessages.SSHComposite_PrivateKey);
+		privateKeyRadioButton.setSelection(false);
 
 		Composite groupInner = new Composite(inner, SWT.FILL);
 		layout = new GridLayout();
@@ -206,31 +208,30 @@ public class SSHComposite extends AbstractDynamicComposite implements IPropertie
 		privateKeyFileComposite.setLayout(layout);
 		privateKeyFileComposite.setLayoutData(data);
 
-		this.privateKeyFileText = new Text(privateKeyFileComposite, SWT.BORDER);
+		privateKeyFileText = new Text(privateKeyFileComposite, SWT.BORDER);
 		data = new GridData(GridData.FILL_HORIZONTAL);
 		data.widthHint = IDialogConstants.ENTRY_FIELD_WIDTH;
-		this.privateKeyFileText.setLayoutData(data);
-		this.validationManager.attachTo(this.privateKeyFileText, new AbstractVerifierProxy(
+		privateKeyFileText.setLayoutData(data);
+		validationManager.attachTo(privateKeyFileText, new AbstractVerifierProxy(
 				new ExistingResourceVerifier(SVNUIMessages.SSHComposite_File_Verifier, true)) {
+			@Override
 			protected boolean isVerificationEnabled(Control input) {
-				return SSHComposite.this.privateKeyRadioButton.getSelection() && SSHComposite.this.isVisible();
+				return privateKeyRadioButton.getSelection() && SSHComposite.this.isVisible();
 			}
 		});
 
-		this.browseButton = new Button(privateKeyFileComposite, SWT.PUSH);
-		this.browseButton.setText(SVNUIMessages.Button_Browse);
+		browseButton = new Button(privateKeyFileComposite, SWT.PUSH);
+		browseButton.setText(SVNUIMessages.Button_Browse);
 		data = new GridData(GridData.HORIZONTAL_ALIGN_END);
-		data.widthHint = DefaultDialog.computeButtonWidth(this.browseButton);
-		this.browseButton.setLayoutData(data);
+		data.widthHint = DefaultDialog.computeButtonWidth(browseButton);
+		browseButton.setLayoutData(data);
 
-		this.browseButton.addListener(SWT.Selection, new Listener() {
-			public void handleEvent(Event event) {
-				FileDialog fileDialog = new FileDialog(SSHComposite.this.getShell(), SWT.OPEN);
-				String res = fileDialog.open();
-				if (res != null) {
-					SSHComposite.this.privateKeyFileText.setText(res);
-					SSHComposite.this.validationManager.validateContent();
-				}
+		browseButton.addListener(SWT.Selection, event -> {
+			FileDialog fileDialog = new FileDialog(SSHComposite.this.getShell(), SWT.OPEN);
+			String res = fileDialog.open();
+			if (res != null) {
+				privateKeyFileText.setText(res);
+				validationManager.validateContent();
 			}
 		});
 
@@ -239,10 +240,10 @@ public class SSHComposite extends AbstractDynamicComposite implements IPropertie
 		data = new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
 		description.setLayoutData(data);
 
-		this.passphraseText = new Text(groupInner, SWT.BORDER | SWT.PASSWORD);
+		passphraseText = new Text(groupInner, SWT.BORDER | SWT.PASSWORD);
 		data = new GridData(GridData.FILL_HORIZONTAL);
 		data.widthHint = IDialogConstants.ENTRY_FIELD_WIDTH;
-		this.passphraseText.setLayoutData(data);
+		passphraseText.setLayoutData(data);
 
 		Composite savePassphrase = new Composite(passGroup, SWT.FILL);
 		layout = new GridLayout();
@@ -252,72 +253,78 @@ public class SSHComposite extends AbstractDynamicComposite implements IPropertie
 		data.horizontalSpan = 2;
 		savePassphrase.setLayoutData(data);
 
-		this.savePassphraseCheckBox = new Button(savePassphrase, SWT.CHECK);
-		this.savePassphraseCheckBox.setText(SVNUIMessages.SSHComposite_SavePassphrase);
+		savePassphraseCheckBox = new Button(savePassphrase, SWT.CHECK);
+		savePassphraseCheckBox.setText(SVNUIMessages.SSHComposite_SavePassphrase);
 
 		new SecurityWarningComposite(savePassphrase);
 	}
 
 	public void setCredentialsInput(SSHSettings input) {
-		this.credentialsInput = input;
+		credentialsInput = input;
 	}
 
+	@Override
 	public void saveChanges() {
-		this.getSSHSettingsDirectImpl(this.credentialsInput);
+		getSSHSettingsDirectImpl(credentialsInput);
 	}
 
+	@Override
 	public void resetChanges() {
-		this.setSSHSettingsDirect(this.credentialsInput);
+		setSSHSettingsDirect(credentialsInput);
 	}
 
+	@Override
 	public void cancelChanges() {
 
 	}
 
 	protected void getSSHSettingsDirectImpl(SSHSettings settings) {
-		settings.setPassPhraseSaved(this.savePassphraseCheckBox.getSelection());
-		settings.setUseKeyFile(this.privateKeyRadioButton.getSelection());
-		settings.setPassPhrase(this.passphraseText.getText());
-		settings.setPrivateKeyPath(this.privateKeyFileText.getText());
-		String port = this.portText.getText().trim();
+		settings.setPassPhraseSaved(savePassphraseCheckBox.getSelection());
+		settings.setUseKeyFile(privateKeyRadioButton.getSelection());
+		settings.setPassPhrase(passphraseText.getText());
+		settings.setPrivateKeyPath(privateKeyFileText.getText());
+		String port = portText.getText().trim();
 		if (port.length() > 0) {
 			settings.setPort(Integer.parseInt(port));
 		}
 	}
 
 	protected void refreshControlsEnablement() {
-		boolean buttonSelected = this.passwordRadioButton.getSelection();
+		boolean buttonSelected = passwordRadioButton.getSelection();
 
-		buttonSelected = this.privateKeyRadioButton.getSelection();
-		this.privateKeyFileText.setEnabled(buttonSelected);
-		this.browseButton.setEnabled(buttonSelected);
-		this.passphraseText.setEnabled(buttonSelected);
-		this.savePassphraseCheckBox.setEnabled(buttonSelected);
+		buttonSelected = privateKeyRadioButton.getSelection();
+		privateKeyFileText.setEnabled(buttonSelected);
+		browseButton.setEnabled(buttonSelected);
+		passphraseText.setEnabled(buttonSelected);
+		savePassphraseCheckBox.setEnabled(buttonSelected);
 
-		this.validationManager.validateContent();
+		validationManager.validateContent();
 	}
 
+	@Override
 	public void saveAppearance() {
-		this.tempPassBtnEnabled = this.passwordRadioButton.getSelection();
-		this.tempKeyBtnEnabled = this.privateKeyRadioButton.getSelection();
-		this.tempSavePassChecked = this.savePassphraseCheckBox.getSelection();
-		this.tempOptionsSaved = true;
+		tempPassBtnEnabled = passwordRadioButton.getSelection();
+		tempKeyBtnEnabled = privateKeyRadioButton.getSelection();
+		tempSavePassChecked = savePassphraseCheckBox.getSelection();
+		tempOptionsSaved = true;
 	}
 
+	@Override
 	public void restoreAppearance() {
-		if (this.tempOptionsSaved) {
-			this.passwordRadioButton.setSelection(this.tempPassBtnEnabled);
-			this.privateKeyRadioButton.setSelection(this.tempKeyBtnEnabled);
-			this.savePassphraseCheckBox.setSelection(this.tempSavePassChecked);
-			this.tempOptionsSaved = false;
-			this.refreshControlsEnablement();
+		if (tempOptionsSaved) {
+			passwordRadioButton.setSelection(tempPassBtnEnabled);
+			privateKeyRadioButton.setSelection(tempKeyBtnEnabled);
+			savePassphraseCheckBox.setSelection(tempSavePassChecked);
+			tempOptionsSaved = false;
+			refreshControlsEnablement();
 		} else {
-			this.resetChanges();
+			resetChanges();
 		}
 	}
 
+	@Override
 	public void revalidateContent() {
-		this.validationManager.validateContent();
+		validationManager.validateContent();
 	}
 
 }

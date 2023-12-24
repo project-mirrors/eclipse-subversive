@@ -26,7 +26,6 @@ import org.eclipse.team.svn.core.connector.ISVNConnector;
 import org.eclipse.team.svn.core.connector.ISVNNotificationCallback;
 import org.eclipse.team.svn.core.connector.SVNNotification;
 import org.eclipse.team.svn.core.operation.IConsoleStream;
-import org.eclipse.team.svn.core.operation.IUnprotectedOperation;
 import org.eclipse.team.svn.core.operation.SVNProgressMonitor;
 import org.eclipse.team.svn.core.operation.UnreportableException;
 import org.eclipse.team.svn.core.resource.IRepositoryLocation;
@@ -48,10 +47,11 @@ public class UnlockOperation extends AbstractFileOperation {
 		super("Operation_UnlockFile", SVNMessages.class, provider); //$NON-NLS-1$
 	}
 
+	@Override
 	protected void runImpl(final IProgressMonitor monitor) throws Exception {
-		File[] files = this.operableData();
+		File[] files = operableData();
 
-		final List<SVNNotification> problems = new ArrayList<SVNNotification>();
+		final List<SVNNotification> problems = new ArrayList<>();
 		Map<?, ?> wc2Resources = SVNUtility.splitWorkingCopies(files);
 		for (Iterator<?> it = wc2Resources.entrySet().iterator(); it.hasNext() && !monitor.isCanceled();) {
 			Map.Entry entry = (Map.Entry) it.next();
@@ -61,36 +61,30 @@ public class UnlockOperation extends AbstractFileOperation {
 
 			final String[] paths = FileUtility.asPathArray(((List<?>) entry.getValue()).toArray(new File[0]));
 
-			this.complexWriteToConsole(new Runnable() {
-				public void run() {
-					UnlockOperation.this.writeToConsole(IConsoleStream.LEVEL_CMD,
-							"svn unlock" + ISVNConnector.Options.asCommandLine(ISVNConnector.Options.FORCE)); //$NON-NLS-1$
-					for (int i = 0; i < paths.length && !monitor.isCanceled(); i++) {
-						UnlockOperation.this.writeToConsole(IConsoleStream.LEVEL_CMD, " \"" + paths[i] + "\""); //$NON-NLS-1$ //$NON-NLS-2$
-					}
-					UnlockOperation.this.writeToConsole(IConsoleStream.LEVEL_CMD,
-							" --force" + FileUtility.getUsernameParam(location.getUsername()) + "\n"); //$NON-NLS-1$ //$NON-NLS-2$
+			complexWriteToConsole(() -> {
+				UnlockOperation.this.writeToConsole(IConsoleStream.LEVEL_CMD,
+						"svn unlock" + ISVNConnector.Options.asCommandLine(ISVNConnector.Options.FORCE)); //$NON-NLS-1$
+				for (int i = 0; i < paths.length && !monitor.isCanceled(); i++) {
+					UnlockOperation.this.writeToConsole(IConsoleStream.LEVEL_CMD, " \"" + paths[i] + "\""); //$NON-NLS-1$ //$NON-NLS-2$
 				}
+				UnlockOperation.this.writeToConsole(IConsoleStream.LEVEL_CMD,
+						" --force" + FileUtility.getUsernameParam(location.getUsername()) + "\n"); //$NON-NLS-1$ //$NON-NLS-2$
 			});
 
 			final ISVNConnector proxy = location.acquireSVNProxy();
-			this.protectStep(new IUnprotectedOperation() {
-				public void run(IProgressMonitor monitor) throws Exception {
-					ISVNNotificationCallback listener = new ISVNNotificationCallback() {
-						public void notify(SVNNotification info) {
-							if (SVNNotification.PerformedAction.FAILED_UNLOCK == info.action) {
-								problems.add(info);
-							}
-						}
-					};
-
-					SVNUtility.addSVNNotifyListener(proxy, listener);
-					try {
-						proxy.unlock(paths, ISVNConnector.Options.FORCE,
-								new SVNProgressMonitor(UnlockOperation.this, monitor, null));
-					} finally {
-						SVNUtility.removeSVNNotifyListener(proxy, listener);
+			this.protectStep(monitor1 -> {
+				ISVNNotificationCallback listener = info -> {
+					if (SVNNotification.PerformedAction.FAILED_UNLOCK == info.action) {
+						problems.add(info);
 					}
+				};
+
+				SVNUtility.addSVNNotifyListener(proxy, listener);
+				try {
+					proxy.unlock(paths, ISVNConnector.Options.FORCE,
+							new SVNProgressMonitor(UnlockOperation.this, monitor1, null));
+				} finally {
+					SVNUtility.removeSVNNotifyListener(proxy, listener);
 				}
 			}, monitor, wc2Resources.size());
 
@@ -99,7 +93,7 @@ public class UnlockOperation extends AbstractFileOperation {
 
 		//check problems
 		if (!problems.isEmpty()) {
-			StringBuffer res = new StringBuffer();
+			StringBuilder res = new StringBuilder();
 			Iterator<SVNNotification> iter = problems.iterator();
 			while (iter.hasNext()) {
 				SVNNotification problem = iter.next();

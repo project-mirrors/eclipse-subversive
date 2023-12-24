@@ -39,15 +39,16 @@ public class SVNLocalFolder extends SVNLocalResource implements ILocalFolder {
 				treeConflictDescriptor);
 	}
 
+	@Override
 	public ILocalResource[] getChildren() {
-		IContainer root = (IContainer) this.resource;
-		List<ILocalResource> members = new ArrayList<ILocalResource>();
+		IContainer root = (IContainer) resource;
+		List<ILocalResource> members = new ArrayList<>();
 
 		GetAllResourcesOperation op = new GetAllResourcesOperation(root);
 		ProgressMonitorUtility.doTaskExternalDefault(op, new NullProgressMonitor());
 		IResource[] resources = op.getChildren();
-		for (int i = 0; i < resources.length; i++) {
-			ILocalResource local = SVNRemoteStorage.instance().asLocalResource(resources[i]);
+		for (IResource element : resources) {
+			ILocalResource local = SVNRemoteStorage.instance().asLocalResource(element);
 			if (!IStateFilter.SF_INTERNAL_INVALID.accept(local) && local.getStatus() != IStateFilter.ST_NOTEXISTS) {
 				members.add(local);
 			}

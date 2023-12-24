@@ -50,25 +50,24 @@ public abstract class AbstractRepositoryResourceSelectionPanel extends AbstractD
 	public AbstractRepositoryResourceSelectionPanel(IRepositoryResource baseResource, long currentRevision,
 			String title, String proposal, String historyKey, String selectionTitle, String selectionDescription,
 			int defaultTextType) {
-		super();
-		this.dialogTitle = title;
-		this.dialogDescription = proposal;
+		dialogTitle = title;
+		dialogDescription = proposal;
 
 		this.historyKey = historyKey;
-		this.selectedResource = baseResource;
+		selectedResource = baseResource;
 		this.currentRevision = currentRevision;
 		this.selectionTitle = selectionTitle;
 		this.selectionDescription = selectionDescription;
 		this.defaultTextType = defaultTextType;
-		this.toFilterCurrent = false;
+		toFilterCurrent = false;
 	}
 
 	public void setFilterCurrent(boolean toFilter) {
-		this.toFilterCurrent = toFilter;
+		toFilterCurrent = toFilter;
 	}
 
 	public IRepositoryResource[] getSelection(IResource[] to) {
-		IRepositoryResource base = this.getSelectedResource();
+		IRepositoryResource base = getSelectedResource();
 		if (to.length == 1) {
 			return new IRepositoryResource[] { base };
 		}
@@ -84,26 +83,29 @@ public abstract class AbstractRepositoryResourceSelectionPanel extends AbstractD
 	}
 
 	public IRepositoryResource getSelectedResource() {
-		return this.selectedResource;
+		return selectedResource;
 	}
 
+	@Override
 	public void createControlsImpl(Composite parent) {
 		GridData data = null;
 
-		this.selectionComposite = new RepositoryResourceSelectionComposite(parent, SWT.NONE, this, this.historyKey,
-				this.selectedResource, false, this.selectionTitle, this.selectionDescription,
-				RepositoryResourceSelectionComposite.MODE_DEFAULT, this.defaultTextType);
-		this.selectionComposite.setFilterCurrent(this.toFilterCurrent);
+		selectionComposite = new RepositoryResourceSelectionComposite(parent, SWT.NONE, this, historyKey,
+				selectedResource, false, selectionTitle, selectionDescription,
+				RepositoryResourceSelectionComposite.MODE_DEFAULT, defaultTextType);
+		selectionComposite.setFilterCurrent(toFilterCurrent);
 		data = new GridData(GridData.FILL_HORIZONTAL);
-		this.selectionComposite.setLayoutData(data);
-		this.selectionComposite.setCurrentRevision(this.currentRevision);
+		selectionComposite.setLayoutData(data);
+		selectionComposite.setCurrentRevision(currentRevision);
 	}
 
+	@Override
 	protected void saveChangesImpl() {
-		this.selectedResource = this.selectionComposite.getSelectedResource();
-		this.selectionComposite.saveHistory();
+		selectedResource = selectionComposite.getSelectedResource();
+		selectionComposite.saveHistory();
 	}
 
+	@Override
 	protected void cancelChangesImpl() {
 	}
 

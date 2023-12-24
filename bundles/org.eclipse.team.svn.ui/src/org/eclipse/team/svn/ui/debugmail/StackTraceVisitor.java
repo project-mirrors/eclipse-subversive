@@ -22,6 +22,7 @@ import org.eclipse.core.runtime.IStatus;
  * @author Alexander Gurov
  */
 public class StackTraceVisitor implements ReportPartsFactory.IStatusVisitor {
+	@Override
 	public boolean visit(IStatus status) {
 		String output = ReportPartsFactory.getOutput(status);
 		return output.indexOf(".eclipse.team.svn.") != -1 && //$NON-NLS-1$

@@ -30,5 +30,5 @@ public interface ISVNEntryInfoCallback {
 	 * @param info
 	 *            the found entry information
 	 */
-	public void next(SVNEntryInfo info);
+	void next(SVNEntryInfo info);
 }

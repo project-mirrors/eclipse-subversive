@@ -27,6 +27,7 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.team.core.synchronize.FastSyncInfoFilter;
 import org.eclipse.team.core.synchronize.SyncInfo;
+import org.eclipse.team.svn.core.BaseMessages;
 import org.eclipse.team.svn.core.IStateFilter;
 import org.eclipse.team.svn.core.SVNMessages;
 import org.eclipse.team.svn.core.connector.SVNRevision;
@@ -57,21 +58,23 @@ public class UpdateAction extends AbstractSynchronizeModelAction {
 
 	public UpdateAction(String text, ISynchronizePageConfiguration configuration) {
 		super(text, configuration);
-		this.advancedMode = false;
+		advancedMode = false;
 	}
 
 	public UpdateAction(String text, ISynchronizePageConfiguration configuration,
 			ISelectionProvider selectionProvider) {
 		super(text, configuration, selectionProvider);
-		this.advancedMode = true;
+		advancedMode = true;
 	}
 
+	@Override
 	protected FastSyncInfoFilter getSyncInfoFilter() {
 		//FastSyncInfoFilter.AndSyncInfoFilter()
 		//FastSyncInfoFilter.OrSyncInfoFilter()
 		//FastSyncInfoFilter.SyncInfoDirectionFilter()
 		//FastSyncInfoFilter.SyncInfoChangeTypeFilter()
 		return new FastSyncInfoFilter.SyncInfoDirectionFilter(new int[] { SyncInfo.INCOMING, SyncInfo.CONFLICTING }) {
+			@Override
 			public boolean select(SyncInfo info) {
 				return super.select(info)
 						&& !IStateFilter.SF_OBSTRUCTED.accept(((UpdateSyncInfo) info).getLocalResource());
@@ -79,10 +82,11 @@ public class UpdateAction extends AbstractSynchronizeModelAction {
 		};
 	}
 
+	@Override
 	protected IActionOperation getOperation(ISynchronizePageConfiguration configuration, IDiffElement[] elements) {
 		// IStateFilter.SF_NONVERSIONED not versioned locally
 		IResource[] resources = UnacceptableOperationNotificator.shrinkResourcesWithNotOnRespositoryParents(
-				configuration.getSite().getShell(), this.syncInfoSelector.getSelectedResources());
+				configuration.getSite().getShell(), syncInfoSelector.getSelectedResources());
 		if (resources == null || resources.length == 0) {
 			return null;
 		}
@@ -97,12 +101,12 @@ public class UpdateAction extends AbstractSynchronizeModelAction {
 				return null;
 			}
 		}
-		if (this.advancedMode) {
+		if (advancedMode) {
 			String message;
 			if (resources.length == 1) {
 				message = SVNUIMessages.UpdateAll_Message_Single;
 			} else {
-				message = SVNUIMessages.format(SVNUIMessages.UpdateAll_Message_Multi,
+				message = BaseMessages.format(SVNUIMessages.UpdateAll_Message_Multi,
 						new String[] { String.valueOf(resources.length) });
 			}
 			MessageDialog dlg = new MessageDialog(configuration.getSite().getShell(), SVNUIMessages.UpdateAll_Title,
@@ -139,11 +143,11 @@ public class UpdateAction extends AbstractSynchronizeModelAction {
 
 	public static Map<SVNRevision, Set<IResource>> splitByPegRevision(AbstractSynchronizeModelAction action,
 			IResource[] resources) {
-		Map<SVNRevision, Set<IResource>> splitted = new HashMap<SVNRevision, Set<IResource>>();
+		Map<SVNRevision, Set<IResource>> splitted = new HashMap<>();
 		//NOTE See bug 237204: SVN replaces files with second last revision after commit: https://bugs.eclipse.org/bugs/show_bug.cgi?id=237204
 		// Due to described problem we should roll back code which prepares update to revisions saved in synchronize view, because potential damage
 		// from updating of unapproved changes many times smaller than reverting all committed files to its previous states
-		splitted.put(SVNRevision.HEAD, new HashSet<IResource>(Arrays.asList(resources)));
+		splitted.put(SVNRevision.HEAD, new HashSet<>(Arrays.asList(resources)));
 //		for (IResource resource : resources) {
 //			try {
 //				AbstractSVNSyncInfo info = (AbstractSVNSyncInfo)UpdateSubscriber.instance().getSyncInfo(resource);

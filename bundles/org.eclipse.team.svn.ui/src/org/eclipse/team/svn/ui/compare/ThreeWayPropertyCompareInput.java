@@ -20,8 +20,9 @@ import org.eclipse.compare.structuremergeviewer.IDiffElement;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuManager;
-import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.viewers.TreeSelection;
+import org.eclipse.jface.window.Window;
+import org.eclipse.team.svn.core.BaseMessages;
 import org.eclipse.team.svn.core.IStateFilter;
 import org.eclipse.team.svn.core.connector.SVNEntryRevisionReference;
 import org.eclipse.team.svn.core.connector.SVNProperty;
@@ -60,24 +61,26 @@ public class ThreeWayPropertyCompareInput extends PropertyCompareInput {
 						: null,
 				ancestor, location);
 		this.baseRevisionNumber = baseRevisionNumber;
-		this.leftResource = left;
+		leftResource = left;
 	}
 
+	@Override
 	protected void fillMenu(IMenuManager manager, TreeSelection selection) {
 		final PropertyCompareNode selectedNode = (PropertyCompareNode) selection.getFirstElement();
 		Action tAction = null;
 		manager.add(tAction = new Action(SVNUIMessages.SetPropertyAction_label) {
+			@Override
 			public void run() {
-				IResource[] resources = new IResource[] { ThreeWayPropertyCompareInput.this.leftResource };
+				IResource[] resources = { leftResource };
 				ResourcePropertyEditPanel panel = new ResourcePropertyEditPanel(null, resources, false);
 				DefaultDialog dialog = new DefaultDialog(UIMonitorUtility.getShell(), panel);
-				if (dialog.open() == Dialog.OK) {
+				if (dialog.open() == Window.OK) {
 					SetPropertyAction.doSetProperty(resources, panel, null);
 					boolean notContained = true;
 					RootCompareNode root = (RootCompareNode) ThreeWayPropertyCompareInput.this.getCompareResult();
 					IDiffElement[] nodes = root.getChildren();
-					for (int i = 0; i < nodes.length; i++) {
-						PropertyCompareNode current = (PropertyCompareNode) nodes[i];
+					for (IDiffElement node : nodes) {
+						PropertyCompareNode current = (PropertyCompareNode) node;
 						if (current.getName().equals(panel.getPropertyName())) {
 							notContained = false;
 							((PropertyElement) current.getLeft()).setValue(panel.getPropertyValue());
@@ -103,6 +106,7 @@ public class ThreeWayPropertyCompareInput extends PropertyCompareInput {
 		tAction.setEnabled(true);
 
 		manager.add(tAction = new Action(SVNUIMessages.RemovePropertyAction_label) {
+			@Override
 			public void run() {
 				ThreeWayPropertyCompareInput.this.removeProperty(selectedNode);
 			}
@@ -113,11 +117,11 @@ public class ThreeWayPropertyCompareInput extends PropertyCompareInput {
 	protected void removeProperty(PropertyCompareNode currentNode) {
 		//perform property removing
 		final String propName = currentNode.getName();
-		IActionOperation op = new RemovePropertiesOperation(new IResource[] { this.leftResource },
+		IActionOperation op = new RemovePropertiesOperation(new IResource[] { leftResource },
 				new SVNProperty[] { new SVNProperty(propName, "") }, false);
 		CompositeOperation cmpOp = new CompositeOperation(op.getId(), op.getMessagesClass());
 		cmpOp.add(op);
-		cmpOp.add(new RefreshResourcesOperation(new IResource[] { this.leftResource }, IResource.DEPTH_ZERO,
+		cmpOp.add(new RefreshResourcesOperation(new IResource[] { leftResource }, IResource.DEPTH_ZERO,
 				RefreshResourcesOperation.REFRESH_CHANGES));
 		UIMonitorUtility.doTaskNowDefault(cmpOp, false);
 
@@ -127,24 +131,26 @@ public class ThreeWayPropertyCompareInput extends PropertyCompareInput {
 		//refresh UI
 		if ((currentNode.getKind() & Differencer.CHANGE_TYPE_MASK) == Differencer.ADDITION
 				&& (currentNode.getKind() & Differencer.DIRECTION_MASK) == Differencer.LEFT) {
-			((RootCompareNode) this.getCompareResult()).remove(currentNode);
+			((RootCompareNode) getCompareResult()).remove(currentNode);
 		} else {
 			((PropertyElement) currentNode.getLeft()).setValue(null);
-			currentNode.setKind(this.calculateDifference(null, ((PropertyElement) currentNode.getRight()).getValue(),
+			currentNode.setKind(calculateDifference(null, ((PropertyElement) currentNode.getRight()).getValue(),
 					((PropertyElement) currentNode.getAncestor()).getValue()));
 		}
 		currentNode.fireChange();
-		this.viewer.refresh();
+		viewer.refresh();
 	}
 
+	@Override
 	public String getTitle() {
-		return SVNUIMessages.format(SVNUIMessages.PropertyCompareInput_Title3,
-				new String[] { this.left.path.substring(this.left.path.lastIndexOf("/") + 1) //$NON-NLS-1$
-						+ " [" + this.getRevisionPart(this.left), //$NON-NLS-1$
-						this.getRevisionPart(this.ancestor), this.getRevisionPart(this.right) + "] " //$NON-NLS-1$
+		return BaseMessages.format(SVNUIMessages.PropertyCompareInput_Title3,
+				new String[] { left.path.substring(left.path.lastIndexOf("/") + 1) //$NON-NLS-1$
+						+ " [" + getRevisionPart(left), //$NON-NLS-1$
+						getRevisionPart(ancestor), getRevisionPart(right) + "] " //$NON-NLS-1$
 				});
 	}
 
+	@Override
 	protected String getRevisionPart(SVNEntryRevisionReference reference) {
 		if (reference == null) {
 			return SVNUIMessages.ResourceCompareInput_PrejFile;
@@ -152,13 +158,13 @@ public class ThreeWayPropertyCompareInput extends PropertyCompareInput {
 		if (reference.revision == SVNRevision.WORKING) {
 			return SVNUIMessages.ResourceCompareInput_LocalSign;
 		} else if (reference.revision == SVNRevision.BASE) {
-			if (this.ancestor == null) {
+			if (ancestor == null) {
 				return SVNUIMessages.ResourceCompareInput_ResourceIsNotAvailable;
 			}
-			return SVNUIMessages.format(SVNUIMessages.ResourceCompareInput_BaseSign,
-					new String[] { String.valueOf(this.baseRevisionNumber) });
+			return BaseMessages.format(SVNUIMessages.ResourceCompareInput_BaseSign,
+					new String[] { String.valueOf(baseRevisionNumber) });
 		}
-		return SVNUIMessages.format(SVNUIMessages.ResourceCompareInput_RevisionSign,
+		return BaseMessages.format(SVNUIMessages.ResourceCompareInput_RevisionSign,
 				new String[] { String.valueOf(reference.revision) });
 	}
 

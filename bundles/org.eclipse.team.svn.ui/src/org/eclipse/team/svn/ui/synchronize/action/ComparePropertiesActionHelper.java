@@ -42,16 +42,17 @@ public class ComparePropertiesActionHelper extends AbstractActionHelper {
 		super(action, configuration);
 	}
 
+	@Override
 	public IActionOperation getOperation() {
-		IResource resource = this.getSelectedResource();
+		IResource resource = getSelectedResource();
 		ILocalResource baseResource = SVNRemoteStorage.instance().asLocalResource(resource);
 		IRepositoryResource remote = SVNRemoteStorage.instance().asRepositoryResource(resource);
 		SVNEntryRevisionReference baseReference = new SVNEntryRevisionReference(
 				FileUtility.getWorkingCopyPath(resource), null, SVNRevision.BASE);
 		SVNEntryRevisionReference remoteReference = baseReference;
-		AbstractSVNSyncInfo info = this.getSelectedSVNSyncInfo();
+		AbstractSVNSyncInfo info = getSelectedSVNSyncInfo();
 		if (info != null) {
-			ILocalResource change = this.getSelectedSVNSyncInfo().getRemoteChangeResource();
+			ILocalResource change = getSelectedSVNSyncInfo().getRemoteChangeResource();
 			if (change instanceof IResourceChange) {
 				remote = ((IResourceChange) change).getOriginator();
 				remoteReference = new SVNEntryRevisionReference(remote.getUrl(), remote.getPegRevision(),

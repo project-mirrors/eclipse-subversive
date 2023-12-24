@@ -22,8 +22,6 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Event;
-import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.team.svn.ui.SVNUIMessages;
 
@@ -45,29 +43,28 @@ public class RemovePropertyDialog extends MessageDialog {
 				oneProperty ? SVNUIMessages.RemoveProperty_Message_Single : SVNUIMessages.RemoveProperty_Message_Multi,
 				MessageDialog.QUESTION, new String[] { IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL }, 0);
 
-		this.recursive = false;
+		recursive = false;
 		this.isFile = isFile;
 	}
 
 	public boolean isRecursive() {
-		return this.recursive;
+		return recursive;
 	}
 
+	@Override
 	protected Control createCustomArea(Composite parent) {
 		Composite composite = new Composite(parent, SWT.NONE);
 		composite.setLayout(new GridLayout());
 		composite.setLayoutData(new GridData(GridData.FILL_BOTH));
 
-		if (!this.isFile) {
+		if (!isFile) {
 			Button recursive = new Button(composite, SWT.CHECK);
 			recursive.setLayoutData(new GridData());
 			recursive.setSelection(false);
 			recursive.setText(SVNUIMessages.RemoveProperty_Recursively);
-			recursive.addListener(SWT.Selection, new Listener() {
-				public void handleEvent(Event event) {
-					Button button = (Button) event.widget;
-					RemovePropertyDialog.this.recursive = button.getSelection();
-				}
+			recursive.addListener(SWT.Selection, event -> {
+				Button button = (Button) event.widget;
+				RemovePropertyDialog.this.recursive = button.getSelection();
 			});
 		}
 

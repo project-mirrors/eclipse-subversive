@@ -36,6 +36,6 @@ public interface IRevisionProvider {
 		}
 	}
 
-	public RevisionPair[] getRevisions();
+	RevisionPair[] getRevisions();
 
 }

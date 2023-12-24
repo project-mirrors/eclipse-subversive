@@ -26,5 +26,5 @@ public interface IResolutionHelper {
 	 * @param description
 	 *            structure which describes the error happened
 	 */
-	public boolean acquireResolution(ErrorDescription description);
+	boolean acquireResolution(ErrorDescription description);
 }

@@ -35,15 +35,15 @@ import org.eclipse.team.svn.ui.panel.remote.CreateProjectStructurePanel;
 public class CreateProjectStructureAction extends AbstractRepositoryTeamAction {
 
 	public CreateProjectStructureAction() {
-		super();
 	}
 
+	@Override
 	public void runImpl(IAction action) {
 		CreateProjectStructurePanel panel = new CreateProjectStructurePanel();
-		DefaultDialog dialog = new DefaultDialog(this.getShell(), panel);
+		DefaultDialog dialog = new DefaultDialog(getShell(), panel);
 		if (dialog.open() == 0) {
 			String name = panel.getResourceName();
-			IRepositoryResource[] parent = this.getSelectedRepositoryResources();
+			IRepositoryResource[] parent = getSelectedRepositoryResources();
 			IRepositoryLocation location = parent[0].getRepositoryLocation();
 			String trunk = ShareProjectOperation.getTrunkName(location);
 			String branches = ShareProjectOperation.getBranchesName(location);
@@ -57,12 +57,13 @@ public class CreateProjectStructureAction extends AbstractRepositoryTeamAction {
 			op.add(mainOp);
 			op.add(new RefreshRemoteResourcesOperation(parent), new IActionOperation[] { mainOp });
 
-			this.runScheduled(op);
+			runScheduled(op);
 		}
 	}
 
+	@Override
 	public boolean isEnabled() {
-		IRepositoryResource[] resources = this.getSelectedRepositoryResources();
+		IRepositoryResource[] resources = getSelectedRepositoryResources();
 		return resources.length == 1 && resources[0] instanceof IRepositoryContainer;
 	}
 

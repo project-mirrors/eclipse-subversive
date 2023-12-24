@@ -21,6 +21,7 @@ import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.team.svn.core.BaseMessages;
 import org.eclipse.team.svn.core.IStateFilter;
 import org.eclipse.team.svn.core.SVNMessages;
 import org.eclipse.team.svn.core.operation.AbstractActionOperation;
@@ -62,15 +63,16 @@ public class ExtractToOperationLocal extends AbstractActionOperation {
 		this.logger = logger;
 	}
 
+	@Override
 	protected void runImpl(IProgressMonitor monitor) throws Exception {
-		FileUtility.reorder(this.outgoingResources, true);
+		FileUtility.reorder(outgoingResources, true);
 		int processed = 0;
 		IPath previousPref = null;
-		for (IResource current : this.outgoingResources) {
+		for (IResource current : outgoingResources) {
 			IPath currentPath = current.getFullPath();
 			String toOperate = ""; //$NON-NLS-1$
 			if (previousPref == null || !previousPref.isPrefixOf(currentPath)) {
-				toOperate = this.path + "/" + current.getName(); //$NON-NLS-1$
+				toOperate = path + "/" + current.getName(); //$NON-NLS-1$
 				if (current instanceof IContainer) {
 					previousPref = current.getFullPath();
 				}
@@ -79,29 +81,29 @@ public class ExtractToOperationLocal extends AbstractActionOperation {
 				if (toRemove < 2) {
 					toRemove = 0;
 				}
-				toOperate = this.path + (currentPath.toString()).substring(toRemove);
+				toOperate = path + currentPath.toString().substring(toRemove);
 			}
 			File operatingDirectory = new File(toOperate);
 			ILocalResource localResource = SVNRemoteStorage.instance().asLocalResourceAccessible(current);
 			if (!IStateFilter.SF_NOTMODIFIED.accept(localResource)) {
-				this.logger.log(operatingDirectory.getAbsolutePath().substring(this.path.length() + 1),
+				logger.log(operatingDirectory.getAbsolutePath().substring(path.length() + 1),
 						localResource.getStatus());
 			}
 			if (IStateFilter.SF_DELETED.accept(localResource)) {
-				if (operatingDirectory.exists() && this.delitionAllowed) {
+				if (operatingDirectory.exists() && delitionAllowed) {
 					FileUtility.deleteRecursive(operatingDirectory);
 				}
 			} else if (!IStateFilter.SF_NOTMODIFIED.accept(localResource)) {
 				if (previousPref != null) {
 					File parent = operatingDirectory.getParentFile();
 					if (parent != null) {
-						monitor.subTask(SVNMessages.format(SVNMessages.Operation_ExtractTo_Folders,
+						monitor.subTask(BaseMessages.format(SVNMessages.Operation_ExtractTo_Folders,
 								new String[] { FileUtility.getWorkingCopyPath(current) }));
 						parent.mkdirs();
 						operatingDirectory = parent;
 					}
 				}
-				monitor.subTask(SVNMessages.format(SVNMessages.Operation_ExtractTo_LocalFile,
+				monitor.subTask(BaseMessages.format(SVNMessages.Operation_ExtractTo_LocalFile,
 						new String[] { FileUtility.getWorkingCopyPath(current) }));
 				if (localResource.getResource().getType() == IResource.FILE
 						|| IStateFilter.SF_ADDED.accept(localResource)) {
@@ -110,12 +112,13 @@ public class ExtractToOperationLocal extends AbstractActionOperation {
 							monitor);
 				}
 			}
-			ProgressMonitorUtility.progress(monitor, processed++, this.outgoingResources.length);
+			ProgressMonitorUtility.progress(monitor, processed++, outgoingResources.length);
 		}
 	}
 
+	@Override
 	public int getOperationWeight() {
-		if (this.outgoingResources.length == 0) {
+		if (outgoingResources.length == 0) {
 			return 0;
 		}
 		return 1;

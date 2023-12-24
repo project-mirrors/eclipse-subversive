@@ -46,24 +46,25 @@ public class CopyRemoteResourcesToWcOperation extends AbstractActionOperation {
 		this.resource = resource;
 	}
 
+	@Override
 	protected void runImpl(IProgressMonitor monitor) throws Exception {
-		IRepositoryResource repositoryResource = SVNUtility.asRepositoryResource(this.entry.path, true);
+		IRepositoryResource repositoryResource = SVNUtility.asRepositoryResource(entry.path, true);
 		IRepositoryLocation location = repositoryResource.getRepositoryLocation();
 		ISVNConnector proxy = location.acquireSVNProxy();
 		try {
-			this.writeToConsole(IConsoleStream.LEVEL_CMD, "svn copy \"" + this.entry.path + "@" + this.entry.pegRevision //$NON-NLS-1$//$NON-NLS-2$
-					+ "\" \"" + FileUtility.getWorkingCopyPath(this.resource) + "\"\n"); //$NON-NLS-1$ //$NON-NLS-2$
+			writeToConsole(IConsoleStream.LEVEL_CMD, "svn copy \"" + entry.path + "@" + entry.pegRevision //$NON-NLS-1$//$NON-NLS-2$
+					+ "\" \"" + FileUtility.getWorkingCopyPath(resource) + "\"\n"); //$NON-NLS-1$ //$NON-NLS-2$
 			proxy.copyLocal(
-					new SVNEntryRevisionReference[] {
-							new SVNEntryRevisionReference(this.entry, this.entry.pegRevision) },
-					FileUtility.getWorkingCopyPath(this.resource), ISVNConnector.Options.NONE,
+					new SVNEntryRevisionReference[] { new SVNEntryRevisionReference(entry, entry.pegRevision) },
+					FileUtility.getWorkingCopyPath(resource), ISVNConnector.Options.NONE,
 					ISVNConnector.NO_EXTERNALS_TO_PIN, new SVNProgressMonitor(this, monitor, null));
 		} finally {
 			location.releaseSVNProxy(proxy);
 		}
 	}
 
+	@Override
 	public ISchedulingRule getSchedulingRule() {
-		return this.resource instanceof IProject ? this.resource : this.resource.getParent();
+		return resource instanceof IProject ? resource : resource.getParent();
 	}
 }

@@ -23,21 +23,21 @@ import org.eclipse.team.svn.core.resource.SSLSettings;
  * @author Alexander Gurov
  */
 public interface ISecurityInfoProvider {
-	public String getUsername();
+	String getUsername();
 
-	public void setUsername(String username);
+	void setUsername(String username);
 
-	public String getPassword();
+	String getPassword();
 
-	public void setPassword(String password);
+	void setPassword(String password);
 
-	public boolean isPasswordSaved();
+	boolean isPasswordSaved();
 
-	public void setPasswordSaved(boolean saved);
+	void setPasswordSaved(boolean saved);
 
-	public SSLSettings getSSLSettings();
+	SSLSettings getSSLSettings();
 
-	public SSHSettings getSSHSettings();
+	SSHSettings getSSHSettings();
 
-	public void commit();
+	void commit();
 }

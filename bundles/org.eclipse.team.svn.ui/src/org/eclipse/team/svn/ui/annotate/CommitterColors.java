@@ -31,13 +31,14 @@ public class CommitterColors {
 	 * @return the committer color singleton
 	 */
 	public static CommitterColors getDefault() {
-		if (fInstance == null)
+		if (fInstance == null) {
 			fInstance = new CommitterColors();
+		}
 		return fInstance;
 	}
 
 	/** The color map. */
-	private Map<String, RGB> fColors = new HashMap<String, RGB>();
+	private Map<String, RGB> fColors = new HashMap<>();
 
 	/** The number of colors that have been issued. */
 	private int fCount = 0;
@@ -54,10 +55,10 @@ public class CommitterColors {
 	 * @return the corresponding color
 	 */
 	public RGB getCommitterRGB(String committer) {
-		RGB rgb = this.fColors.get(committer);
+		RGB rgb = fColors.get(committer);
 		if (rgb == null) {
-			rgb = computeRGB(this.fCount++);
-			this.fColors.put(committer, rgb);
+			rgb = computeRGB(fCount++);
+			fColors.put(committer, rgb);
 		}
 		return rgb;
 	}
@@ -71,7 +72,7 @@ public class CommitterColors {
 	private float computeHue(int ordinal) {
 		int base = 3;
 		int l = ordinal < base ? 0 : (int) Math.floor(Math.log(ordinal / base) / Math.log(2));
-		int m = ((int) Math.pow(2, l)) * base;
+		int m = (int) Math.pow(2, l) * base;
 		int j = ordinal < base ? ordinal : ordinal - m;
 		float offset = ordinal < base ? 0.0f : (float) (180.0f / base / Math.pow(2, l));
 		float delta = ordinal < base ? 120.0f : 2 * offset;

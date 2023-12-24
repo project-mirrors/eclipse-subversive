@@ -31,15 +31,17 @@ public class EditConflictsModelAction extends AbstractSynchronizeLogicalModelAct
 
 	public EditConflictsModelAction(String text, ISynchronizePageConfiguration configuration) {
 		super(text, configuration);
-		this.actionHelper = new EditConflictsActionHelper(this, configuration);
+		actionHelper = new EditConflictsActionHelper(this, configuration);
 	}
 
+	@Override
 	protected FastSyncInfoFilter getSyncInfoFilter() {
-		return this.actionHelper.getSyncInfoFilter();
+		return actionHelper.getSyncInfoFilter();
 	}
 
+	@Override
 	protected IActionOperation getOperation() {
-		return this.actionHelper.getOperation();
+		return actionHelper.getOperation();
 	}
 
 }

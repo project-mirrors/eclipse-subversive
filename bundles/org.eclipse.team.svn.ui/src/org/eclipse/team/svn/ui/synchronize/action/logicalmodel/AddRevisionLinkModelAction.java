@@ -40,20 +40,24 @@ public class AddRevisionLinkModelAction extends AbstractSynchronizeLogicalModelA
 		super(text, configuration);
 	}
 
+	@Override
 	protected FastSyncInfoFilter getSyncInfoFilter() {
 		return new FastSyncInfoFilter() {
+			@Override
 			public boolean select(SyncInfo info) {
 				return IStateFilter.SF_ONREPOSITORY.accept(((AbstractSVNSyncInfo) info).getLocalResource());
 			}
 		};
 	}
 
+	@Override
 	protected boolean needsToSaveDirtyEditors() {
 		return false;
 	}
 
+	@Override
 	protected IActionOperation getOperation() {
-		IResource[] selectedResources = FileUtility.getResourcesRecursive(this.getAllSelectedResources(),
+		IResource[] selectedResources = FileUtility.getResourcesRecursive(getAllSelectedResources(),
 				IStateFilter.SF_ONREPOSITORY, IResource.DEPTH_ZERO);
 		IRepositoryResource[] resources = new IRepositoryResource[selectedResources.length];
 		for (int i = 0; i < selectedResources.length; i++) {
@@ -63,7 +67,7 @@ public class AddRevisionLinkModelAction extends AbstractSynchronizeLogicalModelA
 			resources[i].setSelectedRevision(SVNRevision.fromNumber(local.getRevision()));
 		}
 		return SelectResourceRevisionAction.getAddRevisionLinkOperation(resources,
-				this.getConfiguration().getSite().getShell());
+				getConfiguration().getSite().getShell());
 	}
 
 }

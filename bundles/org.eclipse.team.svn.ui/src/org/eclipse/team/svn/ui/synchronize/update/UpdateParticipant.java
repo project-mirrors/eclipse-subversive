@@ -18,6 +18,7 @@ import java.util.Collection;
 
 import org.eclipse.core.resources.IResource;
 import org.eclipse.team.internal.ui.TeamUIMessages;
+import org.eclipse.team.svn.core.BaseMessages;
 import org.eclipse.team.svn.core.synchronize.AbstractSVNSubscriber;
 import org.eclipse.team.svn.core.synchronize.UpdateSubscriber;
 import org.eclipse.team.svn.ui.SVNUIMessages;
@@ -37,23 +38,24 @@ public class UpdateParticipant extends AbstractSVNParticipant {
 	public static final String PARTICIPANT_ID = "org.eclipse.team.svn.ui.synchronize.update.SynchronizeParticipant";
 
 	public UpdateParticipant() {
-		super();
 	}
 
 	public UpdateParticipant(ISynchronizeScope scope) {
 		super(scope);
 	}
 
+	@Override
 	public AbstractSVNSubscriber getMatchingSubscriber() {
 		return UpdateSubscriber.instance();
 	}
 
+	@Override
 	public String getName() {
 		String name = SVNUIMessages.SynchronizeParticipant;
-		ISynchronizeScope scope = this.getScope();
+		ISynchronizeScope scope = getScope();
 		String scopeName = scope.getName();
 		if (scope instanceof ResourceScope) {
-			StringBuffer buffer = new StringBuffer();
+			StringBuilder buffer = new StringBuilder();
 			IResource[] resources = scope.getRoots();
 			for (int i = 0; i < resources.length; i++) {
 				if (i > 0) {
@@ -63,21 +65,25 @@ public class UpdateParticipant extends AbstractSVNParticipant {
 			}
 			scopeName = buffer.toString();
 		}
-		return SVNUIMessages.format(TeamUIMessages.SubscriberParticipant_namePattern, new String[] { name, scopeName });
+		return BaseMessages.format(TeamUIMessages.SubscriberParticipant_namePattern, new String[] { name, scopeName });
 	}
 
+	@Override
 	protected String getParticipantId() {
 		return UpdateParticipant.PARTICIPANT_ID;
 	}
 
+	@Override
 	protected Collection<AbstractSynchronizeActionGroup> getActionGroups() {
 		return ExtensionsManager.getInstance().getCurrentSynchronizeActionContributor().getUpdateContributions();
 	}
 
+	@Override
 	protected int getSupportedModes() {
 		return ISynchronizePageConfiguration.ALL_MODES;
 	}
 
+	@Override
 	protected int getDefaultMode() {
 		return ISynchronizePageConfiguration.BOTH_MODE;
 	}

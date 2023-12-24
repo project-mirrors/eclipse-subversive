@@ -40,7 +40,7 @@ public class BugtraqModel {
 	protected boolean number = true;
 
 	public boolean isAppend() {
-		return this.append;
+		return append;
 	}
 
 	public void setAppend(boolean append) {
@@ -48,7 +48,7 @@ public class BugtraqModel {
 	}
 
 	public String getLabel() {
-		return this.label == null ? "Bug-ID:" : this.label;
+		return label == null ? "Bug-ID:" : label;
 	}
 
 	public void setLabel(String label) {
@@ -56,7 +56,7 @@ public class BugtraqModel {
 	}
 
 	public String getMessage() {
-		return this.message;
+		return message;
 	}
 
 	public void setMessage(String message) {
@@ -64,7 +64,7 @@ public class BugtraqModel {
 	}
 
 	public boolean isNumber() {
-		return this.number;
+		return number;
 	}
 
 	public void setNumber(boolean number) {
@@ -72,7 +72,7 @@ public class BugtraqModel {
 	}
 
 	public String getUrl() {
-		return this.url;
+		return url;
 	}
 
 	public void setUrl(String url) {
@@ -80,15 +80,15 @@ public class BugtraqModel {
 	}
 
 	public boolean isWarnIfNoIssue() {
-		return this.warnIfNoIssue;
+		return warnIfNoIssue;
 	}
 
 	public void setWarnIfNoIssue(boolean warnifnoissue) {
-		this.warnIfNoIssue = warnifnoissue;
+		warnIfNoIssue = warnifnoissue;
 	}
 
 	public String[] getLogregex() {
-		return this.logregex;
+		return logregex;
 	}
 
 	public void setLogregex(String logregex) {
@@ -96,15 +96,15 @@ public class BugtraqModel {
 	}
 
 	public boolean isDoubleLogRegexp() {
-		if (this.logregex != null) {
-			return (this.logregex.length == 2);
+		if (logregex != null) {
+			return logregex.length == 2;
 		}
 		return false;
 	}
 
 	public String getResultingURL(LinkList.LinkPlacement issue) {
-		if (this.url != null && issue != null && this.url.indexOf(BugtraqModel.BUG_ID) != -1) {
-			return PatternProvider.replaceAll(this.url, BugtraqModel.BUG_ID, issue.getURL());
+		if (url != null && issue != null && url.indexOf(BugtraqModel.BUG_ID) != -1) {
+			return PatternProvider.replaceAll(url, BugtraqModel.BUG_ID, issue.getURL());
 		}
 		return null;
 	}

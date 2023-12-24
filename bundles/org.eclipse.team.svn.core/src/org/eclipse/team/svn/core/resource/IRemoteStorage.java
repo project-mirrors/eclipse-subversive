@@ -25,32 +25,32 @@ import org.eclipse.team.svn.core.resource.events.ResourceStatesChangedEvent;
  * @author Alexander Gurov
  */
 public interface IRemoteStorage extends ISVNStorage {
-	public void addResourceStatesListener(Class eventClass, IResourceStatesListener listener);
+	void addResourceStatesListener(Class eventClass, IResourceStatesListener listener);
 
-	public void removeResourceStatesListener(Class eventClass, IResourceStatesListener listener);
+	void removeResourceStatesListener(Class eventClass, IResourceStatesListener listener);
 
-	public void fireResourceStatesChangedEvent(ResourceStatesChangedEvent event);
+	void fireResourceStatesChangedEvent(ResourceStatesChangedEvent event);
 
-	public IResourceChange asResourceChange(IChangeStateProvider changeState, boolean update);
+	IResourceChange asResourceChange(IChangeStateProvider changeState, boolean update);
 
-	public ILocalResource asLocalResource(IResource resource);
+	ILocalResource asLocalResource(IResource resource);
 
-	public ILocalResource asLocalResourceAccessible(IResource resource);
+	ILocalResource asLocalResourceAccessible(IResource resource);
 
-	public ILocalResource asLocalResourceDirty(IResource resource);
+	ILocalResource asLocalResourceDirty(IResource resource);
 
-	public void refreshLocalResources(IResource[] resources, int depth);
+	void refreshLocalResources(IResource[] resources, int depth);
 
-	public IRepositoryResource asRepositoryResource(IRepositoryLocation location, String url, boolean isFile);
+	IRepositoryResource asRepositoryResource(IRepositoryLocation location, String url, boolean isFile);
 
-	public IRepositoryResource asRepositoryResource(IResource resource);
+	IRepositoryResource asRepositoryResource(IResource resource);
 
-	public ILocalResource asLocalResource(IProject project, String url, int kind);
+	ILocalResource asLocalResource(IProject project, String url, int kind);
 
-	public IRepositoryLocation getRepositoryLocation(IResource resource);
+	IRepositoryLocation getRepositoryLocation(IResource resource);
 
-	public byte[] resourceChangeAsBytes(IResourceChange resource);
+	byte[] resourceChangeAsBytes(IResourceChange resource);
 
-	public IResourceChange resourceChangeFromBytes(byte[] bytes);
+	IResourceChange resourceChangeFromBytes(byte[] bytes);
 
 }

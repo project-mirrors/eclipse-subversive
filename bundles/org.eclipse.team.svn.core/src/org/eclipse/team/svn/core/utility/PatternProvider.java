@@ -26,11 +26,12 @@ import java.util.regex.Pattern;
 public final class PatternProvider {
 	private static int MAX_CACHE_SIZE = 100;
 
-	private static LinkedHashMap<String, Pattern> patterns = new LinkedHashMap<String, Pattern>() {
+	private static LinkedHashMap<String, Pattern> patterns = new LinkedHashMap<>() {
 		private static final long serialVersionUID = 2921759287651173337L;
 
+		@Override
 		protected boolean removeEldestEntry(Map.Entry eldest) {
-			return this.size() > PatternProvider.MAX_CACHE_SIZE;
+			return size() > PatternProvider.MAX_CACHE_SIZE;
 		}
 	};
 

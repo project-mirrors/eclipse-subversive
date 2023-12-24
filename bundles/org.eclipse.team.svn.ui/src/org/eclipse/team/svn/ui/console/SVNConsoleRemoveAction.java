@@ -27,9 +27,10 @@ public class SVNConsoleRemoveAction extends Action {
 
 	public SVNConsoleRemoveAction() {
 		super(SVNUIMessages.SVNConsoleRemoveAction_CloseConsole);
-		this.setImageDescriptor(SVNTeamUIPlugin.instance().getImageDescriptor("icons/common/remove.gif")); //$NON-NLS-1$
+		setImageDescriptor(SVNTeamUIPlugin.instance().getImageDescriptor("icons/common/remove.gif")); //$NON-NLS-1$
 	}
 
+	@Override
 	public void run() {
 		SVNConsoleFactory.destroyConsole();
 	}

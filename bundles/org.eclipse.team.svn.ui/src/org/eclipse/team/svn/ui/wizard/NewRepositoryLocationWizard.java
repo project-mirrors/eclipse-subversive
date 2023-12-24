@@ -43,37 +43,39 @@ public class NewRepositoryLocationWizard extends AbstractSVNWizard implements IN
 	}
 
 	public NewRepositoryLocationWizard(IRepositoryLocation editable, boolean performAction) {
-		super();
 		this.performAction = performAction;
 		this.editable = editable;
 		if (this.editable != null) {
-			this.setWindowTitle(SVNUIMessages.NewRepositoryLocationWizard_Title_Edit);
-			this.backup = SVNRemoteStorage.instance().newRepositoryLocation();
-			SVNRemoteStorage.instance().copyRepositoryLocation(this.backup, editable);
+			setWindowTitle(SVNUIMessages.NewRepositoryLocationWizard_Title_Edit);
+			backup = SVNRemoteStorage.instance().newRepositoryLocation();
+			SVNRemoteStorage.instance().copyRepositoryLocation(backup, editable);
 		} else {
-			this.setWindowTitle(SVNUIMessages.NewRepositoryLocationWizard_Title_New);
+			setWindowTitle(SVNUIMessages.NewRepositoryLocationWizard_Title_New);
 		}
 	}
 
+	@Override
 	public void addPages() {
-		this.addPage(this.locationPage = new AddRepositoryLocationPage(this.editable));
+		addPage(locationPage = new AddRepositoryLocationPage(editable));
 	}
 
 	public IActionOperation getOperationToPerform() {
-		return this.locationPage.getOperationToPeform();
+		return locationPage.getOperationToPeform();
 	}
 
+	@Override
 	public boolean performCancel() {
-		if (this.editable != null) {
-			SVNRemoteStorage.instance().copyRepositoryLocation(this.editable, this.backup);
+		if (editable != null) {
+			SVNRemoteStorage.instance().copyRepositoryLocation(editable, backup);
 		}
 		return super.performCancel();
 	}
 
+	@Override
 	public boolean performFinish() {
-		if (this.locationPage.performFinish()) {
-			if (this.performAction) {
-				IActionOperation op = this.locationPage.getOperationToPeform();
+		if (locationPage.performFinish()) {
+			if (performAction) {
+				IActionOperation op = locationPage.getOperationToPeform();
 				if (op != null) {
 					UIMonitorUtility.doTaskBusyDefault(op);
 				}
@@ -85,6 +87,7 @@ public class NewRepositoryLocationWizard extends AbstractSVNWizard implements IN
 		return false;
 	}
 
+	@Override
 	public void init(IWorkbench workbench, IStructuredSelection selection) {
 
 	}

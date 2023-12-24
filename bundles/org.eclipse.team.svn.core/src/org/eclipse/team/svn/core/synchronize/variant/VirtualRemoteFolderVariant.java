@@ -29,10 +29,12 @@ public class VirtualRemoteFolderVariant extends VirtualRemoteResourceVariant {
 		super(local);
 	}
 
+	@Override
 	protected void fetchContents(IProgressMonitor monitor) throws TeamException {
 
 	}
 
+	@Override
 	public boolean isContainer() {
 		return true;
 	}

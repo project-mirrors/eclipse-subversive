@@ -46,19 +46,20 @@ public class ReplaceWithBranchTagAction extends AbstractWorkingCopyAction {
 	protected int type;
 
 	public ReplaceWithBranchTagAction(int type) {
-		super();
 		this.type = type;
 	}
 
+	@Override
 	public boolean isEnabled() {
-		return this.getSelectedResources().length == 1 && this.checkForResourcesPresence(IStateFilter.SF_ONREPOSITORY);
+		return this.getSelectedResources().length == 1 && checkForResourcesPresence(IStateFilter.SF_ONREPOSITORY);
 	}
 
+	@Override
 	public void runImpl(IAction action) {
 		IResource[] resources = this.getSelectedResources(IStateFilter.SF_ONREPOSITORY);
-		IActionOperation op = ReplaceWithBranchTagAction.getReplaceOperation(resources, this.getShell(), this.type);
+		IActionOperation op = ReplaceWithBranchTagAction.getReplaceOperation(resources, getShell(), type);
 		if (op != null) {
-			this.runScheduled(op);
+			runScheduled(op);
 		}
 	}
 

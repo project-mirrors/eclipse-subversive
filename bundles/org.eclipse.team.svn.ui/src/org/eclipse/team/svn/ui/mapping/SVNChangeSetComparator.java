@@ -21,7 +21,8 @@ import org.eclipse.team.internal.core.subscribers.ChangeSet;
 public class SVNChangeSetComparator implements Comparator<ChangeSet> {
 	private SVNChangeSetSorter fSorter = new SVNChangeSetSorter();
 
+	@Override
 	public int compare(ChangeSet o1, ChangeSet o2) {
-		return this.fSorter.compare(null, o1, o2);
+		return fSorter.compare(null, o1, o2);
 	}
 }

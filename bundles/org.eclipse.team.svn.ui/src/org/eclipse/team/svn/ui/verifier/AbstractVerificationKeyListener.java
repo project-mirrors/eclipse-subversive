@@ -19,8 +19,6 @@ import java.util.Iterator;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.widgets.Combo;
@@ -37,43 +35,33 @@ public abstract class AbstractVerificationKeyListener extends KeyAdapter
 	protected GroupVerifier verifier;
 
 	public AbstractVerificationKeyListener() {
-		super();
-		this.verifier = new GroupVerifier();
-		this.verifier.addVerifierListener(this);
+		verifier = new GroupVerifier();
+		verifier.addVerifierListener(this);
 	}
 
+	@Override
 	public void attachTo(Control cmp, AbstractVerifier verifier) {
 		this.verifier.add(cmp, verifier);
 	}
 
 	public void addListeners() {
-		for (Iterator<Control> it = this.verifier.getComponents(); it.hasNext();) {
+		for (Iterator<Control> it = verifier.getComponents(); it.hasNext();) {
 			Control cmp = it.next();
 			if (cmp instanceof Text) {
-				((Text) cmp).addModifyListener(new ModifyListener() {
-					public void modifyText(ModifyEvent e) {
-						AbstractVerificationKeyListener.this.validateContent();
-					}
-				});
+				((Text) cmp).addModifyListener(e -> AbstractVerificationKeyListener.this.validateContent());
 			}
 			if (cmp instanceof StyledText) {
-				((StyledText) cmp).addModifyListener(new ModifyListener() {
-					public void modifyText(ModifyEvent e) {
-						AbstractVerificationKeyListener.this.validateContent();
-					}
-				});
+				((StyledText) cmp).addModifyListener(e -> AbstractVerificationKeyListener.this.validateContent());
 			}
 			if (cmp instanceof Combo) {
-				((Combo) cmp).addModifyListener(new ModifyListener() {
-					public void modifyText(ModifyEvent e) {
-						AbstractVerificationKeyListener.this.validateContent();
-					}
-				});
+				((Combo) cmp).addModifyListener(e -> AbstractVerificationKeyListener.this.validateContent());
 				((Combo) cmp).addSelectionListener(new SelectionListener() {
+					@Override
 					public void widgetSelected(SelectionEvent e) {
 						AbstractVerificationKeyListener.this.validateContent();
 					}
 
+					@Override
 					public void widgetDefaultSelected(SelectionEvent e) {
 					}
 				});
@@ -81,37 +69,43 @@ public abstract class AbstractVerificationKeyListener extends KeyAdapter
 		}
 	}
 
+	@Override
 	public void detachFrom(Control cmp) {
-		this.verifier.remove(cmp);
+		verifier.remove(cmp);
 		if (!cmp.isDisposed()) {
 			cmp.removeKeyListener(this);
 		}
 	}
 
+	@Override
 	public void detachAll() {
-		for (Iterator<Control> it = this.verifier.getComponents(); it.hasNext();) {
+		for (Iterator<Control> it = verifier.getComponents(); it.hasNext();) {
 			Control ctrl = it.next();
 			if (!ctrl.isDisposed()) {
 				ctrl.removeKeyListener(this);
 			}
 		}
-		this.verifier.removeAll();
+		verifier.removeAll();
 	}
 
+	@Override
 	public void validateContent() {
-		this.verifier.verify();
+		verifier.verify();
 	}
 
+	@Override
 	public boolean validateControl(Control cmp) {
-		return this.verifier.verify(cmp);
+		return verifier.verify(cmp);
 	}
 
+	@Override
 	public boolean isFilledRight() {
-		return this.verifier.isFilledRight();
+		return verifier.isFilledRight();
 	}
 
+	@Override
 	public void keyReleased(KeyEvent e) {
-		this.validateContent();
+		validateContent();
 	}
 
 }

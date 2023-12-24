@@ -29,12 +29,12 @@ public interface ISVNConfigurationCategory {
 	/**
 	 * Returns the names of all the sections in the configuration category.
 	 */
-	public Iterable<String> listSections();
+	Iterable<String> listSections();
 
 	/**
 	 * Calls <code>handler</code> once for each option in the configuration category's section.
 	 */
-	public void enumerateOptions(String section, Enumerator handler);
+	void enumerateOptions(String section, Enumerator handler);
 
 	/**
 	 * Returns the value of a configuration option.
@@ -47,7 +47,7 @@ public interface ISVNConfigurationCategory {
 	 *            default value, if option is not set
 	 * @return
 	 */
-	public String get(String section, String option, String defaultValue);
+	String get(String section, String option, String defaultValue);
 
 	/**
 	 * Returns the boolean value of a configuration option. Converts from: true/false, yes/no, 1/0, on/off.
@@ -62,7 +62,7 @@ public interface ISVNConfigurationCategory {
 	 * @throws SVNConnectorException
 	 *             if the value cannot be parsed.
 	 */
-	public boolean get(String section, String option, boolean defaultValue) throws SVNConnectorException;
+	boolean get(String section, String option, boolean defaultValue) throws SVNConnectorException;
 
 	/**
 	 * Returns the long value of a configuration option.
@@ -77,7 +77,7 @@ public interface ISVNConfigurationCategory {
 	 * @throws SVNConnectorException
 	 *             if the value cannot be parsed.
 	 */
-	public long get(String section, String option, long defaultValue) throws SVNConnectorException;
+	long get(String section, String option, long defaultValue) throws SVNConnectorException;
 
 	/**
 	 * Returns the "tristate" value of a configuration option.
@@ -94,7 +94,7 @@ public interface ISVNConfigurationCategory {
 	 * @throws SVNConnectorException
 	 *             if the value cannot be parsed.
 	 */
-	public Boolean getTristate(String section, String option, String unknown, Boolean defaultValue)
+	Boolean getTristate(String section, String option, String unknown, Boolean defaultValue)
 			throws SVNConnectorException;
 
 	/**
@@ -110,7 +110,7 @@ public interface ISVNConfigurationCategory {
 	 * @throws SVNConnectorException
 	 *             if the value cannot be parsed.
 	 */
-	public String getYesNoAsk(String section, String option, String defaultValue) throws SVNConnectorException;
+	String getYesNoAsk(String section, String option, String defaultValue) throws SVNConnectorException;
 
 	/**
 	 * Defines the option's value.
@@ -122,7 +122,7 @@ public interface ISVNConfigurationCategory {
 	 * @param value
 	 *            value, if <code>null</code>, then the option will be deleted.
 	 */
-	public void set(String section, String option, String value);
+	void set(String section, String option, String value);
 
 	/**
 	 * Defines the option's value to represent a boolean.
@@ -134,7 +134,7 @@ public interface ISVNConfigurationCategory {
 	 * @param value
 	 *            boolean type value
 	 */
-	public void set(String section, String option, boolean value);
+	void set(String section, String option, boolean value);
 
 	/**
 	 * Defines the option's value to represent a long integer.
@@ -146,12 +146,12 @@ public interface ISVNConfigurationCategory {
 	 * @param value
 	 *            long type value
 	 */
-	public void set(String section, String option, long value);
+	void set(String section, String option, long value);
 
 	/**
 	 * Interface for {@link ISVNConfigurationCategory#enumerate} callback handlers.
 	 */
 	public interface Enumerator {
-		public void option(String name, String value);
+		void option(String name, String value);
 	}
 }

@@ -31,9 +31,8 @@ import org.eclipse.team.svn.core.connector.ISVNConnector;
 import org.eclipse.team.svn.core.connector.SVNChangeStatus;
 import org.eclipse.team.svn.core.connector.SVNDepth;
 import org.eclipse.team.svn.core.connector.SVNEntryRevisionReference;
-import org.eclipse.team.svn.core.connector.SVNRevision;
 import org.eclipse.team.svn.core.connector.SVNEntryStatus;
-import org.eclipse.team.svn.core.operation.IUnprotectedOperation;
+import org.eclipse.team.svn.core.connector.SVNRevision;
 import org.eclipse.team.svn.core.operation.SVNNullProgressMonitor;
 import org.eclipse.team.svn.core.operation.SVNResourceRuleFactory;
 import org.eclipse.team.svn.core.operation.local.AbstractWorkingCopyOperation;
@@ -76,33 +75,32 @@ public class ShowConflictEditorOperation extends AbstractWorkingCopyOperation {
 		this.showInDialog = showInDialog;
 	}
 
+	@Override
 	public ISchedulingRule getSchedulingRule() {
 		ISchedulingRule rule = super.getSchedulingRule();
 		if (rule instanceof IWorkspaceRoot) {
 			return rule;
 		}
-		IResource[] resources = this.operableData();
-		HashSet<ISchedulingRule> ruleSet = new HashSet<ISchedulingRule>();
-		for (int i = 0; i < resources.length; i++) {
-			ruleSet.add(SVNResourceRuleFactory.INSTANCE.refreshRule(resources[i].getParent()));
+		IResource[] resources = operableData();
+		HashSet<ISchedulingRule> ruleSet = new HashSet<>();
+		for (IResource element : resources) {
+			ruleSet.add(SVNResourceRuleFactory.INSTANCE.refreshRule(element.getParent()));
 		}
 		return new MultiRule(ruleSet.toArray(new IResource[ruleSet.size()]));
 	}
 
+	@Override
 	public int getOperationWeight() {
 		return 0;
 	}
 
+	@Override
 	protected void runImpl(IProgressMonitor monitor) throws Exception {
-		IResource[] conflictingResources = this.operableData();
+		IResource[] conflictingResources = operableData();
 
 		for (int i = 0; i < conflictingResources.length && !monitor.isCanceled(); i++) {
 			final IResource current = conflictingResources[i];
-			this.protectStep(new IUnprotectedOperation() {
-				public void run(IProgressMonitor monitor) throws Exception {
-					ShowConflictEditorOperation.this.showEditorFor(current, monitor);
-				}
-			}, monitor, conflictingResources.length);
+			this.protectStep(monitor1 -> ShowConflictEditorOperation.this.showEditorFor(current, monitor1), monitor, conflictingResources.length);
 		}
 	}
 
@@ -131,16 +129,14 @@ public class ShowConflictEditorOperation extends AbstractWorkingCopyOperation {
 			final PropertyCompareInput compare = new ThreeWayPropertyCompareInput(cc, resource, null, baseReference,
 					remote.getRepositoryLocation(), baseResource.getRevision());
 			compare.run(monitor);
-			UIMonitorUtility.getDisplay().syncExec(new Runnable() {
-				public void run() {
-					if (ShowConflictEditorOperation.this.showInDialog) {
-						ComparePanel panel = new ComparePanel(compare, resource);
-						DefaultDialog dlg = new DefaultDialog(UIMonitorUtility.getShell(), panel);
-						dlg.open();
-						//CompareUI.openCompareDialog(compare);
-					} else {
-						CompareUI.openCompareEditor(compare);
-					}
+			UIMonitorUtility.getDisplay().syncExec(() -> {
+				if (showInDialog) {
+					ComparePanel panel = new ComparePanel(compare, resource);
+					DefaultDialog dlg = new DefaultDialog(UIMonitorUtility.getShell(), panel);
+					dlg.open();
+					//CompareUI.openCompareDialog(compare);
+				} else {
+					CompareUI.openCompareEditor(compare);
 				}
 			});
 		}
@@ -152,7 +148,7 @@ public class ShowConflictEditorOperation extends AbstractWorkingCopyOperation {
 			IContainer parent = resource.getParent();
 			parent.refreshLocal(IResource.DEPTH_ONE, monitor);
 			/*
-			 * If Subversion considers the file to be unmergeable, then the .mine file isn't 
+			 * If Subversion considers the file to be unmergeable, then the .mine file isn't
 			 * created, since it would be identical to the working file.
 			 */
 			IFile local = null;
@@ -177,9 +173,9 @@ public class ShowConflictEditorOperation extends AbstractWorkingCopyOperation {
 			detectCompareEditorHelper.execute(monitor);
 			ExternalProgramParameters externalProgramParams = detectCompareEditorHelper.getExternalProgramParameters();
 			if (externalProgramParams != null) {
-				this.openExternalEditor((IFile) resource, local, remote, ancestor, externalProgramParams, monitor);
+				openExternalEditor((IFile) resource, local, remote, ancestor, externalProgramParams, monitor);
 			} else {
-				this.openEclipseEditor((IFile) resource, local, remote, ancestor, monitor);
+				openEclipseEditor((IFile) resource, local, remote, ancestor, monitor);
 			}
 		}
 	}
@@ -202,18 +198,16 @@ public class ShowConflictEditorOperation extends AbstractWorkingCopyOperation {
 		cc.setProperty(CompareEditor.CONFIRM_SAVE_PROPERTY, Boolean.TRUE);
 		final ConflictingFileEditorInput compare = new ConflictingFileEditorInput(cc, target, left, right, ancestor);
 		compare.run(monitor);
-		UIMonitorUtility.getDisplay().syncExec(new Runnable() {
-			public void run() {
-				if (ShowConflictEditorOperation.this.showInDialog) {
-					ComparePanel panel = new ComparePanel(compare, target);
-					DefaultDialog dlg = new DefaultDialog(UIMonitorUtility.getShell(), panel);
-					dlg.open();
-					//CompareUI.openCompareDialog(compare);
-				} else {
-					CompareUI.openCompareEditor(compare);
-				}
-				compare.setDirty(true);
+		UIMonitorUtility.getDisplay().syncExec(() -> {
+			if (showInDialog) {
+				ComparePanel panel = new ComparePanel(compare, target);
+				DefaultDialog dlg = new DefaultDialog(UIMonitorUtility.getShell(), panel);
+				dlg.open();
+				//CompareUI.openCompareDialog(compare);
+			} else {
+				CompareUI.openCompareEditor(compare);
 			}
+			compare.setDirty(true);
 		});
 	}
 

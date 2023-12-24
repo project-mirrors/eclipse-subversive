@@ -23,7 +23,7 @@ import org.eclipse.team.svn.ui.repository.RepositoryTreeViewer;
  * @author Alexander Gurov
  */
 public interface IResourceTreeNode extends IDataTreeNode {
-	public IRepositoryResource getRepositoryResource();
+	IRepositoryResource getRepositoryResource();
 
-	public void setViewer(RepositoryTreeViewer repositoryTree);
+	void setViewer(RepositoryTreeViewer repositoryTree);
 }

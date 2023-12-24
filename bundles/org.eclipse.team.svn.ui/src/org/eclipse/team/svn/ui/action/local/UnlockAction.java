@@ -32,12 +32,12 @@ import org.eclipse.team.svn.ui.utility.LockProposeUtility;
 public class UnlockAction extends AbstractRecursiveTeamAction {
 
 	public UnlockAction() {
-		super();
 	}
 
+	@Override
 	public void runImpl(IAction action) {
 		//get resources which can be unlocked
-		List<IResource> filteredResourcesList = new ArrayList<IResource>();
+		List<IResource> filteredResourcesList = new ArrayList<>();
 		IResource[] filteredResources = this.getSelectedResourcesRecursive(IStateFilter.SF_LOCKED);
 		for (IResource filteredResource : filteredResources) {
 			if (filteredResource.getType() == IResource.FILE && filteredResource.getLocation() != null) {
@@ -46,14 +46,15 @@ public class UnlockAction extends AbstractRecursiveTeamAction {
 		}
 
 		IActionOperation op = LockProposeUtility.performUnlockAction(filteredResourcesList.toArray(new IResource[0]),
-				this.getShell());
+				getShell());
 		if (op != null) {
-			this.runScheduled(op);
+			runScheduled(op);
 		}
 	}
 
+	@Override
 	public boolean isEnabled() {
-		return this.checkForResourcesPresenceRecursive(IStateFilter.SF_LOCKED);
+		return checkForResourcesPresenceRecursive(IStateFilter.SF_LOCKED);
 	}
 
 }

@@ -23,6 +23,7 @@ import java.util.Map;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.wizard.Wizard;
+import org.eclipse.team.svn.core.BaseMessages;
 import org.eclipse.team.svn.core.SVNTeamPlugin;
 import org.eclipse.team.svn.core.discovery.model.ConnectorDescriptorKind;
 import org.eclipse.team.svn.core.discovery.model.ConnectorDiscovery;
@@ -46,7 +47,7 @@ public class ConnectorDiscoveryWizard extends Wizard {
 
 	protected IConnectorsInstallJob installJob;
 
-	private final Map<ConnectorDescriptorKind, Boolean> connectorDescriptorKindToVisibility = new HashMap<ConnectorDescriptorKind, Boolean>();
+	private final Map<ConnectorDescriptorKind, Boolean> connectorDescriptorKindToVisibility = new HashMap<>();
 	{
 		for (ConnectorDescriptorKind kind : ConnectorDescriptorKind.values()) {
 			connectorDescriptorKindToVisibility.put(kind, true);
@@ -69,7 +70,7 @@ public class ConnectorDiscoveryWizard extends Wizard {
 	}
 
 	private void createEnvironment() {
-		environment = new Hashtable<Object, Object>(System.getProperties());
+		environment = new Hashtable<>(System.getProperties());
 	}
 
 	@Override
@@ -80,11 +81,11 @@ public class ConnectorDiscoveryWizard extends Wizard {
 	@Override
 	public boolean performFinish() {
 		try {
-			this.installJob.setInstallableConnectors(this.mainPage.getInstallableConnectors());
-			this.getContainer().run(true, true, this.installJob);
+			installJob.setInstallableConnectors(mainPage.getInstallableConnectors());
+			getContainer().run(true, true, installJob);
 			return true;
 		} catch (InvocationTargetException e) {
-			IStatus status = new Status(IStatus.ERROR, SVNTeamPlugin.NATURE_ID, SVNUIMessages.format(
+			IStatus status = new Status(IStatus.ERROR, SVNTeamPlugin.NATURE_ID, BaseMessages.format(
 					SVNUIMessages.ConnectorDiscoveryWizard_installProblems, new Object[] { e.getCause().getMessage() }),
 					e.getCause());
 			DiscoveryUiUtil.logAndDisplayStatus(SVNUIMessages.ConnectorDiscoveryWizard_cannotInstall, status);
@@ -123,7 +124,7 @@ public class ConnectorDiscoveryWizard extends Wizard {
 	 * presented.
 	 */
 	public boolean isShowConnectorDescriptorKindFilter() {
-		return this.showConnectorDescriptorKindFilter & false; //TODO always disabled
+		return showConnectorDescriptorKindFilter & false; //TODO always disabled
 	}
 
 	/**

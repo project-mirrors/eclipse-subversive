@@ -28,12 +28,12 @@ import org.eclipse.team.svn.ui.wizard.CheckoutAsWizard;
  */
 public class CheckoutAsAction extends AbstractRepositoryModifyWorkspaceAction {
 	public CheckoutAsAction() {
-		super();
 	}
 
+	@Override
 	public void runImpl(IAction action) {
-		IRepositoryResource[] selectedResources = this.getSelectedRepositoryResources();
-		IRepositoryLocation[] locations = this.getSelectedRepositoryLocations();
+		IRepositoryResource[] selectedResources = getSelectedRepositoryResources();
+		IRepositoryLocation[] locations = getSelectedRepositoryLocations();
 		if (selectedResources.length == 0) {
 			selectedResources = new IRepositoryResource[locations.length];
 			for (int i = 0; i < locations.length; i++) {
@@ -42,7 +42,7 @@ public class CheckoutAsAction extends AbstractRepositoryModifyWorkspaceAction {
 		}
 
 		CheckoutAsWizard checkoutWizard = new CheckoutAsWizard(selectedResources);
-		WizardDialog dialog = new WizardDialog(this.getShell(), checkoutWizard);
+		WizardDialog dialog = new WizardDialog(getShell(), checkoutWizard);
 		dialog.create();
 		dialog.getShell()
 				.setSize(Math.max(CheckoutAsWizard.SIZING_WIZARD_WIDTH, dialog.getShell().getSize().x),
@@ -50,6 +50,7 @@ public class CheckoutAsAction extends AbstractRepositoryModifyWorkspaceAction {
 		dialog.open();
 	}
 
+	@Override
 	public boolean isEnabled() {
 		return true;
 	}

@@ -21,11 +21,10 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.DirectoryDialog;
-import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.team.svn.core.BaseMessages;
 import org.eclipse.team.svn.core.connector.SVNDepth;
 import org.eclipse.team.svn.ui.SVNUIMessages;
 import org.eclipse.team.svn.ui.composite.CommentComposite;
@@ -51,12 +50,12 @@ public class ImportPanel extends AbstractDialogPanel {
 	protected CommentComposite comment;
 
 	public ImportPanel(String importToUrl) {
-		super();
-		this.dialogTitle = SVNUIMessages.ImportPanel_Title;
-		this.dialogDescription = SVNUIMessages.ImportPanel_Description;
-		this.defaultMessage = SVNUIMessages.format(SVNUIMessages.ImportPanel_Message, new String[] { importToUrl });
+		dialogTitle = SVNUIMessages.ImportPanel_Title;
+		dialogDescription = SVNUIMessages.ImportPanel_Description;
+		defaultMessage = BaseMessages.format(SVNUIMessages.ImportPanel_Message, new String[] { importToUrl });
 	}
 
+	@Override
 	public void createControlsImpl(Composite parent) {
 		GridLayout layout = null;
 		GridData data = null;
@@ -73,25 +72,23 @@ public class ImportPanel extends AbstractDialogPanel {
 		Label folder = new Label(folderSelectionComposite, SWT.NONE);
 		folder.setText(SVNUIMessages.ImportPanel_Folder);
 
-		this.locationField = new Text(folderSelectionComposite, SWT.SINGLE | SWT.BORDER);
+		locationField = new Text(folderSelectionComposite, SWT.SINGLE | SWT.BORDER);
 		data = new GridData(GridData.FILL_HORIZONTAL);
-		this.locationField.setLayoutData(data);
-		this.attachTo(this.locationField, new ExistingResourceVerifier(folder.getText(), false));
+		locationField.setLayoutData(data);
+		attachTo(locationField, new ExistingResourceVerifier(folder.getText(), false));
 
 		Button browseButton = new Button(folderSelectionComposite, SWT.PUSH);
 		browseButton.setText(SVNUIMessages.Button_Browse);
 		data = new GridData();
 		data.widthHint = DefaultDialog.computeButtonWidth(browseButton);
 		browseButton.setLayoutData(data);
-		browseButton.addListener(SWT.Selection, new Listener() {
-			public void handleEvent(Event event) {
-				DirectoryDialog fileDialog = new DirectoryDialog(ImportPanel.this.manager.getShell());
-				fileDialog.setText(SVNUIMessages.ImportPanel_ImportFolder);
-				fileDialog.setMessage(SVNUIMessages.ImportPanel_ImportFolder_Msg);
-				String path = fileDialog.open();
-				if (path != null) {
-					ImportPanel.this.locationField.setText(path);
-				}
+		browseButton.addListener(SWT.Selection, event -> {
+			DirectoryDialog fileDialog = new DirectoryDialog(ImportPanel.this.manager.getShell());
+			fileDialog.setText(SVNUIMessages.ImportPanel_ImportFolder);
+			fileDialog.setMessage(SVNUIMessages.ImportPanel_ImportFolder_Msg);
+			String path = fileDialog.open();
+			if (path != null) {
+				locationField.setText(path);
 			}
 		});
 
@@ -101,52 +98,57 @@ public class ImportPanel extends AbstractDialogPanel {
 		group.setLayoutData(data);
 		group.setText(SVNUIMessages.ImportPanel_Comment);
 
-		this.comment = new CommentComposite(group, this);
+		comment = new CommentComposite(group, this);
 		data = new GridData(GridData.FILL_BOTH);
-		this.comment.setLayoutData(data);
+		comment.setLayoutData(data);
 
 		Label separator = new Label(parent, SWT.HORIZONTAL | SWT.SEPARATOR);
 		separator.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		separator.setVisible(false);
 
-		this.depthSelector = new DepthSelectionComposite(parent, SWT.NONE, false);
+		depthSelector = new DepthSelectionComposite(parent, SWT.NONE, false);
 		data = new GridData(GridData.FILL_HORIZONTAL);
 		data.horizontalSpan = 2;
-		this.depthSelector.setLayoutData(data);
+		depthSelector.setLayoutData(data);
 	}
 
+	@Override
 	public String getHelpId() {
 		return "org.eclipse.team.svn.help.remote_importDialogContext"; //$NON-NLS-1$
 	}
 
+	@Override
 	public Point getPrefferedSizeImpl() {
 		return new Point(525, SWT.DEFAULT);
 	}
 
+	@Override
 	public void postInit() {
 		super.postInit();
-		this.comment.postInit(this.manager);
+		comment.postInit(manager);
 	}
 
+	@Override
 	protected void saveChangesImpl() {
-		this.location = this.locationField.getText();
-		this.comment.saveChanges();
+		location = locationField.getText();
+		comment.saveChanges();
 	}
 
+	@Override
 	protected void cancelChangesImpl() {
-		this.comment.cancelChanges();
+		comment.cancelChanges();
 	}
 
 	public String getLocation() {
-		return this.location;
+		return location;
 	}
 
 	public String getMessage() {
-		return this.comment.getMessage();
+		return comment.getMessage();
 	}
 
 	public SVNDepth getDepth() {
-		return this.depthSelector.getDepth();
+		return depthSelector.getDepth();
 	}
 
 }

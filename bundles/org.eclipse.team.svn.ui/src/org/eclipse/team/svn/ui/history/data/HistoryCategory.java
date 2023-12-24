@@ -44,7 +44,7 @@ public class HistoryCategory {
 	}
 
 	public String getName() {
-		switch (this.categoryType) {
+		switch (categoryType) {
 			case HistoryCategory.CATEGORY_TODAY:
 				return SVNUIMessages.LogMessagesComposite_Group_Today;
 			case HistoryCategory.CATEGORY_YESTERDAY:
@@ -60,16 +60,18 @@ public class HistoryCategory {
 	}
 
 	public Object[] getEntries() {
-		return this.entries;
+		return entries;
 	}
 
+	@Override
 	public int hashCode() {
-		return this.categoryType;
+		return categoryType;
 	}
 
+	@Override
 	public boolean equals(Object obj) {
 		if (obj instanceof HistoryCategory) {
-			return this.categoryType == ((HistoryCategory) obj).categoryType;
+			return categoryType == ((HistoryCategory) obj).categoryType;
 		}
 		return false;
 	}

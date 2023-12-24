@@ -26,13 +26,8 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyleRange;
 import org.eclipse.swt.custom.StyledText;
-import org.eclipse.swt.events.DisposeEvent;
-import org.eclipse.swt.events.DisposeListener;
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
-import org.eclipse.swt.events.MouseMoveListener;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.graphics.Point;
@@ -74,171 +69,171 @@ public class DefaultCommentView implements ICommentView {
 
 	protected final static String linkRegExp = "(?:http|https|file|svn|svn\\+[\\w]+)\\:/(?:/)?(?:/[^\\s\\|\\{\\}\"><#\\^\\~\\[\\]`]+)+"; //$NON-NLS-1$
 
+	@Override
 	public void createCommentView(Composite parent) {
 		this.createCommentView(parent, SWT.V_SCROLL | SWT.MULTI | SWT.BORDER | SWT.WRAP);
 	}
 
+	@Override
 	public void createCommentView(Composite parent, int style) {
-		this.multilineComment = new StyledText(parent, style);
-		this.multilineComment.setEditable(false);
+		multilineComment = new StyledText(parent, style);
+		multilineComment.setEditable(false);
 		// set system color
-		this.multilineComment.setBackground(this.multilineComment.getBackground());
+		multilineComment.setBackground(multilineComment.getBackground());
 
-		this.handCursor = new Cursor(parent.getDisplay(), SWT.CURSOR_HAND);
-		this.busyCursor = new Cursor(parent.getDisplay(), SWT.CURSOR_WAIT);
+		handCursor = new Cursor(parent.getDisplay(), SWT.CURSOR_HAND);
+		busyCursor = new Cursor(parent.getDisplay(), SWT.CURSOR_WAIT);
 
-		this.blue = new Color(parent.getDisplay(), 0, 0, 192);
-		this.black = new Color(parent.getDisplay(), 2, 200, 30);
+		blue = new Color(parent.getDisplay(), 0, 0, 192);
+		black = new Color(parent.getDisplay(), 2, 200, 30);
 
-		this.multilineComment.addMouseListener(new MouseAdapter() {
+		multilineComment.addMouseListener(new MouseAdapter() {
+			@Override
 			public void mouseDown(MouseEvent e) {
 				if (e.button == 1) {
-					DefaultCommentView.this.mouseDown = true;
+					mouseDown = true;
 				}
 			}
 
+			@Override
 			public void mouseUp(MouseEvent e) {
-				DefaultCommentView.this.mouseDown = false;
+				mouseDown = false;
 				StyledText text = (StyledText) e.widget;
 				int offset = text.getCaretOffset();
-				LinkPlacement issue = DefaultCommentView.this.linkList.getLinkAt(offset);
-				LinkPlacement hIssue = DefaultCommentView.this.hyperList.getLinkAt(offset);
-				if (DefaultCommentView.this.dragEvent) {
-					DefaultCommentView.this.dragEvent = false;
+				LinkPlacement issue = linkList.getLinkAt(offset);
+				LinkPlacement hIssue = hyperList.getLinkAt(offset);
+				if (dragEvent) {
+					dragEvent = false;
 					if (issue != null) {
-						text.setCursor(DefaultCommentView.this.handCursor);
-						text.getStyleRangeAtOffset(offset).background = DefaultCommentView.this.blue;
+						text.setCursor(handCursor);
+						text.getStyleRangeAtOffset(offset).background = blue;
 					} else if (hIssue != null) {
-						text.setCursor(DefaultCommentView.this.handCursor);
-						text.getStyleRangeAtOffset(offset).background = DefaultCommentView.this.blue;
+						text.setCursor(handCursor);
+						text.getStyleRangeAtOffset(offset).background = blue;
 					}
 				} else if (issue != null) {
-					text.setCursor(DefaultCommentView.this.busyCursor);
+					text.setCursor(busyCursor);
 					String url = DefaultCommentView.this.getModel().getResultingURL(issue);
 					if (url != null) {
 						Program.launch(url);
 					}
 					text.setCursor(null);
-					text.getStyleRangeAtOffset(offset).background = DefaultCommentView.this.black;
+					text.getStyleRangeAtOffset(offset).background = black;
 				} else if (hIssue != null) {
-					text.setCursor(DefaultCommentView.this.busyCursor);
+					text.setCursor(busyCursor);
 					String url = hIssue.getURL();
 					if (url != null) {
 						Program.launch(url);
 					}
 					text.setCursor(null);
-					text.getStyleRangeAtOffset(offset).background = DefaultCommentView.this.black;
+					text.getStyleRangeAtOffset(offset).background = black;
 				}
 			}
 		});
-		this.multilineComment.addMouseMoveListener(new MouseMoveListener() {
-			public void mouseMove(MouseEvent e) {
-				// Do not change cursor on drag events
-				if (DefaultCommentView.this.mouseDown) {
-					if (!DefaultCommentView.this.dragEvent) {
-						StyledText text = (StyledText) e.widget;
-						text.setCursor(null);
-					}
-					DefaultCommentView.this.dragEvent = true;
-					return;
-				}
-				StyledText text = (StyledText) e.widget;
-				int offset = -1;
-				try {
-					offset = text.getOffsetAtLocation(new Point(e.x, e.y));
-				} catch (IllegalArgumentException ex) {
-					// ok
-				}
-				if (offset != -1 && DefaultCommentView.this.linkList.hasLinkAt(offset)) {
-					text.setCursor(DefaultCommentView.this.handCursor);
-					text.getStyleRangeAtOffset(offset).background = DefaultCommentView.this.blue;
-					DefaultCommentView.this.multilineComment.redraw();
-				} else if (offset != -1 && DefaultCommentView.this.hyperList.hasLinkAt(offset)) {
-					text.setCursor(DefaultCommentView.this.handCursor);
-					text.getStyleRangeAtOffset(offset).background = DefaultCommentView.this.blue;
-					DefaultCommentView.this.multilineComment.redraw();
-				} else {
+		multilineComment.addMouseMoveListener(e -> {
+			// Do not change cursor on drag events
+			if (mouseDown) {
+				if (!dragEvent) {
+					StyledText text = (StyledText) e.widget;
 					text.setCursor(null);
 				}
+				dragEvent = true;
+				return;
+			}
+			StyledText text = (StyledText) e.widget;
+			int offset = -1;
+			try {
+				offset = text.getOffsetAtLocation(new Point(e.x, e.y));
+			} catch (IllegalArgumentException ex) {
+				// ok
+			}
+			if (offset != -1 && linkList.hasLinkAt(offset)) {
+				text.setCursor(handCursor);
+				text.getStyleRangeAtOffset(offset).background = blue;
+				multilineComment.redraw();
+			} else if (offset != -1 && hyperList.hasLinkAt(offset)) {
+				text.setCursor(handCursor);
+				text.getStyleRangeAtOffset(offset).background = blue;
+				multilineComment.redraw();
+			} else {
+				text.setCursor(null);
 			}
 		});
 
-		this.multilineComment.addModifyListener(new ModifyListener() {
-			public void modifyText(ModifyEvent e) {
-				DefaultCommentView.this.linkList.getLinks().clear();
-				DefaultCommentView.this.hyperList.getLinks().clear();
-				StyledText textView = (StyledText) e.getSource();
-				String text = textView.getText();
-				Pattern linkPattern = Pattern.compile(DefaultCommentView.linkRegExp);
-				Matcher linkMatcher = linkPattern.matcher(text);
-				int start = 0;
-				while (linkMatcher.find(start)) {
-					start = linkMatcher.end();
-					DefaultCommentView.this.hyperList.getLinks()
-							.add(new LinkPlacement(linkMatcher.start(), start, text));
-				}
-				if (DefaultCommentView.this.getModel().getMessage() != null
-						|| DefaultCommentView.this.getModel().getLogregex() != null) {
-					DefaultCommentView.this.linkList.parseMessage(text, DefaultCommentView.this.getModel());
-				}
-				List<StyleRange> styledRanges = new ArrayList<StyleRange>();
-				for (LinkPlacement issue : DefaultCommentView.this.linkList.getLinks()) {
-					StyleRange range = new StyleRange();
-					range.start = issue.getStart();
-					range.length = issue.getEnd() - issue.getStart();
-					range.foreground = DefaultCommentView.this.blue;
-					range.underline = true;
-					styledRanges.add(range);
-				}
-				for (LinkList.LinkPlacement issue : DefaultCommentView.this.hyperList.getLinks()) {
-					StyleRange range = new StyleRange();
-					range.start = issue.getStart();
-					range.length = issue.getEnd() - issue.getStart();
-					range.foreground = DefaultCommentView.this.blue;
-					range.underline = true;
-					styledRanges.add(range);
-				}
-				StyleRange[] sorted = styledRanges.toArray(new StyleRange[styledRanges.size()]);
-				for (int i = 0; i < sorted.length - 1; i++) {
-					for (int j = sorted.length - 1; j > i; j--) {
-						if (sorted[j].start < sorted[j - 1].start) {
-							StyleRange tmp = sorted[j];
-							sorted[j] = sorted[j - 1];
-							sorted[j - 1] = tmp;
-						}
+		multilineComment.addModifyListener(e -> {
+			linkList.getLinks().clear();
+			hyperList.getLinks().clear();
+			StyledText textView = (StyledText) e.getSource();
+			String text = textView.getText();
+			Pattern linkPattern = Pattern.compile(DefaultCommentView.linkRegExp);
+			Matcher linkMatcher = linkPattern.matcher(text);
+			int start = 0;
+			while (linkMatcher.find(start)) {
+				start = linkMatcher.end();
+				hyperList.getLinks().add(new LinkPlacement(linkMatcher.start(), start, text));
+			}
+			if (DefaultCommentView.this.getModel().getMessage() != null
+					|| DefaultCommentView.this.getModel().getLogregex() != null) {
+				linkList.parseMessage(text, DefaultCommentView.this.getModel());
+			}
+			List<StyleRange> styledRanges = new ArrayList<>();
+			for (LinkPlacement issue : linkList.getLinks()) {
+				StyleRange range = new StyleRange();
+				range.start = issue.getStart();
+				range.length = issue.getEnd() - issue.getStart();
+				range.foreground = blue;
+				range.underline = true;
+				styledRanges.add(range);
+			}
+			for (LinkList.LinkPlacement issue : hyperList.getLinks()) {
+				StyleRange range = new StyleRange();
+				range.start = issue.getStart();
+				range.length = issue.getEnd() - issue.getStart();
+				range.foreground = blue;
+				range.underline = true;
+				styledRanges.add(range);
+			}
+			StyleRange[] sorted = styledRanges.toArray(new StyleRange[styledRanges.size()]);
+			for (int i = 0; i < sorted.length - 1; i++) {
+				for (int j = sorted.length - 1; j > i; j--) {
+					if (sorted[j].start < sorted[j - 1].start) {
+						StyleRange tmp = sorted[j];
+						sorted[j] = sorted[j - 1];
+						sorted[j - 1] = tmp;
 					}
 				}
-				textView.setStyleRanges(sorted);
 			}
+			textView.setStyleRanges(sorted);
 		});
 
-		this.multilineComment.addDisposeListener(new DisposeListener() {
-			public void widgetDisposed(DisposeEvent e) {
-				DefaultCommentView.this.busyCursor.dispose();
-				DefaultCommentView.this.handCursor.dispose();
-				DefaultCommentView.this.blue.dispose();
-				DefaultCommentView.this.black.dispose();
-			}
+		multilineComment.addDisposeListener(e -> {
+			busyCursor.dispose();
+			handCursor.dispose();
+			blue.dispose();
+			black.dispose();
 		});
 	}
 
+	@Override
 	public void usedFor(IResource resource) {
 		CommitPanel.CollectPropertiesOperation bugtraqOp = new CommitPanel.CollectPropertiesOperation(
 				new IResource[] { resource });
 		bugtraqOp.run(new NullProgressMonitor());
-		this.model = bugtraqOp.getBugtraqModel();
+		model = bugtraqOp.getBugtraqModel();
 	}
 
+	@Override
 	public void usedFor(IRepositoryResource resource) {
 		//FIXME implement support of Bugtraq properties
 	}
 
+	@Override
 	public void setComment(String comment) {
-		this.multilineComment.setText(comment);
+		multilineComment.setText(comment);
 	}
 
 	protected BugtraqModel getModel() {
-		return this.model != null ? this.model : new BugtraqModel();
+		return model != null ? model : new BugtraqModel();
 	}
 
 }

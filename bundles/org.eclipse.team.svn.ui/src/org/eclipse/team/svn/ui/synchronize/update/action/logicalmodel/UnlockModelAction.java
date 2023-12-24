@@ -31,19 +31,22 @@ public class UnlockModelAction extends AbstractSynchronizeLogicalModelAction {
 
 	public UnlockModelAction(String text, ISynchronizePageConfiguration configuration) {
 		super(text, configuration);
-		this.actionHelper = new UnlockActionHelper(this, configuration);
+		actionHelper = new UnlockActionHelper(this, configuration);
 	}
 
+	@Override
 	protected boolean needsToSaveDirtyEditors() {
 		return false;
 	}
 
+	@Override
 	protected FastSyncInfoFilter getSyncInfoFilter() {
-		return this.actionHelper.getSyncInfoFilter();
+		return actionHelper.getSyncInfoFilter();
 	}
 
+	@Override
 	protected IActionOperation getOperation() {
-		return this.actionHelper.getOperation();
+		return actionHelper.getOperation();
 	}
 
 }

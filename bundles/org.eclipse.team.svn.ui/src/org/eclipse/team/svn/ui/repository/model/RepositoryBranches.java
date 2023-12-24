@@ -30,20 +30,24 @@ public class RepositoryBranches extends RepositoryFolder {
 		super(parent, resource);
 	}
 
+	@Override
 	protected ImageDescriptor getImageDescriptorImpl() {
-		return this.isExternals()
+		return isExternals()
 				? super.getImageDescriptorImpl()
 				: SVNTeamUIPlugin.instance().getImageDescriptor("icons/objects/branches.gif"); //$NON-NLS-1$
 	}
 
+	@Override
 	public RGB getForeground(Object element) {
 		return RepositoryResource.STRUCTURE_DEFINED_NODES_FOREGROUND;
 	}
 
+	@Override
 	public RGB getBackground(Object element) {
 		return RepositoryResource.STRUCTURE_DEFINED_NODES_BACKGROUND;
 	}
 
+	@Override
 	public FontData getFont(Object element) {
 		return RepositoryResource.STRUCTURE_DEFINED_NODES_FONT.getFontData()[0];
 	}

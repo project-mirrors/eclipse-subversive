@@ -16,11 +16,9 @@ package org.eclipse.team.svn.ui.operation;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.team.svn.core.operation.AbstractActionOperation;
-import org.eclipse.team.svn.core.operation.IUnprotectedOperation;
 import org.eclipse.team.svn.core.resource.IRepositoryLocation;
 import org.eclipse.team.svn.ui.SVNUIMessages;
 import org.eclipse.team.svn.ui.repository.RepositoriesView;
-import org.eclipse.team.svn.ui.repository.RepositoryTreeViewer;
 import org.eclipse.team.svn.ui.repository.model.RepositoryLocation;
 
 /**
@@ -43,29 +41,24 @@ public class RefreshRepositoryLocationsOperation extends AbstractActionOperation
 		this.deep = deep;
 	}
 
+	@Override
 	public int getOperationWeight() {
 		return 0;
 	}
 
+	@Override
 	protected void runImpl(IProgressMonitor monitor) throws Exception {
-		if (this.resources == null) {
-			RepositoriesView.refreshRepositories(this.deep);
+		if (resources == null) {
+			RepositoriesView.refreshRepositories(deep);
 			return;
 		}
 
-		for (int i = 0; i < this.resources.length; i++) {
-			final IRepositoryLocation current = this.resources[i];
-			this.protectStep(new IUnprotectedOperation() {
-				public void run(IProgressMonitor monitor) throws Exception {
-					RepositoriesView.refresh(current, new RepositoryTreeViewer.IRefreshVisitor() {
-						public void visit(Object data) {
-							if (data instanceof RepositoryLocation && RefreshRepositoryLocationsOperation.this.deep) {
-								((RepositoryLocation) data).refresh();
-							}
-						}
-					});
+		for (final IRepositoryLocation current : resources) {
+			this.protectStep(monitor1 -> RepositoriesView.refresh(current, data -> {
+				if (data instanceof RepositoryLocation && deep) {
+					((RepositoryLocation) data).refresh();
 				}
-			}, monitor, this.resources.length);
+			}), monitor, resources.length);
 		}
 	}
 

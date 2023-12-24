@@ -15,8 +15,6 @@
 package org.eclipse.team.svn.core.operation.local;
 
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IResourceVisitor;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.team.core.Team;
@@ -50,41 +48,38 @@ public class AddToSVNWithPropertiesOperation extends AddToSVNOperation {
 
 	public AddToSVNWithPropertiesOperation(IResource[] resources, boolean isRecursive) {
 		super(resources, isRecursive);
-		this.doMarkTextFiles = CoreExtensionsManager.instance()
+		doMarkTextFiles = CoreExtensionsManager.instance()
 				.getOptionProvider()
 				.is(IOptionProvider.TEXT_MIME_TYPE_REQUIRED);
 	}
 
 	public AddToSVNWithPropertiesOperation(IResourceProvider provider, boolean isRecursive) {
 		super(provider, isRecursive);
-		this.doMarkTextFiles = CoreExtensionsManager.instance()
+		doMarkTextFiles = CoreExtensionsManager.instance()
 				.getOptionProvider()
 				.is(IOptionProvider.TEXT_MIME_TYPE_REQUIRED);
 	}
 
+	@Override
 	protected void doAdd(IResource current, final ISVNConnector proxy, final IProgressMonitor monitor)
 			throws Exception {
 		super.doAdd(current, proxy, monitor);
 
-		if (!this.isRecursive) {
-			this.processResource(current, proxy, monitor);
+		if (!isRecursive) {
+			processResource(current, proxy, monitor);
 		} else {
-			FileUtility.visitNodes(current, new IResourceVisitor() {
-
-				public boolean visit(IResource resource) throws CoreException {
-					if (monitor.isCanceled() || FileUtility.isNotSupervised(resource)) {
-						return false;
-					}
-
-					try {
-						AddToSVNWithPropertiesOperation.this.processResource(resource, proxy, monitor);
-					} catch (SVNConnectorException cwe) {
-						AddToSVNWithPropertiesOperation.this.reportStatus(IStatus.ERROR, null, cwe);
-						return false;
-					}
-					return true;
+			FileUtility.visitNodes(current, resource -> {
+				if (monitor.isCanceled() || FileUtility.isNotSupervised(resource)) {
+					return false;
 				}
 
+				try {
+					AddToSVNWithPropertiesOperation.this.processResource(resource, proxy, monitor);
+				} catch (SVNConnectorException cwe) {
+					AddToSVNWithPropertiesOperation.this.reportStatus(IStatus.ERROR, null, cwe);
+					return false;
+				}
+				return true;
 			}, IResource.DEPTH_INFINITE);
 		}
 	}
@@ -95,12 +90,12 @@ public class AddToSVNWithPropertiesOperation extends AddToSVNOperation {
 		SVNProperty[] properties = CoreExtensionsManager.instance()
 				.getOptionProvider()
 				.getAutomaticProperties(resource.getName());
-		for (int pCount = 0; pCount < properties.length; pCount++) {
-			proxy.setPropertyLocal(new String[] { path }, properties[pCount], SVNDepth.EMPTY,
-					ISVNConnector.Options.NONE, null, new SVNProgressMonitor(this, monitor, null));
+		for (SVNProperty property : properties) {
+			proxy.setPropertyLocal(new String[] { path }, property, SVNDepth.EMPTY, ISVNConnector.Options.NONE, null,
+					new SVNProgressMonitor(this, monitor, null));
 		}
 		if (resource.getType() == IResource.FILE) {
-			this.processFile(resource, proxy, monitor);
+			processFile(resource, proxy, monitor);
 		}
 	}
 
@@ -115,7 +110,7 @@ public class AddToSVNWithPropertiesOperation extends AddToSVNOperation {
 				proxy.setPropertyLocal(new String[] { path },
 						new SVNProperty(BuiltIn.MIME_TYPE, AddToSVNWithPropertiesOperation.BINARY_FILE), SVNDepth.EMPTY,
 						ISVNConnector.Options.NONE, null, new SVNProgressMonitor(this, monitor, null));
-			} else if (this.doMarkTextFiles && type == Team.TEXT) {
+			} else if (doMarkTextFiles && type == Team.TEXT) {
 				proxy.setPropertyLocal(new String[] { path },
 						new SVNProperty(BuiltIn.MIME_TYPE, AddToSVNWithPropertiesOperation.TEXT_FILE), SVNDepth.EMPTY,
 						ISVNConnector.Options.NONE, null, new SVNProgressMonitor(this, monitor, null));

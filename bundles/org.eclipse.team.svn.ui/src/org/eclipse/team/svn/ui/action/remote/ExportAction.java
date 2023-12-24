@@ -32,13 +32,13 @@ import org.eclipse.team.svn.ui.preferences.SVNTeamPreferences;
 public class ExportAction extends AbstractRepositoryTeamAction {
 
 	public ExportAction() {
-		super();
 	}
 
+	@Override
 	public void runImpl(IAction action) {
-		IRepositoryResource[] resources = this.getSelectedRepositoryResources();
+		IRepositoryResource[] resources = getSelectedRepositoryResources();
 		ExportPanel panel = new ExportPanel(resources.length > 1 ? null : resources[0]);
-		DefaultDialog dialog = new DefaultDialog(this.getShell(), panel);
+		DefaultDialog dialog = new DefaultDialog(getShell(), panel);
 		if (dialog.open() == 0) {
 			if (resources.length == 1) {
 				resources[0] = SVNUtility.copyOf(resources[0]);
@@ -47,12 +47,13 @@ public class ExportAction extends AbstractRepositoryTeamAction {
 			boolean ignoreExternals = SVNTeamPreferences.getBehaviourBoolean(
 					SVNTeamUIPlugin.instance().getPreferenceStore(),
 					SVNTeamPreferences.BEHAVIOUR_IGNORE_EXTERNALS_NAME);
-			this.runScheduled(new ExportOperation(resources, panel.getLocation(), panel.getDepth(), ignoreExternals));
+			runScheduled(new ExportOperation(resources, panel.getLocation(), panel.getDepth(), ignoreExternals));
 		}
 	}
 
+	@Override
 	public boolean isEnabled() {
-		return this.getSelectedRepositoryResources().length > 0;
+		return getSelectedRepositoryResources().length > 0;
 	}
 
 }

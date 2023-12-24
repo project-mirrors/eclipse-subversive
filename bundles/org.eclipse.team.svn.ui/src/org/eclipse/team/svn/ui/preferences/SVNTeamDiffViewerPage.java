@@ -40,10 +40,12 @@ public class SVNTeamDiffViewerPage extends AbstractSVNTeamPreferencesPage {
 
 	protected DiffViewerSettings diffSettings;
 
+	@Override
 	public void init(IWorkbench workbench) {
-		this.setDescription(SVNUIMessages.SVNTeamDiffViewerPage_Description);
+		setDescription(SVNUIMessages.SVNTeamDiffViewerPage_Description);
 	}
 
+	@Override
 	protected Control createContentsImpl(Composite parent) {
 		Composite composite = new Composite(parent, SWT.NONE);
 		GridLayout layout = new GridLayout();
@@ -53,7 +55,7 @@ public class SVNTeamDiffViewerPage extends AbstractSVNTeamPreferencesPage {
 		composite.setLayoutData(data);
 		composite.setLayout(layout);
 
-		this.fileAssociationsComposite = new DiffViewerFileAssociationsComposite(composite, this);
+		fileAssociationsComposite = new DiffViewerFileAssociationsComposite(composite, this);
 
 		//Setting context help
 		PlatformUI.getWorkbench()
@@ -63,20 +65,24 @@ public class SVNTeamDiffViewerPage extends AbstractSVNTeamPreferencesPage {
 		return composite;
 	}
 
+	@Override
 	protected void initializeControls() {
-		this.fileAssociationsComposite.initializeControls(this.diffSettings);
+		fileAssociationsComposite.initializeControls(diffSettings);
 	}
 
+	@Override
 	protected void loadDefaultValues(IPreferenceStore store) {
-		this.diffSettings = DiffViewerSettings.getDefaultDiffViewerSettings();
+		diffSettings = DiffViewerSettings.getDefaultDiffViewerSettings();
 	}
 
+	@Override
 	protected void loadValues(IPreferenceStore store) {
-		this.diffSettings = SVNTeamDiffViewerPage.loadDiffViewerSettings(store);
+		diffSettings = SVNTeamDiffViewerPage.loadDiffViewerSettings(store);
 	}
 
+	@Override
 	protected void saveValues(IPreferenceStore store) {
-		SVNTeamDiffViewerPage.saveDiffViewerSettings(this.diffSettings, store);
+		SVNTeamDiffViewerPage.saveDiffViewerSettings(diffSettings, store);
 	}
 
 	public static DiffViewerSettings loadDiffViewerSettings() {

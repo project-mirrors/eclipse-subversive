@@ -35,33 +35,38 @@ public class PropertyComparePanel extends AbstractDialogPanel {
 	public PropertyComparePanel(PropertyCompareInput input, boolean local) {
 		super(new String[] { IDialogConstants.CLOSE_LABEL });
 		this.input = input;
-		this.dialogDescription = SVNUIMessages.ComparePropsPanel_Description;
+		dialogDescription = SVNUIMessages.ComparePropsPanel_Description;
 		if (local) {
-			this.defaultMessage = SVNUIMessages.ComparePropsPanel_Local_Message;
+			defaultMessage = SVNUIMessages.ComparePropsPanel_Local_Message;
 		} else {
-			this.defaultMessage = SVNUIMessages.ComparePropsPanel_Remote_Message;
+			defaultMessage = SVNUIMessages.ComparePropsPanel_Remote_Message;
 		}
 	}
 
+	@Override
 	protected void createControlsImpl(Composite parent) {
-		Control control = this.input.createContents(parent);
+		Control control = input.createContents(parent);
 		control.setLayoutData(new GridData(GridData.FILL_BOTH));
 		Shell shell = control.getShell();
-		shell.setText(this.input.getTitle());
-		shell.setImage(this.input.getTitleImage());
+		shell.setText(input.getTitle());
+		shell.setImage(input.getTitleImage());
 	}
 
+	@Override
 	public String getHelpId() {
 		return "org.eclipse.team.svn.help.comparePropsDialogContext"; //$NON-NLS-1$
 	}
 
+	@Override
 	public Point getPrefferedSizeImpl() {
 		return new Point(650, 500);
 	}
 
+	@Override
 	protected void saveChangesImpl() {
 	}
 
+	@Override
 	protected void cancelChangesImpl() {
 	}
 

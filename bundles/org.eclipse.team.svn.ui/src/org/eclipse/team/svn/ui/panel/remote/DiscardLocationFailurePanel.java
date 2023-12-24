@@ -49,14 +49,15 @@ public class DiscardLocationFailurePanel extends ItemListPanel {
 		this.projects = projects;
 	}
 
+	@Override
 	public void createControlsImpl(Composite parent) {
 		super.createControlsImpl(parent);
 
-		GridData data = (GridData) this.table.getLayoutData();
+		GridData data = (GridData) table.getLayoutData();
 		data.heightHint = 50;
-		this.table.setLayoutData(data);
+		table.setLayoutData(data);
 
-		ProjectListComposite composite = new ProjectListComposite(parent, SWT.NONE, this.projects, true);
+		ProjectListComposite composite = new ProjectListComposite(parent, SWT.NONE, projects, true);
 		composite.initialize();
 
 		data = (GridData) composite.getLayoutData();

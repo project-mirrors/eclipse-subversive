@@ -37,9 +37,9 @@ public class SVNChangeSetSorter extends ResourceModelSorter implements IProperty
 	private int reorderingCriteria = SVNChangeSetSorter.DATE;
 
 	public SVNChangeSetSorter() {
-		super();
 	}
 
+	@Override
 	@SuppressWarnings("deprecation")
 	public int compare(Viewer viewer, Object o1, Object o2) {
 		if (o1 instanceof ChangeSet && o2 instanceof ChangeSet) {
@@ -49,9 +49,9 @@ public class SVNChangeSetSorter extends ResourceModelSorter implements IProperty
 			if (o1 instanceof SVNIncomingChangeSet && o2 instanceof SVNIncomingChangeSet) {
 				SVNIncomingChangeSet r1 = (SVNIncomingChangeSet) o1;
 				SVNIncomingChangeSet r2 = (SVNIncomingChangeSet) o2;
-				if (this.reorderingCriteria == COMMENT) {
+				if (reorderingCriteria == COMMENT) {
 					return this.compareNames(r1.getComment(), r2.getComment());
-				} else if (this.reorderingCriteria == USER) {
+				} else if (reorderingCriteria == USER) {
 					return this.compareNames(r1.getAuthor(), r2.getAuthor());
 				}
 				return r1.getDate().compareTo(r2.getDate());
@@ -80,11 +80,12 @@ public class SVNChangeSetSorter extends ResourceModelSorter implements IProperty
 	public void setConfiguration(ISynchronizePageConfiguration configuration) {
 		this.configuration = configuration;
 		this.configuration.addPropertyChangeListener(this);
-		this.reorderingCriteria = SVNChangeSetActionProvider.getSortCriteria(this.configuration);
+		reorderingCriteria = SVNChangeSetActionProvider.getSortCriteria(this.configuration);
 	}
 
+	@Override
 	public void propertyChange(PropertyChangeEvent event) {
-		this.reorderingCriteria = SVNChangeSetActionProvider.getSortCriteria(this.configuration);
+		reorderingCriteria = SVNChangeSetActionProvider.getSortCriteria(configuration);
 	}
 
 }

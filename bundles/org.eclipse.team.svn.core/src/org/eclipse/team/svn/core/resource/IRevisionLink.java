@@ -21,9 +21,9 @@ package org.eclipse.team.svn.core.resource;
  */
 public interface IRevisionLink {
 
-	public void setComment(String comment);
+	void setComment(String comment);
 
-	public String getComment();
+	String getComment();
 
-	public IRepositoryResource getRepositoryResource();
+	IRepositoryResource getRepositoryResource();
 }

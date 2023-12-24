@@ -48,49 +48,57 @@ public class MergeParticipant extends AbstractSVNParticipant {
 	protected IPropertyChangeListener configurationListener;
 
 	public MergeParticipant() {
-		super();
 	}
 
 	public MergeParticipant(ISynchronizeScope scope) {
 		super(scope);
 	}
 
+	@Override
 	public AbstractSVNSubscriber getMatchingSubscriber() {
 		MergeSubscriber subscriber = MergeSubscriber.instance();
-		MergeScope scope = (MergeScope) this.getScope();
+		MergeScope scope = (MergeScope) getScope();
 
 		subscriber.setMergeScopeHelper(scope.getMergeScopeHelper());
 		return subscriber;
 	}
 
+	@Override
 	protected void initializeConfiguration(ISynchronizePageConfiguration configuration) {
 		super.initializeConfiguration(configuration);
 	}
 
+	@Override
 	public void dispose() {
 		super.dispose();
 	}
 
+	@Override
 	protected String getParticipantId() {
 		return MergeParticipant.PARTICIPANT_ID;
 	}
 
+	@Override
 	protected Collection<AbstractSynchronizeActionGroup> getActionGroups() {
 		return ExtensionsManager.getInstance().getCurrentSynchronizeActionContributor().getMergeContributions();
 	}
 
+	@Override
 	protected int getSupportedModes() {
 		return MergeParticipant.SUPPORTED_MODES;
 	}
 
+	@Override
 	protected int getDefaultMode() {
 		return ISynchronizePageConfiguration.BOTH_MODE;
 	}
 
+	@Override
 	protected String getShortTaskName() {
 		return SVNUIMessages.MergeView_TaskName;
 	}
 
+	@Override
 	protected ILabelDecorator createLabelDecorator(ISynchronizePageConfiguration configuration) {
 		return new MergeLabelDecorator(configuration);
 	}
@@ -100,13 +108,14 @@ public class MergeParticipant extends AbstractSVNParticipant {
 			super(configuration);
 		}
 
+		@Override
 		public Image decorateImage(Image image, Object element) {
-			AbstractSVNSyncInfo info = this.getSyncInfo(element);
+			AbstractSVNSyncInfo info = getSyncInfo(element);
 			if (info != null && (info.getKind()
 					& SynchronizeLabelDecorator.CONFLICTING_REPLACEMENT_MASK) == SynchronizeLabelDecorator.CONFLICTING_REPLACEMENT_MASK) {
 				ILocalResource local = info.getLocalResource();
 				if (IStateFilter.SF_PREREPLACEDREPLACED.accept(local)) {
-					return this.registerImageDescriptor(new OverlayedImageDescriptor(image,
+					return registerImageDescriptor(new OverlayedImageDescriptor(image,
 							AbstractSVNParticipant.OVR_REPLACED_CONF, new Point(22, 16),
 							OverlayedImageDescriptor.RIGHT | OverlayedImageDescriptor.CENTER_V));
 				}

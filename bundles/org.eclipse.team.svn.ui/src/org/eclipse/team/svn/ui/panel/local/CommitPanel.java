@@ -27,8 +27,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jface.action.Action;
-import org.eclipse.jface.action.IMenuListener;
-import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -73,8 +71,8 @@ import org.eclipse.team.svn.core.operation.local.management.CleanupOperation;
 import org.eclipse.team.svn.core.operation.local.property.GetPropertiesOperation;
 import org.eclipse.team.svn.core.operation.local.refactor.DeleteResourceOperation;
 import org.eclipse.team.svn.core.resource.ILocalResource;
-import org.eclipse.team.svn.core.resource.IRemoteStorage;
 import org.eclipse.team.svn.core.resource.IRepositoryResource;
+import org.eclipse.team.svn.core.resource.ISVNStorage;
 import org.eclipse.team.svn.core.resource.events.IResourceStatesListener;
 import org.eclipse.team.svn.core.resource.events.ResourceStatesChangedEvent;
 import org.eclipse.team.svn.core.svnstorage.ResourcesParentsProvider;
@@ -179,15 +177,16 @@ public class CommitPanel extends CommentPanel implements IModifiableCommentDialo
 		this.proposedComment = proposedComment;
 		this.resources = resources;
 		if (msgType == CommitPanel.MSG_OVER_AND_COMMIT) {
-			this.defaultMessage = SVNUIMessages.CommitPanel_Message;
-			this.dialogDescription = SVNUIMessages.CommitPanel_Description;
+			defaultMessage = SVNUIMessages.CommitPanel_Message;
+			dialogDescription = SVNUIMessages.CommitPanel_Description;
 		}
-		this.changeListenerList = new ArrayList<IResourceSelectionChangeListener>();
+		changeListenerList = new ArrayList<>();
 		this.userSelectedResources = userSelectedResources;
 
-		this.paneParticipantHelper = new CommitPaneParticipantHelper();
+		paneParticipantHelper = new CommitPaneParticipantHelper();
 	}
 
+	@Override
 	public void createControlsImpl(Composite parent) {
 		GridData data = null;
 		GridLayout layout = null;
@@ -195,16 +194,16 @@ public class CommitPanel extends CommentPanel implements IModifiableCommentDialo
 		layout = (GridLayout) parent.getLayout();
 		layout.marginHeight = 3;
 
-		this.sForm = new SashForm(parent, SWT.VERTICAL);
+		sForm = new SashForm(parent, SWT.VERTICAL);
 		layout = new GridLayout();
 		layout.marginHeight = layout.marginWidth = 0;
 		layout.verticalSpacing = 3;
-		this.sForm.setLayout(layout);
+		sForm.setLayout(layout);
 		data = new GridData(GridData.FILL_BOTH);
 		data.heightHint = 400;
-		this.sForm.setLayoutData(data);
+		sForm.setLayoutData(data);
 
-		Composite composite = new Composite(this.sForm, SWT.NONE);
+		Composite composite = new Composite(sForm, SWT.NONE);
 		composite.setLayoutData(new GridData(GridData.FILL_BOTH));
 		layout = new GridLayout();
 		layout.verticalSpacing = 4;
@@ -219,16 +218,16 @@ public class CommitPanel extends CommentPanel implements IModifiableCommentDialo
 		group.setLayoutData(data);
 		group.setText(SVNUIMessages.CommitPanel_Comment);
 
-		CommitPanel.CollectPropertiesOperation op = new CollectPropertiesOperation(this.resources);
+		CommitPanel.CollectPropertiesOperation op = new CollectPropertiesOperation(resources);
 		UIMonitorUtility.doTaskNowDefault(op, true);
 
-		this.bugtraqModel = op.getBugtraqModel();
-		this.minLogSize = op.getMinLogSize();
-		this.maxLogWidth = op.getMaxLogWidth();
-		this.comment = new CommentComposite(group, this.proposedComment, this, op.getLogTemplates(), this.bugtraqModel,
-				this.minLogSize, this.maxLogWidth);
+		bugtraqModel = op.getBugtraqModel();
+		minLogSize = op.getMinLogSize();
+		maxLogWidth = op.getMaxLogWidth();
+		comment = new CommentComposite(group, proposedComment, this, op.getLogTemplates(), bugtraqModel, minLogSize,
+				maxLogWidth);
 		data = new GridData(GridData.FILL_BOTH);
-		this.comment.setLayoutData(data);
+		comment.setLayoutData(data);
 
 		Composite middleComposite = new Composite(composite, SWT.NULL);
 		data = new GridData(GridData.FILL_HORIZONTAL);
@@ -239,26 +238,28 @@ public class CommitPanel extends CommentPanel implements IModifiableCommentDialo
 		middleComposite.setLayoutData(data);
 		middleComposite.setLayout(layout);
 
-		this.keepLocks = SVNTeamUIPlugin.instance()
+		keepLocks = SVNTeamUIPlugin.instance()
 				.getPreferenceStore()
 				.getBoolean(SVNTeamPreferences.COMMIT_DIALOG_KEEP_LOCKS);
-		this.keepLocksButton = new Button(middleComposite, SWT.CHECK);
+		keepLocksButton = new Button(middleComposite, SWT.CHECK);
 		data = new GridData(GridData.BEGINNING | GridData.FILL_HORIZONTAL);
-		this.keepLocksButton.setLayoutData(data);
-		this.keepLocksButton.setText(SVNUIMessages.CommitPanel_KeepLocks);
-		this.keepLocksButton.setSelection(false);
-		this.keepLocksButton.addSelectionListener(new SelectionAdapter() {
+		keepLocksButton.setLayoutData(data);
+		keepLocksButton.setText(SVNUIMessages.CommitPanel_KeepLocks);
+		keepLocksButton.setSelection(false);
+		keepLocksButton.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
-				CommitPanel.this.keepLocks = CommitPanel.this.keepLocksButton.getSelection();
+				keepLocks = keepLocksButton.getSelection();
 			}
 		});
-		this.keepLocksButton.setSelection(this.keepLocks);
+		keepLocksButton.setSelection(keepLocks);
 
-		this.pasteNamesButton = new Button(middleComposite, SWT.PUSH | SWT.END);
+		pasteNamesButton = new Button(middleComposite, SWT.PUSH | SWT.END);
 		data = new GridData();
-		this.pasteNamesButton.setLayoutData(data);
-		this.pasteNamesButton.setText(SVNUIMessages.CommitPanel_PasteNames_Button);
-		this.pasteNamesButton.addSelectionListener(new SelectionAdapter() {
+		pasteNamesButton.setLayoutData(data);
+		pasteNamesButton.setText(SVNUIMessages.CommitPanel_PasteNames_Button);
+		pasteNamesButton.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				CommitPanel.this.pasteNames();
 			}
@@ -267,21 +268,21 @@ public class CommitPanel extends CommentPanel implements IModifiableCommentDialo
 		Label separator = new Label(composite, SWT.SEPARATOR | SWT.HORIZONTAL);
 		separator.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
-		if (this.paneParticipantHelper.isParticipantPane()) {
-			CommitPaneParticipant participant = new CommitPaneParticipant(new ResourceScope(this.resources), this);
-			this.paneParticipantHelper.init(participant);
-			this.createPaneControls();
+		if (paneParticipantHelper.isParticipantPane()) {
+			CommitPaneParticipant participant = new CommitPaneParticipant(new ResourceScope(resources), this);
+			paneParticipantHelper.init(participant);
+			createPaneControls();
 		} else {
-			this.createResourceSelectionCompositeControls();
+			createResourceSelectionCompositeControls();
 		}
 	}
 
 	protected void createResourceSelectionCompositeControls() {
-		this.selectionComposite = new ResourceSelectionComposite(this.sForm, SWT.NONE, this.resources, true,
-				this.userSelectedResources, true);
+		selectionComposite = new ResourceSelectionComposite(sForm, SWT.NONE, resources, true, userSelectedResources,
+				true);
 		GridData data = new GridData(GridData.FILL_BOTH);
 		data.heightHint = 175;
-		this.selectionComposite.setLayoutData(data);
+		selectionComposite.setLayoutData(data);
 
 		IPreferenceStore store = SVNTeamUIPlugin.instance().getPreferenceStore();
 		int first = SVNTeamPreferences.getDialogInt(store, SVNTeamPreferences.COMMIT_DIALOG_WEIGHT_NAME);
@@ -289,14 +290,11 @@ public class CommitPanel extends CommentPanel implements IModifiableCommentDialo
 		{
 			first = 50;
 		}
-		this.sForm.setWeights(new int[] { first, 100 - first });
+		sForm.setWeights(new int[] { first, 100 - first });
 
-		this.selectionComposite.addResourcesSelectionChangedListener(new IResourceSelectionChangeListener() {
-			public void resourcesSelectionChanged(ResourceSelectionChangedEvent event) {
-				CommitPanel.this.fireResourcesSelectionChanged(event);
-			}
-		});
-		this.attachTo(this.selectionComposite, new AbstractVerifier() {
+		selectionComposite.addResourcesSelectionChangedListener(CommitPanel.this::fireResourcesSelectionChanged);
+		attachTo(selectionComposite, new AbstractVerifier() {
+			@Override
 			protected String getErrorMessage(Control input) {
 				IResource[] selection = CommitPanel.this.getSelectedResources();
 				if (selection == null || selection.length == 0) {
@@ -309,6 +307,7 @@ public class CommitPanel extends CommentPanel implements IModifiableCommentDialo
 				return null;
 			}
 
+			@Override
 			protected String getWarningMessage(Control input) {
 				String message = null;
 				IResource[] selection = CommitPanel.this.getSelectedResources();
@@ -318,11 +317,11 @@ public class CommitPanel extends CommentPanel implements IModifiableCommentDialo
 				return message;
 			}
 		});
-		this.addContextMenu();
+		addContextMenu();
 	}
 
 	protected void createPaneControls() {
-		Composite paneComposite = new Composite(this.sForm, SWT.NONE);
+		Composite paneComposite = new Composite(sForm, SWT.NONE);
 		GridLayout layout = new GridLayout();
 		layout.marginWidth = 0;
 		paneComposite.setLayout(layout);
@@ -334,71 +333,70 @@ public class CommitPanel extends CommentPanel implements IModifiableCommentDialo
 
 		IPreferenceStore store = SVNTeamUIPlugin.instance().getPreferenceStore();
 		int first = SVNTeamPreferences.getDialogInt(store, SVNTeamPreferences.COMMIT_DIALOG_WEIGHT_NAME);
-		this.sForm.setWeights(new int[] { first, 100 - first });
+		sForm.setWeights(new int[] { first, 100 - first });
 
-		Control paneControl = this.paneParticipantHelper.createChangesPage(paneComposite);
+		Control paneControl = paneParticipantHelper.createChangesPage(paneComposite);
 		data = new GridData(GridData.FILL_BOTH);
 		paneControl.setLayoutData(data);
 
-		this.paneParticipantHelper.initListeners();
+		paneParticipantHelper.initListeners();
 
 		//add validator to pane
-		this.attachTo(paneComposite, new CommitPaneVerifier(this.paneParticipantHelper));
+		attachTo(paneComposite, new CommitPaneVerifier(paneParticipantHelper));
 	}
 
+	@Override
 	public String getHelpId() {
 		return "org.eclipse.team.svn.help.commitDialogContext"; //$NON-NLS-1$
 	}
 
+	@Override
 	public void postInit() {
 		super.postInit();
 
-		this.resourceStatesListener = new IResourceStatesListener() {
-			public void resourcesStateChanged(ResourceStatesChangedEvent event) {
-				CommitPanel.this.updateResources(event);
-			}
-		};
+		resourceStatesListener = CommitPanel.this::updateResources;
 		SVNRemoteStorage.instance()
 				.addResourceStatesListener(ResourceStatesChangedEvent.class, CommitPanel.this.resourceStatesListener);
 
-		if (this.paneParticipantHelper.isParticipantPane()) {
-			this.paneParticipantHelper.expandPaneTree();
+		if (paneParticipantHelper.isParticipantPane()) {
+			paneParticipantHelper.expandPaneTree();
 		}
 	}
 
+	@Override
 	protected void saveChangesImpl() {
 		super.saveChangesImpl();
-		this.savePreferences();
+		savePreferences();
 	}
 
+	@Override
 	protected void cancelChangesImpl() {
 		super.cancelChangesImpl();
-		this.savePreferences();
+		savePreferences();
 	}
 
+	@Override
 	public boolean canClose() {
-		final boolean[] commit = new boolean[] { true };
-		if (this.bugtraqModel != null && this.bugtraqModel.getMessage() != null && this.bugtraqModel.isWarnIfNoIssue()
-				&& this.comment.getBugID() != null && this.comment.getBugID().trim().length() == 0) {
-			UIMonitorUtility.getDisplay().syncExec(new Runnable() {
-				public void run() {
-					MessageDialog dlg = new MessageDialog(
-							UIMonitorUtility.getShell(), SVNUIMessages.CommitPanel_NoBugId_Title, null,
-							SVNUIMessages.CommitPanel_NoBugId_Message, MessageDialog.WARNING,
-							new String[] { IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL }, 0);
-					commit[0] = dlg.open() == 0;
-				}
+		final boolean[] commit = { true };
+		if (bugtraqModel != null && bugtraqModel.getMessage() != null && bugtraqModel.isWarnIfNoIssue()
+				&& comment.getBugID() != null && comment.getBugID().trim().length() == 0) {
+			UIMonitorUtility.getDisplay().syncExec(() -> {
+				MessageDialog dlg = new MessageDialog(
+						UIMonitorUtility.getShell(), SVNUIMessages.CommitPanel_NoBugId_Title, null,
+						SVNUIMessages.CommitPanel_NoBugId_Message, MessageDialog.WARNING,
+						new String[] { IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL }, 0);
+				commit[0] = dlg.open() == 0;
 			});
 		}
 		return commit[0];
 	}
 
 	public void pasteNames() {
-		if (!this.paneParticipantHelper.isParticipantPane()) {
-			List<IResource> selectedResources = this.selectionComposite.getCurrentSelection();
+		if (!paneParticipantHelper.isParticipantPane()) {
+			List<IResource> selectedResources = selectionComposite.getCurrentSelection();
 			this.pasteNames(selectedResources.toArray(new IResource[0]));
 		} else {
-			ISelection selection = this.paneParticipantHelper.getSyncPageConfiguration()
+			ISelection selection = paneParticipantHelper.getSyncPageConfiguration()
 					.getSite()
 					.getSelectionProvider()
 					.getSelection();
@@ -417,400 +415,416 @@ public class CommitPanel extends CommentPanel implements IModifiableCommentDialo
 			for (IResource resource : resources) {
 				namesString += resource.getName() + "\n"; //$NON-NLS-1$
 			}
-			this.comment.insertText(namesString);
+			comment.insertText(namesString);
 		}
 	}
 
-	//relates to resource selection composite	
+	//relates to resource selection composite
 	protected void addContextMenu() {
-		final TableViewer tableViewer = this.selectionComposite.getTableViewer();
+		final TableViewer tableViewer = selectionComposite.getTableViewer();
 		MenuManager menuMgr = new MenuManager();
 		Menu menu = menuMgr.createContextMenu(tableViewer.getTable());
-		menuMgr.addMenuListener(new IMenuListener() {
-			public void menuAboutToShow(IMenuManager manager) {
-				manager.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
-				final IStructuredSelection tSelection = (IStructuredSelection) tableViewer.getSelection();
-				final IResource[] selectedResources = (IResource[]) tSelection.toList()
-						.toArray(new IResource[tSelection.size()]);
-				Action tAction = null;
+		menuMgr.addMenuListener(manager -> {
+			manager.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
+			final IStructuredSelection tSelection = (IStructuredSelection) tableViewer.getSelection();
+			final IResource[] selectedResources = (IResource[]) tSelection.toList()
+					.toArray(new IResource[tSelection.size()]);
+			Action tAction = null;
 
-				//paste selected names action
-				manager.add(tAction = new Action(SVNUIMessages.CommitPanel_PasteNames_Action) {
-					public void run() {
-						CommitPanel.this.pasteNames();
+			//paste selected names action
+			manager.add(tAction = new Action(SVNUIMessages.CommitPanel_PasteNames_Action) {
+				@Override
+				public void run() {
+					CommitPanel.this.pasteNames();
+				}
+			});
+			tAction.setEnabled(tSelection.size() > 0);
+
+			//Create Patch File action
+			manager.add(tAction = new Action(SVNUIMessages.CreatePatchCommand_label) {
+				@Override
+				public void run() {
+					FileDialog dlg = new FileDialog(UIMonitorUtility.getShell(), SWT.PRIMARY_MODAL | SWT.SAVE);
+					dlg.setText(SVNUIMessages.SelectPatchFilePage_SavePatchAs);
+					dlg.setFileName(selectedResources[0].getName() + ".patch"); //$NON-NLS-1$
+					dlg.setFilterExtensions(new String[] { "patch", "*.*" }); //$NON-NLS-1$ //$NON-NLS-2$
+					String file = dlg.open();
+					if (file != null) {
+						CreatePatchOperation mainOp = new CreatePatchOperation(
+								new IResource[] { selectedResources[0] }, file, true, true, true, true);
+						UIMonitorUtility.doTaskNowDefault(mainOp, false);
 					}
-				});
-				tAction.setEnabled(tSelection.size() > 0);
+				}
+			});
+			tAction.setEnabled(tSelection.size() == 1 && FileUtility.checkForResourcesPresence(selectedResources,
+					IStateFilter.SF_VERSIONED, IResource.DEPTH_ZERO));
 
-				//Create Patch File action
-				manager.add(tAction = new Action(SVNUIMessages.CreatePatchCommand_label) {
-					public void run() {
-						FileDialog dlg = new FileDialog(UIMonitorUtility.getShell(), SWT.PRIMARY_MODAL | SWT.SAVE);
-						dlg.setText(SVNUIMessages.SelectPatchFilePage_SavePatchAs);
-						dlg.setFileName(selectedResources[0].getName() + ".patch"); //$NON-NLS-1$
-						dlg.setFilterExtensions(new String[] { "patch", "*.*" }); //$NON-NLS-1$ //$NON-NLS-2$
-						String file = dlg.open();
-						if (file != null) {
-							CreatePatchOperation mainOp = new CreatePatchOperation(
-									new IResource[] { selectedResources[0] }, file, true, true, true, true);
-							UIMonitorUtility.doTaskNowDefault(mainOp, false);
-						}
+			//Create Branch action
+			manager.add(tAction = new Action(SVNUIMessages.BranchAction_label) {
+				@Override
+				public void run() {
+					IResource[] resources = FileUtility.getResourcesRecursive(selectedResources,
+							IStateFilter.SF_EXCLUDE_DELETED, IResource.DEPTH_INFINITE);
+					IActionOperation op = BranchTagAction.getBranchTagOperation(UIMonitorUtility.getShell(),
+							BranchTagAction.BRANCH_ACTION, resources);
+					if (op != null) {
+						UIMonitorUtility.doTaskNowDefault(op, true);
 					}
-				});
-				tAction.setEnabled(tSelection.size() == 1 && FileUtility.checkForResourcesPresence(selectedResources,
-						IStateFilter.SF_VERSIONED, IResource.DEPTH_ZERO));
+				}
+			});
+			tAction.setEnabled(tSelection.size() > 0 && FileUtility.checkForResourcesPresence(selectedResources,
+					IStateFilter.SF_EXCLUDE_DELETED, IResource.DEPTH_ZERO));
+			tAction.setImageDescriptor(
+					SVNTeamUIPlugin.instance().getImageDescriptor("icons/common/actions/branch.gif")); //$NON-NLS-1$
+			manager.add(new Separator());
 
-				//Create Branch action
-				manager.add(tAction = new Action(SVNUIMessages.BranchAction_label) {
-					public void run() {
-						IResource[] resources = FileUtility.getResourcesRecursive(selectedResources,
-								IStateFilter.SF_EXCLUDE_DELETED, IResource.DEPTH_INFINITE);
-						IActionOperation op = BranchTagAction.getBranchTagOperation(UIMonitorUtility.getShell(),
-								BranchTagAction.BRANCH_ACTION, resources);
-						if (op != null) {
+			//Revert action
+			manager.add(tAction = new Action(SVNUIMessages.CommitPanel_Revert_Action) {
+				@Override
+				public void run() {
+					IResource[] changedResources = FileUtility.getResourcesRecursive(selectedResources,
+							RevertAction.SF_REVERTABLE_OR_NEW);
+					CompositeOperation revertOp = RevertAction.getRevertOperation(UIMonitorUtility.getShell(),
+							changedResources, selectedResources);
+					if (revertOp != null) {
+						UIMonitorUtility.doTaskNowDefault(revertOp, true);
+					}
+				}
+			});
+			tAction.setImageDescriptor(
+					SVNTeamUIPlugin.instance().getImageDescriptor("icons/common/actions/revert.gif")); //$NON-NLS-1$
+			tAction.setEnabled(tSelection.size() > 0);
+
+			//Ignore resources group
+			if (tSelection.size() > 0
+					&& selectedResources.length == FileUtility.getResourcesRecursive(selectedResources,
+							AddToSVNIgnoreAction.SF_NEW_AND_PARENT_VERSIONED).length) {
+				MenuManager subMenu = new MenuManager(SVNUIMessages.CommitPanel_Ignore_Group);
+				if (tSelection.size() > 1) {
+					subMenu.add(tAction = new Action(SVNUIMessages.CommitPanel_IgnoreByName_Multiple_Action) {
+						@Override
+						public void run() {
+							CompositeOperation op = new CompositeOperation("Operation_AddToSVNIgnore", //$NON-NLS-1$
+									SVNMessages.class);
+							op.add(new AddToSVNIgnoreOperation(selectedResources, ISVNStorage.IGNORE_NAME, null));
+							op.add(new RefreshResourcesOperation(
+									new ResourcesParentsProvider(resources), IResource.DEPTH_INFINITE,
+									RefreshResourcesOperation.REFRESH_ALL));
 							UIMonitorUtility.doTaskNowDefault(op, true);
 						}
-					}
-				});
-				tAction.setEnabled(tSelection.size() > 0 && FileUtility.checkForResourcesPresence(selectedResources,
-						IStateFilter.SF_EXCLUDE_DELETED, IResource.DEPTH_ZERO));
-				tAction.setImageDescriptor(
-						SVNTeamUIPlugin.instance().getImageDescriptor("icons/common/actions/branch.gif")); //$NON-NLS-1$
-				manager.add(new Separator());
-
-				//Revert action
-				manager.add(tAction = new Action(SVNUIMessages.CommitPanel_Revert_Action) {
-					public void run() {
-						IResource[] changedResources = FileUtility.getResourcesRecursive(selectedResources,
-								RevertAction.SF_REVERTABLE_OR_NEW);
-						CompositeOperation revertOp = RevertAction.getRevertOperation(UIMonitorUtility.getShell(),
-								changedResources, selectedResources);
-						if (revertOp != null) {
-							UIMonitorUtility.doTaskNowDefault(revertOp, true);
+					});
+					tAction.setEnabled(true);
+					subMenu.add(tAction = new Action(SVNUIMessages.CommitPanel_IgnoreByExtension_Multiple_Action) {
+						@Override
+						public void run() {
+							CompositeOperation op = new CompositeOperation("Operation_AddToSVNIgnore", //$NON-NLS-1$
+									SVNMessages.class);
+							op.add(new AddToSVNIgnoreOperation(selectedResources, ISVNStorage.IGNORE_EXTENSION,
+									null));
+							op.add(new RefreshResourcesOperation(
+									new ResourcesParentsProvider(resources), IResource.DEPTH_INFINITE,
+									RefreshResourcesOperation.REFRESH_ALL));
+							UIMonitorUtility.doTaskNowDefault(op, true);
 						}
-					}
-				});
-				tAction.setImageDescriptor(
-						SVNTeamUIPlugin.instance().getImageDescriptor("icons/common/actions/revert.gif")); //$NON-NLS-1$
-				tAction.setEnabled(tSelection.size() > 0);
-
-				//Ignore resources group
-				if (tSelection.size() > 0
-						&& selectedResources.length == FileUtility.getResourcesRecursive(selectedResources,
-								AddToSVNIgnoreAction.SF_NEW_AND_PARENT_VERSIONED).length) {
-					MenuManager subMenu = new MenuManager(SVNUIMessages.CommitPanel_Ignore_Group);
-					if (tSelection.size() > 1) {
-						subMenu.add(tAction = new Action(SVNUIMessages.CommitPanel_IgnoreByName_Multiple_Action) {
-							public void run() {
-								CompositeOperation op = new CompositeOperation("Operation_AddToSVNIgnore", //$NON-NLS-1$
-										SVNMessages.class);
-								op.add(new AddToSVNIgnoreOperation(selectedResources, IRemoteStorage.IGNORE_NAME,
-										null));
-								op.add(new RefreshResourcesOperation(
-										new ResourcesParentsProvider(CommitPanel.this.resources),
-										IResource.DEPTH_INFINITE, RefreshResourcesOperation.REFRESH_ALL));
-								UIMonitorUtility.doTaskNowDefault(op, true);
-							}
-						});
-						tAction.setEnabled(true);
-						subMenu.add(tAction = new Action(SVNUIMessages.CommitPanel_IgnoreByExtension_Multiple_Action) {
-							public void run() {
-								CompositeOperation op = new CompositeOperation("Operation_AddToSVNIgnore", //$NON-NLS-1$
-										SVNMessages.class);
-								op.add(new AddToSVNIgnoreOperation(selectedResources, IRemoteStorage.IGNORE_EXTENSION,
-										null));
-								op.add(new RefreshResourcesOperation(
-										new ResourcesParentsProvider(CommitPanel.this.resources),
-										IResource.DEPTH_INFINITE, RefreshResourcesOperation.REFRESH_ALL));
-								UIMonitorUtility.doTaskNowDefault(op, true);
-							}
-						});
-						tAction.setEnabled(true);
-					} else {
-						subMenu.add(tAction = new Action(selectedResources[0].getName()) {
-							public void run() {
-								CompositeOperation op = new CompositeOperation("Operation_AddToSVNIgnore", //$NON-NLS-1$
-										SVNMessages.class);
-								op.add(new AddToSVNIgnoreOperation(selectedResources, IRemoteStorage.IGNORE_NAME,
-										null));
-								op.add(new RefreshResourcesOperation(
-										new ResourcesParentsProvider(CommitPanel.this.resources),
-										IResource.DEPTH_INFINITE, RefreshResourcesOperation.REFRESH_ALL));
-								UIMonitorUtility.doTaskNowDefault(op, true);
-							}
-						});
-						tAction.setEnabled(true);
-						String name = selectedResources[0].getName();
-						String[] parts = name.split("\\."); //$NON-NLS-1$
-						if ((parts.length != 0)) {
-							subMenu.add(tAction = new Action("*." + parts[parts.length - 1]) { //$NON-NLS-1$
-								public void run() {
-									CompositeOperation op = new CompositeOperation("Operation_AddToSVNIgnore", //$NON-NLS-1$
-											SVNMessages.class);
-									op.add(new AddToSVNIgnoreOperation(selectedResources,
-											IRemoteStorage.IGNORE_EXTENSION, null));
-									op.add(new RefreshResourcesOperation(
-											new ResourcesParentsProvider(CommitPanel.this.resources),
-											IResource.DEPTH_INFINITE, RefreshResourcesOperation.REFRESH_ALL));
-									UIMonitorUtility.doTaskNowDefault(op, true);
-								}
-							});
-							tAction.setEnabled(true);
+					});
+					tAction.setEnabled(true);
+				} else {
+					subMenu.add(tAction = new Action(selectedResources[0].getName()) {
+						@Override
+						public void run() {
+							CompositeOperation op = new CompositeOperation("Operation_AddToSVNIgnore", //$NON-NLS-1$
+									SVNMessages.class);
+							op.add(new AddToSVNIgnoreOperation(selectedResources, ISVNStorage.IGNORE_NAME, null));
+							op.add(new RefreshResourcesOperation(
+									new ResourcesParentsProvider(resources), IResource.DEPTH_INFINITE,
+									RefreshResourcesOperation.REFRESH_ALL));
+							UIMonitorUtility.doTaskNowDefault(op, true);
 						}
+					});
+					tAction.setEnabled(true);
+					String name = selectedResources[0].getName();
+					String[] parts = name.split("\\."); //$NON-NLS-1$
+					if (parts.length != 0) {
+						subMenu.add(tAction = new Action("*." + parts[parts.length - 1]) { //$NON-NLS-1$
+							@Override
+							public void run() {
+								CompositeOperation op = new CompositeOperation("Operation_AddToSVNIgnore", //$NON-NLS-1$
+										SVNMessages.class);
+								op.add(new AddToSVNIgnoreOperation(selectedResources, ISVNStorage.IGNORE_EXTENSION,
+										null));
+								op.add(new RefreshResourcesOperation(
+										new ResourcesParentsProvider(resources), IResource.DEPTH_INFINITE,
+										RefreshResourcesOperation.REFRESH_ALL));
+								UIMonitorUtility.doTaskNowDefault(op, true);
+							}
+						});
+						tAction.setEnabled(true);
 					}
-					manager.add(subMenu);
 				}
+				manager.add(subMenu);
+			}
 
-				//Edit conflicts action
-				manager.add(tAction = new Action(SVNUIMessages.EditConflictsAction_label) {
-					public void run() {
-						UIMonitorUtility.doTaskScheduledDefault(new ShowConflictEditorOperation(FileUtility
-								.getResourcesRecursive(selectedResources, IStateFilter.SF_CONTENT_CONFLICTING), true));
-					}
-				});
-				tAction.setEnabled(FileUtility.checkForResourcesPresenceRecursive(selectedResources,
-						IStateFilter.SF_CONTENT_CONFLICTING));
+			//Edit conflicts action
+			manager.add(tAction = new Action(SVNUIMessages.EditConflictsAction_label) {
+				@Override
+				public void run() {
+					UIMonitorUtility.doTaskScheduledDefault(new ShowConflictEditorOperation(FileUtility
+							.getResourcesRecursive(selectedResources, IStateFilter.SF_CONTENT_CONFLICTING), true));
+				}
+			});
+			tAction.setEnabled(FileUtility.checkForResourcesPresenceRecursive(selectedResources,
+					IStateFilter.SF_CONTENT_CONFLICTING));
 
-				//Edit tree conflicts action
-				manager.add(tAction = new Action(SVNUIMessages.EditTreeConflictsAction_label) {
-					public void run() {
-						if (selectedResources.length > 0) {
-							ILocalResource local = SVNRemoteStorage.instance().asLocalResource(selectedResources[0]);
-							if (local.hasTreeConflict()) {
-								EditTreeConflictsPanel editConflictsPanel = new EditTreeConflictsPanel(local);
-								DefaultDialog dialog = new DefaultDialog(UIMonitorUtility.getShell(),
-										editConflictsPanel);
-								if (dialog.open() == 0 && editConflictsPanel.getOperation() != null) {
-									UIMonitorUtility.doTaskScheduledDefault(editConflictsPanel.getOperation());
-								}
+			//Edit tree conflicts action
+			manager.add(tAction = new Action(SVNUIMessages.EditTreeConflictsAction_label) {
+				@Override
+				public void run() {
+					if (selectedResources.length > 0) {
+						ILocalResource local = SVNRemoteStorage.instance().asLocalResource(selectedResources[0]);
+						if (local.hasTreeConflict()) {
+							EditTreeConflictsPanel editConflictsPanel = new EditTreeConflictsPanel(local);
+							DefaultDialog dialog = new DefaultDialog(UIMonitorUtility.getShell(),
+									editConflictsPanel);
+							if (dialog.open() == 0 && editConflictsPanel.getOperation() != null) {
+								UIMonitorUtility.doTaskScheduledDefault(editConflictsPanel.getOperation());
 							}
 						}
 					}
-				});
-				tAction.setEnabled(selectedResources.length == 1 && FileUtility.checkForResourcesPresence(
-						selectedResources, IStateFilter.SF_TREE_CONFLICTING, IResource.DEPTH_ZERO));
+				}
+			});
+			tAction.setEnabled(selectedResources.length == 1 && FileUtility.checkForResourcesPresence(
+					selectedResources, IStateFilter.SF_TREE_CONFLICTING, IResource.DEPTH_ZERO));
 
-				//Mark as merged action
-				manager.add(tAction = new Action(SVNUIMessages.CommitPanel_MarkAsMerged_Action) {
-					public void run() {
+			//Mark as merged action
+			manager.add(tAction = new Action(SVNUIMessages.CommitPanel_MarkAsMerged_Action) {
+				@Override
+				public void run() {
+					boolean ignoreExternals = SVNTeamPreferences.getBehaviourBoolean(
+							SVNTeamUIPlugin.instance().getPreferenceStore(),
+							SVNTeamPreferences.BEHAVIOUR_IGNORE_EXTERNALS_NAME);
+					MarkAsMergedOperation mainOp = new MarkAsMergedOperation(selectedResources, false, null,
+							ignoreExternals);
+					CompositeOperation op = new CompositeOperation(mainOp.getId(), mainOp.getMessagesClass());
+					op.add(mainOp);
+					op.add(new ShowPostCommitErrorsOperation(mainOp));
+					op.add(new RefreshResourcesOperation(FileUtility.getParents(selectedResources, false)));
+					UIMonitorUtility.doTaskNowDefault(op, false);
+				}
+			});
+			tAction.setEnabled(
+					FileUtility.checkForResourcesPresenceRecursive(selectedResources, IStateFilter.SF_CONFLICTING)
+							&& selectedResources.length == 1);
+			manager.add(new Separator());
+
+			//Lock action
+			manager.add(tAction = new Action(SVNUIMessages.LockAction_label) {
+				@Override
+				public void run() {
+					IResource[] filteredResources = FileUtility.getResourcesRecursive(selectedResources,
+							IStateFilter.SF_READY_TO_LOCK, IResource.DEPTH_INFINITE);
+					IActionOperation op = LockProposeUtility.performLockAction(filteredResources, false,
+							UIMonitorUtility.getShell());
+					if (op != null) {
+						UIMonitorUtility.doTaskNowDefault(op, false);
+					}
+				}
+			});
+			tAction.setImageDescriptor(
+					SVNTeamUIPlugin.instance().getImageDescriptor("icons/common/actions/lock.gif")); //$NON-NLS-1$
+			tAction.setEnabled(FileUtility.checkForResourcesPresenceRecursive(selectedResources,
+					IStateFilter.SF_READY_TO_LOCK));
+
+			//Unlock action
+			manager.add(tAction = new Action(SVNUIMessages.UnlockAction_label) {
+				@Override
+				public void run() {
+					IResource[] filteredResources = FileUtility.getResourcesRecursive(selectedResources,
+							IStateFilter.SF_LOCKED, IResource.DEPTH_INFINITE);
+					IActionOperation op = LockProposeUtility.performUnlockAction(filteredResources,
+							UIMonitorUtility.getShell());
+					if (op != null) {
+						UIMonitorUtility.doTaskNowDefault(op, false);
+					}
+				}
+			});
+			tAction.setImageDescriptor(
+					SVNTeamUIPlugin.instance().getImageDescriptor("icons/common/actions/unlock.gif")); //$NON-NLS-1$
+			tAction.setEnabled(
+					FileUtility.checkForResourcesPresenceRecursive(selectedResources, IStateFilter.SF_LOCKED));
+			manager.add(new Separator());
+
+			//Compare With group
+			MenuManager subMenu = new MenuManager(SVNUIMessages.CommitPanel_CompareWith_Group);
+			subMenu.add(tAction = new Action(SVNUIMessages.CompareWithWorkingCopyAction_label) {
+				@Override
+				public void run() {
+					IResource resource = selectedResources[0];
+					ILocalResource local = SVNRemoteStorage.instance().asLocalResource(resource);
+					if (!IStateFilter.SF_INTERNAL_INVALID.accept(local)) {
+						IRepositoryResource remote = local.isCopied()
+								? SVNUtility.getCopiedFrom(resource)
+								: SVNRemoteStorage.instance().asRepositoryResource(resource);
+						remote.setSelectedRevision(SVNRevision.BASE);
+						UIMonitorUtility
+								.doTaskScheduledDefault(new CompareResourcesOperation(local, remote, false, true));
+					}
+				}
+			});
+			tAction.setEnabled(tSelection.size() == 1 && FileUtility.checkForResourcesPresence(selectedResources,
+					CompareWithWorkingCopyAction.COMPARE_FILTER, IResource.DEPTH_ZERO));
+			subMenu.add(tAction = new Action(SVNUIMessages.CompareWithLatestRevisionAction_label) {
+				@Override
+				public void run() {
+					IResource resource = selectedResources[0];
+					ILocalResource local = SVNRemoteStorage.instance().asLocalResource(resource);
+					if (!IStateFilter.SF_INTERNAL_INVALID.accept(local)) {
+						IRepositoryResource remote = local.isCopied()
+								? SVNUtility.getCopiedFrom(resource)
+								: SVNRemoteStorage.instance().asRepositoryResource(resource);
+						remote.setSelectedRevision(SVNRevision.HEAD);
+						UIMonitorUtility
+								.doTaskScheduledDefault(new CompareResourcesOperation(local, remote, false, true));
+					}
+				}
+			});
+			tAction.setEnabled(tSelection.size() == 1
+					&& (CoreExtensionsManager.instance()
+							.getSVNConnectorFactory()
+							.getSVNAPIVersion() >= ISVNConnectorFactory.APICompatibility.SVNAPI_1_5_x
+							|| selectedResources[0].getType() == IResource.FILE)
+					&& FileUtility.checkForResourcesPresenceRecursive(selectedResources,
+							CompareWithWorkingCopyAction.COMPARE_FILTER));
+			subMenu.add(tAction = new Action(SVNUIMessages.CompareWithRevisionAction_label) {
+				@Override
+				public void run() {
+					IResource resource = selectedResources[0];
+					ILocalResource local = SVNRemoteStorage.instance().asLocalResource(resource);
+					if (!IStateFilter.SF_INTERNAL_INVALID.accept(local)) {
+						IRepositoryResource remote = local.isCopied()
+								? SVNUtility.getCopiedFrom(resource)
+								: SVNRemoteStorage.instance().asRepositoryResource(resource);
+						ComparePanel panel = new ComparePanel(remote, local.getRevision());
+						DefaultDialog dlg = new DefaultDialog(UIMonitorUtility.getShell(), panel);
+						if (dlg.open() == 0) {
+							remote = panel.getSelectedResource();
+							UIMonitorUtility.doTaskScheduledDefault(
+									new CompareResourcesOperation(local, remote, false, true));
+						}
+					}
+				}
+			});
+			tAction.setEnabled(tSelection.size() == 1
+					&& (CoreExtensionsManager.instance()
+							.getSVNConnectorFactory()
+							.getSVNAPIVersion() >= ISVNConnectorFactory.APICompatibility.SVNAPI_1_5_x
+							|| selectedResources[0].getType() == IResource.FILE)
+					&& FileUtility.checkForResourcesPresenceRecursive(selectedResources,
+							CompareWithWorkingCopyAction.COMPARE_FILTER));
+			manager.add(subMenu);
+
+			//Replace with group
+			subMenu = new MenuManager(SVNUIMessages.CommitPanel_ReplaceWith_Group);
+			subMenu.add(tAction = new Action(SVNUIMessages.ReplaceWithLatestRevisionAction_label) {
+				@Override
+				public void run() {
+					IResource[] resources = FileUtility.getResourcesRecursive(selectedResources,
+							IStateFilter.SF_ONREPOSITORY, IResource.DEPTH_ZERO);
+					IActionOperation op = ReplaceWithLatestRevisionAction.getReplaceOperation(resources,
+							UIMonitorUtility.getShell());
+					if (op != null) {
+						UIMonitorUtility.doTaskNowDefault(op, true);
+					}
+				}
+			});
+			tAction.setEnabled(FileUtility.checkForResourcesPresenceRecursive(selectedResources,
+					IStateFilter.SF_ONREPOSITORY));
+			subMenu.add(tAction = new Action(SVNUIMessages.ReplaceWithRevisionAction_label) {
+				@Override
+				public void run() {
+					IActionOperation op = ReplaceWithRevisionAction.getReplaceOperation(selectedResources,
+							UIMonitorUtility.getShell());
+					if (op != null) {
+						UIMonitorUtility.doTaskNowDefault(op, true);
+					}
+				}
+			});
+			tAction.setEnabled(tSelection.size() == 1 && FileUtility.checkForResourcesPresence(selectedResources,
+					IStateFilter.SF_ONREPOSITORY, IResource.DEPTH_ZERO));
+			manager.add(subMenu);
+			manager.add(new Separator());
+
+			//Export action
+			manager.add(tAction = new Action(SVNUIMessages.ExportCommand_label) {
+				@Override
+				public void run() {
+					DirectoryDialog fileDialog = new DirectoryDialog(UIMonitorUtility.getShell());
+					fileDialog.setText(SVNUIMessages.ExportAction_Select_Title);
+					fileDialog.setMessage(SVNUIMessages.ExportAction_Select_Description);
+					String path = fileDialog.open();
+					if (path != null) {
 						boolean ignoreExternals = SVNTeamPreferences.getBehaviourBoolean(
 								SVNTeamUIPlugin.instance().getPreferenceStore(),
 								SVNTeamPreferences.BEHAVIOUR_IGNORE_EXTERNALS_NAME);
-						MarkAsMergedOperation mainOp = new MarkAsMergedOperation(selectedResources, false, null,
-								ignoreExternals);
-						CompositeOperation op = new CompositeOperation(mainOp.getId(), mainOp.getMessagesClass());
-						op.add(mainOp);
-						op.add(new ShowPostCommitErrorsOperation(mainOp));
-						op.add(new RefreshResourcesOperation(FileUtility.getParents(selectedResources, false)));
-						UIMonitorUtility.doTaskNowDefault(op, false);
+						UIMonitorUtility.doTaskScheduledDefault(new ExportOperation(
+								FileUtility.getResourcesRecursive(selectedResources,
+										IStateFilter.SF_EXCLUDE_DELETED, IResource.DEPTH_ZERO),
+								path, SVNRevision.WORKING, ignoreExternals));
 					}
-				});
-				tAction.setEnabled(
-						FileUtility.checkForResourcesPresenceRecursive(selectedResources, IStateFilter.SF_CONFLICTING)
-								&& selectedResources.length == 1);
-				manager.add(new Separator());
+				}
+			});
+			tAction.setImageDescriptor(SVNTeamUIPlugin.instance().getImageDescriptor("icons/common/export.gif")); //$NON-NLS-1$
+			tAction.setEnabled(tSelection.size() > 0 && FileUtility.checkForResourcesPresence(selectedResources,
+					IStateFilter.SF_EXCLUDE_DELETED, IResource.DEPTH_ZERO));
 
-				//Lock action
-				manager.add(tAction = new Action(SVNUIMessages.LockAction_label) {
-					public void run() {
-						IResource[] filteredResources = FileUtility.getResourcesRecursive(selectedResources,
-								IStateFilter.SF_READY_TO_LOCK, IResource.DEPTH_INFINITE);
-						IActionOperation op = LockProposeUtility.performLockAction(filteredResources, false,
-								UIMonitorUtility.getShell());
-						if (op != null) {
-							UIMonitorUtility.doTaskNowDefault(op, false);
-						}
-					}
-				});
-				tAction.setImageDescriptor(
-						SVNTeamUIPlugin.instance().getImageDescriptor("icons/common/actions/lock.gif")); //$NON-NLS-1$
-				tAction.setEnabled(FileUtility.checkForResourcesPresenceRecursive(selectedResources,
-						IStateFilter.SF_READY_TO_LOCK));
+			//Clean-up action
+			manager.add(tAction = new Action(SVNUIMessages.CleanupCommand_label) {
+				@Override
+				public void run() {
+					IResource[] resources = FileUtility.getResourcesRecursive(selectedResources,
+							IStateFilter.SF_VERSIONED_FOLDERS, IResource.DEPTH_ZERO);
+					CleanupOperation mainOp = new CleanupOperation(resources);
+					CompositeOperation op = new CompositeOperation(mainOp.getId(), mainOp.getMessagesClass());
+					op.add(mainOp);
+					op.add(new RefreshResourcesOperation(resources));
+					UIMonitorUtility.doTaskNowDefault(op, false);
+				}
+			});
+			tAction.setEnabled(tSelection.size() > 0 && FileUtility.checkForResourcesPresence(selectedResources,
+					IStateFilter.SF_VERSIONED_FOLDERS, IResource.DEPTH_ZERO));
+			manager.add(new Separator());
 
-				//Unlock action
-				manager.add(tAction = new Action(SVNUIMessages.UnlockAction_label) {
-					public void run() {
-						IResource[] filteredResources = FileUtility.getResourcesRecursive(selectedResources,
-								IStateFilter.SF_LOCKED, IResource.DEPTH_INFINITE);
-						IActionOperation op = LockProposeUtility.performUnlockAction(filteredResources,
-								UIMonitorUtility.getShell());
-						if (op != null) {
-							UIMonitorUtility.doTaskNowDefault(op, false);
-						}
+			//Delete action
+			manager.add(tAction = new Action(SVNUIMessages.CommitPanel_Delete_Action) {
+				@Override
+				public void run() {
+					DiscardConfirmationDialog dialog = new DiscardConfirmationDialog(UIMonitorUtility.getShell(),
+							selectedResources.length == 1, DiscardConfirmationDialog.MSG_RESOURCE);
+					if (dialog.open() == 0) {
+						DeleteResourceOperation deleteOperation = new DeleteResourceOperation(selectedResources);
+						CompositeOperation op = new CompositeOperation(deleteOperation.getId(),
+								deleteOperation.getMessagesClass());
+						SaveProjectMetaOperation saveOp = new SaveProjectMetaOperation(selectedResources);
+						RestoreProjectMetaOperation restoreOp = new RestoreProjectMetaOperation(saveOp);
+						op.add(saveOp);
+						op.add(deleteOperation);
+						op.add(restoreOp);
+						op.add(new RefreshResourcesOperation(selectedResources));
+						UIMonitorUtility.doTaskNowDefault(op, true);
 					}
-				});
-				tAction.setImageDescriptor(
-						SVNTeamUIPlugin.instance().getImageDescriptor("icons/common/actions/unlock.gif")); //$NON-NLS-1$
-				tAction.setEnabled(
-						FileUtility.checkForResourcesPresenceRecursive(selectedResources, IStateFilter.SF_LOCKED));
-				manager.add(new Separator());
-
-				//Compare With group 
-				MenuManager subMenu = new MenuManager(SVNUIMessages.CommitPanel_CompareWith_Group);
-				subMenu.add(tAction = new Action(SVNUIMessages.CompareWithWorkingCopyAction_label) {
-					public void run() {
-						IResource resource = selectedResources[0];
-						ILocalResource local = SVNRemoteStorage.instance().asLocalResource(resource);
-						if (!IStateFilter.SF_INTERNAL_INVALID.accept(local)) {
-							IRepositoryResource remote = local.isCopied()
-									? SVNUtility.getCopiedFrom(resource)
-									: SVNRemoteStorage.instance().asRepositoryResource(resource);
-							remote.setSelectedRevision(SVNRevision.BASE);
-							UIMonitorUtility
-									.doTaskScheduledDefault(new CompareResourcesOperation(local, remote, false, true));
-						}
-					}
-				});
-				tAction.setEnabled(tSelection.size() == 1 && FileUtility.checkForResourcesPresence(selectedResources,
-						CompareWithWorkingCopyAction.COMPARE_FILTER, IResource.DEPTH_ZERO));
-				subMenu.add(tAction = new Action(SVNUIMessages.CompareWithLatestRevisionAction_label) {
-					public void run() {
-						IResource resource = selectedResources[0];
-						ILocalResource local = SVNRemoteStorage.instance().asLocalResource(resource);
-						if (!IStateFilter.SF_INTERNAL_INVALID.accept(local)) {
-							IRepositoryResource remote = local.isCopied()
-									? SVNUtility.getCopiedFrom(resource)
-									: SVNRemoteStorage.instance().asRepositoryResource(resource);
-							remote.setSelectedRevision(SVNRevision.HEAD);
-							UIMonitorUtility
-									.doTaskScheduledDefault(new CompareResourcesOperation(local, remote, false, true));
-						}
-					}
-				});
-				tAction.setEnabled(tSelection.size() == 1
-						&& (CoreExtensionsManager.instance()
-								.getSVNConnectorFactory()
-								.getSVNAPIVersion() >= ISVNConnectorFactory.APICompatibility.SVNAPI_1_5_x
-								|| selectedResources[0].getType() == IResource.FILE)
-						&& FileUtility.checkForResourcesPresenceRecursive(selectedResources,
-								CompareWithWorkingCopyAction.COMPARE_FILTER));
-				subMenu.add(tAction = new Action(SVNUIMessages.CompareWithRevisionAction_label) {
-					public void run() {
-						IResource resource = selectedResources[0];
-						ILocalResource local = SVNRemoteStorage.instance().asLocalResource(resource);
-						if (!IStateFilter.SF_INTERNAL_INVALID.accept(local)) {
-							IRepositoryResource remote = local.isCopied()
-									? SVNUtility.getCopiedFrom(resource)
-									: SVNRemoteStorage.instance().asRepositoryResource(resource);
-							ComparePanel panel = new ComparePanel(remote, local.getRevision());
-							DefaultDialog dlg = new DefaultDialog(UIMonitorUtility.getShell(), panel);
-							if (dlg.open() == 0) {
-								remote = panel.getSelectedResource();
-								UIMonitorUtility.doTaskScheduledDefault(
-										new CompareResourcesOperation(local, remote, false, true));
-							}
-						}
-					}
-				});
-				tAction.setEnabled(tSelection.size() == 1
-						&& (CoreExtensionsManager.instance()
-								.getSVNConnectorFactory()
-								.getSVNAPIVersion() >= ISVNConnectorFactory.APICompatibility.SVNAPI_1_5_x
-								|| selectedResources[0].getType() == IResource.FILE)
-						&& FileUtility.checkForResourcesPresenceRecursive(selectedResources,
-								CompareWithWorkingCopyAction.COMPARE_FILTER));
-				manager.add(subMenu);
-
-				//Replace with group
-				subMenu = new MenuManager(SVNUIMessages.CommitPanel_ReplaceWith_Group);
-				subMenu.add(tAction = new Action(SVNUIMessages.ReplaceWithLatestRevisionAction_label) {
-					public void run() {
-						IResource[] resources = FileUtility.getResourcesRecursive(selectedResources,
-								IStateFilter.SF_ONREPOSITORY, IResource.DEPTH_ZERO);
-						IActionOperation op = ReplaceWithLatestRevisionAction.getReplaceOperation(resources,
-								UIMonitorUtility.getShell());
-						if (op != null) {
-							UIMonitorUtility.doTaskNowDefault(op, true);
-						}
-					}
-				});
-				tAction.setEnabled(FileUtility.checkForResourcesPresenceRecursive(selectedResources,
-						IStateFilter.SF_ONREPOSITORY));
-				subMenu.add(tAction = new Action(SVNUIMessages.ReplaceWithRevisionAction_label) {
-					public void run() {
-						IActionOperation op = ReplaceWithRevisionAction.getReplaceOperation(selectedResources,
-								UIMonitorUtility.getShell());
-						if (op != null) {
-							UIMonitorUtility.doTaskNowDefault(op, true);
-						}
-					}
-				});
-				tAction.setEnabled(tSelection.size() == 1 && FileUtility.checkForResourcesPresence(selectedResources,
-						IStateFilter.SF_ONREPOSITORY, IResource.DEPTH_ZERO));
-				manager.add(subMenu);
-				manager.add(new Separator());
-
-				//Export action
-				manager.add(tAction = new Action(SVNUIMessages.ExportCommand_label) {
-					public void run() {
-						DirectoryDialog fileDialog = new DirectoryDialog(UIMonitorUtility.getShell());
-						fileDialog.setText(SVNUIMessages.ExportAction_Select_Title);
-						fileDialog.setMessage(SVNUIMessages.ExportAction_Select_Description);
-						String path = fileDialog.open();
-						if (path != null) {
-							boolean ignoreExternals = SVNTeamPreferences.getBehaviourBoolean(
-									SVNTeamUIPlugin.instance().getPreferenceStore(),
-									SVNTeamPreferences.BEHAVIOUR_IGNORE_EXTERNALS_NAME);
-							UIMonitorUtility.doTaskScheduledDefault(new ExportOperation(
-									FileUtility.getResourcesRecursive(selectedResources,
-											IStateFilter.SF_EXCLUDE_DELETED, IResource.DEPTH_ZERO),
-									path, SVNRevision.WORKING, ignoreExternals));
-						}
-					}
-				});
-				tAction.setImageDescriptor(SVNTeamUIPlugin.instance().getImageDescriptor("icons/common/export.gif")); //$NON-NLS-1$
-				tAction.setEnabled(tSelection.size() > 0 && FileUtility.checkForResourcesPresence(selectedResources,
-						IStateFilter.SF_EXCLUDE_DELETED, IResource.DEPTH_ZERO));
-
-				//Clean-up action
-				manager.add(tAction = new Action(SVNUIMessages.CleanupCommand_label) {
-					public void run() {
-						IResource[] resources = FileUtility.getResourcesRecursive(selectedResources,
-								IStateFilter.SF_VERSIONED_FOLDERS, IResource.DEPTH_ZERO);
-						CleanupOperation mainOp = new CleanupOperation(resources);
-						CompositeOperation op = new CompositeOperation(mainOp.getId(), mainOp.getMessagesClass());
-						op.add(mainOp);
-						op.add(new RefreshResourcesOperation(resources));
-						UIMonitorUtility.doTaskNowDefault(op, false);
-					}
-				});
-				tAction.setEnabled(tSelection.size() > 0 && FileUtility.checkForResourcesPresence(selectedResources,
-						IStateFilter.SF_VERSIONED_FOLDERS, IResource.DEPTH_ZERO));
-				manager.add(new Separator());
-
-				//Delete action
-				manager.add(tAction = new Action(SVNUIMessages.CommitPanel_Delete_Action) {
-					public void run() {
-						DiscardConfirmationDialog dialog = new DiscardConfirmationDialog(UIMonitorUtility.getShell(),
-								selectedResources.length == 1, DiscardConfirmationDialog.MSG_RESOURCE);
-						if (dialog.open() == 0) {
-							DeleteResourceOperation deleteOperation = new DeleteResourceOperation(selectedResources);
-							CompositeOperation op = new CompositeOperation(deleteOperation.getId(),
-									deleteOperation.getMessagesClass());
-							SaveProjectMetaOperation saveOp = new SaveProjectMetaOperation(selectedResources);
-							RestoreProjectMetaOperation restoreOp = new RestoreProjectMetaOperation(saveOp);
-							op.add(saveOp);
-							op.add(deleteOperation);
-							op.add(restoreOp);
-							op.add(new RefreshResourcesOperation(selectedResources));
-							UIMonitorUtility.doTaskNowDefault(op, true);
-						}
-					}
-				});
-				tAction.setImageDescriptor(SVNTeamUIPlugin.instance().getImageDescriptor("icons/common/delete.gif")); //$NON-NLS-1$
-				tAction.setEnabled(tSelection.size() > 0 && !FileUtility.checkForResourcesPresence(selectedResources,
-						IStateFilter.SF_DELETED, IResource.DEPTH_ZERO));
-			}
+				}
+			});
+			tAction.setImageDescriptor(SVNTeamUIPlugin.instance().getImageDescriptor("icons/common/delete.gif")); //$NON-NLS-1$
+			tAction.setEnabled(tSelection.size() > 0 && !FileUtility.checkForResourcesPresence(selectedResources,
+					IStateFilter.SF_DELETED, IResource.DEPTH_ZERO));
 		});
 		menuMgr.setRemoveAllWhenShown(true);
 		tableViewer.getTable().setMenu(menu);
 	}
 
 	protected void updateResources(ResourceStatesChangedEvent event) {
-		HashSet<IResource> allResources = new HashSet<IResource>(Arrays.asList(this.resources));
+		HashSet<IResource> allResources = new HashSet<>(Arrays.asList(resources));
 
-		HashSet<IResource> toDeleteSet = new HashSet<IResource>();
-		toDeleteSet.addAll(Arrays.asList(
+		HashSet<IResource> toDeleteSet = new HashSet<>(Arrays.asList(
 				FileUtility.getResourcesRecursive(event.resources, IStateFilter.SF_NOTMODIFIED, IResource.DEPTH_ZERO)));
 		toDeleteSet.addAll(Arrays.asList(
 				FileUtility.getResourcesRecursive(event.resources, IStateFilter.SF_NOTEXISTS, IResource.DEPTH_ZERO)));
@@ -821,88 +835,88 @@ public class CommitPanel extends CommentPanel implements IModifiableCommentDialo
 
 		final IResource[] newResources = allResources.toArray(new IResource[allResources.size()]);
 
-		if (!this.paneParticipantHelper.isParticipantPane()) {
-			UIMonitorUtility.getDisplay().syncExec(new Runnable() {
-				public void run() {
-					//FIXME isDisposed() test is necessary as dispose() method is not called from FastTrack Commit Dialog
-					if (!CommitPanel.this.selectionComposite.isDisposed()) {
-						CommitPanel.this.selectionComposite.setResources(newResources);
-						CommitPanel.this.selectionComposite.fireSelectionChanged();
-					}
+		if (!paneParticipantHelper.isParticipantPane()) {
+			UIMonitorUtility.getDisplay().syncExec(() -> {
+				//FIXME isDisposed() test is necessary as dispose() method is not called from FastTrack Commit Dialog
+				if (!selectionComposite.isDisposed()) {
+					selectionComposite.setResources(newResources);
+					selectionComposite.fireSelectionChanged();
 				}
 			});
 		}
 
-		this.resources = newResources;
-		this.resourcesChanged = true;
+		resources = newResources;
+		resourcesChanged = true;
 	}
 
 	public boolean getResourcesChanged() {
-		return this.resourcesChanged;
+		return resourcesChanged;
 	}
 
 	public IResource[] getSelectedResources() {
-		if (this.paneParticipantHelper.isParticipantPane()) {
-			return this.paneParticipantHelper.getSelectedResources();
+		if (paneParticipantHelper.isParticipantPane()) {
+			return paneParticipantHelper.getSelectedResources();
 		} else {
-			return this.selectionComposite.getSelectedResources();
+			return selectionComposite.getSelectedResources();
 		}
 	}
 
 	public IResource[] getTreatAsEdits() {
-		return this.paneParticipantHelper.isParticipantPane()
-				? new IResource[0]
-				: this.selectionComposite.getTreatAsEdits();
+		return paneParticipantHelper.isParticipantPane() ? new IResource[0] : selectionComposite.getTreatAsEdits();
 	}
 
 	public IResource[] getNotSelectedResources() {
-		if (this.paneParticipantHelper.isParticipantPane()) {
-			return this.paneParticipantHelper.getNotSelectedResources();
+		if (paneParticipantHelper.isParticipantPane()) {
+			return paneParticipantHelper.getNotSelectedResources();
 		} else {
-			return this.selectionComposite.getNotSelectedResources();
+			return selectionComposite.getNotSelectedResources();
 		}
 	}
 
+	@Override
 	public void addResourcesSelectionChangedListener(IResourceSelectionChangeListener listener) {
-		this.changeListenerList.add(listener);
+		changeListenerList.add(listener);
 	}
 
+	@Override
 	public void removeResourcesSelectionChangedListener(IResourceSelectionChangeListener listener) {
-		this.changeListenerList.remove(listener);
+		changeListenerList.remove(listener);
 	}
 
 	public void fireResourcesSelectionChanged(ResourceSelectionChangedEvent event) {
-		this.validateContent();
-		IResourceSelectionChangeListener[] listeners = this.changeListenerList
-				.toArray(new IResourceSelectionChangeListener[this.changeListenerList.size()]);
-		for (int i = 0; i < listeners.length; i++) {
-			listeners[i].resourcesSelectionChanged(event);
+		validateContent();
+		IResourceSelectionChangeListener[] listeners = changeListenerList
+				.toArray(new IResourceSelectionChangeListener[changeListenerList.size()]);
+		for (IResourceSelectionChangeListener listener : listeners) {
+			listener.resourcesSelectionChanged(event);
 		}
 	}
 
 	public boolean getKeepLocks() {
-		return this.keepLocks;
+		return keepLocks;
 	}
 
+	@Override
 	protected Point getPrefferedSizeImpl() {
 		return new Point(600, SWT.DEFAULT);
 	}
 
 	protected void savePreferences() {
-		int[] weights = this.sForm.getWeights();
+		int[] weights = sForm.getWeights();
 		IPreferenceStore store = SVNTeamUIPlugin.instance().getPreferenceStore();
 		SVNTeamPreferences.setDialogInt(store, SVNTeamPreferences.COMMIT_DIALOG_WEIGHT_NAME, weights[0] / 10);
-		store.setValue(SVNTeamPreferences.COMMIT_DIALOG_KEEP_LOCKS, this.keepLocks);
+		store.setValue(SVNTeamPreferences.COMMIT_DIALOG_KEEP_LOCKS, keepLocks);
 	}
 
+	@Override
 	public void dispose() {
 		super.dispose();
 
 		SVNRemoteStorage.instance()
-				.removeResourceStatesListener(ResourceStatesChangedEvent.class, this.resourceStatesListener);
+				.removeResourceStatesListener(ResourceStatesChangedEvent.class, resourceStatesListener);
 
-		if (this.paneParticipantHelper.isParticipantPane()) {
-			this.paneParticipantHelper.dispose();
+		if (paneParticipantHelper.isParticipantPane()) {
+			paneParticipantHelper.dispose();
 		}
 	}
 
@@ -924,38 +938,39 @@ public class CommitPanel extends CommentPanel implements IModifiableCommentDialo
 		public CollectPropertiesOperation(IResource[] resources) {
 			super("Operation_CollectProperties", SVNUIMessages.class); //$NON-NLS-1$
 			this.resources = resources;
-			this.logTemplateVisitor = new LogTemplatesPropFindVisitor();
-			this.bugtraqVisitor = new BugtraqPropFindVisitor();
-			this.minLogVisitor = new MinLogSizePropFindVisitor();
-			this.maxWidthVisitor = new MaxLogWidthPropFindVisitor();
-			this.minLockVisitor = new MinLockSizePropFindVisitor();
+			logTemplateVisitor = new LogTemplatesPropFindVisitor();
+			bugtraqVisitor = new BugtraqPropFindVisitor();
+			minLogVisitor = new MinLogSizePropFindVisitor();
+			maxWidthVisitor = new MaxLogWidthPropFindVisitor();
+			minLockVisitor = new MinLockSizePropFindVisitor();
 			if (SVNTeamPreferences.getCommentTemplatesBoolean(SVNTeamUIPlugin.instance().getPreferenceStore(),
 					SVNTeamPreferences.COMMENT_LOG_TEMPLATES_ENABLED_NAME)) {
-				this.compositeVisitor = new CompositePropFindVisitor(new IPropFindVisitor[] { this.logTemplateVisitor,
-						this.bugtraqVisitor, this.minLogVisitor, this.maxWidthVisitor, this.minLockVisitor });
+				compositeVisitor = new CompositePropFindVisitor(new IPropFindVisitor[] { logTemplateVisitor,
+						bugtraqVisitor, minLogVisitor, maxWidthVisitor, minLockVisitor });
 			} else {
-				this.compositeVisitor = new CompositePropFindVisitor(new IPropFindVisitor[] { this.bugtraqVisitor,
-						this.minLogVisitor, this.maxWidthVisitor, this.minLockVisitor });
+				compositeVisitor = new CompositePropFindVisitor(
+						new IPropFindVisitor[] { bugtraqVisitor, minLogVisitor, maxWidthVisitor, minLockVisitor });
 			}
 		}
 
+		@Override
 		protected void runImpl(IProgressMonitor monitor) throws Exception {
-			ArrayList<IResource> parentProperties = new ArrayList<IResource>();
+			ArrayList<IResource> parentProperties = new ArrayList<>();
 
-			int length = this.resources.length < CommitPanel.MAXIMUM_CHECKS_SIZE
-					? this.resources.length
+			int length = resources.length < CommitPanel.MAXIMUM_CHECKS_SIZE
+					? resources.length
 					: CommitPanel.MAXIMUM_CHECKS_SIZE;
 			for (int i = 0; i < length && !monitor.isCanceled(); i++) {
-				ProgressMonitorUtility.setTaskInfo(monitor, this, this.resources[i].getFullPath().toString());
+				ProgressMonitorUtility.setTaskInfo(monitor, this, resources[i].getFullPath().toString());
 
-				ILocalResource local = SVNRemoteStorage.instance().asLocalResourceAccessible(this.resources[i]);
-				IResource resourceToProcess = this.resources[i];
+				ILocalResource local = SVNRemoteStorage.instance().asLocalResourceAccessible(resources[i]);
+				IResource resourceToProcess = resources[i];
 				while (IStateFilter.SF_UNVERSIONED.accept(local) || IStateFilter.SF_TREE_CONFLICTING.accept(local)
 						&& !IStateFilter.SF_TREE_CONFLICTING_REPOSITORY_EXIST.accept(local)) {
 					resourceToProcess = resourceToProcess.getParent();
 					local = SVNRemoteStorage.instance().asLocalResourceAccessible(resourceToProcess);
 				}
-				if (!this.processProperty(resourceToProcess, parentProperties, monitor)) {
+				if (!processProperty(resourceToProcess, parentProperties, monitor)) {
 					break;
 				}
 
@@ -974,8 +989,8 @@ public class CommitPanel extends CommentPanel implements IModifiableCommentDialo
 			if (op.getExecutionState() == IStatus.OK) {
 				SVNProperty[] properties = op.getProperties();
 				if (properties != null) {
-					for (int i = 0; i < properties.length; i++) {
-						if (!this.compositeVisitor.visit(properties[i])) {
+					for (SVNProperty property : properties) {
+						if (!compositeVisitor.visit(property)) {
 							return false;
 						}
 					}
@@ -987,29 +1002,29 @@ public class CommitPanel extends CommentPanel implements IModifiableCommentDialo
 			IResource parent = resource.getParent();
 			if (parent != null && !(parent instanceof IWorkspaceRoot) && !monitor.isCanceled()
 					&& !IStateFilter.SF_UNVERSIONED.accept(SVNRemoteStorage.instance().asLocalResource(parent))) {
-				return this.processProperty(parent, parentProperties, monitor);
+				return processProperty(parent, parentProperties, monitor);
 			}
 			return true;
 		}
 
 		public HashSet getLogTemplates() {
-			return this.logTemplateVisitor.getLogTemplates();
+			return logTemplateVisitor.getLogTemplates();
 		}
 
 		public BugtraqModel getBugtraqModel() {
-			return this.bugtraqVisitor.getBugtraqModel();
+			return bugtraqVisitor.getBugtraqModel();
 		}
 
 		public int getMinLogSize() {
-			return this.minLogVisitor.getMinLogSize();
+			return minLogVisitor.getMinLogSize();
 		}
 
 		public int getMinLockSize() {
-			return this.minLockVisitor.getMinLockSize();
+			return minLockVisitor.getMinLockSize();
 		}
 
 		public int getMaxLogWidth() {
-			return this.maxWidthVisitor.getMaxLogWidth();
+			return maxWidthVisitor.getMaxLogWidth();
 		}
 	}
 

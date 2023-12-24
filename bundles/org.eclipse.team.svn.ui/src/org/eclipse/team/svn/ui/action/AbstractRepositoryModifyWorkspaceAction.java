@@ -25,9 +25,9 @@ import org.eclipse.team.svn.ui.utility.WorkspaceModifyOperationWrapperFactory;
 public abstract class AbstractRepositoryModifyWorkspaceAction extends AbstractRepositoryTeamAction {
 
 	public AbstractRepositoryModifyWorkspaceAction() {
-		super();
 	}
 
+	@Override
 	protected IOperationWrapperFactory getOperationWrapperFactory() {
 		return new WorkspaceModifyOperationWrapperFactory();
 	}

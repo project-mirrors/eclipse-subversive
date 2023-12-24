@@ -49,18 +49,19 @@ public class GetPropertiesOperation extends AbstractFileOperation {
 	}
 
 	public SVNProperty[] getProperties() {
-		return this.properties;
+		return properties;
 	}
 
+	@Override
 	protected void runImpl(IProgressMonitor monitor) throws Exception {
-		File file = this.operableData()[0];
+		File file = operableData()[0];
 		IRepositoryResource remote = SVNFileStorage.instance().asRepositoryResource(file, false);
 		IRepositoryLocation location = remote.getRepositoryLocation();
 		ISVNConnector proxy = location.acquireSVNProxy();
 		try {
-			this.properties = SVNUtility.properties(proxy,
-					new SVNEntryRevisionReference(file.getAbsolutePath(), null, this.revision),
-					ISVNConnector.Options.NONE, new SVNProgressMonitor(this, monitor, null));
+			properties = SVNUtility.properties(proxy,
+					new SVNEntryRevisionReference(file.getAbsolutePath(), null, revision), ISVNConnector.Options.NONE,
+					new SVNProgressMonitor(this, monitor, null));
 		} finally {
 			location.releaseSVNProxy(proxy);
 		}

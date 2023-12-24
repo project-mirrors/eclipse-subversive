@@ -38,82 +38,85 @@ public class AffectedPathsNode {
 	protected SVNLogPath.ChangeType status;
 
 	public AffectedPathsNode(String name, AffectedPathsNode parent, SVNLogPath.ChangeType status) {
-		this.name = this.compressedName = name;
+		this.name = compressedName = name;
 		this.parent = parent;
-		this.data = new ArrayList<SVNChangedPathData>();
-		this.children = new ArrayList<AffectedPathsNode>();
+		data = new ArrayList<>();
+		children = new ArrayList<>();
 		this.status = status;
 	}
 
 	public String getName() {
-		return this.name;
+		return name;
 	}
 
 	public String getCompressedName() {
-		return this.compressedName;
+		return compressedName;
 	}
 
 	public void addCompressedNameSegment(String compressedName) {
 		this.compressedName += "/" + compressedName; //$NON-NLS-1$
 	}
 
+	@Override
 	public String toString() {
-		return this.compressedName;
+		return compressedName;
 	}
 
 	public boolean hasChildren() {
-		return this.children.size() > 0;
+		return children.size() > 0;
 	}
 
 	public AffectedPathsNode getParent() {
-		return this.parent;
+		return parent;
 	}
 
 	public List<AffectedPathsNode> getChildren() {
-		return this.children;
+		return children;
 	}
 
 	public boolean addChild(AffectedPathsNode child) {
-		if (this.children.contains(child)) {
+		if (children.contains(child)) {
 			return false;
 		}
-		return this.children.add(child);
+		return children.add(child);
 	}
 
 	public boolean removeChild(AffectedPathsNode child) {
-		if (this.children.contains(child)) {
-			return this.children.remove(child);
+		if (children.contains(child)) {
+			return children.remove(child);
 		}
 		return false;
 	}
 
+	@Override
 	public boolean equals(Object arg0) {
 		if (arg0 instanceof AffectedPathsNode) {
 			AffectedPathsNode node2 = (AffectedPathsNode) arg0;
-			if (this.parent == null) {
+			if (parent == null) {
 				return node2.parent == null;
 			}
-			if (this.parent.equals(node2.parent) && this.name.equals(node2.name)) {
+			if (parent.equals(node2.parent) && name.equals(node2.name)) {
 				return true;
 			}
 		}
 		return false;
 	}
 
+	@Override
 	public int hashCode() {
 		int h = 17;
-		h += (31 * (this.parent != null ? this.parent.hashCode() : 0));
-		h += (31 * this.name.hashCode());
+		h += 31 * (parent != null ? parent.hashCode() : 0);
+		h += 31 * name.hashCode();
 		return h;
 	}
 
 	public SVNChangedPathData[] getData() {
-		return this.data.toArray(new SVNChangedPathData[this.data.size()]);
+		return data.toArray(new SVNChangedPathData[data.size()]);
 	}
 
 	protected List<SVNChangedPathData> getPathDataImpl(List<SVNChangedPathData> result) {
-		result.addAll(this.data);
-		for (AffectedPathsNode node : this.children) {
+		result.addAll(data);
+		for (AffectedPathsNode node : children) {
 			node.getPathDataImpl(result);
 		}
 		return result;
@@ -126,7 +129,7 @@ public class AffectedPathsNode {
 	}
 
 	public SVNChangedPathData[] getPathData() {
-		List<SVNChangedPathData> tmp = this.getPathDataImpl(new ArrayList<SVNChangedPathData>());
+		List<SVNChangedPathData> tmp = getPathDataImpl(new ArrayList<>());
 		return tmp.toArray(new SVNChangedPathData[tmp.size()]);
 	}
 
@@ -143,11 +146,11 @@ public class AffectedPathsNode {
 	}
 
 	public String getFullPath() {
-		return this.parent != null ? this.parent.getFullPath() + "/" + this.compressedName : ""; //$NON-NLS-1$ //$NON-NLS-2$
+		return parent != null ? parent.getFullPath() + "/" + compressedName : ""; //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 	public SVNLogPath.ChangeType getStatus() {
-		return this.status;
+		return status;
 	}
 
 	public void setStatus(SVNLogPath.ChangeType status) {

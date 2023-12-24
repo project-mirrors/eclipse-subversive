@@ -39,79 +39,89 @@ public class RepositoryLocation extends RepositoryFictiveNode
 
 	public RepositoryLocation(IRepositoryLocation location) {
 		this.location = location;
-		this.refresh();
+		refresh();
 	}
 
+	@Override
 	public void setViewer(RepositoryTreeViewer repositoryTree) {
-		this.locationRoot.setViewer(repositoryTree);
+		locationRoot.setViewer(repositoryTree);
 	}
 
 	public RepositoryResource getResourceWrapper() {
-		return this.locationRoot;
+		return locationRoot;
 	}
 
+	@Override
 	public IRepositoryResource getRepositoryResource() {
-		return this.location.getRoot();
+		return location.getRoot();
 	}
 
+	@Override
 	public void refresh() {
-		this.children = null;
-		if (this.locationRoot == null
-				|| !this.locationRoot.getRepositoryResource().getUrl().equals(this.location.getUrl())) {
-			this.locationRoot = new RepositoryFolder(null, this.location.getRoot()) {
+		children = null;
+		if (locationRoot == null || !locationRoot.getRepositoryResource().getUrl().equals(location.getUrl())) {
+			locationRoot = new RepositoryFolder(null, location.getRoot()) {
+				@Override
 				protected RefreshOperation getRefreshOperation(RepositoryTreeViewer viewer) {
 					return new RefreshOperation(viewer) {
+						@Override
 						protected void runImpl(IProgressMonitor monitor) throws Exception {
 							// TODO rework this using cancellation manager in order to make it thread-safe...
-							if (this.viewer != null && !this.viewer.getControl().isDisposed()) {
-								this.viewer.refresh(RepositoryLocation.this, null, false);
+							if (viewer != null && !viewer.getControl().isDisposed()) {
+								viewer.refresh(RepositoryLocation.this, null, false);
 							}
 						}
 					};
 				}
 			};
 		} else {
-			this.locationRoot.refresh();
+			locationRoot.refresh();
 		}
 	}
 
 	public IRepositoryLocation getRepositoryLocation() {
-		return this.location;
+		return location;
 	}
 
+	@Override
 	public Object getData() {
-		return this.location;
+		return location;
 	}
 
+	@Override
 	public String getLabel(Object o) {
-		return this.location.getLabel();
+		return location.getLabel();
 	}
 
+	@Override
 	public boolean hasChildren() {
 		return true;
 	}
 
+	@Override
 	public Object[] getChildren(Object o) {
-		if (this.children == null) {
-			ArrayList<Object> list = new ArrayList<Object>(Arrays.asList(this.locationRoot.getChildren(o)));
+		if (children == null) {
+			ArrayList<Object> list = new ArrayList<>(Arrays.asList(locationRoot.getChildren(o)));
 			if (list.size() > 0 && list.get(0) instanceof RepositoryPending) {
-				list.add(new RepositoryRevisions(this.location));
+				list.add(new RepositoryRevisions(location));
 				return list.toArray();
 			}
-			list.add(new RepositoryRoot(null, this.location.getRepositoryRoot()));
-			list.add(new RepositoryRevisions(this.location));
-			this.children = list.toArray();
+			list.add(new RepositoryRoot(null, location.getRepositoryRoot()));
+			list.add(new RepositoryRevisions(location));
+			children = list.toArray();
 		}
-		return this.children;
+		return children;
 	}
 
+	@Override
 	public ImageDescriptor getImageDescriptor(Object object) {
 		return SVNTeamUIPlugin.instance().getImageDescriptor("icons/objects/repository.gif"); //$NON-NLS-1$
 	}
 
+	@Override
 	public boolean equals(Object obj) {
 		if (obj != null && obj instanceof RepositoryLocation) {
-			return ((RepositoryLocation) obj).location.equals(this.location);
+			return ((RepositoryLocation) obj).location.equals(location);
 		}
 		return super.equals(obj);
 	}

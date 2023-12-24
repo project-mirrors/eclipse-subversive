@@ -29,16 +29,16 @@ public class ProblemListener implements ILogListener {
 	protected static StackTraceVisitor stackVisitor = new StackTraceVisitor();
 
 	public ProblemListener() {
-		super();
 	}
 
+	@Override
 	public void logging(IStatus status, String plugin) {
-		// our problems should be handled in the UILoggedOperation in order to suppress two sequential dialogs 
+		// our problems should be handled in the UILoggedOperation in order to suppress two sequential dialogs
 		ReportPartsFactory.IStatusVisitor visitor = ReportPartsFactory.checkStatus(status, ProblemListener.idVisitor)
 				? (ReportPartsFactory.IStatusVisitor) null
 				: ProblemListener.stackVisitor;
 		if (visitor != null && ReportPartsFactory.checkStatus(status, visitor)) {
-			this.sendReport(status, plugin);
+			sendReport(status, plugin);
 		}
 	}
 

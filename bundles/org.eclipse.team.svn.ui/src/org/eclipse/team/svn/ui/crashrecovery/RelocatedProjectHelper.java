@@ -47,6 +47,7 @@ import org.eclipse.team.svn.ui.utility.UIMonitorUtility;
  */
 public class RelocatedProjectHelper implements IResolutionHelper {
 
+	@Override
 	public boolean acquireResolution(ErrorDescription description) {
 		if (description.code == ErrorDescription.PROJECT_IS_RELOCATED_OUTSIDE_PLUGIN) {
 			Object[] context = (Object[]) description.context;
@@ -67,11 +68,9 @@ public class RelocatedProjectHelper implements IResolutionHelper {
 			}
 
 			final RelocationChoicesPanel panel = new RelocationChoicesPanel(project);
-			UIMonitorUtility.parallelSyncExec(new Runnable() {
-				public void run() {
-					DefaultDialog dialog = new DefaultDialog(UIMonitorUtility.getShell(), panel);
-					dialog.open();
-				}
+			UIMonitorUtility.parallelSyncExec(() -> {
+				DefaultDialog dialog = new DefaultDialog(UIMonitorUtility.getShell(), panel);
+				dialog.open();
 			});
 
 			if (panel.getRecoveryAction() == RelocationChoicesPanel.DISCONNECT_PROJECT) {
@@ -99,6 +98,7 @@ public class RelocatedProjectHelper implements IResolutionHelper {
 				op.add(scannerOp);
 				op.add(new AbstractWorkingCopyOperation("Operation_ChangeRepositoryLocation", SVNUIMessages.class, //$NON-NLS-1$
 						new IResource[] { project }) {
+					@Override
 					protected void runImpl(IProgressMonitor monitor) throws Exception {
 						location.setUrl(relocatedTo);
 						location.setUrl(location.getRepositoryRootUrl());
@@ -110,6 +110,7 @@ public class RelocatedProjectHelper implements IResolutionHelper {
 				op.add(mainOp);
 				op.add(new AbstractWorkingCopyOperation("Operation_CheckRelocationState", SVNUIMessages.class, //$NON-NLS-1$
 						new IResource[] { project }) {
+					@Override
 					protected void runImpl(IProgressMonitor monitor) throws Exception {
 						if (mainOp.getExecutionState() != IActionOperation.OK) {
 							SVNRemoteStorage.instance().copyRepositoryLocation(location, backup);

@@ -33,8 +33,10 @@ public class RevertActionHelper extends AbstractActionHelper {
 		super(action, configuration);
 	}
 
+	@Override
 	public FastSyncInfoFilter getSyncInfoFilter() {
 		return new FastSyncInfoFilter() {
+			@Override
 			public boolean select(SyncInfo info) {
 				return org.eclipse.team.svn.ui.action.local.RevertAction.SF_REVERTABLE_OR_NEW
 						.accept(((AbstractSVNSyncInfo) info).getLocalResource());
@@ -42,10 +44,11 @@ public class RevertActionHelper extends AbstractActionHelper {
 		};
 	}
 
+	@Override
 	public IActionOperation getOperation() {
-		IResource[] changedResources = this.getSyncInfoSelector().getSelectedResources();
-		return org.eclipse.team.svn.ui.action.local.RevertAction
-				.getRevertOperation(this.configuration.getSite().getShell(), changedResources, changedResources);
+		IResource[] changedResources = getSyncInfoSelector().getSelectedResources();
+		return org.eclipse.team.svn.ui.action.local.RevertAction.getRevertOperation(configuration.getSite().getShell(),
+				changedResources, changedResources);
 	}
 
 }

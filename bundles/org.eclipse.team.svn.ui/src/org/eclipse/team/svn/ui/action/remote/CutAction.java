@@ -31,28 +31,29 @@ import org.eclipse.team.svn.ui.operation.PrepareRemoteResourcesTransferrableOper
 public class CutAction extends AbstractRepositoryTeamAction {
 
 	public CutAction() {
-		super();
 	}
 
+	@Override
 	public void runImpl(IAction action) {
-		this.runBusy(new PrepareRemoteResourcesTransferrableOperation(
-				this.getSelectedRepositoryResources(), RemoteResourceTransferrable.OP_CUT, this.getShell().getDisplay()
+		runBusy(new PrepareRemoteResourcesTransferrableOperation(
+				getSelectedRepositoryResources(), RemoteResourceTransferrable.OP_CUT, getShell().getDisplay()
 		));
 	}
 
+	@Override
 	public boolean isEnabled() {
-		IRepositoryResource[] resources = this.getSelectedRepositoryResources();
+		IRepositoryResource[] resources = getSelectedRepositoryResources();
 		if (resources.length == 0) {
 			return false;
 		}
 		// disable transfer between different repositories
 		IRepositoryLocation first = resources[0].getRepositoryLocation();
-		for (int i = 0; i < resources.length; i++) {
-			IRepositoryLocation location = resources[i].getRepositoryLocation();
-			if (first != location || resources[i].getSelectedRevision().getKind() != Kind.HEAD
-					|| resources[i] instanceof IRepositoryRoot && (((IRepositoryRoot) resources[i])
-							.getKind() == IRepositoryRoot.KIND_ROOT
-							|| ((IRepositoryRoot) resources[i]).getKind() == IRepositoryRoot.KIND_LOCATION_ROOT)) {
+		for (IRepositoryResource element : resources) {
+			IRepositoryLocation location = element.getRepositoryLocation();
+			if (first != location || element.getSelectedRevision().getKind() != Kind.HEAD
+					|| element instanceof IRepositoryRoot
+							&& (((IRepositoryRoot) element).getKind() == IRepositoryRoot.KIND_ROOT
+									|| ((IRepositoryRoot) element).getKind() == IRepositoryRoot.KIND_LOCATION_ROOT)) {
 				return false;
 			}
 		}

@@ -18,7 +18,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.content.IContentType;
 import org.eclipse.team.svn.core.operation.AbstractActionOperation;
-import org.eclipse.team.svn.core.operation.IUnprotectedOperation;
 import org.eclipse.team.svn.core.resource.IRepositoryFile;
 import org.eclipse.team.svn.core.resource.IRepositoryResourceProvider;
 import org.eclipse.team.svn.ui.SVNTeamUIPlugin;
@@ -91,7 +90,7 @@ public class OpenRemoteFileOperation extends AbstractActionOperation {
 	}
 
 	public Class getRequiredDefaultEditorKind() {
-		return this.requiredDefaultEditorKind;
+		return requiredDefaultEditorKind;
 	}
 
 	public void setRequiredDefaultEditorKind(Class requiredDefaultEditorKind) {
@@ -99,90 +98,76 @@ public class OpenRemoteFileOperation extends AbstractActionOperation {
 	}
 
 	public IEditorPart[] getEditors() {
-		return this.editors;
+		return editors;
 	}
 
 	public IRepositoryEditorInput[] getRepositoryEditorInputs() {
-		return this.inputs;
+		return inputs;
 	}
 
+	@Override
 	protected void runImpl(final IProgressMonitor monitor) throws Exception {
-		if (this.provider != null) {
-			if (!(this.provider.getRepositoryResources()[0] instanceof IRepositoryFile)) {
+		if (provider != null) {
+			if (!(provider.getRepositoryResources()[0] instanceof IRepositoryFile)) {
 				return;
 			}
-			this.inputs = OpenRemoteFileOperation.asEditorInput(
-					new IRepositoryFile[] { (IRepositoryFile) this.provider.getRepositoryResources()[0] });
+			inputs = OpenRemoteFileOperation.asEditorInput(
+					new IRepositoryFile[] { (IRepositoryFile) provider.getRepositoryResources()[0] });
 		}
-		this.editors = new IEditorPart[this.inputs.length];
-		for (int i = 0; i < this.inputs.length; i++) {
+		editors = new IEditorPart[inputs.length];
+		for (int i = 0; i < inputs.length; i++) {
 			final int current = i;
 
-			this.protectStep(new IUnprotectedOperation() {
-				public void run(IProgressMonitor monitor) throws Exception {
-					OpenRemoteFileOperation.this.inputs[current].fetchContents(monitor);
-				}
-			}, monitor, OpenRemoteFileOperation.this.inputs.length * 2);
+			this.protectStep(monitor1 -> inputs[current].fetchContents(monitor1), monitor, OpenRemoteFileOperation.this.inputs.length * 2);
 
-			UIMonitorUtility.getDisplay().syncExec(new Runnable() {
-				public void run() {
-					OpenRemoteFileOperation.this.protectStep(new IUnprotectedOperation() {
-						public void run(IProgressMonitor monitor) throws Exception {
-							OpenRemoteFileOperation.this.openFile(current);
-						}
-					}, monitor, OpenRemoteFileOperation.this.inputs.length * 2);
-				}
-			});
+			UIMonitorUtility.getDisplay().syncExec(() -> OpenRemoteFileOperation.this.protectStep(monitor1 -> OpenRemoteFileOperation.this.openFile(current), monitor, inputs.length * 2));
 		}
 	}
 
 	protected void openFile(int current) throws Exception {
-		IRepositoryEditorInput input = this.inputs[current];
+		IRepositoryEditorInput input = inputs[current];
 
 		IWorkbench workbench = SVNTeamUIPlugin.instance().getWorkbench();
 		IEditorRegistry registry = workbench.getEditorRegistry();
 		IWorkbenchPage page = workbench.getActiveWorkbenchWindow().getActivePage();
 
-		if (this.openType == OpenRemoteFileOperation.OPEN_EXTERNAL) {
+		if (openType == OpenRemoteFileOperation.OPEN_EXTERNAL) {
 			IEditorDescriptor descriptor = registry.findEditor(IEditorRegistry.SYSTEM_EXTERNAL_EDITOR_ID);
 			if (descriptor != null) {
-				this.editors[current] = this.openEditor(page, descriptor.getId(), input);
+				editors[current] = openEditor(page, descriptor.getId(), input);
 			}
-		} else if (this.openType == OpenRemoteFileOperation.OPEN_INPLACE) {
+		} else if (openType == OpenRemoteFileOperation.OPEN_INPLACE) {
 			IEditorDescriptor descriptor = registry.findEditor(IEditorRegistry.SYSTEM_INPLACE_EDITOR_ID);
 			if (descriptor != null) {
-				this.editors[current] = this.openEditor(page, descriptor.getId(), input);
+				editors[current] = openEditor(page, descriptor.getId(), input);
 			}
+		} else if (openType == OpenRemoteFileOperation.OPEN_SPECIFIED) {
+			editors[current] = openEditor(page, openWith, input);
 		} else {
-			if (this.openType == OpenRemoteFileOperation.OPEN_SPECIFIED) {
-				this.editors[current] = this.openEditor(page, this.openWith, input);
-			} else {
-				String fileName = input.getRepositoryResource().getName();
-				IContentType type = Platform.getContentTypeManager()
-						.findContentTypeFor(input.getStorage().getContents(), fileName);
-				IEditorDescriptor descriptor = registry.getDefaultEditor(fileName, type);
-				if (descriptor == null) {
-					if (registry.isSystemInPlaceEditorAvailable(fileName)) {
-						descriptor = registry.findEditor(IEditorRegistry.SYSTEM_INPLACE_EDITOR_ID);
-					} else if (registry.isSystemExternalEditorAvailable(fileName)) {
-						descriptor = registry.findEditor(IEditorRegistry.SYSTEM_EXTERNAL_EDITOR_ID);
-					}
+			String fileName = input.getRepositoryResource().getName();
+			IContentType type = Platform.getContentTypeManager()
+					.findContentTypeFor(input.getStorage().getContents(), fileName);
+			IEditorDescriptor descriptor = registry.getDefaultEditor(fileName, type);
+			if (descriptor == null) {
+				if (registry.isSystemInPlaceEditorAvailable(fileName)) {
+					descriptor = registry.findEditor(IEditorRegistry.SYSTEM_INPLACE_EDITOR_ID);
+				} else if (registry.isSystemExternalEditorAvailable(fileName)) {
+					descriptor = registry.findEditor(IEditorRegistry.SYSTEM_EXTERNAL_EDITOR_ID);
 				}
-				String editorId = descriptor == null ? EditorsUI.DEFAULT_TEXT_EDITOR_ID : descriptor.getId();
+			}
+			String editorId = descriptor == null ? EditorsUI.DEFAULT_TEXT_EDITOR_ID : descriptor.getId();
 
-				try {
-					this.editors[current] = this.openEditor(page, editorId, input);
-					if (this.editors[current] != null
-							&& this.editors[current].getClass().getName().toLowerCase().indexOf("error") != -1 || //$NON-NLS-1$
-							this.requiredDefaultEditorKind != null
-									&& (this.editors[current] == null || !this.requiredDefaultEditorKind
-											.isAssignableFrom(this.editors[current].getClass()))) {
-						this.editors[current] = this.openEditor(page, EditorsUI.DEFAULT_TEXT_EDITOR_ID, input);
-					}
-				} catch (Throwable e) {
-					// Cannot open file with correct editor. Trying default editor.
-					this.editors[current] = this.openEditor(page, EditorsUI.DEFAULT_TEXT_EDITOR_ID, input);
+			try {
+				editors[current] = openEditor(page, editorId, input);
+				if (editors[current] != null
+						&& editors[current].getClass().getName().toLowerCase().indexOf("error") != -1 || //$NON-NLS-1$
+						requiredDefaultEditorKind != null && (editors[current] == null
+								|| !requiredDefaultEditorKind.isAssignableFrom(editors[current].getClass()))) {
+					editors[current] = openEditor(page, EditorsUI.DEFAULT_TEXT_EDITOR_ID, input);
 				}
+			} catch (Throwable e) {
+				// Cannot open file with correct editor. Trying default editor.
+				editors[current] = openEditor(page, EditorsUI.DEFAULT_TEXT_EDITOR_ID, input);
 			}
 		}
 	}

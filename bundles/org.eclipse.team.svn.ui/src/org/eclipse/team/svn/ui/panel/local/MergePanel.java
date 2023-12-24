@@ -119,61 +119,62 @@ public class MergePanel extends AbstractAdvancedDialogPanel {
 		super(new String[] { IDialogConstants.OK_LABEL, IDialogConstants.CANCEL_LABEL },
 				new String[] { SVNUIMessages.MergePanel_Preview });
 
-		this.dialogTitle = SVNUIMessages.MergePanel_Title;
-		this.dialogDescription = SVNUIMessages.MergePanel_Description;
-		this.defaultMessage = SVNUIMessages.MergePanel_Message;
+		dialogTitle = SVNUIMessages.MergePanel_Title;
+		dialogDescription = SVNUIMessages.MergePanel_Description;
+		defaultMessage = SVNUIMessages.MergePanel_Message;
 
 		this.to = to;
-		this.baseResource = this.firstSelectedResource = this.secondSelectedResource = baseResource;
+		this.baseResource = firstSelectedResource = secondSelectedResource = baseResource;
 		this.currentRevision = currentRevision;
 	}
 
 	public int getMode() {
-		return this.mode;
+		return mode;
 	}
 
+	@Override
 	public Point getPrefferedSizeImpl() {
 		return new Point(727, 245);
 	}
 
 	public SVNRevision getStartRevision() {
-		return this.simpleSelectionComposite.getStartRevision();
+		return simpleSelectionComposite.getStartRevision();
 	}
 
 	public IRepositoryResource getSelectedResource() {
-		IRepositoryResource retVal = SVNUtility.copyOf(this.simpleSelectionComposite.getSelectedResource());
-		retVal.setSelectedRevision(this.simpleSelectionComposite.getSecondSelectedRevision());
+		IRepositoryResource retVal = SVNUtility.copyOf(simpleSelectionComposite.getSelectedResource());
+		retVal.setSelectedRevision(simpleSelectionComposite.getSecondSelectedRevision());
 		return retVal;
 	}
 
 	public IRepositoryResource[] getSelection() {
-		return this.getSelection(this.getSelectedResource());
+		return this.getSelection(getSelectedResource());
 	}
 
 	public IRepositoryResource[] getFirstSelection() {
-		return this.getSelection(this.firstSelectedResource);
+		return this.getSelection(firstSelectedResource);
 	}
 
 	public IRepositoryResource[] getSecondSelection() {
-		return this.getSelection(this.secondSelectedResource);
+		return this.getSelection(secondSelectedResource);
 	}
 
 	public boolean getIgnoreAncestry() {
-		return this.ignoreAncestry;
+		return ignoreAncestry;
 	}
 
 	public boolean getRecordOnly() {
-		return this.recordOnly;
+		return recordOnly;
 	}
 
 	public SVNRevisionRange[] getSelectedRevisions() {
 		SVNRevisionRange[] revisions = null;
-		if (this.selectedRevisions != null) {
-			revisions = new SVNRevisionRange[this.selectedRevisions.length];
-			for (int i = 0; i < this.selectedRevisions.length; i++) {
-				SVNRevisionRange range = this.selectedRevisions[i];
+		if (selectedRevisions != null) {
+			revisions = new SVNRevisionRange[selectedRevisions.length];
+			for (int i = 0; i < selectedRevisions.length; i++) {
+				SVNRevisionRange range = selectedRevisions[i];
 				/*
-				 * If 'from' revision equals to 'to' revision 
+				 * If 'from' revision equals to 'to' revision
 				 * (it can be in case if only one revision is selected in revision selection),
 				 * we process it as --change option (see svn merge command) and we handle it as
 				 * from = Rev -1, to = Rev, taking into account 'Reversed merge' option.
@@ -181,7 +182,7 @@ public class MergePanel extends AbstractAdvancedDialogPanel {
 				if (range.from.equals(range.to) && range.from.getKind() == SVNRevision.Kind.NUMBER) {
 					SVNRevision from = SVNRevision.fromNumber(((SVNRevision.Number) range.from).getNumber() - 1);
 					SVNRevision to = range.from;
-					if (this.isReverseRevisions) {
+					if (isReverseRevisions) {
 						SVNRevision tmp = from;
 						from = to;
 						to = tmp;
@@ -194,6 +195,7 @@ public class MergePanel extends AbstractAdvancedDialogPanel {
 		return revisions;
 	}
 
+	@Override
 	public void createControlsImpl(Composite parent) {
 		((GridLayout) parent.getLayout()).verticalSpacing = 2;
 
@@ -203,28 +205,29 @@ public class MergePanel extends AbstractAdvancedDialogPanel {
 
 		TabItem tabItem = new TabItem(tabFolder, SWT.NONE);
 		tabItem.setText(SVNUIMessages.MergePanel_1URL);
-		tabItem.setControl(this.create1URLModeView(tabFolder));
+		tabItem.setControl(create1URLModeView(tabFolder));
 
 		tabItem = new TabItem(tabFolder, SWT.NONE);
 		tabItem.setText(SVNUIMessages.MergePanel_2URL);
-		tabItem.setControl(this.create2URLModeView(tabFolder));
+		tabItem.setControl(create2URLModeView(tabFolder));
 
 		if (CoreExtensionsManager.instance()
 				.getSVNConnectorFactory()
 				.getSVNAPIVersion() >= ISVNConnectorFactory.APICompatibility.SVNAPI_1_5_x) {
 			tabItem = new TabItem(tabFolder, SWT.NONE);
 			tabItem.setText(SVNUIMessages.MergePanel_Reintegrate);
-			tabItem.setControl(this.createReintegrateModeView(tabFolder));
+			tabItem.setControl(createReintegrateModeView(tabFolder));
 		}
 
 		tabFolder.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
-				MergePanel.this.mode = tabFolder.getSelectionIndex();
+				mode = tabFolder.getSelectionIndex();
 				MergePanel.this.validateContent();
 			}
 		});
 
-		this.mode = MergePanel.MODE_1URL;
+		mode = MergePanel.MODE_1URL;
 	}
 
 	protected Composite create1URLModeView(Composite parent) {
@@ -242,40 +245,41 @@ public class MergePanel extends AbstractAdvancedDialogPanel {
 				.getSVNAPIVersion() >= ISVNConnectorFactory.APICompatibility.SVNAPI_1_5_x
 						? RepositoryResourceSelectionComposite.MODE_CHECK
 						: RepositoryResourceSelectionComposite.MODE_TWO;
-		this.simpleSelectionComposite = new RepositoryResourceSelectionComposite(
+		simpleSelectionComposite = new RepositoryResourceSelectionComposite(
 				parent, SWT.NONE, new ValidationManagerProxy() {
+					@Override
 					protected AbstractVerifier wrapVerifier(AbstractVerifier verifier) {
 						return new AbstractVerifierProxy(verifier) {
+							@Override
 							protected boolean isVerificationEnabled(Control input) {
 								return MergePanel.this.mode == MergePanel.MODE_1URL;
 							}
 						};
 					}
-				}, MergePanel.FIRST_URL_HISTORY, this.firstSelectedResource, true,
-				SVNUIMessages.MergePanel_Selection_Title, SVNUIMessages.MergePanel_Selection_Description, mode,
-				RepositoryResourceSelectionComposite.TEXT_NONE);
+				}, MergePanel.FIRST_URL_HISTORY, firstSelectedResource, true, SVNUIMessages.MergePanel_Selection_Title,
+				SVNUIMessages.MergePanel_Selection_Description, mode, RepositoryResourceSelectionComposite.TEXT_NONE);
 		data = new GridData(GridData.FILL_HORIZONTAL);
-		this.simpleSelectionComposite.setLayoutData(data);
-		this.simpleSelectionComposite.setCurrentRevision(this.currentRevision);
+		simpleSelectionComposite.setLayoutData(data);
+		simpleSelectionComposite.setCurrentRevision(currentRevision);
 
 		Label separator = new Label(parent, SWT.HORIZONTAL | SWT.SEPARATOR);
 		separator.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		separator.setVisible(false);
 
 		data = new GridData();
-		this.ignoreAncestrySimpleButton = new Button(parent, SWT.CHECK);
-		this.ignoreAncestrySimpleButton.setLayoutData(data);
-		this.ignoreAncestrySimpleButton.setText(SVNUIMessages.MergePanel_Button_IgnoreAncestry);
-		this.ignoreAncestrySimpleButton.setSelection(this.ignoreAncestry);
+		ignoreAncestrySimpleButton = new Button(parent, SWT.CHECK);
+		ignoreAncestrySimpleButton.setLayoutData(data);
+		ignoreAncestrySimpleButton.setText(SVNUIMessages.MergePanel_Button_IgnoreAncestry);
+		ignoreAncestrySimpleButton.setSelection(ignoreAncestry);
 
 		data = new GridData();
-		this.recordOnlySimpleButton = new Button(parent, SWT.CHECK);
-		this.recordOnlySimpleButton.setLayoutData(data);
-		this.recordOnlySimpleButton.setText(SVNUIMessages.MergePanel_Button_RecordOnly);
-		this.recordOnlySimpleButton.setSelection(this.recordOnly);
+		recordOnlySimpleButton = new Button(parent, SWT.CHECK);
+		recordOnlySimpleButton.setLayoutData(data);
+		recordOnlySimpleButton.setText(SVNUIMessages.MergePanel_Button_RecordOnly);
+		recordOnlySimpleButton.setSelection(recordOnly);
 
-		this.depthSelectorSimple = new DepthSelectionComposite(parent, SWT.NONE, true);
-		this.depthSelectorSimple.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		depthSelectorSimple = new DepthSelectionComposite(parent, SWT.NONE, true);
+		depthSelectorSimple.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
 		return parent;
 	}
@@ -291,22 +295,27 @@ public class MergePanel extends AbstractAdvancedDialogPanel {
 		parent.setLayoutData(data);
 
 		final ValidationManagerProxy proxy2 = new ValidationManagerProxy() {
+			@Override
 			protected AbstractVerifier wrapVerifier(AbstractVerifier verifier) {
 				return new AbstractVerifierProxy(verifier) {
+					@Override
 					protected boolean isVerificationEnabled(Control input) {
-						return MergePanel.this.mode == MergePanel.MODE_2URL;
+						return mode == MergePanel.MODE_2URL;
 					}
 				};
 			}
 		};
 
 		ValidationManagerProxy proxy = new ValidationManagerProxy() {
+			@Override
 			protected AbstractVerifier wrapVerifier(AbstractVerifier verifier) {
 				return new AbstractVerifierProxy(verifier) {
+					@Override
 					protected boolean isVerificationEnabled(Control input) {
-						return MergePanel.this.mode == MergePanel.MODE_2URL;
+						return mode == MergePanel.MODE_2URL;
 					}
 
+					@Override
 					public boolean verify(Control input) {
 						for (Control cmp : proxy2.getControls()) {
 							proxy2.validateControl(cmp);
@@ -317,44 +326,46 @@ public class MergePanel extends AbstractAdvancedDialogPanel {
 			}
 		};
 
-		this.firstSelectionComposite = new RepositoryResourceSelectionComposite(
+		firstSelectionComposite = new RepositoryResourceSelectionComposite(
 				parent, SWT.NONE, proxy, MergePanel.FIRST_URL_HISTORY, "MergePanel_SourceURL1", //$NON-NLS-1$
-				this.firstSelectedResource, true, SVNUIMessages.MergePanel_Selection_Title, SVNUIMessages.MergePanel_Selection_Description,
-				RepositoryResourceSelectionComposite.MODE_DEFAULT, RepositoryResourceSelectionComposite.TEXT_NONE);
+				firstSelectedResource, true, SVNUIMessages.MergePanel_Selection_Title,
+				SVNUIMessages.MergePanel_Selection_Description, RepositoryResourceSelectionComposite.MODE_DEFAULT,
+				RepositoryResourceSelectionComposite.TEXT_NONE);
 		data = new GridData(GridData.FILL_HORIZONTAL);
-		this.firstSelectionComposite.setLayoutData(data);
-		this.firstSelectionComposite.setCurrentRevision(this.currentRevision);
+		firstSelectionComposite.setLayoutData(data);
+		firstSelectionComposite.setCurrentRevision(currentRevision);
 
 		Label separator = new Label(parent, SWT.HORIZONTAL | SWT.SEPARATOR);
 		separator.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		separator.setVisible(false);
 
-		this.secondSelectionComposite = new RepositoryResourceSelectionComposite(
+		secondSelectionComposite = new RepositoryResourceSelectionComposite(
 				parent, SWT.NONE, proxy2, MergePanel.SECOND_URL_HISTORY, "MergePanel_SourceURL2", //$NON-NLS-1$
-				this.secondSelectedResource, true, SVNUIMessages.MergePanel_Selection_Title, SVNUIMessages.MergePanel_Selection_Description,
-				RepositoryResourceSelectionComposite.MODE_DEFAULT, RepositoryResourceSelectionComposite.TEXT_NONE);
+				secondSelectedResource, true, SVNUIMessages.MergePanel_Selection_Title,
+				SVNUIMessages.MergePanel_Selection_Description, RepositoryResourceSelectionComposite.MODE_DEFAULT,
+				RepositoryResourceSelectionComposite.TEXT_NONE);
 		data = new GridData(GridData.FILL_HORIZONTAL);
-		this.secondSelectionComposite.setLayoutData(data);
-		this.secondSelectionComposite.setCurrentRevision(this.currentRevision);
+		secondSelectionComposite.setLayoutData(data);
+		secondSelectionComposite.setCurrentRevision(currentRevision);
 
 		separator = new Label(parent, SWT.HORIZONTAL | SWT.SEPARATOR);
 		separator.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		separator.setVisible(false);
 
 		data = new GridData();
-		this.ignoreAncestryButton = new Button(parent, SWT.CHECK);
-		this.ignoreAncestryButton.setLayoutData(data);
-		this.ignoreAncestryButton.setText(SVNUIMessages.MergePanel_Button_IgnoreAncestry);
-		this.ignoreAncestryButton.setSelection(this.ignoreAncestry);
+		ignoreAncestryButton = new Button(parent, SWT.CHECK);
+		ignoreAncestryButton.setLayoutData(data);
+		ignoreAncestryButton.setText(SVNUIMessages.MergePanel_Button_IgnoreAncestry);
+		ignoreAncestryButton.setSelection(ignoreAncestry);
 
 		data = new GridData();
-		this.recordOnlyButton = new Button(parent, SWT.CHECK);
-		this.recordOnlyButton.setLayoutData(data);
-		this.recordOnlyButton.setText(SVNUIMessages.MergePanel_Button_RecordOnly);
-		this.recordOnlyButton.setSelection(this.recordOnly);
+		recordOnlyButton = new Button(parent, SWT.CHECK);
+		recordOnlyButton.setLayoutData(data);
+		recordOnlyButton.setText(SVNUIMessages.MergePanel_Button_RecordOnly);
+		recordOnlyButton.setSelection(recordOnly);
 
-		this.depthSelector = new DepthSelectionComposite(parent, SWT.NONE, true);
-		this.depthSelector.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		depthSelector = new DepthSelectionComposite(parent, SWT.NONE, true);
+		depthSelector.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
 		return parent;
 	}
@@ -369,56 +380,59 @@ public class MergePanel extends AbstractAdvancedDialogPanel {
 		data = new GridData(GridData.FILL_HORIZONTAL);
 		parent.setLayoutData(data);
 
-		this.reintegrateSelectionComposite = new RepositoryResourceSelectionComposite(
+		reintegrateSelectionComposite = new RepositoryResourceSelectionComposite(
 				parent, SWT.NONE, new ValidationManagerProxy() {
+					@Override
 					protected AbstractVerifier wrapVerifier(AbstractVerifier verifier) {
 						return new AbstractVerifierProxy(verifier) {
+							@Override
 							protected boolean isVerificationEnabled(Control input) {
-								return MergePanel.this.mode == MergePanel.MODE_REINTEGRATE;
+								return mode == MergePanel.MODE_REINTEGRATE;
 							}
 						};
 					}
-				}, MergePanel.FIRST_URL_HISTORY, this.firstSelectedResource, true,
-				SVNUIMessages.MergePanel_Selection_Title, SVNUIMessages.MergePanel_Selection_Description,
-				RepositoryResourceSelectionComposite.MODE_DEFAULT, RepositoryResourceSelectionComposite.TEXT_NONE);
+				}, MergePanel.FIRST_URL_HISTORY, firstSelectedResource, true, SVNUIMessages.MergePanel_Selection_Title,
+				SVNUIMessages.MergePanel_Selection_Description, RepositoryResourceSelectionComposite.MODE_DEFAULT,
+				RepositoryResourceSelectionComposite.TEXT_NONE);
 		data = new GridData(GridData.FILL_HORIZONTAL);
-		this.reintegrateSelectionComposite.setLayoutData(data);
-		this.reintegrateSelectionComposite.setCurrentRevision(this.currentRevision);
+		reintegrateSelectionComposite.setLayoutData(data);
+		reintegrateSelectionComposite.setCurrentRevision(currentRevision);
 
 		return parent;
 	}
 
 	public SVNDepth getDepth() {
-		return this.mode == MergePanel.MODE_1URL
-				? this.depthSelectorSimple.getDepth()
-				: (this.mode == MergePanel.MODE_2URL ? this.depthSelector.getDepth() : SVNDepth.UNKNOWN);
+		return mode == MergePanel.MODE_1URL
+				? depthSelectorSimple.getDepth()
+				: mode == MergePanel.MODE_2URL ? depthSelector.getDepth() : SVNDepth.UNKNOWN;
 	}
 
+	@Override
 	protected void showDetails() {
-		this.saveChangesImpl();
+		saveChangesImpl();
 
 		IRepositoryResourceProvider firstSet = new IRepositoryResourceProvider.DefaultRepositoryResourceProvider(
-				this.getFirstSelection());
+				getFirstSelection());
 		IRepositoryResourceProvider secondSet = null;
-		if (this.mode == MergePanel.MODE_2URL) {
-			secondSet = new IRepositoryResourceProvider.DefaultRepositoryResourceProvider(this.getSecondSelection());
+		if (mode == MergePanel.MODE_2URL) {
+			secondSet = new IRepositoryResourceProvider.DefaultRepositoryResourceProvider(getSecondSelection());
 		}
 		JavaHLMergeOperation mergeOp = null;
-		if (this.mode == MergePanel.MODE_2URL) {
-			mergeOp = new JavaHLMergeOperation(this.to, firstSet, secondSet, true, this.getIgnoreAncestry(),
-					this.getDepth());
-			mergeOp.setRecordOnly(this.getRecordOnly());
-		} else if (this.mode == MergePanel.MODE_1URL) {
-			mergeOp = new JavaHLMergeOperation(this.to, firstSet, this.getSelectedRevisions(), true,
-					this.getIgnoreAncestry(), this.getDepth());
-			mergeOp.setRecordOnly(this.getRecordOnly());
+		if (mode == MergePanel.MODE_2URL) {
+			mergeOp = new JavaHLMergeOperation(to, firstSet, secondSet, true, getIgnoreAncestry(), getDepth());
+			mergeOp.setRecordOnly(getRecordOnly());
+		} else if (mode == MergePanel.MODE_1URL) {
+			mergeOp = new JavaHLMergeOperation(to, firstSet, getSelectedRevisions(), true, getIgnoreAncestry(),
+					getDepth());
+			mergeOp.setRecordOnly(getRecordOnly());
 		} else {
-			mergeOp = new JavaHLMergeOperation(this.to, firstSet, true);
+			mergeOp = new JavaHLMergeOperation(to, firstSet, true);
 		}
-		final StringBuffer buf = new StringBuffer();
+		final StringBuilder buf = new StringBuilder();
 		buf.append(SVNUIMessages.MergePanel_Preview_Header_Text);
 		buf.append(SVNUIMessages.MergePanel_Preview_Header_Line);
 		mergeOp.setExternalMonitor(new SVNNullProgressMonitor() {
+			@Override
 			public void progress(int current, int total, ItemState state) {
 				buf.append("<b>"); //$NON-NLS-1$
 				switch (PerformedAction.fromId(state.action)) {
@@ -452,55 +466,57 @@ public class MergePanel extends AbstractAdvancedDialogPanel {
 
 		if (mergeOp.getExecutionState() == IActionOperation.OK) {
 			Font font = new Font(UIMonitorUtility.getDisplay(), "Courier New", 8, SWT.NORMAL); //$NON-NLS-1$
-			new DefaultDialog(this.manager.getShell(),
+			new DefaultDialog(manager.getShell(),
 					new PreviewPanel(SVNUIMessages.MergePanel_Preview_Title,
 							SVNUIMessages.MergePanel_Preview_Description, SVNUIMessages.MergePanel_Preview_Message,
 							buf.toString(), font)).open();
 		}
 	}
 
+	@Override
 	protected void saveChangesImpl() {
-		if (this.mode == MergePanel.MODE_1URL) {
-			this.firstSelectedResource = this.simpleSelectionComposite.getSelectedResource();
-			this.secondSelectedResource = this.simpleSelectionComposite.getSecondSelectedResource();
-			this.selectedRevisions = this.simpleSelectionComposite.getSelectedRevisions();
-			this.isReverseRevisions = this.simpleSelectionComposite.isReverseRevisions();
-			this.simpleSelectionComposite.saveHistory();
+		if (mode == MergePanel.MODE_1URL) {
+			firstSelectedResource = simpleSelectionComposite.getSelectedResource();
+			secondSelectedResource = simpleSelectionComposite.getSecondSelectedResource();
+			selectedRevisions = simpleSelectionComposite.getSelectedRevisions();
+			isReverseRevisions = simpleSelectionComposite.isReverseRevisions();
+			simpleSelectionComposite.saveHistory();
 
-			this.ignoreAncestry = this.ignoreAncestrySimpleButton.getSelection();
-			this.recordOnly = this.recordOnlySimpleButton.getSelection();
-		} else if (this.mode == MergePanel.MODE_2URL) {
-			this.firstSelectedResource = this.firstSelectionComposite.getSelectedResource();
-			this.firstSelectionComposite.saveHistory();
+			ignoreAncestry = ignoreAncestrySimpleButton.getSelection();
+			recordOnly = recordOnlySimpleButton.getSelection();
+		} else if (mode == MergePanel.MODE_2URL) {
+			firstSelectedResource = firstSelectionComposite.getSelectedResource();
+			firstSelectionComposite.saveHistory();
 
-			this.secondSelectedResource = this.secondSelectionComposite.getSelectedResource();
-			this.secondSelectionComposite.saveHistory();
+			secondSelectedResource = secondSelectionComposite.getSelectedResource();
+			secondSelectionComposite.saveHistory();
 
-			this.ignoreAncestry = this.ignoreAncestryButton.getSelection();
-			this.recordOnly = this.recordOnlyButton.getSelection();
+			ignoreAncestry = ignoreAncestryButton.getSelection();
+			recordOnly = recordOnlyButton.getSelection();
 		} else {
-			this.firstSelectedResource = this.secondSelectedResource = this.reintegrateSelectionComposite
-					.getSelectedResource();
-			this.reintegrateSelectionComposite.saveHistory();
+			firstSelectedResource = secondSelectedResource = reintegrateSelectionComposite.getSelectedResource();
+			reintegrateSelectionComposite.saveHistory();
 		}
 	}
 
+	@Override
 	protected void cancelChangesImpl() {
 	}
 
+	@Override
 	protected void setButtonsEnabled(boolean enabled) {
-		((IDialogManagerEx) this.manager).setExtendedButtonEnabled(0, enabled);
+		((IDialogManagerEx) manager).setExtendedButtonEnabled(0, enabled);
 	}
 
 	protected IRepositoryResource[] getSelection(IRepositoryResource base) {
-		if (this.to.length == 1) {
+		if (to.length == 1) {
 			return new IRepositoryResource[] { base };
 		}
-		IRepositoryResource[] retVal = new IRepositoryResource[this.to.length];
+		IRepositoryResource[] retVal = new IRepositoryResource[to.length];
 		String baseUrl = base.getUrl();
 		for (int i = 0; i < retVal.length; i++) {
-			String url = baseUrl + "/" + SVNRemoteStorage.instance().asRepositoryResource(this.to[i]).getName(); //$NON-NLS-1$
-			retVal[i] = this.to[i].getType() == IResource.FILE
+			String url = baseUrl + "/" + SVNRemoteStorage.instance().asRepositoryResource(to[i]).getName(); //$NON-NLS-1$
+			retVal[i] = to[i].getType() == IResource.FILE
 					? (IRepositoryResource) base.asRepositoryFile(url, false)
 					: base.asRepositoryContainer(url, false);
 		}
@@ -508,42 +524,49 @@ public class MergePanel extends AbstractAdvancedDialogPanel {
 	}
 
 	protected abstract class ValidationManagerProxy implements IValidationManager {
-		protected Set<Control> controls = new HashSet<Control>();
+		protected Set<Control> controls = new HashSet<>();
 
+		@Override
 		public void attachTo(Control cmp, AbstractVerifier verifier) {
-			this.controls.add(cmp);
-			MergePanel.this.attachTo(cmp, this.wrapVerifier(verifier));
+			controls.add(cmp);
+			MergePanel.this.attachTo(cmp, wrapVerifier(verifier));
 		}
 
+		@Override
 		public void detachFrom(Control cmp) {
-			this.controls.remove(cmp);
+			controls.remove(cmp);
 			MergePanel.this.detachFrom(cmp);
 		}
 
+		@Override
 		public void detachAll() {
 			MergePanel.this.detachAll();
 		}
 
+		@Override
 		public boolean isFilledRight() {
 			return MergePanel.this.isFilledRight();
 		}
 
+		@Override
 		public void validateContent() {
 			MergePanel.this.validateContent();
 		}
 
+		@Override
 		public boolean validateControl(Control cmp) {
 			return MergePanel.this.validateControl(cmp);
 		}
 
 		public Set<Control> getControls() {
-			return this.controls;
+			return controls;
 		}
 
 		protected abstract AbstractVerifier wrapVerifier(AbstractVerifier verifier);
 
 	}
 
+	@Override
 	public String getHelpId() {
 		return "org.eclipse.team.svn.help.mergeDialogContext"; //$NON-NLS-1$
 	}

@@ -26,18 +26,20 @@ import org.eclipse.team.svn.ui.operation.ShowConflictEditorOperation;
  */
 public class EditConflictsAction extends AbstractRecursiveTeamAction {
 	public EditConflictsAction() {
-		super();
 	}
 
+	@Override
 	public void runImpl(IAction action) {
-		this.runScheduled(new ShowConflictEditorOperation(
+		runScheduled(new ShowConflictEditorOperation(
 				this.getSelectedResourcesRecursive(IStateFilter.SF_DATA_CONFLICTING), false));
 	}
 
+	@Override
 	public boolean isEnabled() {
-		return this.checkForResourcesPresenceRecursive(IStateFilter.SF_DATA_CONFLICTING);
+		return checkForResourcesPresenceRecursive(IStateFilter.SF_DATA_CONFLICTING);
 	}
 
+	@Override
 	protected boolean needsToSaveDirtyEditors() {
 		return true;
 	}

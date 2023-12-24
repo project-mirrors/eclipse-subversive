@@ -21,6 +21,7 @@ import org.eclipse.team.svn.core.mapping.SVNChangeSetResourceMapping;
 
 public class SVNChangeSetAdapterFactory implements IAdapterFactory {
 
+	@Override
 	@SuppressWarnings("unchecked")
 	public Object getAdapter(Object adaptableObject, Class adapterType) {
 		if (adaptableObject instanceof ActiveChangeSet && adapterType == ResourceMapping.class) {
@@ -30,6 +31,7 @@ public class SVNChangeSetAdapterFactory implements IAdapterFactory {
 		return null;
 	}
 
+	@Override
 	@SuppressWarnings("unchecked")
 	public Class[] getAdapterList() {
 		return new Class[] { ResourceMapping.class };

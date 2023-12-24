@@ -32,6 +32,7 @@ public class LocalStatusOperation extends AbstractStatusOperation {
 		super("Operation_LocalStatusFile", SVNMessages.class, provider, recursive); //$NON-NLS-1$
 	}
 
+	@Override
 	protected boolean isRemote() {
 		return false;
 	}

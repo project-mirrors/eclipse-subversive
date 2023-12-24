@@ -34,7 +34,7 @@ public class SSLServerCertificateFailures {
 
 	public static final int OTHER = 0x40000000;
 
-	public static final int ALL_KNOWN = (NOT_YET_VALID | EXPIRED | CN_MISMATCH | UNKNOWN_CA | OTHER);
+	public static final int ALL_KNOWN = NOT_YET_VALID | EXPIRED | CN_MISMATCH | UNKNOWN_CA | OTHER;
 
 	public final int failures;
 
@@ -45,7 +45,7 @@ public class SSLServerCertificateFailures {
 	 *            conditions mask to check
 	 */
 	public boolean anyOf(int mask) {
-		return (this.failures & mask) != 0;
+		return (failures & mask) != 0;
 	}
 
 	/**
@@ -55,7 +55,7 @@ public class SSLServerCertificateFailures {
 	 *            conditions mask to check
 	 */
 	public boolean allOf(int mask) {
-		return (this.failures & mask) == mask;
+		return (failures & mask) == mask;
 	}
 
 	/**
@@ -64,7 +64,7 @@ public class SSLServerCertificateFailures {
 	 * @return
 	 */
 	public boolean isEmpty() {
-		return this.failures == 0;
+		return failures == 0;
 	}
 
 	public SSLServerCertificateFailures(int failures) {

@@ -50,56 +50,60 @@ public class UpdateToRevisionPanel extends AbstractDialogPanel {
 	protected String updatePath;
 
 	public UpdateToRevisionPanel(IRepositoryResource selectedResource, boolean canShowUpdateDepthPath) {
-		this.dialogTitle = SVNUIMessages.UpdateToRevisionPanel_Title;
-		this.dialogDescription = SVNUIMessages.UpdateToRevisionPanel_Description;
-		this.defaultMessage = SVNUIMessages.UpdateToRevisionPanel_Message;
+		dialogTitle = SVNUIMessages.UpdateToRevisionPanel_Title;
+		dialogDescription = SVNUIMessages.UpdateToRevisionPanel_Description;
+		defaultMessage = SVNUIMessages.UpdateToRevisionPanel_Message;
 
 		this.selectedResource = selectedResource;
 		this.canShowUpdateDepthPath = canShowUpdateDepthPath;
 	}
 
+	@Override
 	protected void createControlsImpl(Composite parent) {
-		this.revisionComposite = new RevisionComposite(parent, this, false,
+		revisionComposite = new RevisionComposite(parent, this, false,
 				new String[] { SVNUIMessages.RevisionComposite_Revision, SVNUIMessages.RevisionComposite_HeadRevision },
 				SVNRevision.HEAD, false);
 		GridData data = new GridData(GridData.FILL_HORIZONTAL);
-		this.revisionComposite.setLayoutData(data);
-		this.revisionComposite.setSelectedResource(this.selectedResource);
+		revisionComposite.setLayoutData(data);
+		revisionComposite.setSelectedResource(selectedResource);
 
-		this.depthSelector = new DepthSelectionComposite(parent, SWT.NONE, true, true, this.canShowUpdateDepthPath,
-				this.selectedResource, this);
+		depthSelector = new DepthSelectionComposite(parent, SWT.NONE, true, true, canShowUpdateDepthPath,
+				selectedResource, this);
 		data = new GridData(GridData.FILL_HORIZONTAL);
-		this.depthSelector.setLayoutData(data);
+		depthSelector.setLayoutData(data);
 	}
 
+	@Override
 	protected void cancelChangesImpl() {
 	}
 
+	@Override
 	protected void saveChangesImpl() {
-		this.revision = this.revisionComposite.getSelectedRevision();
-		this.depth = this.depthSelector.getDepth();
-		this.isStickyDepth = this.depthSelector.isStickyDepth();
-		if (this.isStickyDepth) {
-			this.updatePath = this.depthSelector.getUpdatePath();
+		revision = revisionComposite.getSelectedRevision();
+		depth = depthSelector.getDepth();
+		isStickyDepth = depthSelector.isStickyDepth();
+		if (isStickyDepth) {
+			updatePath = depthSelector.getUpdatePath();
 		}
 	}
 
 	public SVNRevision getRevision() {
-		return this.revision;
+		return revision;
 	}
 
 	public SVNDepth getDepth() {
-		return this.depth;
+		return depth;
 	}
 
 	public boolean isStickyDepth() {
-		return this.isStickyDepth;
+		return isStickyDepth;
 	}
 
 	public String getUpdateDepthPath() {
-		return this.updatePath;
+		return updatePath;
 	}
 
+	@Override
 	public String getHelpId() {
 		return "org.eclipse.team.svn.help.updateDialogContext"; //$NON-NLS-1$
 	}

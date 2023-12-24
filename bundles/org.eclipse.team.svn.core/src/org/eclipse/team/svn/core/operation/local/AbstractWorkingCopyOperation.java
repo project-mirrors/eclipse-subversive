@@ -47,20 +47,21 @@ public abstract class AbstractWorkingCopyOperation extends AbstractActionOperati
 		this.provider = provider;
 	}
 
+	@Override
 	public ISchedulingRule getSchedulingRule() {
 		// if the resource provider interface is used then we don't know all the resources at the moment of the operation scheduling, so we lock the entire workspace instead
-		if (this.resources == null || this.resources.length == 0) {
+		if (resources == null || resources.length == 0) {
 			return ResourcesPlugin.getWorkspace().getRoot();
 		}
-		HashSet<ISchedulingRule> ruleSet = new HashSet<ISchedulingRule>();
-		for (int i = 0; i < this.resources.length; i++) {
-			ruleSet.add(SVNResourceRuleFactory.INSTANCE.refreshRule(this.resources[i]));
+		HashSet<ISchedulingRule> ruleSet = new HashSet<>();
+		for (IResource element : resources) {
+			ruleSet.add(SVNResourceRuleFactory.INSTANCE.refreshRule(element));
 		}
 		return new MultiRule(ruleSet.toArray(new ISchedulingRule[ruleSet.size()]));
 	}
 
 	protected IResource[] operableData() {
-		return this.resources == null ? this.provider.getResources() : this.resources;
+		return resources == null ? provider.getResources() : resources;
 	}
 
 }

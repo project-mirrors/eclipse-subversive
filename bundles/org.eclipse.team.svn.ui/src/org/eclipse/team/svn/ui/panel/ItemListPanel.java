@@ -54,52 +54,61 @@ public class ItemListPanel extends AbstractDialogPanel {
 		this.dialogTitle = dialogTitle;
 		this.dialogDescription = dialogDescription;
 		this.defaultMessage = defaultMessage;
-		this.itemIcon = imageDescriptor.createImage();
+		itemIcon = imageDescriptor.createImage();
 	}
 
+	@Override
 	protected void saveChangesImpl() {
 	}
 
+	@Override
 	protected void cancelChangesImpl() {
 	}
 
+	@Override
 	public void createControlsImpl(Composite parent) {
-		this.table = new Table(parent, SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL | SWT.SINGLE | SWT.FULL_SELECTION);
-		this.table.setLayoutData(new GridData(GridData.FILL_BOTH));
+		table = new Table(parent, SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL | SWT.SINGLE | SWT.FULL_SELECTION);
+		table.setLayoutData(new GridData(GridData.FILL_BOTH));
 		TableLayout layout = new TableLayout();
-		this.table.setLayout(layout);
-		TableViewer viewer = new TableViewer(this.table);
+		table.setLayout(layout);
+		TableViewer viewer = new TableViewer(table);
 
-		TableColumn col = new TableColumn(this.table, SWT.NONE);
+		TableColumn col = new TableColumn(table, SWT.NONE);
 		col.setResizable(true);
 		col.setAlignment(SWT.CENTER);
 		layout.addColumnData(new ColumnWeightData(0, 60, true));
 
 		viewer.setContentProvider(new ArrayStructuredContentProvider());
 		ITableLabelProvider labelProvider = new ITableLabelProvider() {
+			@Override
 			public Image getColumnImage(Object element, int columnIndex) {
-				return ItemListPanel.this.itemIcon;
+				return itemIcon;
 			}
 
+			@Override
 			public String getColumnText(Object element, int columnIndex) {
 				return element.toString();
 			}
 
+			@Override
 			public void addListener(ILabelProviderListener listener) {
 			}
 
+			@Override
 			public void dispose() {
 			}
 
+			@Override
 			public boolean isLabelProperty(Object element, String property) {
 				return true;
 			}
 
+			@Override
 			public void removeListener(ILabelProviderListener listener) {
 			}
 		};
 		viewer.setLabelProvider(labelProvider);
-		viewer.setInput(this.items);
+		viewer.setInput(items);
 	}
 
 }

@@ -34,11 +34,12 @@ public class AuthorNameLogEntryFilter implements ILogEntryFilter {
 		this.authorNameToAccept = authorNameToAccept;
 	}
 
+	@Override
 	public boolean accept(SVNLogEntry logEntry) {
-		if (this.authorNameToAccept == null) {
+		if (authorNameToAccept == null) {
 			return true;
 		}
-		StringMatcher matcher = new StringMatcher(this.authorNameToAccept);
+		StringMatcher matcher = new StringMatcher(authorNameToAccept);
 		String authorName = logEntry.author == null ? "" : logEntry.author; //$NON-NLS-1$
 		return matcher.match(authorName);
 	}
@@ -48,6 +49,6 @@ public class AuthorNameLogEntryFilter implements ILogEntryFilter {
 	}
 
 	public String getAuthorNameToAccept() {
-		return this.authorNameToAccept;
+		return authorNameToAccept;
 	}
 }

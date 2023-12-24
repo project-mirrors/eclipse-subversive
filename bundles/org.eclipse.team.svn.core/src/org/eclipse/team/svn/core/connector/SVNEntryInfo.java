@@ -47,7 +47,7 @@ public class SVNEntryInfo {
 
 		public final int id;
 
-		private ScheduledOperation(int id) {
+		ScheduledOperation(int id) {
 			this.id = id;
 		}
 	}
@@ -188,18 +188,18 @@ public class SVNEntryInfo {
 		this.path = path;
 		this.wcRoot = wcRoot;
 		this.url = url;
-		this.revision = rev;
+		revision = rev;
 		this.kind = kind;
 		this.reposRootUrl = reposRootUrl;
 		this.reposUUID = reposUUID;
-		this.lastChangedRevision = lastChangedRev;
+		lastChangedRevision = lastChangedRev;
 		this.lastChangedDate = lastChangedDate;
 		this.lastChangedAuthor = lastChangedAuthor;
 		this.lock = lock;
 		this.hasWcInfo = hasWcInfo;
 		this.schedule = schedule;
 		this.copyFromUrl = copyFromUrl;
-		this.copyFromRevision = copyFromRev;
+		copyFromRevision = copyFromRev;
 		this.textTime = textTime;
 		this.propTime = propTime;
 		this.checksum = checksum;

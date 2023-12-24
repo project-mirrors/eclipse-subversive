@@ -33,6 +33,7 @@ public class RepositoryPerspective implements IPerspectiveFactory {
 
 	}
 
+	@Override
 	public void createInitialLayout(IPageLayout layout) {
 		// Add new Repository Location wizard
 		layout.addNewWizardShortcut("org.eclipse.team.svn.ui.wizard.NewRepositoryLocationWizard"); //$NON-NLS-1$

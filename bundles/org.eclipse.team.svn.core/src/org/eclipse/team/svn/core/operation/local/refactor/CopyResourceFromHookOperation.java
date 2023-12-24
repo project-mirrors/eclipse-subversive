@@ -15,7 +15,6 @@
 package org.eclipse.team.svn.core.operation.local.refactor;
 
 import java.io.File;
-import java.io.FileFilter;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IResource;
@@ -50,32 +49,30 @@ public class CopyResourceFromHookOperation extends AbstractActionOperation {
 		this.options = options;
 	}
 
+	@Override
 	public ISchedulingRule getSchedulingRule() {
-		return SVNResourceRuleFactory.INSTANCE.copyRule(this.source, this.destination);
+		return SVNResourceRuleFactory.INSTANCE.copyRule(source, destination);
 	}
 
+	@Override
 	protected String getShortErrorMessage(Throwable t) {
 		return BaseMessages.format(super.getShortErrorMessage(t),
-				new Object[] { this.source.getName(), this.destination.toString() });
+				new Object[] { source.getName(), destination.toString() });
 	}
 
 	@Override
 	protected void runImpl(IProgressMonitor monitor) throws Exception {
 		//If we copy folder, then copy it to its parent
-		IResource toResource = this.destination;
+		IResource toResource = destination;
 		if (toResource instanceof IContainer) {
 			toResource = toResource.getParent();
 			if (toResource == null) {
 				String errMessage = SVNMessages.formatErrorString("Error_NoParent", //$NON-NLS-1$
-						new String[] { this.destination.getFullPath().toString() });
+						new String[] { destination.getFullPath().toString() });
 				throw new UnreportableException(errMessage);
 			}
 		}
 		FileUtility.copyAll(new File(FileUtility.getWorkingCopyPath(toResource)),
-				new File(FileUtility.getWorkingCopyPath(this.source)), this.options, new FileFilter() {
-					public boolean accept(File pathname) {
-						return !pathname.getName().equals(SVNUtility.getSVNFolderName());
-					}
-				}, monitor);
+				new File(FileUtility.getWorkingCopyPath(source)), options, pathname -> !pathname.getName().equals(SVNUtility.getSVNFolderName()), monitor);
 	}
 }

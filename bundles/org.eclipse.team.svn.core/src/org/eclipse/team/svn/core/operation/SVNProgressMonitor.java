@@ -16,6 +16,7 @@ package org.eclipse.team.svn.core.operation;
 
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.team.svn.core.BaseMessages;
 import org.eclipse.team.svn.core.SVNMessages;
 import org.eclipse.team.svn.core.connector.SVNConnectorException;
 import org.eclipse.team.svn.core.connector.SVNConnectorUnresolvedConflictException;
@@ -49,32 +50,34 @@ public class SVNProgressMonitor extends SVNNullProgressMonitor {
 		this.monitor = monitor;
 		this.parent = parent;
 		this.root = root;
-		this.stream = parent.getConsoleStream();
+		stream = parent.getConsoleStream();
 		this.enableConsoleOutput = enableConsoleOutput;
 	}
 
+	@Override
 	public void progress(int current, int total, ItemState state) {
 		if (state.error != null) {
 			SVNConnectorException ex = state.path != null && state.path.length() > 0
 					? new SVNConnectorUnresolvedConflictException(state.error)
 					: new SVNConnectorException(state.error);
-			this.parent.reportStatus(IStatus.ERROR, null, ex);
+			parent.reportStatus(IStatus.ERROR, null, ex);
 		}
 		if (state != null && state.path != null) {
 //			TODO rework display path...
 //			String info = root.toString();
 //			info = state.path.length() > info.length() ? state.path.substring(info.length()) : state.path;
-			ProgressMonitorUtility.setTaskInfo(this.monitor, this.parent, state.path);
-			if (this.enableConsoleOutput) {
-				SVNProgressMonitor.writeToConsole(this.stream, state.contentState, state.propState, state.action,
-						state.path, state.revision);
+			ProgressMonitorUtility.setTaskInfo(monitor, parent, state.path);
+			if (enableConsoleOutput) {
+				SVNProgressMonitor.writeToConsole(stream, state.contentState, state.propState, state.action, state.path,
+						state.revision);
 			}
 		}
-		ProgressMonitorUtility.progress(this.monitor, current, total);
+		ProgressMonitorUtility.progress(monitor, current, total);
 	}
 
+	@Override
 	public boolean isActivityCancelled() {
-		return this.monitor.isCanceled();
+		return monitor.isCanceled();
 	}
 
 	public static void writeToConsole(IConsoleStream stream, int contentState, int propState, int action, String path,
@@ -82,11 +85,11 @@ public class SVNProgressMonitor extends SVNNullProgressMonitor {
 		if (stream != null && path != null && path.length() > 0) {
 			PerformedAction pAction = PerformedAction.fromId(action);
 			if (pAction == PerformedAction.UPDATE_COMPLETED || pAction == PerformedAction.STATUS_COMPLETED) {
-				String message = SVNMessages.format(SVNMessages.Console_AtRevision,
+				String message = BaseMessages.format(SVNMessages.Console_AtRevision,
 						new String[] { String.valueOf(revision) });
 				stream.write(IConsoleStream.LEVEL_OK, message);
 			} else if (pAction == PerformedAction.UPDATE_EXTERNAL) {
-				String message = SVNMessages.format(SVNMessages.Console_UpdateExternal, new String[] { path });
+				String message = BaseMessages.format(SVNMessages.Console_UpdateExternal, new String[] { path });
 				stream.write(IConsoleStream.LEVEL_OK, message);
 			} else {
 				int severity = IConsoleStream.LEVEL_OK;
@@ -160,10 +163,10 @@ public class SVNProgressMonitor extends SVNNullProgressMonitor {
 					}
 				}
 				if (pAction == PerformedAction.COMMIT_POSTFIX_TXDELTA) {
-					String message = SVNMessages.format(SVNMessages.Console_TransmittingData, new String[] { path });
+					String message = BaseMessages.format(SVNMessages.Console_TransmittingData, new String[] { path });
 					stream.write(severity, message);
 				} else if (status != null) {
-					String message = SVNMessages.format(SVNMessages.Console_Status, new String[] { status, path });
+					String message = BaseMessages.format(SVNMessages.Console_Status, new String[] { status, path });
 					stream.write(severity, message);
 				}
 			}

@@ -22,6 +22,7 @@ import org.eclipse.team.svn.core.operation.IActionOperation;
  * @author Alexander Gurov
  */
 public class DefaultOperationWrapperFactory extends UILoggedOperationFactory implements IOperationWrapperFactory {
+	@Override
 	public ICancellableOperationWrapper getCancellable(IActionOperation operation) {
 		return new DefaultCancellableOperationWrapper(operation);
 	}

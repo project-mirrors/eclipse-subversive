@@ -26,6 +26,7 @@ public class PreviewReportPanel extends PreviewPanel {
 		super(SVNUIMessages.PreviewReportPanel_Title, description, SVNUIMessages.PreviewReportPanel_Message, report);
 	}
 
+	@Override
 	public String getHelpId() {
 		return "org.eclipse.team.svn.help.previewReportDialogContext"; //$NON-NLS-1$
 	}

@@ -22,8 +22,8 @@ import org.eclipse.core.runtime.IAdaptable;
  * @author Alexander Gurov
  */
 public interface IRepositoryBase extends IAdaptable {
-	public String getName();
+	String getName();
 
-	public String getUrl();
+	String getUrl();
 
 }

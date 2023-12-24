@@ -29,13 +29,13 @@ public interface ICommitDialog {
 	/**
 	 * @return message Message for commit
 	 */
-	public String getMessage();
+	String getMessage();
 
 	/**
 	 * return code from dialog.open
 	 * 
 	 * @return code
 	 */
-	public int open();
+	int open();
 
 }

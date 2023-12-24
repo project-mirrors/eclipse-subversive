@@ -30,5 +30,5 @@ public interface ISVNRepositoryMessageCallback {
 	 * @param line
 	 *            next message line
 	 */
-	public void nextMessage(String line);
+	void nextMessage(String line);
 }

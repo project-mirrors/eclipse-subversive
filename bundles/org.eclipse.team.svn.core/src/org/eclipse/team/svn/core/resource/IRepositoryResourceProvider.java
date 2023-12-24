@@ -27,10 +27,11 @@ public interface IRepositoryResourceProvider {
 			this.resources = resources;
 		}
 
+		@Override
 		public IRepositoryResource[] getRepositoryResources() {
-			return this.resources;
+			return resources;
 		}
 	}
 
-	public IRepositoryResource[] getRepositoryResources();
+	IRepositoryResource[] getRepositoryResources();
 }

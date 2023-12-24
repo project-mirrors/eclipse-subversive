@@ -24,8 +24,6 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Event;
-import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.team.core.RepositoryProvider;
 import org.eclipse.team.svn.core.SVNTeamPlugin;
@@ -64,12 +62,8 @@ public class TagModifyWarningDialog extends MessageDialog {
 		final Button dontAskButton = new Button(composite, SWT.CHECK);
 		dontAskButton.setLayoutData(new GridData());
 		dontAskButton.setText(SVNUIMessages.TagModifyWarningDialog_CustomText);
-		dontAskButton.addListener(SWT.Selection, new Listener() {
-			public void handleEvent(Event event) {
-				TagModifyWarningDialog.this.dontAskAnyMore = dontAskButton.getSelection();
-			}
-		});
-		dontAskButton.setSelection(this.dontAskAnyMore = false);
+		dontAskButton.addListener(SWT.Selection, event -> dontAskAnyMore = dontAskButton.getSelection());
+		dontAskButton.setSelection(dontAskAnyMore = false);
 
 		return composite;
 	}
@@ -79,12 +73,12 @@ public class TagModifyWarningDialog extends MessageDialog {
 	 */
 	@Override
 	public boolean close() {
-		if (this.dontAskAnyMore) {
-			for (IProject project : this.projects) {
+		if (dontAskAnyMore) {
+			for (IProject project : projects) {
 				SVNTeamProvider provider = (SVNTeamProvider) RepositoryProvider.getProvider(project,
 						SVNTeamPlugin.NATURE_ID);
 				try {
-					provider.setVerifyTagOnCommit(!this.dontAskAnyMore);
+					provider.setVerifyTagOnCommit(!dontAskAnyMore);
 				} catch (CoreException e) {
 					LoggedOperation.reportError(TagModifyWarningDialog.this.getClass().getName(), e);
 				}

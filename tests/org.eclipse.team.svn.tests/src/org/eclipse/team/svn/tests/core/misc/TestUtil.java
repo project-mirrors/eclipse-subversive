@@ -24,7 +24,6 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.team.svn.core.resource.IRepositoryLocation;
 import org.eclipse.team.svn.core.resource.events.IResourceStatesListener;
@@ -69,13 +68,10 @@ public class TestUtil {
 
 	public static void refreshProjects() {
 		final boolean[] refreshDone = new boolean[1];
-		IResourceStatesListener listener = new IResourceStatesListener() {
-			@Override
-			public void resourcesStateChanged(ResourceStatesChangedEvent event) {
-				synchronized (lockObject) {
-					refreshDone[0] = true;
-					lockObject.notify();
-				}
+		IResourceStatesListener listener = event -> {
+			synchronized (lockObject) {
+				refreshDone[0] = true;
+				lockObject.notify();
 			}
 		};
 		SVNRemoteStorage.instance().addResourceStatesListener(ResourceStatesChangedEvent.class, listener);
@@ -104,12 +100,7 @@ public class TestUtil {
 	}
 
 	public static File[] getWorkspaceFiles() {
-		return TestUtil.getFirstProjectFolder().getParentFile().listFiles(new FileFilter() {
-			@Override
-			public boolean accept(File pathname) {
-				return !pathname.getName().equals(".metadata");
-			}
-		});
+		return TestUtil.getFirstProjectFolder().getParentFile().listFiles((FileFilter) pathname -> !pathname.getName().equals(".metadata"));
 	}
 
 	public static File[] getBothFolders() {
@@ -117,21 +108,16 @@ public class TestUtil {
 	}
 
 	public static File[] getListFilesRecursive() {
-		List<File> allFiles = new ArrayList<File>();
+		List<File> allFiles = new ArrayList<>();
 		getFilesRecursiveImpl(getWorkspaceFiles(), allFiles);
 		return allFiles.toArray(new File[allFiles.size()]);
 	}
 
 	public static void getFilesRecursiveImpl(File[] roots, List<File> allFiles) {
-		for (int i = 0; i < roots.length; i++) {
-			allFiles.add(roots[i]);
-			if (roots[i].isDirectory()) {
-				getFilesRecursiveImpl(roots[i].listFiles(new FileFilter() {
-					@Override
-					public boolean accept(File pathname) {
-						return !pathname.getName().equals(SVNUtility.getSVNFolderName());
-					}
-				}), allFiles);
+		for (File root : roots) {
+			allFiles.add(root);
+			if (root.isDirectory()) {
+				getFilesRecursiveImpl(root.listFiles((FileFilter) pathname -> !pathname.getName().equals(SVNUtility.getSVNFolderName())), allFiles);
 			}
 		}
 	}

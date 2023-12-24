@@ -94,7 +94,7 @@ public interface ISVNManager {
 
 		public final String id;
 
-		private RepositoryKind(String id) {
+		RepositoryKind(String id) {
 			this.id = id;
 		}
 	}
@@ -114,7 +114,7 @@ public interface ISVNManager {
 	 *            operation progress monitor
 	 * @throws SVNConnectorException
 	 */
-	public void create(String repositoryPath, RepositoryKind repositoryType, String configPath, long options,
+	void create(String repositoryPath, RepositoryKind repositoryType, String configPath, long options,
 			ISVNProgressMonitor monitor) throws SVNConnectorException;
 
 	/**
@@ -128,7 +128,7 @@ public interface ISVNManager {
 	 *            operation progress monitor
 	 * @throws SVNConnectorException
 	 */
-	public void deltify(String path, SVNRevisionRange range, ISVNProgressMonitor monitor) throws SVNConnectorException;
+	void deltify(String path, SVNRevisionRange range, ISVNProgressMonitor monitor) throws SVNConnectorException;
 
 	/**
 	 * Makes a hot copy of the repository.
@@ -143,7 +143,7 @@ public interface ISVNManager {
 	 *            operation progress monitor
 	 * @throws SVNConnectorException
 	 */
-	public void hotCopy(String path, String targetPath, long options, ISVNProgressMonitor monitor)
+	void hotCopy(String path, String targetPath, long options, ISVNProgressMonitor monitor)
 			throws SVNConnectorException;
 
 	/**
@@ -183,9 +183,8 @@ public interface ISVNManager {
 	 *            operation progress monitor
 	 * @throws SVNConnectorException
 	 */
-	public void dump(String path, OutputStream dataOut, SVNRevisionRange range,
-			ISVNRepositoryNotificationCallback callback, long options, ISVNProgressMonitor monitor)
-			throws SVNConnectorException;
+	void dump(String path, OutputStream dataOut, SVNRevisionRange range, ISVNRepositoryNotificationCallback callback,
+			long options, ISVNProgressMonitor monitor) throws SVNConnectorException;
 
 	/**
 	 * List all logfiles (BDB) in use or not).
@@ -200,8 +199,8 @@ public interface ISVNManager {
 	 *            operation progress monitor
 	 * @throws SVNConnectorException
 	 */
-	public void listDBLogs(String path, ISVNRepositoryMessageCallback receiver, long options,
-			ISVNProgressMonitor monitor) throws SVNConnectorException;
+	void listDBLogs(String path, ISVNRepositoryMessageCallback receiver, long options, ISVNProgressMonitor monitor)
+			throws SVNConnectorException;
 
 	/**
 	 * Load the data of a dump into a repository.
@@ -222,7 +221,7 @@ public interface ISVNManager {
 	 *            operation progress monitor
 	 * @throws SVNConnectorException
 	 */
-	public void load(String path, InputStream dataInput, SVNRevisionRange range, String relativePath,
+	void load(String path, InputStream dataInput, SVNRevisionRange range, String relativePath,
 			ISVNRepositoryNotificationCallback callback, long options, ISVNProgressMonitor monitor)
 			throws SVNConnectorException;
 
@@ -280,7 +279,7 @@ public interface ISVNManager {
 	 *            operation progress monitor
 	 * @throws SVNConnectorException
 	 */
-	public void listTransactions(String path, ISVNRepositoryMessageCallback receiver, ISVNProgressMonitor monitor)
+	void listTransactions(String path, ISVNRepositoryMessageCallback receiver, ISVNProgressMonitor monitor)
 			throws SVNConnectorException;
 
 	/**
@@ -295,7 +294,7 @@ public interface ISVNManager {
 	 * @return youngest revision
 	 * @throws SVNConnectorException
 	 */
-	public long recover(String path, ISVNRepositoryNotificationCallback callback, ISVNProgressMonitor monitor)
+	long recover(String path, ISVNRepositoryNotificationCallback callback, ISVNProgressMonitor monitor)
 			throws SVNConnectorException;
 
 	/**
@@ -315,7 +314,7 @@ public interface ISVNManager {
 	 *            operation progress monitor
 	 * @throws SVNConnectorException
 	 */
-	public void freeze(ISVNRepositoryFreezeAction action, String[] paths, ISVNProgressMonitor monitor)
+	void freeze(ISVNRepositoryFreezeAction action, String[] paths, ISVNProgressMonitor monitor)
 			throws SVNConnectorException;
 
 	/**
@@ -329,7 +328,7 @@ public interface ISVNManager {
 	 *            operation progress monitor
 	 * @throws SVNConnectorException
 	 */
-	public void removeTransaction(String path, String[] transactions, ISVNProgressMonitor monitor)
+	void removeTransaction(String path, String[] transactions, ISVNProgressMonitor monitor)
 			throws SVNConnectorException;
 
 	/**
@@ -345,7 +344,7 @@ public interface ISVNManager {
 	 *            operation progress monitor
 	 * @throws SVNConnectorException
 	 */
-	public void setRevisionProperty(SVNEntryReference reference, SVNProperty property, long options,
+	void setRevisionProperty(SVNEntryReference reference, SVNProperty property, long options,
 			ISVNProgressMonitor monitor) throws SVNConnectorException;
 
 	/**
@@ -361,7 +360,7 @@ public interface ISVNManager {
 	 *            operation progress monitor
 	 * @throws SVNConnectorException
 	 */
-	public void verify(String path, SVNRevisionRange range, ISVNRepositoryNotificationCallback callback,
+	void verify(String path, SVNRevisionRange range, ISVNRepositoryNotificationCallback callback,
 			ISVNProgressMonitor monitor) throws SVNConnectorException;
 
 	/**
@@ -411,7 +410,7 @@ public interface ISVNManager {
 	 * @return
 	 * @throws SVNConnectorException
 	 */
-	public SVNLock[] listLocks(String path, SVNDepth depth, ISVNProgressMonitor monitor) throws SVNConnectorException;
+	SVNLock[] listLocks(String path, SVNDepth depth, ISVNProgressMonitor monitor) throws SVNConnectorException;
 
 	/**
 	 * Remove multiple locks from the repository.
@@ -424,7 +423,7 @@ public interface ISVNManager {
 	 *            operation progress monitor
 	 * @throws SVNConnectorException
 	 */
-	public void removeLocks(String path, String[] locks, ISVNProgressMonitor monitor) throws SVNConnectorException;
+	void removeLocks(String path, String[] locks, ISVNProgressMonitor monitor) throws SVNConnectorException;
 
 	/**
 	 * Upgrade the repository format.
@@ -437,7 +436,7 @@ public interface ISVNManager {
 	 *            operation progress monitor
 	 * @throws SVNConnectorException
 	 */
-	public void upgrade(String path, ISVNRepositoryNotificationCallback callback, ISVNProgressMonitor monitor)
+	void upgrade(String path, ISVNRepositoryNotificationCallback callback, ISVNProgressMonitor monitor)
 			throws SVNConnectorException;
 
 	/**
@@ -451,11 +450,11 @@ public interface ISVNManager {
 	 *            operation progress monitor
 	 * @throws SVNConnectorException
 	 */
-	public abstract void pack(String path, ISVNRepositoryNotificationCallback callback, ISVNProgressMonitor monitor)
+	void pack(String path, ISVNRepositoryNotificationCallback callback, ISVNProgressMonitor monitor)
 			throws SVNConnectorException;
 
 	/**
 	 * Disposes of all the native resources allocated by the connector instance.
 	 */
-	public void dispose();
+	void dispose();
 }

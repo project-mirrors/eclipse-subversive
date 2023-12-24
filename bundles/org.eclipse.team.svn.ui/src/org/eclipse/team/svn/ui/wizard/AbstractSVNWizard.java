@@ -28,12 +28,12 @@ import org.eclipse.swt.widgets.Control;
 public abstract class AbstractSVNWizard extends Wizard {
 
 	public AbstractSVNWizard() {
-		super();
 	}
 
+	@Override
 	public void createPageControls(Composite pageContainer) {
-		if (!this.needsProgressMonitor()) {
-			ProgressMonitorPart part = this.findProgressMonitorPart(pageContainer);
+		if (!needsProgressMonitor()) {
+			ProgressMonitorPart part = findProgressMonitorPart(pageContainer);
 			if (part != null) {
 				GridData data = new GridData();
 				data.heightHint = 0;
@@ -48,12 +48,12 @@ public abstract class AbstractSVNWizard extends Wizard {
 			return null;
 		}
 		Control[] children = container.getChildren();
-		for (int i = 0; i < children.length; i++) {
-			if (children[i] instanceof ProgressMonitorPart) {
-				return (ProgressMonitorPart) children[i];
+		for (Control child : children) {
+			if (child instanceof ProgressMonitorPart) {
+				return (ProgressMonitorPart) child;
 			}
 		}
-		return this.findProgressMonitorPart(container.getParent());
+		return findProgressMonitorPart(container.getParent());
 	}
 
 }

@@ -46,32 +46,34 @@ public interface IRepositoryResource extends IRepositoryBase, IRepositoryResourc
 		}
 	}
 
-	public SVNRevision getSelectedRevision();
+	SVNRevision getSelectedRevision();
 
-	public void setSelectedRevision(SVNRevision revision);
+	void setSelectedRevision(SVNRevision revision);
 
-	public SVNRevision getPegRevision();
+	SVNRevision getPegRevision();
 
-	public void setPegRevision(SVNRevision pegRevision);
+	void setPegRevision(SVNRevision pegRevision);
 
-	public boolean isInfoCached();
+	boolean isInfoCached();
 
-	public void refresh();
+	void refresh();
 
-	public boolean exists() throws SVNConnectorException;
+	boolean exists() throws SVNConnectorException;
 
-	public String getName();
+	@Override
+	String getName();
 
-	public String getUrl();
+	@Override
+	String getUrl();
 
-	public long getRevision() throws SVNConnectorException;
+	long getRevision() throws SVNConnectorException;
 
-	public IRepositoryResource getParent();
+	IRepositoryResource getParent();
 
-	public IRepositoryResource getRoot();
+	IRepositoryResource getRoot();
 
-	public IRepositoryLocation getRepositoryLocation();
+	IRepositoryLocation getRepositoryLocation();
 
-	public Information getInfo();
+	Information getInfo();
 
 }

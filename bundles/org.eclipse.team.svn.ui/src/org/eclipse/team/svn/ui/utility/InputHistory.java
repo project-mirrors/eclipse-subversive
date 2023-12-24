@@ -46,106 +46,106 @@ public class InputHistory {
 		this.name = name;
 		this.type = type;
 
-		this.loadHistoryValue(defaultValue);
+		loadHistoryValue(defaultValue);
 	}
 
 	public String getName() {
-		return this.name;
+		return name;
 	}
 
 	public Object getValue() {
-		return this.value;
+		return value;
 	}
 
 	public void clear() {
-		this.value = null;
-		this.saveHistoryValue();
+		value = null;
+		saveHistoryValue();
 	}
 
 	public void setValue(Object value) {
 		this.value = value;
-		this.saveHistoryValue();
+		saveHistoryValue();
 	}
 
 	protected void loadHistoryValue(Object defaultValue) {
-		String fullName = UserInputHistory.HISTORY_NAME_BASE + this.name;
-		switch (this.type) {
+		String fullName = UserInputHistory.HISTORY_NAME_BASE + name;
+		switch (type) {
 			case InputHistory.TYPE_BOOLEAN: {
 				SVNTeamUIPlugin.instance()
 						.getPreferenceStore()
-						.setDefault(fullName, defaultValue == null ? false : ((Boolean) defaultValue).booleanValue());
-				this.value = SVNTeamUIPlugin.instance().getPreferenceStore().getBoolean(fullName);
+						.setDefault(fullName, defaultValue == null ? false : ((Boolean) defaultValue));
+				value = SVNTeamUIPlugin.instance().getPreferenceStore().getBoolean(fullName);
 				break;
 			}
 			case InputHistory.TYPE_DOUBLE: {
 				SVNTeamUIPlugin.instance()
 						.getPreferenceStore()
-						.setDefault(fullName, defaultValue == null ? 0 : ((Double) defaultValue).doubleValue());
-				this.value = SVNTeamUIPlugin.instance().getPreferenceStore().getDouble(fullName);
+						.setDefault(fullName, defaultValue == null ? 0 : ((Double) defaultValue));
+				value = SVNTeamUIPlugin.instance().getPreferenceStore().getDouble(fullName);
 				break;
 			}
 			case InputHistory.TYPE_FLOAT: {
 				SVNTeamUIPlugin.instance()
 						.getPreferenceStore()
-						.setDefault(fullName, defaultValue == null ? 0 : ((Float) defaultValue).floatValue());
-				this.value = SVNTeamUIPlugin.instance().getPreferenceStore().getFloat(fullName);
+						.setDefault(fullName, defaultValue == null ? 0 : ((Float) defaultValue));
+				value = SVNTeamUIPlugin.instance().getPreferenceStore().getFloat(fullName);
 				break;
 			}
 			case InputHistory.TYPE_INT: {
 				SVNTeamUIPlugin.instance()
 						.getPreferenceStore()
-						.setDefault(fullName, defaultValue == null ? 0 : ((Integer) defaultValue).intValue());
-				this.value = SVNTeamUIPlugin.instance().getPreferenceStore().getInt(fullName);
+						.setDefault(fullName, defaultValue == null ? 0 : ((Integer) defaultValue));
+				value = SVNTeamUIPlugin.instance().getPreferenceStore().getInt(fullName);
 				break;
 			}
 			case InputHistory.TYPE_LONG: {
 				SVNTeamUIPlugin.instance()
 						.getPreferenceStore()
-						.setDefault(fullName, defaultValue == null ? 0 : ((Long) defaultValue).longValue());
-				this.value = SVNTeamUIPlugin.instance().getPreferenceStore().getLong(fullName);
+						.setDefault(fullName, defaultValue == null ? 0 : ((Long) defaultValue));
+				value = SVNTeamUIPlugin.instance().getPreferenceStore().getLong(fullName);
 				break;
 			}
 			default: {
 				SVNTeamUIPlugin.instance()
 						.getPreferenceStore()
 						.setDefault(fullName, defaultValue == null ? "" : (String) defaultValue); //$NON-NLS-1$
-				this.value = SVNTeamUIPlugin.instance().getPreferenceStore().getString(fullName);
+				value = SVNTeamUIPlugin.instance().getPreferenceStore().getString(fullName);
 			}
 		}
 	}
 
 	protected void saveHistoryValue() {
 		Object value = this.value;
-		String fullName = UserInputHistory.HISTORY_NAME_BASE + this.name;
-		switch (this.type) {
+		String fullName = UserInputHistory.HISTORY_NAME_BASE + name;
+		switch (type) {
 			case InputHistory.TYPE_BOOLEAN: {
 				SVNTeamUIPlugin.instance()
 						.getPreferenceStore()
-						.setValue(fullName, value == null ? false : ((Boolean) value).booleanValue());
+						.setValue(fullName, value == null ? false : ((Boolean) value));
 				break;
 			}
 			case InputHistory.TYPE_DOUBLE: {
 				SVNTeamUIPlugin.instance()
 						.getPreferenceStore()
-						.setValue(fullName, value == null ? 0 : ((Double) value).doubleValue());
+						.setValue(fullName, value == null ? 0 : ((Double) value));
 				break;
 			}
 			case InputHistory.TYPE_FLOAT: {
 				SVNTeamUIPlugin.instance()
 						.getPreferenceStore()
-						.setValue(fullName, value == null ? 0 : ((Float) value).floatValue());
+						.setValue(fullName, value == null ? 0 : ((Float) value));
 				break;
 			}
 			case InputHistory.TYPE_INT: {
 				SVNTeamUIPlugin.instance()
 						.getPreferenceStore()
-						.setValue(fullName, value == null ? 0 : ((Integer) value).intValue());
+						.setValue(fullName, value == null ? 0 : ((Integer) value));
 				break;
 			}
 			case InputHistory.TYPE_LONG: {
 				SVNTeamUIPlugin.instance()
 						.getPreferenceStore()
-						.setValue(fullName, value == null ? 0 : ((Long) value).longValue());
+						.setValue(fullName, value == null ? 0 : ((Long) value));
 				break;
 			}
 			default: {

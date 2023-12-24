@@ -21,6 +21,7 @@ import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.team.svn.core.BaseMessages;
 import org.eclipse.team.svn.ui.SVNUIMessages;
 
 /**
@@ -36,42 +37,42 @@ public abstract class AbstractVerifier {
 	protected boolean hasWarning;
 
 	public AbstractVerifier() {
-		this.listeners = new ArrayList<IVerifierListener>();
-		this.filledRight = false;
-		this.hasWarning = false;
+		listeners = new ArrayList<>();
+		filledRight = false;
+		hasWarning = false;
 	}
 
 	public synchronized void addVerifierListener(IVerifierListener listener) {
-		synchronized (this.listeners) {
-			this.listeners.add(listener);
+		synchronized (listeners) {
+			listeners.add(listener);
 		}
 	}
 
 	public void removeVerifierListener(IVerifierListener listener) {
-		synchronized (this.listeners) {
-			this.listeners.remove(listener);
+		synchronized (listeners) {
+			listeners.remove(listener);
 		}
 	}
 
 	public boolean isFilledRight() {
-		return this.filledRight;
+		return filledRight;
 	}
 
 	public boolean hasWarning() {
-		return this.hasWarning;
+		return hasWarning;
 	}
 
 	public boolean verify(Control input) {
-		String msg = this.getErrorMessage(input);
+		String msg = getErrorMessage(input);
 		if (msg != null) {
-			this.fireError(msg);
+			fireError(msg);
 			return false;
 		}
-		msg = this.getWarningMessage(input);
+		msg = getWarningMessage(input);
 		if (msg != null) {
-			this.fireWarning(msg);
+			fireWarning(msg);
 		} else {
-			this.fireOk();
+			fireOk();
 		}
 		return true;
 	}
@@ -88,14 +89,14 @@ public abstract class AbstractVerifier {
 		} else if (input instanceof Combo) {
 			return ((Combo) input).getText();
 		}
-		String message = SVNUIMessages.format(SVNUIMessages.Verifier_Abstract,
+		String message = BaseMessages.format(SVNUIMessages.Verifier_Abstract,
 				new String[] { this.getClass().getName() });
 		throw new RuntimeException(message);
 	}
 
 	protected void fireError(String errorReason) {
-		this.filledRight = false;
-		this.hasWarning = false;
+		filledRight = false;
+		hasWarning = false;
 
 		Object[] listeners = null;
 		synchronized (this.listeners) {
@@ -107,8 +108,8 @@ public abstract class AbstractVerifier {
 	}
 
 	protected void fireWarning(String warningReason) {
-		this.filledRight = true;
-		this.hasWarning = true;
+		filledRight = true;
+		hasWarning = true;
 		Object[] listeners = null;
 		synchronized (this.listeners) {
 			listeners = this.listeners.toArray();
@@ -119,8 +120,8 @@ public abstract class AbstractVerifier {
 	}
 
 	protected void fireOk() {
-		this.filledRight = true;
-		this.hasWarning = false;
+		filledRight = true;
+		hasWarning = false;
 		Object[] listeners = null;
 		synchronized (this.listeners) {
 			listeners = this.listeners.toArray();

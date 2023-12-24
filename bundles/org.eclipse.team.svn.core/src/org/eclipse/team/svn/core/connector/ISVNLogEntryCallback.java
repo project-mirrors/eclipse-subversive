@@ -33,5 +33,5 @@ public interface ISVNLogEntryCallback {
 	 *            SVNRevision.INVALID_REVISION_NUMBER value. Children could be added to parent log entry if it is required. Also please note
 	 *            that children could be reported recursively.
 	 */
-	public void next(SVNLogEntry log);
+	void next(SVNLogEntry log);
 }

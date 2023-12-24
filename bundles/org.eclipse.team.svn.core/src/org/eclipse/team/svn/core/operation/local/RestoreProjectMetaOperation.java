@@ -22,7 +22,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.team.svn.core.SVNMessages;
 import org.eclipse.team.svn.core.operation.AbstractActionOperation;
-import org.eclipse.team.svn.core.operation.IUnprotectedOperation;
 import org.eclipse.team.svn.core.utility.FileUtility;
 
 /**
@@ -45,47 +44,46 @@ public class RestoreProjectMetaOperation extends AbstractActionOperation {
 		this.force = force;
 	}
 
+	@Override
 	public ISchedulingRule getSchedulingRule() {
-		return this.saveOp.getSchedulingRule();
+		return saveOp.getSchedulingRule();
 	}
 
+	@Override
 	public int getOperationWeight() {
 		return 0;
 	}
 
+	@Override
 	protected void runImpl(IProgressMonitor monitor) throws Exception {
-		Map<?, ?> container = this.saveOp.getSavedMetas();
+		Map<?, ?> container = saveOp.getSavedMetas();
 		for (Iterator<?> it = container.entrySet().iterator(); it.hasNext() && !monitor.isCanceled();) {
 			Map.Entry entry = (Map.Entry) it.next();
 			final File targetFile = new File((String) entry.getKey());
 			final File savedCopy = (File) entry.getValue();
 			if (targetFile.getParentFile().exists()) {
 				if (savedCopy.isDirectory()) {
-					this.protectStep(new IUnprotectedOperation() {
-						public void run(IProgressMonitor monitor) throws Exception {
-							try {
-								if (RestoreProjectMetaOperation.this.force) {
-									FileUtility.copyAll(targetFile.getParentFile(), savedCopy.listFiles()[0],
-											FileUtility.COPY_IGNORE_EXISTING_FOLDERS
-													| FileUtility.COPY_OVERRIDE_EXISTING_FILES,
-											null, monitor);
-								} else {
-									FileUtility.copyAll(targetFile.getParentFile(), savedCopy.listFiles()[0],
-											FileUtility.COPY_IGNORE_EXISTING_FOLDERS, null, monitor);
-								}
-							} catch (Exception ex) {
-								// Any Exception must be ignored in this context
+					this.protectStep(monitor1 -> {
+						try {
+							if (force) {
+								FileUtility.copyAll(targetFile.getParentFile(), savedCopy.listFiles()[0],
+										FileUtility.COPY_IGNORE_EXISTING_FOLDERS
+												| FileUtility.COPY_OVERRIDE_EXISTING_FILES,
+										null, monitor1);
+							} else {
+								FileUtility.copyAll(targetFile.getParentFile(), savedCopy.listFiles()[0],
+										FileUtility.COPY_IGNORE_EXISTING_FOLDERS, null, monitor1);
 							}
+						} catch (Exception ex) {
+							// Any Exception must be ignored in this context
 						}
 					}, monitor, container.size());
-				} else if (!targetFile.exists() || this.force) {
-					this.protectStep(new IUnprotectedOperation() {
-						public void run(IProgressMonitor monitor) throws Exception {
-							try {
-								FileUtility.copyFile(targetFile, savedCopy, monitor);
-							} catch (Exception ex) {
-								// Any Exception must be ignored in this context
-							}
+				} else if (!targetFile.exists() || force) {
+					this.protectStep(monitor1 -> {
+						try {
+							FileUtility.copyFile(targetFile, savedCopy, monitor1);
+						} catch (Exception ex) {
+							// Any Exception must be ignored in this context
 						}
 					}, monitor, container.size());
 				}

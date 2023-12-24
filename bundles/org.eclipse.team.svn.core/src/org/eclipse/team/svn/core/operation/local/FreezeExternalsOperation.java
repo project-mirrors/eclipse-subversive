@@ -24,7 +24,6 @@ import org.eclipse.team.svn.core.SVNMessages;
 import org.eclipse.team.svn.core.connector.SVNProperty;
 import org.eclipse.team.svn.core.connector.SVNProperty.BuiltIn;
 import org.eclipse.team.svn.core.operation.IActionOperation;
-import org.eclipse.team.svn.core.operation.IUnprotectedOperation;
 import org.eclipse.team.svn.core.operation.UnreportableException;
 import org.eclipse.team.svn.core.operation.local.change.IActionOperationProcessor;
 import org.eclipse.team.svn.core.operation.local.change.IResourceChangeVisitor;
@@ -46,7 +45,7 @@ import org.eclipse.team.svn.core.utility.SVNUtility.SVNExternalPropertyData;
  */
 public class FreezeExternalsOperation extends AbstractWorkingCopyOperation
 		implements IActionOperationProcessor, IResourceProvider {
-	protected ArrayList<ResourceChange> changes = new ArrayList<ResourceChange>();
+	protected ArrayList<ResourceChange> changes = new ArrayList<>();
 
 	public FreezeExternalsOperation(IResource[] resources) {
 		super("Operation_FreezeExternals", SVNMessages.class, resources); //$NON-NLS-1$
@@ -56,16 +55,18 @@ public class FreezeExternalsOperation extends AbstractWorkingCopyOperation
 		super("Operation_FreezeExternals", SVNMessages.class, provider); //$NON-NLS-1$
 	}
 
+	@Override
 	public IResource[] getResources() {
-		return this.operableData();
+		return operableData();
 	}
 
 	public Collection<ResourceChange> getChanges() {
-		return this.changes;
+		return changes;
 	}
 
+	@Override
 	protected void runImpl(IProgressMonitor monitor) throws Exception {
-		IResource[] resources = this.operableData();
+		IResource[] resources = operableData();
 
 		final CompositeVisitor visitor = new CompositeVisitor();
 		visitor.add(new SavePropertiesVisitor(true));
@@ -73,28 +74,29 @@ public class FreezeExternalsOperation extends AbstractWorkingCopyOperation
 
 		for (int i = 0; i < resources.length && !monitor.isCanceled(); i++) {
 			final IResource current = resources[i];
-			this.protectStep(new IUnprotectedOperation() {
-				public void run(IProgressMonitor monitor) throws Exception {
-					ResourceChange change = ResourceChange.wrapLocalResource(null,
-							SVNRemoteStorage.instance().asLocalResourceAccessible(current), false);
-					if (change != null) {
-						change.traverse(visitor, IResource.DEPTH_INFINITE, FreezeExternalsOperation.this, monitor);
-					}
+			this.protectStep(monitor1 -> {
+				ResourceChange change = ResourceChange.wrapLocalResource(null,
+						SVNRemoteStorage.instance().asLocalResourceAccessible(current), false);
+				if (change != null) {
+					change.traverse(visitor, IResource.DEPTH_INFINITE, FreezeExternalsOperation.this, monitor1);
 				}
 			}, monitor, resources.length);
 		}
 	}
 
+	@Override
 	public void doOperation(IActionOperation op, IProgressMonitor monitor) {
 		this.reportStatus(op.run(monitor).getStatus());
 	}
 
 	protected class FreezeVisitor implements IResourceChangeVisitor {
+		@Override
 		public void postVisit(ResourceChange change, IActionOperationProcessor processor, IProgressMonitor monitor)
 				throws Exception {
 
 		}
 
+		@Override
 		public void preVisit(ResourceChange change, IActionOperationProcessor processor, IProgressMonitor monitor)
 				throws Exception {
 			if (change.getLocal() instanceof ILocalFolder) {
@@ -102,8 +104,8 @@ public class FreezeExternalsOperation extends AbstractWorkingCopyOperation
 				if (properties != null) {
 					for (int i = 0; i < properties.length && !monitor.isCanceled(); i++) {
 						if (properties[i].name.equals(BuiltIn.EXTERNALS)) {
-							FreezeExternalsOperation.this.changes.add(change);
-							this.processExternals(change, properties[i], processor, monitor);
+							changes.add(change);
+							processExternals(change, properties[i], processor, monitor);
 						}
 					}
 				}
@@ -113,7 +115,7 @@ public class FreezeExternalsOperation extends AbstractWorkingCopyOperation
 		protected void processExternals(ResourceChange change, SVNProperty property,
 				IActionOperationProcessor processor, IProgressMonitor monitor) throws Exception {
 			// process externals
-			String newValue = ""; //$NON-NLS-1$			
+			String newValue = ""; //$NON-NLS-1$
 			SVNExternalPropertyData[] externals = SVNExternalPropertyData.parse(property.value);
 			for (SVNExternalPropertyData external : externals) {
 				if (external.pegRevision == null && external.revision == null) {

@@ -22,5 +22,5 @@ import java.io.File;
  * @author Alexander Gurov
  */
 public interface IFileProvider {
-	public File[] getFiles();
+	File[] getFiles();
 }

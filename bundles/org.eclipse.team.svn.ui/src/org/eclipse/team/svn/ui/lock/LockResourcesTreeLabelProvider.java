@@ -46,6 +46,7 @@ public class LockResourcesTreeLabelProvider extends LabelProvider {
 		}
 	}
 
+	@Override
 	public Image getImage(Object element) {
 		LockResource node = (LockResource) element;
 		if (node.isRoot()) {
@@ -55,6 +56,7 @@ public class LockResourcesTreeLabelProvider extends LabelProvider {
 		}
 	}
 
+	@Override
 	public String getText(Object element) {
 		LockResource node = (LockResource) element;
 		return node.getName();

@@ -46,21 +46,22 @@ import org.eclipse.team.svn.core.utility.SVNUtility;
 public class SVNScmHandler extends ScmHandler {
 	public static final String SVN_SCM_ID = "scm:svn:";
 
+	@Override
 	public InputStream open(String url, String revision) throws CoreException {
-		IRepositoryContainer container = this.getRepositoryContainer(url, revision);
+		IRepositoryContainer container = getRepositoryContainer(url, revision);
 
 		GetFileContentOperation op = new GetFileContentOperation(
 				container.asRepositoryFile(url + "/" + "pom.xml", false));
 
-		this.runOperation(op, null);
+		runOperation(op, null);
 
 		return op.getContent();
 	}
 
+	@Override
 	public void checkoutProject(MavenProjectScmInfo projectInfo, File destination, IProgressMonitor monitor)
 			throws CoreException, InterruptedException {
-		IRepositoryContainer container = this.getRepositoryContainer(projectInfo.getFolderUrl(),
-				projectInfo.getRevision());
+		IRepositoryContainer container = getRepositoryContainer(projectInfo.getFolderUrl(), projectInfo.getRevision());
 
 		IActionOperation op = new CheckoutAsOperation(destination, container, SVNDepth.INFINITY, false, true);
 
@@ -74,7 +75,7 @@ public class SVNScmHandler extends ScmHandler {
 			op = cOp;
 		}
 
-		this.runOperation(op, monitor);
+		runOperation(op, monitor);
 	}
 
 	protected void runOperation(IActionOperation op, IProgressMonitor monitor) throws CoreException {

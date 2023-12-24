@@ -35,14 +35,15 @@ public class MultiLinePropertyVerifier extends AbstractFormattedVerifier {
 		MultiLinePropertyVerifier.ERROR_MESSAGE_INVALID_FORMAT = SVNUIMessages.Verifier_MultiLineProperty_Main;
 	}
 
+	@Override
 	protected String getErrorMessageImpl(Control input) {
-		String[] properties = this.getText(input).split(System.getProperty("line.separator")); //$NON-NLS-1$
+		String[] properties = getText(input).split(System.lineSeparator());
 		for (int i = 0; i < properties.length; i++) {
 			if (properties[i].length() == 0) {
 				continue;
 			}
 
-			String retVal = this.validateProperty(properties[i], i);
+			String retVal = validateProperty(properties[i], i);
 			if (retVal != null) {
 				return retVal;
 			}
@@ -51,6 +52,7 @@ public class MultiLinePropertyVerifier extends AbstractFormattedVerifier {
 		return null;
 	}
 
+	@Override
 	protected String getWarningMessageImpl(Control input) {
 		return null;
 	}
@@ -61,21 +63,21 @@ public class MultiLinePropertyVerifier extends AbstractFormattedVerifier {
 		String[] propNameValue = property.split("=", 2); //$NON-NLS-1$
 
 		if (propNameValue.length == 0 || propNameValue[0].length() == 0) {
-			return this.formatMainMessage(line) + " " + SVNUIMessages.Verifier_MultiLineProperty_NameIsEmpty; //$NON-NLS-1$
+			return formatMainMessage(line) + " " + SVNUIMessages.Verifier_MultiLineProperty_NameIsEmpty; //$NON-NLS-1$
 		}
 
 		pattern = Pattern.compile("[a-zA-Z:_].*"); //$NON-NLS-1$
 		if (!pattern.matcher(propNameValue[0]).matches()) {
-			return this.formatMainMessage(line) + " " + SVNUIMessages.Verifier_MultiLineProperty_NotALetter; //$NON-NLS-1$
+			return formatMainMessage(line) + " " + SVNUIMessages.Verifier_MultiLineProperty_NotALetter; //$NON-NLS-1$
 		}
 
 		pattern = Pattern.compile("[a-zA-Z0-9:\\-_\\.]+"); //$NON-NLS-1$
 		if (!pattern.matcher(propNameValue[0]).matches()) {
-			return this.formatMainMessage(line) + " " + SVNUIMessages.Verifier_MultiLineProperty_InvalidNameChar; //$NON-NLS-1$
+			return formatMainMessage(line) + " " + SVNUIMessages.Verifier_MultiLineProperty_InvalidNameChar; //$NON-NLS-1$
 		}
 
 		if (propNameValue.length < 2 || propNameValue[1].length() == 0) {
-			return this.formatMainMessage(line) + " " + SVNUIMessages.Verifier_MultiLineProperty_EmptyValue; //$NON-NLS-1$
+			return formatMainMessage(line) + " " + SVNUIMessages.Verifier_MultiLineProperty_EmptyValue; //$NON-NLS-1$
 		}
 
 		return null;

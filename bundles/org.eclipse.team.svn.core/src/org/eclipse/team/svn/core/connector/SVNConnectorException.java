@@ -32,12 +32,12 @@ public class SVNConnectorException extends Exception {
 
 	public SVNConnectorException(String message) {
 		super(message);
-		this.errorId = SVNErrorCodes.NO_ERROR_CODE;
+		errorId = SVNErrorCodes.NO_ERROR_CODE;
 	}
 
 	public SVNConnectorException(Throwable cause) {
 		super(cause);
-		this.errorId = SVNErrorCodes.NO_ERROR_CODE;
+		errorId = SVNErrorCodes.NO_ERROR_CODE;
 	}
 
 	public SVNConnectorException(String message, Throwable cause) {
@@ -61,11 +61,11 @@ public class SVNConnectorException extends Exception {
 	 * @since 1.9
 	 */
 	public ErrorMessage[] getMessageStack() {
-		return this.messageStack;
+		return messageStack;
 	}
 
 	public int getErrorId() {
-		return this.errorId;
+		return errorId;
 	}
 
 	public static final class ErrorMessage {

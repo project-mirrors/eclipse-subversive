@@ -70,18 +70,13 @@ public class SSLClientCertificatesMSCapi extends ListDialog {
 					//keyStore.getCertificate(alias)
 				}
 			}
-		} catch (KeyStoreException e) {
-			e.printStackTrace();
-		} catch (NoSuchAlgorithmException e) {
-			e.printStackTrace();
-		} catch (CertificateException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
+		} catch (KeyStoreException | NoSuchAlgorithmException | CertificateException | IOException e) {
 			e.printStackTrace();
 		}
 		setTitle("Select Certificate Alias"); //$NON-NLS-1$
 		setAddCancelButton(true);
 		LabelProvider lp = new LabelProvider() {
+			@Override
 			public String getText(Object element) {
 				if (element == null) {
 					return "";
@@ -103,9 +98,9 @@ public class SSLClientCertificatesMSCapi extends ListDialog {
 		if (getResult() != null && getResult().length > 0) {
 			Object result = getResult()[0];
 			if (result instanceof String[]) {
-				this.alias = ((String[]) result)[0];
+				alias = ((String[]) result)[0];
 			} else {
-				this.alias = (String) result;
+				alias = (String) result;
 			}
 		}
 		return alias;

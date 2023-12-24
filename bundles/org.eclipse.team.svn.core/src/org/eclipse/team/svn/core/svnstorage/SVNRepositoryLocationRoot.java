@@ -30,6 +30,7 @@ public class SVNRepositoryLocationRoot extends SVNRepositoryRootBase {
 		super(location, location.getUrl(), SVNRevision.HEAD);
 	}
 
+	@Override
 	public int getKind() {
 		return IRepositoryRoot.KIND_LOCATION_ROOT;
 	}

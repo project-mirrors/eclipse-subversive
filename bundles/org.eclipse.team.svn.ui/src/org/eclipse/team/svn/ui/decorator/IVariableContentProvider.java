@@ -20,5 +20,5 @@ package org.eclipse.team.svn.ui.decorator;
  * @author Alexander Gurov
  */
 public interface IVariableContentProvider {
-	public String getValue(IVariable var);
+	String getValue(IVariable var);
 }

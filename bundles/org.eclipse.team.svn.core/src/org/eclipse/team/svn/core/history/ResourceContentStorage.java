@@ -49,21 +49,23 @@ public class ResourceContentStorage implements IEncodedStorage {
 		this.remote = remote;
 	}
 
+	@Override
 	public InputStream getContents() {
-		this.fetchContents(null);
-		return this.op.getContent();
+		fetchContents(null);
+		return op.getContent();
 	}
 
 	public synchronized void fetchContents(IProgressMonitor monitor) {
-		if (this.op == null) {
-			this.op = this.getLoadContentOperation();
-			CompositeOperation composite = new CompositeOperation(this.op.getId(), this.op.getMessagesClass());
-			composite.add(this.op);
+		if (op == null) {
+			op = getLoadContentOperation();
+			CompositeOperation composite = new CompositeOperation(op.getId(), op.getMessagesClass());
+			composite.add(op);
 			composite.add(new AbstractActionOperation("Operation_DetectCharset", SVNMessages.class) { //$NON-NLS-1$
+				@Override
 				protected void runImpl(IProgressMonitor monitor) throws Exception {
-					ResourceContentStorage.this.detectCharset(ResourceContentStorage.this.op.getContent());
+					ResourceContentStorage.this.detectCharset(op.getContent());
 				}
-			}, new IActionOperation[] { this.op });
+			}, new IActionOperation[] { op });
 			if (monitor == null) {
 				monitor = new NullProgressMonitor();
 			}
@@ -71,52 +73,58 @@ public class ResourceContentStorage implements IEncodedStorage {
 		}
 	}
 
+	@Override
 	public IPath getFullPath() {
-		return SVNUtility.createPathForSVNUrl(this.remote.getUrl());
+		return SVNUtility.createPathForSVNUrl(remote.getUrl());
 	}
 
 	public IPath getTemporaryPath() {
-		this.fetchContents(null);
-		return new Path(this.op.getTemporaryPath());
+		fetchContents(null);
+		return new Path(op.getTemporaryPath());
 	}
 
+	@Override
 	public String getName() {
-		return this.remote.getName();
+		return remote.getName();
 	}
 
+	@Override
 	public boolean isReadOnly() {
 		return true;
 	}
 
+	@Override
 	public Object getAdapter(Class adapter) {
 		return Platform.getAdapterManager().getAdapter(this, adapter);
 	}
 
+	@Override
 	public String getCharset() {
-		return this.charSet;
+		return charSet;
 	}
 
 	public IRepositoryResource getRepositoryResource() {
-		return this.remote;
+		return remote;
 	}
 
+	@Override
 	public boolean equals(Object obj) {
 		if (obj == null || !(obj instanceof ResourceContentStorage)) {
 			return false;
 		}
 		IRepositoryResource other = ((ResourceContentStorage) obj).getRepositoryResource();
-		return this.remote.equals(other);
+		return remote.equals(other);
 	}
 
 	protected AbstractGetFileContentOperation getLoadContentOperation() {
-		return new GetFileContentOperation(this.remote);
+		return new GetFileContentOperation(remote);
 	}
 
 	protected void detectCharset(InputStream stream) throws Exception {
 		try {
 			IContentDescription description = Platform.getContentTypeManager()
-					.getDescriptionFor(stream, this.getName(), IContentDescription.ALL);
-			this.charSet = description == null ? null : description.getCharset();
+					.getDescriptionFor(stream, getName(), IContentDescription.ALL);
+			charSet = description == null ? null : description.getCharset();
 		} finally {
 			try {
 				stream.close();

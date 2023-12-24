@@ -17,13 +17,11 @@ package org.eclipse.team.svn.ui.operation;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.team.svn.core.connector.SVNRevision;
 import org.eclipse.team.svn.core.operation.AbstractActionOperation;
-import org.eclipse.team.svn.core.operation.IUnprotectedOperation;
 import org.eclipse.team.svn.core.resource.IRepositoryLocation;
 import org.eclipse.team.svn.ui.SVNUIMessages;
 import org.eclipse.team.svn.ui.properties.RevPropertiesView;
 import org.eclipse.team.svn.ui.utility.UIMonitorUtility;
 import org.eclipse.ui.IWorkbenchPage;
-import org.eclipse.ui.PartInitException;
 
 /**
  * Show revision properties operation
@@ -45,20 +43,12 @@ public class ShowRevisionPropertiesOperation extends AbstractActionOperation {
 		this.revision = revision;
 	}
 
+	@Override
 	protected void runImpl(final IProgressMonitor monitor) throws Exception {
-		UIMonitorUtility.getDisplay().syncExec(new Runnable() {
-			public void run() {
-				ShowRevisionPropertiesOperation.this.protectStep(new IUnprotectedOperation() {
-					public void run(IProgressMonitor monitor) throws PartInitException {
-						RevPropertiesView view = (RevPropertiesView) ShowRevisionPropertiesOperation.this.page
-								.showView(RevPropertiesView.VIEW_ID);
-						view.setLocationAndRevision(ShowRevisionPropertiesOperation.this.location,
-								ShowRevisionPropertiesOperation.this.revision);
-					}
-				}, monitor, 1);
-
-			}
-		});
+		UIMonitorUtility.getDisplay().syncExec(() -> ShowRevisionPropertiesOperation.this.protectStep(monitor1 -> {
+			RevPropertiesView view = (RevPropertiesView) page.showView(RevPropertiesView.VIEW_ID);
+			view.setLocationAndRevision(location, revision);
+		}, monitor, 1));
 	}
 
 }

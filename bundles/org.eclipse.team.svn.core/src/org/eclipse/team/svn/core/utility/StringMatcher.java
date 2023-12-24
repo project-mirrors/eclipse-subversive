@@ -28,7 +28,7 @@ public class StringMatcher {
 	protected Pattern filter;
 
 	public StringMatcher(String mask) {
-		this.filter = Pattern.compile(this.getRegexp(mask), Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
+		filter = Pattern.compile(getRegexp(mask), Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
 	}
 
 	protected String getRegexp(String pattern) {
@@ -37,7 +37,7 @@ public class StringMatcher {
 		}
 
 		Pattern regexp = Pattern.compile(StringMatcher.NOT_MASKING);
-		StringBuffer ret = new StringBuffer();
+		StringBuilder ret = new StringBuilder();
 
 		for (int i = 0; i < pattern.length(); i++) {
 			String ch = pattern.substring(i, i + 1);
@@ -57,7 +57,7 @@ public class StringMatcher {
 	}
 
 	public boolean match(String text) {
-		return text != null && this.filter.matcher(text).matches();
+		return text != null && filter.matcher(text).matches();
 	}
 
 }

@@ -23,8 +23,8 @@ import org.eclipse.team.svn.core.connector.SVNConnectorException;
  */
 public interface IRepositoryContainer extends IRepositoryResource {
 
-	public boolean isChildrenCached();
+	boolean isChildrenCached();
 
-	public IRepositoryResource[] getChildren() throws SVNConnectorException;
+	IRepositoryResource[] getChildren() throws SVNConnectorException;
 
 }

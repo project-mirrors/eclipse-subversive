@@ -40,20 +40,23 @@ public class TagPanel extends AbstractBranchTagPanel {
 		super(tagTo, showStartsWith, existingNames, "TagPanel", "tag", resources, selectedRemoteResources);
 	}
 
+	@Override
 	public void createControlsImpl(Composite parent) {
 		super.createControlsImpl(parent);
-		if (this.startsWith && SVNTeamPreferences.getRepositoryBoolean(SVNTeamUIPlugin.instance().getPreferenceStore(),
+		if (startsWith && SVNTeamPreferences.getRepositoryBoolean(SVNTeamUIPlugin.instance().getPreferenceStore(),
 				SVNTeamPreferences.REPOSITORY_FORCE_EXTERNALS_FREEZE_NAME)) {
-			this.freezeExternalsCheck.setSelection(true);
-			this.freezeExternalsCheck.setEnabled(false);
+			freezeExternalsCheck.setSelection(true);
+			freezeExternalsCheck.setEnabled(false);
 		}
 	}
 
+	@Override
 	protected void creationModeChanged(int creationMode) {
-		this.freezeExternalsCheck.setSelection(creationMode != SVNTeamPreferences.CREATION_MODE_REPOSITORY);
-		this.revisionComposite.setEnabled(creationMode == SVNTeamPreferences.CREATION_MODE_REPOSITORY);
+		freezeExternalsCheck.setSelection(creationMode != SVNTeamPreferences.CREATION_MODE_REPOSITORY);
+		revisionComposite.setEnabled(creationMode == SVNTeamPreferences.CREATION_MODE_REPOSITORY);
 	}
 
+	@Override
 	public String getHelpId() {
 		return "org.eclipse.team.svn.help.tagDialogContext"; //$NON-NLS-1$
 	}

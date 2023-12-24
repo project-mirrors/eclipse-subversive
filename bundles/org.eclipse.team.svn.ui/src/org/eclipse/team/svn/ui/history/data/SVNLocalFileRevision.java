@@ -43,32 +43,37 @@ public class SVNLocalFileRevision extends LocalFileRevision implements IEditable
 		super(fileState);
 	}
 
+	@Override
 	public String getComment() {
-		if (this.getFile() != null) {
+		if (getFile() != null) {
 			return SVNUIMessages.SVNLocalFileRevision_CurrentVersion;
 		}
 		return ""; //$NON-NLS-1$
 	}
 
+	@Override
 	public String getContentIdentifier() {
-		if (this.getFile() != null) {
+		if (getFile() != null) {
 			return ""; //$NON-NLS-1$
 		}
-		return "[" + DateFormatter.formatDate(this.getTimestamp()) + "]"; //$NON-NLS-1$ //$NON-NLS-2$
+		return "[" + DateFormatter.formatDate(getTimestamp()) + "]"; //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
+	@Override
 	public boolean isEditable() {
-		return this.isCurrentState();
+		return isCurrentState();
 	}
 
+	@Override
 	public ITypedElement replace(ITypedElement dest, ITypedElement src) {
 		return dest;
 	}
 
+	@Override
 	public void setContent(byte[] newContent) {
-		if (this.isEditable()) {
+		if (isEditable()) {
 			try {
-				this.getFile().setContents(new ByteArrayInputStream(newContent), true, true, new NullProgressMonitor());
+				getFile().setContents(new ByteArrayInputStream(newContent), true, true, new NullProgressMonitor());
 			} catch (CoreException ex) {
 				UILoggedOperation.reportError(SVNMessages.Operation_GetFileContent_SetContent, ex);
 			}

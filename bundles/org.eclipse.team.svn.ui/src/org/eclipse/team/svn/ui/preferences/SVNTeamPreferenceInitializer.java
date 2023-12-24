@@ -24,6 +24,7 @@ import org.eclipse.team.svn.ui.SVNTeamUIPlugin;
  */
 public class SVNTeamPreferenceInitializer extends AbstractPreferenceInitializer {
 
+	@Override
 	public void initializeDefaultPreferences() {
 		SVNTeamPreferences.setDefaultValues(SVNTeamUIPlugin.instance().getPreferenceStore());
 	}

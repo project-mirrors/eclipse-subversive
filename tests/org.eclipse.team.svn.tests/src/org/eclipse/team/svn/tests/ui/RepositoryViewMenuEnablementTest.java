@@ -84,11 +84,11 @@ public class RepositoryViewMenuEnablementTest {
 	public void setUp() throws Exception {
 		ActionOperationWorkflowBuilder workflowBuilder = new ActionOperationWorkflowBuilder();
 		workflowBuilder.buildShareAddCommitWorkflow().execute();
-		File newFolder = new File(this.getFirstProject().getLocation().toString() + "/testFolder");
+		File newFolder = new File(getFirstProject().getLocation().toString() + "/testFolder");
 		newFolder.mkdir();
-		newFolder = new File(this.getSecondProject().getLocation().toString() + "/testFolder");
+		newFolder = new File(getSecondProject().getLocation().toString() + "/testFolder");
 		newFolder.mkdir();
-		IResource[] projects = new IResource[] { this.getFirstProject(), this.getSecondProject() };
+		IResource[] projects = { getFirstProject(), getSecondProject() };
 		new RefreshResourcesOperation(projects).run(new NullProgressMonitor());
 		new AddToSVNOperation(new IResource[] { getSecondProject().getFolder("testFolder") })
 				.run(new NullProgressMonitor());
@@ -96,160 +96,160 @@ public class RepositoryViewMenuEnablementTest {
 
 	@Test
 	public void testPasteRemoteResourceAction() {
-		RepositoryResource[] resources = this.getTwoRepositoryFiles();
+		RepositoryResource[] resources = getTwoRepositoryFiles();
 		new PrepareRemoteResourcesTransferrableOperation(
 				new IRepositoryResource[] { resources[0].getRepositoryResource(),
 						resources[1].getRepositoryResource() },
 				RemoteResourceTransferrable.OP_COPY, TestPlugin.instance().getWorkbench().getDisplay())
 						.run(new NullProgressMonitor());
 		IActionDelegate action = new PasteAction();
-		this.assertEnablement(action, this.getAllRepositoryResources(), false);
-		this.assertEnablement(action, this.getOneRepositoryContainer(), true);
-		this.assertEnablement(action, this.getNotHeadRevisionFiles(), false);
-		this.assertEnablement(action, new RepositoryResource[] { this.getNotHeadRevisionFiles()[0] }, false);
+		this.assertEnablement(action, getAllRepositoryResources(), false);
+		this.assertEnablement(action, getOneRepositoryContainer(), true);
+		this.assertEnablement(action, getNotHeadRevisionFiles(), false);
+		this.assertEnablement(action, new RepositoryResource[] { getNotHeadRevisionFiles()[0] }, false);
 	}
 
 	@Test
 	public void testBranchRemoteAction() {
 		IActionDelegate action = new BranchAction();
-		this.assertEnablement(action, this.getAllRepositoryResources(), true);
-		this.assertEnablement(action, new RepositoryResource[] { this.getAllRepositoryResources()[0] }, true);
+		this.assertEnablement(action, getAllRepositoryResources(), true);
+		this.assertEnablement(action, new RepositoryResource[] { getAllRepositoryResources()[0] }, true);
 	}
 
 	@Test
 	public void testTagRemoteAction() {
 		IActionDelegate action = new TagAction();
-		this.assertEnablement(action, this.getAllRepositoryResources(), true);
-		this.assertEnablement(action, new RepositoryResource[] { this.getAllRepositoryResources()[0] }, true);
+		this.assertEnablement(action, getAllRepositoryResources(), true);
+		this.assertEnablement(action, new RepositoryResource[] { getAllRepositoryResources()[0] }, true);
 	}
 
 	@Test
 	public void testCleanupAction() {
 		IActionDelegate action = new CleanupAction();
-		this.assertEnablement(action, this.getSelectedProjects(), true);
-		this.assertEnablement(action, new IResource[] { this.getSelectedProjects()[0] }, true);
+		this.assertEnablement(action, getSelectedProjects(), true);
+		this.assertEnablement(action, new IResource[] { getSelectedProjects()[0] }, true);
 	}
 
 	@Test
 	public void testCompareTwoRepositoryResourcesAction() {
 		IActionDelegate action = new CompareAction();
-		this.assertEnablement(action, new IResource[] { this.getSelectedProjects()[0] }, false);
-		this.assertEnablement(action, this.getOneRepositoryContainer(), true);
-		this.assertEnablement(action, this.getOneRepositoryFile(), true);
-		this.assertEnablement(action, this.getAllRepositoryResources(), false);
+		this.assertEnablement(action, new IResource[] { getSelectedProjects()[0] }, false);
+		this.assertEnablement(action, getOneRepositoryContainer(), true);
+		this.assertEnablement(action, getOneRepositoryFile(), true);
+		this.assertEnablement(action, getAllRepositoryResources(), false);
 	}
 
 	@Test
 	public void testCopyRemoteResourceAction() {
 		IActionDelegate action = new CopyAction();
-		this.assertEnablement(action, this.getTwoRepositoryContainers(), true);
-		this.assertEnablement(action, this.getAllRepositoryResources(), true);
-		this.assertEnablement(action, new RepositoryResource[] { this.getAllRepositoryResources()[0] }, true);
+		this.assertEnablement(action, getTwoRepositoryContainers(), true);
+		this.assertEnablement(action, getAllRepositoryResources(), true);
+		this.assertEnablement(action, new RepositoryResource[] { getAllRepositoryResources()[0] }, true);
 	}
 
 	@Test
 	public void testCreateProjectStructureAction() {
 		IActionDelegate action = new CreateProjectStructureAction();
-		this.assertEnablement(action, this.getOneRepositoryContainer(), true);
-		this.assertEnablement(action, this.getRepositoryLocation(), true);
+		this.assertEnablement(action, getOneRepositoryContainer(), true);
+		this.assertEnablement(action, getRepositoryLocation(), true);
 	}
 
 	@Test
 	public void testCreateRemoteFolderAction() {
 		IActionDelegate action = new CreateFolderAction();
-		this.assertEnablement(action, this.getTwoRepositoryContainers(), false);
-		this.assertEnablement(action, new RepositoryResource[] { this.getTwoRepositoryContainers()[0] }, true);
-		this.assertEnablement(action, new RepositoryResource[] { this.getNotHeadRevisionFiles()[0] }, false);
+		this.assertEnablement(action, getTwoRepositoryContainers(), false);
+		this.assertEnablement(action, new RepositoryResource[] { getTwoRepositoryContainers()[0] }, true);
+		this.assertEnablement(action, new RepositoryResource[] { getNotHeadRevisionFiles()[0] }, false);
 	}
 
 	@Test
 	public void testCutRemoteResourceAction() {
 		IActionDelegate action = new CutAction();
-		this.assertEnablement(action, this.getTwoRepositoryContainers(), true);
-		this.assertEnablement(action, this.getAllRepositoryResources(), true);
-		this.assertEnablement(action, this.getNotHeadRevisionFiles(), false);
-		this.assertEnablement(action, new RepositoryResource[] { this.getAllRepositoryResources()[0] }, true);
-		this.assertEnablement(action, this.getRepositoryLocation(), false);
-		this.assertEnablement(action, this.getRepositoryRoots(), false);
+		this.assertEnablement(action, getTwoRepositoryContainers(), true);
+		this.assertEnablement(action, getAllRepositoryResources(), true);
+		this.assertEnablement(action, getNotHeadRevisionFiles(), false);
+		this.assertEnablement(action, new RepositoryResource[] { getAllRepositoryResources()[0] }, true);
+		this.assertEnablement(action, getRepositoryLocation(), false);
+		this.assertEnablement(action, getRepositoryRoots(), false);
 	}
 
 	@Test
 	public void testDeleteRemoteResourceAction() {
 		IActionDelegate action = new DeleteAction();
-		this.assertEnablement(action, this.getTwoRepositoryContainers(), true);
-		this.assertEnablement(action, this.getAllRepositoryResources(), true);
-		this.assertEnablement(action, new RepositoryResource[] { this.getNotHeadRevisionFiles()[0] }, false);
-		this.assertEnablement(action, new RepositoryResource[] { this.getAllRepositoryResources()[0] }, true);
-		this.assertEnablement(action, this.getRepositoryLocation(), false);
-		this.assertEnablement(action, this.getRepositoryRoots(), false);
+		this.assertEnablement(action, getTwoRepositoryContainers(), true);
+		this.assertEnablement(action, getAllRepositoryResources(), true);
+		this.assertEnablement(action, new RepositoryResource[] { getNotHeadRevisionFiles()[0] }, false);
+		this.assertEnablement(action, new RepositoryResource[] { getAllRepositoryResources()[0] }, true);
+		this.assertEnablement(action, getRepositoryLocation(), false);
+		this.assertEnablement(action, getRepositoryRoots(), false);
 	}
 
 	@Test
 	public void testEditRepositoryLocationPropertiesAction() {
 		IActionDelegate action = new EditRepositoryLocationPropertiesAction();
-		this.assertEnablement(action, this.getTwoRepositoryContainers(), false);
-		this.assertEnablement(action, this.getRepositoryLocation(), true);
-		this.assertEnablement(action, new RepositoryResource[] { this.getAllRepositoryResources()[0] }, false);
+		this.assertEnablement(action, getTwoRepositoryContainers(), false);
+		this.assertEnablement(action, getRepositoryLocation(), true);
+		this.assertEnablement(action, new RepositoryResource[] { getAllRepositoryResources()[0] }, false);
 	}
 
 	@Test
 	public void testRefreshRemoteAction() {
 		IActionDelegate action = new RefreshAction();
-		this.assertEnablement(action, this.getTwoRepositoryContainers(), true);
-		this.assertEnablement(action, this.getNotHeadRevisionFiles(), true);
-		this.assertEnablement(action, this.getRepositoryLocation(), true);
-		this.assertEnablement(action, new RepositoryResource[] { this.getAllRepositoryResources()[0] }, true);
+		this.assertEnablement(action, getTwoRepositoryContainers(), true);
+		this.assertEnablement(action, getNotHeadRevisionFiles(), true);
+		this.assertEnablement(action, getRepositoryLocation(), true);
+		this.assertEnablement(action, new RepositoryResource[] { getAllRepositoryResources()[0] }, true);
 	}
 
 	@Test
 	public void testRenameRemoteResourceAction() {
 		IActionDelegate action = new RenameAction();
-		this.assertEnablement(action, this.getTwoRepositoryContainers(), false);
-		this.assertEnablement(action, this.getAllRepositoryResources(), false);
-		this.assertEnablement(action, new RepositoryResource[] { this.getNotHeadRevisionFiles()[0] }, false);
-		this.assertEnablement(action, new RepositoryResource[] { this.getAllRepositoryResources()[0] }, true);
-		this.assertEnablement(action, this.getRepositoryLocation(), false);
-		this.assertEnablement(action, this.getRepositoryRoots(), false);
+		this.assertEnablement(action, getTwoRepositoryContainers(), false);
+		this.assertEnablement(action, getAllRepositoryResources(), false);
+		this.assertEnablement(action, new RepositoryResource[] { getNotHeadRevisionFiles()[0] }, false);
+		this.assertEnablement(action, new RepositoryResource[] { getAllRepositoryResources()[0] }, true);
+		this.assertEnablement(action, getRepositoryLocation(), false);
+		this.assertEnablement(action, getRepositoryRoots(), false);
 	}
 
 	@Test
 	public void testShowRemoteAnnotationAction() {
 		IActionDelegate action = new ShowAnnotationAction();
-		this.assertEnablement(action, this.getAllRepositoryResources(), false);
-		this.assertEnablement(action, new RepositoryResource[] { this.getAllRepositoryResources()[0] }, true);
+		this.assertEnablement(action, getAllRepositoryResources(), false);
+		this.assertEnablement(action, new RepositoryResource[] { getAllRepositoryResources()[0] }, true);
 	}
 
 	@Test
 	public void testShowRemoteResourceHistoryAction() {
 		IActionDelegate action = new ShowHistoryAction();
-		this.assertEnablement(action, this.getAllRepositoryResources(), false);
-		this.assertEnablement(action, new RepositoryResource[] { this.getAllRepositoryResources()[0] }, true);
+		this.assertEnablement(action, getAllRepositoryResources(), false);
+		this.assertEnablement(action, new RepositoryResource[] { getAllRepositoryResources()[0] }, true);
 	}
 
 	protected void assertEnablement(IActionDelegate actionDelegate, RepositoryResource[] resources,
 			boolean expectedEnablement) {
 		IAction action = new Action() {
 		};
-		ISelection selection = this.asSelection(resources);
+		ISelection selection = asSelection(resources);
 		actionDelegate.selectionChanged(action, selection);
-		assertEquals(this.getName(actionDelegate) + " enablement wrong!", expectedEnablement, action.isEnabled());
+		assertEquals(getName(actionDelegate) + " enablement wrong!", expectedEnablement, action.isEnabled());
 	}
 
 	protected void assertEnablement(IActionDelegate actionDelegate, IResource[] resources, boolean expectedEnablement) {
 		IAction action = new Action() {
 		};
-		ISelection selection = this.asSelection(resources);
+		ISelection selection = asSelection(resources);
 		actionDelegate.selectionChanged(action, selection);
-		assertEquals(this.getName(actionDelegate) + " enablement wrong!", expectedEnablement, action.isEnabled());
+		assertEquals(getName(actionDelegate) + " enablement wrong!", expectedEnablement, action.isEnabled());
 	}
 
 	protected void assertEnablement(IActionDelegate actionDelegate, RepositoryLocation[] locations,
 			boolean expectedEnablement) {
 		IAction action = new Action() {
 		};
-		ISelection selection = this.asSelection(locations);
+		ISelection selection = asSelection(locations);
 		actionDelegate.selectionChanged(action, selection);
-		assertEquals(this.getName(actionDelegate) + " enablement wrong!", expectedEnablement, action.isEnabled());
+		assertEquals(getName(actionDelegate) + " enablement wrong!", expectedEnablement, action.isEnabled());
 	}
 
 	protected ISelection asSelection(Object[] resources) {
@@ -262,30 +262,30 @@ public class RepositoryViewMenuEnablementTest {
 
 	protected RepositoryLocation[] getRepositoryLocation() {
 		return new RepositoryLocation[] { new RepositoryLocation(
-				this.getAllRepositoryResources()[0].getRepositoryResource().getRepositoryLocation()) };
+				getAllRepositoryResources()[0].getRepositoryResource().getRepositoryLocation()) };
 	}
 
 	protected RepositoryResource[] getAllRepositoryResources() {
 		SVNRemoteStorage storage = SVNRemoteStorage.instance();
-		List<RepositoryResource> remoteResources = new ArrayList<RepositoryResource>();
+		List<RepositoryResource> remoteResources = new ArrayList<>();
 		IResource[] resources = FileUtility.getResourcesRecursive(
-				new IResource[] { this.getFirstProject(), this.getSecondProject() }, IStateFilter.SF_ONREPOSITORY);
-		for (int i = 0; i < resources.length; i++) {
-			remoteResources.add(RepositoryFolder.wrapChild(null, storage.asRepositoryResource(resources[i]), null));
+				new IResource[] { getFirstProject(), getSecondProject() }, IStateFilter.SF_ONREPOSITORY);
+		for (IResource element : resources) {
+			remoteResources.add(RepositoryFolder.wrapChild(null, storage.asRepositoryResource(element), null));
 		}
 		return remoteResources.toArray(new RepositoryResource[remoteResources.size()]);
 	}
 
 	protected RepositoryResource[] getOneRepositoryFile() {
-		return new RepositoryResource[] { this.getTwoRepositoryFiles()[0] };
+		return new RepositoryResource[] { getTwoRepositoryFiles()[0] };
 	}
 
 	protected RepositoryResource[] getTwoRepositoryFiles() {
-		List<RepositoryResource> twoRemoteFiles = new ArrayList<RepositoryResource>();
-		RepositoryResource[] resources = this.getAllRepositoryResources();
-		for (int i = 0; i < resources.length; i++) {
-			if (resources[i] instanceof RepositoryFile) {
-				twoRemoteFiles.add(resources[i]);
+		List<RepositoryResource> twoRemoteFiles = new ArrayList<>();
+		RepositoryResource[] resources = getAllRepositoryResources();
+		for (RepositoryResource element : resources) {
+			if (element instanceof RepositoryFile) {
+				twoRemoteFiles.add(element);
 				if (twoRemoteFiles.size() == 2) {
 					return twoRemoteFiles.toArray(new RepositoryResource[twoRemoteFiles.size()]);
 				}
@@ -295,12 +295,12 @@ public class RepositoryViewMenuEnablementTest {
 	}
 
 	protected RepositoryResource[] getNotHeadRevisionFiles() {
-		List<RepositoryResource> twoRemoteFiles = new ArrayList<RepositoryResource>();
-		RepositoryResource[] resources = this.getAllRepositoryResources();
-		for (int i = 0; i < resources.length; i++) {
-			if (resources[i] instanceof RepositoryFile) {
-				resources[i].getRepositoryResource().setSelectedRevision(SVNRevision.fromNumber(123));
-				twoRemoteFiles.add(resources[i]);
+		List<RepositoryResource> twoRemoteFiles = new ArrayList<>();
+		RepositoryResource[] resources = getAllRepositoryResources();
+		for (RepositoryResource element : resources) {
+			if (element instanceof RepositoryFile) {
+				element.getRepositoryResource().setSelectedRevision(SVNRevision.fromNumber(123));
+				twoRemoteFiles.add(element);
 				if (twoRemoteFiles.size() == 2) {
 					return twoRemoteFiles.toArray(new RepositoryResource[twoRemoteFiles.size()]);
 				}
@@ -310,15 +310,15 @@ public class RepositoryViewMenuEnablementTest {
 	}
 
 	protected RepositoryResource[] getOneRepositoryContainer() {
-		return new RepositoryResource[] { this.getTwoRepositoryContainers()[0] };
+		return new RepositoryResource[] { getTwoRepositoryContainers()[0] };
 	}
 
 	protected RepositoryResource[] getTwoRepositoryContainers() {
-		List<RepositoryResource> twoRemoteFolders = new ArrayList<RepositoryResource>();
-		RepositoryResource[] resources = this.getAllRepositoryResources();
-		for (int i = 0; i < resources.length; i++) {
-			if (resources[i] instanceof RepositoryFolder) {
-				twoRemoteFolders.add(resources[i]);
+		List<RepositoryResource> twoRemoteFolders = new ArrayList<>();
+		RepositoryResource[] resources = getAllRepositoryResources();
+		for (RepositoryResource element : resources) {
+			if (element instanceof RepositoryFolder) {
+				twoRemoteFolders.add(element);
 				if (twoRemoteFolders.size() == 2) {
 					return twoRemoteFolders.toArray(new RepositoryResource[twoRemoteFolders.size()]);
 				}
@@ -329,11 +329,10 @@ public class RepositoryViewMenuEnablementTest {
 
 	protected IResource[] getSelectedProjects() {
 		IResource[] selectedResources = FileUtility.getResourcesRecursive(
-				new IResource[] { this.getFirstProject(), this.getSecondProject() }, IStateFilter.SF_ONREPOSITORY);
-		;
-		ArrayList<IResource> projects = new ArrayList<IResource>();
-		for (int i = 0; i < selectedResources.length; i++) {
-			IResource resource = selectedResources[i];
+				new IResource[] { getFirstProject(), getSecondProject() }, IStateFilter.SF_ONREPOSITORY);
+
+		ArrayList<IResource> projects = new ArrayList<>();
+		for (IResource resource : selectedResources) {
 			if (resource.getType() == IResource.PROJECT) {
 				projects.add(resource);
 			}
@@ -342,11 +341,11 @@ public class RepositoryViewMenuEnablementTest {
 	}
 
 	protected RepositoryResource[] getRepositoryRoots() {
-		List<RepositoryResource> roots = new ArrayList<RepositoryResource>();
-		RepositoryResource[] resources = this.getAllRepositoryResources();
-		for (int i = 0; i < resources.length; i++) {
+		List<RepositoryResource> roots = new ArrayList<>();
+		RepositoryResource[] resources = getAllRepositoryResources();
+		for (RepositoryResource element : resources) {
 			if (resources[0].getRepositoryResource() instanceof IRepositoryRoot) {
-				roots.add(resources[i]);
+				roots.add(element);
 			}
 		}
 		return roots.toArray(new RepositoryResource[roots.size()]);

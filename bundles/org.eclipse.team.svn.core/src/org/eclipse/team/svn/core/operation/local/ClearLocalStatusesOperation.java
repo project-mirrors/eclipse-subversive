@@ -36,16 +36,19 @@ public class ClearLocalStatusesOperation extends AbstractWorkingCopyOperation {
 		super("Operation_ClearLocalStatuses", SVNMessages.class, provider); //$NON-NLS-1$
 	}
 
+	@Override
 	public ISchedulingRule getSchedulingRule() {
 		return null;
 	}
 
+	@Override
 	public int getOperationWeight() {
 		return 0;
 	}
 
+	@Override
 	protected void runImpl(IProgressMonitor monitor) throws Exception {
-		SVNRemoteStorage.instance().refreshLocalResources(this.operableData(), IResource.DEPTH_INFINITE);
+		SVNRemoteStorage.instance().refreshLocalResources(operableData(), IResource.DEPTH_INFINITE);
 		ProgressMonitorUtility.progress(monitor, 1, 1);
 	}
 

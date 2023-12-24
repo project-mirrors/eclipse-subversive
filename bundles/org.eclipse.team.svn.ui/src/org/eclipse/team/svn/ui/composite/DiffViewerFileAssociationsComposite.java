@@ -14,20 +14,14 @@
 
 package org.eclipse.team.svn.ui.composite;
 
-import org.eclipse.jface.viewers.CheckStateChangedEvent;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.ColumnPixelData;
 import org.eclipse.jface.viewers.ColumnWeightData;
-import org.eclipse.jface.viewers.DoubleClickEvent;
-import org.eclipse.jface.viewers.ICheckStateListener;
-import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TableLayout;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
@@ -36,9 +30,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Group;
-import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.Text;
@@ -89,20 +81,20 @@ public class DiffViewerFileAssociationsComposite extends Composite {
 		super(parent, SWT.NONE);
 		this.validationManager = validationManager;
 
-		this.createControls();
+		createControls();
 	}
 
 	public void initializeControls(DiffViewerSettings diffSettings) {
 		this.diffSettings = diffSettings;
 
-		this.diffParametersText.setText(""); //$NON-NLS-1$
-		this.mergeParametersText.setText(""); //$NON-NLS-1$
-		this.tableViewer.setInput(diffSettings);
+		diffParametersText.setText(""); //$NON-NLS-1$
+		mergeParametersText.setText(""); //$NON-NLS-1$
+		tableViewer.setInput(diffSettings);
 
 		//set checked
 		ResourceSpecificParameters[] params = diffSettings.getResourceSpecificParameters();
 		for (ResourceSpecificParameters param : params) {
-			this.tableViewer.setChecked(param, param.isEnabled);
+			tableViewer.setChecked(param, param.isEnabled);
 		}
 	}
 
@@ -111,8 +103,8 @@ public class DiffViewerFileAssociationsComposite extends Composite {
 		layout.marginHeight = layout.marginWidth = 0;
 		layout.numColumns = 2;
 		GridData data = new GridData(GridData.FILL_BOTH);
-		this.setLayout(layout);
-		this.setLayoutData(data);
+		setLayout(layout);
+		setLayoutData(data);
 
 		Composite tableComposite = new Composite(this, SWT.NONE);
 		layout = new GridLayout();
@@ -122,11 +114,11 @@ public class DiffViewerFileAssociationsComposite extends Composite {
 		tableComposite.setLayout(layout);
 		tableComposite.setLayoutData(data);
 
-		this.createFileAssociationsTable(tableComposite);
-		this.createParametersPreview(tableComposite);
+		createFileAssociationsTable(tableComposite);
+		createParametersPreview(tableComposite);
 
-		this.createButtonsControls(this);
-		this.enableButtons();
+		createButtonsControls(this);
+		enableButtons();
 	}
 
 	protected void createParametersPreview(Composite parent) {
@@ -138,12 +130,12 @@ public class DiffViewerFileAssociationsComposite extends Composite {
 		diffGroup.setLayoutData(data);
 		diffGroup.setText(SVNUIMessages.DiffViewerExternalProgramComposite_DiffProgramArguments_Label);
 
-		this.diffParametersText = new Text(diffGroup, SWT.BORDER | SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL | SWT.WRAP);
+		diffParametersText = new Text(diffGroup, SWT.BORDER | SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL | SWT.WRAP);
 		data = new GridData(GridData.FILL_HORIZONTAL);
-		data.heightHint = DefaultDialog.convertHeightInCharsToPixels(this.diffParametersText, 5);
-		this.diffParametersText.setLayoutData(data);
-		this.diffParametersText.setBackground(this.diffParametersText.getBackground());
-		this.diffParametersText.setEditable(false);
+		data.heightHint = DefaultDialog.convertHeightInCharsToPixels(diffParametersText, 5);
+		diffParametersText.setLayoutData(data);
+		diffParametersText.setBackground(diffParametersText.getBackground());
+		diffParametersText.setEditable(false);
 
 		//merge
 		Group mergeGroup = new Group(parent, SWT.NONE);
@@ -153,13 +145,12 @@ public class DiffViewerFileAssociationsComposite extends Composite {
 		mergeGroup.setLayoutData(data);
 		mergeGroup.setText(SVNUIMessages.DiffViewerExternalProgramComposite_MergeProgramArguments_Label);
 
-		this.mergeParametersText = new Text(mergeGroup,
-				SWT.BORDER | SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL | SWT.WRAP);
+		mergeParametersText = new Text(mergeGroup, SWT.BORDER | SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL | SWT.WRAP);
 		data = new GridData(GridData.FILL_HORIZONTAL);
-		data.heightHint = DefaultDialog.convertHeightInCharsToPixels(this.mergeParametersText, 5);
-		this.mergeParametersText.setLayoutData(data);
-		this.mergeParametersText.setBackground(this.mergeParametersText.getBackground());
-		this.mergeParametersText.setEditable(false);
+		data.heightHint = DefaultDialog.convertHeightInCharsToPixels(mergeParametersText, 5);
+		mergeParametersText.setLayoutData(data);
+		mergeParametersText.setBackground(mergeParametersText.getBackground());
+		mergeParametersText.setEditable(false);
 	}
 
 	protected void createFileAssociationsTable(Composite parent) {
@@ -175,14 +166,14 @@ public class DiffViewerFileAssociationsComposite extends Composite {
 		table.setLinesVisible(true);
 		table.setHeaderVisible(true);
 
-		this.tableViewer = new CheckboxTableViewer(table);
-		this.tableViewer.setUseHashlookup(true);
+		tableViewer = new CheckboxTableViewer(table);
+		tableViewer.setUseHashlookup(true);
 		//this.tableViewer.setColumnProperties(columnNames);
 
-		this.tableViewer.setContentProvider(new FileAssociationsContentProvider());
-		this.tableViewer.setLabelProvider(new FileAssociationsLabelProvider());
+		tableViewer.setContentProvider(new FileAssociationsContentProvider());
+		tableViewer.setLabelProvider(new FileAssociationsLabelProvider());
 
-		ColumnedViewerComparator comparator = new FileAssociationsComparator(this.tableViewer);
+		ColumnedViewerComparator comparator = new FileAssociationsComparator(tableViewer);
 
 		TableColumn column = new TableColumn(table, SWT.NONE);
 		column.setResizable(false);
@@ -199,52 +190,46 @@ public class DiffViewerFileAssociationsComposite extends Composite {
 		column.setText(SVNUIMessages.DiffViewerFileAssociationsComposite_MergeProgramPath_Column);
 		column.addSelectionListener(comparator);
 
-		this.tableViewer.setComparator(comparator);
+		tableViewer.setComparator(comparator);
 		comparator.setColumnNumber(DiffViewerFileAssociationsComposite.COLUMN_EXTENSION);
-		this.tableViewer.getTable()
+		tableViewer.getTable()
 				.setSortColumn(
-						this.tableViewer.getTable().getColumn(DiffViewerFileAssociationsComposite.COLUMN_EXTENSION));
-		this.tableViewer.getTable().setSortDirection(SWT.UP);
+						tableViewer.getTable().getColumn(DiffViewerFileAssociationsComposite.COLUMN_EXTENSION));
+		tableViewer.getTable().setSortDirection(SWT.UP);
 
-		this.tableViewer.addCheckStateListener(new ICheckStateListener() {
-			public void checkStateChanged(CheckStateChangedEvent event) {
-				ResourceSpecificParameters param = (ResourceSpecificParameters) event.getElement();
-				param.isEnabled = event.getChecked();
-			}
+		tableViewer.addCheckStateListener(event -> {
+			ResourceSpecificParameters param = (ResourceSpecificParameters) event.getElement();
+			param.isEnabled = event.getChecked();
 		});
 
-		this.tableViewer.addDoubleClickListener(new IDoubleClickListener() {
-			public void doubleClick(DoubleClickEvent event) {
-				ResourceSpecificParameters param = getSelectedResourceSpecificParameter();
-				DiffViewerFileAssociationsComposite.this.editFileAssociations(param);
-			}
+		tableViewer.addDoubleClickListener(event -> {
+			ResourceSpecificParameters param = getSelectedResourceSpecificParameter();
+			DiffViewerFileAssociationsComposite.this.editFileAssociations(param);
 		});
 
 		//selection listener
-		this.tableViewer.addSelectionChangedListener(new ISelectionChangedListener() {
-			public void selectionChanged(SelectionChangedEvent event) {
-				//init parameters control
-				ResourceSpecificParameters param = DiffViewerFileAssociationsComposite.this
-						.getSelectedResourceSpecificParameter();
-				if (param != null) {
-					String diffParamsStr = param.params.diffParamatersString;
-					diffParamsStr = diffParamsStr != null ? diffParamsStr : ""; //$NON-NLS-1$
-					DiffViewerFileAssociationsComposite.this.diffParametersText.setText(diffParamsStr);
+		tableViewer.addSelectionChangedListener(event -> {
+			//init parameters control
+			ResourceSpecificParameters param = DiffViewerFileAssociationsComposite.this
+					.getSelectedResourceSpecificParameter();
+			if (param != null) {
+				String diffParamsStr = param.params.diffParamatersString;
+				diffParamsStr = diffParamsStr != null ? diffParamsStr : ""; //$NON-NLS-1$
+				diffParametersText.setText(diffParamsStr);
 
-					String mergeParamsStr = param.params.mergeParamatersString;
-					mergeParamsStr = mergeParamsStr != null ? mergeParamsStr : ""; //$NON-NLS-1$
-					DiffViewerFileAssociationsComposite.this.mergeParametersText.setText(mergeParamsStr);
-				}
-
-				DiffViewerFileAssociationsComposite.this.enableButtons();
+				String mergeParamsStr = param.params.mergeParamatersString;
+				mergeParamsStr = mergeParamsStr != null ? mergeParamsStr : ""; //$NON-NLS-1$
+				mergeParametersText.setText(mergeParamsStr);
 			}
+
+			DiffViewerFileAssociationsComposite.this.enableButtons();
 		});
 	}
 
 	protected void enableButtons() {
-		boolean hasSelection = this.getSelectedResourceSpecificParameter() != null;
-		this.editButton.setEnabled(hasSelection);
-		this.removeButton.setEnabled(hasSelection);
+		boolean hasSelection = getSelectedResourceSpecificParameter() != null;
+		editButton.setEnabled(hasSelection);
+		removeButton.setEnabled(hasSelection);
 	}
 
 	protected void createButtonsControls(Composite parent) {
@@ -259,23 +244,23 @@ public class DiffViewerFileAssociationsComposite extends Composite {
 		composite.setLayout(layout);
 		composite.setLayoutData(data);
 
-		this.addButton = new Button(composite, SWT.PUSH);
+		addButton = new Button(composite, SWT.PUSH);
 		data = new GridData(GridData.FILL_HORIZONTAL);
-		data.widthHint = DefaultDialog.computeButtonWidth(this.addButton);
-		this.addButton.setLayoutData(data);
-		this.addButton.setText(SVNUIMessages.DiffViewerFileAssociationsComposite_Add_Button);
+		data.widthHint = DefaultDialog.computeButtonWidth(addButton);
+		addButton.setLayoutData(data);
+		addButton.setText(SVNUIMessages.DiffViewerFileAssociationsComposite_Add_Button);
 
-		this.editButton = new Button(composite, SWT.PUSH);
+		editButton = new Button(composite, SWT.PUSH);
 		data = new GridData(GridData.FILL_HORIZONTAL);
-		data.widthHint = DefaultDialog.computeButtonWidth(this.editButton);
-		this.editButton.setLayoutData(data);
-		this.editButton.setText(SVNUIMessages.DiffViewerFileAssociationsComposite_Edit_Button);
+		data.widthHint = DefaultDialog.computeButtonWidth(editButton);
+		editButton.setLayoutData(data);
+		editButton.setText(SVNUIMessages.DiffViewerFileAssociationsComposite_Edit_Button);
 
-		this.removeButton = new Button(composite, SWT.PUSH);
+		removeButton = new Button(composite, SWT.PUSH);
 		data = new GridData(GridData.FILL_HORIZONTAL);
-		data.widthHint = DefaultDialog.computeButtonWidth(this.removeButton);
-		this.removeButton.setLayoutData(data);
-		this.removeButton.setText(SVNUIMessages.DiffViewerFileAssociationsComposite_Remove_Button);
+		data.widthHint = DefaultDialog.computeButtonWidth(removeButton);
+		removeButton.setLayoutData(data);
+		removeButton.setText(SVNUIMessages.DiffViewerFileAssociationsComposite_Remove_Button);
 
 		Button variablesButton = new Button(composite, SWT.PUSH);
 		data = new GridData(GridData.FILL_HORIZONTAL);
@@ -285,44 +270,34 @@ public class DiffViewerFileAssociationsComposite extends Composite {
 
 		//handlers
 
-		this.addButton.addListener(SWT.Selection, new Listener() {
-			public void handleEvent(Event event) {
-				EditFileAssociationsPanel editPanel = new EditFileAssociationsPanel(null,
-						DiffViewerFileAssociationsComposite.this.diffSettings);
-				DefaultDialog dialog = new DefaultDialog(DiffViewerFileAssociationsComposite.this.getShell(),
-						editPanel);
-				if (dialog.open() == 0) {
-					ResourceSpecificParameters resourceParams = editPanel.getResourceSpecificParameters();
-					DiffViewerFileAssociationsComposite.this.diffSettings.addResourceSpecificParameters(resourceParams);
-				}
+		addButton.addListener(SWT.Selection, event -> {
+			EditFileAssociationsPanel editPanel = new EditFileAssociationsPanel(null, diffSettings);
+			DefaultDialog dialog = new DefaultDialog(DiffViewerFileAssociationsComposite.this.getShell(),
+					editPanel);
+			if (dialog.open() == 0) {
+				ResourceSpecificParameters resourceParams = editPanel.getResourceSpecificParameters();
+				diffSettings.addResourceSpecificParameters(resourceParams);
 			}
 		});
 
-		this.editButton.addListener(SWT.Selection, new Listener() {
-			public void handleEvent(Event event) {
-				ResourceSpecificParameters resourceParams = DiffViewerFileAssociationsComposite.this
-						.getSelectedResourceSpecificParameter();
-				DiffViewerFileAssociationsComposite.this.editFileAssociations(resourceParams);
+		editButton.addListener(SWT.Selection, event -> {
+			ResourceSpecificParameters resourceParams = DiffViewerFileAssociationsComposite.this
+					.getSelectedResourceSpecificParameter();
+			DiffViewerFileAssociationsComposite.this.editFileAssociations(resourceParams);
+		});
+
+		removeButton.addListener(SWT.Selection, event -> {
+			ResourceSpecificParameters resourceParams = DiffViewerFileAssociationsComposite.this
+					.getSelectedResourceSpecificParameter();
+			if (resourceParams != null) {
+				diffSettings.removeResourceSpecificParameters(resourceParams);
 			}
 		});
 
-		this.removeButton.addListener(SWT.Selection, new Listener() {
-			public void handleEvent(Event event) {
-				ResourceSpecificParameters resourceParams = DiffViewerFileAssociationsComposite.this
-						.getSelectedResourceSpecificParameter();
-				if (resourceParams != null) {
-					DiffViewerFileAssociationsComposite.this.diffSettings
-							.removeResourceSpecificParameters(resourceParams);
-				}
-			}
-		});
-
-		variablesButton.addListener(SWT.Selection, new Listener() {
-			public void handleEvent(Event event) {
-				DiffViewerVariablesPanel panel = new DiffViewerVariablesPanel();
-				DefaultDialog dlg = new DefaultDialog(DiffViewerFileAssociationsComposite.this.getShell(), panel);
-				dlg.open();
-			}
+		variablesButton.addListener(SWT.Selection, event -> {
+			DiffViewerVariablesPanel panel = new DiffViewerVariablesPanel();
+			DefaultDialog dlg = new DefaultDialog(DiffViewerFileAssociationsComposite.this.getShell(), panel);
+			dlg.open();
 		});
 	}
 
@@ -341,7 +316,7 @@ public class DiffViewerFileAssociationsComposite extends Composite {
 	protected ResourceSpecificParameters getSelectedResourceSpecificParameter() {
 		ResourceSpecificParameters resourceParams = null;
 
-		ISelection sel = this.tableViewer.getSelection();
+		ISelection sel = tableViewer.getSelection();
 		if (!sel.isEmpty() && sel instanceof IStructuredSelection) {
 			IStructuredSelection selection = (IStructuredSelection) sel;
 			resourceParams = (ResourceSpecificParameters) selection.getFirstElement();
@@ -354,6 +329,7 @@ public class DiffViewerFileAssociationsComposite extends Composite {
 	 */
 	protected class FileAssociationsLabelProvider extends LabelProvider implements ITableLabelProvider {
 
+		@Override
 		public String getColumnText(Object element, int columnIndex) {
 			String res = ""; //$NON-NLS-1$
 			ResourceSpecificParameters param = (ResourceSpecificParameters) element;
@@ -374,6 +350,7 @@ public class DiffViewerFileAssociationsComposite extends Composite {
 			return res;
 		}
 
+		@Override
 		public Image getColumnImage(Object element, int columnIndex) {
 			return null;
 		}
@@ -390,11 +367,12 @@ public class DiffViewerFileAssociationsComposite extends Composite {
 			super(basedOn);
 		}
 
+		@Override
 		public int compareImpl(Viewer viewer, Object row1, Object row2) {
 			ResourceSpecificParameters r1 = (ResourceSpecificParameters) row1;
 			ResourceSpecificParameters r2 = (ResourceSpecificParameters) row2;
 
-			if (this.column == DiffViewerFileAssociationsComposite.COLUMN_EXTENSION) {
+			if (column == DiffViewerFileAssociationsComposite.COLUMN_EXTENSION) {
 				ResourceSpecificParameterKindEnum kindEnum1 = r1.kind.kindEnum;
 				ResourceSpecificParameterKindEnum kindEnum2 = r2.kind.kindEnum;
 
@@ -404,12 +382,12 @@ public class DiffViewerFileAssociationsComposite extends Composite {
 					return kindEnum2.compareTo(kindEnum1);
 				}
 			}
-			if (this.column == DiffViewerFileAssociationsComposite.COLUMN_DIFF_PATH) {
+			if (column == DiffViewerFileAssociationsComposite.COLUMN_DIFF_PATH) {
 				String path1 = r1.params.diffProgramPath;
 				String path2 = r2.params.diffProgramPath;
 				return ColumnedViewerComparator.compare(path1, path2);
 			}
-			if (this.column == DiffViewerFileAssociationsComposite.COLUMN_MERGE_PATH) {
+			if (column == DiffViewerFileAssociationsComposite.COLUMN_MERGE_PATH) {
 				String path1 = r1.params.mergeProgramPath;
 				String path2 = r2.params.mergeProgramPath;
 				return ColumnedViewerComparator.compare(path1, path2);
@@ -417,37 +395,42 @@ public class DiffViewerFileAssociationsComposite extends Composite {
 
 			return 0;
 		}
-	};
+	}
 
 	/*
 	 * Content provider for file associations table
 	 */
 	protected class FileAssociationsContentProvider implements IStructuredContentProvider, IDiffViewerChangeListener {
 
+		@Override
 		public Object[] getElements(Object inputElement) {
 			DiffViewerSettings diffSettings = (DiffViewerSettings) inputElement;
 			return diffSettings.getResourceSpecificParameters();
 		}
 
+		@Override
 		public void addResourceSpecificParameters(ResourceSpecificParameters params) {
-			DiffViewerFileAssociationsComposite.this.tableViewer.add(params);
-			DiffViewerFileAssociationsComposite.this.tableViewer.setChecked(params, params.isEnabled);
+			tableViewer.add(params);
+			tableViewer.setChecked(params, params.isEnabled);
 		}
 
+		@Override
 		public void changeResourceSpecificParameters(ResourceSpecificParameters params) {
-			DiffViewerFileAssociationsComposite.this.tableViewer.update(params, null);
+			tableViewer.update(params, null);
 			//update parametersText
-			DiffViewerFileAssociationsComposite.this.diffParametersText.setText(params.params.diffParamatersString);
-			DiffViewerFileAssociationsComposite.this.mergeParametersText.setText(params.params.mergeParamatersString);
+			diffParametersText.setText(params.params.diffParamatersString);
+			mergeParametersText.setText(params.params.mergeParamatersString);
 		}
 
+		@Override
 		public void removeResourceSpecificParameters(ResourceSpecificParameters params) {
-			DiffViewerFileAssociationsComposite.this.tableViewer.remove(params);
+			tableViewer.remove(params);
 			//clear parametersText
-			DiffViewerFileAssociationsComposite.this.diffParametersText.setText(""); //$NON-NLS-1$
-			DiffViewerFileAssociationsComposite.this.mergeParametersText.setText(""); //$NON-NLS-1$
+			diffParametersText.setText(""); //$NON-NLS-1$
+			mergeParametersText.setText(""); //$NON-NLS-1$
 		}
 
+		@Override
 		public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 			if (newInput != null) {
 				((DiffViewerSettings) newInput).addChangeListener(this);
@@ -457,8 +440,9 @@ public class DiffViewerFileAssociationsComposite extends Composite {
 			}
 		}
 
+		@Override
 		public void dispose() {
-			DiffViewerFileAssociationsComposite.this.diffSettings.removeChangeListener(this);
+			diffSettings.removeChangeListener(this);
 		}
 	}
 

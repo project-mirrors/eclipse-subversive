@@ -40,40 +40,42 @@ public class SwitchPanel extends AbstractRepositoryResourceSelectionPanel {
 		super(baseResource, currentRevision, SVNUIMessages.SwitchPanel_Title, SVNUIMessages.SwitchPanel_Description,
 				"SwitchPanel_URL_HISTORY_NAME", SVNUIMessages.SwitchPanel_Selection_Title, //$NON-NLS-1$
 				SVNUIMessages.SwitchPanel_Selection_Description, RepositoryResourceSelectionComposite.TEXT_BASE);
-		this.defaultMessage = SVNUIMessages.SwitchPanel_Message;
+		defaultMessage = SVNUIMessages.SwitchPanel_Message;
 		this.containFolders = containFolders;
 	}
 
+	@Override
 	public void createControlsImpl(Composite parent) {
 		super.createControlsImpl(parent);
-		if (this.containFolders) {
+		if (containFolders) {
 			Label separator = new Label(parent, SWT.HORIZONTAL | SWT.SEPARATOR);
 			separator.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 			separator.setVisible(false);
 
 			boolean canShowUpdateDepthPath = false;
-			this.depthSelector = new DepthSelectionComposite(parent, SWT.NONE, true, true, canShowUpdateDepthPath,
-					this.selectedResource, this);
+			depthSelector = new DepthSelectionComposite(parent, SWT.NONE, true, true, canShowUpdateDepthPath,
+					selectedResource, this);
 
 			GridData data = new GridData(GridData.FILL_HORIZONTAL);
-			this.depthSelector.setLayoutData(data);
+			depthSelector.setLayoutData(data);
 		}
 	}
 
 	public SVNDepth getDepth() {
-		if (this.depthSelector == null) {
+		if (depthSelector == null) {
 			return SVNDepth.INFINITY;
 		}
-		return this.depthSelector.getDepth();
+		return depthSelector.getDepth();
 	}
 
 	public boolean isStickyDepth() {
-		if (this.depthSelector == null) {
+		if (depthSelector == null) {
 			return false;
 		}
-		return this.depthSelector.isStickyDepth();
+		return depthSelector.isStickyDepth();
 	}
 
+	@Override
 	public String getHelpId() {
 		return "org.eclipse.team.svn.help.switchDialogContext"; //$NON-NLS-1$
 	}

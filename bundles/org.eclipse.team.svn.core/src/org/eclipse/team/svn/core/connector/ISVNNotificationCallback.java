@@ -30,5 +30,5 @@ public interface ISVNNotificationCallback {
 	 * @param info
 	 *            notification information container
 	 */
-	public void notify(SVNNotification info);
+	void notify(SVNNotification info);
 }

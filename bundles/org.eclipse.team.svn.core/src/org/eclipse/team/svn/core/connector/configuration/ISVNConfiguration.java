@@ -27,151 +27,151 @@ public interface ISVNConfiguration {
 	/*
 	 * The following constants are section and option names from the "config" configuration file.
 	 */
-	public static final String SECTION_AUTH = "auth";
+	String SECTION_AUTH = "auth";
 
-	public static final String PASSWORD_STORES = "password-stores";
+	String PASSWORD_STORES = "password-stores";
 
-	public static final String KWALLET_WALLET = "kwallet-wallet";
+	String KWALLET_WALLET = "kwallet-wallet";
 
-	public static final String KWALLET_SVN_APPLICATION_NAME_WITH_PID = "kwallet-svn-application-name-with-pid";
+	String KWALLET_SVN_APPLICATION_NAME_WITH_PID = "kwallet-svn-application-name-with-pid";
 
-	public static final String SSL_CLIENT_CERT_FILE_PROMPT = "ssl-client-cert-file-prompt";
+	String SSL_CLIENT_CERT_FILE_PROMPT = "ssl-client-cert-file-prompt";
 
-	public static final String SECTION_HELPERS = "helpers";
+	String SECTION_HELPERS = "helpers";
 
-	public static final String EDITOR_CMD = "editor-cmd";
+	String EDITOR_CMD = "editor-cmd";
 
-	public static final String DIFF_CMD = "diff-cmd";
+	String DIFF_CMD = "diff-cmd";
 
-	public static final String DIFF_EXTENSIONS = "diff-extensions";
+	String DIFF_EXTENSIONS = "diff-extensions";
 
-	public static final String DIFF3_CMD = "diff3-cmd";
+	String DIFF3_CMD = "diff3-cmd";
 
-	public static final String DIFF3_HAS_PROGRAM_ARG = "diff3-has-program-arg";
+	String DIFF3_HAS_PROGRAM_ARG = "diff3-has-program-arg";
 
-	public static final String MERGE_TOOL_CMD = "merge-tool-cmd";
+	String MERGE_TOOL_CMD = "merge-tool-cmd";
 
-	public static final String SECTION_MISCELLANY = "miscellany";
+	String SECTION_MISCELLANY = "miscellany";
 
-	public static final String GLOBAL_IGNORES = "global-ignores";
+	String GLOBAL_IGNORES = "global-ignores";
 
-	public static final String LOG_ENCODING = "log-encoding";
+	String LOG_ENCODING = "log-encoding";
 
-	public static final String USE_COMMIT_TIMES = "use-commit-times";
+	String USE_COMMIT_TIMES = "use-commit-times";
 
-	public static final String ENABLE_AUTO_PROPS = "enable-auto-props";
+	String ENABLE_AUTO_PROPS = "enable-auto-props";
 
-	public static final String ENABLE_MAGIC_FILE = "enable-magic-file";
+	String ENABLE_MAGIC_FILE = "enable-magic-file";
 
-	public static final String NO_UNLOCK = "no-unlock";
+	String NO_UNLOCK = "no-unlock";
 
-	public static final String MIMETYPES_FILE = "mime-types-file";
+	String MIMETYPES_FILE = "mime-types-file";
 
-	public static final String PRESERVED_CF_EXTS = "preserved-conflict-file-exts";
+	String PRESERVED_CF_EXTS = "preserved-conflict-file-exts";
 
-	public static final String INTERACTIVE_CONFLICTS = "interactive-conflicts";
+	String INTERACTIVE_CONFLICTS = "interactive-conflicts";
 
-	public static final String MEMORY_CACHE_SIZE = "memory-cache-size";
+	String MEMORY_CACHE_SIZE = "memory-cache-size";
 
-	public static final String DIFF_IGNORE_CONTENT_TYPE = "diff-ignore-content-type";
+	String DIFF_IGNORE_CONTENT_TYPE = "diff-ignore-content-type";
 
-	public static final String SECTION_TUNNELS = "tunnels";
+	String SECTION_TUNNELS = "tunnels";
 
-	public static final String SECTION_AUTO_PROPS = "auto-props";
+	String SECTION_AUTO_PROPS = "auto-props";
 
-	public static final String SECTION_WORKING_COPY = "working-copy";
+	String SECTION_WORKING_COPY = "working-copy";
 
-	public static final String SQLITE_EXCLUSIVE = "exclusive-locking";
+	String SQLITE_EXCLUSIVE = "exclusive-locking";
 
-	public static final String SQLITE_EXCLUSIVE_CLIENTS = "exclusive-locking-clients";
+	String SQLITE_EXCLUSIVE_CLIENTS = "exclusive-locking-clients";
 
-	public static final String SQLITE_BUSY_TIMEOUT = "busy-timeout";
+	String SQLITE_BUSY_TIMEOUT = "busy-timeout";
 
 	/*
 	 * The following constants are section and option names from the "servers" configuration file.
 	 */
-	public static final String SECTION_GROUPS = "groups";
+	String SECTION_GROUPS = "groups";
 
-	public static final String SECTION_GLOBAL = "global";
+	String SECTION_GLOBAL = "global";
 
-	public static final String HTTP_PROXY_HOST = "http-proxy-host";
+	String HTTP_PROXY_HOST = "http-proxy-host";
 
-	public static final String HTTP_PROXY_PORT = "http-proxy-port";
+	String HTTP_PROXY_PORT = "http-proxy-port";
 
-	public static final String HTTP_PROXY_USERNAME = "http-proxy-username";
+	String HTTP_PROXY_USERNAME = "http-proxy-username";
 
-	public static final String HTTP_PROXY_PASSWORD = "http-proxy-password";
+	String HTTP_PROXY_PASSWORD = "http-proxy-password";
 
-	public static final String HTTP_PROXY_EXCEPTIONS = "http-proxy-exceptions";
+	String HTTP_PROXY_EXCEPTIONS = "http-proxy-exceptions";
 
-	public static final String HTTP_TIMEOUT = "http-timeout";
+	String HTTP_TIMEOUT = "http-timeout";
 
-	public static final String HTTP_COMPRESSION = "http-compression";
+	String HTTP_COMPRESSION = "http-compression";
 
-	public static final String NEON_DEBUG_MASK = "neon-debug-mask";
+	String NEON_DEBUG_MASK = "neon-debug-mask";
 
-	public static final String HTTP_AUTH_TYPES = "http-auth-types";
+	String HTTP_AUTH_TYPES = "http-auth-types";
 
-	public static final String SSL_AUTHORITY_FILES = "ssl-authority-files";
+	String SSL_AUTHORITY_FILES = "ssl-authority-files";
 
-	public static final String SSL_TRUST_DEFAULT_CA = "ssl-trust-default-ca";
+	String SSL_TRUST_DEFAULT_CA = "ssl-trust-default-ca";
 
-	public static final String SSL_CLIENT_CERT_FILE = "ssl-client-cert-file";
+	String SSL_CLIENT_CERT_FILE = "ssl-client-cert-file";
 
-	public static final String SSL_CLIENT_CERT_PASSWORD = "ssl-client-cert-password";
+	String SSL_CLIENT_CERT_PASSWORD = "ssl-client-cert-password";
 
-	public static final String SSL_PKCS11_PROVIDER = "ssl-pkcs11-provider";
+	String SSL_PKCS11_PROVIDER = "ssl-pkcs11-provider";
 
-	public static final String HTTP_LIBRARY = "http-library";
+	String HTTP_LIBRARY = "http-library";
 
-	public static final String STORE_PASSWORDS = "store-passwords";
+	String STORE_PASSWORDS = "store-passwords";
 
-	public static final String STORE_PLAINTEXT_PASSWORDS = "store-plaintext-passwords";
+	String STORE_PLAINTEXT_PASSWORDS = "store-plaintext-passwords";
 
-	public static final String STORE_AUTH_CREDS = "store-auth-creds";
+	String STORE_AUTH_CREDS = "store-auth-creds";
 
-	public static final String STORE_SSL_CLIENT_CERT_PP = "store-ssl-client-cert-pp";
+	String STORE_SSL_CLIENT_CERT_PP = "store-ssl-client-cert-pp";
 
-	public static final String STORE_SSL_CLIENT_CERT_PP_PLAINTEXT = "store-ssl-client-cert-pp-plaintext";
+	String STORE_SSL_CLIENT_CERT_PP_PLAINTEXT = "store-ssl-client-cert-pp-plaintext";
 
-	public static final String USERNAME = "username";
+	String USERNAME = "username";
 
-	public static final String HTTP_BULK_UPDATES = "http-bulk-updates";
+	String HTTP_BULK_UPDATES = "http-bulk-updates";
 
-	public static final String HTTP_MAX_CONNECTIONS = "http-max-connections";
+	String HTTP_MAX_CONNECTIONS = "http-max-connections";
 
-	public static final String HTTP_CHUNKED_REQUESTS = "http-chunked-requests";
+	String HTTP_CHUNKED_REQUESTS = "http-chunked-requests";
 
-	public static final String SERF_LOG_COMPONENTS = "serf-log-components";
+	String SERF_LOG_COMPONENTS = "serf-log-components";
 
-	public static final String SERF_LOG_LEVEL = "serf-log-level";
+	String SERF_LOG_LEVEL = "serf-log-level";
 
 	/**
 	 * "true" value in configuration.
 	 */
-	public static final String TRUE = "TRUE";
+	String TRUE = "TRUE";
 
 	/**
 	 * "false" value in configuration.
 	 */
-	public static final String FALSE = "FALSE";
+	String FALSE = "FALSE";
 
 	/**
 	 * "ask" value in configuration.
 	 */
-	public static final String ASK = "ASK";
+	String ASK = "ASK";
 
 	/**
 	 * Returns a reference to the "config" settings category.
 	 * 
 	 * @return ISVNConfigurationCategory
 	 */
-	public ISVNConfigurationCategory getConfigCategory();
+	ISVNConfigurationCategory getConfigCategory();
 
 	/**
 	 * Returns a reference to the "servers" settings category.
 	 * 
 	 * @return ISVNConfigurationCategory
 	 */
-	public ISVNConfigurationCategory getServersCategory();
+	ISVNConfigurationCategory getServersCategory();
 }

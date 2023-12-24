@@ -24,11 +24,10 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.team.core.RepositoryProvider;
+import org.eclipse.team.svn.core.BaseMessages;
 import org.eclipse.team.svn.core.IStateFilter;
 import org.eclipse.team.svn.core.SVNMessages;
 import org.eclipse.team.svn.core.SVNTeamPlugin;
@@ -66,9 +65,9 @@ public class LocalInfoPage extends PropertyPage {
 	protected boolean isVerifyTagOnCommit;
 
 	public LocalInfoPage() {
-		super();
 	}
 
+	@Override
 	protected Control createContents(Composite parent) {
 		Composite composite = new Composite(parent, SWT.NONE);
 		GridLayout layout = new GridLayout();
@@ -78,14 +77,14 @@ public class LocalInfoPage extends PropertyPage {
 		GridData data = new GridData(GridData.FILL_HORIZONTAL);
 		composite.setLayoutData(data);
 
-		this.resource = (IResource) this.getElement().getAdapter(IResource.class);
-		InfoOperation op = new InfoOperation(this.resource);
+		resource = getElement().getAdapter(IResource.class);
+		InfoOperation op = new InfoOperation(resource);
 		UIMonitorUtility.doTaskBusyDefault(op);
 
-		this.local = op.getLocal();
+		local = op.getLocal();
 
 		if (!(resource instanceof IProject)) {
-			this.noDefaultAndApplyButton();
+			noDefaultAndApplyButton();
 		}
 
 		Label description = new Label(composite, SWT.WRAP);
@@ -97,7 +96,7 @@ public class LocalInfoPage extends PropertyPage {
 		data.widthHint = 300;
 		content.setLayoutData(data);
 		content.setEditable(false);
-		content.setText(this.resource.getFullPath().toString());
+		content.setText(resource.getFullPath().toString());
 
 		//text status
 		description = new Label(composite, SWT.WRAP);
@@ -107,7 +106,7 @@ public class LocalInfoPage extends PropertyPage {
 		content = new Text(composite, SWT.SINGLE);
 		content.setLayoutData(new GridData());
 		content.setEditable(false);
-		content.setText(SVNUtility.getStatusText(this.local.getTextStatus()));
+		content.setText(SVNUtility.getStatusText(local.getTextStatus()));
 
 		//property status
 		description = new Label(composite, SWT.WRAP);
@@ -117,7 +116,7 @@ public class LocalInfoPage extends PropertyPage {
 		content = new Text(composite, SWT.SINGLE);
 		content.setLayoutData(new GridData());
 		content.setEditable(false);
-		content.setText(SVNUtility.getStatusText(this.local.getPropStatus()));
+		content.setText(SVNUtility.getStatusText(local.getPropStatus()));
 
 		//is copied
 		description = new Label(composite, SWT.WRAP);
@@ -127,10 +126,10 @@ public class LocalInfoPage extends PropertyPage {
 		content = new Text(composite, SWT.SINGLE);
 		content.setLayoutData(new GridData());
 		content.setEditable(false);
-		content.setText(String.valueOf(this.local.isCopied()));
+		content.setText(String.valueOf(local.isCopied()));
 
 		SVNEntryInfo info = op.getInfo();
-		if (IStateFilter.SF_ONREPOSITORY.accept(this.local) && info != null) {
+		if (IStateFilter.SF_ONREPOSITORY.accept(local) && info != null) {
 			// add space
 			new Label(composite, SWT.WRAP);
 			new Label(composite, SWT.WRAP);
@@ -233,8 +232,8 @@ public class LocalInfoPage extends PropertyPage {
 			}
 		}
 
-		//tree conflict		
-		if (this.local.hasTreeConflict()) {
+		//tree conflict
+		if (local.hasTreeConflict()) {
 			//add space
 			new Label(composite, SWT.WRAP);
 			new Label(composite, SWT.WRAP);
@@ -247,12 +246,12 @@ public class LocalInfoPage extends PropertyPage {
 			data.widthHint = 300;
 			content.setLayoutData(data);
 			content.setEditable(false);
-			content.setText(this.getTreeConflictDescription(this.local.getTreeConflictDescriptor()));
+			content.setText(getTreeConflictDescription(local.getTreeConflictDescriptor()));
 		}
 
-		this.createOptions(composite);
+		createOptions(composite);
 
-		if (IStateFilter.SF_VERSIONED.accept(this.local)) {
+		if (IStateFilter.SF_VERSIONED.accept(local)) {
 			//add space
 			new Label(composite, SWT.WRAP);
 			new Label(composite, SWT.WRAP);
@@ -264,12 +263,12 @@ public class LocalInfoPage extends PropertyPage {
 			layout = new GridLayout();
 			layout.marginHeight = layout.marginWidth = 0;
 			group.setLayout(layout);
-			this.properties = new PropertiesComposite(group);
+			properties = new PropertiesComposite(group);
 			IResourcePropertyProvider propertyProvider = new GetPropertiesOperation(resource);
 			UIMonitorUtility.doTaskBusyDefault(propertyProvider);
-			this.properties.setResource(this.resource, propertyProvider);
-			UIMonitorUtility.doTaskBusyDefault(this.properties.getRefreshViewOperation());
-			this.properties.setLayoutData(new GridData(GridData.FILL_BOTH));
+			properties.setResource(resource, propertyProvider);
+			UIMonitorUtility.doTaskBusyDefault(properties.getRefreshViewOperation());
+			properties.setLayoutData(new GridData(GridData.FILL_BOTH));
 		}
 
 //		Setting context help
@@ -339,31 +338,27 @@ public class LocalInfoPage extends PropertyPage {
 				operation = "merge"; //$NON-NLS-1$
 				break;
 		}
-		return SVNUIMessages.format(SVNUIMessages.LocalInfoPage_TreeConflictDescription,
+		return BaseMessages.format(SVNUIMessages.LocalInfoPage_TreeConflictDescription,
 				new String[] { reason, action, operation });
 	}
 
 	protected void createOptions(Composite parent) {
-		if (this.resource instanceof IProject) {
-			SVNTeamProvider provider = (SVNTeamProvider) RepositoryProvider.getProvider((IProject) this.resource,
+		if (resource instanceof IProject) {
+			SVNTeamProvider provider = (SVNTeamProvider) RepositoryProvider.getProvider((IProject) resource,
 					SVNTeamPlugin.NATURE_ID);
 
 			//add space
 			new Label(parent, SWT.WRAP);
 			new Label(parent, SWT.WRAP);
 
-			this.verifyTagButton = new Button(parent, SWT.CHECK);
+			verifyTagButton = new Button(parent, SWT.CHECK);
 			GridData data = new GridData();
 			data.horizontalSpan = 2;
-			this.verifyTagButton.setLayoutData(data);
-			this.verifyTagButton.setText(SVNUIMessages.LocalInfoPage_VerifyTagModification);
-			this.verifyTagButton.addListener(SWT.Selection, new Listener() {
-				public void handleEvent(Event event) {
-					LocalInfoPage.this.isVerifyTagOnCommit = LocalInfoPage.this.verifyTagButton.getSelection();
-				}
-			});
+			verifyTagButton.setLayoutData(data);
+			verifyTagButton.setText(SVNUIMessages.LocalInfoPage_VerifyTagModification);
+			verifyTagButton.addListener(SWT.Selection, event -> isVerifyTagOnCommit = verifyTagButton.getSelection());
 
-			this.verifyTagButton.setSelection(this.isVerifyTagOnCommit = provider.isVerifyTagOnCommit());
+			verifyTagButton.setSelection(isVerifyTagOnCommit = provider.isVerifyTagOnCommit());
 		}
 	}
 
@@ -372,12 +367,12 @@ public class LocalInfoPage extends PropertyPage {
 	 */
 	@Override
 	public boolean performOk() {
-		if (this.resource instanceof IProject) {
-			SVNTeamProvider provider = (SVNTeamProvider) RepositoryProvider.getProvider((IProject) this.resource,
+		if (resource instanceof IProject) {
+			SVNTeamProvider provider = (SVNTeamProvider) RepositoryProvider.getProvider((IProject) resource,
 					SVNTeamPlugin.NATURE_ID);
-			if (this.isVerifyTagOnCommit != provider.isVerifyTagOnCommit()) {
+			if (isVerifyTagOnCommit != provider.isVerifyTagOnCommit()) {
 				try {
-					provider.setVerifyTagOnCommit(this.isVerifyTagOnCommit);
+					provider.setVerifyTagOnCommit(isVerifyTagOnCommit);
 				} catch (CoreException e) {
 					LoggedOperation.reportError(this.getClass().getName(), e);
 				}
@@ -393,7 +388,7 @@ public class LocalInfoPage extends PropertyPage {
 	protected void performDefaults() {
 		super.performDefaults();
 
-		this.verifyTagButton.setSelection(this.isVerifyTagOnCommit = SVNTeamProvider.DEFAULT_VERIFY_TAG_ON_COMMIT);
+		verifyTagButton.setSelection(isVerifyTagOnCommit = SVNTeamProvider.DEFAULT_VERIFY_TAG_ON_COMMIT);
 	}
 
 }

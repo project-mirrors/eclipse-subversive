@@ -32,6 +32,7 @@ import org.eclipse.team.svn.core.utility.FileUtility;
  */
 public class SaveContentVisitor implements IResourceChangeVisitor {
 
+	@Override
 	public void preVisit(ResourceChange change, IActionOperationProcessor processor, IProgressMonitor monitor)
 			throws Exception {
 		ILocalResource local = change.getLocal();
@@ -49,6 +50,7 @@ public class SaveContentVisitor implements IResourceChangeVisitor {
 		}
 	}
 
+	@Override
 	public void postVisit(ResourceChange change, IActionOperationProcessor processor, IProgressMonitor monitor)
 			throws Exception {
 	}

@@ -36,17 +36,18 @@ public class ShowHistoryActionHelper extends AbstractActionHelper {
 		super(action, configuration);
 	}
 
+	@Override
 	public IActionOperation getOperation() {
 		/*
-		 * If resource exists locally, then show history for local resource 
-		 * (even if there are incoming changes), 
+		 * If resource exists locally, then show history for local resource
+		 * (even if there are incoming changes),
 		 * otherwise show history for remote resource
 		 */
-		IResource resource = this.getSelectedResource();
+		IResource resource = getSelectedResource();
 		if (IStateFilter.SF_VERSIONED.accept(SVNRemoteStorage.instance().asLocalResource(resource))) {
 			return new ShowHistoryViewOperation(resource, 0, 0);
 		} else {
-			AbstractSVNSyncInfo info = this.getSelectedSVNSyncInfo();
+			AbstractSVNSyncInfo info = getSelectedSVNSyncInfo();
 			if (info != null) {
 				ILocalResource incoming = info.getRemoteChangeResource();
 				if (incoming instanceof IResourceChange) {
@@ -54,7 +55,7 @@ public class ShowHistoryActionHelper extends AbstractActionHelper {
 				}
 			}
 		}
-		return new ShowHistoryViewOperation(this.getSelectedResource(), 0, 0);
+		return new ShowHistoryViewOperation(getSelectedResource(), 0, 0);
 	}
 
 }

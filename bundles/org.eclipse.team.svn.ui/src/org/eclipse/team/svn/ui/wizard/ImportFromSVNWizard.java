@@ -40,56 +40,59 @@ public class ImportFromSVNWizard extends AbstractSVNWizard implements INewWizard
 	protected SelectCheckoutResourcePage selectResource;
 
 	public ImportFromSVNWizard() {
-		super();
-		this.setWindowTitle(SVNUIMessages.ImportFromSVNWizard_Title);
+		setWindowTitle(SVNUIMessages.ImportFromSVNWizard_Title);
 	}
 
+	@Override
 	public void addPages() {
 		IRepositoryLocation[] locations = SVNRemoteStorage.instance().getRepositoryLocations();
 		if (locations.length > 0) {
-			this.addPage(this.selectLocation = new SelectRepositoryLocationPage(locations, true));
+			addPage(selectLocation = new SelectRepositoryLocationPage(locations, true));
 		}
-		this.addPage(this.addLocation = new AddRepositoryLocationPage());
-		this.addPage(this.selectResource = new SelectCheckoutResourcePage());
+		addPage(addLocation = new AddRepositoryLocationPage());
+		addPage(selectResource = new SelectCheckoutResourcePage());
 	}
 
+	@Override
 	public IWizardPage getNextPage(IWizardPage page) {
 		IWizardPage retVal = null;
-		this.addLocation.setInitialUrl(null);
-		if (page instanceof SelectRepositoryLocationPage && this.selectLocation.useExistingLocation()) {
+		addLocation.setInitialUrl(null);
+		if (page instanceof SelectRepositoryLocationPage && selectLocation.useExistingLocation()) {
 			retVal = super.getNextPage(super.getNextPage(page));
 		} else {
 			retVal = super.getNextPage(page);
 		}
 
 		if (retVal instanceof SelectCheckoutResourcePage) {
-			this.selectResource
-					.setRepositoryLocation(this.selectLocation != null && this.selectLocation.useExistingLocation()
-							? this.selectLocation.getRepositoryLocation()
-							: this.addLocation.getRepositoryLocation());
+			selectResource.setRepositoryLocation(selectLocation != null && selectLocation.useExistingLocation()
+					? selectLocation.getRepositoryLocation()
+					: addLocation.getRepositoryLocation());
 		}
 
 		return retVal;
 	}
 
+	@Override
 	public IWizardPage getPreviousPage(IWizardPage page) {
-		if (page instanceof SelectCheckoutResourcePage && this.selectLocation != null
-				&& this.selectLocation.useExistingLocation()) {
+		if (page instanceof SelectCheckoutResourcePage && selectLocation != null
+				&& selectLocation.useExistingLocation()) {
 			return super.getPreviousPage(super.getPreviousPage(page));
 		}
 		return super.getPreviousPage(page);
 	}
 
+	@Override
 	public boolean canFinish() {
-		IWizardPage currentPage = this.getContainer().getCurrentPage();
-		return currentPage instanceof SelectCheckoutResourcePage && this.selectResource.isPageComplete();
+		IWizardPage currentPage = getContainer().getCurrentPage();
+		return currentPage instanceof SelectCheckoutResourcePage && selectResource.isPageComplete();
 	}
 
+	@Override
 	public boolean performFinish() {
-		IRepositoryResource resource = this.selectResource.getSelectedResource();
+		IRepositoryResource resource = selectResource.getSelectedResource();
 		CheckoutAsWizard checkoutWizard = new CheckoutAsWizard(new IRepositoryResource[] { resource },
-				this.addLocation.getOperationToPeform());
-		WizardDialog dialog = new WizardDialog(this.getShell(), checkoutWizard);
+				addLocation.getOperationToPeform());
+		WizardDialog dialog = new WizardDialog(getShell(), checkoutWizard);
 		dialog.create();
 		dialog.getShell()
 				.setSize(Math.max(CheckoutAsWizard.SIZING_WIZARD_WIDTH, dialog.getShell().getSize().x),
@@ -97,6 +100,7 @@ public class ImportFromSVNWizard extends AbstractSVNWizard implements INewWizard
 		return dialog.open() == 0 ? true : false;
 	}
 
+	@Override
 	public void init(IWorkbench workbench, IStructuredSelection selection) {
 
 	}

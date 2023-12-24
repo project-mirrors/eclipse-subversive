@@ -17,6 +17,7 @@ package org.eclipse.team.svn.ui.verifier;
 import java.io.File;
 
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.team.svn.core.BaseMessages;
 import org.eclipse.team.svn.ui.SVNUIMessages;
 
 /**
@@ -37,41 +38,43 @@ public class ExistingResourceVerifier extends AbstractFormattedVerifier {
 
 	public ExistingResourceVerifier(String fieldName) {
 		super(fieldName);
-		this.init();
-		this.checkNodeType = false;
+		init();
+		checkNodeType = false;
 	}
 
 	public ExistingResourceVerifier(String fieldName, boolean files) {
 		super(fieldName);
-		this.init();
+		init();
 		this.files = files;
-		this.checkNodeType = true;
+		checkNodeType = true;
 	}
 
+	@Override
 	protected String getErrorMessageImpl(Control input) {
-		File currentFile = new File(this.getText(input));
+		File currentFile = new File(getText(input));
 		if (!currentFile.exists()) {
 			return ExistingResourceVerifier.ERROR_MESSAGE_DOES_NOT_EXIST;
-		} else if (this.checkNodeType && this.files && !currentFile.isFile()) {
+		} else if (checkNodeType && files && !currentFile.isFile()) {
 			return ExistingResourceVerifier.ERROR_MESSAGE_IS_NOT_A_FILE;
-		} else if (this.checkNodeType && !this.files && !currentFile.isDirectory()) {
+		} else if (checkNodeType && !files && !currentFile.isDirectory()) {
 			return ExistingResourceVerifier.ERROR_MESSAGE_IS_NOT_A_DIRECTORY;
 		}
 		return null;
 	}
 
+	@Override
 	protected String getWarningMessageImpl(Control input) {
 		return null;
 	}
 
 	private void init() {
-		ExistingResourceVerifier.ERROR_MESSAGE_DOES_NOT_EXIST = SVNUIMessages.format(
+		ExistingResourceVerifier.ERROR_MESSAGE_DOES_NOT_EXIST = BaseMessages.format(
 				SVNUIMessages.Verifier_ExistingResource_NotExists,
 				new String[] { AbstractFormattedVerifier.FIELD_NAME });
-		ExistingResourceVerifier.ERROR_MESSAGE_IS_NOT_A_FILE = SVNUIMessages.format(
+		ExistingResourceVerifier.ERROR_MESSAGE_IS_NOT_A_FILE = BaseMessages.format(
 				SVNUIMessages.Verifier_ExistingResource_IsNotAFile,
 				new String[] { AbstractFormattedVerifier.FIELD_NAME });
-		ExistingResourceVerifier.ERROR_MESSAGE_IS_NOT_A_DIRECTORY = SVNUIMessages.format(
+		ExistingResourceVerifier.ERROR_MESSAGE_IS_NOT_A_DIRECTORY = BaseMessages.format(
 				SVNUIMessages.Verifier_ExistingResource_IsNotADir,
 				new String[] { AbstractFormattedVerifier.FIELD_NAME });
 	}

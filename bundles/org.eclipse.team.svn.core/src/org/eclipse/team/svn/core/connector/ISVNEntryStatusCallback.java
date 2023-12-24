@@ -30,5 +30,5 @@ public interface ISVNEntryStatusCallback {
 	 * @param status
 	 *            the {@link SVNChangeStatus} entry instance
 	 */
-	public void next(SVNChangeStatus status);
+	void next(SVNChangeStatus status);
 }

@@ -28,10 +28,12 @@ import org.eclipse.team.svn.ui.extension.factory.IReportingDescriptor;
  * @author Alexander Gurov
  */
 public class MylynReporterFactory implements IReporterFactory {
+	@Override
 	public boolean isCustomEditorSupported() {
 		return true;
 	}
 
+	@Override
 	public IReporter newReporter(IReportingDescriptor settings, ReportType type) {
 		TaskRepository repository = MylynReporterFactory.getRepository(settings.getTrackerUrl());
 		if (repository == null) {

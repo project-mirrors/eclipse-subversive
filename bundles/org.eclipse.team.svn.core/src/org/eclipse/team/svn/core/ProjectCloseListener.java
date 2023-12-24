@@ -30,8 +30,9 @@ import org.eclipse.team.svn.core.utility.ProgressMonitorUtility;
  * @author Alexander Gurov
  */
 public class ProjectCloseListener implements IResourceChangeListener {
+	@Override
 	public void resourceChanged(IResourceChangeEvent event) {
-		IProject[] projects = new IProject[] { (IProject) event.getResource() };
+		IProject[] projects = { (IProject) event.getResource() };
 		SVNRemoteStorage.instance()
 				.fireResourceStatesChangedEvent(new ProjectStatesChangedEvent(projects,
 						event.getType() == IResourceChangeEvent.PRE_CLOSE

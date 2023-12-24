@@ -41,9 +41,9 @@ import org.eclipse.team.svn.ui.preferences.SVNTeamPreferences;
 public class CompareWithLatestRevisionAction extends AbstractWorkingCopyAction {
 
 	public CompareWithLatestRevisionAction() {
-		super();
 	}
 
+	@Override
 	public void runImpl(IAction action) {
 		IResource resource = this.getSelectedResources()[0];
 
@@ -63,18 +63,20 @@ public class CompareWithLatestRevisionAction extends AbstractWorkingCopyAction {
 			op.add(new ShowHistoryViewOperation(resource, remote, ISVNHistoryView.COMPARE_MODE,
 					ISVNHistoryView.COMPARE_MODE), new IActionOperation[] { mainOp });
 		}
-		this.runScheduled(op);
+		runScheduled(op);
 	}
 
+	@Override
 	public boolean isEnabled() {
 		boolean isCompareFoldersAllowed = CoreExtensionsManager.instance()
 				.getSVNConnectorFactory()
 				.getSVNAPIVersion() >= ISVNConnectorFactory.APICompatibility.SVNAPI_1_5_x;
 		return this.getSelectedResources().length == 1
 				&& (isCompareFoldersAllowed || this.getSelectedResources()[0].getType() == IResource.FILE)
-				&& this.checkForResourcesPresence(CompareWithWorkingCopyAction.COMPARE_FILTER);
+				&& checkForResourcesPresence(CompareWithWorkingCopyAction.COMPARE_FILTER);
 	}
 
+	@Override
 	protected boolean needsToSaveDirtyEditors() {
 		return true;
 	}

@@ -37,10 +37,9 @@ public class CommentPanel extends AbstractDialogPanel {
 	protected String message;
 
 	public CommentPanel(String title) {
-		super();
-		this.dialogTitle = title;
-		this.dialogDescription = SVNUIMessages.CommentPanel_Description;
-		this.defaultMessage = SVNUIMessages.CommentPanel_Message;
+		dialogTitle = title;
+		dialogDescription = SVNUIMessages.CommentPanel_Description;
+		defaultMessage = SVNUIMessages.CommentPanel_Message;
 	}
 
 	public CommentPanel(String title, BugtraqModel bugtraqModel) {
@@ -49,52 +48,57 @@ public class CommentPanel extends AbstractDialogPanel {
 	}
 
 	public String getMessage() {
-		if (this.comment != null) {
-			this.message = this.comment.getMessage();
+		if (comment != null) {
+			message = comment.getMessage();
 		}
-		return this.appendBugtraqMessage(this.message);
+		return appendBugtraqMessage(message);
 	}
 
 	public void setMessage(String message) {
 		this.message = message;
-		if (this.comment != null) {
-			this.comment.setMessage(message);
+		if (comment != null) {
+			comment.setMessage(message);
 		}
 	}
 
+	@Override
 	public void createControlsImpl(Composite parent) {
-		this.comment = new CommentComposite(parent, this);
+		comment = new CommentComposite(parent, this);
 		GridData data = new GridData(GridData.FILL_BOTH);
-		this.comment.setLayoutData(data);
+		comment.setLayoutData(data);
 	}
 
+	@Override
 	protected Point getPrefferedSizeImpl() {
 		return new Point(510, SWT.DEFAULT);
 	}
 
+	@Override
 	public void postInit() {
 		super.postInit();
-		this.comment.postInit(this.manager);
-		if (this.message != null) {
-			this.comment.setMessage(this.message);
+		comment.postInit(manager);
+		if (message != null) {
+			comment.setMessage(message);
 		}
 	}
 
+	@Override
 	protected void saveChangesImpl() {
-		this.comment.saveChanges();
+		comment.saveChanges();
 	}
 
+	@Override
 	protected void cancelChangesImpl() {
-		this.comment.cancelChanges();
+		comment.cancelChanges();
 	}
 
 	protected String appendBugtraqMessage(String message) {
 		String bugtraqMessage;
-		if (this.bugtraqModel != null && (bugtraqMessage = this.bugtraqModel.getMessage()) != null) {
-			String addString = this.comment.getBugID();
+		if (bugtraqModel != null && (bugtraqMessage = bugtraqModel.getMessage()) != null) {
+			String addString = comment.getBugID();
 			if (addString != null && addString.trim().length() > 0) {
 				bugtraqMessage = bugtraqMessage.replaceAll(BugtraqModel.BUG_ID, addString);
-				if (this.bugtraqModel.isAppend()) {
+				if (bugtraqModel.isAppend()) {
 					message += "\n" + bugtraqMessage; //$NON-NLS-1$
 				} else {
 					message = bugtraqMessage + "\n" + message; //$NON-NLS-1$

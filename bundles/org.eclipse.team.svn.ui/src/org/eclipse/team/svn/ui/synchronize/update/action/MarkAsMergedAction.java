@@ -46,8 +46,10 @@ public class MarkAsMergedAction extends AbstractSynchronizeModelAction {
 		super(text, configuration);
 	}
 
+	@Override
 	protected FastSyncInfoFilter getSyncInfoFilter() {
 		return new FastSyncInfoFilter.SyncInfoDirectionFilter(new int[] { SyncInfo.CONFLICTING, SyncInfo.INCOMING }) {
+			@Override
 			public boolean select(SyncInfo info) {
 				if (super.select(info)) {
 					UpdateSyncInfo sync = (UpdateSyncInfo) info;
@@ -60,9 +62,10 @@ public class MarkAsMergedAction extends AbstractSynchronizeModelAction {
 		};
 	}
 
+	@Override
 	protected IActionOperation getOperation(ISynchronizePageConfiguration configuration, IDiffElement[] elements) {
 		IResource[] resources = UnacceptableOperationNotificator.shrinkResourcesWithNotOnRespositoryParents(
-				configuration.getSite().getShell(), this.syncInfoSelector.getSelectedResources());
+				configuration.getSite().getShell(), syncInfoSelector.getSelectedResources());
 		if (resources == null || resources.length == 0) {
 			return null;
 		}

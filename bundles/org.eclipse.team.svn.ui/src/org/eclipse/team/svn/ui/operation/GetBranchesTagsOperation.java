@@ -47,29 +47,28 @@ public class GetBranchesTagsOperation extends AbstractActionOperation {
 	}
 
 	public IRepositoryResource[] getChildren() {
-		return this.children == null ? new IRepositoryResource[0] : this.children;
+		return children == null ? new IRepositoryResource[0] : children;
 	}
 
+	@Override
 	protected void runImpl(IProgressMonitor monitor) throws Exception {
 		boolean hasError = false;
 		try {
-			this.children = this.parent.getChildren();
+			children = parent.getChildren();
 		} catch (SVNConnectorException se) {
 			if (!(se instanceof SVNConnectorAuthenticationException || se instanceof SVNConnectorCancelException)) {
 				hasError = true;
 			}
 		}
-		if (hasError || this.getChildren().length == 0) {
-			UIMonitorUtility.getDisplay().syncExec(new Runnable() {
-				public void run() {
-					MessageDialog dialog = new MessageDialog(
-							UIMonitorUtility.getShell(), SVNUIMessages.ComparePropsNoDiff_Title, null,
-							GetBranchesTagsOperation.this.isBranch
-									? SVNUIMessages.BranchTagSelectionComposite_NoBranches
-									: SVNUIMessages.BranchTagSelectionComposite_NoTags,
-							MessageDialog.INFORMATION, new String[] { IDialogConstants.OK_LABEL }, 0);
-					dialog.open();
-				}
+		if (hasError || getChildren().length == 0) {
+			UIMonitorUtility.getDisplay().syncExec(() -> {
+				MessageDialog dialog = new MessageDialog(
+						UIMonitorUtility.getShell(), SVNUIMessages.ComparePropsNoDiff_Title, null,
+						isBranch
+								? SVNUIMessages.BranchTagSelectionComposite_NoBranches
+								: SVNUIMessages.BranchTagSelectionComposite_NoTags,
+						MessageDialog.INFORMATION, new String[] { IDialogConstants.OK_LABEL }, 0);
+				dialog.open();
 			});
 		}
 	}

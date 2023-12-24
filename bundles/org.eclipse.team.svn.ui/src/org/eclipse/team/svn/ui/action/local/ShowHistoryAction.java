@@ -28,16 +28,17 @@ import org.eclipse.team.svn.ui.operation.ShowHistoryViewOperation;
 public class ShowHistoryAction extends AbstractWorkingCopyAction {
 
 	public ShowHistoryAction() {
-		super();
 	}
 
+	@Override
 	public void runImpl(IAction action) {
 		IResource resource = this.getSelectedResources()[0];
-		this.runBusy(new ShowHistoryViewOperation(resource, 0, 0));
+		runBusy(new ShowHistoryViewOperation(resource, 0, 0));
 	}
 
+	@Override
 	public boolean isEnabled() {
-		return this.getSelectedResources().length == 1 && this.checkForResourcesPresence(IStateFilter.SF_VERSIONED);
+		return this.getSelectedResources().length == 1 && checkForResourcesPresence(IStateFilter.SF_VERSIONED);
 	}
 
 }

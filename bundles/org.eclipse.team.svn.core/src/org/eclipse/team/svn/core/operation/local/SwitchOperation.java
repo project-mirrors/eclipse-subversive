@@ -29,7 +29,6 @@ import org.eclipse.team.svn.core.connector.ISVNConnector;
 import org.eclipse.team.svn.core.connector.SVNDepth;
 import org.eclipse.team.svn.core.operation.IActionOperation;
 import org.eclipse.team.svn.core.operation.IConsoleStream;
-import org.eclipse.team.svn.core.operation.IUnprotectedOperation;
 import org.eclipse.team.svn.core.operation.SVNConflictDetectionProgressMonitor;
 import org.eclipse.team.svn.core.operation.remote.AbstractRepositoryOperation;
 import org.eclipse.team.svn.core.resource.IRepositoryLocation;
@@ -72,7 +71,7 @@ public class SwitchOperation extends AbstractRepositoryOperation implements IUnr
 		this.resources = resources;
 		this.depth = depth;
 		this.options = options & ISVNConnector.CommandMasks.SWITCH;
-		this.conflictDetectorHelper = new UnresolvedConflictDetectorHelper();
+		conflictDetectorHelper = new UnresolvedConflictDetectorHelper();
 	}
 
 	public SwitchOperation(IResource[] resources, IRepositoryResource[] destination, SVNDepth depth, long options) {
@@ -80,88 +79,96 @@ public class SwitchOperation extends AbstractRepositoryOperation implements IUnr
 		this.resources = resources;
 		this.depth = depth;
 		this.options = options & ISVNConnector.CommandMasks.SWITCH;
-		this.conflictDetectorHelper = new UnresolvedConflictDetectorHelper();
+		conflictDetectorHelper = new UnresolvedConflictDetectorHelper();
 	}
 
+	@Override
 	public int getOperationWeight() {
 		return 19;
 	}
 
+	@Override
 	public ISchedulingRule getSchedulingRule() {
-		HashSet<IResource> ruleSet = new HashSet<IResource>();
-		for (int i = 0; i < this.resources.length; i++) {
-			ruleSet.add(this.resources[i] instanceof IProject ? this.resources[i] : this.resources[i].getParent());
+		HashSet<IResource> ruleSet = new HashSet<>();
+		for (IResource element : resources) {
+			ruleSet.add(element instanceof IProject ? element : element.getParent());
 		}
 		return new MultiRule(ruleSet.toArray(new IResource[ruleSet.size()]));
 	}
 
+	@Override
 	protected void runImpl(IProgressMonitor monitor) throws Exception {
-		IRepositoryResource[] destinations = this.operableData();
-		for (int i = 0; i < this.resources.length; i++) {
-			final IResource resource = this.resources[i];
+		IRepositoryResource[] destinations = operableData();
+		for (int i = 0; i < resources.length; i++) {
+			final IResource resource = resources[i];
 			final IRepositoryResource destination = destinations[i];
 			final IRepositoryLocation location = destination.getRepositoryLocation();
 			final ISVNConnector proxy = location.acquireSVNProxy();
 
-			this.protectStep(new IUnprotectedOperation() {
-				public void run(IProgressMonitor monitor) throws Exception {
-					String wcPath = FileUtility.getWorkingCopyPath(resource);
-					SwitchOperation.this.writeToConsole(IConsoleStream.LEVEL_CMD,
-							"svn switch \"" + destination.getUrl() + "\" \"" + FileUtility.normalizePath(wcPath) //$NON-NLS-1$//$NON-NLS-2$
-									+ "\" -r " + destination.getSelectedRevision() //$NON-NLS-1$
-									+ ISVNConnector.Options.asCommandLine(SwitchOperation.this.options)
-									+ SVNUtility.getDepthArg(SwitchOperation.this.depth, SwitchOperation.this.options)
-									+ FileUtility.getUsernameParam(location.getUsername()) + "\n"); //$NON-NLS-1$
-					proxy.switchTo(wcPath, SVNUtility.getEntryRevisionReference(destination),
-							SwitchOperation.this.depth, SwitchOperation.this.options,
-							new ConflictDetectionProgressMonitor(SwitchOperation.this, monitor, null));
+			this.protectStep(monitor1 -> {
+				String wcPath = FileUtility.getWorkingCopyPath(resource);
+				SwitchOperation.this.writeToConsole(IConsoleStream.LEVEL_CMD,
+						"svn switch \"" + destination.getUrl() + "\" \"" + FileUtility.normalizePath(wcPath) //$NON-NLS-1$//$NON-NLS-2$
+								+ "\" -r " + destination.getSelectedRevision() //$NON-NLS-1$
+								+ ISVNConnector.Options.asCommandLine(options)
+								+ SVNUtility.getDepthArg(depth, options)
+								+ FileUtility.getUsernameParam(location.getUsername()) + "\n"); //$NON-NLS-1$
+				proxy.switchTo(wcPath, SVNUtility.getEntryRevisionReference(destination), depth, options,
+						new ConflictDetectionProgressMonitor(SwitchOperation.this, monitor1, null));
 
-					if (resource instanceof IProject) {
-						SVNTeamProvider provider = (SVNTeamProvider) RepositoryProvider
-								.getProvider((IProject) resource);
-						provider.switchResource(destination);
-					}
+				if (resource instanceof IProject) {
+					SVNTeamProvider provider = (SVNTeamProvider) RepositoryProvider
+							.getProvider((IProject) resource);
+					provider.switchResource(destination);
 				}
-			}, monitor, this.resources.length);
+			}, monitor, resources.length);
 
 			location.releaseSVNProxy(proxy);
 		}
 	}
 
+	@Override
 	public void setUnresolvedConflict(boolean hasUnresolvedConflict) {
-		this.conflictDetectorHelper.setUnresolvedConflict(hasUnresolvedConflict);
+		conflictDetectorHelper.setUnresolvedConflict(hasUnresolvedConflict);
 	}
 
+	@Override
 	public boolean hasUnresolvedConflicts() {
-		return this.conflictDetectorHelper.hasUnresolvedConflicts();
+		return conflictDetectorHelper.hasUnresolvedConflicts();
 	}
 
+	@Override
 	public String getMessage() {
-		return this.conflictDetectorHelper.getMessage();
+		return conflictDetectorHelper.getMessage();
 	}
 
+	@Override
 	public IResource[] getUnprocessed() {
-		return this.conflictDetectorHelper.getUnprocessed();
+		return conflictDetectorHelper.getUnprocessed();
 	}
 
+	@Override
 	public IResource[] getProcessed() {
-		return this.conflictDetectorHelper.getProcessed();
+		return conflictDetectorHelper.getProcessed();
 	}
 
 	protected void defineInitialResourceSet(IResource[] resources) {
-		this.conflictDetectorHelper.defineInitialResourceSet(resources);
+		conflictDetectorHelper.defineInitialResourceSet(resources);
 	}
 
+	@Override
 	public void addUnprocessed(IResource unprocessed) {
-		this.conflictDetectorHelper.addUnprocessed(unprocessed);
+		conflictDetectorHelper.addUnprocessed(unprocessed);
 	}
 
+	@Override
 	public void setConflictMessage(String message) {
-		this.conflictDetectorHelper.setConflictMessage(message);
+		conflictDetectorHelper.setConflictMessage(message);
 	}
 
+	@Override
 	public void removeProcessed(IResource resource) {
-		this.conflictDetectorHelper.removeProcessed(resource);
+		conflictDetectorHelper.removeProcessed(resource);
 	}
 
 	protected class ConflictDetectionProgressMonitor extends SVNConflictDetectionProgressMonitor {
@@ -169,8 +176,9 @@ public class SwitchOperation extends AbstractRepositoryOperation implements IUnr
 			super(parent, monitor, root);
 		}
 
+		@Override
 		protected void processConflict(ItemState state) {
-			SwitchOperation.this.setUnresolvedConflict(true);
+			setUnresolvedConflict(true);
 		}
 	}
 }

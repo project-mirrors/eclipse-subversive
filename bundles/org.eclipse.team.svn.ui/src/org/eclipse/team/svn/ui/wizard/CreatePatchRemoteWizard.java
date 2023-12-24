@@ -38,19 +38,21 @@ public class CreatePatchRemoteWizard extends CreatePatchWizard {
 	}
 
 	public IRepositoryResource getSelectedResource() {
-		return this.urlSelectionPage.getSelectedResource();
+		return urlSelectionPage.getSelectedResource();
 	}
 
+	@Override
 	public boolean canFinish() {
-		IWizardPage currentPage = this.getContainer().getCurrentPage();
+		IWizardPage currentPage = getContainer().getCurrentPage();
 		if (currentPage instanceof SelectRepositoryResourcePage) {
 			return false;
 		}
 		return super.canFinish();
 	}
 
+	@Override
 	public void addPages() {
-		this.addPage(this.urlSelectionPage = new SelectRepositoryResourcePage(this.targetResource));
+		addPage(urlSelectionPage = new SelectRepositoryResourcePage(targetResource));
 		super.addPages();
 	}
 

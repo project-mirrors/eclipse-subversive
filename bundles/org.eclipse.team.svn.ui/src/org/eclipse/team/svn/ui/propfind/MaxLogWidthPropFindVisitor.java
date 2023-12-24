@@ -25,15 +25,16 @@ public class MaxLogWidthPropFindVisitor implements IPropFindVisitor {
 	protected int width;
 
 	public MaxLogWidthPropFindVisitor() {
-		this.width = 0;
+		width = 0;
 	}
 
+	@Override
 	public boolean visit(SVNProperty propertyParam) {
 		if (propertyParam.name.equals("tsvn:logwidthmarker")) { //$NON-NLS-1$
 			try {
 				int currWidth = Integer.decode(propertyParam.value);
-				if (this.width > currWidth || this.width == 0) {
-					this.width = currWidth;
+				if (width > currWidth || width == 0) {
+					width = currWidth;
 				}
 			} catch (NumberFormatException ex) {
 				//we ignore the exception
@@ -43,7 +44,7 @@ public class MaxLogWidthPropFindVisitor implements IPropFindVisitor {
 	}
 
 	public int getMaxLogWidth() {
-		return this.width;
+		return width;
 	}
 
 }

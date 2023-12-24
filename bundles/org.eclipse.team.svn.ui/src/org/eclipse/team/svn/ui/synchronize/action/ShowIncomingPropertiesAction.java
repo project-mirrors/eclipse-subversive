@@ -37,19 +37,21 @@ public class ShowIncomingPropertiesAction extends AbstractSynchronizeModelAction
 
 	public ShowIncomingPropertiesAction(String text, ISynchronizePageConfiguration configuration) {
 		super(text, configuration);
-		this.actionHelper = new ShowIncomingPropertiesActionHelper(this, configuration);
+		actionHelper = new ShowIncomingPropertiesActionHelper(this, configuration);
 	}
 
 	public ShowIncomingPropertiesAction(String text, ISynchronizePageConfiguration configuration,
 			ISelectionProvider selectionProvider) {
 		super(text, configuration, selectionProvider);
-		this.actionHelper = new ShowIncomingPropertiesActionHelper(this, configuration);
+		actionHelper = new ShowIncomingPropertiesActionHelper(this, configuration);
 	}
 
+	@Override
 	protected boolean needsToSaveDirtyEditors() {
 		return false;
 	}
 
+	@Override
 	protected boolean updateSelection(IStructuredSelection selection) {
 		super.updateSelection(selection);
 		if (selection.size() == 1 && selection.getFirstElement() instanceof SyncInfoModelElement) {
@@ -68,8 +70,9 @@ public class ShowIncomingPropertiesAction extends AbstractSynchronizeModelAction
 		return false;
 	}
 
+	@Override
 	protected IActionOperation getOperation(ISynchronizePageConfiguration configuration, IDiffElement[] elements) {
-		return this.actionHelper.getOperation();
+		return actionHelper.getOperation();
 	}
 
 }

@@ -28,8 +28,9 @@ import org.eclipse.team.svn.ui.preferences.SVNTeamPropsPreferencePage;
  */
 public class CustomPropertySet extends PredefinedPropertySet {
 
+	@Override
 	protected void init() {
-		this.registerProperty(new PredefinedProperty(SVNUIMessages.AbstractPropertyEditPanel_custom_description,
+		registerProperty(new PredefinedProperty(SVNUIMessages.AbstractPropertyEditPanel_custom_description,
 				PredefinedProperty.TYPE_GROUP | PredefinedProperty.TYPE_COMMON));
 		PredefinedProperty[] customProps = SVNTeamPropsPreferencePage.loadCustomProperties(
 				SVNTeamPreferences.getCustomPropertiesList(SVNTeamUIPlugin.instance().getPreferenceStore(),
@@ -37,7 +38,7 @@ public class CustomPropertySet extends PredefinedPropertySet {
 		if (customProps.length > 0) {
 			this.registerProperties(customProps);
 		} else {
-			this.registerProperty(new PredefinedProperty("    " + SVNUIMessages.AbstractPropertyEditPanel_custom_hint, //$NON-NLS-1$
+			registerProperty(new PredefinedProperty("    " + SVNUIMessages.AbstractPropertyEditPanel_custom_hint, //$NON-NLS-1$
 					PredefinedProperty.TYPE_GROUP | PredefinedProperty.TYPE_COMMON));
 		}
 	}

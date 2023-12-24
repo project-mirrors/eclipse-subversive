@@ -26,7 +26,6 @@ import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.team.svn.core.BaseMessages;
 import org.eclipse.team.svn.core.connector.SVNConnectorException;
 import org.eclipse.team.svn.core.operation.AbstractActionOperation;
-import org.eclipse.team.svn.core.operation.IUnprotectedOperation;
 import org.eclipse.team.svn.core.operation.remote.GetFileContentOperation;
 import org.eclipse.team.svn.core.resource.IRepositoryLocation;
 import org.eclipse.team.svn.core.resource.IRepositoryResource;
@@ -61,7 +60,7 @@ public class ObtainProjectNameOperation extends AbstractActionOperation {
 	public ObtainProjectNameOperation(IRepositoryResource[] resources) {
 		super("Operation_ObtainProjectName", SVNUIMessages.class); //$NON-NLS-1$
 		this.resources = resources;
-		this.names2Resources = new HashMap<String, IRepositoryResource>();
+		names2Resources = new HashMap<>();
 	}
 
 	public ObtainProjectNameOperation(IRepositoryResourceProvider resourceProvider) {
@@ -69,70 +68,66 @@ public class ObtainProjectNameOperation extends AbstractActionOperation {
 		this.resourceProvider = resourceProvider;
 	}
 
+	@Override
 	protected void runImpl(IProgressMonitor monitor) throws Exception {
 		IPreferenceStore store = SVNTeamUIPlugin.instance().getPreferenceStore();
 		final boolean doObtainFromDotProject = SVNTeamPreferences.getCheckoutBoolean(store,
 				SVNTeamPreferences.CHECKOUT_USE_DOT_PROJECT_NAME);
-		final Set<String> lowerCaseNames = new HashSet<String>();
+		final Set<String> lowerCaseNames = new HashSet<>();
 		final boolean caseInsensitiveOS = FileUtility.isCaseInsensitiveOS();
-		if (this.resourceProvider != null) {
-			this.resources = this.resourceProvider.getRepositoryResources();
+		if (resourceProvider != null) {
+			resources = resourceProvider.getRepositoryResources();
 		}
-		for (int i = 0; i < this.resources.length && !monitor.isCanceled(); i++) {
-			ProgressMonitorUtility.setTaskInfo(monitor, this, BaseMessages.format(this.getOperationResource("Scanning"), //$NON-NLS-1$
-					new Object[] { this.resources[i].getName() }));
+		for (int i = 0; i < resources.length && !monitor.isCanceled(); i++) {
+			ProgressMonitorUtility.setTaskInfo(monitor, this, BaseMessages.format(getOperationResource("Scanning"), //$NON-NLS-1$
+					new Object[] { resources[i].getName() }));
 
 			final int j = i;
-			this.protectStep(new IUnprotectedOperation() {
-				public void run(IProgressMonitor monitor) throws Exception {
-					String name = null;
-					String newName = null;
-					try {
-						name = doObtainFromDotProject
-								? ObtainProjectNameOperation.this
-										.obtainProjectName(ObtainProjectNameOperation.this.resources[j], monitor)
-								: null;
-					} catch (SVNConnectorException ex) {
-						// do nothing
-					}
-					if (name == null) {
-						IRepositoryResource resource = ObtainProjectNameOperation.this.resources[j];
-						IRepositoryLocation location = resource.getRepositoryLocation();
-						if (location.isStructureEnabled() && location.getTrunkLocation().equals(resource.getName())) {
-							if (resource.getParent() != null) {
-								name = resource.getParent().getName();
-							} else {
-								name = SVNUtility.createPathForSVNUrl(location.getUrl()).lastSegment();
-							}
-							name = FileUtility.formatResourceName(name);
-						} else {
-							name = resource.getName();
-						}
-					}
-					if (!ObtainProjectNameOperation.this.names2Resources.containsKey(name)
-							&& (caseInsensitiveOS ? !lowerCaseNames.contains(name.toLowerCase()) : true)) {
-						ObtainProjectNameOperation.this.names2Resources.put(name,
-								ObtainProjectNameOperation.this.resources[j]);
-						if (caseInsensitiveOS) {
-							lowerCaseNames.add(name.toLowerCase());
-						}
-					} else {
-						for (int k = 1;; k++) {
-							newName = name + " (" + k + ")"; //$NON-NLS-1$ //$NON-NLS-2$
-							if (!ObtainProjectNameOperation.this.names2Resources.containsKey(newName)
-									&& (caseInsensitiveOS ? !lowerCaseNames.contains(newName.toLowerCase()) : true)) {
-								ObtainProjectNameOperation.this.names2Resources.put(newName,
-										ObtainProjectNameOperation.this.resources[j]);
-								if (caseInsensitiveOS) {
-									lowerCaseNames.add(newName.toLowerCase());
-								}
-								break;
-							}
-						}
-					}
-
+			this.protectStep(monitor1 -> {
+				String name = null;
+				String newName = null;
+				try {
+					name = doObtainFromDotProject
+							? ObtainProjectNameOperation.this.obtainProjectName(resources[j], monitor1)
+							: null;
+				} catch (SVNConnectorException ex) {
+					// do nothing
 				}
-			}, monitor, this.resources.length);
+				if (name == null) {
+					IRepositoryResource resource = resources[j];
+					IRepositoryLocation location = resource.getRepositoryLocation();
+					if (location.isStructureEnabled() && location.getTrunkLocation().equals(resource.getName())) {
+						if (resource.getParent() != null) {
+							name = resource.getParent().getName();
+						} else {
+							name = SVNUtility.createPathForSVNUrl(location.getUrl()).lastSegment();
+						}
+						name = FileUtility.formatResourceName(name);
+					} else {
+						name = resource.getName();
+					}
+				}
+				if (!names2Resources.containsKey(name)
+						&& (caseInsensitiveOS ? !lowerCaseNames.contains(name.toLowerCase()) : true)) {
+					names2Resources.put(name, resources[j]);
+					if (caseInsensitiveOS) {
+						lowerCaseNames.add(name.toLowerCase());
+					}
+				} else {
+					for (int k = 1;; k++) {
+						newName = name + " (" + k + ")"; //$NON-NLS-1$ //$NON-NLS-2$
+						if (!names2Resources.containsKey(newName)
+								&& (caseInsensitiveOS ? !lowerCaseNames.contains(newName.toLowerCase()) : true)) {
+							names2Resources.put(newName, resources[j]);
+							if (caseInsensitiveOS) {
+								lowerCaseNames.add(newName.toLowerCase());
+							}
+							break;
+						}
+					}
+				}
+
+			}, monitor, resources.length);
 
 		}
 	}
@@ -199,7 +194,7 @@ public class ObtainProjectNameOperation extends AbstractActionOperation {
 	}
 
 	public HashMap<String, IRepositoryResource> getNames2Resources() {
-		return this.names2Resources;
+		return names2Resources;
 	}
 
 	private static class NameReceiver implements ContentHandler {
@@ -207,53 +202,64 @@ public class ObtainProjectNameOperation extends AbstractActionOperation {
 
 		private String name = "";//$NON-NLS-1$
 
-		private int level = 0;;
+		private int level = 0;
 
 		public String getName() {
-			return this.name;
+			return name;
 		}
 
+		@Override
 		public void setDocumentLocator(Locator locator) {
 		}
 
+		@Override
 		public void startDocument() throws SAXException {
 		}
 
+		@Override
 		public void endDocument() throws SAXException {
 		}
 
+		@Override
 		public void startPrefixMapping(String prefix, String uri) throws SAXException {
 		}
 
+		@Override
 		public void endPrefixMapping(String prefix) throws SAXException {
 		}
 
+		@Override
 		public void startElement(String uri, String localName, String qName, Attributes atts) throws SAXException {
-			this.level++;
-			if (localName.equals("name") && this.level == 2) {//$NON-NLS-1$
-				this.state = 1;
+			level++;
+			if (localName.equals("name") && level == 2) {//$NON-NLS-1$
+				state = 1;
 			}
 		}
 
+		@Override
 		public void endElement(String uri, String localName, String qName) throws SAXException {
-			if (localName.equals("name") && this.level == 2) {//$NON-NLS-1$
-				this.state = 0;
+			if (localName.equals("name") && level == 2) {//$NON-NLS-1$
+				state = 0;
 			}
-			this.level--;
+			level--;
 		}
 
+		@Override
 		public void characters(char[] ch, int start, int length) throws SAXException {
-			if (this.state == 1) {
-				this.name += new String(ch, start, length);
+			if (state == 1) {
+				name += new String(ch, start, length);
 			}
 		}
 
+		@Override
 		public void ignorableWhitespace(char[] ch, int start, int length) throws SAXException {
 		}
 
+		@Override
 		public void processingInstruction(String target, String data) throws SAXException {
 		}
 
+		@Override
 		public void skippedEntity(String name) throws SAXException {
 		}
 	}

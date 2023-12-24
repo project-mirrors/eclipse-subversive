@@ -40,7 +40,7 @@ public class StringId {
 		}
 
 		Random random = new Random();
-		StringBuffer str = new StringBuffer();
+		StringBuilder str = new StringBuilder();
 
 		str.append(FIRST_CHAR[random.nextInt(FIRST_CHAR.length)]);
 

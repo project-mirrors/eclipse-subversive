@@ -96,7 +96,7 @@ public abstract class SVNEntryStatus {
 			throw new IllegalArgumentException("Invalid entry status kind: " + id); //$NON-NLS-1$
 		}
 
-		private Kind(int id) {
+		Kind(int id) {
 			this.id = id;
 		}
 	}

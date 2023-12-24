@@ -37,11 +37,11 @@ import org.eclipse.team.svn.ui.wizard.CreatePatchWizard;
  */
 public class CreatePatchAction extends AbstractRepositoryModifyWorkspaceAction {
 	public CreatePatchAction() {
-		super();
 	}
 
+	@Override
 	public void runImpl(IAction action) {
-		IRepositoryResource[] resources = this.getSelectedRepositoryResources();
+		IRepositoryResource[] resources = getSelectedRepositoryResources();
 		CreatePatchWizard wizard = null;
 		if (resources.length == 1) {
 			wizard = new CreatePatchRemoteWizard(resources[0], true);
@@ -49,7 +49,7 @@ public class CreatePatchAction extends AbstractRepositoryModifyWorkspaceAction {
 			wizard = new CreatePatchWizard(resources[0].getName(), null, true);
 		}
 
-		WizardDialog dialog = new WizardDialog(this.getShell(), wizard);
+		WizardDialog dialog = new WizardDialog(getShell(), wizard);
 		if (dialog.open() == 0) {
 			IRepositoryResource second = resources.length == 1
 					? ((CreatePatchRemoteWizard) wizard).getSelectedResource()
@@ -60,7 +60,7 @@ public class CreatePatchAction extends AbstractRepositoryModifyWorkspaceAction {
 					second = resources[0];
 					resources[0] = tmp;
 				}
-				this.runScheduled(CreatePatchAction.getCreatePatchOperation(resources[0], second, wizard));
+				runScheduled(CreatePatchAction.getCreatePatchOperation(resources[0], second, wizard));
 			} catch (SVNConnectorException ex) {
 				UILoggedOperation.reportError(SVNMessages.Operation_CreatePatchRemote, ex);
 			}
@@ -89,8 +89,9 @@ public class CreatePatchAction extends AbstractRepositoryModifyWorkspaceAction {
 
 	}
 
+	@Override
 	public boolean isEnabled() {
-		IRepositoryResource[] resources = this.getSelectedRepositoryResources();
+		IRepositoryResource[] resources = getSelectedRepositoryResources();
 		return resources.length == 1 || resources.length == 2;
 	}
 

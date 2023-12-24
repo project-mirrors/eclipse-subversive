@@ -32,9 +32,10 @@ import org.eclipse.team.svn.ui.utility.UIMonitorUtility;
  */
 public class NewRepositoryAction extends TeamAction {
 
+	@Override
 	public void run(IAction action) {
 		AddRepositoryPanel addRepositoryPanel = new AddRepositoryPanel();
-		DefaultDialog dialog = new DefaultDialog(this.getShell(), addRepositoryPanel);
+		DefaultDialog dialog = new DefaultDialog(getShell(), addRepositoryPanel);
 		if (dialog.open() == 0) {
 			IActionOperation op = addRepositoryPanel.getOperationToPeform();
 			if (op != null) {
@@ -43,10 +44,12 @@ public class NewRepositoryAction extends TeamAction {
 		}
 	}
 
+	@Override
 	public boolean isEnabled() {
 		return true;
 	}
 
+	@Override
 	protected void execute(IAction action) throws InvocationTargetException, InterruptedException {
 		// compatibility with 3.3
 	}

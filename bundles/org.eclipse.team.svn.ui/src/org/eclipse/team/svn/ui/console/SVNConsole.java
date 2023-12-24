@@ -23,6 +23,7 @@ import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.team.svn.core.BaseMessages;
 import org.eclipse.team.svn.core.operation.IConsoleStream;
 import org.eclipse.team.svn.ui.SVNTeamUIPlugin;
 import org.eclipse.team.svn.ui.SVNUIMessages;
@@ -59,55 +60,51 @@ public class SVNConsole extends IOConsole implements IPropertyChangeListener {
 	public SVNConsole() {
 		super(SVNUIMessages.SVNConsole_Name, SVNTeamUIPlugin.instance().getImageDescriptor("icons/views/console.gif")); //$NON-NLS-1$
 
-		this.setType(SVNConsole.SVN_CONSOLE_TYPE);
+		setType(SVNConsole.SVN_CONSOLE_TYPE);
 	}
 
 	public IConsoleStream getConsoleStream() {
 		return new SVNConsoleStream();
 	}
 
+	@Override
 	public void propertyChange(PropertyChangeEvent event) {
 		if (event.getProperty().startsWith(SVNTeamPreferences.CONSOLE_BASE)) {
-			UIMonitorUtility.getDisplay().asyncExec(new Runnable() {
-				public void run() {
-					SVNConsole.this.loadPreferences();
-				}
-			});
+			UIMonitorUtility.getDisplay().asyncExec(SVNConsole.this::loadPreferences);
 		}
 	}
 
+	@Override
 	public IPageBookViewPage createPage(IConsoleView view) {
 		IOConsolePage page = (IOConsolePage) super.createPage(view);
 		page.setReadOnly();
 		return page;
 	}
 
+	@Override
 	protected void init() {
-		if (!this.enabled) {
+		if (!enabled) {
 			super.init();
 
-			this.setTabWidth(4);
+			setTabWidth(4);
 
-			this.cmdStream = this.newOutputStream();
-			this.okStream = this.newOutputStream();
-			this.warningStream = this.newOutputStream();
-			this.errorStream = this.newOutputStream();
+			cmdStream = newOutputStream();
+			okStream = newOutputStream();
+			warningStream = newOutputStream();
+			errorStream = newOutputStream();
 
-			UIMonitorUtility.getDisplay().syncExec(new Runnable() {
-				public void run() {
-					SVNConsole.this.loadPreferences();
-				}
-			});
+			UIMonitorUtility.getDisplay().syncExec(SVNConsole.this::loadPreferences);
 			JFaceResources.getFontRegistry().addListener(this);
 			SVNTeamUIPlugin.instance().getPreferenceStore().addPropertyChangeListener(this);
 
-			this.enabled = true;
+			enabled = true;
 		}
 	}
 
+	@Override
 	protected void dispose() {
-		if (this.enabled) {
-			this.enabled = false;
+		if (enabled) {
+			enabled = false;
 			super.dispose();
 
 			SVNTeamUIPlugin.instance().getPreferenceStore().removePropertyChangeListener(this);
@@ -115,26 +112,26 @@ public class SVNConsole extends IOConsole implements IPropertyChangeListener {
 
 			ConsolePlugin.getDefault().getConsoleManager().removeConsoles(new IConsole[] { this });
 
-			Color tmp1 = this.cmdStream.getColor();
-			Color tmp2 = this.okStream.getColor();
-			Color tmp3 = this.warningStream.getColor();
-			Color tmp4 = this.errorStream.getColor();
+			Color tmp1 = cmdStream.getColor();
+			Color tmp2 = okStream.getColor();
+			Color tmp3 = warningStream.getColor();
+			Color tmp4 = errorStream.getColor();
 
 			// unsupported in Eclipse IDE 3.0
 			try {
-				this.cmdStream.close();
+				cmdStream.close();
 			} catch (Exception ex) {
 			}
 			try {
-				this.okStream.close();
+				okStream.close();
 			} catch (Exception ex) {
 			}
 			try {
-				this.warningStream.close();
+				warningStream.close();
 			} catch (Exception ex) {
 			}
 			try {
-				this.errorStream.close();
+				errorStream.close();
 			} catch (Exception ex) {
 			}
 
@@ -156,42 +153,42 @@ public class SVNConsole extends IOConsole implements IPropertyChangeListener {
 	protected void loadPreferences() {
 		IPreferenceStore store = SVNTeamUIPlugin.instance().getPreferenceStore();
 
-		Color tmp = this.cmdStream.getColor();
-		this.cmdStream.setColor(new Color(UIMonitorUtility.getDisplay(),
+		Color tmp = cmdStream.getColor();
+		cmdStream.setColor(new Color(UIMonitorUtility.getDisplay(),
 				SVNTeamPreferences.getConsoleRGB(store, SVNTeamPreferences.CONSOLE_CMD_COLOR_NAME)));
-		if (tmp != null && !tmp.equals(this.cmdStream.getColor())) {
+		if (tmp != null && !tmp.equals(cmdStream.getColor())) {
 			tmp.dispose();
 		}
-		tmp = this.okStream.getColor();
-		this.okStream.setColor(new Color(UIMonitorUtility.getDisplay(),
+		tmp = okStream.getColor();
+		okStream.setColor(new Color(UIMonitorUtility.getDisplay(),
 				SVNTeamPreferences.getConsoleRGB(store, SVNTeamPreferences.CONSOLE_OK_COLOR_NAME)));
-		if (tmp != null && !tmp.equals(this.okStream.getColor())) {
+		if (tmp != null && !tmp.equals(okStream.getColor())) {
 			tmp.dispose();
 		}
-		tmp = this.warningStream.getColor();
-		this.warningStream.setColor(new Color(UIMonitorUtility.getDisplay(),
+		tmp = warningStream.getColor();
+		warningStream.setColor(new Color(UIMonitorUtility.getDisplay(),
 				SVNTeamPreferences.getConsoleRGB(store, SVNTeamPreferences.CONSOLE_WRN_COLOR_NAME)));
-		if (tmp != null && !tmp.equals(this.warningStream.getColor())) {
+		if (tmp != null && !tmp.equals(warningStream.getColor())) {
 			tmp.dispose();
 		}
-		tmp = this.errorStream.getColor();
-		this.errorStream.setColor(new Color(UIMonitorUtility.getDisplay(),
+		tmp = errorStream.getColor();
+		errorStream.setColor(new Color(UIMonitorUtility.getDisplay(),
 				SVNTeamPreferences.getConsoleRGB(store, SVNTeamPreferences.CONSOLE_ERR_COLOR_NAME)));
-		if (tmp != null && !tmp.equals(this.errorStream.getColor())) {
+		if (tmp != null && !tmp.equals(errorStream.getColor())) {
 			tmp.dispose();
 		}
 
 		if (SVNTeamPreferences.getConsoleBoolean(store, SVNTeamPreferences.CONSOLE_WRAP_ENABLED_NAME)) {
-			this.setConsoleWidth(SVNTeamPreferences.getConsoleInt(store, SVNTeamPreferences.CONSOLE_WRAP_WIDTH_NAME));
+			setConsoleWidth(SVNTeamPreferences.getConsoleInt(store, SVNTeamPreferences.CONSOLE_WRAP_WIDTH_NAME));
 		} else {
-			this.setConsoleWidth(-1);
+			setConsoleWidth(-1);
 		}
 
 		if (SVNTeamPreferences.getConsoleBoolean(store, SVNTeamPreferences.CONSOLE_LIMIT_ENABLED_NAME)) {
 			int limit = SVNTeamPreferences.getConsoleInt(store, SVNTeamPreferences.CONSOLE_LIMIT_VALUE_NAME);
-			this.setWaterMarks(1000 < limit ? 1000 : limit - 1, limit);
+			setWaterMarks(1000 < limit ? 1000 : limit - 1, limit);
 		} else {
-			this.setWaterMarks(-1, 0);
+			setWaterMarks(-1, 0);
 		}
 
 		SVNConsole.this.setFont(PlatformUI.getWorkbench()
@@ -229,76 +226,81 @@ public class SVNConsole extends IOConsole implements IPropertyChangeListener {
 
 		}
 
+		@Override
 		public void markEnd() {
-			if (this.outputStarted) {
-				this.write(IConsoleStream.LEVEL_CMD, "*** "); //$NON-NLS-1$
-				if (this.hasError) {
-					this.write(IConsoleStream.LEVEL_ERROR, SVNUIMessages.SVNConsole_Error);
-				} else if (this.hasWarning) {
-					this.write(IConsoleStream.LEVEL_WARNING, SVNUIMessages.SVNConsole_Warning);
+			if (outputStarted) {
+				write(IConsoleStream.LEVEL_CMD, "*** "); //$NON-NLS-1$
+				if (hasError) {
+					write(IConsoleStream.LEVEL_ERROR, SVNUIMessages.SVNConsole_Error);
+				} else if (hasWarning) {
+					write(IConsoleStream.LEVEL_WARNING, SVNUIMessages.SVNConsole_Warning);
 				} else {
-					this.write(IConsoleStream.LEVEL_CMD,
-							this.cancelled ? SVNUIMessages.SVNConsole_Cancelled : SVNUIMessages.SVNConsole_Ok);
+					write(IConsoleStream.LEVEL_CMD,
+							cancelled ? SVNUIMessages.SVNConsole_Cancelled : SVNUIMessages.SVNConsole_Ok);
 				}
-				this.write(
+				write(
 						IConsoleStream.LEVEL_CMD, " " //$NON-NLS-1$
-								+ SVNUIMessages
+								+ BaseMessages
 										.format(SVNUIMessages.SVNConsole_Took,
 												new String[] { new SimpleDateFormat("mm:ss.SSS") //$NON-NLS-1$
-														.format(new Date(System.currentTimeMillis() - this.start)) })
+														.format(new Date(System.currentTimeMillis() - start)) })
 								+ "\n\n"); //$NON-NLS-1$
 			}
 		}
 
+		@Override
 		public void markStart(String data) {
-			this.start = System.currentTimeMillis();
-			this.buffer = data;
+			start = System.currentTimeMillis();
+			buffer = data;
 		}
 
+		@Override
 		public void doComplexWrite(Runnable runnable) {
-			this.flushBuffer();
+			flushBuffer();
 			runnable.run();
 		}
 
+		@Override
 		public void write(int severity, String data) {
-			this.flushBuffer();
+			flushBuffer();
 
-			if (!this.activated && SVNConsole.this.canShowConsoleAutomatically(severity)) {
-				if (!SVNConsole.this.enabled) {
+			if (!activated && canShowConsoleAutomatically(severity)) {
+				if (!enabled) {
 					SVNConsoleFactory.showConsole();
 				} else {
 					ConsolePlugin.getDefault().getConsoleManager().showConsoleView(SVNConsole.this);
 				}
-				this.activated = true;
+				activated = true;
 			}
 
-			if (SVNConsole.this.enabled && this.activated && !SVNConsole.this.cmdStream.isClosed()) {
+			if (enabled && activated && !cmdStream.isClosed()) {
 				switch (severity) {
 					case IConsoleStream.LEVEL_CMD: {
-						this.print(SVNConsole.this.cmdStream, data);
+						print(cmdStream, data);
 						break;
 					}
 					case IConsoleStream.LEVEL_OK: {
-						this.print(SVNConsole.this.okStream, data);
+						print(okStream, data);
 						break;
 					}
 					case IConsoleStream.LEVEL_WARNING: {
-						this.hasWarning = true;
-						this.print(SVNConsole.this.warningStream, data);
+						hasWarning = true;
+						print(warningStream, data);
 						break;
 					}
 					case IConsoleStream.LEVEL_ERROR:
 					default: {
-						this.hasError = true;
-						this.print(SVNConsole.this.errorStream, data);
+						hasError = true;
+						print(errorStream, data);
 						break;
 					}
 				}
 			}
 		}
 
+		@Override
 		public void markCancelled() {
-			this.cancelled = true;
+			cancelled = true;
 		}
 
 		protected void print(final IOConsoleOutputStream stream, final String data) {
@@ -310,13 +312,13 @@ public class SVNConsole extends IOConsole implements IPropertyChangeListener {
 		}
 
 		protected void flushBuffer() {
-			this.outputStarted = true;
-			if (this.buffer != null) {
-				String tmp = this.buffer;
-				this.buffer = null;
-				this.write(IConsoleStream.LEVEL_CMD, "*** "); //$NON-NLS-1$
-				this.write(IConsoleStream.LEVEL_CMD, tmp);
-				this.write(IConsoleStream.LEVEL_CMD, "\n"); //$NON-NLS-1$
+			outputStarted = true;
+			if (buffer != null) {
+				String tmp = buffer;
+				buffer = null;
+				write(IConsoleStream.LEVEL_CMD, "*** "); //$NON-NLS-1$
+				write(IConsoleStream.LEVEL_CMD, tmp);
+				write(IConsoleStream.LEVEL_CMD, "\n"); //$NON-NLS-1$
 			}
 		}
 

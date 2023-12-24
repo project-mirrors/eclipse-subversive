@@ -22,17 +22,17 @@ import org.eclipse.team.svn.core.connector.SVNRevision;
  * @author Alexander Gurov
  */
 public interface IResourceChange extends ILocalResource {
-	public SVNRevision getPegRevision();
+	SVNRevision getPegRevision();
 
-	public void setPegRevision(SVNRevision pegRevision);
+	void setPegRevision(SVNRevision pegRevision);
 
-	public String getComment();
+	String getComment();
 
-	public IRepositoryResource getOriginator();
+	IRepositoryResource getOriginator();
 
-	public void setOriginator(IRepositoryResource originator);
+	void setOriginator(IRepositoryResource originator);
 
-	public void setCommentProvider(ICommentProvider provider);
+	void setCommentProvider(ICommentProvider provider);
 
-	public void treatAsReplacement();
+	void treatAsReplacement();
 }

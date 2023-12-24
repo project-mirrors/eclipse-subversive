@@ -33,13 +33,14 @@ public class EditTreeConflictsActionHelper extends AbstractActionHelper {
 		super(action, configuration);
 	}
 
+	@Override
 	public IActionOperation getOperation() {
-		AbstractSVNSyncInfo syncInfo = this.getSelectedSVNSyncInfo();
+		AbstractSVNSyncInfo syncInfo = getSelectedSVNSyncInfo();
 		if (syncInfo != null) {
 			ILocalResource local = syncInfo.getLocalResource();
 			if (local.hasTreeConflict()) {
 				EditTreeConflictsPanel editConflictsPanel = new EditTreeConflictsPanel(local);
-				DefaultDialog dialog = new DefaultDialog(this.configuration.getSite().getShell(), editConflictsPanel);
+				DefaultDialog dialog = new DefaultDialog(configuration.getSite().getShell(), editConflictsPanel);
 				if (dialog.open() == 0) {
 					return editConflictsPanel.getOperation();
 				}

@@ -46,27 +46,31 @@ public abstract class AbstractFileConflictDetectionOperation extends AbstractFil
 		super(operationName, messagesClass, provider);
 	}
 
+	@Override
 	public boolean hasUnresolvedConflicts() {
-		return this.hasUnresolvedConflict;
+		return hasUnresolvedConflict;
 	}
 
+	@Override
 	public String getMessage() {
-		return this.conflictMessage;
+		return conflictMessage;
 	}
 
+	@Override
 	public File[] getProcessed() {
-		return this.processed == null ? null : (File[]) this.processed.toArray(new File[this.processed.size()]);
+		return processed == null ? null : (File[]) processed.toArray(new File[processed.size()]);
 	}
 
+	@Override
 	public File[] getUnprocessed() {
-		return this.unprocessed == null ? null : (File[]) this.unprocessed.toArray(new File[this.unprocessed.size()]);
+		return unprocessed == null ? null : (File[]) unprocessed.toArray(new File[unprocessed.size()]);
 	}
 
 	protected void defineInitialResourceSet(File[] resources) {
-		this.hasUnresolvedConflict = false;
-		this.unprocessed = new HashSet();
-		this.processed = new HashSet();
-		this.processed.addAll(Arrays.asList(resources));
+		hasUnresolvedConflict = false;
+		unprocessed = new HashSet();
+		processed = new HashSet();
+		processed.addAll(Arrays.asList(resources));
 	}
 
 }

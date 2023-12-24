@@ -16,13 +16,9 @@ package org.eclipse.team.svn.ui.wizard.shareproject;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.viewers.ColumnWeightData;
-import org.eclipse.jface.viewers.DoubleClickEvent;
-import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ILabelProviderListener;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITableLabelProvider;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TableLayout;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.Viewer;
@@ -71,19 +67,21 @@ public class SelectRepositoryLocationPage extends AbstractVerifiedWizardPage {
 		super(
 				SelectRepositoryLocationPage.class.getName(),
 				SVNUIMessages.getString("SelectRepositoryLocationPage_Title" //$NON-NLS-1$
-						+ SelectRepositoryLocationPage.getNationalizationSuffix(importProject)), SVNTeamUIPlugin.instance().getImageDescriptor("icons/wizards/newconnect.gif")); //$NON-NLS-1$
+						+ SelectRepositoryLocationPage.getNationalizationSuffix(importProject)),
+				SVNTeamUIPlugin.instance().getImageDescriptor("icons/wizards/newconnect.gif")); //$NON-NLS-1$
 
-		this.setDescription(SVNUIMessages.SelectRepositoryLocationPage_Description);
+		setDescription(SVNUIMessages.SelectRepositoryLocationPage_Description);
 		this.repositories = repositories;
-		this.useExistingLocation = true;
-		this.location = this.repositories[0];
+		useExistingLocation = true;
+		location = this.repositories[0];
 		this.importProject = importProject;
 	}
 
+	@Override
 	protected Composite createControlImpl(Composite parent) {
 		GridLayout layout = null;
 		GridData data = null;
-		this.initializeDialogUnits(parent);
+		initializeDialogUnits(parent);
 
 		Composite composite = new Composite(parent, SWT.NONE);
 		layout = new GridLayout();
@@ -94,10 +92,10 @@ public class SelectRepositoryLocationPage extends AbstractVerifiedWizardPage {
 		Label description = new Label(composite, SWT.WRAP);
 		data = new GridData(GridData.FILL_HORIZONTAL);
 		data.widthHint = IDialogConstants.ENTRY_FIELD_WIDTH;
-		data.heightHint = this.convertHeightInCharsToPixels(2);
+		data.heightHint = convertHeightInCharsToPixels(2);
 		description.setLayoutData(data);
 		description.setText(SVNUIMessages.getString("SelectRepositoryLocationPage_Hint" //$NON-NLS-1$
-				+ SelectRepositoryLocationPage.getNationalizationSuffix(this.importProject)));
+				+ SelectRepositoryLocationPage.getNationalizationSuffix(importProject)));
 
 		Button addLocationButton = new Button(composite, SWT.RADIO);
 		data = new GridData(GridData.FILL_HORIZONTAL);
@@ -108,40 +106,36 @@ public class SelectRepositoryLocationPage extends AbstractVerifiedWizardPage {
 		data = new GridData(GridData.FILL_HORIZONTAL);
 		useExistingLocationButton.setLayoutData(data);
 		useExistingLocationButton.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				Button button = (Button) e.widget;
-				SelectRepositoryLocationPage.this.repositoriesView.getTable()
+				repositoriesView.getTable()
 						.setEnabled(
-								SelectRepositoryLocationPage.this.useExistingLocation = button.getSelection());
+								useExistingLocation = button.getSelection());
 				SelectRepositoryLocationPage.this.setPageComplete(true);
 			}
 		});
 		useExistingLocationButton.setText(SVNUIMessages.SelectRepositoryLocationPage_UseLocation);
 		useExistingLocationButton.setSelection(true);
 
-		this.repositoriesView = SelectRepositoryLocationPage.createRepositoriesListTable(composite, this.repositories);
+		repositoriesView = SelectRepositoryLocationPage.createRepositoriesListTable(composite, repositories);
 
-		this.repositoriesView.addDoubleClickListener(new IDoubleClickListener() {
-			public void doubleClick(DoubleClickEvent event) {
-				IWizard wizard = SelectRepositoryLocationPage.this.getWizard();
-				IWizardPage nextPage = wizard.getNextPage(SelectRepositoryLocationPage.this);
-				if (nextPage != null) {
-					wizard.getContainer().showPage(nextPage);
-				}
+		repositoriesView.addDoubleClickListener(event -> {
+			IWizard wizard = SelectRepositoryLocationPage.this.getWizard();
+			IWizardPage nextPage = wizard.getNextPage(SelectRepositoryLocationPage.this);
+			if (nextPage != null) {
+				wizard.getContainer().showPage(nextPage);
 			}
 		});
 
-		this.repositoriesView.addSelectionChangedListener(new ISelectionChangedListener() {
-			public void selectionChanged(SelectionChangedEvent event) {
-				IStructuredSelection selection = (IStructuredSelection) SelectRepositoryLocationPage.this.repositoriesView
-						.getSelection();
-				SelectRepositoryLocationPage.this.location = (IRepositoryLocation) selection.getFirstElement();
-				SelectRepositoryLocationPage.this.setPageComplete(true);
-			}
+		repositoriesView.addSelectionChangedListener(event -> {
+			IStructuredSelection selection = (IStructuredSelection) repositoriesView.getSelection();
+			location = (IRepositoryLocation) selection.getFirstElement();
+			SelectRepositoryLocationPage.this.setPageComplete(true);
 		});
 
-		IStructuredSelection selection = (IStructuredSelection) this.repositoriesView.getSelection();
-		this.location = (IRepositoryLocation) selection.getFirstElement();
+		IStructuredSelection selection = (IStructuredSelection) repositoriesView.getSelection();
+		location = (IRepositoryLocation) selection.getFirstElement();
 
 		//Setting context help
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(composite, "org.eclipse.team.svn.help.reposLocationContext"); //$NON-NLS-1$
@@ -150,11 +144,11 @@ public class SelectRepositoryLocationPage extends AbstractVerifiedWizardPage {
 	}
 
 	public boolean useExistingLocation() {
-		return this.useExistingLocation;
+		return useExistingLocation;
 	}
 
 	public IRepositoryLocation getRepositoryLocation() {
-		return this.useExistingLocation() ? this.location : null;
+		return useExistingLocation() ? location : null;
 	}
 
 	protected static String getNationalizationSuffix(boolean importProject) {
@@ -177,10 +171,11 @@ public class SelectRepositoryLocationPage extends AbstractVerifiedWizardPage {
 		TableViewer repositoriesView = new TableViewer(table);
 
 		ColumnedViewerComparator comparator = new ColumnedViewerComparator(repositoriesView) {
+			@Override
 			public int compareImpl(Viewer viewer, Object row1, Object row2) {
 				IRepositoryLocation location1 = (IRepositoryLocation) row1;
 				IRepositoryLocation location2 = (IRepositoryLocation) row2;
-				if (this.column == 0) {
+				if (column == 0) {
 					return ColumnedViewerComparator.compare(location1.getLabel(), location2.getLabel());
 				}
 				return ColumnedViewerComparator.compare(location1.getUrl(), location2.getUrl());
@@ -203,10 +198,12 @@ public class SelectRepositoryLocationPage extends AbstractVerifiedWizardPage {
 
 		repositoriesView.setContentProvider(new ArrayStructuredContentProvider());
 		repositoriesView.setLabelProvider(new ITableLabelProvider() {
+			@Override
 			public Image getColumnImage(Object element, int columnIndex) {
 				return null;
 			}
 
+			@Override
 			public String getColumnText(Object element, int columnIndex) {
 				IRepositoryLocation location = (IRepositoryLocation) element;
 				if (columnIndex == 0) {
@@ -215,16 +212,20 @@ public class SelectRepositoryLocationPage extends AbstractVerifiedWizardPage {
 				return location.getUrlAsIs();
 			}
 
+			@Override
 			public void addListener(ILabelProviderListener listener) {
 			}
 
+			@Override
 			public void dispose() {
 			}
 
+			@Override
 			public boolean isLabelProperty(Object element, String property) {
 				return true;
 			}
 
+			@Override
 			public void removeListener(ILabelProviderListener listener) {
 			}
 		});

@@ -38,14 +38,14 @@ public interface ICheckoutFactory {
 	 *            mapping between proposed project names and repository resources that is referenced to corresponding projects on repository
 	 * @return table decorator
 	 */
-	public ITableLabelProvider getLabelProvider(HashMap name2resources);
+	ITableLabelProvider getLabelProvider(HashMap name2resources);
 
 	/**
 	 * The method provides specific filter allowing automated detection of the projects on repository
 	 * 
 	 * @return repository resource filter
 	 */
-	public LocateProjectsOperation.ILocateFilter getLocateFilter();
+	LocateProjectsOperation.ILocateFilter getLocateFilter();
 
 	/**
 	 * The method allows override the default Subversive project Checkout Operation behavior with specific one
@@ -64,7 +64,7 @@ public interface ICheckoutFactory {
 	 *            sets the recSure data
 	 * @return alternative Checkout Operation instance
 	 */
-	public IActionOperation getCheckoutOperation(Shell shell, IRepositoryResource[] remote, HashMap checkoutMap,
+	IActionOperation getCheckoutOperation(Shell shell, IRepositoryResource[] remote, HashMap checkoutMap,
 			boolean respectHierarchy, String location, SVNDepth recurseDepth, boolean ignoreExternals);
 
 	/**
@@ -74,7 +74,7 @@ public interface ICheckoutFactory {
 	 *            automatically proposed project name mapping
 	 * @return corrected project name mapping
 	 */
-	public HashMap prepareName2resources(HashMap name2resources);
+	HashMap prepareName2resources(HashMap name2resources);
 
 	/**
 	 * The method allows providing of some additional processing for the projects found on repository
@@ -85,13 +85,12 @@ public interface ICheckoutFactory {
 	 *            found repository resource provider
 	 * @return additional resources provider
 	 */
-	public IRepositoryResourceProvider additionalProcessing(CompositeOperation op,
-			IRepositoryResourceProvider provider);
+	IRepositoryResourceProvider additionalProcessing(CompositeOperation op, IRepositoryResourceProvider provider);
 
 	/**
 	 * The method allows to enable/disable 'Find projects in the children of the selected resource' option in the 'Find/Checkout As' wizard.
 	 * 
 	 * @return true if the button should be enabled and false otherwise
 	 */
-	public boolean findProjectsOptionEnabled();
+	boolean findProjectsOptionEnabled();
 }

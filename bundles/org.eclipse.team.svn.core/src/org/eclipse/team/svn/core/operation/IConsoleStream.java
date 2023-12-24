@@ -20,21 +20,21 @@ package org.eclipse.team.svn.core.operation;
  * @author Alexander Gurov
  */
 public interface IConsoleStream {
-	public static final int LEVEL_CMD = 0;
+	int LEVEL_CMD = 0;
 
-	public static final int LEVEL_OK = 1;
+	int LEVEL_OK = 1;
 
-	public static final int LEVEL_WARNING = 2;
+	int LEVEL_WARNING = 2;
 
-	public static final int LEVEL_ERROR = 3;
+	int LEVEL_ERROR = 3;
 
-	public void markStart(String data);
+	void markStart(String data);
 
-	public void write(int severity, String data);
+	void write(int severity, String data);
 
-	public void markEnd();
+	void markEnd();
 
-	public void markCancelled();
+	void markCancelled();
 
-	public void doComplexWrite(Runnable runnable);
+	void doComplexWrite(Runnable runnable);
 }

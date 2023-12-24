@@ -17,7 +17,6 @@ package org.eclipse.team.svn.ui.action.remote.management;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.resources.IProject;
@@ -30,7 +29,6 @@ import org.eclipse.team.svn.core.SVNTeamPlugin;
 import org.eclipse.team.svn.core.SVNTeamProvider;
 import org.eclipse.team.svn.core.operation.CompositeOperation;
 import org.eclipse.team.svn.core.operation.IActionOperation;
-import org.eclipse.team.svn.core.operation.IUnprotectedOperation;
 import org.eclipse.team.svn.core.operation.local.AbstractWorkingCopyOperation;
 import org.eclipse.team.svn.core.operation.local.NotifyProjectStatesChangedOperation;
 import org.eclipse.team.svn.core.operation.local.RefreshResourcesOperation;
@@ -54,22 +52,22 @@ import org.eclipse.team.svn.ui.panel.remote.DiscardLocationFailurePanel;
 public class DiscardRepositoryLocationAction extends AbstractRepositoryTeamAction {
 
 	public DiscardRepositoryLocationAction() {
-		super();
 	}
 
+	@Override
 	public void runImpl(IAction action) {
-		IRepositoryLocation[] locations = this.getSelectedRepositoryLocations();
+		IRepositoryLocation[] locations = getSelectedRepositoryLocations();
 		List<IRepositoryLocation> selection = Arrays.asList(locations);
-		List<IRepositoryLocation> operateLocations = new ArrayList<IRepositoryLocation>(Arrays.asList(locations));
-		ArrayList<IProject> connectedProjects = new ArrayList<IProject>();
-		HashSet<IRepositoryLocation> connectedLocations = new HashSet<IRepositoryLocation>();
+		List<IRepositoryLocation> operateLocations = new ArrayList<>(Arrays.asList(locations));
+		ArrayList<IProject> connectedProjects = new ArrayList<>();
+		HashSet<IRepositoryLocation> connectedLocations = new HashSet<>();
 		IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
-		for (int i = 0; i < projects.length; i++) {
-			RepositoryProvider tmp = RepositoryProvider.getProvider(projects[i]);
+		for (IProject project : projects) {
+			RepositoryProvider tmp = RepositoryProvider.getProvider(project);
 			if (tmp != null && SVNTeamPlugin.NATURE_ID.equals(tmp.getID())) {
 				SVNTeamProvider provider = (SVNTeamProvider) tmp;
 				if (selection.contains(provider.getRepositoryLocation())) {
-					connectedProjects.add(projects[i]);
+					connectedProjects.add(project);
 					connectedLocations.add(provider.getRepositoryLocation());
 					operateLocations.remove(provider.getRepositoryLocation());
 				}
@@ -78,22 +76,21 @@ public class DiscardRepositoryLocationAction extends AbstractRepositoryTeamActio
 
 		if (operateLocations.size() > 0) {
 			locations = operateLocations.toArray(new IRepositoryLocation[operateLocations.size()]);
-			DiscardConfirmationDialog dialog = new DiscardConfirmationDialog(this.getShell(), locations.length == 1,
+			DiscardConfirmationDialog dialog = new DiscardConfirmationDialog(getShell(), locations.length == 1,
 					DiscardConfirmationDialog.MSG_LOCATION);
 			if (dialog.open() == 0) {
-				this.doDiscard(locations, null);
+				doDiscard(locations, null);
 			}
 		}
 		if (connectedProjects.size() > 0) {
-			ArrayList<String> locationsList = new ArrayList<String>();
-			for (Iterator<IRepositoryLocation> iter = connectedLocations.iterator(); iter.hasNext();) {
-				IRepositoryLocation location = iter.next();
+			ArrayList<String> locationsList = new ArrayList<>();
+			for (IRepositoryLocation location : connectedLocations) {
 				locationsList.add(location.getLabel());
 			}
 			IProject[] tmp = connectedProjects.toArray(new IProject[connectedProjects.size()]);
 			DiscardLocationFailurePanel panel = new DiscardLocationFailurePanel(
 					locationsList.toArray(new String[locationsList.size()]), tmp);
-			int retVal = new DefaultDialog(this.getShell(), panel).open();
+			int retVal = new DefaultDialog(getShell(), panel).open();
 			if (retVal == 0 || retVal == 1) {
 				DisconnectOperation disconnectOp = new DisconnectOperation(tmp, false);
 				CompositeOperation op = new CompositeOperation(disconnectOp.getId(), disconnectOp.getMessagesClass());
@@ -106,20 +103,17 @@ public class DiscardRepositoryLocationAction extends AbstractRepositoryTeamActio
 				} else {
 					op.add(new NotifyProjectStatesChangedOperation(tmp, ProjectStatesChangedEvent.ST_PRE_DELETED));
 					op.add(new AbstractWorkingCopyOperation("Operation_DeleteProjects", SVNUIMessages.class, tmp) { //$NON-NLS-1$
+						@Override
 						protected void runImpl(IProgressMonitor monitor) throws Exception {
-							IProject[] projects = (IProject[]) this.operableData();
+							IProject[] projects = (IProject[]) operableData();
 							for (int i = 0; i < projects.length && !monitor.isCanceled(); i++) {
 								final IProject current = projects[i];
-								this.protectStep(new IUnprotectedOperation() {
-									public void run(IProgressMonitor monitor) throws Exception {
-										current.delete(true, monitor);
-									}
-								}, monitor, projects.length);
+								this.protectStep(monitor1 -> current.delete(true, monitor1), monitor, projects.length);
 							}
 						}
 					});
 				}
-				this.doDiscard(locations, op);
+				doDiscard(locations, op);
 			}
 		}
 	}
@@ -138,11 +132,12 @@ public class DiscardRepositoryLocationAction extends AbstractRepositoryTeamActio
 		op.add(new SaveRepositoryLocationsOperation());
 		op.add(new RefreshRepositoryLocationsOperation(false));
 
-		this.runScheduled(op);
+		runScheduled(op);
 	}
 
+	@Override
 	public boolean isEnabled() {
-		return this.getSelectedRepositoryLocations().length > 0;
+		return getSelectedRepositoryLocations().length > 0;
 	}
 
 }

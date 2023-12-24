@@ -20,8 +20,6 @@ import java.util.List;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Point;
@@ -91,40 +89,41 @@ public class ShareProjectNameAdvancedModeComposite extends Composite implements 
 
 	protected IValidationManager validationManager;
 
-	protected List<Control> controls = new ArrayList<Control>();
+	protected List<Control> controls = new ArrayList<>();
 
 	public ShareProjectNameAdvancedModeComposite(Composite parent, int style, IValidationManager validationManager) {
 		super(parent, style);
 		this.validationManager = validationManager;
-		this.layoutType = ShareProjectOperation.LAYOUT_DEFAULT;
-		this.createControls();
+		layoutType = ShareProjectOperation.LAYOUT_DEFAULT;
+		createControls();
 	}
 
 	protected void createControls() {
 		GridLayout layout = new GridLayout();
 
-		this.setLayout(layout);
+		setLayout(layout);
 		GridData gridData = new GridData();
-		this.setLayoutData(gridData);
+		setLayoutData(gridData);
 
 		CompositeVerifier verifier;
 
-		this.nameGroup = new Group(this, SWT.NONE);
+		nameGroup = new Group(this, SWT.NONE);
 		layout = new GridLayout();
-		this.nameGroup.setLayout(layout);
+		nameGroup.setLayout(layout);
 		GridData data = new GridData(GridData.FILL_HORIZONTAL);
-		this.nameGroup.setLayoutData(data);
-		this.nameGroup.setText(SVNUIMessages.SelectProjectNamePage_NameOnRepository);
-		this.controls.add(this.nameGroup);
+		nameGroup.setLayoutData(data);
+		nameGroup.setText(SVNUIMessages.SelectProjectNamePage_NameOnRepository);
+		controls.add(nameGroup);
 
-		Button useProjectNameButton = new Button(this.nameGroup, SWT.RADIO);
-		useProjectNameButton.setLayoutData(this.makeGridData());
+		Button useProjectNameButton = new Button(nameGroup, SWT.RADIO);
+		useProjectNameButton.setLayoutData(makeGridData());
 		useProjectNameButton.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
-				ShareProjectNameAdvancedModeComposite.this.validationManager.validateContent();
+				validationManager.validateContent();
 				Button button = (Button) e.widget;
 				if (button.getSelection()) {
-					ShareProjectNameAdvancedModeComposite.this.selectedName = ShareProjectNameAdvancedModeComposite.this.projectName;
+					selectedName = projectName;
 					//ShareProjectNameAdvancedModeComposite.this.setPageComplete(true);
 				}
 				ShareProjectNameAdvancedModeComposite.this.showTargetUrl();
@@ -132,175 +131,173 @@ public class ShareProjectNameAdvancedModeComposite extends Composite implements 
 		});
 		useProjectNameButton.setText(SVNUIMessages.SelectProjectNamePage_UseProjectName);
 		useProjectNameButton.setSelection(true);
-		this.controls.add(useProjectNameButton);
+		controls.add(useProjectNameButton);
 
-		this.useEmptyNameButton = new Button(this.nameGroup, SWT.RADIO);
-		this.useEmptyNameButton.setLayoutData(this.makeGridData());
-		this.useEmptyNameButton.setText(SVNUIMessages.SelectProjectNamePage_UseEmptyName);
-		this.useEmptyNameButton.setSelection(false);
-		this.controls.add(this.useEmptyNameButton);
+		useEmptyNameButton = new Button(nameGroup, SWT.RADIO);
+		useEmptyNameButton.setLayoutData(makeGridData());
+		useEmptyNameButton.setText(SVNUIMessages.SelectProjectNamePage_UseEmptyName);
+		useEmptyNameButton.setSelection(false);
+		controls.add(useEmptyNameButton);
 
-		final Button useRedefinedNameButton = new Button(this.nameGroup, SWT.RADIO);
-		useRedefinedNameButton.setLayoutData(this.makeGridData());
+		final Button useRedefinedNameButton = new Button(nameGroup, SWT.RADIO);
+		useRedefinedNameButton.setLayoutData(makeGridData());
 		useRedefinedNameButton.setText(SVNUIMessages.SelectProjectNamePage_UseSpecifiedName);
 		useRedefinedNameButton.setSelection(false);
 		useRedefinedNameButton.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
-				ShareProjectNameAdvancedModeComposite.this.validationManager.validateContent();
+				validationManager.validateContent();
 				Button button = (Button) e.widget;
 				if (button.getSelection()) {
-					ShareProjectNameAdvancedModeComposite.this.selectedName = ShareProjectNameAdvancedModeComposite.this.projectNameField
-							.getText();
-					ShareProjectNameAdvancedModeComposite.this.projectNameField.setEditable(true);
+					selectedName = projectNameField.getText();
+					projectNameField.setEditable(true);
 				} else {
-					ShareProjectNameAdvancedModeComposite.this.projectNameField.setEditable(false);
+					projectNameField.setEditable(false);
 				}
 				ShareProjectNameAdvancedModeComposite.this.showTargetUrl();
 			}
 		});
-		this.controls.add(useRedefinedNameButton);
+		controls.add(useRedefinedNameButton);
 
-		this.projectNameField = new Text(this.nameGroup, SWT.SINGLE | SWT.BORDER);
-		this.projectNameField.setLayoutData(this.makeGridData());
-		this.projectNameField.setEditable(false);
-		this.projectNameField.addModifyListener(new ModifyListener() {
-			public void modifyText(ModifyEvent e) {
-				ShareProjectNameAdvancedModeComposite.this.selectedName = ShareProjectNameAdvancedModeComposite.this.projectNameField
-						.getText();
-				ShareProjectNameAdvancedModeComposite.this.showTargetUrl();
-			}
+		projectNameField = new Text(nameGroup, SWT.SINGLE | SWT.BORDER);
+		projectNameField.setLayoutData(makeGridData());
+		projectNameField.setEditable(false);
+		projectNameField.addModifyListener(e -> {
+			selectedName = projectNameField.getText();
+			ShareProjectNameAdvancedModeComposite.this.showTargetUrl();
 		});
 		verifier = new CompositeVerifier();
 		String name = SVNUIMessages.SelectProjectNamePage_ProjectName;
 		verifier.add(new NonEmptyFieldVerifier(name));
 		verifier.add(new ResourceNameVerifier(name, true));
 		verifier.add(new AbsolutePathVerifier(name));
-		this.validationManager.attachTo(this.projectNameField, new AbstractVerifierProxy(verifier) {
+		validationManager.attachTo(projectNameField, new AbstractVerifierProxy(verifier) {
+			@Override
 			protected boolean isVerificationEnabled(Control input) {
 				return useRedefinedNameButton.getSelection();
 			}
 		});
-		this.controls.add(this.projectNameField);
+		controls.add(projectNameField);
 
-		this.layoutGroup = new Group(this, SWT.NONE);
+		layoutGroup = new Group(this, SWT.NONE);
 		layout = new GridLayout();
-		this.layoutGroup.setLayout(layout);
+		layoutGroup.setLayout(layout);
 		data = new GridData(GridData.FILL_HORIZONTAL);
-		this.layoutGroup.setLayoutData(data);
-		this.layoutGroup.setText(SVNUIMessages.SelectProjectNamePage_ProjectLayout);
-		this.controls.add(this.layoutGroup);
+		layoutGroup.setLayoutData(data);
+		layoutGroup.setText(SVNUIMessages.SelectProjectNamePage_ProjectLayout);
+		controls.add(layoutGroup);
 
-		this.defaultLayoutButton = new Button(this.layoutGroup, SWT.RADIO);
-		data = this.makeGridData();
-		this.defaultLayoutButton.setLayoutData(data);
-		this.defaultLayoutButton.addSelectionListener(new SelectionAdapter() {
+		defaultLayoutButton = new Button(layoutGroup, SWT.RADIO);
+		data = makeGridData();
+		defaultLayoutButton.setLayoutData(data);
+		defaultLayoutButton.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				Button button = (Button) e.widget;
 				if (button.getSelection()) {
-					ShareProjectNameAdvancedModeComposite.this.layoutType = ShareProjectOperation.LAYOUT_DEFAULT;
+					layoutType = ShareProjectOperation.LAYOUT_DEFAULT;
 				}
-				ShareProjectNameAdvancedModeComposite.this.validationManager.validateContent();
+				validationManager.validateContent();
 				ShareProjectNameAdvancedModeComposite.this.showTargetUrl();
 				ShareProjectNameAdvancedModeComposite.this.enableManagementFoldersEnabledButton();
 			}
 		});
-		this.defaultLayoutButton.setText(SVNUIMessages.SelectProjectNamePage_RepositoryLocationLayout);
-		this.defaultLayoutButton.setSelection(true);
-		this.controls.add(this.defaultLayoutButton);
+		defaultLayoutButton.setText(SVNUIMessages.SelectProjectNamePage_RepositoryLocationLayout);
+		defaultLayoutButton.setSelection(true);
+		controls.add(defaultLayoutButton);
 
-		this.singleLayoutButton = new Button(this.layoutGroup, SWT.RADIO);
-		data = this.makeGridData();
-		this.singleLayoutButton.setLayoutData(data);
-		this.singleLayoutButton.addSelectionListener(new SelectionAdapter() {
+		singleLayoutButton = new Button(layoutGroup, SWT.RADIO);
+		data = makeGridData();
+		singleLayoutButton.setLayoutData(data);
+		singleLayoutButton.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				Button button = (Button) e.widget;
 				if (button.getSelection()) {
-					ShareProjectNameAdvancedModeComposite.this.layoutType = ShareProjectOperation.LAYOUT_SINGLE;
+					layoutType = ShareProjectOperation.LAYOUT_SINGLE;
 				}
-				ShareProjectNameAdvancedModeComposite.this.validationManager.validateContent();
+				validationManager.validateContent();
 				ShareProjectNameAdvancedModeComposite.this.showTargetUrl();
 				ShareProjectNameAdvancedModeComposite.this.enableManagementFoldersEnabledButton();
 			}
 		});
-		this.singleLayoutButton.setText(SVNUIMessages.SelectProjectNamePage_SingleProjectLayout);
-		this.controls.add(this.singleLayoutButton);
+		singleLayoutButton.setText(SVNUIMessages.SelectProjectNamePage_SingleProjectLayout);
+		controls.add(singleLayoutButton);
 
-		this.multipleLayoutButton = new Button(this.layoutGroup, SWT.RADIO);
-		data = this.makeGridData();
-		this.multipleLayoutButton.setLayoutData(data);
-		this.multipleLayoutButton.addSelectionListener(new SelectionAdapter() {
+		multipleLayoutButton = new Button(layoutGroup, SWT.RADIO);
+		data = makeGridData();
+		multipleLayoutButton.setLayoutData(data);
+		multipleLayoutButton.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				Button button = (Button) e.widget;
 				if (button.getSelection()) {
-					ShareProjectNameAdvancedModeComposite.this.layoutType = ShareProjectOperation.LAYOUT_MULTIPLE;
-					ShareProjectNameAdvancedModeComposite.this.rootProjectName = ShareProjectNameAdvancedModeComposite.this.rootProjectNameField
-							.getText();
+					layoutType = ShareProjectOperation.LAYOUT_MULTIPLE;
+					rootProjectName = rootProjectNameField.getText();
 				}
-				ShareProjectNameAdvancedModeComposite.this.rootProjectNameField.setEditable(button.getSelection());
-				ShareProjectNameAdvancedModeComposite.this.validationManager.validateContent();
+				rootProjectNameField.setEditable(button.getSelection());
+				validationManager.validateContent();
 				ShareProjectNameAdvancedModeComposite.this.showTargetUrl();
 				ShareProjectNameAdvancedModeComposite.this.enableManagementFoldersEnabledButton();
 			}
 		});
-		this.multipleLayoutButton.setText(SVNUIMessages.SelectProjectNamePage_MultiProjectLayout);
-		this.controls.add(this.multipleLayoutButton);
+		multipleLayoutButton.setText(SVNUIMessages.SelectProjectNamePage_MultiProjectLayout);
+		controls.add(multipleLayoutButton);
 
-		this.rootProjectNameField = new Text(this.layoutGroup, SWT.SINGLE | SWT.BORDER);
-		this.rootProjectNameField.setLayoutData(this.makeGridData());
-		this.rootProjectNameField.setEditable(false);
-		this.rootProjectNameField.addModifyListener(new ModifyListener() {
-			public void modifyText(ModifyEvent e) {
-				ShareProjectNameAdvancedModeComposite.this.rootProjectName = ShareProjectNameAdvancedModeComposite.this.rootProjectNameField
-						.getText();
-				ShareProjectNameAdvancedModeComposite.this.showTargetUrl();
-			}
+		rootProjectNameField = new Text(layoutGroup, SWT.SINGLE | SWT.BORDER);
+		rootProjectNameField.setLayoutData(makeGridData());
+		rootProjectNameField.setEditable(false);
+		rootProjectNameField.addModifyListener(e -> {
+			rootProjectName = rootProjectNameField.getText();
+			ShareProjectNameAdvancedModeComposite.this.showTargetUrl();
 		});
 		verifier = new CompositeVerifier();
 		name = SVNUIMessages.SelectProjectNamePage_RootName;
 		verifier.add(new NonEmptyFieldVerifier(name));
 		verifier.add(new ResourceNameVerifier(name, true));
 		verifier.add(new AbsolutePathVerifier(name));
-		this.validationManager.attachTo(this.rootProjectNameField, new AbstractVerifierProxy(verifier) {
+		validationManager.attachTo(rootProjectNameField, new AbstractVerifierProxy(verifier) {
+			@Override
 			protected boolean isVerificationEnabled(Control input) {
-				return ShareProjectNameAdvancedModeComposite.this.multipleLayoutButton.getSelection();
+				return multipleLayoutButton.getSelection();
 			}
 		});
-		this.controls.add(this.rootProjectNameField);
+		controls.add(rootProjectNameField);
 
-		Label label = new Label(this.layoutGroup, SWT.SEPARATOR | SWT.HORIZONTAL);
-		label.setLayoutData(this.makeGridData());
-		this.controls.add(label);
+		Label label = new Label(layoutGroup, SWT.SEPARATOR | SWT.HORIZONTAL);
+		label.setLayoutData(makeGridData());
+		controls.add(label);
 
-		this.managementFoldersEnabledButton = new Button(this.layoutGroup, SWT.CHECK);
-		this.managementFoldersEnabledButton.setLayoutData(new GridData());
-		this.managementFoldersEnabledButton.setSelection(true);
-		this.managementFoldersEnabled = true;
-		this.managementFoldersEnabledButton.setText(SVNUIMessages.SelectProjectNamePage_UseRecommended);
-		this.managementFoldersEnabledButton.addSelectionListener(new SelectionAdapter() {
+		managementFoldersEnabledButton = new Button(layoutGroup, SWT.CHECK);
+		managementFoldersEnabledButton.setLayoutData(new GridData());
+		managementFoldersEnabledButton.setSelection(true);
+		managementFoldersEnabled = true;
+		managementFoldersEnabledButton.setText(SVNUIMessages.SelectProjectNamePage_UseRecommended);
+		managementFoldersEnabledButton.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
-				ShareProjectNameAdvancedModeComposite.this.managementFoldersEnabled = ((Button) e.widget)
-						.getSelection();
+				managementFoldersEnabled = ((Button) e.widget).getSelection();
 				ShareProjectNameAdvancedModeComposite.this.showTargetUrl();
 			}
 		});
-		this.controls.add(this.managementFoldersEnabledButton);
+		controls.add(managementFoldersEnabledButton);
 
-		label = new Label(this.layoutGroup, SWT.WRAP);
-		data = this.makeGridData();
+		label = new Label(layoutGroup, SWT.WRAP);
+		data = makeGridData();
 		data.heightHint = DefaultDialog.convertHeightInCharsToPixels(this, 2);
 		//this.convertHeightInCharsToPixels(2);
 		label.setLayoutData(data);
 		label.setText(SVNUIMessages.SelectProjectNamePage_Hint);
-		this.controls.add(label);
+		controls.add(label);
 
-		Composite urlComposite = new Composite(this.layoutGroup, SWT.NONE);
+		Composite urlComposite = new Composite(layoutGroup, SWT.NONE);
 		layout = new GridLayout();
 		layout.numColumns = 2;
 		layout.marginHeight = 2;
 		urlComposite.setLayout(layout);
 		data = new GridData(GridData.FILL_HORIZONTAL);
 		urlComposite.setLayoutData(data);
-		this.controls.add(urlComposite);
+		controls.add(urlComposite);
 
 		label = new Label(urlComposite, SWT.NONE);
 		label.setLayoutData(new GridData());
@@ -308,29 +305,30 @@ public class ShareProjectNameAdvancedModeComposite extends Composite implements 
 				.getSharedImages()
 				.getImageDescriptor(ISharedImages.IMG_OBJ_FOLDER)
 				.createImage());
-		this.controls.add(label);
+		controls.add(label);
 
-		this.targetUrlField = new Label(urlComposite, SWT.SINGLE);
-		this.targetUrlField.setLayoutData(this.makeGridData());
-		this.projectNameField.setEditable(true);
-		this.targetUrlField.setBackground(this.projectNameField.getBackground());
-		this.controls.add(this.targetUrlField);
+		targetUrlField = new Label(urlComposite, SWT.SINGLE);
+		targetUrlField.setLayoutData(makeGridData());
+		projectNameField.setEditable(true);
+		targetUrlField.setBackground(projectNameField.getBackground());
+		controls.add(targetUrlField);
 
-		label.setBackground(this.projectNameField.getBackground());
-		urlComposite.setBackground(this.projectNameField.getBackground());
-		this.projectNameField.setEditable(false);
+		label.setBackground(projectNameField.getBackground());
+		urlComposite.setBackground(projectNameField.getBackground());
+		projectNameField.setEditable(false);
 
-		this.useEmptyNameButton.addSelectionListener(new SelectionAdapter() {
+		useEmptyNameButton.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
-				ShareProjectNameAdvancedModeComposite.this.validationManager.validateContent();
-				ShareProjectNameAdvancedModeComposite.this.selectedName = ""; //$NON-NLS-1$
+				validationManager.validateContent();
+				selectedName = ""; //$NON-NLS-1$
 				Button button = (Button) e.widget;
 
 				if (button.getSelection()) {
-					if (ShareProjectNameAdvancedModeComposite.this.multipleLayoutButton.getSelection()) {
-						ShareProjectNameAdvancedModeComposite.this.multipleLayoutButton.setSelection(false);
-						ShareProjectNameAdvancedModeComposite.this.rootProjectNameField.setEditable(false);
-						ShareProjectNameAdvancedModeComposite.this.defaultLayoutButton.setSelection(true);
+					if (multipleLayoutButton.getSelection()) {
+						multipleLayoutButton.setSelection(false);
+						rootProjectNameField.setEditable(false);
+						defaultLayoutButton.setSelection(true);
 					}
 				}
 
@@ -341,28 +339,29 @@ public class ShareProjectNameAdvancedModeComposite extends Composite implements 
 		});
 	}
 
+	@Override
 	public void setProjectsAndLocation(IProject[] projects, IRepositoryLocation location, boolean multiProject) {
 		this.multiProject = multiProject;
 		this.location = location;
 
 		if (this.multiProject) {
-			this.selectedName = this.projectName = ""; //$NON-NLS-1$
-			this.savedPosition = this.layoutGroup.getLocation();
-			this.layoutGroup.setLocation(this.nameGroup.getLocation());
-			this.nameGroup.setVisible(false);
-			this.defaultLayoutButton.setSelection(true);
+			selectedName = projectName = ""; //$NON-NLS-1$
+			savedPosition = layoutGroup.getLocation();
+			layoutGroup.setLocation(nameGroup.getLocation());
+			nameGroup.setVisible(false);
+			defaultLayoutButton.setSelection(true);
 		} else {
-			this.selectedName = this.projectName = projects[0].getName();
-			if (this.savedPosition != null) {
-				this.nameGroup.setVisible(true);
-				this.layoutGroup.setLocation(this.savedPosition);
-				this.savedPosition = null;
+			selectedName = projectName = projects[0].getName();
+			if (savedPosition != null) {
+				nameGroup.setVisible(true);
+				layoutGroup.setLocation(savedPosition);
+				savedPosition = null;
 			}
 		}
 
-		this.projectNameField.setText(this.projectName);
-		this.rootProjectNameField.setText(this.projectName);
-		this.showTargetUrl();
+		projectNameField.setText(projectName);
+		rootProjectNameField.setText(projectName);
+		showTargetUrl();
 	}
 
 	protected GridData makeGridData() {
@@ -373,68 +372,72 @@ public class ShareProjectNameAdvancedModeComposite extends Composite implements 
 	}
 
 	protected void showTargetUrl() {
-		String targetUrl = ShareProjectOperation.getTargetUrl(this.location, this.layoutType, this.selectedName,
-				this.rootProjectName, this.isManagementFoldersEnabled());
-		this.showTargetUrlImpl(targetUrl);
+		String targetUrl = ShareProjectOperation.getTargetUrl(location, layoutType, selectedName, rootProjectName,
+				isManagementFoldersEnabled());
+		showTargetUrlImpl(targetUrl);
 	}
 
 	protected void showTargetUrlImpl(String targetUrl) {
-		if (this.targetUrlField != null) {
-			this.targetUrlField.setText(targetUrl);
+		if (targetUrlField != null) {
+			targetUrlField.setText(targetUrl);
 		}
 	}
 
+	@Override
 	public boolean isManagementFoldersEnabled() {
-		return (this.layoutType == ShareProjectOperation.LAYOUT_DEFAULT) ? true : this.managementFoldersEnabled;
+		return layoutType == ShareProjectOperation.LAYOUT_DEFAULT ? true : managementFoldersEnabled;
 	}
 
+	@Override
 	public int getLayoutType() {
-		return this.layoutType;
+		return layoutType;
 	}
 
+	@Override
 	public ShareProjectOperation.IFolderNameMapper getSelectedNames() {
-		return this.multiProject ? null : new ShareProjectOperation.IFolderNameMapper() {
-			public String getRepositoryFolderName(IProject project) {
-				return ShareProjectNameAdvancedModeComposite.this.selectedName;
-			}
-		};
+		return multiProject ? null : project -> selectedName;
 	}
 
+	@Override
 	public String getRootProjectName() {
-		return this.rootProjectName;
+		return rootProjectName;
 	}
 
 	public boolean isMultiProject() {
-		return this.multiProject;
+		return multiProject;
 	}
 
+	@Override
 	public void save() {
 		//do nothing
 	}
 
+	@Override
 	public void validateContent() {
-		this.validationManager.validateContent();
+		validationManager.validateContent();
 	}
 
+	@Override
 	public IRepositoryLocation getRepositoryLocation() {
-		return this.location;
+		return location;
 	}
 
+	@Override
 	public void setEnabled(boolean enabled) {
 		super.setEnabled(enabled);
-		if (this.controls != null && !this.controls.isEmpty()) {
-			for (Control control : this.controls) {
+		if (controls != null && !controls.isEmpty()) {
+			for (Control control : controls) {
 				if (enabled) {
 					/*
 					 * Handle special cases for enabling controls as
-					 * there are dependencies among controls for enabling/disabling 
+					 * there are dependencies among controls for enabling/disabling
 					 */
-					if (control == this.multipleLayoutButton) {
-						this.enableMultipleLayoutButton();
-					} else if (control == this.managementFoldersEnabledButton) {
-						this.enableManagementFoldersEnabledButton();
-					} else if (control == this.singleLayoutButton) {
-						this.enableSingleLayoutButton();
+					if (control == multipleLayoutButton) {
+						enableMultipleLayoutButton();
+					} else if (control == managementFoldersEnabledButton) {
+						enableManagementFoldersEnabledButton();
+					} else if (control == singleLayoutButton) {
+						enableSingleLayoutButton();
 					} else {
 						control.setEnabled(enabled);
 					}
@@ -446,24 +449,24 @@ public class ShareProjectNameAdvancedModeComposite extends Composite implements 
 	}
 
 	protected void enableMultipleLayoutButton() {
-		this.multipleLayoutButton.setEnabled(!this.useEmptyNameButton.getSelection());
+		multipleLayoutButton.setEnabled(!useEmptyNameButton.getSelection());
 	}
 
 	protected void enableSingleLayoutButton() {
-		this.singleLayoutButton.setEnabled(!this.multiProject);
+		singleLayoutButton.setEnabled(!multiProject);
 	}
 
 	protected void enableManagementFoldersEnabledButton() {
-		if (this.defaultLayoutButton.getSelection()) {
-			this.managementFoldersEnabledButton.setEnabled(false);
-		} else if (this.singleLayoutButton.getSelection()) {
-			this.managementFoldersEnabledButton.setEnabled(true);
-		} else if (this.multipleLayoutButton.getSelection()) {
-			this.managementFoldersEnabledButton.setEnabled(true);
+		if (defaultLayoutButton.getSelection()) {
+			managementFoldersEnabledButton.setEnabled(false);
+		} else if (singleLayoutButton.getSelection()) {
+			managementFoldersEnabledButton.setEnabled(true);
+		} else if (multipleLayoutButton.getSelection()) {
+			managementFoldersEnabledButton.setEnabled(true);
 		}
 
-		if (this.useEmptyNameButton.getSelection() && this.multipleLayoutButton.getSelection()) {
-			this.managementFoldersEnabledButton.setEnabled(false);
+		if (useEmptyNameButton.getSelection() && multipleLayoutButton.getSelection()) {
+			managementFoldersEnabledButton.setEnabled(false);
 		}
 	}
 }

@@ -32,16 +32,16 @@ public abstract class AbstractMergeSet {
 
 	public AbstractMergeSet(IResource[] to) {
 		this.to = to;
-		this.statuses = new ArrayList<SVNMergeStatus>();
+		statuses = new ArrayList<>();
 	}
 
 	public SVNMergeStatus[] getStatuses() {
-		return this.statuses.toArray(new SVNMergeStatus[this.statuses.size()]);
+		return statuses.toArray(new SVNMergeStatus[statuses.size()]);
 	}
 
 	public void setStatuses(SVNMergeStatus[] statuses) {
 		this.statuses.clear();
-		this.addStatuses(statuses);
+		addStatuses(statuses);
 	}
 
 	public void addStatuses(SVNMergeStatus[] statuses) {

@@ -49,40 +49,43 @@ public class CopyResourceWithHistoryOperation extends AbstractActionOperation {
 		this.destination = destination;
 	}
 
+	@Override
 	public ISchedulingRule getSchedulingRule() {
-		return this.destination instanceof IProject ? this.destination : this.destination.getParent();
+		return destination instanceof IProject ? destination : destination.getParent();
 	}
 
 	public boolean isAllowed() {
 		IRemoteStorage storage = SVNRemoteStorage.instance();
-		IRepositoryLocation locationSource = storage.getRepositoryLocation(this.source);
-		IRepositoryLocation locationDestination = storage.getRepositoryLocation(this.destination);
-		ILocalResource localSource = storage.asLocalResource(this.source);
+		IRepositoryLocation locationSource = storage.getRepositoryLocation(source);
+		IRepositoryLocation locationDestination = storage.getRepositoryLocation(destination);
+		ILocalResource localSource = storage.asLocalResource(source);
 
 		return IStateFilter.SF_ONREPOSITORY.accept(localSource) && locationSource.equals(locationDestination);
 	}
 
+	@Override
 	protected void runImpl(IProgressMonitor monitor) throws Exception {
 		IRemoteStorage storage = SVNRemoteStorage.instance();
-		IRepositoryLocation location = storage.getRepositoryLocation(this.source);
+		IRepositoryLocation location = storage.getRepositoryLocation(source);
 		ISVNConnector proxy = location.acquireSVNProxy();
 		try {
-			this.writeToConsole(IConsoleStream.LEVEL_CMD,
-					"svn copy \"" + FileUtility.normalizePath(FileUtility.getWorkingCopyPath(this.source)) + "\" \"" //$NON-NLS-1$//$NON-NLS-2$
-							+ FileUtility.getWorkingCopyPath(this.destination) + "\"\n"); //$NON-NLS-1$
+			writeToConsole(IConsoleStream.LEVEL_CMD,
+					"svn copy \"" + FileUtility.normalizePath(FileUtility.getWorkingCopyPath(source)) + "\" \"" //$NON-NLS-1$//$NON-NLS-2$
+							+ FileUtility.getWorkingCopyPath(destination) + "\"\n"); //$NON-NLS-1$
 			proxy.copyLocal(
 					new SVNEntryRevisionReference[] { new SVNEntryRevisionReference(
-							FileUtility.getWorkingCopyPath(this.source), null, SVNRevision.WORKING) },
-					FileUtility.getWorkingCopyPath(this.destination), ISVNConnector.Options.NONE,
+							FileUtility.getWorkingCopyPath(source), null, SVNRevision.WORKING) },
+					FileUtility.getWorkingCopyPath(destination), ISVNConnector.Options.NONE,
 					ISVNConnector.NO_EXTERNALS_TO_PIN, new SVNProgressMonitor(this, monitor, null));
 		} finally {
 			location.releaseSVNProxy(proxy);
 		}
 	}
 
+	@Override
 	protected String getShortErrorMessage(Throwable t) {
 		return BaseMessages.format(super.getShortErrorMessage(t),
-				new Object[] { this.source.getName(), this.destination.toString() });
+				new Object[] { source.getName(), destination.toString() });
 	}
 
 }

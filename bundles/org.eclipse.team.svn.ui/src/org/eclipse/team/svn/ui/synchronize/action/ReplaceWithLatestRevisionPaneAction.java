@@ -34,8 +34,9 @@ public class ReplaceWithLatestRevisionPaneAction extends AbstractSynchronizeMode
 		super(text, configuration);
 	}
 
+	@Override
 	protected IActionOperation getOperation(ISynchronizePageConfiguration configuration, IDiffElement[] elements) {
-		IResource[] selectedResources = this.getAllSelectedResources();
+		IResource[] selectedResources = getAllSelectedResources();
 		IResource[] resources = FileUtility.getResourcesRecursive(selectedResources, IStateFilter.SF_ONREPOSITORY,
 				IResource.DEPTH_ZERO);
 		IActionOperation op = ReplaceWithLatestRevisionAction.getReplaceOperation(resources,
@@ -43,9 +44,10 @@ public class ReplaceWithLatestRevisionPaneAction extends AbstractSynchronizeMode
 		return op;
 	}
 
+	@Override
 	protected boolean updateSelection(IStructuredSelection selection) {
 		if (super.updateSelection(selection)) {
-			IResource[] selectedResources = this.getAllSelectedResources();
+			IResource[] selectedResources = getAllSelectedResources();
 			return FileUtility.checkForResourcesPresenceRecursive(selectedResources, IStateFilter.SF_ONREPOSITORY);
 		}
 		return false;

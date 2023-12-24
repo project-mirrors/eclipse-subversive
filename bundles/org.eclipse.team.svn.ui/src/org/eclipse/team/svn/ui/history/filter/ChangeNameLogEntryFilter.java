@@ -35,14 +35,15 @@ public class ChangeNameLogEntryFilter implements ILogEntryFilter {
 		this.changedPathToAccept = changedPathToAccept;
 	}
 
+	@Override
 	public boolean accept(SVNLogEntry logEntry) {
-		if (this.changedPathToAccept == null) {
+		if (changedPathToAccept == null) {
 			return true;
 		}
-		StringMatcher matcher = new StringMatcher(this.changedPathToAccept);
+		StringMatcher matcher = new StringMatcher(changedPathToAccept);
 		SVNLogPath[] paths = logEntry.changedPaths == null ? new SVNLogPath[0] : logEntry.changedPaths;
-		for (int i = 0; i < paths.length; i++) {
-			if (matcher.match(paths[i].path)) {
+		for (SVNLogPath path : paths) {
+			if (matcher.match(path.path)) {
 				return true;
 			}
 		}
@@ -54,7 +55,7 @@ public class ChangeNameLogEntryFilter implements ILogEntryFilter {
 	}
 
 	public String getGangedPathToAccept() {
-		return this.changedPathToAccept;
+		return changedPathToAccept;
 	}
 
 }

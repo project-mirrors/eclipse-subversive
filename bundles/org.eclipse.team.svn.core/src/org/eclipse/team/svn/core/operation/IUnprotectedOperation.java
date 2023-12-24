@@ -22,5 +22,5 @@ import org.eclipse.core.runtime.IProgressMonitor;
  * @author Alexander Gurov
  */
 public interface IUnprotectedOperation {
-	public void run(IProgressMonitor monitor) throws Exception;
+	void run(IProgressMonitor monitor) throws Exception;
 }

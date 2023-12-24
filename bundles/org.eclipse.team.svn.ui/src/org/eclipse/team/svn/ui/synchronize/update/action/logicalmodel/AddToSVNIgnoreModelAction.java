@@ -31,22 +31,25 @@ public class AddToSVNIgnoreModelAction extends AbstractSynchronizeLogicalModelAc
 
 	public AddToSVNIgnoreModelAction(String text, ISynchronizePageConfiguration configuration) {
 		super(text, configuration);
-		this.actionHelper = new AddToSVNIgnoreActionHelper(this, configuration);
+		actionHelper = new AddToSVNIgnoreActionHelper(this, configuration);
 	}
 
+	@Override
 	protected boolean needsToSaveDirtyEditors() {
 		return false;
 	}
 
+	@Override
 	protected FastSyncInfoFilter getSyncInfoFilter() {
-		return this.actionHelper.getSyncInfoFilter();
+		return actionHelper.getSyncInfoFilter();
 	}
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.team.svn.ui.synchronize.action.AbstractSynchronizeLogicalModelAction#getOperation()
 	 */
+	@Override
 	protected IActionOperation getOperation() {
-		return this.actionHelper.getOperation();
+		return actionHelper.getOperation();
 	}
 
 }

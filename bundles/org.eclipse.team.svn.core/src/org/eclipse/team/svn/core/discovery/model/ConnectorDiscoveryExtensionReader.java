@@ -13,6 +13,8 @@
  *******************************************************************************/
 package org.eclipse.team.svn.core.discovery.model;
 
+import java.util.Collections;
+
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.team.svn.core.SVNMessages;
 
@@ -66,16 +68,14 @@ public class ConnectorDiscoveryExtensionReader {
 		String ids = element.getAttribute("id"); //$NON-NLS-1$
 		if (ids != null) {
 			String[] aids = ids.split("\\s*,\\s*"); //$NON-NLS-1$
-			for (String id : aids) {
-				connectorDescriptor.getInstallableUnits().add(id);
-			}
+			Collections.addAll(connectorDescriptor.getInstallableUnits(), aids);
 		}
 
 		connectorDescriptor.setName(element.getAttribute("name")); //$NON-NLS-1$
 		connectorDescriptor.setProvider(element.getAttribute("provider")); //$NON-NLS-1$
 		connectorDescriptor.setLicense(element.getAttribute("license")); //$NON-NLS-1$
 		connectorDescriptor.setDescription(element.getAttribute("description")); //$NON-NLS-1$
-		connectorDescriptor.setSiteUrl(element.getAttribute("siteUrl")); //$NON-NLS-1$		
+		connectorDescriptor.setSiteUrl(element.getAttribute("siteUrl")); //$NON-NLS-1$
 		connectorDescriptor.setCategoryId(element.getAttribute("categoryId")); //$NON-NLS-1$
 		connectorDescriptor.setPlatformFilter(element.getAttribute("platformFilter")); //$NON-NLS-1$
 		connectorDescriptor.setGroupId(element.getAttribute("groupId")); //$NON-NLS-1$

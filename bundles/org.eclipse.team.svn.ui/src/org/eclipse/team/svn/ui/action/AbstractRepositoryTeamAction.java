@@ -30,16 +30,17 @@ public abstract class AbstractRepositoryTeamAction extends AbstractSVNTeamAction
 	private IStructuredSelection selection;
 
 	public AbstractRepositoryTeamAction() {
-		super();
 	}
 
+	@Override
 	protected IStructuredSelection getSelection() {
-		if (this.selection == null) {
-			this.selection = StructuredSelection.EMPTY;
+		if (selection == null) {
+			selection = StructuredSelection.EMPTY;
 		}
-		return this.selection;
+		return selection;
 	}
 
+	@Override
 	protected void checkSelection(IStructuredSelection selection) {
 		this.selection = selection;
 	}

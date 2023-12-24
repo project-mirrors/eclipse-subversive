@@ -33,21 +33,22 @@ import org.eclipse.team.svn.ui.panel.remote.ComparePanel;
  */
 public class CompareAction extends AbstractRepositoryTeamAction {
 	public CompareAction() {
-		super();
 	}
 
+	@Override
 	public void runImpl(IAction action) {
-		IRepositoryResource first = this.getSelectedRepositoryResources()[0];
+		IRepositoryResource first = getSelectedRepositoryResources()[0];
 		ComparePanel panel = new ComparePanel(first);
 		panel.setFilterCurrent(true);
-		DefaultDialog dlg = new DefaultDialog(this.getShell(), panel);
+		DefaultDialog dlg = new DefaultDialog(getShell(), panel);
 		if (dlg.open() == 0) {
-			this.doCompare(first, panel.getSelectedResource(), panel.getDiffOptions());
+			doCompare(first, panel.getSelectedResource(), panel.getDiffOptions());
 		}
 	}
 
+	@Override
 	public boolean isEnabled() {
-		IRepositoryResource[] resources = this.getSelectedRepositoryResources();
+		IRepositoryResource[] resources = getSelectedRepositoryResources();
 		if (resources.length != 1) {
 			return false;
 		}
@@ -67,7 +68,7 @@ public class CompareAction extends AbstractRepositoryTeamAction {
 		} catch (SVNConnectorException ex) {
 			UILoggedOperation.reportError("Compare", ex);
 		}
-		this.runScheduled(new CompareRepositoryResourcesOperation(second, first, false, options));
+		runScheduled(new CompareRepositoryResourcesOperation(second, first, false, options));
 	}
 
 }

@@ -35,15 +35,15 @@ public class ResourcesParentsProvider implements IResourceProvider {
 		this.provider = provider;
 	}
 
+	@Override
 	public IResource[] getResources() {
-		IResource[] resources = this.operableData();
+		IResource[] resources = operableData();
 		if (resources == null) {
 			return new IResource[1];
 		}
-		HashSet resourcesWithParents = new HashSet();
-		resourcesWithParents.addAll(Arrays.asList(resources));
-		for (int i = 0; i < resources.length; i++) {
-			IResource parent = resources[i].getParent();
+		HashSet resourcesWithParents = new HashSet(Arrays.asList(resources));
+		for (IResource element : resources) {
+			IResource parent = element.getParent();
 			if (parent != null && !(parent instanceof IWorkspaceRoot)) {
 				resourcesWithParents.add(parent);
 			}
@@ -52,7 +52,7 @@ public class ResourcesParentsProvider implements IResourceProvider {
 	}
 
 	protected IResource[] operableData() {
-		return this.resources == null ? this.provider.getResources() : this.resources;
+		return resources == null ? provider.getResources() : resources;
 	}
 
 }

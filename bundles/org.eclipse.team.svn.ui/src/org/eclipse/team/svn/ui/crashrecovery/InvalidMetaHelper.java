@@ -38,6 +38,7 @@ import org.eclipse.team.svn.ui.utility.UIMonitorUtility;
  */
 public class InvalidMetaHelper implements IResolutionHelper {
 
+	@Override
 	public boolean acquireResolution(ErrorDescription description) {
 		if (description.code == ErrorDescription.CANNOT_READ_PROJECT_METAINFORMATION) {
 			final IProject project = (IProject) description.context;
@@ -48,12 +49,12 @@ public class InvalidMetaHelper implements IResolutionHelper {
 			ISVNConnectorFactory current = CoreExtensionsManager.instance().getSVNConnectorFactory();
 			String path = location.toString();
 			// check if already handled for any other project
-			if (this.isValid(current, path)) {
+			if (isValid(current, path)) {
 				return true;
 			}
-			final ArrayList<ISVNConnectorFactory> valid = new ArrayList<ISVNConnectorFactory>();
+			final ArrayList<ISVNConnectorFactory> valid = new ArrayList<>();
 			for (ISVNConnectorFactory factory : CoreExtensionsManager.instance().getAccessibleClients()) {
-				if (this.isValid(factory, path)) {
+				if (isValid(factory, path)) {
 					valid.add(factory);
 				}
 			}
@@ -61,13 +62,11 @@ public class InvalidMetaHelper implements IResolutionHelper {
 				return false;
 			}
 
-			final boolean[] solved = new boolean[] { false };
-			UIMonitorUtility.parallelSyncExec(new Runnable() {
-				public void run() {
-					DefaultDialog dialog = new DefaultDialog(UIMonitorUtility.getShell(),
-							new ValidConnectorsSelectionPanel(project, valid));
-					solved[0] = dialog.open() == 0;
-				}
+			final boolean[] solved = { false };
+			UIMonitorUtility.parallelSyncExec(() -> {
+				DefaultDialog dialog = new DefaultDialog(UIMonitorUtility.getShell(),
+						new ValidConnectorsSelectionPanel(project, valid));
+				solved[0] = dialog.open() == 0;
 			});
 			// if user pressed "Ok" the project can be recovered
 			return solved[0];

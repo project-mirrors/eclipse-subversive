@@ -46,53 +46,61 @@ public class SVNFolderChange extends SVNLocalFolder implements IFolderChange {
 		this.pegRevision = pegRevision;
 	}
 
+	@Override
 	public void treatAsReplacement() {
-		this.textStatus = IStateFilter.ST_REPLACED;
+		textStatus = IStateFilter.ST_REPLACED;
 	}
 
+	@Override
 	public SVNRevision getPegRevision() {
-		return this.pegRevision == null
-				? (this.revision != SVNRevision.INVALID_REVISION_NUMBER
-						? SVNRevision.fromNumber(this.revision)
-						: SVNRevision.INVALID_REVISION)
-				: this.pegRevision;
+		return pegRevision == null
+				? revision != SVNRevision.INVALID_REVISION_NUMBER
+						? SVNRevision.fromNumber(revision)
+						: SVNRevision.INVALID_REVISION
+				: pegRevision;
 	}
 
+	@Override
 	public void setPegRevision(SVNRevision pegRevision) {
 		this.pegRevision = pegRevision;
 	}
 
+	@Override
 	public ILocalResource[] getChildren() {
 		return new ILocalResource[0];
 	}
 
+	@Override
 	public IRepositoryResource getOriginator() {
-		if (this.originator == null && this.getRevision() != SVNRevision.INVALID_REVISION_NUMBER) {
-			IRepositoryResource remote = SVNRemoteStorage.instance().asRepositoryResource(this.resource);
-			remote.setPegRevision(this.getPegRevision());
-			remote.setSelectedRevision(SVNRevision.fromNumber(this.getRevision()));
+		if (originator == null && getRevision() != SVNRevision.INVALID_REVISION_NUMBER) {
+			IRepositoryResource remote = SVNRemoteStorage.instance().asRepositoryResource(resource);
+			remote.setPegRevision(getPegRevision());
+			remote.setSelectedRevision(SVNRevision.fromNumber(getRevision()));
 			return remote;
 		}
-		return this.originator;
+		return originator;
 	}
 
+	@Override
 	public void setOriginator(IRepositoryResource originator) {
 		this.originator = originator;
 	}
 
+	@Override
 	public synchronized String getComment() {
-		if (this.comment == null && this.provider != null) {
-			long rev = this.getRevision();
-			this.comment = this.provider.getComment(this.getResource(),
+		if (comment == null && provider != null) {
+			long rev = getRevision();
+			comment = provider.getComment(getResource(),
 					rev == SVNRevision.INVALID_REVISION_NUMBER
 							? SVNRevision.INVALID_REVISION
 							: SVNRevision.fromNumber(rev),
-					this.getPegRevision());
-			this.provider = null;
+					getPegRevision());
+			provider = null;
 		}
-		return this.comment;
+		return comment;
 	}
 
+	@Override
 	public void setCommentProvider(ICommentProvider provider) {
 		this.provider = provider;
 	}

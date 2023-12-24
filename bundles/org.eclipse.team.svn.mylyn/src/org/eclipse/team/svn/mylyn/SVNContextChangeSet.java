@@ -60,17 +60,20 @@ public class SVNContextChangeSet extends SVNActiveChangeSet implements IAdaptabl
 		updateLabel();
 	}
 
+	@Override
 	public boolean isManagedExternally() {
 		return true;
 	}
 
+	@Override
 	public boolean isUserCreated() {
 		return true;
 	}
 
+	@Override
 	public void updateLabel() {
-		super.setName(this.task.getSummary());
-		super.setTitle(this.task.getSummary());
+		super.setName(task.getSummary());
+		super.setTitle(task.getSummary());
 	}
 
 	/**
@@ -83,7 +86,7 @@ public class SVNContextChangeSet extends SVNActiveChangeSet implements IAdaptabl
 	}
 
 	protected String getTitleForPersistance() {
-		return getTitle() + " (" + this.task.getHandleIdentifier() + ")"; //$NON-NLS-1$ //$NON-NLS-2$
+		return getTitle() + " (" + task.getHandleIdentifier() + ")"; //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 	public static String getHandleFromPersistedTitle(String title) {
@@ -96,13 +99,15 @@ public class SVNContextChangeSet extends SVNActiveChangeSet implements IAdaptabl
 		}
 	}
 
+	@Override
 	public String getComment() {
 		return getComment(true);
 	}
 
+	@Override
 	public String getComment(boolean checkTaskRepository) {
 		String template = null;
-		Set<IProject> projects = new HashSet<IProject>();
+		Set<IProject> projects = new HashSet<>();
 		IResource[] resources = getChangedResources();
 		for (IResource resource : resources) {
 			IProject project = resource.getProject();
@@ -123,7 +128,7 @@ public class SVNContextChangeSet extends SVNActiveChangeSet implements IAdaptabl
 			for (IProject project : projects) {
 				TaskRepository repository = TasksUiPlugin.getDefault().getRepositoryForResource(project);
 				if (repository != null) {
-					if (!repository.getRepositoryUrl().equals(this.task.getRepositoryUrl())) {
+					if (!repository.getRepositoryUrl().equals(task.getRepositoryUrl())) {
 						unmatchedRepositoryFound = true;
 					}
 				}
@@ -143,17 +148,18 @@ public class SVNContextChangeSet extends SVNActiveChangeSet implements IAdaptabl
 						.getString(
 								FocusedTeamUiPlugin.COMMIT_TEMPLATE);
 			}
-			return FocusedTeamUiPlugin.getDefault().getCommitTemplateManager().generateComment(this.task, template);
+			return FocusedTeamUiPlugin.getDefault().getCommitTemplateManager().generateComment(task, template);
 		} else {
 			return ""; //$NON-NLS-1$
 		}
 	}
 
+	@Override
 	public void add(IDiff diff) {
 		super.add(diff);
 		IResource resource = getResourceFromDiff(diff);
-		if (!this.suppressInterestContribution && resource != null) {
-			Set<IResource> resources = new HashSet<IResource>();
+		if (!suppressInterestContribution && resource != null) {
+			Set<IResource> resources = new HashSet<>();
 			resources.add(resource);
 			if (ResourcesUiBridgePlugin.getDefault() != null) {
 				ResourcesUi.addResourceToContext(resources, InteractionEvent.Kind.SELECTION);
@@ -172,15 +178,16 @@ public class SVNContextChangeSet extends SVNActiveChangeSet implements IAdaptabl
 		}
 	}
 
+	@Override
 	public void restoreResources(IResource[] newResources) throws CoreException {
-		this.suppressInterestContribution = true;
+		suppressInterestContribution = true;
 		try {
 			super.add(newResources);
 			setComment(getComment(false));
 		} catch (TeamException e) {
 			throw e;
 		} finally {
-			this.suppressInterestContribution = false;
+			suppressInterestContribution = false;
 		}
 	}
 
@@ -188,31 +195,35 @@ public class SVNContextChangeSet extends SVNActiveChangeSet implements IAdaptabl
 		return super.getResources();
 	}
 
+	@Override
 	public boolean equals(Object object) {
-		if (object instanceof SVNContextChangeSet && this.task != null) {
+		if (object instanceof SVNContextChangeSet && task != null) {
 			SVNContextChangeSet changeSet = (SVNContextChangeSet) object;
-			return this.task.equals(changeSet.getTask());
+			return task.equals(changeSet.getTask());
 		} else {
 			return super.equals(object);
 		}
 	}
 
+	@Override
 	public int hashCode() {
-		if (this.task != null) {
-			return this.task.hashCode();
+		if (task != null) {
+			return task.hashCode();
 		} else {
 			return super.hashCode();
 		}
 	}
 
+	@Override
 	public ITask getTask() {
-		return this.task;
+		return task;
 	}
 
+	@Override
 	@SuppressWarnings("unchecked")
 	public Object getAdapter(Class adapter) {
 		if (adapter == AbstractTask.class) {
-			return this.task;
+			return task;
 		} else if (adapter == AbstractTaskReference.class) {
 			return new LinkedTaskInfo(getTask(), this);
 		}

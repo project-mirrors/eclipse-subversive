@@ -27,7 +27,6 @@ import org.eclipse.team.svn.core.connector.SVNCommitStatus;
 import org.eclipse.team.svn.core.connector.SVNRevision;
 import org.eclipse.team.svn.core.operation.IActionOperation;
 import org.eclipse.team.svn.core.operation.IPostCommitErrorsProvider;
-import org.eclipse.team.svn.core.operation.IUnprotectedOperation;
 import org.eclipse.team.svn.core.operation.local.change.FolderChange;
 import org.eclipse.team.svn.core.operation.local.change.IActionOperationProcessor;
 import org.eclipse.team.svn.core.operation.local.change.ResourceChange;
@@ -58,9 +57,9 @@ public class MarkAsMergedOperation extends AbstractWorkingCopyOperation
 
 	protected String overrideMessage;
 
-	protected IResource[] committables = new IResource[0];
+	protected IResource[] committables = {};
 
-	protected IResource[] withDifferentNodeKind = new IResource[0];
+	protected IResource[] withDifferentNodeKind = {};
 
 	protected boolean ignoreExternals;
 
@@ -94,54 +93,53 @@ public class MarkAsMergedOperation extends AbstractWorkingCopyOperation
 		this(provider, override, overrideMessage, false, ignoreExternals);
 	}
 
+	@Override
 	public IResource[] getResources() {
-		return this.committables;
+		return committables;
 	}
 
 	public IResource[] getHavingDifferentNodeKind() {
-		return this.withDifferentNodeKind;
+		return withDifferentNodeKind;
 	}
 
+	@Override
 	public SVNCommitStatus[] getPostCommitErrors() {
-		return this.postCommitErrors == null
-				? null
-				: this.postCommitErrors.toArray(new SVNCommitStatus[this.postCommitErrors.size()]);
+		return postCommitErrors == null ? null : postCommitErrors.toArray(new SVNCommitStatus[postCommitErrors.size()]);
 	}
 
+	@Override
 	public void doOperation(IActionOperation op, IProgressMonitor monitor) {
 		this.reportStatus(op.run(monitor).getStatus());
 	}
 
+	@Override
 	protected void runImpl(IProgressMonitor monitor) throws Exception {
-		IResource[] resources = FileUtility.shrinkChildNodesWithSwitched(this.operableData());
-		final ArrayList<IResource> committables = new ArrayList<IResource>();
-		final ArrayList<IResource> withDifferentNodeKind = new ArrayList<IResource>();
-		this.postCommitErrors = new ArrayList<SVNCommitStatus>();
+		IResource[] resources = FileUtility.shrinkChildNodesWithSwitched(operableData());
+		final ArrayList<IResource> committables = new ArrayList<>();
+		final ArrayList<IResource> withDifferentNodeKind = new ArrayList<>();
+		postCommitErrors = new ArrayList<>();
 
 		for (int i = 0; i < resources.length && !monitor.isCanceled(); i++) {
 			final IResource current = resources[i];
-			this.protectStep(new IUnprotectedOperation() {
-				public void run(IProgressMonitor monitor) throws Exception {
-					ILocalResource local = SVNRemoteStorage.instance().asLocalResourceAccessible(current);
-					if (IStateFilter.SF_DELETED.accept(local) && !IStateFilter.SF_PREREPLACEDREPLACED.accept(local)) {
-						MarkAsMergedOperation.this.markDeleted(local, new NullProgressMonitor());
-						committables.add(local.getResource());
-					} else if (!IStateFilter.SF_INTERNAL_INVALID.accept(local)) {
-						if ((local.getChangeMask() & ILocalResource.TREE_CONFLICT_UNKNOWN_NODE_KIND) != 0) {
-							MarkAsMergedOperation.this.doOperation(
-									new RevertOperation(new IResource[] { local.getResource() }, true), monitor);
-							MarkAsMergedOperation.this
-									.doOperation(
-											new RefreshResourcesOperation(new IResource[] { local.getResource() },
-													IResource.DEPTH_INFINITE, RefreshResourcesOperation.REFRESH_ALL),
-											monitor);
+			this.protectStep(monitor1 -> {
+				ILocalResource local = SVNRemoteStorage.instance().asLocalResourceAccessible(current);
+				if (IStateFilter.SF_DELETED.accept(local) && !IStateFilter.SF_PREREPLACEDREPLACED.accept(local)) {
+					MarkAsMergedOperation.this.markDeleted(local, new NullProgressMonitor());
+					committables.add(local.getResource());
+				} else if (!IStateFilter.SF_INTERNAL_INVALID.accept(local)) {
+					if ((local.getChangeMask() & ILocalResource.TREE_CONFLICT_UNKNOWN_NODE_KIND) != 0) {
+						MarkAsMergedOperation.this.doOperation(
+								new RevertOperation(new IResource[] { local.getResource() }, true), monitor1);
+						MarkAsMergedOperation.this.doOperation(
+								new RefreshResourcesOperation(new IResource[] { local.getResource() },
+										IResource.DEPTH_INFINITE, RefreshResourcesOperation.REFRESH_ALL),
+								monitor1);
+					} else {
+						boolean nodeKindChanged = MarkAsMergedOperation.this.markExisting(local, monitor1);
+						if (!nodeKindChanged) {
+							committables.add(local.getResource());
 						} else {
-							boolean nodeKindChanged = MarkAsMergedOperation.this.markExisting(local, monitor);
-							if (!nodeKindChanged) {
-								committables.add(local.getResource());
-							} else {
-								withDifferentNodeKind.add(local.getResource());
-							}
+							withDifferentNodeKind.add(local.getResource());
 						}
 					}
 				}
@@ -153,14 +151,14 @@ public class MarkAsMergedOperation extends AbstractWorkingCopyOperation
 	}
 
 	protected void markDeleted(ILocalResource local, IProgressMonitor monitor) throws Exception {
-		this.doOperation(new RevertOperation(new IResource[] { local.getResource() }, true), monitor);
-		this.doOperation(new UpdateOperation(new IResource[] { local.getResource() }, this.getRevisionToUpdate(local),
-				this.ignoreExternals), monitor);
+		doOperation(new RevertOperation(new IResource[] { local.getResource() }, true), monitor);
+		doOperation(new UpdateOperation(new IResource[] { local.getResource() }, getRevisionToUpdate(local),
+				ignoreExternals), monitor);
 		//don't delete the resource which already doesn't exist on file system
 		//this can happen with tree conflicts, for instance, local - delete and remote - delete
 		File f = new File(FileUtility.getWorkingCopyPath(local.getResource()));
 		if (f.exists()) {
-			this.doOperation(new DeleteResourceOperation(local.getResource()), monitor);
+			doOperation(new DeleteResourceOperation(local.getResource()), monitor);
 		}
 	}
 
@@ -187,25 +185,25 @@ public class MarkAsMergedOperation extends AbstractWorkingCopyOperation
 
 			if (FileUtility.checkForResourcesPresenceRecursive(new IResource[] { local.getResource() },
 					IStateFilter.SF_REVERTABLE)) {
-				this.doOperation(new RevertOperation(new IResource[] { local.getResource() }, true), monitor);
+				doOperation(new RevertOperation(new IResource[] { local.getResource() }, true), monitor);
 			}
 
 			change.traverse(new RemoveNonVersionedVisitor(true), IResource.DEPTH_INFINITE, this, monitor);
 
-			this.doOperation(new UpdateOperation(new IResource[] { local.getResource() },
-					this.getRevisionToUpdate(local), this.ignoreExternals), monitor);
+			doOperation(new UpdateOperation(new IResource[] { local.getResource() }, getRevisionToUpdate(local),
+					ignoreExternals), monitor);
 			String wcPath = FileUtility.getWorkingCopyPath(local.getResource());
 			boolean isLocalExists = new File(wcPath).exists();
-			if (this.override && isLocalExists) {
-				nodeKindChanged = this.prepareToOverride(change, monitor);
+			if (override && isLocalExists) {
+				nodeKindChanged = prepareToOverride(change, monitor);
 				//do additional check for exists because prepareToOverride can delete resources
 				if (new File(wcPath).exists()) {
-					CommitOperation op = new CommitOperation(new IResource[] { local.getResource() },
-							this.overrideMessage, true, this.keepLocks);
-					this.doOperation(op, monitor);
+					CommitOperation op = new CommitOperation(new IResource[] { local.getResource() }, overrideMessage,
+							true, keepLocks);
+					doOperation(op, monitor);
 					SVNCommitStatus[] errors = op.getPostCommitErrors();
 					if (errors != null) {
-						this.postCommitErrors.addAll(Arrays.asList(errors));
+						postCommitErrors.addAll(Arrays.asList(errors));
 					}
 				}
 			}
@@ -236,8 +234,8 @@ public class MarkAsMergedOperation extends AbstractWorkingCopyOperation
 		boolean nodeKindBeforeUpdate = change instanceof FolderChange;
 		if (nodeKindBeforeUpdate) {
 			ResourceChange[] children = ((FolderChange) change).getChildren();
-			for (int i = 0; i < children.length; i++) {
-				this.prepareToOverride(children[i], monitor);
+			for (ResourceChange child : children) {
+				prepareToOverride(child, monitor);
 			}
 		}
 		ILocalResource local = change.getLocal();
@@ -246,7 +244,7 @@ public class MarkAsMergedOperation extends AbstractWorkingCopyOperation
 		if (real.exists()) {
 			nodeKindChanged = nodeKindBeforeUpdate != real.isDirectory();
 			if (IStateFilter.SF_NOTONREPOSITORY.accept(local) || nodeKindChanged) {
-				this.doOperation(new DeleteResourceOperation(local.getResource()), monitor);
+				doOperation(new DeleteResourceOperation(local.getResource()), monitor);
 			}
 		}
 		return nodeKindChanged;

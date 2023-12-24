@@ -33,15 +33,15 @@ public class RepositoriesStateChangedEvent {
 
 	public RepositoriesStateChangedEvent(IRepositoryLocation location, int action) {
 		this.location = location;
-		this.eventType = action;
+		eventType = action;
 	}
 
 	public int getAction() {
-		return this.eventType;
+		return eventType;
 	}
 
 	public IRepositoryLocation getLocation() {
-		return this.location;
+		return location;
 	}
 
 }

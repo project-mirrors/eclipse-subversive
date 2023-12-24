@@ -24,6 +24,7 @@ import org.eclipse.team.svn.ui.extension.factory.IHistoryViewFactory;
  */
 public class DefaultHistoryViewFactory implements IHistoryViewFactory {
 
+	@Override
 	public ICommentView getCommentView() {
 		return new DefaultCommentView();
 	}

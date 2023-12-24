@@ -23,9 +23,7 @@ import java.util.List;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.IBaseLabelProvider;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TableLayout;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -71,30 +69,26 @@ public class ListSelectionPanel extends AbstractDialogPanel {
 	public ListSelectionPanel(Object input, IStructuredContentProvider contentProvider,
 			IBaseLabelProvider labelProvider, String description, String defaultMessage, String title,
 			boolean multipleColumns) {
-		super();
-		this.initialSelections = Collections.EMPTY_LIST;
-		this.initialGrayed = Collections.EMPTY_LIST;
-		this.dialogTitle = title;
-		this.inputElement = input;
+		initialSelections = Collections.EMPTY_LIST;
+		initialGrayed = Collections.EMPTY_LIST;
+		dialogTitle = title;
+		inputElement = input;
 		this.contentProvider = contentProvider;
 		this.labelProvider = labelProvider;
-		this.dialogDescription = description;
+		dialogDescription = description;
 		this.defaultMessage = defaultMessage;
 		this.multipleColumns = multipleColumns;
 	}
 
+	@Override
 	public void createControlsImpl(Composite parent) {
-		this.listViewer = this.createViewer(parent);
+		listViewer = createViewer(parent);
 		GridData data = new GridData(GridData.FILL_BOTH);
 		data.heightHint = 120;
-		this.listViewer.getTable().setLayoutData(data);
-		this.listViewer.setLabelProvider(this.labelProvider);
-		this.listViewer.setContentProvider(this.contentProvider);
-		this.listViewer.addSelectionChangedListener(new ISelectionChangedListener() {
-			public void selectionChanged(SelectionChangedEvent event) {
-				ListSelectionPanel.this.validateContent();
-			}
-		});
+		listViewer.getTable().setLayoutData(data);
+		listViewer.setLabelProvider(labelProvider);
+		listViewer.setContentProvider(contentProvider);
+		listViewer.addSelectionChangedListener(event -> ListSelectionPanel.this.validateContent());
 
 		Composite tComposite = new Composite(parent, SWT.RIGHT);
 		GridLayout gLayout = new GridLayout();
@@ -111,8 +105,9 @@ public class ListSelectionPanel extends AbstractDialogPanel {
 		data.widthHint = DefaultDialog.computeButtonWidth(selectButton);
 		selectButton.setLayoutData(data);
 		SelectionListener listener = new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
-				ListSelectionPanel.this.listViewer.setAllChecked(true);
+				listViewer.setAllChecked(true);
 				ListSelectionPanel.this.validateContent();
 			}
 		};
@@ -124,43 +119,45 @@ public class ListSelectionPanel extends AbstractDialogPanel {
 		data.widthHint = DefaultDialog.computeButtonWidth(deselectButton);
 		deselectButton.setLayoutData(data);
 		listener = new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
-				ListSelectionPanel.this.listViewer.setAllChecked(false);
+				listViewer.setAllChecked(false);
 				ListSelectionPanel.this.validateContent();
 			}
 		};
 		deselectButton.addSelectionListener(listener);
 	}
 
+	@Override
 	public void postInit() {
-		this.listViewer.setInput(this.inputElement);
-		for (Iterator it = this.initialSelections.iterator(); it.hasNext();) {
-			this.listViewer.setChecked(it.next(), true);
+		listViewer.setInput(inputElement);
+		for (Iterator it = initialSelections.iterator(); it.hasNext();) {
+			listViewer.setChecked(it.next(), true);
 		}
-		for (Iterator it = this.initialGrayed.iterator(); it.hasNext();) {
-			this.listViewer.setGrayed(it.next(), true);
+		for (Iterator it = initialGrayed.iterator(); it.hasNext();) {
+			listViewer.setGrayed(it.next(), true);
 		}
 		super.postInit();
 	}
 
 	public Object[] getResultSelections() {
-		return this.resultSelections;
+		return resultSelections;
 	}
 
 	public Object[] getInitialSelections() {
-		return this.initialSelections.toArray();
+		return initialSelections.toArray();
 	}
 
 	public void setInitialSelections(Object[] selectedElements) {
-		this.initialSelections = Arrays.asList(selectedElements);
+		initialSelections = Arrays.asList(selectedElements);
 	}
 
 	public void setInitialGrayed(Object[] grayedElements) {
-		this.initialGrayed = Arrays.asList(grayedElements);
+		initialGrayed = Arrays.asList(grayedElements);
 	}
 
 	protected CheckboxTableViewer createViewer(Composite parent) {
-		if (!this.multipleColumns) {
+		if (!multipleColumns) {
 			return CheckboxTableViewer.newCheckList(parent, SWT.BORDER);
 		}
 		Table table = new Table(parent, SWT.CHECK | SWT.BORDER);
@@ -186,19 +183,21 @@ public class ListSelectionPanel extends AbstractDialogPanel {
 		return new CheckboxTableViewer(table);
 	}
 
+	@Override
 	protected void saveChangesImpl() {
-		Object[] children = this.contentProvider.getElements(this.inputElement);
+		Object[] children = contentProvider.getElements(inputElement);
 		if (children != null) {
 			ArrayList list = new ArrayList();
-			for (int i = 0; i < children.length; i++) {
-				if (this.listViewer.getChecked(children[i])) {
-					list.add(children[i]);
+			for (Object child : children) {
+				if (listViewer.getChecked(child)) {
+					list.add(child);
 				}
 			}
-			this.resultSelections = list.toArray();
+			resultSelections = list.toArray();
 		}
 	}
 
+	@Override
 	protected void cancelChangesImpl() {
 	}
 

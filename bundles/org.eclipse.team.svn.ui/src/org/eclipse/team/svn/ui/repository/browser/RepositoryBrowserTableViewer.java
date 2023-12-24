@@ -106,7 +106,7 @@ public class RepositoryBrowserTableViewer extends TableViewer {
 
 	public static final int COLUMN_LOCK_OWNER = 6;
 
-	private static final Map<Class<?>, String> class2Format = new HashMap<Class<?>, String>();
+	private static final Map<Class<?>, String> class2Format = new HashMap<>();
 
 	static {
 		RepositoryBrowserTableViewer.class2Format.put(RepositoryResource.class,
@@ -144,14 +144,15 @@ public class RepositoryBrowserTableViewer extends TableViewer {
 		RepositoryBrowserTableViewer.hasProps = SVNUIMessages.RepositoriesView_Browser_HasProps;
 		RepositoryBrowserTableViewer.noProps = SVNUIMessages.RepositoriesView_Browser_NoProps;
 
-		this.getTable().setHeaderVisible(true);
-		this.getTable().setLinesVisible(true);
+		getTable().setHeaderVisible(true);
+		getTable().setLinesVisible(true);
 		GridData data = new GridData(GridData.FILL_BOTH);
 		data.horizontalSpan = 2;
-		this.getTable().setLayoutData(data);
+		getTable().setLayoutData(data);
 
-		this.getTable().setLayout(new TableLayout());
-		this.getTable().addMouseTrackListener(new MouseTrackAdapter() {
+		getTable().setLayout(new TableLayout());
+		getTable().addMouseTrackListener(new MouseTrackAdapter() {
+			@Override
 			public void mouseHover(MouseEvent e) {
 				String tooltipText = ""; //$NON-NLS-1$
 				TableItem item = RepositoryBrowserTableViewer.this.getTable().getItem(new Point(e.x, e.y));
@@ -165,22 +166,25 @@ public class RepositoryBrowserTableViewer extends TableViewer {
 				RepositoryBrowserTableViewer.this.getTable().setToolTipText(tooltipText);
 			}
 
+			@Override
 			public void mouseExit(MouseEvent e) {
 				RepositoryBrowserTableViewer.this.getTable().setToolTipText(""); //$NON-NLS-1$
 			}
 		});
 
-		this.addDragSupport(DND.DROP_COPY | DND.DROP_MOVE | DND.DROP_LINK,
+		addDragSupport(DND.DROP_COPY | DND.DROP_MOVE | DND.DROP_LINK,
 				new Transfer[] { RemoteResourceTransfer.getInstance() }, new TransferDragSourceListener() {
 
+					@Override
 					public void dragFinished(DragSourceEvent event) {
 					}
 
+					@Override
 					public void dragSetData(DragSourceEvent event) {
 						if (RemoteResourceTransfer.getInstance().isSupportedType(event.dataType)) {
 							IStructuredSelection selection = (IStructuredSelection) RepositoryBrowserTableViewer.this
 									.getSelection();
-							ArrayList<IRepositoryResource> resources = new ArrayList<IRepositoryResource>();
+							ArrayList<IRepositoryResource> resources = new ArrayList<>();
 							for (Iterator<?> it = selection.iterator(); it.hasNext();) {
 								resources.add(((RepositoryResource) it.next()).getRepositoryResource());
 							}
@@ -189,6 +193,7 @@ public class RepositoryBrowserTableViewer extends TableViewer {
 						}
 					}
 
+					@Override
 					public void dragStart(DragSourceEvent event) {
 						IStructuredSelection selection = (IStructuredSelection) RepositoryBrowserTableViewer.this
 								.getSelection();
@@ -201,24 +206,28 @@ public class RepositoryBrowserTableViewer extends TableViewer {
 						event.doit = canBeDragged;
 					}
 
+					@Override
 					public Transfer getTransfer() {
 						return RemoteResourceTransfer.getInstance();
 					}
 				});
 
-		this.addDropSupport(DND.DROP_COPY | DND.DROP_MOVE, new Transfer[] { RemoteResourceTransfer.getInstance() },
+		addDropSupport(DND.DROP_COPY | DND.DROP_MOVE, new Transfer[] { RemoteResourceTransfer.getInstance() },
 				new DropTargetAdapter() {
 
 					protected int expectedOperation = DND.DROP_MOVE;
 
+					@Override
 					public void dragOperationChanged(DropTargetEvent event) {
-						this.expectedOperation = event.detail;
+						expectedOperation = event.detail;
 					}
 
+					@Override
 					public void dragEnter(DropTargetEvent event) {
-						this.expectedOperation = event.detail;
+						expectedOperation = event.detail;
 					}
 
+					@Override
 					public void dragOver(DropTargetEvent event) {
 						Table repositoryTable = (Table) ((DropTarget) event.widget).getControl();
 						TableItem aboveItem = repositoryTable.getItem(repositoryTable.toControl(event.x, event.y));
@@ -245,9 +254,10 @@ public class RepositoryBrowserTableViewer extends TableViewer {
 								return;
 							}
 						}
-						event.detail = this.expectedOperation;
+						event.detail = expectedOperation;
 					}
 
+					@Override
 					public void drop(DropTargetEvent event) {
 						Table repositoryTable = (Table) ((DropTarget) event.widget).getControl();
 						RepositoryResource aboveResource = (RepositoryResource) repositoryTable
@@ -267,7 +277,7 @@ public class RepositoryBrowserTableViewer extends TableViewer {
 											commentPanel.getMessage(), null);
 							CompositeOperation op = new CompositeOperation(mainOp.getId(), mainOp.getMessagesClass());
 							op.add(mainOp);
-							ArrayList<IRepositoryResource> toRefresh = new ArrayList<IRepositoryResource>();
+							ArrayList<IRepositoryResource> toRefresh = new ArrayList<>();
 							toRefresh.add(aboveResource.getRepositoryResource());
 							if (event.detail == DND.DROP_MOVE) {
 								toRefresh.addAll(Arrays.asList(((RemoteResourceTransferrable) event.data).resources));
@@ -282,35 +292,35 @@ public class RepositoryBrowserTableViewer extends TableViewer {
 
 		RepositoryBrowserTableComparator comparator = new RepositoryBrowserTableComparator(this);
 
-		this.createColumn(comparator, SVNUIMessages.RepositoriesView_Browser_Name, SWT.NONE, SWT.LEFT, true,
+		createColumn(comparator, SVNUIMessages.RepositoriesView_Browser_Name, SWT.NONE, SWT.LEFT, true,
 				new ColumnWeightData(18, true));
-		this.createColumn(comparator, SVNUIMessages.RepositoriesView_Browser_Revision, SWT.NONE, SWT.RIGHT, true,
+		createColumn(comparator, SVNUIMessages.RepositoriesView_Browser_Revision, SWT.NONE, SWT.RIGHT, true,
 				new ColumnWeightData(9, true));
-		this.createColumn(comparator, SVNUIMessages.RepositoriesView_Browser_LastChangedAt, SWT.NONE, SWT.LEFT, true,
+		createColumn(comparator, SVNUIMessages.RepositoriesView_Browser_LastChangedAt, SWT.NONE, SWT.LEFT, true,
 				new ColumnWeightData(17, true));
-		this.createColumn(comparator, SVNUIMessages.RepositoriesView_Browser_LastChangedBy, SWT.NONE, SWT.LEFT, true,
+		createColumn(comparator, SVNUIMessages.RepositoriesView_Browser_LastChangedBy, SWT.NONE, SWT.LEFT, true,
 				new ColumnWeightData(14, true));
-		this.createColumn(comparator, SVNUIMessages.RepositoriesView_Browser_Size, SWT.NONE, SWT.RIGHT, true,
+		createColumn(comparator, SVNUIMessages.RepositoriesView_Browser_Size, SWT.NONE, SWT.RIGHT, true,
 				new ColumnWeightData(10, true));
-		this.createColumn(comparator, SVNUIMessages.RepositoriesView_Browser_HasProperties, SWT.NONE, SWT.LEFT, true,
+		createColumn(comparator, SVNUIMessages.RepositoriesView_Browser_HasProperties, SWT.NONE, SWT.LEFT, true,
 				new ColumnWeightData(12, true));
-		this.createColumn(comparator, SVNUIMessages.RepositoriesView_Browser_LockOwner, SWT.NONE, SWT.LEFT, true,
+		createColumn(comparator, SVNUIMessages.RepositoriesView_Browser_LockOwner, SWT.NONE, SWT.LEFT, true,
 				new ColumnWeightData(13, true));
 
-		this.setComparator(comparator);
+		setComparator(comparator);
 		comparator.setColumnNumber(RepositoryBrowserTableViewer.COLUMN_NAME);
 		comparator.setReversed(false);
-		this.getTable().setSortDirection(SWT.UP);
-		this.getTable().setSortColumn(this.getTable().getColumn(RepositoryBrowserTableViewer.COLUMN_NAME));
+		getTable().setSortDirection(SWT.UP);
+		getTable().setSortColumn(getTable().getColumn(RepositoryBrowserTableViewer.COLUMN_NAME));
 	}
 
 	protected void createColumn(ColumnedViewerComparator comparator, String name, int style, int alignment,
 			boolean resizable, ColumnWeightData data) {
-		TableColumn column = new TableColumn(this.getTable(), style);
+		TableColumn column = new TableColumn(getTable(), style);
 		column.setText(name);
 		column.setResizable(resizable);
 		column.setAlignment(alignment);
-		((TableLayout) this.getTable().getLayout()).addColumnData(data);
+		((TableLayout) getTable().getLayout()).addColumnData(data);
 		column.addSelectionListener(comparator);
 	}
 }

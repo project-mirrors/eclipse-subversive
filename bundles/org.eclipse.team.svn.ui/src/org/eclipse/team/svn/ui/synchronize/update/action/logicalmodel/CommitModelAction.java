@@ -31,15 +31,17 @@ public class CommitModelAction extends AbstractSynchronizeLogicalModelAction {
 
 	public CommitModelAction(String text, ISynchronizePageConfiguration configuration) {
 		super(text, configuration);
-		this.actionHelper = new CommitActionHelper(this, configuration);
+		actionHelper = new CommitActionHelper(this, configuration);
 	}
 
+	@Override
 	protected FastSyncInfoFilter getSyncInfoFilter() {
-		return this.actionHelper.getSyncInfoFilter();
+		return actionHelper.getSyncInfoFilter();
 	}
 
+	@Override
 	protected IActionOperation getOperation() {
-		return this.actionHelper.getOperation();
+		return actionHelper.getOperation();
 	}
 
 }

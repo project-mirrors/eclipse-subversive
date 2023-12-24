@@ -27,7 +27,6 @@ public class SVNMylynIntegrationPlugin extends AbstractUIPlugin {
 	private static SVNMylynIntegrationPlugin instance;
 
 	public SVNMylynIntegrationPlugin() {
-		super();
 		SVNMylynIntegrationPlugin.instance = this;
 	}
 

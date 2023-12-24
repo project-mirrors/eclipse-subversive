@@ -46,27 +46,25 @@ public final class DecoratorVariables {
 	private String amend(IVariable var, IVariableContentProvider provider) {
 		IVariable[] variables = parseFormatLine(provider.getValue(var));
 		String value = ""; //$NON-NLS-1$
-		for (int i = 0; i < variables.length; i++) {
-			String variableValue = provider.getValue(variables[i]);
-			if (!variables[i].equals(var)) {
+		for (IVariable variable : variables) {
+			String variableValue = provider.getValue(variable);
+			if (!variable.equals(var)) {
+				value += variableValue;
+			} else if (variableValue.equals(variable.getName())) {
 				value += variableValue;
 			} else {
-				if (variableValue.equals(variables[i].getName())) {
-					value += variableValue;
-				} else {
-					value += "?{" + variables[i].getName() + "}?"; //$NON-NLS-1$ //$NON-NLS-2$
-				}
+				value += "?{" + variable.getName() + "}?"; //$NON-NLS-1$ //$NON-NLS-2$
 			}
 		}
 		return value;
 	}
 
 	public void decorateText(IDecoration decoration, IVariable[] format, IVariableContentProvider provider) {
-		int centerPoint = Arrays.asList(format).indexOf(this.variableSetProvider.getCenterVariable());
+		int centerPoint = Arrays.asList(format).indexOf(variableSetProvider.getCenterVariable());
 		String prefix = ""; //$NON-NLS-1$
 		String suffix = ""; //$NON-NLS-1$
 		for (int i = 0; i < format.length; i++) {
-			if (!format[i].equals(this.variableSetProvider.getCenterVariable())) {
+			if (!format[i].equals(variableSetProvider.getCenterVariable())) {
 				if (centerPoint != -1 && i < centerPoint) {
 					prefix += getValue(format[i], provider);
 				} else {
@@ -76,12 +74,14 @@ public final class DecoratorVariables {
 		}
 		// trim left/trim right
 		int i = 0;
-		for (; i < prefix.length() && Character.isWhitespace(prefix.charAt(i)); i++)
+		for (; i < prefix.length() && Character.isWhitespace(prefix.charAt(i)); i++) {
 			;
+		}
 		prefix = prefix.substring(i);
 		i = suffix.length() - 1;
-		for (; i >= 0 && Character.isWhitespace(suffix.charAt(i)); i--)
+		for (; i >= 0 && Character.isWhitespace(suffix.charAt(i)); i--) {
 			;
+		}
 		suffix = suffix.substring(0, i + 1);
 
 		decoration.addPrefix(prefix);
@@ -90,18 +90,18 @@ public final class DecoratorVariables {
 
 	public static String prepareFormatLine(IVariable[] format) {
 		String retVal = ""; //$NON-NLS-1$
-		for (int i = 0; i < format.length; i++) {
-			if (format[i] instanceof UserVariable) {
-				retVal += format[i].getName();
+		for (IVariable element : format) {
+			if (element instanceof UserVariable) {
+				retVal += element.getName();
 			} else {
-				retVal += "{" + format[i].getName() + "}"; //$NON-NLS-1$ //$NON-NLS-2$
+				retVal += "{" + element.getName() + "}"; //$NON-NLS-1$ //$NON-NLS-2$
 			}
 		}
 		return retVal;
 	}
 
 	public IVariable[] parseFormatLine(String line) {
-		List<IVariable> retVal = new ArrayList<IVariable>();
+		List<IVariable> retVal = new ArrayList<>();
 
 		int startPos = 0;
 		int stopPos = -1;
@@ -112,7 +112,7 @@ public final class DecoratorVariables {
 					stopPos = line.indexOf('{', startPos);
 					String userData = stopPos != -1 ? line.substring(startPos, stopPos++) : line.substring(startPos);
 					if (userData.length() > 0) {
-						retVal.add(new UserVariable(this.variableSetProvider.getDomainName(), userData));
+						retVal.add(new UserVariable(variableSetProvider.getDomainName(), userData));
 					}
 					startPos = stopPos;
 					state = 1;
@@ -123,15 +123,14 @@ public final class DecoratorVariables {
 					if (stopPos != -1) {
 						String varName = line.substring(startPos, stopPos++);
 						if (varName.length() > 0) {
-							IVariable var = this.variableSetProvider.getVariable(varName);
-							retVal.add(var == null
-									? new UserVariable(this.variableSetProvider.getDomainName(), varName)
-									: var);
+							IVariable var = variableSetProvider.getVariable(varName);
+							retVal.add(
+									var == null ? new UserVariable(variableSetProvider.getDomainName(), varName) : var);
 						}
 					} else {
 						String userData = line.substring(startPos);
 						if (userData.length() > 0) {
-							retVal.add(new UserVariable(this.variableSetProvider.getDomainName(), userData));
+							retVal.add(new UserVariable(variableSetProvider.getDomainName(), userData));
 						}
 					}
 					startPos = stopPos;

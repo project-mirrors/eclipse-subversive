@@ -37,6 +37,7 @@ public class BranchPanel extends AbstractBranchTagPanel {
 		super(branchTo, showStartsWith, existingNames, "BranchPanel", "branch", resources, selectedRemoteResources);
 	}
 
+	@Override
 	public String getHelpId() {
 		return "org.eclipse.team.svn.help.branchDialogContext"; //$NON-NLS-1$
 	}

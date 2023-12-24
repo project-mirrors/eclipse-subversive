@@ -38,18 +38,21 @@ public class FilteredSynchronizeModelOperation extends SynchronizeModelOperation
 		this.executable = executable;
 	}
 
+	@Override
 	public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-		if (this.executable != null) {
-			ProgressMonitorUtility.doTaskExternal(this.executable, monitor);
+		if (executable != null) {
+			ProgressMonitorUtility.doTaskExternal(executable, monitor);
 		}
 	}
 
+	@Override
 	protected boolean canRunAsJob() {
 		return true;
 	}
 
+	@Override
 	protected String getJobName() {
-		return this.executable == null ? super.getJobName() : this.executable.getOperationName();
+		return executable == null ? super.getJobName() : executable.getOperationName();
 	}
 
 }

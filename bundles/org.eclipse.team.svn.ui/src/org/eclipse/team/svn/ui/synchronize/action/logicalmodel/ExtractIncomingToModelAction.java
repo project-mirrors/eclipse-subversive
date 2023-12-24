@@ -31,19 +31,22 @@ public class ExtractIncomingToModelAction extends AbstractSynchronizeLogicalMode
 
 	public ExtractIncomingToModelAction(String text, ISynchronizePageConfiguration configuration) {
 		super(text, configuration);
-		this.actionHelper = new ExtractIncomingToActionHelper(this, configuration);
+		actionHelper = new ExtractIncomingToActionHelper(this, configuration);
 	}
 
+	@Override
 	protected boolean needsToSaveDirtyEditors() {
 		return false;
 	}
 
+	@Override
 	protected FastSyncInfoFilter getSyncInfoFilter() {
-		return this.actionHelper.getSyncInfoFilter();
+		return actionHelper.getSyncInfoFilter();
 	}
 
+	@Override
 	protected IActionOperation getOperation() {
-		return this.actionHelper.getOperation();
+		return actionHelper.getOperation();
 	}
 
 }

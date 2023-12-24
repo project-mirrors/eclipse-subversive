@@ -32,5 +32,5 @@ public interface ISVNConfigurationEventHandler {
 	 * @param cnf
 	 *            the object is valid during "onLoad" call only
 	 */
-	public void onLoad(ISVNConfiguration cnf);
+	void onLoad(ISVNConfiguration cnf);
 }

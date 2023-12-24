@@ -25,9 +25,9 @@ import org.eclipse.team.svn.core.resource.IResourceChange;
  * @author Alexander Gurov
  */
 public interface IRemoteStatusOperation extends IActionOperation {
-	public IResource[] getScope();
+	IResource[] getScope();
 
-	public SVNEntryStatus[] getStatuses();
+	SVNEntryStatus[] getStatuses();
 
-	public void setPegRevision(IResourceChange change);
+	void setPegRevision(IResourceChange change);
 }

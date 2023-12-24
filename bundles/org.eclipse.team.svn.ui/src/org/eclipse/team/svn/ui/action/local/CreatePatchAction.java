@@ -36,14 +36,14 @@ import org.eclipse.team.svn.ui.wizard.CreatePatchWizard;
  */
 public class CreatePatchAction extends AbstractWorkingCopyAction {
 	public CreatePatchAction() {
-		super();
 	}
 
+	@Override
 	public void runImpl(IAction action) {
 		IResource[] targets = FileUtility.filterResources(this.getSelectedResources(), IStateFilter.SF_ANY_CHANGE);
-		IActionOperation op = CreatePatchAction.getCreatePatchOperation(targets, this.getShell());
+		IActionOperation op = CreatePatchAction.getCreatePatchOperation(targets, getShell());
 		if (op != null) {
-			this.runScheduled(op);
+			runScheduled(op);
 		}
 	}
 
@@ -77,10 +77,12 @@ public class CreatePatchAction extends AbstractWorkingCopyAction {
 		return null;
 	}
 
+	@Override
 	public boolean isEnabled() {
-		return this.checkForResourcesPresenceRecursive(IStateFilter.SF_ANY_CHANGE);
+		return checkForResourcesPresenceRecursive(IStateFilter.SF_ANY_CHANGE);
 	}
 
+	@Override
 	protected boolean needsToSaveDirtyEditors() {
 		return true;
 	}

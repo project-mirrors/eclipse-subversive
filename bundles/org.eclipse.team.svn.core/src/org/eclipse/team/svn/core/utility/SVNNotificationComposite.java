@@ -30,28 +30,29 @@ public class SVNNotificationComposite implements ISVNNotificationCallback {
 	protected ISVNNotificationCallback[] listeners;
 
 	public SVNNotificationComposite() {
-		this.listeners = new ISVNNotificationCallback[0];
+		listeners = new ISVNNotificationCallback[0];
 	}
 
 	public void add(ISVNNotificationCallback listener) {
-		List<ISVNNotificationCallback> tmp = new ArrayList<ISVNNotificationCallback>(Arrays.asList(this.listeners));
+		List<ISVNNotificationCallback> tmp = new ArrayList<>(Arrays.asList(listeners));
 		if (!tmp.contains(listener)) {
 			tmp.add(listener);
 		}
-		this.listeners = tmp.toArray(new ISVNNotificationCallback[tmp.size()]);
+		listeners = tmp.toArray(new ISVNNotificationCallback[tmp.size()]);
 	}
 
 	public void remove(ISVNNotificationCallback listener) {
-		List<ISVNNotificationCallback> tmp = new ArrayList<ISVNNotificationCallback>(Arrays.asList(this.listeners));
+		List<ISVNNotificationCallback> tmp = new ArrayList<>(Arrays.asList(listeners));
 		tmp.remove(listener);
-		this.listeners = tmp.toArray(new ISVNNotificationCallback[tmp.size()]);
+		listeners = tmp.toArray(new ISVNNotificationCallback[tmp.size()]);
 	}
 
+	@Override
 	public void notify(SVNNotification info) {
 		// thread safe...
-		ISVNNotificationCallback[] tmp = this.listeners;
-		for (int i = 0; i < tmp.length; i++) {
-			tmp[i].notify(info);
+		ISVNNotificationCallback[] tmp = listeners;
+		for (ISVNNotificationCallback element : tmp) {
+			element.notify(info);
 		}
 	}
 

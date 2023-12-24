@@ -25,30 +25,29 @@ import org.eclipse.team.svn.ui.history.data.SVNLocalFileRevision;
  * @author Alexander Gurov
  */
 public interface ISVNHistoryViewInfo {
-	public static final int MODE_BOTH = 0x20;
+	int MODE_BOTH = 0x20;
 
-	public static final int MODE_LOCAL = 0x40;
+	int MODE_LOCAL = 0x40;
 
-	public static final int MODE_REMOTE = 0x80;
+	int MODE_REMOTE = 0x80;
 
-	public static final int MODE_MASK = ISVNHistoryViewInfo.MODE_BOTH | ISVNHistoryViewInfo.MODE_REMOTE
-			| ISVNHistoryViewInfo.MODE_LOCAL;
+	int MODE_MASK = ISVNHistoryViewInfo.MODE_BOTH | ISVNHistoryViewInfo.MODE_REMOTE | ISVNHistoryViewInfo.MODE_LOCAL;
 
-	public IResource getResource();
+	IResource getResource();
 
-	public IRepositoryResource getRepositoryResource();
+	IRepositoryResource getRepositoryResource();
 
-	public long getCurrentRevision();
+	long getCurrentRevision();
 
-	public boolean isPending();
+	boolean isPending();
 
-	public boolean isRelatedPathsOnly();
+	boolean isRelatedPathsOnly();
 
-	public boolean isGrouped();
+	boolean isGrouped();
 
-	public int getMode();
+	int getMode();
 
-	public SVNLocalFileRevision[] getLocalHistory();
+	SVNLocalFileRevision[] getLocalHistory();
 
-	public SVNLogEntry[] getRemoteHistory();
+	SVNLogEntry[] getRemoteHistory();
 }

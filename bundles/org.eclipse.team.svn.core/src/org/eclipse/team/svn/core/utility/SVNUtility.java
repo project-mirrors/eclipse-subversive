@@ -55,18 +55,15 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.team.core.RepositoryProvider;
 import org.eclipse.team.core.Team;
+import org.eclipse.team.svn.core.BaseMessages;
 import org.eclipse.team.svn.core.PathForURL;
 import org.eclipse.team.svn.core.SVNMessages;
 import org.eclipse.team.svn.core.SVNTeamPlugin;
 import org.eclipse.team.svn.core.SVNTeamProvider;
 import org.eclipse.team.svn.core.connector.ISVNConnector;
-import org.eclipse.team.svn.core.connector.ISVNDiffStatusCallback;
-import org.eclipse.team.svn.core.connector.ISVNEntryCallback;
-import org.eclipse.team.svn.core.connector.ISVNEntryInfoCallback;
-import org.eclipse.team.svn.core.connector.ISVNEntryStatusCallback;
 import org.eclipse.team.svn.core.connector.ISVNNotificationCallback;
 import org.eclipse.team.svn.core.connector.ISVNProgressMonitor;
-import org.eclipse.team.svn.core.connector.ISVNPropertyCallback;
+import org.eclipse.team.svn.core.connector.ISVNPropertyCallback.Pair;
 import org.eclipse.team.svn.core.connector.SVNChangeStatus;
 import org.eclipse.team.svn.core.connector.SVNConnectorException;
 import org.eclipse.team.svn.core.connector.SVNDepth;
@@ -96,7 +93,6 @@ import org.eclipse.team.svn.core.resource.IRepositoryLocation;
 import org.eclipse.team.svn.core.resource.IRepositoryResource;
 import org.eclipse.team.svn.core.resource.IRepositoryRoot;
 import org.eclipse.team.svn.core.resource.IRevisionLink;
-import org.eclipse.team.svn.core.resource.SSHSettings;
 import org.eclipse.team.svn.core.resource.SSLSettings;
 import org.eclipse.team.svn.core.svnstorage.SVNCachedProxyCredentialsManager;
 import org.eclipse.team.svn.core.svnstorage.SVNRemoteStorage;
@@ -147,32 +143,32 @@ public final class SVNUtility {
 			validFrom = df.parse(fromStr).getTime();
 			validTo = df.parse(toStr).getTime();
 		}
-		return new SSLServerCertificateInfo(subject, issuer, validFrom, validTo, fingerprint,
-				Arrays.asList(new String[] { serverURL }), null);
+		return new SSLServerCertificateInfo(subject, issuer, validFrom, validTo, fingerprint, Arrays.asList(serverURL),
+				null);
 	}
 
 	public static Map<String, String> splitCertificateString(String message) {
-		HashMap<String, String> retVal = new HashMap<String, String>();
+		HashMap<String, String> retVal = new HashMap<>();
 		String[] baseLines = message.split("\n"); //$NON-NLS-1$
 		boolean infoMessagePart = false;
 		String infoMessage = null;
-		for (int i = 0; i < baseLines.length; i++) {
-			int idx1 = baseLines[i].indexOf("https:"); //$NON-NLS-1$
+		for (String baseLine : baseLines) {
+			int idx1 = baseLine.indexOf("https:"); //$NON-NLS-1$
 			if (idx1 != -1) {
-				String serverURL = baseLines[i].substring(idx1).trim();
+				String serverURL = baseLine.substring(idx1).trim();
 				serverURL = serverURL.substring(0, serverURL.length() - 2);
 				retVal.put("serverURL", serverURL); //$NON-NLS-1$
 				infoMessagePart = true;
 			} else if (infoMessagePart) {
-				if (baseLines[i].endsWith(":")) {
+				if (baseLine.endsWith(":")) {
 					infoMessagePart = false;
 				} else {
-					infoMessage = infoMessage == null ? baseLines[i] : (infoMessage + "\n" + baseLines[i]); //$NON-NLS-1$
+					infoMessage = infoMessage == null ? baseLine : infoMessage + "\n" + baseLine; //$NON-NLS-1$
 				}
 			} else {
-				int idx = baseLines[i].indexOf(':');
-				String key = baseLines[i].substring(0, idx).replaceFirst("\\s*-\\s*", "").trim(); //$NON-NLS-1$
-				String value = baseLines[i].substring(idx + 1).trim();
+				int idx = baseLine.indexOf(':');
+				String key = baseLine.substring(0, idx).replaceFirst("\\s*-\\s*", "").trim(); //$NON-NLS-1$
+				String value = baseLine.substring(idx + 1).trim();
 				if ("Subject".equals(key)) { //$NON-NLS-1$
 					retVal.put("subject", value); //$NON-NLS-1$
 				} else if ("Valid".equals(key)) { //$NON-NLS-1$
@@ -262,7 +258,7 @@ public final class SVNUtility {
 						.asRepositoryResource(location, url, resource.getType() == IResource.FILE);
 				retVal.setSelectedRevision(
 						SVNRevision.fromNumber(st[0].copyFromRevision == SVNRevision.INVALID_REVISION_NUMBER
-								? st[0].revision
+						? st[0].revision
 								: st[0].copyFromRevision));
 				return retVal;
 			}
@@ -272,7 +268,7 @@ public final class SVNUtility {
 
 	public static Map<String, SVNEntryRevisionReference> parseSVNExternalsProperty(String property,
 			IRepositoryResource propertyHolder) {
-		Map<String, SVNEntryRevisionReference> retVal = new HashMap<String, SVNEntryRevisionReference>();
+		Map<String, SVNEntryRevisionReference> retVal = new HashMap<>();
 
 		SVNExternalPropertyData[] externalsData = SVNExternalPropertyData.parse(property);
 		for (SVNExternalPropertyData externalData : externalsData) {
@@ -372,7 +368,7 @@ public final class SVNUtility {
 			return false;
 		}
 		return reference1.path.equals(reference2.path) && (reference1.pegRevision == reference2.pegRevision
-				|| (reference1.pegRevision != null && reference1.pegRevision.equals(reference2.pegRevision)));
+				|| reference1.pegRevision != null && reference1.pegRevision.equals(reference2.pegRevision));
 	}
 
 	public static SVNEntryRevisionReference getEntryRevisionReference(IRepositoryResource resource) {
@@ -387,37 +383,27 @@ public final class SVNUtility {
 	public static SVNProperty[] properties(ISVNConnector proxy, SVNEntryRevisionReference reference, long options,
 			ISVNProgressMonitor monitor) throws SVNConnectorException {
 		final SVNProperty[][] retVal = new SVNProperty[1][];
-		proxy.listProperties(reference, SVNDepth.EMPTY, null, options, new ISVNPropertyCallback() {
-			public void next(Pair personalProps, Pair[] inheritedProps) {
-				ArrayList<SVNProperty> props = new ArrayList<SVNProperty>();
-				Collections.addAll(props, personalProps.data);
-				for (Pair iProps : inheritedProps) {
-					Collections.addAll(props, iProps.data);
-				}
-				retVal[0] = personalProps.data;
+		proxy.listProperties(reference, SVNDepth.EMPTY, null, options, (personalProps, inheritedProps) -> {
+			ArrayList<SVNProperty> props = new ArrayList<>();
+			Collections.addAll(props, personalProps.data);
+			for (Pair iProps : inheritedProps) {
+				Collections.addAll(props, iProps.data);
 			}
+			retVal[0] = personalProps.data;
 		}, monitor);
 		return retVal[0];
 	}
 
 	public static SVNChangeStatus[] status(ISVNConnector proxy, String path, SVNDepth depth, long options,
 			ISVNProgressMonitor monitor) throws SVNConnectorException {
-		final ArrayList<SVNChangeStatus> statuses = new ArrayList<SVNChangeStatus>();
-		proxy.status(path, depth, options, null, new ISVNEntryStatusCallback() {
-			public void next(SVNChangeStatus status) {
-				statuses.add(status);
-			}
-		}, monitor);
+		final ArrayList<SVNChangeStatus> statuses = new ArrayList<>();
+		proxy.status(path, depth, options, null, status -> statuses.add(status), monitor);
 
 		for (Iterator<SVNChangeStatus> it = statuses.iterator(); it.hasNext() && !monitor.isActivityCancelled();) {
 			final SVNChangeStatus svnChangeStatus = it.next();
 			if (svnChangeStatus.hasConflict && svnChangeStatus.treeConflicts == null) {
 				proxy.getInfo(new SVNEntryRevisionReference(svnChangeStatus.path), SVNDepth.EMPTY,
-						ISVNConnector.Options.FETCH_ACTUAL_ONLY, null, new ISVNEntryInfoCallback() {
-							public void next(SVNEntryInfo info) {
-								svnChangeStatus.setTreeConflicts(info.treeConflicts);
-							}
-						}, monitor);
+						ISVNConnector.Options.FETCH_ACTUAL_ONLY, null, info -> svnChangeStatus.setTreeConflicts(info.treeConflicts), monitor);
 			}
 		}
 
@@ -427,37 +413,25 @@ public final class SVNUtility {
 	public static void diffStatus(ISVNConnector proxy, final Collection<SVNDiffStatus> statuses,
 			SVNEntryRevisionReference reference1, SVNEntryRevisionReference reference2, SVNDepth depth, long options,
 			ISVNProgressMonitor monitor) throws SVNConnectorException {
-		proxy.diffStatusTwo(reference1, reference2, depth, options, null, new ISVNDiffStatusCallback() {
-			public void next(SVNDiffStatus status) {
-				statuses.add(status);
-			}
-		}, monitor);
+		proxy.diffStatusTwo(reference1, reference2, depth, options, null, status -> statuses.add(status), monitor);
 	}
 
 	public static void diffStatus(ISVNConnector proxy, final Collection<SVNDiffStatus> statuses,
 			SVNEntryReference reference, SVNRevisionRange range, SVNDepth depth, long options,
 			ISVNProgressMonitor monitor) throws SVNConnectorException {
-		proxy.diffStatus(reference, range, depth, options, null, new ISVNDiffStatusCallback() {
-			public void next(SVNDiffStatus status) {
-				statuses.add(status);
-			}
-		}, monitor);
+		proxy.diffStatus(reference, range, depth, options, null, status -> statuses.add(status), monitor);
 	}
 
 	public static SVNEntry[] list(ISVNConnector proxy, SVNEntryRevisionReference reference, SVNDepth depth,
 			int direntFields, long options, ISVNProgressMonitor monitor) throws SVNConnectorException {
-		final ArrayList<SVNEntry> entries = new ArrayList<SVNEntry>();
-		proxy.listEntries(reference, depth, direntFields, options, new ISVNEntryCallback() {
-			public void next(SVNEntry entry) {
-				entries.add(entry);
-			}
-		}, monitor);
+		final ArrayList<SVNEntry> entries = new ArrayList<>();
+		proxy.listEntries(reference, depth, direntFields, options, entry -> entries.add(entry), monitor);
 		return entries.toArray(new SVNEntry[entries.size()]);
 	}
 
 	public static SVNLogEntry[] logEntries(ISVNConnector proxy, SVNEntryReference reference, SVNRevision revisionStart,
 			SVNRevision revisionEnd, long options, String[] revProps, long limit, ISVNProgressMonitor monitor)
-			throws SVNConnectorException {
+					throws SVNConnectorException {
 		return SVNUtility.logEntries(proxy, reference,
 				new SVNRevisionRange[] { new SVNRevisionRange(revisionStart, revisionEnd) }, options, revProps, limit,
 				monitor);
@@ -465,7 +439,7 @@ public final class SVNUtility {
 
 	public static SVNLogEntry[] logEntries(ISVNConnector proxy, SVNEntryReference reference,
 			SVNRevisionRange[] revisionRanges, long options, String[] revProps, long limit, ISVNProgressMonitor monitor)
-			throws SVNConnectorException {
+					throws SVNConnectorException {
 		SVNLogEntryCallbackWithMergeInfo callback = new SVNLogEntryCallbackWithMergeInfo();
 		proxy.listHistoryLog(reference, revisionRanges, revProps, limit, options, callback, monitor);
 		return callback.getEntries();
@@ -484,12 +458,8 @@ public final class SVNUtility {
 
 	public static SVNEntryInfo[] info(ISVNConnector proxy, SVNEntryRevisionReference reference, SVNDepth depth,
 			ISVNProgressMonitor monitor) throws SVNConnectorException {
-		final ArrayList<SVNEntryInfo> infos = new ArrayList<SVNEntryInfo>();
-		proxy.getInfo(reference, depth, ISVNConnector.Options.FETCH_ACTUAL_ONLY, null, new ISVNEntryInfoCallback() {
-			public void next(SVNEntryInfo info) {
-				infos.add(info);
-			}
-		}, monitor);
+		final ArrayList<SVNEntryInfo> infos = new ArrayList<>();
+		proxy.getInfo(reference, depth, ISVNConnector.Options.FETCH_ACTUAL_ONLY, null, info -> infos.add(info), monitor);
 		return infos.toArray(new SVNEntryInfo[infos.size()]);
 	}
 
@@ -541,17 +511,17 @@ public final class SVNUtility {
 
 	public static String getProposedTrunkLocation(IRepositoryLocation location) {
 		String baseUrl = location.getUrl();
-		return location.isStructureEnabled() ? (baseUrl + "/" + location.getTrunkLocation()) : baseUrl; //$NON-NLS-1$
+		return location.isStructureEnabled() ? baseUrl + "/" + location.getTrunkLocation() : baseUrl; //$NON-NLS-1$
 	}
 
 	public static String getProposedBranchesLocation(IRepositoryLocation location) {
 		String baseUrl = location.getUrl();
-		return location.isStructureEnabled() ? (baseUrl + "/" + location.getBranchesLocation()) : baseUrl; //$NON-NLS-1$
+		return location.isStructureEnabled() ? baseUrl + "/" + location.getBranchesLocation() : baseUrl; //$NON-NLS-1$
 	}
 
 	public static String getProposedTagsLocation(IRepositoryLocation location) {
 		String baseUrl = location.getUrl();
-		return location.isStructureEnabled() ? (baseUrl + "/" + location.getTagsLocation()) : baseUrl; //$NON-NLS-1$
+		return location.isStructureEnabled() ? baseUrl + "/" + location.getTagsLocation() : baseUrl; //$NON-NLS-1$
 	}
 
 	public static IRepositoryRoot[] findRoots(String resourceUrl, boolean longestOnly) {
@@ -560,26 +530,21 @@ public final class SVNUtility {
 		}
 		IPath url = SVNUtility.createPathForSVNUrl(resourceUrl);
 		IRepositoryLocation[] locations = SVNRemoteStorage.instance().getRepositoryLocations();
-		ArrayList<IRepositoryRoot> roots = new ArrayList<IRepositoryRoot>();
-		for (int i = 0; i < locations.length; i++) {
-			IPath locationUrl = SVNUtility.createPathForSVNUrl(locations[i].getUrl());
+		ArrayList<IRepositoryRoot> roots = new ArrayList<>();
+		for (IRepositoryLocation location : locations) {
+			IPath locationUrl = SVNUtility.createPathForSVNUrl(location.getUrl());
 			if (url.segmentCount() < locationUrl.segmentCount() && !url.isPrefixOf(locationUrl)) {
 				continue;
 			}
 			if (locationUrl.isPrefixOf(url) || // performance optimization: repository root URL detection [if is not cached] requires interaction with a remote host
-					SVNUtility.createPathForSVNUrl(locations[i].getRepositoryRootUrl()).isPrefixOf(url)) {
+					SVNUtility.createPathForSVNUrl(location.getRepositoryRootUrl()).isPrefixOf(url)) {
 				SVNUtility.addRepositoryRoot(roots,
-						(IRepositoryRoot) locations[i].asRepositoryContainer(resourceUrl, false).getRoot(),
-						longestOnly);
+						(IRepositoryRoot) location.asRepositoryContainer(resourceUrl, false).getRoot(), longestOnly);
 			}
 		}
 		IRepositoryRoot[] repositoryRoots = roots.toArray(new IRepositoryRoot[roots.size()]);
 		if (!longestOnly) {
-			Arrays.sort(repositoryRoots, new Comparator<IRepositoryRoot>() {
-				public int compare(IRepositoryRoot first, IRepositoryRoot second) {
-					return second.getUrl().compareTo(first.getUrl());
-				}
-			});
+			Arrays.sort(repositoryRoots, Comparator.comparing(IRepositoryRoot::getUrl).reversed());
 		}
 		return repositoryRoots;
 	}
@@ -640,7 +605,7 @@ public final class SVNUtility {
 		String url = resource.getUrl();
 		return resource instanceof IRepositoryFile
 				? (IRepositoryResource) resource.asRepositoryFile(url, false)
-				: resource.asRepositoryContainer(url, false);
+						: resource.asRepositoryContainer(url, false);
 	}
 
 	public static IRevisionLink createRevisionLink(IRepositoryResource resource) {
@@ -653,14 +618,14 @@ public final class SVNUtility {
 		IRepositoryLocation location = upPoint.getRepositoryLocation();
 		IRepositoryResource downPoint = isFile
 				? (IRepositoryResource) location.asRepositoryFile(url, false)
-				: location.asRepositoryContainer(url, false);
+						: location.asRepositoryContainer(url, false);
 		downPoint.setPegRevision(upPoint.getPegRevision());
 		downPoint.setSelectedRevision(upPoint.getSelectedRevision());
 		return SVNUtility.makeResourceSet(upPoint, downPoint);
 	}
 
 	public static IRepositoryResource[] makeResourceSet(IRepositoryResource upPoint, IRepositoryResource downPoint) {
-		ArrayList<IRepositoryResource> resourceSet = new ArrayList<IRepositoryResource>();
+		ArrayList<IRepositoryResource> resourceSet = new ArrayList<>();
 		while (downPoint != null && !downPoint.equals(upPoint)) {
 			resourceSet.add(0, downPoint);
 			downPoint = downPoint.getParent();
@@ -723,15 +688,16 @@ public final class SVNUtility {
 
 	public static void reorder(SVNDiffStatus[] statuses, final boolean parent2Child) {
 		/*
-		 * Resources are reported in reverse for tree deletions and in averse for tree additions. Next, when we 
-		 * virtually have a replacement of trees, in actuality we would get two sequences reported: one for deletion and 
+		 * Resources are reported in reverse for tree deletions and in averse for tree additions. Next, when we
+		 * virtually have a replacement of trees, in actuality we would get two sequences reported: one for deletion and
 		 * one for addition. The reason, I suspect is that there could be a node kind change with file replaced with folder and otherwise.
-		 * So, we should ensure we take into account the actual action type when reordering the nodes and deletions should go first 
+		 * So, we should ensure we take into account the actual action type when reordering the nodes and deletions should go first
 		 * in case they're followed by additions of the nodes with the same paths.
 		 */
 		SVNDiffStatus[] tStatuses = new SVNDiffStatus[statuses.length];
 		System.arraycopy(statuses, 0, tStatuses, 0, statuses.length);
 		Arrays.sort(tStatuses, new Comparator<SVNDiffStatus>() {
+			@Override
 			public int compare(SVNDiffStatus d1, SVNDiffStatus d2) {
 				int retVal = parent2Child ? d1.pathPrev.compareTo(d2.pathPrev) : d2.pathPrev.compareTo(d1.pathPrev);
 				if (retVal == 0 && d1.textStatus != d2.textStatus) {
@@ -745,6 +711,7 @@ public final class SVNUtility {
 				return retVal;
 			}
 
+			@Override
 			public boolean equals(Object obj) {
 				return false;
 			}
@@ -771,12 +738,14 @@ public final class SVNUtility {
 
 	public static void reorder(SVNChangeStatus[] statuses, final boolean parent2Child) {
 		Arrays.sort(statuses, new Comparator<SVNChangeStatus>() {
+			@Override
 			public int compare(SVNChangeStatus o1, SVNChangeStatus o2) {
 				String s1 = o1 != null ? o1.path : ""; //$NON-NLS-1$
 				String s2 = o2 != null ? o2.path : ""; //$NON-NLS-1$
 				return parent2Child ? s1.compareTo(s2) : s2.compareTo(s1);
 			}
 
+			@Override
 			public boolean equals(Object obj) {
 				return false;
 			}
@@ -785,21 +754,23 @@ public final class SVNUtility {
 
 	public static void reorder(IRepositoryResource[] resources, final boolean parent2Child) {
 		Arrays.sort(resources, new Comparator<IRepositoryResource>() {
+			@Override
 			public int compare(IRepositoryResource o1, IRepositoryResource o2) {
 				String s1 = o1.getUrl();
 				String s2 = o2.getUrl();
 				return parent2Child ? s1.compareTo(s2) : s2.compareTo(s1);
 			}
 
+			@Override
 			public boolean equals(Object obj) {
 				return false;
 			}
 		});
 	}
 
-	private static final byte[] uri_char_validity = new byte[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-			1, 1, 1, 1, 1, 0, 0, 1, 0, 0,
+	private static final byte[] uri_char_validity = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+			1, 0, 0, 1, 0, 0,
 
 			/* 64 */
 			1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 0, 1, 1, 1,
@@ -814,7 +785,7 @@ public final class SVNUtility {
 			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, };
 
 	public static boolean isHexDigit(char ch) {
-		return Character.isDigit(ch) || (Character.toUpperCase(ch) >= 'A' && Character.toUpperCase(ch) <= 'F');
+		return Character.isDigit(ch) || Character.toUpperCase(ch) >= 'A' && Character.toUpperCase(ch) <= 'F';
 	}
 
 	private static int hexValue(char ch) {
@@ -822,7 +793,7 @@ public final class SVNUtility {
 			return ch - '0';
 		}
 		ch = Character.toUpperCase(ch);
-		return (ch - 'A') + 0x0A;
+		return ch - 'A' + 0x0A;
 	}
 
 	public static String encodeURL(String url) {
@@ -832,7 +803,7 @@ public final class SVNUtility {
 		url = SVNUtility.normalizeURL(url);
 		int idx = url.startsWith("file:///") //$NON-NLS-1$
 				? "file:///".length() //$NON-NLS-1$
-				: (url.startsWith("file://") ? (url.indexOf("/", "file://".length()) + 1) : (url.indexOf("://") + 3)); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+						: url.startsWith("file://") ? url.indexOf("/", "file://".length()) + 1 : url.indexOf("://") + 3; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 		idx = url.indexOf("/", idx); //$NON-NLS-1$
 		if (idx == -1) {
 			return url;
@@ -857,7 +828,7 @@ public final class SVNUtility {
 		url = SVNUtility.normalizeURL(url);
 		int idx = url.startsWith("file:///") //$NON-NLS-1$
 				? "file:///".length() //$NON-NLS-1$
-				: (url.startsWith("file://") ? (url.indexOf("/", "file://".length()) + 1) : (url.indexOf("://") + 3)); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+						: url.startsWith("file://") ? url.indexOf("/", "file://".length()) + 1 : url.indexOf("://") + 3; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 		idx = url.indexOf("/", idx); //$NON-NLS-1$
 		if (idx == -1) {
 			return url;
@@ -876,7 +847,7 @@ public final class SVNUtility {
 	}
 
 	protected static String doEncode(String src) {
-		StringBuffer sb = null;
+		StringBuilder sb = null;
 		byte[] bytes;
 		try {
 			bytes = src.getBytes("UTF-8"); //$NON-NLS-1$
@@ -892,7 +863,7 @@ public final class SVNUtility {
 				continue;
 			}
 			if (sb == null) {
-				sb = new StringBuffer();
+				sb = new StringBuilder();
 				try {
 					sb.append(new String(bytes, 0, i, "UTF-8")); //$NON-NLS-1$
 				} catch (UnsupportedEncodingException e) {
@@ -945,27 +916,27 @@ public final class SVNUtility {
 
 		int len = url.length();
 		int st = 0;
-		while ((st < len) && (url.charAt(st) <= ' ')) {
+		while (st < len && url.charAt(st) <= ' ') {
 			st++;
 		}
 		url = url.substring(st);
 
 		String prefix = ""; //$NON-NLS-1$
-		final String[] knownPrefixes = new String[] { "http://", "https://", "svn://", "svn+ssh://", "file:///", //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$//$NON-NLS-4$//$NON-NLS-5$
+		final String[] knownPrefixes = { "http://", "https://", "svn://", "svn+ssh://", "file:///", //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$//$NON-NLS-4$//$NON-NLS-5$
 				"file://", "^/", "../", "//", "/" }; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
-		for (int i = 0; i < knownPrefixes.length; i++) {
-			if (url.startsWith(knownPrefixes[i])) {
-				prefix = knownPrefixes[i];
-				url = url.substring(knownPrefixes[i].length());
+		for (String element : knownPrefixes) {
+			if (url.startsWith(element)) {
+				prefix = element;
+				url = url.substring(element.length());
 				break;
 			}
 		}
 
 		StringTokenizer tokenizer = new StringTokenizer(PatternProvider.replaceAll(url, "([\\\\])+", "/"), "/", false); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-		StringBuffer retVal = new StringBuffer();
+		StringBuilder retVal = new StringBuilder();
 		while (tokenizer.hasMoreTokens()) {
 			String token = tokenizer.nextToken();
-			retVal.append(retVal.length() == 0 ? token : ("/" + token)); //$NON-NLS-1$
+			retVal.append(retVal.length() == 0 ? token : "/" + token); //$NON-NLS-1$
 		}
 		if (!"".equals(prefix)) { //$NON-NLS-1$
 			retVal.insert(0, prefix);
@@ -977,9 +948,7 @@ public final class SVNUtility {
 		ISVNConnector proxy = location.acquireSVNProxy();
 		try {
 			proxy.listEntries(new SVNEntryRevisionReference(SVNUtility.encodeURL(location.getUrl()), null, null),
-					SVNDepth.EMPTY, SVNEntry.Fields.NONE, ISVNConnector.Options.NONE, new ISVNEntryCallback() {
-						public void next(SVNEntry entry) {
-						}
+					SVNDepth.EMPTY, SVNEntry.Fields.NONE, ISVNConnector.Options.NONE, entry -> {
 					}, monitor);
 		} catch (Exception e) {
 			return e;
@@ -1063,8 +1032,8 @@ public final class SVNUtility {
 	}
 
 	public static boolean isIgnored(IResource resource) {
-		if (FileUtility.isNotSupervised(resource) || (resource.isDerived(IResource.CHECK_ANCESTORS)
-				&& !CoreExtensionsManager.instance().getOptionProvider().is(IOptionProvider.COMMIT_DERIVED_ENABLED))
+		if (FileUtility.isNotSupervised(resource) || resource.isDerived(IResource.CHECK_ANCESTORS)
+				&& !CoreExtensionsManager.instance().getOptionProvider().is(IOptionProvider.COMMIT_DERIVED_ENABLED)
 				|| Team.isIgnoredHint(resource) || SVNUtility.isMergeParts(resource)) {
 			return true;
 		}
@@ -1081,16 +1050,16 @@ public final class SVNUtility {
 	}
 
 	public static Map<IProject, List<IResource>> splitWorkingCopies(IResource[] resources) {
-		Map<IProject, List<IResource>> wc2Resources = new HashMap<IProject, List<IResource>>();
+		Map<IProject, List<IResource>> wc2Resources = new HashMap<>();
 
 		ISVNConnector proxy = CoreExtensionsManager.instance().getSVNConnectorFactory().createConnector();
 		try {
-			Map<File, IProject> roots = new HashMap<File, IProject>();
-			for (int i = 0; i < resources.length; i++) {
-				IProject wcRoot = resources[i].getProject();
+			Map<File, IProject> roots = new HashMap<>();
+			for (IResource element : resources) {
+				IProject wcRoot = element.getProject();
 				File tFile = FileUtility.getResourcePath(wcRoot).toFile();
 				Object[] realRoot = SVNUtility.getWCRoot(proxy, tFile, SVNUtility.getSVNInfo(tFile, proxy));
-				IProject tRoot = roots.get((File) realRoot[0]);
+				IProject tRoot = roots.get(realRoot[0]);
 				if (tRoot == null) {
 					roots.put((File) realRoot[0], tRoot = wcRoot);
 				}
@@ -1098,9 +1067,9 @@ public final class SVNUtility {
 
 				List<IResource> wcResources = wc2Resources.get(wcRoot);
 				if (wcResources == null) {
-					wc2Resources.put(wcRoot, wcResources = new ArrayList<IResource>());
+					wc2Resources.put(wcRoot, wcResources = new ArrayList<>());
 				}
-				wcResources.add(resources[i]);
+				wcResources.add(element);
 			}
 		} finally {
 			proxy.dispose();
@@ -1114,12 +1083,12 @@ public final class SVNUtility {
 
 		ISVNConnector proxy = CoreExtensionsManager.instance().getSVNConnectorFactory().createConnector();
 		try {
-			Map<File, SVNEntryInfo> file2info = new HashMap<File, SVNEntryInfo>();
-			for (int i = 0; i < files.length; i++) {
-				file2info.put(files[i], SVNUtility.getSVNInfo(files[i], proxy));
+			Map<File, SVNEntryInfo> file2info = new HashMap<>();
+			for (File file : files) {
+				file2info.put(file, SVNUtility.getSVNInfo(file, proxy));
 			}
 
-			ArrayList<File> restOfFiles = new ArrayList<File>(Arrays.asList(files));
+			ArrayList<File> restOfFiles = new ArrayList<>(Arrays.asList(files));
 			while (restOfFiles.size() > 0) {
 				File current = restOfFiles.get(0);
 				SVNEntryInfo info = file2info.get(current);
@@ -1171,8 +1140,8 @@ public final class SVNUtility {
 		}
 
 		if (oldInfo == null) {
-			SVNUtility.getSVNInfo(oldRoot, proxy, true); //check for real reason 
-			// throw a generic exception otherwise 
+			SVNUtility.getSVNInfo(oldRoot, proxy, true); //check for real reason
+			// throw a generic exception otherwise
 			String errMessage = SVNMessages.formatErrorString("Error_NonSVNPath", //$NON-NLS-1$
 					new String[] { oldRoot.getAbsolutePath() });
 			throw new RuntimeException(errMessage);
@@ -1224,14 +1193,14 @@ public final class SVNUtility {
 
 	public static Map splitRepositoryLocations(IRepositoryResource[] resources) throws Exception {
 		Map repository2Resources = new HashMap();
-		for (int i = 0; i < resources.length; i++) {
-			IRepositoryLocation location = resources[i].getRepositoryLocation();
+		for (IRepositoryResource element : resources) {
+			IRepositoryLocation location = element.getRepositoryLocation();
 
 			List tResources = (List) repository2Resources.get(location);
 			if (tResources == null) {
 				repository2Resources.put(location, tResources = new ArrayList());
 			}
-			tResources.add(resources[i]);
+			tResources.add(element);
 		}
 		return SVNUtility.combineLocationsByUUID(repository2Resources);
 	}
@@ -1239,29 +1208,29 @@ public final class SVNUtility {
 	public static Map splitRepositoryLocations(IResource[] resources) throws Exception {
 		Map repository2Resources = new HashMap();
 		SVNRemoteStorage storage = SVNRemoteStorage.instance();
-		for (int i = 0; i < resources.length; i++) {
-			IRepositoryLocation location = storage.getRepositoryLocation(resources[i]);
+		for (IResource element : resources) {
+			IRepositoryLocation location = storage.getRepositoryLocation(element);
 
 			List tResources = (List) repository2Resources.get(location);
 			if (tResources == null) {
 				repository2Resources.put(location, tResources = new ArrayList());
 			}
-			tResources.add(resources[i]);
+			tResources.add(element);
 		}
 		return SVNUtility.combineLocationsByUUID(repository2Resources);
 	}
 
 	public static Map splitRepositoryLocations(File[] files) throws Exception {
 		Map repository2Resources = new HashMap();
-		for (int i = 0; i < files.length; i++) {
-			IRepositoryResource resource = SVNFileStorage.instance().asRepositoryResource(files[i], false);
+		for (File file : files) {
+			IRepositoryResource resource = SVNFileStorage.instance().asRepositoryResource(file, false);
 			IRepositoryLocation location = resource.getRepositoryLocation();
 
 			List tResources = (List) repository2Resources.get(location);
 			if (tResources == null) {
 				repository2Resources.put(location, tResources = new ArrayList());
 			}
-			tResources.add(files[i]);
+			tResources.add(file);
 		}
 		return SVNUtility.combineLocationsByUUID(repository2Resources);
 	}
@@ -1288,32 +1257,32 @@ public final class SVNUtility {
 				return Kind.NONE;
 			}
 		}
-		String errMessage = SVNMessages.format("Error_UnrecognizedNodeKind", //$NON-NLS-1$
+		String errMessage = BaseMessages.format("Error_UnrecognizedNodeKind", //$NON-NLS-1$
 				new String[] { String.valueOf(kind), path });
 		throw new RuntimeException(errMessage);
 	}
 
 	public static IRepositoryResource[] shrinkChildNodes(IRepositoryResource[] resources) {
-		Set<IRepositoryResource> roots = new HashSet<IRepositoryResource>(Arrays.asList(resources));
-		for (int i = 0; i < resources.length; i++) {
-			if (SVNUtility.hasRoots(roots, resources[i])) {
-				roots.remove(resources[i]);
+		Set<IRepositoryResource> roots = new HashSet<>(Arrays.asList(resources));
+		for (IRepositoryResource element : resources) {
+			if (SVNUtility.hasRoots(roots, element)) {
+				roots.remove(element);
 			}
 		}
 		return roots.toArray(new IRepositoryResource[roots.size()]);
 	}
 
 	public static IRepositoryResource[] getCommonParents(IRepositoryResource[] resources) {
-		Map<IRepositoryResource, ArrayList> byRepositoryRoots = new HashMap<IRepositoryResource, ArrayList>();
-		for (int i = 0; i < resources.length; i++) {
-			IRepositoryResource root = resources[i].getRoot();
+		Map<IRepositoryResource, ArrayList> byRepositoryRoots = new HashMap<>();
+		for (IRepositoryResource element : resources) {
+			IRepositoryResource root = element.getRoot();
 			ArrayList tmp = byRepositoryRoots.get(root);
 			if (tmp == null) {
 				byRepositoryRoots.put(root, tmp = new ArrayList());
 			}
-			tmp.add(resources[i]);
+			tmp.add(element);
 		}
-		HashSet<IRepositoryResource> container = new HashSet<IRepositoryResource>();
+		HashSet<IRepositoryResource> container = new HashSet<>();
 		for (ArrayList tmp : byRepositoryRoots.values()) {
 			IRepositoryResource parent = SVNUtility
 					.getCommonParent((IRepositoryResource[]) tmp.toArray(new IRepositoryResource[tmp.size()]));
@@ -1353,7 +1322,7 @@ public final class SVNUtility {
 			SVNRevision.Number toNumber = (SVNRevision.Number) second;
 			return fromNumber.getNumber() > toNumber.getNumber()
 					? 1
-					: (fromNumber.getNumber() == toNumber.getNumber() ? 0 : -1);
+							: fromNumber.getNumber() == toNumber.getNumber() ? 0 : -1;
 		}
 		SVNRevision.Date fromDate = null;
 		SVNRevision.Date toDate = null;
@@ -1371,10 +1340,10 @@ public final class SVNUtility {
 					new SVNNullProgressMonitor());
 			toDate = SVNRevision.fromDate(entryInfo[0].lastChangedDate);
 		}
-		return fromDate.getDate() > toDate.getDate() ? 1 : (fromDate.getDate() == toDate.getDate() ? 0 : -1);
+		return fromDate.getDate() > toDate.getDate() ? 1 : fromDate.getDate() == toDate.getDate() ? 0 : -1;
 	}
 
-	private static final Pattern MERGE_PART = Pattern.compile("r\\d+"); //$NON-NLS-1$ 
+	private static final Pattern MERGE_PART = Pattern.compile("r\\d+"); //$NON-NLS-1$
 
 	private static boolean isMergeParts(IResource resource) {
 		String ext = resource.getFileExtension();
@@ -1383,8 +1352,8 @@ public final class SVNUtility {
 
 	private static Map combineLocationsByUUID(Map repository2Resources) throws Exception {
 		Map locationUtility2Resources = new HashMap();
-		for (Iterator it = repository2Resources.entrySet().iterator(); it.hasNext();) {
-			Map.Entry entry = (Map.Entry) it.next();
+		for (Object element : repository2Resources.entrySet()) {
+			Map.Entry entry = (Map.Entry) element;
 			IRepositoryLocation location = (IRepositoryLocation) entry.getKey();
 			List tResources = (List) entry.getValue();
 			RepositoryLocationUtility locationUtility = new RepositoryLocationUtility(location);
@@ -1395,8 +1364,8 @@ public final class SVNUtility {
 			tResources2.addAll(tResources);
 		}
 		repository2Resources.clear();
-		for (Iterator it = locationUtility2Resources.entrySet().iterator(); it.hasNext();) {
-			Map.Entry entry = (Map.Entry) it.next();
+		for (Object element : locationUtility2Resources.entrySet()) {
+			Map.Entry entry = (Map.Entry) element;
 			RepositoryLocationUtility locationUtility = (RepositoryLocationUtility) entry.getKey();
 			repository2Resources.put(locationUtility.location, entry.getValue());
 		}
@@ -1420,8 +1389,8 @@ public final class SVNUtility {
 		while (base != null) { // can be null for resources from different repositories
 			int startsCnt = 0;
 			IPath baseUrl = SVNUtility.createPathForSVNUrl(base.getUrl());
-			for (int i = 0; i < resources.length; i++) {
-				if (baseUrl.isPrefixOf(SVNUtility.createPathForSVNUrl(resources[i].getUrl()))) {
+			for (IRepositoryResource element : resources) {
+				if (baseUrl.isPrefixOf(SVNUtility.createPathForSVNUrl(element.getUrl()))) {
 					startsCnt++;
 				}
 			}
@@ -1446,7 +1415,7 @@ public final class SVNUtility {
 			retVal = root.asRepositoryContainer(rootName, false);
 		} else if (rootKind == IRepositoryRoot.KIND_LOCATION_ROOT) {
 			IRepositoryRoot tmp = (IRepositoryRoot) parent.getRoot();
-			if (root.getName().equals(location.getTrunkLocation()) || // the actual reason for bug #385530 
+			if (root.getName().equals(location.getTrunkLocation()) || // the actual reason for bug #385530
 					root.getName().equals(location.getBranchesLocation())
 					|| root.getName().equals(location.getTagsLocation())) {
 				retVal = parent.asRepositoryContainer(rootName, false);
@@ -1473,15 +1442,15 @@ public final class SVNUtility {
 	 * @return projects which contain modifications on tag
 	 */
 	public static IProject[] getTagOperatedProjects(IResource[] resources) {
-		Set<IProject> operatedProjects = new HashSet<IProject>();
-		for (int i = 0; i < resources.length; i++) {
-			IProject project = resources[i].getProject();
+		Set<IProject> operatedProjects = new HashSet<>();
+		for (IResource element : resources) {
+			IProject project = element.getProject();
 			if (project != null && !operatedProjects.contains(project)) {
 				SVNTeamProvider provider = (SVNTeamProvider) RepositoryProvider.getProvider(project,
 						SVNTeamPlugin.NATURE_ID);
 				if (provider != null && provider.isVerifyTagOnCommit()
-						&& ((IRepositoryRoot) SVNRemoteStorage.instance().asRepositoryResource(resources[i]).getRoot())
-								.getKind() == IRepositoryRoot.KIND_TAGS) {
+						&& ((IRepositoryRoot) SVNRemoteStorage.instance().asRepositoryResource(element).getRoot())
+						.getKind() == IRepositoryRoot.KIND_TAGS) {
 					operatedProjects.add(project);
 				}
 			}
@@ -1534,7 +1503,6 @@ public final class SVNUtility {
 
 		public SVNExternalPropertyData(String localPath, String url, String pegRevision, String revision,
 				boolean isNewFormat) {
-			super();
 			this.isNewFormat = isNewFormat;
 			this.localPath = localPath;
 			this.pegRevision = pegRevision;
@@ -1553,8 +1521,8 @@ public final class SVNUtility {
 			}
 
 			//process that local path can be enclosed in quotes or contain the \ (backslash) character for escaping characters
-			List<String> parts = new ArrayList<String>();
-			StringBuffer tmpString = new StringBuffer();
+			List<String> parts = new ArrayList<>();
+			StringBuilder tmpString = new StringBuilder();
 			boolean hasQuote = false;
 			for (int i = 0; i < str.length(); i++) {
 				char ch = str.charAt(i);
@@ -1598,96 +1566,97 @@ public final class SVNUtility {
 				return new SVNExternalPropertyData[0];
 			}
 
-			List<SVNExternalPropertyData> resList = new ArrayList<SVNExternalPropertyData>();
+			List<SVNExternalPropertyData> resList = new ArrayList<>();
 
 			String[] externals = property.trim().split("[\\n|\\r\\n]+"); // it seems different clients have different behaviours wrt trailing whitespace.. so trim() to be safe //$NON-NLS-1$
-			for (int i = 0; i < externals.length; i++) {
-				if (externals[i].startsWith("#")) { // commented externals, see bug #316114
+			for (String external : externals) {
+				if (external.startsWith("#")) { // commented externals, see bug #316114
 					continue;
 				}
 				boolean isCheckSpacesInLocalPath = CoreExtensionsManager.instance()
 						.getSVNConnectorFactory()
 						.getSVNAPIVersion() >= ISVNConnectorFactory.APICompatibility.SVNAPI_1_6_x;
-				String[] parts = SVNExternalPropertyData.splitExternalOnParts(externals[i], isCheckSpacesInLocalPath);
-				// 2 - name + URL
-				// 3 - name + -rRevision + URL
-				// 4 - name + -r + Revision + URL
-				//or in SVN 1.5 format
-				// 2 - URL@peg + name
-				// 3 - -rRevision + URL@peg + name
-				// 4 - -r + Revision + URL@peg + name
-				if (parts.length < 2 || parts.length > 4) {
-					throw new UnreportableException("Malformed external, " + parts.length + ", " + externals[i]); //$NON-NLS-1$//$NON-NLS-2$
-				}
+						String[] parts = SVNExternalPropertyData.splitExternalOnParts(external, isCheckSpacesInLocalPath);
+						// 2 - name + URL
+						// 3 - name + -rRevision + URL
+						// 4 - name + -r + Revision + URL
+						//or in SVN 1.5 format
+						// 2 - URL@peg + name
+						// 3 - -rRevision + URL@peg + name
+						// 4 - -r + Revision + URL@peg + name
+						if (parts.length < 2 || parts.length > 4) {
+							throw new UnreportableException("Malformed external, " + parts.length + ", " + external); //$NON-NLS-1$//$NON-NLS-2$
+						}
 
-				String name = null;
-				String url = null;
-				String revision = null;
-				String pegRevision = null;
-				boolean isNewFormat = false;
+						String name = null;
+						String url = null;
+						String revision = null;
+						String pegRevision = null;
+						boolean isNewFormat = false;
 
-				if (SVNUtility.isValidSVNURL(parts[parts.length - 1])) {
-					isNewFormat = false;
-					name = parts[0];
+						if (SVNUtility.isValidSVNURL(parts[parts.length - 1])) {
+							isNewFormat = false;
+							name = parts[0];
 
-					url = parts[1];
-					if (parts.length == 4) {
-						revision = parts[2];
-						url = parts[3];
-					} else if (parts.length == 3) {
-						revision = parts[1].substring(2);
-						url = parts[2];
-					}
-				} else {
-					isNewFormat = true;
-					name = parts[parts.length - 1];
+							url = parts[1];
+							if (parts.length == 4) {
+								revision = parts[2];
+								url = parts[3];
+							} else if (parts.length == 3) {
+								revision = parts[1].substring(2);
+								url = parts[2];
+							}
+						} else {
+							isNewFormat = true;
+							name = parts[parts.length - 1];
 
-					url = parts[0];
-					if (parts.length == 4) {
-						revision = parts[1];
-						url = parts[2];
-					} else if (parts.length == 3) {
-						revision = parts[0].substring(2);
-						url = parts[1];
-					}
+							url = parts[0];
+							if (parts.length == 4) {
+								revision = parts[1];
+								url = parts[2];
+							} else if (parts.length == 3) {
+								revision = parts[0].substring(2);
+								url = parts[1];
+							}
 
-					int idx = url.lastIndexOf('@');
-					if (idx != -1) {
-						pegRevision = url.substring(idx + 1);
-						url = url.substring(0, idx);
-					}
-				}
+							int idx = url.lastIndexOf('@');
+							if (idx != -1) {
+								pegRevision = url.substring(idx + 1);
+								url = url.substring(0, idx);
+							}
+						}
 
-				SVNExternalPropertyData data = new SVNExternalPropertyData(name, url, pegRevision, revision,
-						isNewFormat);
-				resList.add(data);
+						SVNExternalPropertyData data = new SVNExternalPropertyData(name, url, pegRevision, revision,
+								isNewFormat);
+						resList.add(data);
 			}
 			return resList.toArray(new SVNExternalPropertyData[0]);
 		}
 
+		@Override
 		public String toString() {
 			String localPath = this.localPath;
 			if (localPath.contains(" ")) { //$NON-NLS-1$
 				localPath = "\"" + localPath + "\""; //$NON-NLS-1$ //$NON-NLS-2$
 			}
-			StringBuffer res = new StringBuffer();
-			if (this.isNewFormat) {
+			StringBuilder res = new StringBuilder();
+			if (isNewFormat) {
 				//Example: -r12 http://svn.example.com/skin-maker@21 third-party/skins/toolkit
-				if (this.revision != null) {
-					res.append("-r").append(this.revision).append("\t"); //$NON-NLS-1$ //$NON-NLS-2$
+				if (revision != null) {
+					res.append("-r").append(revision).append("\t"); //$NON-NLS-1$ //$NON-NLS-2$
 				}
-				res.append(this.url);
-				if (this.pegRevision != null) {
-					res.append("@").append(this.pegRevision); //$NON-NLS-1$
+				res.append(url);
+				if (pegRevision != null) {
+					res.append("@").append(pegRevision); //$NON-NLS-1$
 				}
 				res.append("\t").append(localPath); //$NON-NLS-1$
 			} else {
 				//Example: third-party/skins -r148 http://svn.example.com/skinproj
 				res.append(localPath).append("\t"); //$NON-NLS-1$
-				if (this.revision != null) {
-					res.append("-r").append(this.revision).append("\t"); //$NON-NLS-1$ //$NON-NLS-2$
+				if (revision != null) {
+					res.append("-r").append(revision).append("\t"); //$NON-NLS-1$ //$NON-NLS-2$
 				}
-				res.append(this.url);
+				res.append(url);
 			}
 			return res.toString();
 		}

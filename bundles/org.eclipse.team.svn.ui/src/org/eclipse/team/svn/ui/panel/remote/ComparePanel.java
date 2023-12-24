@@ -46,16 +46,17 @@ public class ComparePanel extends AbstractRepositoryResourceSelectionPanel {
 		super(baseResource, SVNRevision.INVALID_REVISION_NUMBER, SVNUIMessages.ComparePanel_Title,
 				SVNUIMessages.ComparePanel_Description, "compareUrl", SVNUIMessages.ComparePanel_Selection_Title, //$NON-NLS-1$
 				SVNUIMessages.ComparePanel_Selection_Description, RepositoryResourceSelectionComposite.TEXT_BASE);
-		this.defaultMessage = SVNUIMessages.ComparePanel_Message;
+		defaultMessage = SVNUIMessages.ComparePanel_Message;
 	}
 
 	public ComparePanel(IRepositoryResource baseResource, long revision) {
 		super(baseResource, revision, SVNUIMessages.ComparePanel_Title, SVNUIMessages.ComparePanel_Description,
 				"compareUrl", SVNUIMessages.ComparePanel_Selection_Title, //$NON-NLS-1$
 				SVNUIMessages.ComparePanel_Selection_Description, RepositoryResourceSelectionComposite.TEXT_BASE);
-		this.defaultMessage = SVNUIMessages.ComparePanel_Message;
+		defaultMessage = SVNUIMessages.ComparePanel_Message;
 	}
 
+	@Override
 	public String getHelpId() {
 		return "org.eclipse.team.svn.help.remote_compareDialogContext"; //$NON-NLS-1$
 	}
@@ -68,30 +69,31 @@ public class ComparePanel extends AbstractRepositoryResourceSelectionPanel {
 		super.createControlsImpl(parent);
 
 		GridData data = new GridData();
-		this.ignoreAncestryButton = new Button(parent, SWT.CHECK);
-		this.ignoreAncestryButton.setLayoutData(data);
-		this.ignoreAncestryButton.setText(SVNUIMessages.MergePanel_Button_IgnoreAncestry);
-		this.ignoreHistory = new InputHistory("ignoreAncestry", InputHistory.TYPE_BOOLEAN, //$NON-NLS-1$
-				(this.options & ISVNConnector.Options.IGNORE_ANCESTRY) != 0);
-		this.ignoreAncestryButton.setSelection((Boolean) this.ignoreHistory.getValue());
+		ignoreAncestryButton = new Button(parent, SWT.CHECK);
+		ignoreAncestryButton.setLayoutData(data);
+		ignoreAncestryButton.setText(SVNUIMessages.MergePanel_Button_IgnoreAncestry);
+		ignoreHistory = new InputHistory("ignoreAncestry", InputHistory.TYPE_BOOLEAN, //$NON-NLS-1$
+				(options & ISVNConnector.Options.IGNORE_ANCESTRY) != 0);
+		ignoreAncestryButton.setSelection((Boolean) ignoreHistory.getValue());
 
-		this.diffFormatComposite = new DiffFormatComposite(parent, this);
+		diffFormatComposite = new DiffFormatComposite(parent, this);
 	}
 
 	public String getDiffFile() {
-		return this.diffFormatComposite.getDiffFile();
+		return diffFormatComposite.getDiffFile();
 	}
 
 	public long getDiffOptions() {
-		return this.options;
+		return options;
 	}
 
+	@Override
 	protected void saveChangesImpl() {
 		super.saveChangesImpl();
-		this.options |= this.ignoreAncestryButton.getSelection()
+		options |= ignoreAncestryButton.getSelection()
 				? ISVNConnector.Options.IGNORE_ANCESTRY
 				: ISVNConnector.Options.NONE;
-		this.ignoreHistory.setValue(this.ignoreAncestryButton.getSelection());
+		ignoreHistory.setValue(ignoreAncestryButton.getSelection());
 	}
 
 }

@@ -40,10 +40,11 @@ public class ScanLocksModelAction extends AbstractSynchronizeLogicalModelAction 
 		super(text, configuration);
 	}
 
+	@Override
 	protected boolean updateSelection(IStructuredSelection selection) {
 		if (super.updateSelection(selection)) {
 			if (selection.size() == 1) {
-				IResource resource = this.getSelectedResource();
+				IResource resource = getSelectedResource();
 				ILocalResource local = SVNRemoteStorage.instance().asLocalResource(resource);
 				if (local != null) {
 					return IStateFilter.SF_ONREPOSITORY.accept(local);
@@ -53,8 +54,9 @@ public class ScanLocksModelAction extends AbstractSynchronizeLogicalModelAction 
 		return false;
 	}
 
+	@Override
 	protected IActionOperation getOperation() {
-		IResource resource = this.getSelectedResource();
+		IResource resource = getSelectedResource();
 		IWorkbenchPage page = UIMonitorUtility.getActivePage();
 		if (page != null) {
 			try {

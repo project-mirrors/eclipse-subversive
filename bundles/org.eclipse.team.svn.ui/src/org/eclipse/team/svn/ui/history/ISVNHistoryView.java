@@ -24,40 +24,40 @@ import org.eclipse.team.ui.history.HistoryPage;
  * @author Alexander Gurov
  */
 public interface ISVNHistoryView extends ISVNHistoryViewInfo {
-	public static final int REFRESH_VIEW = 0;
+	int REFRESH_VIEW = 0;
 
-	public static final int REFRESH_LOCAL = 1;
+	int REFRESH_LOCAL = 1;
 
-	public static final int REFRESH_REMOTE = 2;
+	int REFRESH_REMOTE = 2;
 
-	public static final int REFRESH_ALL = 3;
+	int REFRESH_ALL = 3;
 
-	public static final int PAGING_ENABLED = 0x01;
+	int PAGING_ENABLED = 0x01;
 
-	public static final int COMPARE_MODE = 0x02;
+	int COMPARE_MODE = 0x02;
 
-	public static final int HIDE_UNRELATED = 0x04;
+	int HIDE_UNRELATED = 0x04;
 
-	public static final int STOP_ON_COPY = 0x08;
+	int STOP_ON_COPY = 0x08;
 
-	public static final int GROUP_BY_DATE = 0x10;
+	int GROUP_BY_DATE = 0x10;
 	/* 0x20, 0x40 and 0x80 are reserved for LogMessagesComposite */
 
-	public HistoryPage getHistoryPage();
+	HistoryPage getHistoryPage();
 
-	public IResource getCompareWith();
+	IResource getCompareWith();
 
-	public SVNLogEntry[] getFullRemoteHistory();
+	SVNLogEntry[] getFullRemoteHistory();
 
-	public boolean isAllRemoteHistoryFetched();
+	boolean isAllRemoteHistoryFetched();
 
-	public void clearFilter();
+	void clearFilter();
 
-	public void setFilter();
+	void setFilter();
 
-	public void refresh(int refreshType);
+	void refresh(int refreshType);
 
-	public boolean isFilterEnabled();
+	boolean isFilterEnabled();
 
-	public int getOptions();
+	int getOptions();
 }

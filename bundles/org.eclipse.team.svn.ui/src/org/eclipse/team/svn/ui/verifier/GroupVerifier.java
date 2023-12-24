@@ -29,27 +29,27 @@ public class GroupVerifier extends CompositeVerifier {
 	protected Map<AbstractVerifier, Control> componentsMap;
 
 	public GroupVerifier() {
-		super();
-		this.componentsMap = new LinkedHashMap<AbstractVerifier, Control>();
+		componentsMap = new LinkedHashMap<>();
 	}
 
 	public boolean verify() {
-		this.hasWarning = false;
-		for (Iterator<?> it = this.verifiers.iterator(); it.hasNext();) {
+		hasWarning = false;
+		for (Iterator<?> it = verifiers.iterator(); it.hasNext();) {
 			AbstractVerifier iVer = (AbstractVerifier) it.next();
-			if (!iVer.verify(this.componentsMap.get(iVer))) {
+			if (!iVer.verify(componentsMap.get(iVer))) {
 				return false;
 			}
 		}
-		if (!this.hasWarning) {
-			this.fireOk();
+		if (!hasWarning) {
+			fireOk();
 		}
 		return true;
 	}
 
+	@Override
 	public boolean verify(Control input) {
 		// could be used as workaround for situations when control validation is required in any case
-		for (Map.Entry<AbstractVerifier, Control> entry : this.componentsMap.entrySet()) {
+		for (Map.Entry<AbstractVerifier, Control> entry : componentsMap.entrySet()) {
 			if (entry.getValue().equals(input)) {
 				return entry.getKey().verify(input);
 			}
@@ -59,12 +59,11 @@ public class GroupVerifier extends CompositeVerifier {
 
 	public void add(Control cmp, AbstractVerifier verifier) {
 		super.add(verifier);
-		this.componentsMap.put(verifier, cmp);
+		componentsMap.put(verifier, cmp);
 	}
 
 	public void remove(Control cmp) {
-		for (Iterator<Map.Entry<AbstractVerifier, Control>> it = this.componentsMap.entrySet().iterator(); it
-				.hasNext();) {
+		for (Iterator<Map.Entry<AbstractVerifier, Control>> it = componentsMap.entrySet().iterator(); it.hasNext();) {
 			Map.Entry<AbstractVerifier, Control> entry = it.next();
 			if (cmp == entry.getValue()) {
 				AbstractVerifier verifier = entry.getKey();
@@ -75,13 +74,14 @@ public class GroupVerifier extends CompositeVerifier {
 		}
 	}
 
+	@Override
 	public void removeAll() {
 		super.removeAll();
-		this.componentsMap.clear();
+		componentsMap.clear();
 	}
 
 	public Iterator<Control> getComponents() {
-		return this.componentsMap.values().iterator();
+		return componentsMap.values().iterator();
 	}
 
 }

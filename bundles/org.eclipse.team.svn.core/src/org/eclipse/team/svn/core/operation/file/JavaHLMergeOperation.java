@@ -55,23 +55,23 @@ public class JavaHLMergeOperation extends AbstractFileOperation {
 		this.notify = notify;
 	}
 
+	@Override
 	protected void runImpl(IProgressMonitor monitor) throws Exception {
-		File file = this.operableData()[0];
+		File file = operableData()[0];
 
-		IRepositoryLocation location = this.from1.getRepositoryLocation();
+		IRepositoryLocation location = from1.getRepositoryLocation();
 		ISVNConnector proxy = location.acquireSVNProxy();
 
-		if (this.notify != null) {
-			SVNUtility.addSVNNotifyListener(proxy, this.notify);
+		if (notify != null) {
+			SVNUtility.addSVNNotifyListener(proxy, notify);
 		}
 		try {
 			proxy.mergeTwo(
-					SVNUtility.getEntryRevisionReference(this.from1), SVNUtility.getEntryRevisionReference(this.from2),
-					file.getAbsolutePath(), SVNDepth.INFINITY, this.options,
-					new SVNProgressMonitor(this, monitor, null));
+					SVNUtility.getEntryRevisionReference(from1), SVNUtility.getEntryRevisionReference(from2),
+					file.getAbsolutePath(), SVNDepth.INFINITY, options, new SVNProgressMonitor(this, monitor, null));
 		} finally {
-			if (this.notify != null) {
-				SVNUtility.removeSVNNotifyListener(proxy, this.notify);
+			if (notify != null) {
+				SVNUtility.removeSVNNotifyListener(proxy, notify);
 			}
 			location.releaseSVNProxy(proxy);
 		}

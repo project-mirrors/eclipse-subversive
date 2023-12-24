@@ -45,9 +45,9 @@ public class SVNTeamProjectSetCapability extends ProjectSetCapability {
 	private static final Pattern SINGLE_SCHEME_URL_PATTERN = Pattern.compile("^.*:(\\w[\\w+-_]*://.*)$"); //$NON-NLS-1$
 
 	public SVNTeamProjectSetCapability() {
-		super();
 	}
 
+	@Override
 	public String[] asReference(IProject[] projects, ProjectSetSerializationContext context, IProgressMonitor monitor)
 			throws TeamException {
 		monitor.beginTask(SVNMessages.Operation_ExportProjectSet, projects.length);
@@ -63,6 +63,7 @@ public class SVNTeamProjectSetCapability extends ProjectSetCapability {
 		}
 	}
 
+	@Override
 	public String asReference(URI uri, String projectName) {
 		String resourceUrl = SVNTeamProjectSetCapability.getSingleSchemeUrl(uri);
 		return SVNTeamProjectSetCapability.DEFAULT_HANDLER.asReference(resourceUrl, projectName);
@@ -76,6 +77,7 @@ public class SVNTeamProjectSetCapability extends ProjectSetCapability {
 		return m.replaceAll("$1"); //$NON-NLS-1$
 	}
 
+	@Override
 	public IProject[] addToWorkspace(String[] referenceStrings, ProjectSetSerializationContext context,
 			IProgressMonitor monitor) throws TeamException {
 		if (referenceStrings.length == 0) {
@@ -87,26 +89,26 @@ public class SVNTeamProjectSetCapability extends ProjectSetCapability {
 		}
 
 		IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
-		Map<IProject, String> project2reference = new HashMap<IProject, String>();
-		for (int i = 0; i < referenceStrings.length; i++) {
-			String name = handler.getProjectNameForReference(referenceStrings[i]);
+		Map<IProject, String> project2reference = new HashMap<>();
+		for (String referenceString : referenceStrings) {
+			String name = handler.getProjectNameForReference(referenceString);
 			if (name != null) {
-				project2reference.put(root.getProject(name), referenceStrings[i]);
+				project2reference.put(root.getProject(name), referenceString);
 			}
 		}
 
 		Set<IProject> allProjects = project2reference.keySet();
-		IProject[] projects = this.confirmOverwrite(context, allProjects.toArray(new IProject[allProjects.size()]));
+		IProject[] projects = confirmOverwrite(context, allProjects.toArray(new IProject[allProjects.size()]));
 
 		if (projects != null && projects.length > 0) {
 			final CompositeOperation op = new CompositeOperation("Operation_ImportProjectSet", SVNMessages.class); //$NON-NLS-1$
 
 			op.add(new SaveRepositoryLocationsOperation());
 
-			ArrayList<IProject> retVal = new ArrayList<IProject>();
-			for (int i = 0; i < projects.length; i++) {
-				String fullReference = project2reference.get(projects[i]);
-				IProject project = handler.configureCheckoutOperation(op, projects[i], fullReference);
+			ArrayList<IProject> retVal = new ArrayList<>();
+			for (IProject project2 : projects) {
+				String fullReference = project2reference.get(project2);
+				IProject project = handler.configureCheckoutOperation(op, project2, fullReference);
 				if (project != null) {
 					retVal.add(project);
 				}

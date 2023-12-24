@@ -23,14 +23,17 @@ import org.eclipse.jface.viewers.Viewer;
  * @author Alexander Gurov
  */
 public class ArrayStructuredContentProvider implements IStructuredContentProvider {
+	@Override
 	public Object[] getElements(Object inputElement) {
 		return (Object[]) inputElement;
 	}
 
+	@Override
 	public void dispose() {
 
 	}
 
+	@Override
 	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 
 	}

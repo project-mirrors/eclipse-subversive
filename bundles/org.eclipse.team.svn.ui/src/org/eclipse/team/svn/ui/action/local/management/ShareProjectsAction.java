@@ -32,21 +32,21 @@ import org.eclipse.team.svn.ui.wizard.ShareProjectWizard;
  */
 public class ShareProjectsAction extends AbstractLocalTeamAction {
 	public ShareProjectsAction() {
-		super();
 	}
 
+	@Override
 	public void runImpl(IAction action) {
-		IProject[] projects = this.getProjectsToShare();
+		IProject[] projects = getProjectsToShare();
 
 		ShareProjectWizard wizard = new ShareProjectWizard();
 		wizard.init(projects);
-		WizardDialog dialog = new WizardDialog(this.getShell(), wizard);
+		WizardDialog dialog = new WizardDialog(getShell(), wizard);
 		dialog.setPageSize(500, 400);
 		dialog.open();
 	}
 
 	protected IProject[] getProjectsToShare() {
-		HashSet<IProject> projects = new HashSet<IProject>(Arrays.asList(this.getSelectedProjects()));
+		HashSet<IProject> projects = new HashSet<>(Arrays.asList(getSelectedProjects()));
 		for (Iterator<IProject> it = projects.iterator(); it.hasNext();) {
 			IProject project = it.next();
 			if (!project.isAccessible() || RepositoryProvider.getProvider(project) != null) {
@@ -56,10 +56,11 @@ public class ShareProjectsAction extends AbstractLocalTeamAction {
 		return projects.toArray(new IProject[projects.size()]);
 	}
 
+	@Override
 	public boolean isEnabled() {
-		IProject[] projects = this.getSelectedProjects();
-		for (int i = 0; i < projects.length; i++) {
-			if (projects[i].isAccessible() && RepositoryProvider.getProvider(projects[i]) == null) {
+		IProject[] projects = getSelectedProjects();
+		for (IProject project : projects) {
+			if (project.isAccessible() && RepositoryProvider.getProvider(project) == null) {
 				return true;
 			}
 		}

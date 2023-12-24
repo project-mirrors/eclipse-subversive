@@ -31,23 +31,24 @@ import org.eclipse.ui.IWorkbenchPage;
 public class ShowAnnotationAction extends AbstractWorkingCopyAction {
 
 	public ShowAnnotationAction() {
-		super();
 	}
 
+	@Override
 	public void runImpl(IAction action) {
 		IResource resource = this.getSelectedResources(IStateFilter.SF_ONREPOSITORY)[0];
-		IWorkbenchPage page = this.getTargetPage();
+		IWorkbenchPage page = getTargetPage();
 		// could be called by keyboard actions for any resource, or there could be no page to show annotation in
 		if (resource.getType() == IResource.FILE && page != null) {
-			IActionOperation op = new BuiltInAnnotate().getAnnotateOperation(page, (IFile) resource, this.getShell());
+			IActionOperation op = new BuiltInAnnotate().getAnnotateOperation(page, (IFile) resource, getShell());
 			if (op != null) {
-				this.runScheduled(op);
+				runScheduled(op);
 			}
 		}
 	}
 
+	@Override
 	public boolean isEnabled() {
-		return this.getSelectedResources().length == 1 && this.checkForResourcesPresence(IStateFilter.SF_ONREPOSITORY);
+		return this.getSelectedResources().length == 1 && checkForResourcesPresence(IStateFilter.SF_ONREPOSITORY);
 	}
 
 }

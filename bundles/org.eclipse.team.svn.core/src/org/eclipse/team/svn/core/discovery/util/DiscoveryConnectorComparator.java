@@ -57,6 +57,7 @@ public class DiscoveryConnectorComparator implements Comparator<DiscoveryConnect
 		return -1;
 	}
 
+	@Override
 	public int compare(DiscoveryConnector o1, DiscoveryConnector o2) {
 		if (o1.getCategory() != category || o2.getCategory() != category) {
 			throw new IllegalArgumentException();

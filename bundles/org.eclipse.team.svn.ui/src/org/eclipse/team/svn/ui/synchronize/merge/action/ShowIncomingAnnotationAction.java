@@ -39,10 +39,12 @@ public class ShowIncomingAnnotationAction extends AbstractSynchronizeModelAction
 		super(text, configuration);
 	}
 
+	@Override
 	protected boolean needsToSaveDirtyEditors() {
 		return false;
 	}
 
+	@Override
 	protected boolean updateSelection(IStructuredSelection selection) {
 		super.updateSelection(selection);
 		if (selection.size() == 1 && selection.getFirstElement() instanceof SyncInfoModelElement) {
@@ -58,8 +60,9 @@ public class ShowIncomingAnnotationAction extends AbstractSynchronizeModelAction
 		return false;
 	}
 
+	@Override
 	protected IActionOperation getOperation(ISynchronizePageConfiguration configuration, IDiffElement[] elements) {
-		AbstractSVNSyncInfo syncInfo = this.getSelectedSVNSyncInfo();
+		AbstractSVNSyncInfo syncInfo = getSelectedSVNSyncInfo();
 		if (syncInfo instanceof IMergeSyncInfo) {
 			IResourceChange change = ((IMergeSyncInfo) syncInfo).getRemoteResource();
 			return new RemoteShowAnnotationOperation(change.getOriginator());

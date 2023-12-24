@@ -15,7 +15,6 @@
 package org.eclipse.team.svn.ui.repository.model;
 
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.HashMap;
 
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -35,57 +34,61 @@ public class RepositoriesRoot extends RepositoryFictiveNode implements IParentTr
 
 	protected boolean softRefresh;
 
+	@Override
 	public Object getData() {
 		return null;
 	}
 
+	@Override
 	public void refresh() {
-		this.children = null;
+		children = null;
 	}
 
 	public void softRefresh() {
-		this.softRefresh = true;
+		softRefresh = true;
 	}
 
+	@Override
 	public String getLabel(Object o) {
 		return null;
 	}
 
+	@Override
 	public boolean hasChildren() {
 		return true;
 	}
 
+	@Override
 	public Object[] getChildren(Object o) {
-		if (this.children == null || this.softRefresh) {
-			HashMap<IRepositoryLocation, RepositoryLocation> oldLocations = new HashMap<IRepositoryLocation, RepositoryLocation>();
-			if (this.children != null) {
-				for (int i = 0; i < this.children.length; i++) {
-					oldLocations.put(this.children[i].getRepositoryLocation(), this.children[i]);
+		if (children == null || softRefresh) {
+			HashMap<IRepositoryLocation, RepositoryLocation> oldLocations = new HashMap<>();
+			if (children != null) {
+				for (RepositoryLocation child : children) {
+					oldLocations.put(child.getRepositoryLocation(), child);
 				}
 			}
 
 			IRepositoryLocation[] locations = SVNRemoteStorage.instance().getRepositoryLocations();
-			Arrays.sort(locations, new Comparator<IRepositoryLocation>() {
-				public int compare(IRepositoryLocation first, IRepositoryLocation second) {
-					IPreferenceStore store = SVNTeamUIPlugin.instance().getPreferenceStore();
-					if (SVNTeamPreferences.getBehaviourBoolean(store,
-							SVNTeamPreferences.BEHAVIOUR_CASE_INSENSITIVE_TABLE_SORTING_NAME)) {
-						return first.getLabel().compareToIgnoreCase(second.getLabel());
-					}
-					return first.getLabel().compareTo(second.getLabel());
+			Arrays.sort(locations, (first, second) -> {
+				IPreferenceStore store = SVNTeamUIPlugin.instance().getPreferenceStore();
+				if (SVNTeamPreferences.getBehaviourBoolean(store,
+						SVNTeamPreferences.BEHAVIOUR_CASE_INSENSITIVE_TABLE_SORTING_NAME)) {
+					return first.getLabel().compareToIgnoreCase(second.getLabel());
 				}
+				return first.getLabel().compareTo(second.getLabel());
 			});
-			this.children = new RepositoryLocation[locations.length];
+			children = new RepositoryLocation[locations.length];
 			for (int i = 0; i < locations.length; i++) {
-				this.children[i] = oldLocations.get(locations[i]);
-				if (this.children[i] == null) {
-					this.children[i] = new RepositoryLocation(locations[i]);
+				children[i] = oldLocations.get(locations[i]);
+				if (children[i] == null) {
+					children[i] = new RepositoryLocation(locations[i]);
 				}
 			}
 		}
-		return this.children;
+		return children;
 	}
 
+	@Override
 	public ImageDescriptor getImageDescriptor(Object object) {
 		return null;
 	}

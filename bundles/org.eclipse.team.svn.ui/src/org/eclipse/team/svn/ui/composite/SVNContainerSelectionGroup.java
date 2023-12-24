@@ -41,6 +41,7 @@ public class SVNContainerSelectionGroup extends ContainerSelectionGroup {
 		super(parent, listener, false, "", false); //$NON-NLS-1$
 	}
 
+	@Override
 	public void createContents(String message, int heightHint, int widthHint) {
 		GridLayout layout = new GridLayout();
 		layout.marginWidth = 0;
@@ -77,6 +78,7 @@ public class SVNContainerSelectionGroup extends ContainerSelectionGroup {
 			SVNContainerSelectionVerifier.DESTINATION_DIRECTORY_IS_OBSTRUCTED = SVNUIMessages.SVNContainerSelectionGroup_Verifier_Obstructed;
 		}
 
+		@Override
 		protected String getErrorMessageImpl(Control input) {
 			SVNContainerSelectionGroup control = (SVNContainerSelectionGroup) input;
 			if (control.getContainerFullPath() == null) {
@@ -87,9 +89,7 @@ public class SVNContainerSelectionGroup extends ContainerSelectionGroup {
 					.findMember(control.getContainerFullPath());
 			ILocalResource localDest = SVNRemoteStorage.instance().asLocalResource(destinationRoot);
 			if (IStateFilter.SF_INTERNAL_INVALID.accept(localDest)) {
-				return this.isNonSVNCheckDisabled()
-						? SVNContainerSelectionVerifier.DESTINATION_IS_DETACHED_FROM_SVN
-						: null;
+				return isNonSVNCheckDisabled() ? SVNContainerSelectionVerifier.DESTINATION_IS_DETACHED_FROM_SVN : null;
 			}
 			if (IStateFilter.SF_DELETED.accept(localDest)) {
 				return SVNContainerSelectionVerifier.DESTINATION_DIRECTORY_IS_DELETED;
@@ -100,6 +100,7 @@ public class SVNContainerSelectionGroup extends ContainerSelectionGroup {
 			return null;
 		}
 
+		@Override
 		protected String getWarningMessageImpl(Control input) {
 			return null;
 		}
@@ -114,10 +115,10 @@ public class SVNContainerSelectionGroup extends ContainerSelectionGroup {
 		protected static String WARNING_MESSAGE;
 
 		public SVNContainerCheckOutSelectionVerifier() {
-			super();
 			SVNContainerCheckOutSelectionVerifier.WARNING_MESSAGE = SVNUIMessages.SVNContainerSelectionGroup_Verifier_NonSVNWarning;
 		}
 
+		@Override
 		protected String getWarningMessageImpl(Control input) {
 			SVNContainerSelectionGroup control = (SVNContainerSelectionGroup) input;
 			IResource destinationRoot = ResourcesPlugin.getWorkspace()
@@ -129,6 +130,7 @@ public class SVNContainerSelectionGroup extends ContainerSelectionGroup {
 			return null;
 		}
 
+		@Override
 		protected boolean isNonSVNCheckDisabled() {
 			return false;
 		}

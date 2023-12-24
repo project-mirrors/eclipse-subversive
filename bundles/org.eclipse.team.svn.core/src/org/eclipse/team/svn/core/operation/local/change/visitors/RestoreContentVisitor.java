@@ -40,10 +40,12 @@ public class RestoreContentVisitor implements IResourceChangeVisitor {
 		this.nodeKindChanged = nodeKindChanged;
 	}
 
+	@Override
 	public void preVisit(ResourceChange change, IActionOperationProcessor processor, IProgressMonitor monitor)
 			throws Exception {
 	}
 
+	@Override
 	public void postVisit(ResourceChange change, IActionOperationProcessor processor, IProgressMonitor monitor)
 			throws Exception {
 		ILocalResource local = change.getLocal();
@@ -73,7 +75,7 @@ public class RestoreContentVisitor implements IResourceChangeVisitor {
 				change.getTemporary().delete();
 			}
 
-			if (!this.nodeKindChanged
+			if (!nodeKindChanged
 					&& (IStateFilter.SF_REPLACED.accept(local) || !exists && IStateFilter.SF_VERSIONED.accept(local))) {
 				processor.doOperation(new AddToSVNOperation(new IResource[] { local.getResource() }, false), monitor);
 			}

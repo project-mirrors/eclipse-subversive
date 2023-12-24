@@ -53,21 +53,22 @@ public class GetRevisionPropertiesOperation extends AbstractActionOperation impl
 		this.location = location;
 	}
 
+	@Override
 	public SVNProperty[] getRevisionProperties() {
-		if (this.revProperties == null) {
+		if (revProperties == null) {
 			return new SVNProperty[0];
 		}
-		return this.revProperties;
+		return revProperties;
 	}
 
+	@Override
 	protected void runImpl(IProgressMonitor monitor) throws Exception {
-		SVNEntryRevisionReference reference = new SVNEntryRevisionReference(this.location.getUrl(), this.revision,
-				this.revision);
-		ISVNConnector proxy = this.location.acquireSVNProxy();
+		SVNEntryRevisionReference reference = new SVNEntryRevisionReference(location.getUrl(), revision, revision);
+		ISVNConnector proxy = location.acquireSVNProxy();
 		try {
-			this.revProperties = proxy.listRevisionProperties(reference, new SVNProgressMonitor(this, monitor, null));
+			revProperties = proxy.listRevisionProperties(reference, new SVNProgressMonitor(this, monitor, null));
 		} finally {
-			this.location.releaseSVNProxy(proxy);
+			location.releaseSVNProxy(proxy);
 		}
 	}
 }

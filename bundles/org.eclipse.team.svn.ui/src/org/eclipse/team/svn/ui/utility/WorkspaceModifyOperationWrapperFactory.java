@@ -23,6 +23,7 @@ import org.eclipse.team.svn.core.operation.IActionOperation;
  */
 public class WorkspaceModifyOperationWrapperFactory extends UILoggedOperationFactory
 		implements IOperationWrapperFactory {
+	@Override
 	public ICancellableOperationWrapper getCancellable(IActionOperation operation) {
 		return new WorkspaceModifyCancellableOperationWrapper(operation);
 	}

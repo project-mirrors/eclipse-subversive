@@ -26,15 +26,16 @@ import org.eclipse.team.svn.ui.operation.RemoteShowAnnotationOperation;
 public class ShowAnnotationAction extends AbstractRepositoryTeamAction {
 
 	public ShowAnnotationAction() {
-		super();
 	}
 
+	@Override
 	public void runImpl(IAction action) {
-		this.runScheduled(new RemoteShowAnnotationOperation(this.getSelectedRepositoryResources()[0]));
+		runScheduled(new RemoteShowAnnotationOperation(getSelectedRepositoryResources()[0]));
 	}
 
+	@Override
 	public boolean isEnabled() {
-		return this.getSelectedRepositoryResources().length == 1;
+		return getSelectedRepositoryResources().length == 1;
 	}
 
 }

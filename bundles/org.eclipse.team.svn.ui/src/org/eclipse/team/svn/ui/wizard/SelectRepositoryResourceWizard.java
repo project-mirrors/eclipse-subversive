@@ -47,46 +47,47 @@ public class SelectRepositoryResourceWizard extends AbstractSVNWizard {
 	public SelectRepositoryResourceWizard(boolean showFolders, IRepositoryLocation location) {
 		this.showFolders = showFolders;
 		this.location = location;
-		this.setWindowTitle(SVNUIMessages.SelectRepositoryResourceWizard_Title);
+		setWindowTitle(SVNUIMessages.SelectRepositoryResourceWizard_Title);
 	}
 
 	@Override
 	public void addPages() {
-		if (this.location == null) {
+		if (location == null) {
 			IRepositoryLocation[] locations = SVNRemoteStorage.instance().getRepositoryLocations();
-			this.addPage(this.selectLocationPage = new SelectSimpleRepositoryLocationPage(locations));
+			addPage(selectLocationPage = new SelectSimpleRepositoryLocationPage(locations));
 
-			this.addPage(this.selectResourcePage = new SelectResourceLocationPage(this.showFolders, null));
+			addPage(selectResourcePage = new SelectResourceLocationPage(showFolders, null));
 		} else {
-			this.addPage(this.selectResourcePage = new SelectResourceLocationPage(this.showFolders, this.location));
+			addPage(selectResourcePage = new SelectResourceLocationPage(showFolders, location));
 		}
 	}
 
 	@Override
 	public IWizardPage getNextPage(IWizardPage page) {
 		if (page instanceof SelectSimpleRepositoryLocationPage) {
-			this.selectResourcePage.setModelRoot(this.selectLocationPage.getRepositoryLocation());
-			return this.selectResourcePage;
+			selectResourcePage.setModelRoot(selectLocationPage.getRepositoryLocation());
+			return selectResourcePage;
 		}
 		return null;
 	}
 
 	@Override
 	public boolean canFinish() {
-		IWizardPage currentPage = this.getContainer().getCurrentPage();
+		IWizardPage currentPage = getContainer().getCurrentPage();
 		if (currentPage instanceof SelectResourceLocationPage) {
-			return this.selectResourcePage.getRepositoryResource() != null;
+			return selectResourcePage.getRepositoryResource() != null;
 		}
 		return false;
 	}
 
+	@Override
 	public boolean performFinish() {
-		this.selectedResource = this.selectResourcePage.getRepositoryResource();
+		selectedResource = selectResourcePage.getRepositoryResource();
 		return true;
 	}
 
 	public IRepositoryResource getSelectedResource() {
-		return this.selectedResource;
+		return selectedResource;
 	}
 
 }

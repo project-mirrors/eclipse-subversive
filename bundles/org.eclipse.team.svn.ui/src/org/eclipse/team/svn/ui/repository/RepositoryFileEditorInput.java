@@ -19,6 +19,7 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.PlatformObject;
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.team.svn.core.BaseMessages;
 import org.eclipse.team.svn.core.history.ResourceContentStorage;
 import org.eclipse.team.svn.core.operation.LoggedOperation;
 import org.eclipse.team.svn.core.resource.IRepositoryFile;
@@ -36,7 +37,7 @@ import org.eclipse.ui.model.IWorkbenchAdapter;
  */
 public class RepositoryFileEditorInput extends PlatformObject
 		implements IWorkbenchAdapter, IRepositoryEditorInput, IResourceTreeNode {
-	private static final Object[] NO_CHILDREN = new Object[0];
+	private static final Object[] NO_CHILDREN = {};
 
 	protected ResourceContentStorage storage;
 
@@ -44,95 +45,113 @@ public class RepositoryFileEditorInput extends PlatformObject
 
 	public RepositoryFileEditorInput(IRepositoryFile resource) {
 		this.resource = new RepositoryFile(null, resource);
-		this.storage = new ResourceContentStorage(resource);
+		storage = new ResourceContentStorage(resource);
 	}
 
+	@Override
 	public Object[] getChildren(Object o) {
 		return RepositoryFileEditorInput.NO_CHILDREN;
 	}
 
+	@Override
 	public void setViewer(RepositoryTreeViewer repositoryTree) {
 
 	}
 
+	@Override
 	public IRepositoryResource getRepositoryResource() {
-		return this.resource.getRepositoryResource();
+		return resource.getRepositoryResource();
 	}
 
+	@Override
 	public Object getData() {
-		return this.getRepositoryResource();
+		return getRepositoryResource();
 	}
 
+	@Override
 	public void refresh() {
-		this.resource.refresh();
+		resource.refresh();
 	}
 
+	@Override
 	public Object getParent(Object o) {
-		return this.resource.getParent(o);
+		return resource.getParent(o);
 	}
 
+	@Override
 	public ImageDescriptor getImageDescriptor(Object object) {
-		return this.resource.getImageDescriptor(object);
+		return resource.getImageDescriptor(object);
 	}
 
+	@Override
 	public String getLabel(Object o) {
-		return this.resource.getLabel(o);
+		return resource.getLabel(o);
 	}
 
+	@Override
 	public void fetchContents(IProgressMonitor monitor) {
-		this.storage.fetchContents(monitor);
+		storage.fetchContents(monitor);
 	}
 
+	@Override
 	public IStorage getStorage() {
-		return this.storage;
+		return storage;
 	}
 
+	@Override
 	public boolean exists() {
 		try {
-			return this.resource.getRepositoryResource().exists();
+			return resource.getRepositoryResource().exists();
 		} catch (Exception ex) {
 			LoggedOperation.reportError(this.getClass().getName(), ex);
 			return false;
 		}
 	}
 
+	@Override
 	public ImageDescriptor getImageDescriptor() {
-		return this.getImageDescriptor(this.resource);
+		return this.getImageDescriptor(resource);
 	}
 
+	@Override
 	public String getName() {
-		return SVNUIMessages.format(SVNUIMessages.RepositoryFileViewer_Name,
-				new String[] { this.resource.getRepositoryResource().getName(),
-						String.valueOf(this.resource.getRepositoryResource().getSelectedRevision()) });
+		return BaseMessages.format(SVNUIMessages.RepositoryFileViewer_Name,
+				new String[] { resource.getRepositoryResource().getName(),
+						String.valueOf(resource.getRepositoryResource().getSelectedRevision()) });
 	}
 
+	@Override
 	public IPersistableElement getPersistable() {
 		return null;
 	}
 
+	@Override
 	public String getToolTipText() {
-		return this.getName();
+		return getName();
 	}
 
+	@Override
 	public Object getAdapter(Class adapter) {
 		if (adapter == IWorkbenchAdapter.class) {
 			return this;
 		}
 		if (adapter == IRepositoryFile.class) {
-			return this.resource.getRepositoryResource();
+			return resource.getRepositoryResource();
 		}
 		return super.getAdapter(adapter);
 	}
 
+	@Override
 	public boolean equals(Object obj) {
 		if (obj != null && obj instanceof RepositoryFileEditorInput) {
-			return this.resource.equals(((RepositoryFileEditorInput) obj).resource);
+			return resource.equals(((RepositoryFileEditorInput) obj).resource);
 		}
 		return false;
 	}
 
+	@Override
 	public IPath getPath() {
-		return this.storage.getTemporaryPath();
+		return storage.getTemporaryPath();
 	}
 
 }

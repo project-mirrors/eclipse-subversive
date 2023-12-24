@@ -40,7 +40,7 @@ public class SVNChecksum {
 
 		public final int id;
 
-		private Kind(int id) {
+		Kind(int id) {
 			this.id = id;
 		}
 	}

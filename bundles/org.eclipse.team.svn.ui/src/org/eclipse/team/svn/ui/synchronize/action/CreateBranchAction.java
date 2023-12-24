@@ -33,17 +33,19 @@ public class CreateBranchAction extends AbstractSynchronizeModelAction {
 		super(text, configuration);
 	}
 
+	@Override
 	protected boolean updateSelection(IStructuredSelection selection) {
 		super.updateSelection(selection);
-		IResource[] resources = this.getAllSelectedResources();
+		IResource[] resources = getAllSelectedResources();
 		if (FileUtility.checkForResourcesPresence(resources, IStateFilter.SF_EXCLUDE_DELETED, IResource.DEPTH_ZERO)) {
 			return true;
 		}
 		return false;
 	}
 
+	@Override
 	protected IActionOperation getOperation(ISynchronizePageConfiguration configuration, IDiffElement[] elements) {
-		IResource[] selectedResources = this.getAllSelectedResources();
+		IResource[] selectedResources = getAllSelectedResources();
 		IResource[] resources = FileUtility.getResourcesRecursive(selectedResources, IStateFilter.SF_EXCLUDE_DELETED,
 				IResource.DEPTH_ZERO);
 		return BranchTagAction.getBranchTagOperation(configuration.getSite().getShell(), BranchTagAction.BRANCH_ACTION,

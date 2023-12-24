@@ -40,8 +40,9 @@ public class DeletePaneAction extends AbstractSynchronizeModelAction {
 		super(text, configuration);
 	}
 
+	@Override
 	protected IActionOperation getOperation(ISynchronizePageConfiguration configuration, IDiffElement[] elements) {
-		IResource[] selectedResources = this.getAllSelectedResources();
+		IResource[] selectedResources = getAllSelectedResources();
 		DiscardConfirmationDialog dialog = new DiscardConfirmationDialog(UIMonitorUtility.getShell(),
 				selectedResources.length == 1, DiscardConfirmationDialog.MSG_RESOURCE);
 		if (dialog.open() == 0) {
@@ -59,10 +60,11 @@ public class DeletePaneAction extends AbstractSynchronizeModelAction {
 		return null;
 	}
 
+	@Override
 	protected boolean updateSelection(IStructuredSelection selection) {
 		if (super.updateSelection(selection)) {
 			if (selection.size() > 0) {
-				IResource[] selectedResources = this.getAllSelectedResources();
+				IResource[] selectedResources = getAllSelectedResources();
 				return !FileUtility.checkForResourcesPresence(selectedResources, IStateFilter.SF_DELETED,
 						IResource.DEPTH_ZERO);
 			}

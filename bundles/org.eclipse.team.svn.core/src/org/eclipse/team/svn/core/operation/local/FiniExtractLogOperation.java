@@ -32,8 +32,9 @@ public class FiniExtractLogOperation extends AbstractActionOperation {
 		this.logger = logger;
 	}
 
+	@Override
 	protected void runImpl(IProgressMonitor monitor) throws Exception {
-		this.logger.flushLog();
+		logger.flushLog();
 	}
 
 }

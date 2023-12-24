@@ -35,21 +35,24 @@ public class RepositoryError extends RepositoryFictiveNode {
 	}
 
 	public IStatus getErrorStatus() {
-		return this.errorStatus;
+		return errorStatus;
 	}
 
 	public boolean hasChildren() {
 		return false;
 	}
 
+	@Override
 	public Object[] getChildren(Object o) {
 		return null;
 	}
 
+	@Override
 	public String getLabel(Object o) {
 		return SVNUIMessages.getString(RepositoryError.ERROR_MSG);
 	}
 
+	@Override
 	public ImageDescriptor getImageDescriptor(Object o) {
 		return PlatformUI.getWorkbench().getSharedImages().getImageDescriptor(ISharedImages.IMG_OBJS_ERROR_TSK);
 	}

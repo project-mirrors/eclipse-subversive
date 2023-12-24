@@ -23,21 +23,21 @@ import org.eclipse.team.svn.core.operation.IActionOperation;
  * @author Alexander Gurov
  */
 public interface IReporter extends IActionOperation {
-	public IReportingDescriptor getReportingDescriptor();
+	IReportingDescriptor getReportingDescriptor();
 
-	public boolean isCustomEditorSupported();
+	boolean isCustomEditorSupported();
 
-	public void setSummary(String summary);
+	void setSummary(String summary);
 
-	public void setUserComment(String userComment);
+	void setUserComment(String userComment);
 
-	public void setUserName(String userName);
+	void setUserName(String userName);
 
-	public void setUserEMail(String userEMail);
+	void setUserEMail(String userEMail);
 
-	public void setProblemStatus(IStatus problemStatus);
+	void setProblemStatus(IStatus problemStatus);
 
-	public String buildReport();
+	String buildReport();
 
-	public String buildSubject();
+	String buildSubject();
 }

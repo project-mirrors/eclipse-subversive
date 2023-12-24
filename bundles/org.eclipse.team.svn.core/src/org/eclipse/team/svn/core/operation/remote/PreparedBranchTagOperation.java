@@ -66,70 +66,70 @@ public class PreparedBranchTagOperation extends CompositeOperation implements IR
 		this.forceCreate = forceCreate;
 	}
 
+	@Override
 	public IRepositoryResource[] getRepositoryResources() {
-		return this.targets;
+		return targets;
 	}
 
 	public IRepositoryResource getDestination() {
-		return this.destination;
+		return destination;
 	}
 
+	@Override
 	protected void runImpl(IProgressMonitor monitor) throws Exception {
-		IRepositoryResource parent = PreparedBranchTagOperation.getExistentParent(this.destination);
+		IRepositoryResource parent = PreparedBranchTagOperation.getExistentParent(destination);
 		if (parent == null) {
 			throw new UnreportableException(SVNMessages.getErrorString("Error_RepositoryInaccessible")); //$NON-NLS-1$
 		}
 		boolean createLastSegment = false;
 		IPath newFolderPath = null;
-		if (parent != this.destination) {
-			newFolderPath = new Path(this.destination.getUrl().substring(parent.getUrl().length() + 1));
-			createLastSegment = this.resources.length == 1 && !newFolderPath.isEmpty() && !this.forceCreate;
+		if (parent != destination) {
+			newFolderPath = new Path(destination.getUrl().substring(parent.getUrl().length() + 1));
+			createLastSegment = resources.length == 1 && !newFolderPath.isEmpty() && !forceCreate;
 		}
-		this.targets = new IRepositoryResource[this.resources.length];
-		for (int i = 0; i < this.targets.length; i++) {
-			String targetUrl = this.destination.getUrl();
+		targets = new IRepositoryResource[resources.length];
+		for (int i = 0; i < targets.length; i++) {
+			String targetUrl = destination.getUrl();
 			if (!createLastSegment) {
-				targetUrl += "/" + this.resources[i].getName(); //$NON-NLS-1$
+				targetUrl += "/" + resources[i].getName(); //$NON-NLS-1$
 			}
-			this.targets[i] = this.resources[i] instanceof IRepositoryFile
-					? (IRepositoryResource) this.destination.asRepositoryFile(targetUrl, false)
-					: this.destination.asRepositoryContainer(targetUrl, false);
+			targets[i] = resources[i] instanceof IRepositoryFile
+					? (IRepositoryResource) destination.asRepositoryFile(targetUrl, false)
+					: destination.asRepositoryContainer(targetUrl, false);
 		}
 
 		if (CoreExtensionsManager.instance()
 				.getSVNConnectorFactory()
-				.getSVNAPIVersion() < ISVNConnectorFactory.APICompatibility.SVNAPI_1_5_x || this.wcResources != null) {
+				.getSVNAPIVersion() < ISVNConnectorFactory.APICompatibility.SVNAPI_1_5_x || wcResources != null) {
 			CreateFolderOperation op = null;
 			if (newFolderPath != null) {
 				IPath cutPath = newFolderPath.removeLastSegments(1);
-				if (this.resources.length != 1 || !cutPath.isEmpty() || this.forceCreate) {
-					String folderName = this.resources.length == 1 && !cutPath.isEmpty() && !this.forceCreate
+				if (resources.length != 1 || !cutPath.isEmpty() || forceCreate) {
+					String folderName = resources.length == 1 && !cutPath.isEmpty() && !forceCreate
 							? cutPath.toString()
 							: newFolderPath.toString();
-					this.add(op = new CreateFolderOperation(parent, folderName, this.message));
+					this.add(op = new CreateFolderOperation(parent, folderName, message));
 					this.add(new SetRevisionAuthorNameOperation(op, Options.FORCE), new IActionOperation[] { op });
 				}
 			}
-			if (this.wcResources != null) {
-				for (int i = 0; i < this.targets.length; i++) {
+			if (wcResources != null) {
+				for (int i = 0; i < targets.length; i++) {
 					this.add(
-							new org.eclipse.team.svn.core.operation.local.BranchTagOperation(this.operationName,
-									new IResource[] { this.wcResources[i] }, this.targets[i], this.message),
+							new org.eclipse.team.svn.core.operation.local.BranchTagOperation(operationName,
+									new IResource[] { wcResources[i] }, targets[i], message),
 							op == null ? null : new IActionOperation[] { op });
 				}
 			} else {
-				BranchTagOperation branchtagOp = new BranchTagOperation(this.operationName, SVNMessages.class,
-						this.resources, this.destination, this.message);
+				BranchTagOperation branchtagOp = new BranchTagOperation(operationName, SVNMessages.class, resources,
+						destination, message);
 				this.add(branchtagOp, op == null ? null : new IActionOperation[] { op });
 				this.add(new SetRevisionAuthorNameOperation(branchtagOp, Options.FORCE));
 			}
 		} else {
 			// SVN 1.5 allows to create branch/tag for repository resources at once
-			CopyResourcesOperation branchtagOp = this.forceCreate
-					? new CopyResourcesOperation(this.destination, this.resources, this.message,
-							this.resources[0].getName())
-					: new CopyResourcesOperation(this.destination.getParent(), this.resources, this.message,
-							this.destination.getName());
+			CopyResourcesOperation branchtagOp = forceCreate
+					? new CopyResourcesOperation(destination, resources, message, resources[0].getName())
+					: new CopyResourcesOperation(destination.getParent(), resources, message, destination.getName());
 			this.add(branchtagOp);
 			this.add(new SetRevisionAuthorNameOperation(branchtagOp, Options.FORCE));
 		}

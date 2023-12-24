@@ -47,13 +47,14 @@ public abstract class AbstractFileOperation extends AbstractActionOperation {
 		this.provider = provider;
 	}
 
+	@Override
 	public ISchedulingRule getSchedulingRule() {
-		if (this.files == null) {
+		if (files == null) {
 			return AbstractFileOperation.EXCLUSIVE;
 		}
-		HashSet<ISchedulingRule> ruleSet = new HashSet<ISchedulingRule>();
-		for (int i = 0; i < this.files.length; i++) {
-			ruleSet.add(this.getSchedulingRule(this.files[i]));
+		HashSet<ISchedulingRule> ruleSet = new HashSet<>();
+		for (File file : files) {
+			ruleSet.add(this.getSchedulingRule(file));
 		}
 		return ruleSet.size() == 1
 				? (ISchedulingRule) ruleSet.iterator().next()
@@ -61,7 +62,7 @@ public abstract class AbstractFileOperation extends AbstractActionOperation {
 	}
 
 	protected File[] operableData() {
-		return this.files == null ? this.provider.getFiles() : this.files;
+		return files == null ? provider.getFiles() : files;
 	}
 
 	protected ISchedulingRule getSchedulingRule(File file) {
@@ -85,28 +86,30 @@ public abstract class AbstractFileOperation extends AbstractActionOperation {
 			this.filePath = filePath;
 		}
 
+		@Override
 		public boolean isConflicting(ISchedulingRule arg) {
 			if (arg instanceof LockingRule) {
 				LockingRule rule = (LockingRule) arg;
-				return this.filePath == null || rule.filePath == null || this.filePath.isPrefixOf(rule.filePath)
-						|| rule.filePath.isPrefixOf(this.filePath);
+				return filePath == null || rule.filePath == null || filePath.isPrefixOf(rule.filePath)
+						|| rule.filePath.isPrefixOf(filePath);
 			}
 			return false;
 		}
 
+		@Override
 		public boolean contains(ISchedulingRule arg) {
 			if (this == arg) {
 				return true;
 			}
 			if (arg instanceof LockingRule) {
 				LockingRule rule = (LockingRule) arg;
-				return this.filePath == rule.filePath || this.filePath.isPrefixOf(rule.filePath);
+				return filePath == rule.filePath || filePath.isPrefixOf(rule.filePath);
 			}
 			if (arg instanceof MultiRule) {
 				MultiRule rule = (MultiRule) arg;
 				ISchedulingRule[] children = rule.getChildren();
-				for (int i = 0; i < children.length; i++) {
-					if (!this.contains(children[i])) {
+				for (ISchedulingRule child : children) {
+					if (!contains(child)) {
 						return false;
 					}
 				}
@@ -115,14 +118,16 @@ public abstract class AbstractFileOperation extends AbstractActionOperation {
 			return false;
 		}
 
+		@Override
 		public int hashCode() {
-			return this.filePath == null ? 0 : this.filePath.hashCode();
+			return filePath == null ? 0 : filePath.hashCode();
 		}
 
+		@Override
 		public boolean equals(Object obj) {
 			if (obj instanceof LockingRule) {
 				LockingRule rule = (LockingRule) obj;
-				return this.filePath == rule.filePath || this.filePath != null && this.filePath.equals(rule.filePath);
+				return filePath == rule.filePath || filePath != null && filePath.equals(rule.filePath);
 			}
 			return false;
 		}

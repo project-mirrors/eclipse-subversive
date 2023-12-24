@@ -33,10 +33,12 @@ import org.eclipse.team.svn.core.resource.ILocalResource;
  */
 public class RestorePropertiesVisitor implements IResourceChangeVisitor {
 
+	@Override
 	public void preVisit(ResourceChange change, IActionOperationProcessor processor, IProgressMonitor monitor)
 			throws Exception {
 	}
 
+	@Override
 	public void postVisit(ResourceChange change, IActionOperationProcessor processor, IProgressMonitor monitor)
 			throws Exception {
 		ILocalResource local = change.getLocal();

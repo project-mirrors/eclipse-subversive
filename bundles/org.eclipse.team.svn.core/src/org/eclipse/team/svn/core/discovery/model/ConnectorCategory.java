@@ -35,7 +35,7 @@ public class ConnectorCategory {
 
 	protected Overview overview;
 
-	protected java.util.List<Group> group = new java.util.ArrayList<Group>();
+	protected java.util.List<Group> group = new java.util.ArrayList<>();
 
 	public ConnectorCategory() {
 	}

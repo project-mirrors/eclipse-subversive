@@ -34,16 +34,19 @@ public class SVNTeamOperationWrapper extends TeamOperation {
 		this.operationWrapper = operationWrapper;
 	}
 
+	@Override
 	public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-		this.operationWrapper.run(monitor);
+		operationWrapper.run(monitor);
 	}
 
+	@Override
 	protected boolean canRunAsJob() {
 		return true;
 	}
 
+	@Override
 	protected String getJobName() {
-		return this.operationWrapper.getOperationName();
+		return operationWrapper.getOperationName();
 	}
 
 }

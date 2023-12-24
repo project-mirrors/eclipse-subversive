@@ -45,20 +45,19 @@ public class DiscoveryConnectorsHelper {
 
 	protected static class ProxyAuthenticator extends Authenticator {
 
+		@Override
 		protected PasswordAuthentication getPasswordAuthentication() {
-			if (this.getRequestorType() == Authenticator.RequestorType.PROXY) {
+			if (getRequestorType() == Authenticator.RequestorType.PROXY) {
 				SVNCachedProxyCredentialsManager proxyCredentialsManager = SVNRemoteStorage.instance()
 						.getProxyCredentialsManager();
 				if (proxyCredentialsManager.getUsername() == null || proxyCredentialsManager.getUsername() == "") { //$NON-NLS-1$
 					final boolean[] result = new boolean[1];
-					UIMonitorUtility.getDisplay().syncExec(new Runnable() {
-						public void run() {
-							PromptCredentialsPanel panel = new PromptCredentialsPanel(getRequestingPrompt(),
-									SVNRepositoryLocation.PROXY_CONNECTION);
-							DefaultDialog dialog = new DefaultDialog(UIMonitorUtility.getShell(), panel);
-							if (dialog.open() == 0) {
-								result[0] = true;
-							}
+					UIMonitorUtility.getDisplay().syncExec(() -> {
+						PromptCredentialsPanel panel = new PromptCredentialsPanel(getRequestingPrompt(),
+								SVNRepositoryLocation.PROXY_CONNECTION);
+						DefaultDialog dialog = new DefaultDialog(UIMonitorUtility.getShell(), panel);
+						if (dialog.open() == 0) {
+							result[0] = true;
 						}
 					});
 					if (result[0]) {
@@ -81,18 +80,16 @@ public class DiscoveryConnectorsHelper {
 		if (CoreExtensionsManager.instance().getAccessibleClients().isEmpty()
 				&& Platform.getBundle("org.eclipse.equinox.p2.repository") != null) { //$NON-NLS-1$
 			try {
-				final IConnectorsInstallJob installJob = this.getInstallJob();
+				final IConnectorsInstallJob installJob = getInstallJob();
 
 				if (installJob != null) {
 					//set proxy authenticator to WebUtil for accessing Internet files
 					WebUtil.setAuthenticator(new ProxyAuthenticator());
 
-					UIMonitorUtility.getDisplay().asyncExec(new Runnable() {
-						public void run() {
-							ConnectorDiscoveryWizard wizard = new ConnectorDiscoveryWizard(installJob);
-							WizardDialog dialog = new WizardDialog(UIMonitorUtility.getShell(), wizard);
-							dialog.open();
-						}
+					UIMonitorUtility.getDisplay().asyncExec(() -> {
+						ConnectorDiscoveryWizard wizard = new ConnectorDiscoveryWizard(installJob);
+						WizardDialog dialog = new WizardDialog(UIMonitorUtility.getShell(), wizard);
+						dialog.open();
 					});
 				}
 			} catch (Throwable e) {
@@ -111,14 +108,14 @@ public class DiscoveryConnectorsHelper {
 	 */
 	protected IConnectorsInstallJob getInstallJob() throws Exception {
 		IConnectorsInstallJob runnable = null;
-		Bundle bundle = Platform.getBundle("org.eclipse.equinox.p2.engine"); //$NON-NLS-1$	
+		Bundle bundle = Platform.getBundle("org.eclipse.equinox.p2.engine"); //$NON-NLS-1$
 		if (bundle != null) {
 			Class<?> clazz = null;
 			if (new VersionRange("[1.0.0,1.1.0)").isIncluded(bundle.getVersion())) { //$NON-NLS-1$
 				//for Eclipse 3.5
 				clazz = Class.forName("org.eclipse.team.svn.ui.discovery.PrepareInstallProfileJob_3_5"); //$NON-NLS-1$
 			} else {
-				//for Eclipse 3.6						
+				//for Eclipse 3.6
 				clazz = Class.forName("org.eclipse.team.svn.ui.discovery.PrepareInstallProfileJob_3_6"); //$NON-NLS-1$
 			}
 			Constructor<?> c = clazz.getConstructor();

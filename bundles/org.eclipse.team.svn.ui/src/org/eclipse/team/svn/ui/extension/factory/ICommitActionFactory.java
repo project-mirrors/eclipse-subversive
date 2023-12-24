@@ -34,21 +34,21 @@ public interface ICommitActionFactory {
 	 * 
 	 * @param commentManager
 	 */
-	public void initCommentManager(ICommentManager commentManager);
+	void initCommentManager(ICommentManager commentManager);
 
 	/**
 	 * Called each time "Ok" button is pressed.
 	 * 
 	 * @param commentManager
 	 */
-	public void confirmMessage(ICommentManager commentManager);
+	void confirmMessage(ICommentManager commentManager);
 
 	/**
 	 * Called each time "Cancel" button is pressed.
 	 * 
 	 * @param commentManager
 	 */
-	public void cancelMessage(ICommentManager commentManager);
+	void cancelMessage(ICommentManager commentManager);
 
 	/**
 	 * The method provide abilities in extending of the standard Subversive Commit Dialog to more powerful
@@ -61,7 +61,7 @@ public interface ICommitActionFactory {
 	 *            the default Subversive Commit Panel implementation
 	 * @return enahanced Commit Dialog
 	 */
-	public ICommitDialog getCommitDialog(Shell shell, Collection allFilesToCommit, ICommentDialogPanel panel);
+	ICommitDialog getCommitDialog(Shell shell, Collection allFilesToCommit, ICommentDialogPanel panel);
 
 	/**
 	 * The method allows customizing of the Commit Operation
@@ -75,7 +75,7 @@ public interface ICommitActionFactory {
 	 * @param part
 	 *            workbench part which will be used to interact with user
 	 */
-	public void performAfterCommitTasks(CompositeOperation operation, IRevisionProvider revisionProvider,
+	void performAfterCommitTasks(CompositeOperation operation, IRevisionProvider revisionProvider,
 			IActionOperation[] dependsOn, IWorkbenchPart part);
 
 }

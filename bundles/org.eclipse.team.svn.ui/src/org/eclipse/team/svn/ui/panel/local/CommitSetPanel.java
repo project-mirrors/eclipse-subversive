@@ -61,21 +61,22 @@ public class CommitSetPanel extends CommentPanel implements IModifiableCommentDi
 		this.resources = resources;
 		switch (type) {
 			case MSG_EDIT:
-				this.dialogDescription = SVNUIMessages.CommitSetPanel_Description_Edit;
-				this.defaultMessage = SVNUIMessages.CommitSetPanel_Message_Edit;
+				dialogDescription = SVNUIMessages.CommitSetPanel_Description_Edit;
+				defaultMessage = SVNUIMessages.CommitSetPanel_Message_Edit;
 				break;
 			default:
-				this.dialogDescription = SVNUIMessages.CommitSetPanel_Description_New;
-				this.defaultMessage = SVNUIMessages.CommitSetPanel_Message_New;
+				dialogDescription = SVNUIMessages.CommitSetPanel_Description_New;
+				defaultMessage = SVNUIMessages.CommitSetPanel_Message_New;
 		}
 
 		if (resources == null) {
 			resources = set.getResources();
 		}
 
-		this.changeListenerList = new ArrayList<IResourceSelectionChangeListener>();
+		changeListenerList = new ArrayList<>();
 	}
 
+	@Override
 	public void createControlsImpl(Composite parent) {
 		GridData data = null;
 		GridLayout layout = null;
@@ -92,15 +93,15 @@ public class CommitSetPanel extends CommentPanel implements IModifiableCommentDi
 		label.setText(SVNUIMessages.CommitSetPanel_Name);
 		label.setLayoutData(new GridData(GridData.BEGINNING));
 
-		this.nameText = new Text(composite, SWT.BORDER);
-		this.nameText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		String initialText = this.set.getTitle();
+		nameText = new Text(composite, SWT.BORDER);
+		nameText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		String initialText = set.getTitle();
 		if (initialText == null) {
 			initialText = ""; //$NON-NLS-1$
 		}
-		this.nameText.setText(initialText);
-		this.nameText.selectAll();
-		this.attachTo(this.nameText, new NonEmptyFieldVerifier(SVNUIMessages.CommitSetPanel_Name_Verifier));
+		nameText.setText(initialText);
+		nameText.selectAll();
+		attachTo(nameText, new NonEmptyFieldVerifier(SVNUIMessages.CommitSetPanel_Name_Verifier));
 
 		Group group = new Group(parent, SWT.NULL);
 		layout = new GridLayout();
@@ -109,45 +110,50 @@ public class CommitSetPanel extends CommentPanel implements IModifiableCommentDi
 		group.setLayoutData(data);
 		group.setText(SVNUIMessages.CommitSetPanel_Comment);
 
-		CommitPanel.CollectPropertiesOperation op = new CollectPropertiesOperation(this.resources);
+		CommitPanel.CollectPropertiesOperation op = new CollectPropertiesOperation(resources);
 		UIMonitorUtility.doTaskNowDefault(op, true);
 
-		this.bugtraqModel = op.getBugtraqModel();
-		this.comment = new CommentComposite(group, this.set.getComment(), this, op.getLogTemplates(), null,
-				op.getMinLogSize(), op.getMaxLogWidth());
+		bugtraqModel = op.getBugtraqModel();
+		comment = new CommentComposite(group, set.getComment(), this, op.getLogTemplates(), null, op.getMinLogSize(),
+				op.getMaxLogWidth());
 		data = new GridData(GridData.FILL_BOTH);
-		this.comment.setLayoutData(data);
+		comment.setLayoutData(data);
 	}
 
+	@Override
 	public String getHelpId() {
 		return "org.eclipse.team.svn.help.commitSetDialogContext"; //$NON-NLS-1$
 	}
 
+	@Override
 	public void addResourcesSelectionChangedListener(IResourceSelectionChangeListener listener) {
-		this.changeListenerList.add(listener);
+		changeListenerList.add(listener);
 	}
 
+	@Override
 	public void removeResourcesSelectionChangedListener(IResourceSelectionChangeListener listener) {
-		this.changeListenerList.remove(listener);
+		changeListenerList.remove(listener);
 	}
 
 	public void fireResourcesSelectionChanged(ResourceSelectionChangedEvent event) {
-		this.validateContent();
-		IResourceSelectionChangeListener[] listeners = this.changeListenerList
-				.toArray(new IResourceSelectionChangeListener[this.changeListenerList.size()]);
-		for (int i = 0; i < listeners.length; i++) {
-			listeners[i].resourcesSelectionChanged(event);
+		validateContent();
+		IResourceSelectionChangeListener[] listeners = changeListenerList
+				.toArray(new IResourceSelectionChangeListener[changeListenerList.size()]);
+		for (IResourceSelectionChangeListener listener : listeners) {
+			listener.resourcesSelectionChanged(event);
 		}
 	}
 
+	@Override
 	public Point getPrefferedSizeImpl() {
 		return new Point(525, SWT.DEFAULT);
 	}
 
+	@Override
 	protected void saveChangesImpl() {
 		super.saveChangesImpl();
-		this.set.setTitle(this.nameText.getText());
-		this.set.setComment(this.comment.getMessage());
+		set.setTitle(nameText.getText());
+		set.setComment(comment.getMessage());
 	}
 
 }

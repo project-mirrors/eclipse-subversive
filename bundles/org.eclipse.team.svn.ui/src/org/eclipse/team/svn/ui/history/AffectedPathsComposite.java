@@ -101,82 +101,84 @@ public class AffectedPathsComposite extends Composite {
 					.getImageDescriptor("icons/overlays/replacement.gif"); //$NON-NLS-1$
 		}
 
-		this.createControls();
+		createControls();
 	}
 
 	public void setResourceTreeVisible(boolean visible) {
 		if (visible) {
-			this.sashForm.setMaximizedControl(null);
+			sashForm.setMaximizedControl(null);
 		} else {
-			this.sashForm.setMaximizedControl(this.tableViewer.getControl());
+			sashForm.setMaximizedControl(tableViewer.getControl());
 			AffectedPathsContentProvider provider = (AffectedPathsContentProvider) AffectedPathsComposite.this.treeViewer
 					.getContentProvider();
 			AffectedPathsNode rootNode = provider.getRoot();
 			if (rootNode != null) {
-				this.treeViewer.setSelection(new StructuredSelection(rootNode));
+				treeViewer.setSelection(new StructuredSelection(rootNode));
 			}
 		}
 	}
 
 	public void setInput(SVNChangedPathData[] input, Collection<String> relatedPathPrefixes,
 			Collection<String> relatedParents, long currentRevision) {
-		this.labelProvider.setCurrentRevision(currentRevision);
-		AffectedPathsContentProvider provider = (AffectedPathsContentProvider) this.treeViewer.getContentProvider();
+		labelProvider.setCurrentRevision(currentRevision);
+		AffectedPathsContentProvider provider = (AffectedPathsContentProvider) treeViewer.getContentProvider();
 		provider.initialize(input, relatedPathPrefixes, relatedParents, currentRevision);
 		if (input != null && (input.length > 0 || currentRevision == 0)) {
-			this.treeViewer.setInput("Root");
+			treeViewer.setInput("Root");
 
-			this.treeViewer.expandAll();
-			this.treeViewer.setSelection(new StructuredSelection(provider.getRoot()));
-			((Tree) this.treeViewer.getControl()).showSelection();
+			treeViewer.expandAll();
+			treeViewer.setSelection(new StructuredSelection(provider.getRoot()));
+			((Tree) treeViewer.getControl()).showSelection();
 		} else {
-			this.treeViewer.setInput(null);
+			treeViewer.setInput(null);
 		}
 	}
 
 	public void registerActionManager(HistoryActionManager manager, IWorkbenchPartSite site) {
-		manager.affectedTableManager.installKeyBindings(this.tableViewer);
-		manager.affectedTableManager.installDefaultAction(this.tableViewer);
-		manager.affectedTableManager.installMenuActions(this.tableViewer, site);
+		manager.affectedTableManager.installKeyBindings(tableViewer);
+		manager.affectedTableManager.installDefaultAction(tableViewer);
+		manager.affectedTableManager.installMenuActions(tableViewer, site);
 
-		manager.affectedTreeManager.installKeyBindings(this.treeViewer);
-		manager.affectedTreeManager.installDefaultAction(this.treeViewer);
-		manager.affectedTreeManager.installMenuActions(this.treeViewer, site);
+		manager.affectedTreeManager.installKeyBindings(treeViewer);
+		manager.affectedTreeManager.installDefaultAction(treeViewer);
+		manager.affectedTreeManager.installMenuActions(treeViewer, site);
 	}
 
 	protected void createControls() {
 		GridLayout gridLayout = new GridLayout();
 		gridLayout.marginHeight = gridLayout.marginWidth = 0;
-		this.setLayout(gridLayout);
+		setLayout(gridLayout);
 
-		this.sashForm = new SashForm(this, SWT.HORIZONTAL);
-		this.sashForm.setLayoutData(new GridData(GridData.FILL_BOTH));
-		this.treeViewer = new TreeViewer(this.sashForm, SWT.H_SCROLL | SWT.V_SCROLL);
-		this.treeViewer.setContentProvider(new AffectedPathsContentProvider());
-		this.treeViewer.setLabelProvider(this.labelProvider = new AffectedPathsLabelProvider());
-		this.treeViewer.addSelectionChangedListener(new ISelectionChangedListener() {
+		sashForm = new SashForm(this, SWT.HORIZONTAL);
+		sashForm.setLayoutData(new GridData(GridData.FILL_BOTH));
+		treeViewer = new TreeViewer(sashForm, SWT.H_SCROLL | SWT.V_SCROLL);
+		treeViewer.setContentProvider(new AffectedPathsContentProvider());
+		treeViewer.setLabelProvider(labelProvider = new AffectedPathsLabelProvider());
+		treeViewer.addSelectionChangedListener(new ISelectionChangedListener() {
 			protected AffectedPathsNode oldSelection;
 
+			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
 				IStructuredSelection tSelection = (IStructuredSelection) event.getSelection();
 				if (tSelection.size() > 0) {
 					AffectedPathsNode selection = (AffectedPathsNode) tSelection.getFirstElement();
-					if (this.oldSelection != selection) {
-						AffectedPathsComposite.this.tableViewer.setInput(selection.getPathData());
-						this.oldSelection = selection;
+					if (oldSelection != selection) {
+						tableViewer.setInput(selection.getPathData());
+						oldSelection = selection;
 					}
 				} else {
-					AffectedPathsComposite.this.tableViewer.setInput(null);
+					tableViewer.setInput(null);
 				}
 			}
 		});
 
-		final Table table = new Table(this.sashForm, SWT.H_SCROLL | SWT.V_SCROLL | SWT.SINGLE | SWT.FULL_SELECTION);
+		final Table table = new Table(sashForm, SWT.H_SCROLL | SWT.V_SCROLL | SWT.SINGLE | SWT.FULL_SELECTION);
 		table.setHeaderVisible(true);
 		table.setLinesVisible(true);
 		GridData data = new GridData(GridData.FILL_BOTH);
 		table.setLayoutData(data);
 		table.addMouseTrackListener(new MouseTrackAdapter() {
+			@Override
 			public void mouseHover(MouseEvent e) {
 				TableItem item = table.getItem(new Point(e.x, e.y));
 				if (item != null) {
@@ -211,12 +213,12 @@ public class AffectedPathsComposite extends Composite {
 		TableLayout layout = new TableLayout();
 		table.setLayout(layout);
 
-		this.tableViewer = new TableViewer(table);
-		this.sashForm.setWeights(new int[] { 25, 75 });
+		tableViewer = new TableViewer(table);
+		sashForm.setWeights(new int[] { 25, 75 });
 
-		AffectedPathsTableComparator tableComparator = new AffectedPathsTableComparator(this.tableViewer);
+		AffectedPathsTableComparator tableComparator = new AffectedPathsTableComparator(tableViewer);
 
-		//0.image        
+		//0.image
 		TableColumn col = new TableColumn(table, SWT.NONE);
 		col.setText(""); //$NON-NLS-1$
 		col.setResizable(false);
@@ -243,18 +245,18 @@ public class AffectedPathsComposite extends Composite {
 
 		tableComparator.setReversed(false);
 		tableComparator.setColumnNumber(AffectedPathsComposite.COLUMN_PATH);
-		this.tableViewer.setComparator(tableComparator);
-		this.tableViewer.getTable()
-				.setSortColumn(this.tableViewer.getTable().getColumn(AffectedPathsComposite.COLUMN_PATH));
-		this.tableViewer.getTable().setSortDirection(SWT.UP);
+		tableViewer.setComparator(tableComparator);
+		tableViewer.getTable().setSortColumn(tableViewer.getTable().getColumn(AffectedPathsComposite.COLUMN_PATH));
+		tableViewer.getTable().setSortDirection(SWT.UP);
 
-		this.tableViewer.setContentProvider(new ArrayStructuredContentProvider());
-		this.tableViewer.setLabelProvider(new AffectedPathsTableLabelProvider());
+		tableViewer.setContentProvider(new ArrayStructuredContentProvider());
+		tableViewer.setLabelProvider(new AffectedPathsTableLabelProvider());
 	}
 
 	protected class AffectedPathsTableLabelProvider implements ITableLabelProvider {
-		protected Map<ImageDescriptor, Image> images = new HashMap<ImageDescriptor, Image>();
+		protected Map<ImageDescriptor, Image> images = new HashMap<>();
 
+		@Override
 		public Image getColumnImage(Object element, int columnIndex) {
 			if (columnIndex == AffectedPathsComposite.COLUMN_ICON) {
 				String fileName = ((SVNChangedPathData) element).resourceName;
@@ -262,10 +264,10 @@ public class AffectedPathsComposite extends Composite {
 						.getWorkbench()
 						.getEditorRegistry()
 						.getImageDescriptor(fileName);
-				Image img = this.images.get(descr);
+				Image img = images.get(descr);
 				if (img == null) {
 					img = descr.createImage();
-					this.images.put(descr, img);
+					images.put(descr, img);
 				}
 				switch (((SVNChangedPathData) element).action) {
 					case ADDED: {
@@ -289,16 +291,17 @@ public class AffectedPathsComposite extends Composite {
 						break;
 					}
 				}
-				img = this.images.get(descr);
+				img = images.get(descr);
 				if (img == null) {
 					img = descr.createImage();
-					this.images.put(descr, img);
+					images.put(descr, img);
 				}
 				return img;
 			}
 			return null;
 		}
 
+		@Override
 		public String getColumnText(Object element, int columnIndex) {
 			SVNChangedPathData data = (SVNChangedPathData) element;
 			switch (columnIndex) {
@@ -309,7 +312,7 @@ public class AffectedPathsComposite extends Composite {
 					return data.resourcePath;
 				}
 				case AffectedPathsComposite.COLUMN_COPIED_FROM: {
-					return data.copiedFromPath + ((data.copiedFromRevision == SVNRevision.INVALID_REVISION_NUMBER)
+					return data.copiedFromPath + (data.copiedFromRevision == SVNRevision.INVALID_REVISION_NUMBER
 							? "" //$NON-NLS-1$
 							: '@' + String.valueOf(data.copiedFromRevision));
 				}
@@ -317,19 +320,23 @@ public class AffectedPathsComposite extends Composite {
 			return ""; //$NON-NLS-1$
 		}
 
+		@Override
 		public void dispose() {
-			for (Image img : this.images.values()) {
+			for (Image img : images.values()) {
 				img.dispose();
 			}
 		}
 
+		@Override
 		public boolean isLabelProperty(Object element, String property) {
 			return true;
 		}
 
+		@Override
 		public void addListener(ILabelProviderListener listener) {
 		}
 
+		@Override
 		public void removeListener(ILabelProviderListener listener) {
 		}
 
@@ -340,10 +347,11 @@ public class AffectedPathsComposite extends Composite {
 			super(tableViewer);
 		}
 
+		@Override
 		public int compareImpl(Viewer viewer, Object row1, Object row2) {
 			SVNChangedPathData data1 = (SVNChangedPathData) row1;
 			SVNChangedPathData data2 = (SVNChangedPathData) row2;
-			switch (this.column) {
+			switch (column) {
 				case AffectedPathsComposite.COLUMN_NAME: {
 					return ColumnedViewerComparator.compare(data1.resourceName, data2.resourceName);
 				}
@@ -352,11 +360,11 @@ public class AffectedPathsComposite extends Composite {
 				}
 				case AffectedPathsComposite.COLUMN_COPIED_FROM: {
 					String copied1 = data1.copiedFromPath
-							+ ((data1.copiedFromRevision == SVNRevision.INVALID_REVISION_NUMBER)
+							+ (data1.copiedFromRevision == SVNRevision.INVALID_REVISION_NUMBER
 									? "" //$NON-NLS-1$
 									: '@' + String.valueOf(data1.copiedFromRevision));
 					String copied2 = data2.copiedFromPath
-							+ ((data2.copiedFromRevision == SVNRevision.INVALID_REVISION_NUMBER)
+							+ (data2.copiedFromRevision == SVNRevision.INVALID_REVISION_NUMBER
 									? "" //$NON-NLS-1$
 									: '@' + String.valueOf(data2.copiedFromRevision));
 					return ColumnedViewerComparator.compare(copied1, copied2);

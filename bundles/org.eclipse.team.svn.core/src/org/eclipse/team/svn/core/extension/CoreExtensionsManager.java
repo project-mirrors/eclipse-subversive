@@ -17,9 +17,9 @@ package org.eclipse.team.svn.core.extension;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
@@ -57,7 +57,7 @@ public class CoreExtensionsManager {
 
 	private HashSet<String> validConnectors;
 
-	private HashMap<String, IOptionProvider> optionProviders = new HashMap<String, IOptionProvider>();
+	private HashMap<String, IOptionProvider> optionProviders = new HashMap<>();
 
 	private String selectedOptionProviderId;
 
@@ -78,7 +78,7 @@ public class CoreExtensionsManager {
 			synchronized (CoreExtensionsManager.class) {
 				if (!CoreExtensionsManager.instance.initialized) {
 					Object[] extensions = CoreExtensionsManager.loadCoreExtensions(CoreExtensionsManager.CORE_OPTIONS);
-					HashSet<String> inferiors = new HashSet<String>();
+					HashSet<String> inferiors = new HashSet<>();
 					for (int i = 0; i < extensions.length; i++) {
 						IOptionProvider optProvider = (IOptionProvider) extensions[i];
 						String id = CoreExtensionsManager.instance.registerOptionProvider(optProvider);
@@ -87,13 +87,11 @@ public class CoreExtensionsManager {
 						}
 						String[] inferiorOnes = optProvider.getCoveredProviders();
 						if (inferiorOnes != null) {
-							for (int k = 0; k < inferiorOnes.length; k++) {
-								inferiors.add(inferiorOnes[k]);
-							}
+							Collections.addAll(inferiors, inferiorOnes);
 						}
 					}
-					for (int i = 0; i < extensions.length; i++) {
-						IOptionProvider optProvider = (IOptionProvider) extensions[i];
+					for (Object extension : extensions) {
+						IOptionProvider optProvider = (IOptionProvider) extension;
 						String id = optProvider.getId();
 						if (!inferiors.contains(id)) {
 							CoreExtensionsManager.instance.selectOptionProvider(id);
@@ -110,7 +108,7 @@ public class CoreExtensionsManager {
 				}
 
 				PredefinedPropertySet pSet = null;
-				CoreExtensionsManager.instance.svnPropertySets = new ArrayList<IPredefinedPropertySet>();
+				CoreExtensionsManager.instance.svnPropertySets = new ArrayList<>();
 				IExtensionPoint extension = Platform.getExtensionRegistry()
 						.getExtensionPoint(CoreExtensionsManager.EXTENSION_NAMESPACE, "svnproperties"); //$NON-NLS-1$
 				for (IExtension ext : extension.getExtensions()) {
@@ -168,61 +166,61 @@ public class CoreExtensionsManager {
 
 	public IPredefinedPropertySet getPredefinedPropertySet() {
 		PredefinedPropertySet retVal = new PredefinedPropertySet();
-		for (IPredefinedPropertySet set : this.svnPropertySets) {
+		for (IPredefinedPropertySet set : svnPropertySets) {
 			retVal.registerProperties(set.getPredefinedProperties());
 		}
 		return retVal;
 	}
 
 	public IIgnoreRecommendations[] getIgnoreRecommendations() {
-		return this.ignoreRecommendations;
+		return ignoreRecommendations;
 	}
 
 	public IResolutionHelper[] getResolutionHelpers() {
-		return this.disableHelpers ? new IResolutionHelper[0] : this.helpers;
+		return disableHelpers ? new IResolutionHelper[0] : helpers;
 	}
 
 	public void setResolutionHelpersDisabled(boolean disable) {
-		this.disableHelpers = disable;
+		disableHelpers = disable;
 	}
 
 	public boolean isResoultionHelpersDisabled() {
-		return this.disableHelpers;
+		return disableHelpers;
 	}
 
 	public IOptionProvider getOptionProvider(String id) {
-		return this.optionProviders.containsKey(id) ? this.optionProviders.get(id) : IOptionProvider.DEFAULT;
+		return optionProviders.containsKey(id) ? optionProviders.get(id) : IOptionProvider.DEFAULT;
 	}
 
 	public IOptionProvider getOptionProvider() {
-		return this.getOptionProvider(this.selectedOptionProviderId);
+		return this.getOptionProvider(selectedOptionProviderId);
 	}
 
 	public void setOptionProvider(IOptionProvider optionProvider) {
-		this.selectOptionProvider(this.registerOptionProvider(optionProvider));
+		selectOptionProvider(registerOptionProvider(optionProvider));
 	}
 
 	public void selectOptionProvider(String id) {
-		this.selectedOptionProviderId = id;
+		selectedOptionProviderId = id;
 	}
 
 	public String getSelectedOptionProviderId() {
-		return this.selectedOptionProviderId;
+		return selectedOptionProviderId;
 	}
 
 	public String registerOptionProvider(IOptionProvider optionProvider) {
-		this.optionProviders.put(optionProvider.getId(), optionProvider);
+		optionProviders.put(optionProvider.getId(), optionProvider);
 		return optionProvider.getId();
 	}
 
 	public Collection<String> getAccessibleClientIds() {
-		this.initializeConnectors();
-		return this.connectors.keySet();
+		initializeConnectors();
+		return connectors.keySet();
 	}
 
 	public Collection<ISVNConnectorFactory> getAccessibleClients() {
-		this.initializeConnectors();
-		return this.connectors.values();
+		initializeConnectors();
+		return connectors.values();
 	}
 
 	public ISVNConnectorFactory getSVNConnectorFactory() {
@@ -231,7 +229,7 @@ public class CoreExtensionsManager {
 	}
 
 	public ISVNConnectorFactory getSVNConnectorFactory(String id) {
-		ISVNConnectorFactory retVal = this.getFirstValidConnector(id);
+		ISVNConnectorFactory retVal = getFirstValidConnector(id);
 		if (retVal == null) {
 			retVal = ISVNConnectorFactory.EMPTY;
 		}
@@ -244,16 +242,15 @@ public class CoreExtensionsManager {
 	}
 
 	private ISVNConnectorFactory getFirstValidConnector(String id) {
-		this.initializeConnectors();
+		initializeConnectors();
 
-		if (this.validConnectors.contains(id)) {
-			return this.connectors.get(id);
-		} else if (this.validConnectors.contains(ISVNConnectorFactory.DEFAULT_ID)) {
-			return this.connectors.get(ISVNConnectorFactory.DEFAULT_ID);
+		if (validConnectors.contains(id)) {
+			return connectors.get(id);
+		} else if (validConnectors.contains(ISVNConnectorFactory.DEFAULT_ID)) {
+			return connectors.get(ISVNConnectorFactory.DEFAULT_ID);
 		}
-		for (Iterator<ISVNConnectorFactory> it = this.connectors.values().iterator(); it.hasNext();) {
-			ISVNConnectorFactory connector = it.next();
-			if (this.validConnectors.contains(connector.getId())) {
+		for (ISVNConnectorFactory connector : connectors.values()) {
+			if (validConnectors.contains(connector.getId())) {
 				return connector;
 			}
 		}
@@ -264,15 +261,15 @@ public class CoreExtensionsManager {
 	}
 
 	private synchronized void initializeConnectors() {
-		if (this.connectors == null) {
+		if (connectors == null) {
 			synchronized (this) {
-				if (this.connectors == null) {
-					this.connectors = new HashMap<String, ISVNConnectorFactory>();
-					this.validConnectors = new HashSet<String>();
+				if (connectors == null) {
+					connectors = new HashMap<>();
+					validConnectors = new HashSet<>();
 					Object[] extensions = CoreExtensionsManager.loadCoreExtensions(CoreExtensionsManager.SVN_CONNECTOR);
-					for (int i = 0; i < extensions.length; i++) {
+					for (Object extension : extensions) {
 						ISVNConnectorFactory factory = new ThreadNameModifierFactory(
-								(ISVNConnectorFactory) extensions[i]);
+								(ISVNConnectorFactory) extension);
 						try {
 							// extension point API changed and old connectors will be declined due to version changes or AbstractMethodError.
 							if (factory.getCompatibilityVersion()
@@ -282,8 +279,8 @@ public class CoreExtensionsManager {
 						} catch (Throwable ex) {
 							continue;
 						}
-						this.connectors.put(factory.getId(), factory);
-						this.validateClient(factory);
+						connectors.put(factory.getId(), factory);
+						validateClient(factory);
 					}
 				}
 			}
@@ -294,7 +291,7 @@ public class CoreExtensionsManager {
 	private void validateClient(ISVNConnectorFactory connector) {
 		try {
 			connector.createConnector().dispose();
-			this.validConnectors.add(connector.getId());
+			validConnectors.add(connector.getId());
 		} catch (Throwable ex) {
 			ex.printStackTrace();
 			// do nothing
@@ -313,12 +310,12 @@ public class CoreExtensionsManager {
 			throw new RuntimeException(errMessage);
 		}
 		IExtension[] extensions = extension.getExtensions();
-		ArrayList<Object> retVal = new ArrayList<Object>();
-		for (int i = 0; i < extensions.length; i++) {
-			IConfigurationElement[] configElements = extensions[i].getConfigurationElements();
-			for (int j = 0; j < configElements.length; j++) {
+		ArrayList<Object> retVal = new ArrayList<>();
+		for (IExtension extension2 : extensions) {
+			IConfigurationElement[] configElements = extension2.getConfigurationElements();
+			for (IConfigurationElement configElement : configElements) {
 				try {
-					retVal.add(configElements[j].createExecutableExtension("class")); //$NON-NLS-1$
+					retVal.add(configElement.createExecutableExtension("class")); //$NON-NLS-1$
 				} catch (CoreException ex) {
 					LoggedOperation.reportError(SVNMessages.getErrorString("Error_LoadExtensions"), ex); //$NON-NLS-1$
 				}

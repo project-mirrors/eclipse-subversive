@@ -24,7 +24,7 @@ package org.eclipse.team.svn.core.connector;
  * @author Alexander Gurov
  */
 public interface ISVNProgressMonitor {
-	public static final int TOTAL_UNKNOWN = -1;
+	int TOTAL_UNKNOWN = -1;
 
 	public static class ItemState {
 		public final String path;
@@ -65,9 +65,9 @@ public interface ISVNProgressMonitor {
 		}
 	}
 
-	public void progress(int current, int total, ItemState state);
+	void progress(int current, int total, ItemState state);
 
-	public void commitStatus(SVNCommitStatus status);
+	void commitStatus(SVNCommitStatus status);
 
-	public boolean isActivityCancelled();
+	boolean isActivityCancelled();
 }

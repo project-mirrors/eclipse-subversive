@@ -39,7 +39,7 @@ public class FileTestRepositoryManager implements TestRepositoryManager {
 	protected ResourceBundle bundle = TestPlugin.instance().getResourceBundle();
 
 	public FileTestRepositoryManager() {
-		this.svnStorage = SVNFileStorage.instance();
+		svnStorage = SVNFileStorage.instance();
 	}
 
 	@Override
@@ -48,35 +48,35 @@ public class FileTestRepositoryManager implements TestRepositoryManager {
 		// TestUtil.setUpRemoteRepository()
 		// this extended version was taken from TestWorkflow
 
-		HashMap<String, Object> preferences = new HashMap<String, Object>();
+		HashMap<String, Object> preferences = new HashMap<>();
 		preferences.put(ISVNStorage.PREF_STATE_INFO_LOCATION, TestPlugin.instance().getStateLocation());
 		svnStorage.initialize(preferences);
 
-		this.repositoryLocation = svnStorage.newRepositoryLocation();
-		this.repositoryLocation.setUrl(bundle.getString("Repository.URL"));
-		this.repositoryLocation.setTrunkLocation(bundle.getString("Repository.Trunk"));
-		this.repositoryLocation.setBranchesLocation(bundle.getString("Repository.Branches"));
-		this.repositoryLocation.setTagsLocation(bundle.getString("Repository.Tags"));
-		this.repositoryLocation.setStructureEnabled(true);
-		this.repositoryLocation.setLabel(bundle.getString("Repository.Label"));
-		this.repositoryLocation.setUsername(bundle.getString("Repository.Username"));
-		this.repositoryLocation.setPassword(bundle.getString("Repository.Password"));
-		this.repositoryLocation.setPasswordSaved("true".equals(bundle.getString("Repository.SavePassword")));
+		repositoryLocation = svnStorage.newRepositoryLocation();
+		repositoryLocation.setUrl(bundle.getString("Repository.URL"));
+		repositoryLocation.setTrunkLocation(bundle.getString("Repository.Trunk"));
+		repositoryLocation.setBranchesLocation(bundle.getString("Repository.Branches"));
+		repositoryLocation.setTagsLocation(bundle.getString("Repository.Tags"));
+		repositoryLocation.setStructureEnabled(true);
+		repositoryLocation.setLabel(bundle.getString("Repository.Label"));
+		repositoryLocation.setUsername(bundle.getString("Repository.Username"));
+		repositoryLocation.setPassword(bundle.getString("Repository.Password"));
+		repositoryLocation.setPasswordSaved("true".equals(bundle.getString("Repository.SavePassword")));
 
-		svnStorage.addRepositoryLocation(this.repositoryLocation);
-		this.repositoryLocation = svnStorage.getRepositoryLocation(this.repositoryLocation.getId());
+		svnStorage.addRepositoryLocation(repositoryLocation);
+		repositoryLocation = svnStorage.getRepositoryLocation(repositoryLocation.getId());
 
-		this.deleteRepositoryNode(SVNUtility.getProposedTrunk(this.repositoryLocation));
-		this.deleteRepositoryNode(SVNUtility.getProposedBranches(this.repositoryLocation));
-		this.deleteRepositoryNode(SVNUtility.getProposedTags(this.repositoryLocation));
+		deleteRepositoryNode(SVNUtility.getProposedTrunk(repositoryLocation));
+		deleteRepositoryNode(SVNUtility.getProposedBranches(repositoryLocation));
+		deleteRepositoryNode(SVNUtility.getProposedTags(repositoryLocation));
 
-		CreateFolderOperation op = new CreateFolderOperation(this.repositoryLocation.getRoot(),
-				this.repositoryLocation.getTrunkLocation(), "create trunk");
+		CreateFolderOperation op = new CreateFolderOperation(repositoryLocation.getRoot(),
+				repositoryLocation.getTrunkLocation(), "create trunk");
 		op.run(new NullProgressMonitor());
-		op = new CreateFolderOperation(this.repositoryLocation.getRoot(), this.repositoryLocation.getBranchesLocation(),
+		op = new CreateFolderOperation(repositoryLocation.getRoot(), repositoryLocation.getBranchesLocation(),
 				"create branches");
 		op.run(new NullProgressMonitor());
-		op = new CreateFolderOperation(this.repositoryLocation.getRoot(), this.repositoryLocation.getTagsLocation(),
+		op = new CreateFolderOperation(repositoryLocation.getRoot(), repositoryLocation.getTagsLocation(),
 				"createTags");
 		op.run(new NullProgressMonitor());
 
@@ -92,25 +92,25 @@ public class FileTestRepositoryManager implements TestRepositoryManager {
 		}
 
 		try {
-			this.cleanRepositoryNode(SVNUtility.getProposedTags(this.repositoryLocation));
+			cleanRepositoryNode(SVNUtility.getProposedTags(repositoryLocation));
 		} catch (Exception ex) {
 		}
 		try {
-			this.cleanRepositoryNode(SVNUtility.getProposedBranches(this.repositoryLocation));
+			cleanRepositoryNode(SVNUtility.getProposedBranches(repositoryLocation));
 		} catch (Exception ex) {
 		}
 		try {
-			this.cleanRepositoryNode(SVNUtility.getProposedTrunk(this.repositoryLocation));
+			cleanRepositoryNode(SVNUtility.getProposedTrunk(repositoryLocation));
 		} catch (Exception ex) {
 		}
 
 		ISVNStorage storage = svnStorage;
 		IRepositoryLocation[] locations = storage.getRepositoryLocations();
 
-		for (int i = 0; i < locations.length; i++) {
-			locations[i].dispose();
+		for (IRepositoryLocation location : locations) {
+			location.dispose();
 			try {
-				storage.removeRepositoryLocation(locations[i]);
+				storage.removeRepositoryLocation(location);
 			} catch (Exception ex) {
 			}
 		}
@@ -137,12 +137,12 @@ public class FileTestRepositoryManager implements TestRepositoryManager {
 				for (int i = 0; i < children.length; i++) {
 					toDelete[i] = SVNUtility.encodeURL(children[i].getUrl());
 				}
-				ISVNConnector proxy = this.repositoryLocation.acquireSVNProxy();
+				ISVNConnector proxy = repositoryLocation.acquireSVNProxy();
 				try {
 					proxy.removeRemote(toDelete, "Test Done", ISVNConnector.Options.FORCE, null,
 							new SVNNullProgressMonitor());
 				} finally {
-					this.repositoryLocation.releaseSVNProxy(proxy);
+					repositoryLocation.releaseSVNProxy(proxy);
 				}
 			}
 		}

@@ -46,6 +46,7 @@ import org.eclipse.team.ui.synchronize.ISynchronizePageConfiguration;
 public class AddToSVNIgnoreActionHelper extends AbstractActionHelper {
 
 	protected static IStateFilter SF_NEW_AND_PARENT_VERSIONED = new IStateFilter.AbstractStateFilter() {
+		@Override
 		protected boolean acceptImpl(ILocalResource local, IResource resource, String state, int mask) {
 			if (state == IStateFilter.ST_NEW) {
 				return IStateFilter.SF_VERSIONED
@@ -54,6 +55,7 @@ public class AddToSVNIgnoreActionHelper extends AbstractActionHelper {
 			return false;
 		}
 
+		@Override
 		protected boolean allowsRecursionImpl(ILocalResource local, IResource resource, String state, int mask) {
 			return true;
 		}
@@ -63,8 +65,10 @@ public class AddToSVNIgnoreActionHelper extends AbstractActionHelper {
 		super(action, configuration);
 	}
 
+	@Override
 	public FastSyncInfoFilter getSyncInfoFilter() {
 		return new FastSyncInfoFilter() {
+			@Override
 			public boolean select(SyncInfo info) {
 				UpdateSyncInfo sync = (UpdateSyncInfo) info;
 				return AddToSVNIgnoreActionHelper.SF_NEW_AND_PARENT_VERSIONED.accept(sync.getLocalResource());
@@ -75,13 +79,14 @@ public class AddToSVNIgnoreActionHelper extends AbstractActionHelper {
 	/* (non-Javadoc)
 	 * @see org.eclipse.team.svn.ui.synchronize.action.AbstractActionHelper#getOperation()
 	 */
+	@Override
 	public IActionOperation getOperation() {
 		//FIXME add unversioned parents if required
-		IResource[] resources = FileUtility.shrinkChildNodes(this.getSyncInfoSelector().getSelectedResources());
+		IResource[] resources = FileUtility.shrinkChildNodes(getSyncInfoSelector().getSelectedResources());
 		IResource[] operableParents = FileUtility.getOperableParents(resources, IStateFilter.SF_UNVERSIONED);
 		if (operableParents.length > 0) {
 			final AddToSVNPanel panel = new AddToSVNPanel(operableParents);
-			final DefaultDialog dialog1 = new DefaultDialog(this.configuration.getSite().getShell(), panel);
+			final DefaultDialog dialog1 = new DefaultDialog(configuration.getSite().getShell(), panel);
 			if (dialog1.open() != 0) {
 				return null;
 			}
@@ -89,7 +94,7 @@ public class AddToSVNIgnoreActionHelper extends AbstractActionHelper {
 		}
 
 		IgnoreMethodPanel panel = new IgnoreMethodPanel(resources);
-		DefaultDialog dialog = new DefaultDialog(this.configuration.getSite().getShell(), panel);
+		DefaultDialog dialog = new DefaultDialog(configuration.getSite().getShell(), panel);
 		if (dialog.open() != 0) {
 			return null;
 		}
@@ -105,9 +110,9 @@ public class AddToSVNIgnoreActionHelper extends AbstractActionHelper {
 		}
 
 		op.add(mainOp);
-		HashSet<IResource> tmp = new HashSet<IResource>(Arrays.asList(resources));
-		for (int i = 0; i < resources.length; i++) {
-			tmp.add(resources[i].getParent());
+		HashSet<IResource> tmp = new HashSet<>(Arrays.asList(resources));
+		for (IResource element : resources) {
+			tmp.add(element.getParent());
 		}
 		IResource[] resourcesAndParents = tmp.toArray(new IResource[tmp.size()]);
 		op.add(new RefreshResourcesOperation(resourcesAndParents, IResource.DEPTH_INFINITE,

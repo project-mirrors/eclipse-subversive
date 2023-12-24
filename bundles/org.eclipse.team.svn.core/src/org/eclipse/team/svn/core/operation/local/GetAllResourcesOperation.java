@@ -34,18 +34,19 @@ public class GetAllResourcesOperation extends AbstractActionOperation {
 	public GetAllResourcesOperation(IContainer container) {
 		super("Operation_GetResourceList", SVNMessages.class); //$NON-NLS-1$
 		this.container = container;
-		this.children = new IResource[0];
+		children = new IResource[0];
 	}
 
+	@Override
 	protected void runImpl(IProgressMonitor monitor) throws Exception {
-		IResource[] retVal = SVNRemoteStorage.instance().getRegisteredChildren(this.container);
+		IResource[] retVal = SVNRemoteStorage.instance().getRegisteredChildren(container);
 		if (retVal != null) {
-			this.children = retVal;
+			children = retVal;
 		}
 	}
 
 	public IResource[] getChildren() {
-		return this.children;
+		return children;
 	}
 
 }

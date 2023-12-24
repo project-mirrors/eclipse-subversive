@@ -51,8 +51,8 @@ public class SVNDiffStatus extends SVNEntryStatus {
 	 */
 	public SVNDiffStatus(String path1, String path2, SVNEntry.Kind nodeKind, Kind textStatus, Kind propStatus) {
 		super(nodeKind, textStatus, propStatus);
-		this.pathPrev = path1;
-		this.pathNext = path2;
+		pathPrev = path1;
+		pathNext = path2;
 	}
 
 }

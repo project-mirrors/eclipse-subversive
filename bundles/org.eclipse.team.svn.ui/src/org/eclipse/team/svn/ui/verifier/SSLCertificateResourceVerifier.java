@@ -9,7 +9,7 @@
  *
  * Contributors:
  *    Sergiy Logvin - Initial API and implementation
- *    Markus Oberlassnig (ilogs information logistics GmbH) - MSCAPI support via SVNKit 
+ *    Markus Oberlassnig (ilogs information logistics GmbH) - MSCAPI support via SVNKit
  *    Alexander Fedorov (ArSysOp) - ongoing support
  *******************************************************************************/
 
@@ -32,8 +32,9 @@ public class SSLCertificateResourceVerifier extends ExistingResourceVerifier {
 		super(fieldName);
 	}
 
+	@Override
 	protected String getErrorMessageImpl(Control input) {
-		String fileName = this.getText(input);
+		String fileName = getText(input);
 		if (fileName != null && ("MSCAPI".equals(fileName) || fileName.startsWith("MSCAPI;"))) {
 			// it's ok - use Microsoft Crypto API
 		} else {

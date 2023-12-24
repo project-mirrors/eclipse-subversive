@@ -62,22 +62,22 @@ public class RepositoryResourceBaseSelectionComposite extends Composite {
 			String historyKey, String comboId, IRepositoryResource baseResource, String selectionTitle,
 			String selectionDescription) {
 		super(parent, style);
-		this.urlHistory = new UserInputHistory(historyKey);
+		urlHistory = new UserInputHistory(historyKey);
 		this.validationManager = validationManager;
 		this.baseResource = baseResource;
 		this.selectionTitle = selectionTitle;
 		this.selectionDescription = selectionDescription;
 		this.comboId = comboId;
-		this.foldersOnly = !(baseResource instanceof IRepositoryFile);
+		foldersOnly = !(baseResource instanceof IRepositoryFile);
 	}
 
 	public final void setBaseResource(IRepositoryResource baseResource) {
 		this.baseResource = baseResource;
-		this.setBaseResourceImpl();
+		setBaseResourceImpl();
 	}
 
 	protected void setBaseResourceImpl() {
-		this.urlText.setText(this.baseResource.getUrl());
+		urlText.setText(baseResource.getUrl());
 	}
 
 	public void setFoldersOnly(boolean foldersOnly) {
@@ -85,11 +85,11 @@ public class RepositoryResourceBaseSelectionComposite extends Composite {
 	}
 
 	public boolean isSelectionAvailable() {
-		return this.getDestination(SVNUtility.asEntryReference(this.url), true) != null;
+		return getDestination(SVNUtility.asEntryReference(url), true) != null;
 	}
 
 	public IRepositoryResource getSelectedResource() {
-		return this.getDestination(SVNUtility.asEntryReference(this.url), false);
+		return getDestination(SVNUtility.asEntryReference(url), false);
 	}
 
 	public void addVerifier(AbstractVerifier verifier) {
@@ -101,44 +101,45 @@ public class RepositoryResourceBaseSelectionComposite extends Composite {
 	}
 
 	public void setUrl(String url) {
-		this.urlText.setText(url);
+		urlText.setText(url);
 	}
 
 	public String getUrl() {
-		return this.urlText.getText();
+		return urlText.getText();
 	}
 
 	public void saveHistory() {
-		this.urlHistory.addLine(this.urlText.getText());
+		urlHistory.addLine(urlText.getText());
 	}
 
+	@Override
 	public void setEnabled(boolean enabled) {
 		super.setEnabled(enabled);
-		this.urlText.setEnabled(enabled);
-		this.browse.setEnabled(enabled);
+		urlText.setEnabled(enabled);
+		browse.setEnabled(enabled);
 	}
 
 	protected IRepositoryResource getDestination(SVNEntryReference ref, boolean allowsNull) {
 		if (ref == null) {
-			if (this.baseResource == null) {
+			if (baseResource == null) {
 				if (allowsNull) {
 					return null;
 				}
 				throw new IllegalArgumentException("SVN entry reference cannot be null.");
 			}
-			return SVNUtility.copyOf(this.baseResource);
+			return SVNUtility.copyOf(baseResource);
 		}
 		String url = SVNUtility.normalizeURL(ref.path);
 		try {
-			IRepositoryResource base = this.baseResource;
+			IRepositoryResource base = baseResource;
 			IRepositoryResource resource = null;
 			if (base != null) {
-				resource = this.foldersOnly
-						? (IRepositoryResource) this.baseResource.asRepositoryContainer(url, false)
-						: this.baseResource.asRepositoryFile(url, false);
+				resource = foldersOnly
+						? (IRepositoryResource) baseResource.asRepositoryContainer(url, false)
+						: baseResource.asRepositoryFile(url, false);
 			} else {
 				SVNUtility.getSVNUrl(url); // validate an URL
-				resource = SVNUtility.asRepositoryResource(url, this.foldersOnly);
+				resource = SVNUtility.asRepositoryResource(url, foldersOnly);
 			}
 			if (ref.pegRevision != null) {
 				resource.setPegRevision(ref.pegRevision);
@@ -148,10 +149,10 @@ public class RepositoryResourceBaseSelectionComposite extends Composite {
 			if (allowsNull) {
 				return null;
 			}
-			if (this.baseResource == null) {
+			if (baseResource == null) {
 				throw new IllegalArgumentException("SVN entry reference must contain a valid value.");
 			}
-			return SVNUtility.copyOf(this.baseResource);
+			return SVNUtility.copyOf(baseResource);
 		}
 	}
 }

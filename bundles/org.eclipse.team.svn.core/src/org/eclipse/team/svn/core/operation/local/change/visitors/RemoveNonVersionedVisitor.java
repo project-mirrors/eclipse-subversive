@@ -36,17 +36,19 @@ public class RemoveNonVersionedVisitor implements IResourceChangeVisitor {
 		this.addedAlso = addedAlso;
 	}
 
+	@Override
 	public void postVisit(ResourceChange change, IActionOperationProcessor processor, IProgressMonitor monitor)
 			throws Exception {
 
 	}
 
+	@Override
 	public void preVisit(ResourceChange change, IActionOperationProcessor processor, IProgressMonitor monitor)
 			throws Exception {
 		ILocalResource local = change.getLocal();
 		//don't delete ignored resources
 		if (IStateFilter.SF_UNVERSIONED.accept(local) && !IStateFilter.SF_IGNORED.accept(local)
-				|| this.addedAlso && local.getStatus() == IStateFilter.ST_ADDED) {
+				|| addedAlso && local.getStatus() == IStateFilter.ST_ADDED) {
 			File real = new File(FileUtility.getWorkingCopyPath(local.getResource()));
 			FileUtility.deleteRecursive(real);
 		}

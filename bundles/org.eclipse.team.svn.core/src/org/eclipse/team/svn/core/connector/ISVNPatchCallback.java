@@ -35,5 +35,5 @@ public interface ISVNPatchCallback {
 	 *            the path of the reject file
 	 * @return <code>true</code> to filter out the prospective patch
 	 */
-	public boolean singlePatch(String pathFromPatchfile, String patchPath, String rejectPath);
+	boolean singlePatch(String pathFromPatchfile, String patchPath, String rejectPath);
 }

@@ -44,18 +44,19 @@ public class SelectCheckoutResourcePage extends AbstractVerifiedWizardPage {
 		super(
 				SelectCheckoutResourcePage.class.getName(), SVNUIMessages.SelectCheckoutResourcePage_Title,
 				SVNTeamUIPlugin.instance().getImageDescriptor("icons/wizards/newconnect.gif")); //$NON-NLS-1$
-		this.setDescription(SVNUIMessages.SelectCheckoutResourcePage_Description);
+		setDescription(SVNUIMessages.SelectCheckoutResourcePage_Description);
 	}
 
 	public void setRepositoryLocation(IRepositoryLocation location) {
-		this.selectedResource = this.baseResource = location.getRoot();
-		this.selectComposite.setBaseResource(this.baseResource);
+		selectedResource = baseResource = location.getRoot();
+		selectComposite.setBaseResource(baseResource);
 	}
 
 	public IRepositoryResource getSelectedResource() {
-		return this.selectedResource;
+		return selectedResource;
 	}
 
+	@Override
 	protected Composite createControlImpl(Composite parent) {
 		GridData data = null;
 		GridLayout layout = null;
@@ -67,14 +68,14 @@ public class SelectCheckoutResourcePage extends AbstractVerifiedWizardPage {
 		data = new GridData(GridData.FILL_BOTH);
 		composite.setLayoutData(data);
 
-		this.selectComposite = new RepositoryResourceSelectionComposite(
-				composite, SWT.NONE, this, "selectCheckoutUrl", this.baseResource, true, //$NON-NLS-1$
+		selectComposite = new RepositoryResourceSelectionComposite(
+				composite, SWT.NONE, this, "selectCheckoutUrl", baseResource, true, //$NON-NLS-1$
 				SVNUIMessages.SelectRepositoryResourcePage_Select_Title,
 				SVNUIMessages.SelectRepositoryResourcePage_Select_Description,
 				RepositoryResourceSelectionComposite.MODE_DEFAULT, RepositoryResourceSelectionComposite.TEXT_BASE);
 		data = new GridData(GridData.FILL_HORIZONTAL);
 		data.widthHint = 550;
-		this.selectComposite.setLayoutData(data);
+		selectComposite.setLayoutData(data);
 
 		//Setting context help
 		PlatformUI.getWorkbench()
@@ -84,9 +85,10 @@ public class SelectCheckoutResourcePage extends AbstractVerifiedWizardPage {
 		return composite;
 	}
 
+	@Override
 	public IWizardPage getNextPage() {
-		this.selectedResource = this.selectComposite.getSelectedResource();
-		this.selectComposite.saveHistory();
+		selectedResource = selectComposite.getSelectedResource();
+		selectComposite.saveHistory();
 		return super.getNextPage();
 	}
 }

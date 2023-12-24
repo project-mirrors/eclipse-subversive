@@ -22,5 +22,5 @@ import org.eclipse.core.resources.IResource;
  * @author Alexander Gurov
  */
 public interface IResourceProvider {
-	public IResource[] getResources();
+	IResource[] getResources();
 }

@@ -26,10 +26,12 @@ import org.eclipse.ui.model.IWorkbenchAdapter2;
  * @author Alexander Gurov
  */
 public abstract class RepositoryFictiveNode implements IWorkbenchAdapter, IWorkbenchAdapter2, IAdaptable {
+	@Override
 	public Object getParent(Object o) {
 		return null;
 	}
 
+	@Override
 	public Object getAdapter(Class adapter) {
 		if (adapter.equals(IWorkbenchAdapter.class) || adapter.equals(IWorkbenchAdapter2.class)) {
 			return this;
@@ -37,15 +39,18 @@ public abstract class RepositoryFictiveNode implements IWorkbenchAdapter, IWorkb
 		return null;
 	}
 
+	@Override
 	public RGB getBackground(Object element) {
 		// do not change default background color
 		return null;
 	}
 
+	@Override
 	public RGB getForeground(Object element) {
 		return null;
 	}
 
+	@Override
 	public FontData getFont(Object element) {
 		// do not change default font
 		return null;

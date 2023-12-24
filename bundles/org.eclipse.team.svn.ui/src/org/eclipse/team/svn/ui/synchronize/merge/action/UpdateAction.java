@@ -24,6 +24,7 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.team.core.synchronize.FastSyncInfoFilter;
 import org.eclipse.team.core.synchronize.SyncInfo;
+import org.eclipse.team.svn.core.BaseMessages;
 import org.eclipse.team.svn.core.IStateFilter;
 import org.eclipse.team.svn.core.operation.CompositeOperation;
 import org.eclipse.team.svn.core.operation.IActionOperation;
@@ -55,17 +56,19 @@ public class UpdateAction extends AbstractSynchronizeModelAction {
 
 	public UpdateAction(String text, ISynchronizePageConfiguration configuration) {
 		super(text, configuration);
-		this.advancedMode = false;
+		advancedMode = false;
 	}
 
 	public UpdateAction(String text, ISynchronizePageConfiguration configuration,
 			ISelectionProvider selectionProvider) {
 		super(text, configuration, selectionProvider);
-		this.advancedMode = true;
+		advancedMode = true;
 	}
 
+	@Override
 	protected FastSyncInfoFilter getSyncInfoFilter() {
 		return new FastSyncInfoFilter.SyncInfoDirectionFilter(new int[] { SyncInfo.INCOMING, SyncInfo.OUTGOING }) {
+			@Override
 			public boolean select(SyncInfo info) {
 				return super.select(info)
 						&& !IStateFilter.SF_OBSTRUCTED.accept(((AbstractSVNSyncInfo) info).getLocalResource());
@@ -73,14 +76,15 @@ public class UpdateAction extends AbstractSynchronizeModelAction {
 		};
 	}
 
+	@Override
 	protected IActionOperation getOperation(ISynchronizePageConfiguration configuration, IDiffElement[] elements) {
-		IResource[] allResources = this.syncInfoSelector.getSelectedResources();
-		if (this.advancedMode) {
+		IResource[] allResources = syncInfoSelector.getSelectedResources();
+		if (advancedMode) {
 			String message;
 			if (allResources.length == 1) {
 				message = SVNUIMessages.AcceptAll_Message_Single;
 			} else {
-				message = SVNUIMessages.format(SVNUIMessages.AcceptAll_Message_Multi,
+				message = BaseMessages.format(SVNUIMessages.AcceptAll_Message_Multi,
 						new String[] { String.valueOf(allResources.length) });
 			}
 			MessageDialog dlg = new MessageDialog(configuration.getSite().getShell(), SVNUIMessages.AcceptAll_Title,
@@ -91,17 +95,17 @@ public class UpdateAction extends AbstractSynchronizeModelAction {
 			}
 		}
 
-		AbstractSVNSyncInfo[] infos = this.getSVNSyncInfos();
-		HashMap<String, String> remote2local = new HashMap<String, String>();
-		ArrayList<IRepositoryResource> remoteSet = new ArrayList<IRepositoryResource>();
-		ArrayList<IResource> localSet = new ArrayList<IResource>();
-		for (int i = 0; i < infos.length; i++) {
-			ILocalResource remote = infos[i].getRemoteChangeResource();
+		AbstractSVNSyncInfo[] infos = getSVNSyncInfos();
+		HashMap<String, String> remote2local = new HashMap<>();
+		ArrayList<IRepositoryResource> remoteSet = new ArrayList<>();
+		ArrayList<IResource> localSet = new ArrayList<>();
+		for (AbstractSVNSyncInfo element : infos) {
+			ILocalResource remote = element.getRemoteChangeResource();
 			if (remote instanceof IResourceChange && ISyncStateFilter.SF_ONREPOSITORY.acceptRemote(remote.getResource(),
 					remote.getStatus(), remote.getChangeMask())) {
-				IResource resource = infos[i].getLocal();
+				IResource resource = element.getLocal();
 				localSet.add(resource);
-				IRepositoryResource remoteResource = ((IResourceChange) infos[i].getRemoteChangeResource())
+				IRepositoryResource remoteResource = ((IResourceChange) element.getRemoteChangeResource())
 						.getOriginator();
 				remoteSet.add(remoteResource);
 				remote2local.put(SVNUtility.encodeURL(remoteResource.getUrl()),

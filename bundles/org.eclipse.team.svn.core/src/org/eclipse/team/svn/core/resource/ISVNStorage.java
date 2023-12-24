@@ -24,35 +24,35 @@ import org.eclipse.core.runtime.IPath;
  * @author Alexander Gurov
  */
 public interface ISVNStorage extends IRepositoryLocationFactory {
-	public static final int IGNORE_NAME = 0;
+	int IGNORE_NAME = 0;
 
-	public static final int IGNORE_EXTENSION = 1;
+	int IGNORE_EXTENSION = 1;
 
-	public static final int IGNORE_PATTERN = 2;
+	int IGNORE_PATTERN = 2;
 
-	public static final String PREF_STATE_INFO_LOCATION = "stateInfoLocation";
+	String PREF_STATE_INFO_LOCATION = "stateInfoLocation";
 
-	public static final String PREF_NO_STORED_AUTHENTICATION = "noStoredAuthentication";
+	String PREF_NO_STORED_AUTHENTICATION = "noStoredAuthentication";
 
-	public void initialize(IPath stateInfoLocation) throws Exception;
+	void initialize(IPath stateInfoLocation) throws Exception;
 
-	public void initialize(Map<String, Object> preferences) throws Exception;
+	void initialize(Map<String, Object> preferences) throws Exception;
 
-	public void dispose();
+	void dispose();
 
-	public IRepositoryLocation[] getRepositoryLocations();
+	IRepositoryLocation[] getRepositoryLocations();
 
-	public IRepositoryLocation getRepositoryLocation(String id);
+	IRepositoryLocation getRepositoryLocation(String id);
 
-	public void addRepositoryLocation(IRepositoryLocation location);
+	void addRepositoryLocation(IRepositoryLocation location);
 
-	public void removeRepositoryLocation(IRepositoryLocation location);
+	void removeRepositoryLocation(IRepositoryLocation location);
 
-	public void reconfigureLocations();
+	void reconfigureLocations();
 
-	public void saveConfiguration() throws Exception;
+	void saveConfiguration() throws Exception;
 
-	public byte[] repositoryResourceAsBytes(IRepositoryResource resource);
+	byte[] repositoryResourceAsBytes(IRepositoryResource resource);
 
-	public IRepositoryResource repositoryResourceFromBytes(byte[] bytes);
+	IRepositoryResource repositoryResourceFromBytes(byte[] bytes);
 }

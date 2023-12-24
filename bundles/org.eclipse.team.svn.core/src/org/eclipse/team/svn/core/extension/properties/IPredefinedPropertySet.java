@@ -23,12 +23,13 @@ import java.util.Map;
  * @author Sergiy Logvin
  */
 public interface IPredefinedPropertySet {
-	public List<PredefinedProperty> getPredefinedProperties();
+	List<PredefinedProperty> getPredefinedProperties();
 
-	public PredefinedProperty getPredefinedProperty(String name);
+	PredefinedProperty getPredefinedProperty(String name);
 
 	/**
 	 * @deprecated
 	 */
-	public Map<String, String> getPredefinedPropertiesRegexps();
+	@Deprecated
+	Map<String, String> getPredefinedPropertiesRegexps();
 }

@@ -25,13 +25,14 @@ public class CompositePropFindVisitor implements IPropFindVisitor {
 	protected IPropFindVisitor[] visitorsList;
 
 	public CompositePropFindVisitor(IPropFindVisitor[] visitorsListParam) {
-		this.visitorsList = visitorsListParam;
+		visitorsList = visitorsListParam;
 	}
 
+	@Override
 	public boolean visit(SVNProperty propertyParam) {
 		boolean retVal = false;
-		for (int i = 0; i < this.visitorsList.length; i++) {
-			retVal |= this.visitorsList[i].visit(propertyParam);
+		for (IPropFindVisitor element : visitorsList) {
+			retVal |= element.visit(propertyParam);
 		}
 		return retVal;
 	}

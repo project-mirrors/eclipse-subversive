@@ -40,15 +40,15 @@ public class RemoteResourceTransfer extends ByteArrayTransfer {
 	protected static final RemoteResourceTransfer instance = new RemoteResourceTransfer();
 
 	protected RemoteResourceTransfer() {
-		super();
 	}
 
 	public static RemoteResourceTransfer getInstance() {
 		return RemoteResourceTransfer.instance;
 	}
 
+	@Override
 	public void javaToNative(Object object, TransferData transferData) {
-		if (object == null || !(object instanceof RemoteResourceTransferrable) || !this.isSupportedType(transferData)) {
+		if (object == null || !(object instanceof RemoteResourceTransferrable) || !isSupportedType(transferData)) {
 			return;
 		}
 		RemoteResourceTransferrable transferrable = (RemoteResourceTransferrable) object;
@@ -57,10 +57,10 @@ public class RemoteResourceTransfer extends ByteArrayTransfer {
 		try {
 			stream.write(transferrable.operation);
 			if (transferrable.resources != null && transferrable.operation != RemoteResourceTransferrable.OP_NONE) {
-				for (int i = 0; i < transferrable.resources.length; i++) {
-					byte[] data = SVNRemoteStorage.instance().repositoryResourceAsBytes(transferrable.resources[i]);
+				for (IRepositoryResource element : transferrable.resources) {
+					byte[] data = SVNRemoteStorage.instance().repositoryResourceAsBytes(element);
 					stream.write(data.length & 0xFF);
-					stream.write((data.length >> 8) & 0xFF);
+					stream.write(data.length >> 8 & 0xFF);
 					stream.write(data);
 				}
 			}
@@ -77,8 +77,9 @@ public class RemoteResourceTransfer extends ByteArrayTransfer {
 		super.javaToNative(stream.toByteArray(), transferData);
 	}
 
+	@Override
 	public Object nativeToJava(TransferData transferData) {
-		if (!this.isSupportedType(transferData)) {
+		if (!isSupportedType(transferData)) {
 			return null;
 		}
 		byte[] bytes = (byte[]) super.nativeToJava(transferData);
@@ -87,7 +88,7 @@ public class RemoteResourceTransfer extends ByteArrayTransfer {
 		}
 
 		IRemoteStorage storage = SVNRemoteStorage.instance();
-		List<IRepositoryResource> retVal = new ArrayList<IRepositoryResource>();
+		List<IRepositoryResource> retVal = new ArrayList<>();
 		int operation = RemoteResourceTransferrable.OP_COPY;
 		ByteArrayInputStream stream = new ByteArrayInputStream(bytes);
 		try {
@@ -122,10 +123,12 @@ public class RemoteResourceTransfer extends ByteArrayTransfer {
 				retVal.toArray(new IRepositoryResource[retVal.size()]), operation);
 	}
 
+	@Override
 	protected String[] getTypeNames() {
 		return new String[] { RemoteResourceTransfer.TYPE_NAME };
 	}
 
+	@Override
 	protected int[] getTypeIds() {
 		return new int[] { RemoteResourceTransfer.TYPE_ID };
 	}

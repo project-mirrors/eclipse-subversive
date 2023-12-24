@@ -39,18 +39,18 @@ public abstract class ResourceChange {
 	public ResourceChange(ResourceChange parent, ILocalResource local, boolean needsTemporary) {
 		this.local = local;
 		if (needsTemporary) {
-			this.tmp = SVNTeamPlugin.instance()
+			tmp = SVNTeamPlugin.instance()
 					.getTemporaryFile(parent == null ? null : parent.getTemporary(), local.getName());
 		}
-		this.properties = null;
+		properties = null;
 	}
 
 	public ILocalResource getLocal() {
-		return this.local;
+		return local;
 	}
 
 	public SVNProperty[] getProperties() {
-		return this.properties;
+		return properties;
 	}
 
 	public void setProperties(SVNProperty[] properties) {
@@ -58,19 +58,19 @@ public abstract class ResourceChange {
 	}
 
 	public File getTemporary() {
-		return this.tmp;
+		return tmp;
 	}
 
 	public void disposeChangeModel(IProgressMonitor monitor) throws Exception {
-		if (this.tmp != null) {
-			FileUtility.deleteRecursive(this.tmp, monitor);
+		if (tmp != null) {
+			FileUtility.deleteRecursive(tmp, monitor);
 		}
 	}
 
 	public void traverse(IResourceChangeVisitor visitor, int depth, IActionOperationProcessor processor,
 			IProgressMonitor monitor) throws Exception {
-		this.preTraverse(visitor, depth, processor, monitor);
-		this.postTraverse(visitor, depth, processor, monitor);
+		preTraverse(visitor, depth, processor, monitor);
+		postTraverse(visitor, depth, processor, monitor);
 	}
 
 	protected abstract void preTraverse(IResourceChangeVisitor visitor, int depth, IActionOperationProcessor processor,

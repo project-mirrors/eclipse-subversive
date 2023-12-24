@@ -42,7 +42,7 @@ public abstract class AbstractRepositoryOperation extends AbstractActionOperatio
 	}
 
 	protected IRepositoryResource[] operableData() {
-		return this.resources == null ? this.provider.getRepositoryResources() : this.resources;
+		return resources == null ? provider.getRepositoryResources() : resources;
 	}
 
 }

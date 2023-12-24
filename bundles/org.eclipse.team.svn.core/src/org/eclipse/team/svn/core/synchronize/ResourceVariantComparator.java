@@ -28,6 +28,7 @@ import org.eclipse.team.svn.core.synchronize.variant.ResourceVariant;
  */
 public class ResourceVariantComparator implements IResourceVariantComparator {
 
+	@Override
 	public boolean compare(IResource local, IResourceVariant remote) {
 		if (local == null && remote == null) {
 			return true;
@@ -39,6 +40,7 @@ public class ResourceVariantComparator implements IResourceVariantComparator {
 		return resource.getRevision() == ((ResourceVariant) remote).getResource().getRevision();
 	}
 
+	@Override
 	public boolean compare(IResourceVariant base, IResourceVariant remote) {
 		if (base == remote) {
 			return true;
@@ -49,6 +51,7 @@ public class ResourceVariantComparator implements IResourceVariantComparator {
 		return base.getContentIdentifier().equals(remote.getContentIdentifier());
 	}
 
+	@Override
 	public boolean isThreeWay() {
 		return true;
 	}

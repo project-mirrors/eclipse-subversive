@@ -23,6 +23,6 @@ import org.eclipse.team.svn.core.connector.SVNProperty;
  */
 public interface IPropFindVisitor {
 
-	public boolean visit(SVNProperty propertyParam);
+	boolean visit(SVNProperty propertyParam);
 
 }

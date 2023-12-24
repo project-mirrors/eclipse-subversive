@@ -20,7 +20,6 @@ import org.eclipse.team.svn.core.SVNMessages;
 import org.eclipse.team.svn.core.connector.ISVNConnector;
 import org.eclipse.team.svn.core.extension.CoreExtensionsManager;
 import org.eclipse.team.svn.core.operation.IConsoleStream;
-import org.eclipse.team.svn.core.operation.IUnprotectedOperation;
 import org.eclipse.team.svn.core.operation.SVNProgressMonitor;
 import org.eclipse.team.svn.core.resource.IResourceProvider;
 import org.eclipse.team.svn.core.utility.FileUtility;
@@ -40,21 +39,17 @@ public class UpgradeWorkingCopyOperation extends AbstractWorkingCopyOperation {
 		super("Operation_Upgrade", SVNMessages.class, provider); //$NON-NLS-1$
 	}
 
+	@Override
 	protected void runImpl(IProgressMonitor monitor) throws Exception {
-		IResource[] resources = this.operableData();
+		IResource[] resources = operableData();
 		resources = FileUtility.shrinkChildNodes(resources);
 
 		final ISVNConnector proxy = CoreExtensionsManager.instance().getSVNConnectorFactory().createConnector();
 		try {
 			for (int i = 0; i < resources.length && !monitor.isCanceled(); i++) {
 				final String wcPath = FileUtility.getWorkingCopyPath(resources[i]);
-				this.writeToConsole(IConsoleStream.LEVEL_CMD,
-						"svn upgrade \"" + FileUtility.normalizePath(wcPath) + "\"\n"); //$NON-NLS-1$ //$NON-NLS-2$
-				this.protectStep(new IUnprotectedOperation() {
-					public void run(IProgressMonitor monitor) throws Exception {
-						proxy.upgrade(wcPath, new SVNProgressMonitor(UpgradeWorkingCopyOperation.this, monitor, null));
-					}
-				}, monitor, resources.length);
+				writeToConsole(IConsoleStream.LEVEL_CMD, "svn upgrade \"" + FileUtility.normalizePath(wcPath) + "\"\n"); //$NON-NLS-1$ //$NON-NLS-2$
+				this.protectStep(monitor1 -> proxy.upgrade(wcPath, new SVNProgressMonitor(UpgradeWorkingCopyOperation.this, monitor1, null)), monitor, resources.length);
 			}
 		} finally {
 			proxy.dispose();

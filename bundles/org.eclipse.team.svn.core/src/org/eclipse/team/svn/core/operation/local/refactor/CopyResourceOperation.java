@@ -48,27 +48,30 @@ public class CopyResourceOperation extends AbstractActionOperation {
 		this.skipSVNMeta = skipSVNMeta;
 	}
 
+	@Override
 	public ISchedulingRule getSchedulingRule() {
-		return SVNResourceRuleFactory.INSTANCE.copyRule(this.source, this.destination);
+		return SVNResourceRuleFactory.INSTANCE.copyRule(source, destination);
 	}
 
+	@Override
 	protected void runImpl(IProgressMonitor monitor) throws Exception {
 		try {
-			this.source.copy(this.destination.getFullPath(), true, monitor);
-			if (this.skipSVNMeta) {
-				FileUtility.removeSVNMetaInformation(this.destination, monitor);
+			source.copy(destination.getFullPath(), true, monitor);
+			if (skipSVNMeta) {
+				FileUtility.removeSVNMetaInformation(destination, monitor);
 			}
 		} catch (CoreException ex) {
-			if (!this.destination.isSynchronized(IResource.DEPTH_ZERO)) { // resource exists on disk, but not in sync with eclipse: exception shouldn't be reported
+			if (!destination.isSynchronized(IResource.DEPTH_ZERO)) { // resource exists on disk, but not in sync with eclipse: exception shouldn't be reported
 				throw new ActivityCancelledException(ex);
 			}
 			throw ex;
 		}
 	}
 
+	@Override
 	protected String getShortErrorMessage(Throwable t) {
 		return BaseMessages.format(super.getShortErrorMessage(t),
-				new Object[] { this.source.getName(), this.destination.toString() });
+				new Object[] { source.getName(), destination.toString() });
 	}
 
 }

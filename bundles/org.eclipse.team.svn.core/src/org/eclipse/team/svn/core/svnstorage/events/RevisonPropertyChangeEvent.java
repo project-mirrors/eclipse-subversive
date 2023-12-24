@@ -46,18 +46,18 @@ public class RevisonPropertyChangeEvent {
 	}
 
 	public int getAction() {
-		return this.action;
+		return action;
 	}
 
 	public SVNRevision getRevision() {
-		return this.revision;
+		return revision;
 	}
 
 	public SVNProperty getProperty() {
-		return this.property;
+		return property;
 	}
 
 	public IRepositoryLocation getLocation() {
-		return this.location;
+		return location;
 	}
 }

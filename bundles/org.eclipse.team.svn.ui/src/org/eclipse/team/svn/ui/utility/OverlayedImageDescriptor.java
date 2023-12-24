@@ -50,45 +50,48 @@ public class OverlayedImageDescriptor extends CompositeImageDescriptor {
 	protected int where;
 
 	public OverlayedImageDescriptor(Image base, ImageDescriptor overlay, Point size, int where) {
-		super();
 		this.base = base;
 		this.size = size;
 		this.overlay = overlay;
 		this.where = where;
 	}
 
+	@Override
 	protected void drawCompositeImage(int width, int height) {
-		this.drawImage(this.base.getImageData(), 0, 0);
+		this.drawImage(base.getImageData(), 0, 0);
 
-		ImageData overlayData = this.overlay.getImageData();
+		ImageData overlayData = overlay.getImageData();
 		int x = 0;
 		int y = 0;
-		if ((this.where & OverlayedImageDescriptor.CENTER_H) == OverlayedImageDescriptor.CENTER_H) {
-			x = (this.size.x - overlayData.width) / 2;
-		} else if ((this.where & OverlayedImageDescriptor.RIGHT) == OverlayedImageDescriptor.RIGHT) {
-			x = this.size.x - overlayData.width;
+		if ((where & OverlayedImageDescriptor.CENTER_H) == OverlayedImageDescriptor.CENTER_H) {
+			x = (size.x - overlayData.width) / 2;
+		} else if ((where & OverlayedImageDescriptor.RIGHT) == OverlayedImageDescriptor.RIGHT) {
+			x = size.x - overlayData.width;
 		}
-		if ((this.where & OverlayedImageDescriptor.CENTER_V) == OverlayedImageDescriptor.CENTER_V) {
-			y = (this.size.y - overlayData.height) / 2;
-		} else if ((this.where & OverlayedImageDescriptor.BOTTOM) == OverlayedImageDescriptor.BOTTOM) {
-			y = this.size.y - overlayData.height;
+		if ((where & OverlayedImageDescriptor.CENTER_V) == OverlayedImageDescriptor.CENTER_V) {
+			y = (size.y - overlayData.height) / 2;
+		} else if ((where & OverlayedImageDescriptor.BOTTOM) == OverlayedImageDescriptor.BOTTOM) {
+			y = size.y - overlayData.height;
 		}
 		this.drawImage(overlayData, x, y);
 	}
 
+	@Override
 	protected Point getSize() {
-		return this.size;
+		return size;
 	}
 
+	@Override
 	public int hashCode() {
-		return this.base.hashCode() ^ this.overlay.hashCode();
+		return base.hashCode() ^ overlay.hashCode();
 	}
 
+	@Override
 	public boolean equals(Object obj) {
 		if (obj != null && obj instanceof OverlayedImageDescriptor) {
 			OverlayedImageDescriptor other = (OverlayedImageDescriptor) obj;
-			return this.base.equals(other.base) && this.overlay.equals(other.overlay) && this.where == other.where
-					&& this.size.equals(other.size);
+			return base.equals(other.base) && overlay.equals(other.overlay) && where == other.where
+					&& size.equals(other.size);
 		}
 		return super.equals(obj);
 	}

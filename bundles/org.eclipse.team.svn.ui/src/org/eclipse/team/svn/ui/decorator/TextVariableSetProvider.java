@@ -109,7 +109,7 @@ public class TextVariableSetProvider implements IVariableSetProvider {
 
 	public static final IVariable CENTER_VARIABLE = TextVariableSetProvider.VAR_NAME;
 
-	private static final Map<String, IVariable> name2Variable = new HashMap<String, IVariable>();
+	private static final Map<String, IVariable> name2Variable = new HashMap<>();
 
 	static {
 		TextVariableSetProvider.name2Variable.put(TextVariableSetProvider.NAME_OF_LOCATION_URL,
@@ -148,14 +148,17 @@ public class TextVariableSetProvider implements IVariableSetProvider {
 
 	public static final TextVariableSetProvider instance = new TextVariableSetProvider();
 
+	@Override
 	public IVariable getCenterVariable() {
 		return TextVariableSetProvider.CENTER_VARIABLE;
 	}
 
+	@Override
 	public String getDomainName() {
 		return TextVariableSetProvider.DOMAIN_NAME;
 	}
 
+	@Override
 	public IVariable getVariable(String name) {
 		return TextVariableSetProvider.name2Variable.get(name);
 	}

@@ -34,8 +34,10 @@ public class EditConflictsActionHelper extends AbstractActionHelper {
 		super(action, configuration);
 	}
 
+	@Override
 	public FastSyncInfoFilter getSyncInfoFilter() {
 		return new FastSyncInfoFilter.SyncInfoDirectionFilter(new int[] { SyncInfo.CONFLICTING }) {
+			@Override
 			public boolean select(SyncInfo info) {
 				return super.select(info)
 						&& IStateFilter.SF_DATA_CONFLICTING.accept(((AbstractSVNSyncInfo) info).getLocalResource());
@@ -43,9 +45,10 @@ public class EditConflictsActionHelper extends AbstractActionHelper {
 		};
 	}
 
+	@Override
 	public IActionOperation getOperation() {
 		return new ShowConflictEditorOperation(
-				this.getSyncInfoSelector().getSelectedResources(IStateFilter.SF_DATA_CONFLICTING), false);
+				getSyncInfoSelector().getSelectedResources(IStateFilter.SF_DATA_CONFLICTING), false);
 	}
 
 }

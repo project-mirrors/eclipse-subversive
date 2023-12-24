@@ -28,12 +28,14 @@ public class RepositoryFile extends RepositoryResource {
 		super(parent, resource);
 	}
 
+	@Override
 	public Object[] getChildren(Object o) {
 		return null;
 	}
 
+	@Override
 	protected ImageDescriptor getImageDescriptorImpl() {
-		return PlatformUI.getWorkbench().getEditorRegistry().getImageDescriptor(this.resource.getName());
+		return PlatformUI.getWorkbench().getEditorRegistry().getImageDescriptor(resource.getName());
 	}
 
 }

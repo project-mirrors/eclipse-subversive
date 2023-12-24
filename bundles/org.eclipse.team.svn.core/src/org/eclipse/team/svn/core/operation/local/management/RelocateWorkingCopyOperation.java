@@ -34,7 +34,6 @@ import org.eclipse.team.svn.core.connector.ISVNConnector;
 import org.eclipse.team.svn.core.connector.SVNChangeStatus;
 import org.eclipse.team.svn.core.connector.SVNDepth;
 import org.eclipse.team.svn.core.operation.IConsoleStream;
-import org.eclipse.team.svn.core.operation.IUnprotectedOperation;
 import org.eclipse.team.svn.core.operation.SVNNullProgressMonitor;
 import org.eclipse.team.svn.core.operation.SVNProgressMonitor;
 import org.eclipse.team.svn.core.operation.local.AbstractWorkingCopyOperation;
@@ -64,73 +63,73 @@ public class RelocateWorkingCopyOperation extends AbstractWorkingCopyOperation i
 		this.location = location;
 	}
 
+	@Override
 	public IResource[] getResources() {
-		return this.resources == null ? new IResource[0] : this.resources.toArray(new IResource[this.resources.size()]);
+		return resources == null ? new IResource[0] : resources.toArray(new IResource[resources.size()]);
 	}
 
+	@Override
 	public ISchedulingRule getSchedulingRule() {
 		return ResourcesPlugin.getWorkspace().getRoot();
 	}
 
+	@Override
 	protected void runImpl(IProgressMonitor monitor) throws Exception {
-		this.resources = new ArrayList<IProject>();
-		IResource[] projects = this.operableData();
+		resources = new ArrayList<>();
+		IResource[] projects = operableData();
 		if (projects.length == 0) {
 			return;
 		}
-		final ISVNConnector proxy = this.location.acquireSVNProxy();
+		final ISVNConnector proxy = location.acquireSVNProxy();
 
 		try {
-			final IRepositoryResource[] children = this.location.getRepositoryRoot().getChildren();
-			final HashSet<String> processedPaths = new HashSet<String>(); // handle nested projects
+			final IRepositoryResource[] children = location.getRepositoryRoot().getChildren();
+			final HashSet<String> processedPaths = new HashSet<>(); // handle nested projects
 
 			for (int i = 0; i < projects.length && !monitor.isCanceled(); i++) {
 				final IProject current = (IProject) projects[i];
-				this.protectStep(new IUnprotectedOperation() {
-					public void run(IProgressMonitor monitor) throws Exception {
-						IPath fsLocation = FileUtility.getResourcePath(current);
-						if (fsLocation != FileUtility.getAlwaysIgnoredPath()) {
-							String path = RelocateWorkingCopyOperation.this.getWCRootPath(fsLocation.toString());
-							if (!processedPaths.contains(path)) {
-								SVNChangeStatus[] stats = SVNUtility.status(proxy, path, SVNDepth.EMPTY,
-										ISVNConnector.Options.INCLUDE_UNCHANGED, new SVNNullProgressMonitor());
-								if (stats.length > 0 && stats[0].url != null) {
-									String url = SVNUtility.decodeURL(stats[0].url);
-									String newURL = RelocateWorkingCopyOperation.this.remapURL(url, children);
-									if (!url.equals(newURL)) {
-										RelocateWorkingCopyOperation.this.writeToConsole(IConsoleStream.LEVEL_CMD,
-												"svn switch --relocate \"" + newURL + "\" \"" //$NON-NLS-1$//$NON-NLS-2$
-														+ FileUtility.normalizePath(path) + "\"" //$NON-NLS-1$
-														+ FileUtility.getUsernameParam(
-																RelocateWorkingCopyOperation.this.location
-																		.getUsername())
-														+ "\n"); //$NON-NLS-1$ //$NON-NLS-5$
-										proxy.relocate(url, newURL, path, SVNDepth.INFINITY, new SVNProgressMonitor(
-												RelocateWorkingCopyOperation.this, monitor, null));
-									}
+				this.protectStep(monitor1 -> {
+					IPath fsLocation = FileUtility.getResourcePath(current);
+					if (fsLocation != FileUtility.getAlwaysIgnoredPath()) {
+						String path = RelocateWorkingCopyOperation.this.getWCRootPath(fsLocation.toString());
+						if (!processedPaths.contains(path)) {
+							SVNChangeStatus[] stats = SVNUtility.status(proxy, path, SVNDepth.EMPTY,
+									ISVNConnector.Options.INCLUDE_UNCHANGED, new SVNNullProgressMonitor());
+							if (stats.length > 0 && stats[0].url != null) {
+								String url = SVNUtility.decodeURL(stats[0].url);
+								String newURL = RelocateWorkingCopyOperation.this.remapURL(url, children);
+								if (!url.equals(newURL)) {
+									RelocateWorkingCopyOperation.this.writeToConsole(IConsoleStream.LEVEL_CMD,
+											"svn switch --relocate \"" + newURL + "\" \"" //$NON-NLS-1$//$NON-NLS-2$
+													+ FileUtility.normalizePath(path) + "\"" //$NON-NLS-1$
+													+ FileUtility.getUsernameParam(
+															location.getUsername())
+													+ "\n"); //$NON-NLS-1$
+									proxy.relocate(url, newURL, path, SVNDepth.INFINITY, new SVNProgressMonitor(
+											RelocateWorkingCopyOperation.this, monitor1, null));
 								}
-								processedPaths.add(path);
 							}
-							SVNTeamProvider provider = (SVNTeamProvider) RepositoryProvider.getProvider(current,
-									SVNTeamPlugin.NATURE_ID);
-							provider.relocateResource();
-							RelocateWorkingCopyOperation.this.resources.add(current);
+							processedPaths.add(path);
 						}
+						SVNTeamProvider provider = (SVNTeamProvider) RepositoryProvider.getProvider(current,
+								SVNTeamPlugin.NATURE_ID);
+						provider.relocateResource();
+						resources.add(current);
 					}
 				}, monitor, projects.length);
 			}
 		} finally {
-			this.location.releaseSVNProxy(proxy);
+			location.releaseSVNProxy(proxy);
 		}
 	}
 
 	public String remapURL(String oldUrl, IRepositoryResource[] rootChildren) {
-		for (int i = 0; i < rootChildren.length; i++) {
-			String childName = rootChildren[i].getName();
+		for (IRepositoryResource rootChild : rootChildren) {
+			String childName = rootChild.getName();
 			int idx = oldUrl.indexOf(childName);
 			if (idx > 0 && oldUrl.charAt(idx - 1) == '/'
 					&& (oldUrl.endsWith(childName) || oldUrl.charAt(idx + childName.length()) == '/')) {
-				return rootChildren[i].getUrl() + oldUrl.substring(idx + childName.length());
+				return rootChild.getUrl() + oldUrl.substring(idx + childName.length());
 			}
 		}
 		return null;
@@ -144,8 +143,9 @@ public class RelocateWorkingCopyOperation extends AbstractWorkingCopyOperation i
 		return path;
 	}
 
+	@Override
 	protected String getShortErrorMessage(Throwable t) {
-		return BaseMessages.format(super.getShortErrorMessage(t), new Object[] { this.location.getUrl() });
+		return BaseMessages.format(super.getShortErrorMessage(t), new Object[] { location.getUrl() });
 	}
 
 }

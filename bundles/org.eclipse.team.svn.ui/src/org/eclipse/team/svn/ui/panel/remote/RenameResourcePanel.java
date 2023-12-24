@@ -25,17 +25,19 @@ import org.eclipse.team.svn.ui.SVNUIMessages;
 public class RenameResourcePanel extends AbstractGetResourceNamePanel {
 	public RenameResourcePanel(String originalName) {
 		super(SVNUIMessages.RenameResourcePanel_Title, true);
-		this.dialogDescription = SVNUIMessages.RenameResourcePanel_Description;
-		this.disallowedName = originalName;
+		dialogDescription = SVNUIMessages.RenameResourcePanel_Description;
+		disallowedName = originalName;
 	}
 
+	@Override
 	public void createControlsImpl(Composite parent) {
 		super.createControlsImpl(parent);
 
-		this.text.setText(this.disallowedName);
-		this.text.selectAll();
+		text.setText(disallowedName);
+		text.selectAll();
 	}
 
+	@Override
 	public String getHelpId() {
 		return "org.eclipse.team.svn.help.renameDialogContext"; //$NON-NLS-1$
 	}

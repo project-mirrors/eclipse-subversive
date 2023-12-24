@@ -41,9 +41,9 @@ import org.eclipse.team.svn.core.operation.local.management.ShareProjectOperatio
 import org.eclipse.team.svn.core.operation.local.refactor.CopyResourceOperation;
 import org.eclipse.team.svn.core.operation.remote.CheckoutAsOperation;
 import org.eclipse.team.svn.core.operation.remote.PreparedBranchTagOperation;
-import org.eclipse.team.svn.core.resource.IRemoteStorage;
 import org.eclipse.team.svn.core.resource.IRepositoryLocation;
 import org.eclipse.team.svn.core.resource.IRepositoryResource;
+import org.eclipse.team.svn.core.resource.ISVNStorage;
 import org.eclipse.team.svn.core.svnstorage.SVNRemoteStorage;
 import org.eclipse.team.svn.core.svnstorage.SVNRepositoryFolder;
 import org.eclipse.team.svn.core.utility.FileUtility;
@@ -146,10 +146,10 @@ public class ActionOperationWorkflowBuilder {
 			protected void runImpl(IProgressMonitor monitor) throws Exception {
 				FileUtility.copyAll(TestUtil.getFirstProject().getFolder("src").getLocation().toFile(),
 						TestUtil.getSecondProject().getFolder("web").getLocation().toFile(), monitor);
-				IResource[] ignoreResource = new IResource[] { TestUtil.getFirstProject().getFile("src/web"),
+				IResource[] ignoreResource = { TestUtil.getFirstProject().getFile("src/web"),
 						TestUtil.getFirstProject().getFile("src/web/site.css"),
 						TestUtil.getFirstProject().getFile("src/web/site.xsl") };
-				new AddToSVNIgnoreOperation(ignoreResource, IRemoteStorage.IGNORE_NAME, "").run(monitor);
+				new AddToSVNIgnoreOperation(ignoreResource, ISVNStorage.IGNORE_NAME, "").run(monitor);
 				new AddToSVNOperation(new IResource[] { TestUtil.getFirstProject().getFile("src/web/site.css") })
 						.run(monitor);
 				SVNRemoteStorage storage = SVNRemoteStorage.instance();
@@ -175,7 +175,7 @@ public class ActionOperationWorkflowBuilder {
 						assertTrue("Name of added to SVN resource was not deleted (PLC314Test)", false);
 					}
 				}
-			};
+			}
 		};
 	}
 
@@ -185,9 +185,9 @@ public class ActionOperationWorkflowBuilder {
 			protected void runImpl(IProgressMonitor monitor) throws Exception {
 				FileUtility.copyAll(TestUtil.getFirstProject().getFolder("src").getLocation().toFile(),
 						TestUtil.getSecondProject().getFolder("web").getLocation().toFile(), monitor);
-				IResource[] ignoreResource = new IResource[] { TestUtil.getFirstProject().getFile("src/web/site.css") };
-				new AddToSVNIgnoreOperation(ignoreResource, IRemoteStorage.IGNORE_NAME, "").run(monitor);
-			};
+				IResource[] ignoreResource = { TestUtil.getFirstProject().getFile("src/web/site.css") };
+				new AddToSVNIgnoreOperation(ignoreResource, ISVNStorage.IGNORE_NAME, "").run(monitor);
+			}
 		};
 	}
 
@@ -215,8 +215,7 @@ public class ActionOperationWorkflowBuilder {
 				IResource source = TestUtil.getSecondProject().getFile("site.xml");
 				IResource destination = TestUtil.getSecondProject().getFile("web/site.xml");
 				new CopyResourceOperation(source, destination).run(monitor);
-				new AddToSVNIgnoreOperation(new IResource[] { destination }, IRemoteStorage.IGNORE_NAME, "")
-						.run(monitor);
+				new AddToSVNIgnoreOperation(new IResource[] { destination }, ISVNStorage.IGNORE_NAME, "").run(monitor);
 				new CommitOperation(new IResource[] { TestUtil.getSecondProject().getFolder("web") }, "test PLC366",
 						false, false).run(monitor);
 			}
@@ -238,12 +237,8 @@ public class ActionOperationWorkflowBuilder {
 		return () -> new AbstractLockingTestOperation("PLC375Test") {
 			@Override
 			protected void runImpl(IProgressMonitor monitor) throws Exception {
-				FileOutputStream fos = null;
-				try {
-					fos = new FileOutputStream(TestUtil.getSecondProject().getLocation().toString() + "/123");
+				try (FileOutputStream fos = new FileOutputStream(TestUtil.getSecondProject().getLocation().toString() + "/123")) {
 					fos.write(12345);
-				} finally {
-					fos.close();
 				}
 				IResource[] forCommit = FileUtility
 						.getResourcesRecursive(new IResource[] { TestUtil.getSecondProject() }, IStateFilter.SF_ADDED);
@@ -283,9 +278,9 @@ public class ActionOperationWorkflowBuilder {
 				} finally {
 					fos.close();
 				}
-				IResource[] forAddition = new IResource[] { TestUtil.getFirstProject().getFile("testFile") };
+				IResource[] forAddition = { TestUtil.getFirstProject().getFile("testFile") };
 				new AddToSVNOperation(forAddition).run(monitor);
-				IResource[] forCommit = new IResource[] { TestUtil.getFirstProject().getFile("testFile") };
+				IResource[] forCommit = { TestUtil.getFirstProject().getFile("testFile") };
 				new CommitOperation(forCommit, "PLC378Test", false, false).run(monitor);
 
 				try {
@@ -298,7 +293,7 @@ public class ActionOperationWorkflowBuilder {
 				new AddToSVNOperation(forAddition).run(monitor);
 				forCommit = new IResource[] { TestUtil.getSecondProject().getFile("testFile") };
 				new CommitOperation(forCommit, "PLC378Test", false, false).run(monitor);
-				IResource[] forUpdate = new IResource[] { TestUtil.getSecondProject().getFile("testFile") };
+				IResource[] forUpdate = { TestUtil.getSecondProject().getFile("testFile") };
 				new UpdateOperation(forUpdate, true).run(monitor);
 			}
 		};
@@ -332,9 +327,9 @@ public class ActionOperationWorkflowBuilder {
 				} finally {
 					fos.close();
 				}
-				IResource[] forAddition = new IResource[] { TestUtil.getFirstProject().getFile("123") };
+				IResource[] forAddition = { TestUtil.getFirstProject().getFile("123") };
 				new AddToSVNOperation(forAddition).run(monitor);
-				IResource[] forCommit = new IResource[] { TestUtil.getFirstProject().getFile("123") };
+				IResource[] forCommit = { TestUtil.getFirstProject().getFile("123") };
 				new CommitOperation(forCommit, "PLC379Test", false, false).run(monitor);
 
 				try {
@@ -345,11 +340,10 @@ public class ActionOperationWorkflowBuilder {
 				} finally {
 					fos.close();
 				}
-				IResource[] ignoreResource = new IResource[] {
+				IResource[] ignoreResource = {
 						ResourcesPlugin.getWorkspace().getRoot().getProjects()[2].getFile("123") };
-				new AddToSVNIgnoreOperation(ignoreResource, IRemoteStorage.IGNORE_NAME, "").run(monitor);
-				IResource[] forUpdate = new IResource[] {
-						ResourcesPlugin.getWorkspace().getRoot().getProjects()[2].getFile("123") };
+				new AddToSVNIgnoreOperation(ignoreResource, ISVNStorage.IGNORE_NAME, "").run(monitor);
+				IResource[] forUpdate = { ResourcesPlugin.getWorkspace().getRoot().getProjects()[2].getFile("123") };
 				new UpdateOperation(forUpdate, true).run(monitor);
 			}
 		};

@@ -35,36 +35,38 @@ public class RepositoryContentProvider extends WorkbenchContentProvider {
 	}
 
 	public IRepositoryContentFilter getFilter() {
-		return this.filter;
+		return filter;
 	}
 
 	public void setFilter(IRepositoryContentFilter filter) {
 		this.filter = filter;
 	}
 
+	@Override
 	public boolean hasChildren(Object element) {
-		IWorkbenchAdapter adapter = this.getAdapter(element);
+		IWorkbenchAdapter adapter = getAdapter(element);
 		if (adapter instanceof IParentTreeNode) {
 			return ((IParentTreeNode) adapter).hasChildren();
 		}
 		return false;
 	}
 
+	@Override
 	public Object[] getChildren(Object parentElement) {
-		IWorkbenchAdapter adapter = this.getAdapter(parentElement);
+		IWorkbenchAdapter adapter = getAdapter(parentElement);
 		if (adapter instanceof IParentTreeNode) {
 			if (adapter instanceof IResourceTreeNode) {
-				((IResourceTreeNode) adapter).setViewer(this.repositoryTree);
+				((IResourceTreeNode) adapter).setViewer(repositoryTree);
 			}
-			ArrayList<Object> filtered = new ArrayList<Object>();
+			ArrayList<Object> filtered = new ArrayList<>();
 			Object[] children = adapter.getChildren(parentElement);
 			if (children != null) {
-				for (int i = 0; i < children.length; i++) {
-					if (this.filter == null || this.filter.accept(children[i])) {
-						if (children[i] instanceof IResourceTreeNode) {
-							((IResourceTreeNode) children[i]).setViewer(this.repositoryTree);
+				for (Object child : children) {
+					if (filter == null || filter.accept(child)) {
+						if (child instanceof IResourceTreeNode) {
+							((IResourceTreeNode) child).setViewer(repositoryTree);
 						}
-						filtered.add(children[i]);
+						filtered.add(child);
 					}
 				}
 			}

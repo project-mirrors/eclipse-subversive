@@ -33,18 +33,20 @@ public class SVNURLStreamHandler extends URLStreamHandler {
 	}
 
 	public URL getURL() {
-		return this.url;
+		return url;
 	}
 
+	@Override
 	protected URLConnection openConnection(URL u) throws IOException {
 		return null;
 	}
 
 	public void setHost(String host) {
-		this.setURL(this.url, this.url.getProtocol(), host, this.url.getPort(), this.url.getAuthority(),
-				this.url.getUserInfo(), this.url.getPath(), this.url.getQuery(), this.url.getRef());
+		this.setURL(url, url.getProtocol(), host, url.getPort(), url.getAuthority(), url.getUserInfo(), url.getPath(),
+				url.getQuery(), url.getRef());
 	}
 
+	@Override
 	protected void parseURL(URL u, String spec, int start, int limit) {
 		String protocol = u.getProtocol();
 		if (!protocol.equals("file") && //$NON-NLS-1$
@@ -55,7 +57,7 @@ public class SVNURLStreamHandler extends URLStreamHandler {
 			String errMessage = SVNMessages.formatErrorString("Error_UnknownProtocol", new String[] { protocol }); //$NON-NLS-1$
 			throw new RuntimeException(errMessage);
 		}
-		this.url = u;
+		url = u;
 		super.parseURL(u, spec, start, limit);
 	}
 

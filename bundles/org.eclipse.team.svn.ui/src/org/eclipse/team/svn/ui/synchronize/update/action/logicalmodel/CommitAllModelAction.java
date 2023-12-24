@@ -31,11 +31,13 @@ public class CommitAllModelAction extends AbstractModelToolbarAction {
 		super(text, configuration);
 	}
 
+	@Override
 	public FastSyncInfoFilter getSyncInfoFilter() {
 		return CommitActionHelper.getCommitSyncInfoFilter();
 	}
 
+	@Override
 	protected IActionOperation getOperation() {
-		return CommitActionHelper.getCommitOperation(this.getSyncInfoSelector(), this.getConfiguration());
+		return CommitActionHelper.getCommitOperation(getSyncInfoSelector(), getConfiguration());
 	}
 }

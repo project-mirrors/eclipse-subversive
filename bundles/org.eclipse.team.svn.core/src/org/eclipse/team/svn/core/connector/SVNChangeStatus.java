@@ -292,11 +292,11 @@ public class SVNChangeStatus extends SVNEntryStatus {
 		this.lastChangedRevision = lastChangedRevision;
 		this.lastChangedDate = lastChangedDate;
 		this.lastCommitAuthor = lastCommitAuthor;
-		this.isLocked = locked;
-		this.isCopied = copied;
+		isLocked = locked;
+		isCopied = copied;
 		this.repositoryTextStatus = repositoryTextStatus;
 		this.repositoryPropStatus = repositoryPropStatus;
-		this.isSwitched = switched;
+		isSwitched = switched;
 		this.wcLock = wcLock;
 		this.reposLock = reposLock;
 		this.reposLastCmtRevision = reposLastCmtRevision;
@@ -305,7 +305,7 @@ public class SVNChangeStatus extends SVNEntryStatus {
 		this.reposLastCmtAuthor = reposLastCmtAuthor;
 		this.isFileExternal = isFileExternal;
 		this.hasConflict = hasConflict;
-		this.setTreeConflicts(treeConflicts);
+		setTreeConflicts(treeConflicts);
 		this.changeListName = changeListName;
 		this.movedFromAbsPath = movedFromAbsPath;
 		this.movedToAbsPath = movedToAbsPath;

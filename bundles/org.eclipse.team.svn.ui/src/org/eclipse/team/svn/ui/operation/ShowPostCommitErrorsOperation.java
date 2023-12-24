@@ -35,26 +35,22 @@ public class ShowPostCommitErrorsOperation extends AbstractActionOperation {
 		this.provider = provider;
 	}
 
+	@Override
 	public int getOperationWeight() {
 		return 0;
 	}
 
+	@Override
 	protected void runImpl(IProgressMonitor monitor) throws Exception {
-		SVNCommitStatus[] errors = this.provider.getPostCommitErrors();
+		SVNCommitStatus[] errors = provider.getPostCommitErrors();
 		if (errors != null) {
 			String tCompleteMessage = null;
 			for (SVNCommitStatus error : errors) {
-				tCompleteMessage = tCompleteMessage == null
-						? error.message
-						: (tCompleteMessage + "\n\n" + error.message); //$NON-NLS-1$
+				tCompleteMessage = tCompleteMessage == null ? error.message : tCompleteMessage + "\n\n" + error.message; //$NON-NLS-1$
 			}
 			if (tCompleteMessage != null) {
 				final String completeMessage = tCompleteMessage;
-				UIMonitorUtility.getDisplay().syncExec(new Runnable() {
-					public void run() {
-						new ShowPostCommitErrorsDialog(UIMonitorUtility.getShell(), completeMessage).open();
-					}
-				});
+				UIMonitorUtility.getDisplay().syncExec(() -> new ShowPostCommitErrorsDialog(UIMonitorUtility.getShell(), completeMessage).open());
 			}
 		}
 	}

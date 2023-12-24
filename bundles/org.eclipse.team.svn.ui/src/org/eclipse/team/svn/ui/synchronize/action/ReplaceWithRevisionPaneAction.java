@@ -34,17 +34,19 @@ public class ReplaceWithRevisionPaneAction extends AbstractSynchronizeModelActio
 		super(text, configuration);
 	}
 
+	@Override
 	protected IActionOperation getOperation(ISynchronizePageConfiguration configuration, IDiffElement[] elements) {
-		IResource[] selectedResources = this.getAllSelectedResources();
+		IResource[] selectedResources = getAllSelectedResources();
 		IActionOperation op = ReplaceWithRevisionAction.getReplaceOperation(selectedResources,
 				UIMonitorUtility.getShell());
 		return op;
 	}
 
+	@Override
 	protected boolean updateSelection(IStructuredSelection selection) {
 		if (super.updateSelection(selection)) {
 			if (selection.size() == 1) {
-				IResource[] selectedResources = this.getAllSelectedResources();
+				IResource[] selectedResources = getAllSelectedResources();
 				return FileUtility.checkForResourcesPresence(selectedResources, IStateFilter.SF_ONREPOSITORY,
 						IResource.DEPTH_ZERO);
 			}

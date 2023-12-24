@@ -22,8 +22,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.team.svn.ui.SVNUIMessages;
 import org.eclipse.team.svn.ui.composite.ResourceSelectionComposite;
-import org.eclipse.team.svn.ui.event.IResourceSelectionChangeListener;
-import org.eclipse.team.svn.ui.event.ResourceSelectionChangedEvent;
 import org.eclipse.team.svn.ui.panel.AbstractDialogPanel;
 import org.eclipse.team.svn.ui.panel.participant.BasePaneParticipant;
 import org.eclipse.team.svn.ui.panel.participant.PaneParticipantHelper;
@@ -51,49 +49,46 @@ public abstract class AbstractResourceSelectionPanel extends AbstractDialogPanel
 		this.resources = resources;
 		this.userSelectedResources = userSelectedResources;
 
-		this.paneParticipantHelper = new PaneParticipantHelper();
+		paneParticipantHelper = new PaneParticipantHelper();
 	}
 
 	public IResource[] getSelectedResources() {
-		if (this.paneParticipantHelper.isParticipantPane()) {
-			return this.paneParticipantHelper.getSelectedResources();
+		if (paneParticipantHelper.isParticipantPane()) {
+			return paneParticipantHelper.getSelectedResources();
 		}
-		return this.selectionComposite.getSelectedResources();
+		return selectionComposite.getSelectedResources();
 	}
 
 	public IResource[] getNotSelectedResources() {
-		if (this.paneParticipantHelper.isParticipantPane()) {
-			return this.paneParticipantHelper.getNotSelectedResources();
+		if (paneParticipantHelper.isParticipantPane()) {
+			return paneParticipantHelper.getNotSelectedResources();
 		}
-		return this.selectionComposite.getNotSelectedResources();
+		return selectionComposite.getNotSelectedResources();
 	}
 
 	public IResource[] getTreatAsEdits() {
-		return this.paneParticipantHelper.isParticipantPane()
-				? new IResource[0]
-				: this.selectionComposite.getTreatAsEdits();
+		return paneParticipantHelper.isParticipantPane() ? new IResource[0] : selectionComposite.getTreatAsEdits();
 	}
 
+	@Override
 	public Point getPrefferedSizeImpl() {
 		return new Point(600, SWT.DEFAULT);
 	}
 
+	@Override
 	public void createControlsImpl(Composite parent) {
-		if (this.paneParticipantHelper.isParticipantPane()) {
-			this.paneParticipantHelper.init(this.createPaneParticipant());
-			this.createPaneControls(parent);
+		if (paneParticipantHelper.isParticipantPane()) {
+			paneParticipantHelper.init(createPaneParticipant());
+			createPaneControls(parent);
 		} else {
-			this.selectionComposite = new ResourceSelectionComposite(parent, SWT.NONE, this.resources, false,
-					this.userSelectedResources, false);
+			selectionComposite = new ResourceSelectionComposite(parent, SWT.NONE, resources, false,
+					userSelectedResources, false);
 			GridData data = new GridData(GridData.FILL_BOTH);
 			data.heightHint = 210;
-			this.selectionComposite.setLayoutData(data);
-			this.selectionComposite.addResourcesSelectionChangedListener(new IResourceSelectionChangeListener() {
-				public void resourcesSelectionChanged(ResourceSelectionChangedEvent event) {
-					AbstractResourceSelectionPanel.this.validateContent();
-				}
-			});
-			this.attachTo(this.selectionComposite, new AbstractVerifier() {
+			selectionComposite.setLayoutData(data);
+			selectionComposite.addResourcesSelectionChangedListener(event -> AbstractResourceSelectionPanel.this.validateContent());
+			attachTo(selectionComposite, new AbstractVerifier() {
+				@Override
 				protected String getErrorMessage(Control input) {
 					IResource[] selection = AbstractResourceSelectionPanel.this.getSelectedResources();
 					if (selection == null || selection.length == 0) {
@@ -102,43 +97,48 @@ public abstract class AbstractResourceSelectionPanel extends AbstractDialogPanel
 					return null;
 				}
 
+				@Override
 				protected String getWarningMessage(Control input) {
 					return null;
 				}
 			});
-			this.addContextMenu();
+			addContextMenu();
 		}
 	}
 
 	protected void createPaneControls(Composite parent) {
-		Control paneControl = this.paneParticipantHelper.createChangesPage(parent);
+		Control paneControl = paneParticipantHelper.createChangesPage(parent);
 		GridData data = new GridData(GridData.FILL_BOTH);
 		data.heightHint = 210;
 		paneControl.setLayoutData(data);
 
-		this.paneParticipantHelper.initListeners();
+		paneParticipantHelper.initListeners();
 
 		//add validator to pane
-		this.attachTo(paneControl, new PaneVerifier(this.paneParticipantHelper));
+		attachTo(paneControl, new PaneVerifier(paneParticipantHelper));
 	}
 
+	@Override
 	public void postInit() {
 		super.postInit();
-		if (this.paneParticipantHelper.isParticipantPane()) {
-			this.paneParticipantHelper.expandPaneTree();
+		if (paneParticipantHelper.isParticipantPane()) {
+			paneParticipantHelper.expandPaneTree();
 		}
 	}
 
+	@Override
 	public void dispose() {
 		super.dispose();
-		if (this.paneParticipantHelper.isParticipantPane()) {
-			this.paneParticipantHelper.dispose();
+		if (paneParticipantHelper.isParticipantPane()) {
+			paneParticipantHelper.dispose();
 		}
 	}
 
+	@Override
 	protected void saveChangesImpl() {
 	}
 
+	@Override
 	protected void cancelChangesImpl() {
 	}
 

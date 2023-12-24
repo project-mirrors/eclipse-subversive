@@ -51,23 +51,23 @@ public abstract class AbstractGetResourceNamePanel extends AbstractDialogPanel {
 	protected boolean allowMultipart;
 
 	public AbstractGetResourceNamePanel(String title, boolean allowMultipart) {
-		super();
-		this.dialogTitle = title;
+		dialogTitle = title;
 		this.allowMultipart = allowMultipart;
-		this.defaultMessage = allowMultipart
+		defaultMessage = allowMultipart
 				? SVNUIMessages.AbstractGetResourceNamePanel_Message_MultiPart
 				: SVNUIMessages.AbstractGetResourceNamePanel_Message_Simple;
-		this.resourceName = ""; //$NON-NLS-1$
+		resourceName = ""; //$NON-NLS-1$
 	}
 
 	public String getResourceName() {
-		return this.resourceName.trim();
+		return resourceName.trim();
 	}
 
 	public String getMessage() {
-		return this.comment.getMessage();
+		return comment.getMessage();
 	}
 
+	@Override
 	public void createControlsImpl(Composite parent) {
 		GridData data = null;
 		GridLayout layout = null;
@@ -83,32 +83,33 @@ public abstract class AbstractGetResourceNamePanel extends AbstractDialogPanel {
 
 		Label nameLabel = new Label(nameComposite, SWT.NONE);
 		nameLabel.setText(SVNUIMessages.AbstractGetResourceNamePanel_Name);
-		this.text = new Text(nameComposite, SWT.SINGLE | SWT.BORDER);
+		text = new Text(nameComposite, SWT.SINGLE | SWT.BORDER);
 		data = new GridData(GridData.FILL_HORIZONTAL);
-		this.text.setLayoutData(data);
-		this.text.setEditable(true);
+		text.setLayoutData(data);
+		text.setEditable(true);
 		CompositeVerifier verifier = new CompositeVerifier();
-		verifier.add(this.createNonEmptyNameFieldVerifier());
+		verifier.add(createNonEmptyNameFieldVerifier());
 		String name = SVNUIMessages.AbstractGetResourceNamePanel_Name_Verifier;
-		verifier.add(new ResourceNameVerifier(name, this.allowMultipart));
+		verifier.add(new ResourceNameVerifier(name, allowMultipart));
 		verifier.add(new AbsolutePathVerifier(name));
 		verifier.add(new AbstractFormattedVerifier(name) {
 			private String msg = SVNUIMessages.AbstractGetResourceNamePanel_Name_Verifier_Error;
 
+			@Override
 			protected String getErrorMessageImpl(Control input) {
-				String text = this.getText(input);
-				if (AbstractGetResourceNamePanel.this.disallowedName != null
-						&& AbstractGetResourceNamePanel.this.disallowedName.equals(text)) {
-					return BaseMessages.format(this.msg, new Object[] { AbstractFormattedVerifier.FIELD_NAME, text });
+				String text = getText(input);
+				if (disallowedName != null && disallowedName.equals(text)) {
+					return BaseMessages.format(msg, new Object[] { AbstractFormattedVerifier.FIELD_NAME, text });
 				}
 				return null;
 			}
 
+			@Override
 			protected String getWarningMessageImpl(Control input) {
 				return null;
-			};
+			}
 		});
-		this.attachTo(this.text, verifier);
+		attachTo(text, verifier);
 
 		Group group = new Group(parent, SWT.NULL);
 		group.setLayout(new GridLayout());
@@ -116,27 +117,31 @@ public abstract class AbstractGetResourceNamePanel extends AbstractDialogPanel {
 		group.setLayoutData(data);
 		group.setText(SVNUIMessages.AbstractGetResourceNamePanel_Comment);
 
-		this.comment = new CommentComposite(group, this);
+		comment = new CommentComposite(group, this);
 		data = new GridData(GridData.FILL_BOTH);
-		this.comment.setLayoutData(data);
+		comment.setLayoutData(data);
 	}
 
+	@Override
 	public Point getPrefferedSizeImpl() {
 		return new Point(525, SWT.DEFAULT);
 	}
 
+	@Override
 	public void postInit() {
 		super.postInit();
-		this.comment.postInit(this.manager);
+		comment.postInit(manager);
 	}
 
+	@Override
 	protected void saveChangesImpl() {
-		this.resourceName = this.text.getText();
-		this.comment.saveChanges();
+		resourceName = text.getText();
+		comment.saveChanges();
 	}
 
+	@Override
 	protected void cancelChangesImpl() {
-		this.comment.cancelChanges();
+		comment.cancelChanges();
 	}
 
 	protected AbstractVerifier createNonEmptyNameFieldVerifier() {

@@ -20,7 +20,6 @@ import org.eclipse.team.svn.core.SVNMessages;
 import org.eclipse.team.svn.core.connector.ISVNConnector;
 import org.eclipse.team.svn.core.connector.SVNDepth;
 import org.eclipse.team.svn.core.connector.SVNProperty;
-import org.eclipse.team.svn.core.operation.IUnprotectedOperation;
 import org.eclipse.team.svn.core.operation.SVNProgressMonitor;
 import org.eclipse.team.svn.core.operation.local.AbstractWorkingCopyOperation;
 import org.eclipse.team.svn.core.resource.IRepositoryLocation;
@@ -51,10 +50,11 @@ public class RemovePropertiesOperation extends AbstractWorkingCopyOperation {
 		this.isRecursive = isRecursive;
 	}
 
+	@Override
 	protected void runImpl(IProgressMonitor monitor) throws Exception {
-		IResource[] resources = this.operableData();
+		IResource[] resources = operableData();
 
-		if (this.isRecursive) {
+		if (isRecursive) {
 			resources = FileUtility.shrinkChildNodes(resources);
 		}
 
@@ -64,11 +64,7 @@ public class RemovePropertiesOperation extends AbstractWorkingCopyOperation {
 			IRepositoryLocation location = SVNRemoteStorage.instance().getRepositoryLocation(resource);
 			final ISVNConnector proxy = location.acquireSVNProxy();
 
-			this.protectStep(new IUnprotectedOperation() {
-				public void run(IProgressMonitor monitor) throws Exception {
-					RemovePropertiesOperation.this.processResource(proxy, resource, monitor);
-				}
-			}, monitor, resources.length);
+			this.protectStep(monitor1 -> RemovePropertiesOperation.this.processResource(proxy, resource, monitor1), monitor, resources.length);
 
 			location.releaseSVNProxy(proxy);
 		}
@@ -78,16 +74,11 @@ public class RemovePropertiesOperation extends AbstractWorkingCopyOperation {
 		ProgressMonitorUtility.setTaskInfo(monitor, this, resource.getFullPath().toString());
 		final String wcPath = FileUtility.getWorkingCopyPath(resource);
 
-		for (int i = 0; i < this.data.length && !monitor.isCanceled(); i++) {
-			final SVNProperty current = this.data[i];
-			this.protectStep(new IUnprotectedOperation() {
-				public void run(IProgressMonitor monitor) throws Exception {
-					proxy.setPropertyLocal(new String[] { wcPath }, new SVNProperty(current.name),
-							RemovePropertiesOperation.this.isRecursive ? SVNDepth.INFINITY : SVNDepth.EMPTY,
-							ISVNConnector.Options.NONE, null,
-							new SVNProgressMonitor(RemovePropertiesOperation.this, monitor, null));
-				}
-			}, monitor, this.data.length);
+		for (int i = 0; i < data.length && !monitor.isCanceled(); i++) {
+			final SVNProperty current = data[i];
+			this.protectStep(monitor1 -> proxy.setPropertyLocal(new String[] { wcPath }, new SVNProperty(current.name),
+					isRecursive ? SVNDepth.INFINITY : SVNDepth.EMPTY, ISVNConnector.Options.NONE, null,
+					new SVNProgressMonitor(RemovePropertiesOperation.this, monitor1, null)), monitor, data.length);
 		}
 	}
 

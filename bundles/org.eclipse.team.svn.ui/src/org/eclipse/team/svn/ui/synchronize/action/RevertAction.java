@@ -30,19 +30,22 @@ public class RevertAction extends AbstractSynchronizeModelAction {
 
 	public RevertAction(String text, ISynchronizePageConfiguration configuration) {
 		super(text, configuration);
-		this.actionHelper = new RevertActionHelper(this, configuration);
+		actionHelper = new RevertActionHelper(this, configuration);
 	}
 
+	@Override
 	protected boolean needsToSaveDirtyEditors() {
 		return false;
 	}
 
+	@Override
 	protected FastSyncInfoFilter getSyncInfoFilter() {
-		return this.actionHelper.getSyncInfoFilter();
+		return actionHelper.getSyncInfoFilter();
 	}
 
+	@Override
 	protected IActionOperation getOperation(ISynchronizePageConfiguration configuration, IDiffElement[] elements) {
-		return this.actionHelper.getOperation();
+		return actionHelper.getOperation();
 	}
 
 }

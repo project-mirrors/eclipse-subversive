@@ -26,7 +26,6 @@ import org.eclipse.team.svn.core.SVNMessages;
 import org.eclipse.team.svn.core.connector.ISVNConnector;
 import org.eclipse.team.svn.core.connector.SVNDepth;
 import org.eclipse.team.svn.core.operation.IConsoleStream;
-import org.eclipse.team.svn.core.operation.IUnprotectedOperation;
 import org.eclipse.team.svn.core.operation.SVNProgressMonitor;
 import org.eclipse.team.svn.core.resource.IRepositoryFile;
 import org.eclipse.team.svn.core.resource.IRepositoryLocation;
@@ -49,11 +48,7 @@ public class GetRemoteContentsOperation extends AbstractWorkingCopyOperation {
 
 	public GetRemoteContentsOperation(IResource[] resources, final IRepositoryResource[] remoteResources,
 			HashMap<String, String> remotePath2localPath, boolean ignoreExternals) {
-		this(resources, new IRepositoryResourceProvider() {
-			public IRepositoryResource[] getRepositoryResources() {
-				return remoteResources;
-			}
-		}, remotePath2localPath, ignoreExternals);
+		this(resources, (IRepositoryResourceProvider) () -> remoteResources, remotePath2localPath, ignoreExternals);
 	}
 
 	public GetRemoteContentsOperation(IResource[] resources, IRepositoryResourceProvider provider,
@@ -70,15 +65,12 @@ public class GetRemoteContentsOperation extends AbstractWorkingCopyOperation {
 		this.options = options & ISVNConnector.CommandMasks.EXPORT;
 	}
 
+	@Override
 	protected void runImpl(IProgressMonitor monitor) throws Exception {
-		IRepositoryResource[] remoteResources = this.provider.getRepositoryResources();
+		IRepositoryResource[] remoteResources = provider.getRepositoryResources();
 		for (int i = 0; i < remoteResources.length && !monitor.isCanceled(); i++) {
 			final IRepositoryResource remote = remoteResources[i];
-			this.protectStep(new IUnprotectedOperation() {
-				public void run(IProgressMonitor monitor) throws Exception {
-					GetRemoteContentsOperation.this.doGet(remote, monitor);
-				}
-			}, monitor, remoteResources.length);
+			this.protectStep(monitor1 -> GetRemoteContentsOperation.this.doGet(remote, monitor1), monitor, remoteResources.length);
 		}
 	}
 
@@ -87,7 +79,7 @@ public class GetRemoteContentsOperation extends AbstractWorkingCopyOperation {
 		ISVNConnector proxy = location.acquireSVNProxy();
 		try {
 			String url = SVNUtility.encodeURL(remote.getUrl());
-			String wcPath = this.remotePath2localPath.get(url);
+			String wcPath = remotePath2localPath.get(url);
 			if (remote instanceof IRepositoryFile) {
 				File parent = new File(wcPath.substring(0, wcPath.lastIndexOf("/"))); //$NON-NLS-1$
 				if (!parent.exists()) {
@@ -99,7 +91,7 @@ public class GetRemoteContentsOperation extends AbstractWorkingCopyOperation {
 				}
 				FileOutputStream stream = null;
 				try {
-					this.writeToConsole(IConsoleStream.LEVEL_CMD,
+					writeToConsole(IConsoleStream.LEVEL_CMD,
 							"svn cat " + url + "@" + remote.getPegRevision() + " -r " + remote.getSelectedRevision() //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
 									+ FileUtility.getUsernameParam(location.getUsername()) + "\n"); //$NON-NLS-1$
 					stream = new FileOutputStream(wcPath);
@@ -120,21 +112,22 @@ public class GetRemoteContentsOperation extends AbstractWorkingCopyOperation {
 				if (!directory.exists()) {
 					directory.mkdirs();
 				}
-				this.writeToConsole(IConsoleStream.LEVEL_CMD,
+				writeToConsole(IConsoleStream.LEVEL_CMD,
 						"svn export " + url + "@" + remote.getPegRevision() + " -r " + remote.getSelectedRevision() //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
-								+ ISVNConnector.Options.asCommandLine(this.options) + " \"" + wcPath + "\" " //$NON-NLS-1$//$NON-NLS-2$
+								+ ISVNConnector.Options.asCommandLine(options) + " \"" + wcPath + "\" " //$NON-NLS-1$//$NON-NLS-2$
 								+ FileUtility.getUsernameParam(location.getUsername()) + "\n"); //$NON-NLS-1$
-				proxy.exportTo(SVNUtility.getEntryRevisionReference(remote), wcPath, null, SVNDepth.INFINITY,
-						this.options, new SVNProgressMonitor(this, monitor, null));
+				proxy.exportTo(SVNUtility.getEntryRevisionReference(remote), wcPath, null, SVNDepth.INFINITY, options,
+						new SVNProgressMonitor(this, monitor, null));
 			}
 		} finally {
 			location.releaseSVNProxy(proxy);
 		}
 	}
 
+	@Override
 	protected String getShortErrorMessage(Throwable t) {
 		return BaseMessages.format(super.getShortErrorMessage(t),
-				new Object[] { FileUtility.getNamesListAsString(this.provider.getRepositoryResources()) });
+				new Object[] { FileUtility.getNamesListAsString(provider.getRepositoryResources()) });
 	}
 
 }

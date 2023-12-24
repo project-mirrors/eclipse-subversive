@@ -45,7 +45,7 @@ public class SVNConflictDescriptor {
 
 		public final int id;
 
-		private Kind(int id) {
+		Kind(int id) {
 			this.id = id;
 		}
 	}
@@ -82,7 +82,7 @@ public class SVNConflictDescriptor {
 			throw new IllegalArgumentException("Invalid action kind: " + id); //$NON-NLS-1$
 		}
 
-		private Action(int id) {
+		Action(int id) {
 			this.id = id;
 		}
 	}
@@ -147,7 +147,7 @@ public class SVNConflictDescriptor {
 			throw new IllegalArgumentException("Invalid reason kind: " + id); //$NON-NLS-1$
 		}
 
-		private Reason(int id) {
+		Reason(int id) {
 			this.id = id;
 		}
 	}
@@ -181,7 +181,7 @@ public class SVNConflictDescriptor {
 			throw new IllegalArgumentException("Invalid operation kind: " + id); //$NON-NLS-1$
 		}
 
-		private Operation(int id) {
+		Operation(int id) {
 			this.id = id;
 		}
 	}

@@ -45,8 +45,10 @@ public class ExtractOutgoingToActionHelper extends AbstractActionHelper {
 		super(action, configuration);
 	}
 
+	@Override
 	public FastSyncInfoFilter getSyncInfoFilter() {
 		return new FastSyncInfoFilter.SyncInfoDirectionFilter(new int[] { SyncInfo.OUTGOING, SyncInfo.CONFLICTING }) {
+			@Override
 			public boolean select(SyncInfo info) {
 				if (super.select(info)) {
 					AbstractSVNSyncInfo syncInfo = (AbstractSVNSyncInfo) info;
@@ -59,6 +61,7 @@ public class ExtractOutgoingToActionHelper extends AbstractActionHelper {
 		};
 	}
 
+	@Override
 	public IActionOperation getOperation() {
 		DirectoryDialog fileDialog = new DirectoryDialog(configuration.getSite().getShell());
 		fileDialog.setText(SVNUIMessages.ExtractToAction_Select_Title);
@@ -67,9 +70,9 @@ public class ExtractOutgoingToActionHelper extends AbstractActionHelper {
 		if (path == null) {
 			return null;
 		}
-		IResource[] selectedOutgoingResources = this.getSyncInfoSelector()
+		IResource[] selectedOutgoingResources = getSyncInfoSelector()
 				.getSelectedResources(new ISyncStateFilter.StateFilterWrapper(IStateFilter.SF_ANY_CHANGE, true));
-		HashSet<IResource> outgoingResources = new HashSet<IResource>(Arrays.asList(selectedOutgoingResources));
+		HashSet<IResource> outgoingResources = new HashSet<>(Arrays.asList(selectedOutgoingResources));
 		for (IResource current : selectedOutgoingResources) {
 			outgoingResources.add(current.getProject());
 		}

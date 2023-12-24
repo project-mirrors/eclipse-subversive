@@ -20,11 +20,10 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
-import org.eclipse.swt.widgets.Listener;
+import org.eclipse.team.svn.core.BaseMessages;
 import org.eclipse.team.svn.core.connector.SVNConflictDescriptor.Operation;
 import org.eclipse.team.svn.core.connector.SVNConflictVersion;
 import org.eclipse.team.svn.core.connector.SVNRevision;
@@ -36,7 +35,6 @@ import org.eclipse.team.svn.ui.SVNUIMessages;
 import org.eclipse.team.svn.ui.dialog.DefaultDialog;
 import org.eclipse.team.svn.ui.panel.AbstractDialogPanel;
 import org.eclipse.team.svn.ui.panel.common.SVNHistoryPanel;
-import org.eclipse.team.svn.ui.panel.common.SelectRevisionPanel;
 import org.eclipse.team.svn.ui.utility.UIMonitorUtility;
 
 /**
@@ -62,13 +60,14 @@ public class EditTreeConflictsPanel extends AbstractDialogPanel {
 
 	public EditTreeConflictsPanel(ILocalResource local) {
 		this.local = local;
-		this.helper = new EditTreeConflictsHelper(this.local);
+		helper = new EditTreeConflictsHelper(this.local);
 
-		this.dialogTitle = SVNUIMessages.EditTreeConflictsPanel_Title;
-		this.dialogDescription = SVNUIMessages.EditTreeConflictsPanel_Description;
-		this.defaultMessage = SVNUIMessages.EditTreeConflictsPanel_DefaultMessage;
+		dialogTitle = SVNUIMessages.EditTreeConflictsPanel_Title;
+		dialogDescription = SVNUIMessages.EditTreeConflictsPanel_Description;
+		defaultMessage = SVNUIMessages.EditTreeConflictsPanel_DefaultMessage;
 	}
 
+	@Override
 	protected void createControlsImpl(Composite parent) {
 		Composite composite = new Composite(parent, SWT.NONE);
 		GridLayout layout = new GridLayout();
@@ -78,8 +77,8 @@ public class EditTreeConflictsPanel extends AbstractDialogPanel {
 		composite.setLayout(layout);
 		composite.setLayoutData(data);
 
-		this.createConflictInfoControls(composite);
-		this.createConflictResolutionControls(composite);
+		createConflictInfoControls(composite);
+		createConflictResolutionControls(composite);
 	}
 
 	protected void createConflictInfoControls(Composite parent) {
@@ -100,7 +99,7 @@ public class EditTreeConflictsPanel extends AbstractDialogPanel {
 		data = new GridData(GridData.FILL_HORIZONTAL);
 		data.horizontalSpan = 2;
 		label.setLayoutData(data);
-		label.setText(this.helper.getOperationAsString());
+		label.setText(helper.getOperationAsString());
 
 		//local status
 		label = new Label(composite, SWT.NULL);
@@ -111,7 +110,7 @@ public class EditTreeConflictsPanel extends AbstractDialogPanel {
 		data = new GridData(GridData.FILL_HORIZONTAL);
 		data.horizontalSpan = 2;
 		label.setLayoutData(data);
-		label.setText(this.helper.getReasonAsString());
+		label.setText(helper.getReasonAsString());
 
 		//remote action
 		label = new Label(composite, SWT.NULL);
@@ -122,7 +121,7 @@ public class EditTreeConflictsPanel extends AbstractDialogPanel {
 		data = new GridData(GridData.FILL_HORIZONTAL);
 		data.horizontalSpan = 2;
 		label.setLayoutData(data);
-		label.setText(this.helper.getActionAsString());
+		label.setText(helper.getActionAsString());
 
 		//srcLeft
 		label = new Label(composite, SWT.NULL);
@@ -131,22 +130,18 @@ public class EditTreeConflictsPanel extends AbstractDialogPanel {
 
 		label = new Label(composite, SWT.NULL);
 		label.setLayoutData(new GridData());
-		SVNConflictVersion cVersionLeft = this.local.getTreeConflictDescriptor().srcLeftVersion;
-		SVNConflictVersion cVersionRight = this.local.getTreeConflictDescriptor().srcRightVersion;
-		label.setText(SVNUIMessages.format(SVNUIMessages.EditTreeConflictsPanel_revision,
+		SVNConflictVersion cVersionLeft = local.getTreeConflictDescriptor().srcLeftVersion;
+		SVNConflictVersion cVersionRight = local.getTreeConflictDescriptor().srcRightVersion;
+		label.setText(BaseMessages.format(SVNUIMessages.EditTreeConflictsPanel_revision,
 				String.valueOf(cVersionLeft != null ? cVersionLeft.pegRevision : SVNRevision.INVALID_REVISION_NUMBER)));
 
-		String leftUrl = this.helper.getSrcUrl(true);
-		if (this.local.getTreeConflictDescriptor().operation == Operation.MERGE
-				|| this.local.getTreeConflictDescriptor().operation == Operation.SWITCHED) {
+		String leftUrl = helper.getSrcUrl(true);
+		if (local.getTreeConflictDescriptor().operation == Operation.MERGE
+				|| local.getTreeConflictDescriptor().operation == Operation.SWITCHED) {
 			Link leftLink = new Link(composite, SWT.NULL);
 			leftLink.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 			leftLink.setText("<a>" + leftUrl + "</a>"); //$NON-NLS-1$ //$NON-NLS-2$
-			leftLink.addListener(SWT.Selection, new Listener() {
-				public void handleEvent(Event event) {
-					EditTreeConflictsPanel.this.showHistoryPage(true);
-				}
-			});
+			leftLink.addListener(SWT.Selection, event -> EditTreeConflictsPanel.this.showHistoryPage(true));
 		} else {
 			label = new Label(composite, SWT.NULL);
 			label.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
@@ -160,26 +155,22 @@ public class EditTreeConflictsPanel extends AbstractDialogPanel {
 
 		label = new Label(composite, SWT.NULL);
 		label.setLayoutData(new GridData());
-		label.setText(SVNUIMessages.format(SVNUIMessages.EditTreeConflictsPanel_revision, String
+		label.setText(BaseMessages.format(SVNUIMessages.EditTreeConflictsPanel_revision, String
 				.valueOf(cVersionRight != null ? cVersionRight.pegRevision : SVNRevision.INVALID_REVISION_NUMBER)));
 
 		Link rightLink = new Link(composite, SWT.NULL);
 		rightLink.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		rightLink.setText("<a>" + this.helper.getSrcUrl(false) + "</a>"); //$NON-NLS-1$ //$NON-NLS-2$
-		rightLink.addListener(SWT.Selection, new Listener() {
-			public void handleEvent(Event event) {
-				EditTreeConflictsPanel.this.showHistoryPage(false);
-			}
-		});
+		rightLink.setText("<a>" + helper.getSrcUrl(false) + "</a>"); //$NON-NLS-1$ //$NON-NLS-2$
+		rightLink.addListener(SWT.Selection, event -> EditTreeConflictsPanel.this.showHistoryPage(false));
 	}
 
 	protected void showHistoryPage(boolean isLeft) {
 		boolean stopOnCopy = true;
-		IRepositoryResource rr = this.helper.getRepositoryResourceForHistory(isLeft);
+		IRepositoryResource rr = helper.getRepositoryResourceForHistory(isLeft);
 
-		SVNConflictVersion cVersionRight = this.local.getTreeConflictDescriptor().srcRightVersion;
+		SVNConflictVersion cVersionRight = local.getTreeConflictDescriptor().srcRightVersion;
 		long currentRevision = cVersionRight != null ? cVersionRight.pegRevision : SVNRevision.INVALID_REVISION_NUMBER;
-		GetLogMessagesOperation msgsOp = SelectRevisionPanel.getMsgsOp(rr, stopOnCopy);
+		GetLogMessagesOperation msgsOp = SVNHistoryPanel.getMsgsOp(rr, stopOnCopy);
 
 		if (!UIMonitorUtility.doTaskNowDefault(UIMonitorUtility.getShell(), msgsOp, true).isCancelled()
 				&& msgsOp.getExecutionState() == IActionOperation.OK) {
@@ -202,7 +193,7 @@ public class EditTreeConflictsPanel extends AbstractDialogPanel {
 		composite.setText(SVNUIMessages.EditTreeConflictsPanel_Conflict_Resolution_Group);
 
 		//tips section
-		String tip = this.helper.getTip();
+		String tip = helper.getTip();
 		if (tip != null) {
 			Label tipLabel = new Label(composite, SWT.NONE);
 			tipLabel.setLayoutData(new GridData());
@@ -214,71 +205,63 @@ public class EditTreeConflictsPanel extends AbstractDialogPanel {
 			tipValue.setText(tip);
 		}
 
-		this.localResolutionButton = new Button(composite, SWT.RADIO);
-		this.localResolutionButton.setLayoutData(new GridData());
-		this.localResolutionButton.setText(SVNUIMessages.EditTreeConflictsPanel_ApplyLocalChanges_Resolution);
-		this.localResolutionButton.addListener(SWT.Selection, new Listener() {
-			public void handleEvent(Event event) {
-				EditTreeConflictsPanel.this.changeResolutionSelection();
-			}
-		});
+		localResolutionButton = new Button(composite, SWT.RADIO);
+		localResolutionButton.setLayoutData(new GridData());
+		localResolutionButton.setText(SVNUIMessages.EditTreeConflictsPanel_ApplyLocalChanges_Resolution);
+		localResolutionButton.addListener(SWT.Selection, event -> EditTreeConflictsPanel.this.changeResolutionSelection());
 
-		this.remoteResolutionButton = new Button(composite, SWT.RADIO);
-		this.remoteResolutionButton.setLayoutData(new GridData());
-		this.remoteResolutionButton.setText(SVNUIMessages.EditTreeConflictsPanel_ApplyIncomigChanges_Resolution);
-		this.remoteResolutionButton.addListener(SWT.Selection, new Listener() {
-			public void handleEvent(Event event) {
-				EditTreeConflictsPanel.this.changeResolutionSelection();
-			}
-		});
+		remoteResolutionButton = new Button(composite, SWT.RADIO);
+		remoteResolutionButton.setLayoutData(new GridData());
+		remoteResolutionButton.setText(SVNUIMessages.EditTreeConflictsPanel_ApplyIncomigChanges_Resolution);
+		remoteResolutionButton.addListener(SWT.Selection, event -> EditTreeConflictsPanel.this.changeResolutionSelection());
 
-		this.manualResolutionButton = new Button(composite, SWT.RADIO);
-		this.manualResolutionButton.setLayoutData(new GridData());
-		this.manualResolutionButton.setText(SVNUIMessages.EditTreeConflictsPanel_ManualResolution);
-		this.manualResolutionButton.addListener(SWT.Selection, new Listener() {
-			public void handleEvent(Event event) {
-				EditTreeConflictsPanel.this.changeResolutionSelection();
-			}
-		});
+		manualResolutionButton = new Button(composite, SWT.RADIO);
+		manualResolutionButton.setLayoutData(new GridData());
+		manualResolutionButton.setText(SVNUIMessages.EditTreeConflictsPanel_ManualResolution);
+		manualResolutionButton.addListener(SWT.Selection, event -> EditTreeConflictsPanel.this.changeResolutionSelection());
 
-		this.markAsMergedButton = new Button(composite, SWT.CHECK);
-		this.markAsMergedButton.setLayoutData(new GridData());
-		this.markAsMergedButton.setText(SVNUIMessages.EditTreeConflictsPanel_MarkAsMerged_Button);
+		markAsMergedButton = new Button(composite, SWT.CHECK);
+		markAsMergedButton.setLayoutData(new GridData());
+		markAsMergedButton.setText(SVNUIMessages.EditTreeConflictsPanel_MarkAsMerged_Button);
 	}
 
+	@Override
 	public void postInit() {
 		super.postInit();
 
-		this.manualResolutionButton.setSelection(true);
-		this.changeResolutionSelection();
+		manualResolutionButton.setSelection(true);
+		changeResolutionSelection();
 	}
 
 	protected void changeResolutionSelection() {
-		if (this.localResolutionButton.getSelection()) {
-			this.markAsMergedButton.setSelection(true);
-			this.markAsMergedButton.setEnabled(false);
-		} else if (this.manualResolutionButton.getSelection()) {
-			this.markAsMergedButton.setSelection(false);
-			this.markAsMergedButton.setEnabled(true);
-		} else if (this.remoteResolutionButton.getSelection()) {
-			this.markAsMergedButton.setSelection(true);
-			this.markAsMergedButton.setEnabled(!this.helper.isRemoteOperationResolveTheConflict());
+		if (localResolutionButton.getSelection()) {
+			markAsMergedButton.setSelection(true);
+			markAsMergedButton.setEnabled(false);
+		} else if (manualResolutionButton.getSelection()) {
+			markAsMergedButton.setSelection(false);
+			markAsMergedButton.setEnabled(true);
+		} else if (remoteResolutionButton.getSelection()) {
+			markAsMergedButton.setSelection(true);
+			markAsMergedButton.setEnabled(!helper.isRemoteOperationResolveTheConflict());
 		}
 	}
 
+	@Override
 	protected void saveChangesImpl() {
-		this.operation = this.helper.getOperation(this.remoteResolutionButton.getSelection(),
-				this.localResolutionButton.getSelection(), this.markAsMergedButton.getSelection());
+		operation = helper.getOperation(remoteResolutionButton.getSelection(), localResolutionButton.getSelection(),
+				markAsMergedButton.getSelection());
 	}
 
+	@Override
 	protected void cancelChangesImpl() {
-		this.operation = null;
+		operation = null;
 	}
 
 	public IActionOperation getOperation() {
-		return this.operation;
+		return operation;
 	}
 
+	@Override
 	public String getHelpId() {
 		return "org.eclipse.team.svn.help.editTreeConflictsContext"; //$NON-NLS-1$
 	}

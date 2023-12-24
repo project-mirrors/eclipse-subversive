@@ -34,11 +34,11 @@ import org.eclipse.team.svn.ui.repository.model.RepositoryError;
 public class ShowBrowsingErrorAction extends AbstractRepositoryTeamAction {
 
 	public ShowBrowsingErrorAction() {
-		super();
 	}
 
+	@Override
 	public void runImpl(IAction action) {
-		Object selectedElement = this.getSelection().getFirstElement();
+		Object selectedElement = getSelection().getFirstElement();
 		OperationErrorInfo errorInfo = UILoggedOperation
 				.formatMessage(((RepositoryError) selectedElement).getErrorStatus(), true);
 		ErrorCancelPanel panel;
@@ -51,10 +51,11 @@ public class ShowBrowsingErrorAction extends AbstractRepositoryTeamAction {
 			panel = new ErrorCancelPanel(SVNUIMessages.ShowBrowsingErrorAction_Dialog_Title, errorInfo.numberOfErrors,
 					errorInfo.simpleMessage, errorInfo.advancedMessage, false, false, null);
 		}
-		DefaultDialog dialog = new DefaultDialog(this.getShell(), panel);
+		DefaultDialog dialog = new DefaultDialog(getShell(), panel);
 		dialog.open();
 	}
 
+	@Override
 	public boolean isEnabled() {
 		return true;
 	}

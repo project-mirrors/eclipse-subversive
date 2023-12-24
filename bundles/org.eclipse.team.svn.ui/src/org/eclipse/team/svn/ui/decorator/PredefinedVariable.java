@@ -31,29 +31,34 @@ public class PredefinedVariable implements IVariable {
 		this.name = name;
 	}
 
+	@Override
 	public String getName() {
-		return this.name;
+		return name;
 	}
 
+	@Override
 	public String getDescription() {
-		return this.getDescription(this.name);
+		return this.getDescription(name);
 	}
 
 	protected String getDescription(String name) {
-		return SVNUIMessages.getString(this.domain + "_" + name); //$NON-NLS-1$
+		return SVNUIMessages.getString(domain + "_" + name); //$NON-NLS-1$
 	}
 
+	@Override
 	public String toString() {
-		return this.getName();
+		return getName();
 	}
 
+	@Override
 	public int hashCode() {
-		return this.name.hashCode();
+		return name.hashCode();
 	}
 
+	@Override
 	public boolean equals(Object obj) {
 		if (obj != null && obj instanceof IVariable) {
-			return this.name.equals(((IVariable) obj).getName());
+			return name.equals(((IVariable) obj).getName());
 		}
 		return super.equals(obj);
 	}

@@ -25,5 +25,5 @@ public interface IHistoryViewFactory {
 	 * 
 	 * @return project-specific multi-line comment view implementation
 	 */
-	public ICommentView getCommentView();
+	ICommentView getCommentView();
 }

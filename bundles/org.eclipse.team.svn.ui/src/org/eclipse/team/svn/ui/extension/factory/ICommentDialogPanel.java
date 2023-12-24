@@ -29,16 +29,16 @@ public interface ICommentDialogPanel extends IDialogPanel {
 	 * 
 	 * @return
 	 */
-	public String getMessage();
+	String getMessage();
 
 	/**
 	 * Adds resources selection change listener
 	 */
-	public void addResourcesSelectionChangedListener(IResourceSelectionChangeListener listener);
+	void addResourcesSelectionChangedListener(IResourceSelectionChangeListener listener);
 
 	/**
 	 * Removes resources selection change listener
 	 */
-	public void removeResourcesSelectionChangedListener(IResourceSelectionChangeListener listener);
+	void removeResourcesSelectionChangedListener(IResourceSelectionChangeListener listener);
 
 }

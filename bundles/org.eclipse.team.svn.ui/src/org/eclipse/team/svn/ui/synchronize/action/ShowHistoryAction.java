@@ -37,13 +37,15 @@ public class ShowHistoryAction extends AbstractSynchronizeModelAction {
 
 	public ShowHistoryAction(String text, ISynchronizePageConfiguration configuration) {
 		super(text, configuration);
-		this.actionHelper = new ShowHistoryActionHelper(this, configuration);
+		actionHelper = new ShowHistoryActionHelper(this, configuration);
 	}
 
+	@Override
 	protected boolean needsToSaveDirtyEditors() {
 		return false;
 	}
 
+	@Override
 	protected boolean updateSelection(IStructuredSelection selection) {
 		super.updateSelection(selection);
 		if (selection.size() == 1) {
@@ -66,8 +68,9 @@ public class ShowHistoryAction extends AbstractSynchronizeModelAction {
 		return false;
 	}
 
+	@Override
 	protected IActionOperation getOperation(ISynchronizePageConfiguration configuration, IDiffElement[] elements) {
-		return this.actionHelper.getOperation();
+		return actionHelper.getOperation();
 	}
 
 }

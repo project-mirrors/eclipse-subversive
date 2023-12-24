@@ -56,18 +56,19 @@ public class GetFileContentOperation extends AbstractFileOperation {
 		this.target = target;
 	}
 
+	@Override
 	protected void runImpl(IProgressMonitor monitor) throws Exception {
-		File file = this.operableData()[0];
+		File file = operableData()[0];
 
 		IRepositoryResource remote = SVNFileStorage.instance().asRepositoryResource(file, false);
 		ISVNConnector proxy = remote.getRepositoryLocation().acquireSVNProxy();
 		try {
-			SVNRevision.Kind kind = this.revision.getKind();
+			SVNRevision.Kind kind = revision.getKind();
 			if (kind == Kind.BASE || kind == Kind.WORKING) {
-				proxy.streamFileContent(new SVNEntryRevisionReference(file.getAbsolutePath(), null, this.revision),
-						this.bufferSize, this.target, new SVNProgressMonitor(this, monitor, null));
+				proxy.streamFileContent(new SVNEntryRevisionReference(file.getAbsolutePath(), null, revision),
+						bufferSize, target, new SVNProgressMonitor(this, monitor, null));
 			} else {
-				proxy.streamFileContent(SVNUtility.getEntryRevisionReference(remote), this.bufferSize, this.target,
+				proxy.streamFileContent(SVNUtility.getEntryRevisionReference(remote), bufferSize, target,
 						new SVNProgressMonitor(this, monitor, null));
 			}
 		} finally {

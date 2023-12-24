@@ -22,7 +22,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -76,16 +75,18 @@ public class PrepareInstallProfileJob_3_6 implements IConnectorsInstallJob {
 	private Set<URI> repositoryLocations;
 
 	public PrepareInstallProfileJob_3_6() {
-		this.provisioningUI = ProvisioningUI.getDefaultUI();
+		provisioningUI = ProvisioningUI.getDefaultUI();
 	}
 
+	@Override
 	public void setInstallableConnectors(List<ConnectorDescriptor> installableConnectors) {
 		if (installableConnectors == null || installableConnectors.isEmpty()) {
 			throw new IllegalArgumentException();
 		}
-		this.installableConnectors = new ArrayList<ConnectorDescriptor>(installableConnectors);
+		this.installableConnectors = new ArrayList<>(installableConnectors);
 	}
 
+	@Override
 	public void run(IProgressMonitor progressMonitor) throws InvocationTargetException, InterruptedException {
 		try {
 			SubMonitor monitor = SubMonitor.convert(progressMonitor,
@@ -100,11 +101,7 @@ public class PrepareInstallProfileJob_3_6 implements IConnectorsInstallJob {
 
 				checkCancelled(monitor);
 
-				Display.getDefault().asyncExec(new Runnable() {
-					public void run() {
-						provisioningUI.openInstallWizard(Arrays.asList(ius), installOperation, null);
-					}
-				});
+				Display.getDefault().asyncExec(() -> provisioningUI.openInstallWizard(Arrays.asList(ius), installOperation, null));
 			} finally {
 				monitor.done();
 			}
@@ -164,11 +161,7 @@ public class PrepareInstallProfileJob_3_6 implements IConnectorsInstallJob {
 //
 //			plannerResolutionOperation = operation;
 
-		} catch (URISyntaxException e) {
-			// should never happen, since we already validated URLs.
-			throw new CoreException(new Status(IStatus.ERROR, SVNTeamPlugin.NATURE_ID,
-					SVNUIMessages.InstallConnectorsJob_unexpectedError_url, e));
-		} catch (MalformedURLException e) {
+		} catch (URISyntaxException | MalformedURLException e) {
 			// should never happen, since we already validated URLs.
 			throw new CoreException(new Status(IStatus.ERROR, SVNTeamPlugin.NATURE_ID,
 					SVNUIMessages.InstallConnectorsJob_unexpectedError_url, e));
@@ -183,7 +176,7 @@ public class PrepareInstallProfileJob_3_6 implements IConnectorsInstallJob {
 	 */
 	private void checkForUnavailable(final List<IInstallableUnit> installableUnits) throws CoreException {
 		// at least one selected connector could not be found in a repository
-		Set<String> foundIds = new HashSet<String>();
+		Set<String> foundIds = new HashSet<>();
 		for (IInstallableUnit unit : installableUnits) {
 			foundIds.add(unit.getId());
 		}
@@ -220,14 +213,10 @@ public class PrepareInstallProfileJob_3_6 implements IConnectorsInstallJob {
 			// instead of aborting here we ask the user if they wish to proceed anyways
 			final boolean[] okayToProceed = new boolean[1];
 			final String finalMessage = message;
-			UIMonitorUtility.getDisplay().syncExec(new Runnable() {
-				public void run() {
-					okayToProceed[0] = MessageDialog.openQuestion(UIMonitorUtility.getShell(),
-							SVNUIMessages.InstallConnectorsJob_questionProceed, NLS.bind(
-									SVNUIMessages.InstallConnectorsJob_questionProceed_long,
-									new Object[] { finalMessage }));
-				}
-			});
+			UIMonitorUtility.getDisplay().syncExec(() -> okayToProceed[0] = MessageDialog.openQuestion(UIMonitorUtility.getShell(),
+					SVNUIMessages.InstallConnectorsJob_questionProceed, NLS.bind(
+							SVNUIMessages.InstallConnectorsJob_questionProceed_long,
+							new Object[] { finalMessage })));
 			if (!okayToProceed[0]) {
 				throw new CoreException(new Status(IStatus.ERROR, SVNTeamPlugin.NATURE_ID, NLS.bind(
 						SVNUIMessages.InstallConnectorsJob_connectorsNotAvailable, detailedMessage), null));
@@ -240,7 +229,7 @@ public class PrepareInstallProfileJob_3_6 implements IConnectorsInstallJob {
 	 * will host multiple versions of a particular feature. we assume that the user wants the highest version.
 	 */
 	private void removeOldVersions(final List<IInstallableUnit> installableUnits) {
-		Map<String, Version> symbolicNameToVersion = new HashMap<String, Version>();
+		Map<String, Version> symbolicNameToVersion = new HashMap<>();
 		for (IInstallableUnit unit : installableUnits) {
 			Version version = symbolicNameToVersion.get(unit.getId());
 			if (version == null || version.compareTo(unit.getVersion()) == -1) {
@@ -248,7 +237,7 @@ public class PrepareInstallProfileJob_3_6 implements IConnectorsInstallJob {
 			}
 		}
 		if (symbolicNameToVersion.size() != installableUnits.size()) {
-			for (IInstallableUnit unit : new ArrayList<IInstallableUnit>(installableUnits)) {
+			for (IInstallableUnit unit : new ArrayList<>(installableUnits)) {
 				Version version = symbolicNameToVersion.get(unit.getId());
 				if (!version.equals(unit.getVersion())) {
 					installableUnits.remove(unit);
@@ -264,7 +253,7 @@ public class PrepareInstallProfileJob_3_6 implements IConnectorsInstallJob {
 	 */
 	private List<IInstallableUnit> queryInstallableUnits(SubMonitor monitor, List<IMetadataRepository> repositories)
 			throws URISyntaxException {
-		final List<IInstallableUnit> installableUnits = new ArrayList<IInstallableUnit>();
+		final List<IInstallableUnit> installableUnits = new ArrayList<>();
 
 		monitor.setWorkRemaining(repositories.size());
 		for (final IMetadataRepository repository : repositories) {
@@ -274,8 +263,7 @@ public class PrepareInstallProfileJob_3_6 implements IConnectorsInstallJob {
 					"id ~= /*.feature.group/ && " + //$NON-NLS-1$
 							"properties['org.eclipse.equinox.p2.type.group'] == true ");//$NON-NLS-1$
 			IQueryResult<IInstallableUnit> result = repository.query(query, monitor.newChild(1));
-			for (Iterator<IInstallableUnit> iter = result.iterator(); iter.hasNext();) {
-				IInstallableUnit iu = iter.next();
+			for (IInstallableUnit iu : result) {
 				String id = iu.getId();
 				if (installableUnitIdsThisRepository.contains(id)) {
 					installableUnits.add(iu);
@@ -290,7 +278,7 @@ public class PrepareInstallProfileJob_3_6 implements IConnectorsInstallJob {
 		// tell p2 that it's okay to use these repositories
 		ProvisioningSession session = ProvisioningUI.getDefaultUI().getSession();
 		RepositoryTracker repositoryTracker = ProvisioningUI.getDefaultUI().getRepositoryTracker();
-		repositoryLocations = new HashSet<URI>();
+		repositoryLocations = new HashSet<>();
 		monitor.setWorkRemaining(installableConnectors.size() * 5);
 		for (ConnectorDescriptor descriptor : installableConnectors) {
 			URI uri = new URL(descriptor.getSiteUrl()).toURI();
@@ -305,7 +293,7 @@ public class PrepareInstallProfileJob_3_6 implements IConnectorsInstallJob {
 		}
 
 		// fetch meta-data for these repositories
-		ArrayList<IMetadataRepository> repositories = new ArrayList<IMetadataRepository>();
+		ArrayList<IMetadataRepository> repositories = new ArrayList<>();
 		monitor.setWorkRemaining(repositories.size());
 		IMetadataRepositoryManager manager = (IMetadataRepositoryManager) session.getProvisioningAgent()
 				.getService(
@@ -319,7 +307,7 @@ public class PrepareInstallProfileJob_3_6 implements IConnectorsInstallJob {
 	}
 
 	private Set<String> getDescriptorIds(final IMetadataRepository repository) throws URISyntaxException {
-		final Set<String> installableUnitIdsThisRepository = new HashSet<String>();
+		final Set<String> installableUnitIdsThisRepository = new HashSet<>();
 		// determine all installable units for this repository
 		for (ConnectorDescriptor descriptor : installableConnectors) {
 			try {
@@ -334,7 +322,7 @@ public class PrepareInstallProfileJob_3_6 implements IConnectorsInstallJob {
 	}
 
 	private Set<String> getFeatureIds(ConnectorDescriptor descriptor) {
-		Set<String> featureIds = new HashSet<String>();
+		Set<String> featureIds = new HashSet<>();
 		for (String id : descriptor.getInstallableUnits()) {
 			if (!id.endsWith(P2_FEATURE_GROUP_SUFFIX)) {
 				id += P2_FEATURE_GROUP_SUFFIX;

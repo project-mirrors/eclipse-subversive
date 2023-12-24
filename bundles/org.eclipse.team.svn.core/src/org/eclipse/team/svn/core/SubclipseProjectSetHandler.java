@@ -37,6 +37,7 @@ public class SubclipseProjectSetHandler implements IProjectSetHandler {
 
 	protected static final String PLUGIN_INFORMATION = "0.9.3"; //$NON-NLS-1$
 
+	@Override
 	public String getProjectNameForReference(String fullReference) {
 		String[] parts = fullReference.split(","); //$NON-NLS-1$
 		if (parts.length < 3 || !parts[0].equals(SubclipseProjectSetHandler.PLUGIN_INFORMATION)) {
@@ -45,11 +46,12 @@ public class SubclipseProjectSetHandler implements IProjectSetHandler {
 		return parts[2];
 	}
 
+	@Override
 	public IProject configureCheckoutOperation(CompositeOperation op, IProject project, String fullReference)
 			throws TeamException {
 		String[] parts = fullReference.split(","); //$NON-NLS-1$
 
-		IRepositoryLocation location = this.getLocationForReference(parts);
+		IRepositoryLocation location = getLocationForReference(parts);
 		IRepositoryResource resource = location.asRepositoryContainer(parts[1], true);
 
 		if (resource != null) {
@@ -69,9 +71,9 @@ public class SubclipseProjectSetHandler implements IProjectSetHandler {
 		String url = parts[1];
 		IRepositoryLocation[] locations = SVNRemoteStorage.instance().getRepositoryLocations();
 		IPath awaitingFor = SVNUtility.createPathForSVNUrl(url);
-		for (int i = 0; i < locations.length; i++) {
-			if (SVNUtility.createPathForSVNUrl(locations[i].getUrl()).isPrefixOf(awaitingFor)) {
-				return locations[i];
+		for (IRepositoryLocation location2 : locations) {
+			if (SVNUtility.createPathForSVNUrl(location2.getUrl()).isPrefixOf(awaitingFor)) {
+				return location2;
 			}
 		}
 		if (location == null) {
@@ -82,14 +84,17 @@ public class SubclipseProjectSetHandler implements IProjectSetHandler {
 		return location;
 	}
 
+	@Override
 	public String asReference(IProject project) throws TeamException {
 		throw new RuntimeException("Unsupported operation"); //$NON-NLS-1$
 	}
 
+	@Override
 	public String asReference(String resourceUrl, String projectName) {
 		throw new RuntimeException("Unsupported operation"); //$NON-NLS-1$
 	}
 
+	@Override
 	public boolean accept(String referenceString) {
 		return referenceString.startsWith(PLUGIN_INFORMATION);
 	}

@@ -31,14 +31,14 @@ public interface ICommentView {
 	 * @param parent
 	 * @return
 	 */
-	public void createCommentView(Composite parent);
+	void createCommentView(Composite parent);
 
-	public void createCommentView(Composite parent, int style);
+	void createCommentView(Composite parent, int style);
 
-	public void usedFor(IResource resource);
+	void usedFor(IResource resource);
 
-	public void usedFor(IRepositoryResource resource);
+	void usedFor(IRepositoryResource resource);
 
-	public void setComment(String comment);
+	void setComment(String comment);
 
 }

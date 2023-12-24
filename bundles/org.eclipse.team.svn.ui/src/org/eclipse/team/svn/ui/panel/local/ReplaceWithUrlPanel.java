@@ -31,7 +31,7 @@ public class ReplaceWithUrlPanel extends AbstractRepositoryResourceSelectionPane
 				SVNUIMessages.ReplaceUrlPanel_Selection_Description, "replaceUrl", //$NON-NLS-1$
 				SVNUIMessages.ReplaceUrlPanel_Selection_Title, SVNUIMessages.ReplaceUrlPanel_Description,
 				RepositoryResourceSelectionComposite.TEXT_BASE);
-		this.defaultMessage = SVNUIMessages.ReplaceUrlPanel_Message;
+		defaultMessage = SVNUIMessages.ReplaceUrlPanel_Message;
 	}
 
 }

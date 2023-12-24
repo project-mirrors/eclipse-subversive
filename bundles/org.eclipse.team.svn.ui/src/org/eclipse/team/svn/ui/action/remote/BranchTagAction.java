@@ -55,14 +55,13 @@ public class BranchTagAction extends AbstractRepositoryTeamAction {
 	protected int nodeType;
 
 	public BranchTagAction(int nodeType) {
-		super();
 		this.nodeType = nodeType;
 	}
 
+	@Override
 	public void runImpl(IAction action) {
-		IRepositoryResource[] resources = this.getSelectedRepositoryResources();
-		PreparedBranchTagOperation op = BranchTagAction.getBranchTagOperation(resources, this.getShell(),
-				this.nodeType);
+		IRepositoryResource[] resources = getSelectedRepositoryResources();
+		PreparedBranchTagOperation op = BranchTagAction.getBranchTagOperation(resources, getShell(), nodeType);
 
 		if (op != null) {
 			CompositeOperation composite = new CompositeOperation(op.getId(), op.getMessagesClass());
@@ -70,7 +69,7 @@ public class BranchTagAction extends AbstractRepositoryTeamAction {
 			composite.add(
 					new RefreshRemoteResourcesOperation(new IRepositoryResource[] { op.getDestination().getParent() }),
 					new IActionOperation[] { op });
-			this.runScheduled(composite);
+			runScheduled(composite);
 		}
 	}
 
@@ -152,16 +151,17 @@ public class BranchTagAction extends AbstractRepositoryTeamAction {
 		HashSet<String> nodeNames = null;
 		IRepositoryResource[] existentNodes = BranchTagAction.getRemoteChildren(parent);
 		if (existentNodes != null) {
-			nodeNames = new HashSet<String>();
-			for (int i = 0; i < existentNodes.length; i++) {
-				nodeNames.add(existentNodes[i].getName());
+			nodeNames = new HashSet<>();
+			for (IRepositoryResource existentNode : existentNodes) {
+				nodeNames.add(existentNode.getName());
 			}
 		}
 		return nodeNames;
 	}
 
+	@Override
 	public boolean isEnabled() {
-		IRepositoryResource[] resources = this.getSelectedRepositoryResources();
+		IRepositoryResource[] resources = getSelectedRepositoryResources();
 		if (resources.length == 0) {
 			return false;
 		}

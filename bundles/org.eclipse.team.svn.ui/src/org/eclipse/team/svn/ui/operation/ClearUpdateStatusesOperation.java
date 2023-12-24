@@ -36,16 +36,19 @@ public class ClearUpdateStatusesOperation extends AbstractWorkingCopyOperation {
 		super("Operation_ClearUpdateStatusesCache", SVNUIMessages.class, provider); //$NON-NLS-1$
 	}
 
+	@Override
 	public ISchedulingRule getSchedulingRule() {
 		return null;
 	}
 
+	@Override
 	public int getOperationWeight() {
 		return 0;
 	}
 
+	@Override
 	protected void runImpl(IProgressMonitor monitor) throws Exception {
-		UpdateSubscriber.instance().clearRemoteStatuses(this.operableData());
+		UpdateSubscriber.instance().clearRemoteStatuses(operableData());
 	}
 
 }

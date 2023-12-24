@@ -15,16 +15,12 @@
 package org.eclipse.team.svn.ui.composite;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.FileDialog;
-import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.team.svn.ui.SVNUIMessages;
 import org.eclipse.team.svn.ui.dialog.DefaultDialog;
@@ -54,11 +50,11 @@ public class DiffFormatComposite extends Composite {
 	public DiffFormatComposite(Composite parent, IValidationManager validationManager) {
 		super(parent, SWT.NONE);
 		this.validationManager = validationManager;
-		this.createControls();
+		createControls();
 	}
 
 	public String getDiffFile() {
-		return this.diffFile;
+		return diffFile;
 	}
 
 	protected void createControls() {
@@ -66,70 +62,63 @@ public class DiffFormatComposite extends Composite {
 		layout.numColumns = 3;
 		layout.marginHeight = 0;
 		layout.marginWidth = 0;
-		this.setLayout(layout);
+		setLayout(layout);
 		GridData data = new GridData(GridData.FILL_HORIZONTAL);
-		this.setLayoutData(data);
+		setLayoutData(data);
 
-		this.generateUDiffCheckbox = new Button(this, SWT.CHECK);
-		this.generateUDiffCheckbox.setText(SVNUIMessages.DiffFormatComposite_GenerateDiffFile_Message);
+		generateUDiffCheckbox = new Button(this, SWT.CHECK);
+		generateUDiffCheckbox.setText(SVNUIMessages.DiffFormatComposite_GenerateDiffFile_Message);
 		data = new GridData();
-		this.generateUDiffCheckbox.setLayoutData(data);
+		generateUDiffCheckbox.setLayoutData(data);
 
-		this.uDiffPath = new Text(this, SWT.SINGLE | SWT.BORDER);
+		uDiffPath = new Text(this, SWT.SINGLE | SWT.BORDER);
 		data = new GridData(GridData.FILL_HORIZONTAL);
-		this.uDiffPath.setLayoutData(data);
+		uDiffPath.setLayoutData(data);
 
-		this.browseButton = new Button(this, SWT.PUSH);
-		this.browseButton.setText(SVNUIMessages.Button_Browse);
+		browseButton = new Button(this, SWT.PUSH);
+		browseButton.setText(SVNUIMessages.Button_Browse);
 		data = new GridData();
-		data.widthHint = DefaultDialog.computeButtonWidth(this.browseButton);
-		this.browseButton.setLayoutData(data);
+		data.widthHint = DefaultDialog.computeButtonWidth(browseButton);
+		browseButton.setLayoutData(data);
 
 		//validation
 		String name = SVNUIMessages.DiffFormatComposite_DiffFile_Name;
 		CompositeVerifier cVerifier = new CompositeVerifier();
 		cVerifier.add(new NonEmptyFieldVerifier(name));
 		cVerifier.add(new ResourcePathVerifier(name));
-		this.validationManager.attachTo(this.uDiffPath, new AbstractVerifierProxy(cVerifier) {
+		validationManager.attachTo(uDiffPath, new AbstractVerifierProxy(cVerifier) {
+			@Override
 			protected boolean isVerificationEnabled(Control input) {
-				return DiffFormatComposite.this.generateUDiffCheckbox.getSelection();
+				return generateUDiffCheckbox.getSelection();
 			}
 		});
 
-		//event handlers:			
+		//event handlers:
 
-		this.generateUDiffCheckbox.addListener(SWT.Selection, new Listener() {
-			public void handleEvent(Event e) {
-				DiffFormatComposite.this.validationManager.validateContent();
-				DiffFormatComposite.this.setEnablement();
+		generateUDiffCheckbox.addListener(SWT.Selection, e -> {
+			validationManager.validateContent();
+			DiffFormatComposite.this.setEnablement();
+		});
+
+		browseButton.addListener(SWT.Selection, e -> {
+			FileDialog dlg = new FileDialog(DiffFormatComposite.this.getShell(), SWT.PRIMARY_MODAL | SWT.SAVE);
+			dlg.setFilterExtensions(new String[] { "*.diff", "*.*" }); //$NON-NLS-1$ //$NON-NLS-2$
+			dlg.setText(SVNUIMessages.DiffFormatComposite_SaveDiffFileAs);
+			String file = dlg.open();
+			if (file != null) {
+				uDiffPath.setText(file);
 			}
 		});
 
-		this.browseButton.addListener(SWT.Selection, new Listener() {
-			public void handleEvent(Event e) {
-				FileDialog dlg = new FileDialog(DiffFormatComposite.this.getShell(), SWT.PRIMARY_MODAL | SWT.SAVE);
-				dlg.setFilterExtensions(new String[] { "*.diff", "*.*" }); //$NON-NLS-1$ //$NON-NLS-2$
-				dlg.setText(SVNUIMessages.DiffFormatComposite_SaveDiffFileAs);
-				String file = dlg.open();
-				if (file != null) {
-					DiffFormatComposite.this.uDiffPath.setText(file);
-				}
-			}
-		});
-
-		this.uDiffPath.addModifyListener(new ModifyListener() {
-			public void modifyText(ModifyEvent e) {
-				DiffFormatComposite.this.diffFile = ((Text) e.widget).getText();
-			}
-		});
+		uDiffPath.addModifyListener(e -> diffFile = ((Text) e.widget).getText());
 
 		//set init values and run enablement
-		this.generateUDiffCheckbox.setSelection(false);
-		this.setEnablement();
+		generateUDiffCheckbox.setSelection(false);
+		setEnablement();
 	}
 
 	protected void setEnablement() {
-		boolean enabled = this.generateUDiffCheckbox.getSelection();
+		boolean enabled = generateUDiffCheckbox.getSelection();
 		DiffFormatComposite.this.uDiffPath.setEnabled(enabled);
 		DiffFormatComposite.this.browseButton.setEnabled(enabled);
 	}

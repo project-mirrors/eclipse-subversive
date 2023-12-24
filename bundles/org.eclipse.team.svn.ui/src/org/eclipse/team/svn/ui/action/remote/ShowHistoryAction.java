@@ -27,16 +27,17 @@ import org.eclipse.team.svn.ui.operation.ShowHistoryViewOperation;
 public class ShowHistoryAction extends AbstractRepositoryTeamAction {
 
 	public ShowHistoryAction() {
-		super();
 	}
 
+	@Override
 	public void runImpl(IAction action) {
-		IRepositoryResource resource = this.getSelectedRepositoryResources()[0];
-		this.runBusy(new ShowHistoryViewOperation(resource, 0, 0));
+		IRepositoryResource resource = getSelectedRepositoryResources()[0];
+		runBusy(new ShowHistoryViewOperation(resource, 0, 0));
 	}
 
+	@Override
 	public boolean isEnabled() {
-		return this.getSelectedRepositoryResources().length == 1;
+		return getSelectedRepositoryResources().length == 1;
 	}
 
 }

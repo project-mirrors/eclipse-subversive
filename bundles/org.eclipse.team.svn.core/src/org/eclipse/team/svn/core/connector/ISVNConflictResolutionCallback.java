@@ -33,6 +33,6 @@ public interface ISVNConflictResolutionCallback {
 	 * @throws SVNConnectorException
 	 *             If an error occurs.
 	 */
-	public SVNConflictResolution resolve(SVNConflictDescriptor descriptor) throws SVNConnectorException;
+	SVNConflictResolution resolve(SVNConflictDescriptor descriptor) throws SVNConnectorException;
 
 }

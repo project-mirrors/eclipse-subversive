@@ -33,22 +33,26 @@ public class RepositoryPending extends RepositoryFictiveNode {
 		this.parent = parent;
 	}
 
+	@Override
 	public RGB getForeground(Object element) {
-		return this.parent.getForeground(element);
+		return parent.getForeground(element);
 	}
 
 	public boolean hasChildren() {
 		return false;
 	}
 
+	@Override
 	public Object[] getChildren(Object o) {
 		return null;
 	}
 
+	@Override
 	public String getLabel(Object o) {
 		return SVNUIMessages.getString(RepositoryPending.PENDING);
 	}
 
+	@Override
 	public ImageDescriptor getImageDescriptor(Object object) {
 		return SVNTeamUIPlugin.instance().getImageDescriptor("icons/views/repositories/browser_pending.gif"); //$NON-NLS-1$
 	}

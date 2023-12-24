@@ -87,7 +87,7 @@ public class ShowMergeViewOperation extends AbstractActionOperation {
 		super("Operation_ShowMergeView", SVNUIMessages.class); //$NON-NLS-1$
 		this.part = part;
 		this.locals = locals;
-		this.from = fromStart;
+		from = fromStart;
 		this.fromEnd = fromEnd;
 		this.ignoreAncestry = ignoreAncestry;
 		this.depth = depth;
@@ -104,20 +104,22 @@ public class ShowMergeViewOperation extends AbstractActionOperation {
 		this.recordOnly = recordOnly;
 	}
 
+	@Override
 	public int getOperationWeight() {
 		return 0;
 	}
 
+	@Override
 	protected void runImpl(IProgressMonitor monitor) throws Exception {
 		AbstractMergeSet mergeSet = null;
-		if (this.fromEnd != null) {
-			mergeSet = new MergeSet2URL(this.locals, this.from.getRepositoryResources(),
-					this.fromEnd.getRepositoryResources(), this.ignoreAncestry, this.recordOnly, this.depth);
-		} else if (this.revisions != null) {
-			mergeSet = new MergeSet1URL(this.locals, this.from.getRepositoryResources(), this.revisions,
-					this.ignoreAncestry, this.recordOnly, this.depth);
+		if (fromEnd != null) {
+			mergeSet = new MergeSet2URL(locals, from.getRepositoryResources(), fromEnd.getRepositoryResources(),
+					ignoreAncestry, recordOnly, depth);
+		} else if (revisions != null) {
+			mergeSet = new MergeSet1URL(locals, from.getRepositoryResources(), revisions, ignoreAncestry, recordOnly,
+					depth);
 		} else {
-			mergeSet = new MergeSetReintegrate(this.locals, this.from.getRepositoryResources());
+			mergeSet = new MergeSetReintegrate(locals, from.getRepositoryResources());
 		}
 
 		//SubscriberParticipant.getMatchingParticipant silently changes resources order. So, make a copy...
@@ -132,7 +134,7 @@ public class ShowMergeViewOperation extends AbstractActionOperation {
 			((MergeScope) participant.getScope()).setMergeSet(mergeSet);
 		}
 
-		participant.run(this.part);
+		participant.run(part);
 	}
 
 }

@@ -29,8 +29,8 @@ import org.eclipse.team.svn.ui.extension.factory.IReportingDescriptor;
  * @author Alexander Gurov
  */
 public class ReportPartsFactory {
-	public static interface IStatusVisitor {
-		public boolean visit(IStatus status);
+	public interface IStatusVisitor {
+		boolean visit(IStatus status);
 	}
 
 	public static boolean checkStatus(IStatus status, IStatusVisitor visitor) {
@@ -38,8 +38,8 @@ public class ReportPartsFactory {
 			return visitor.visit(status);
 		}
 		IStatus[] children = status.getChildren();
-		for (int i = 0; i < children.length; i++) {
-			if (ReportPartsFactory.checkStatus(children[i], visitor)) {
+		for (IStatus child : children) {
+			if (ReportPartsFactory.checkStatus(child, visitor)) {
 				return true;
 			}
 		}
@@ -47,15 +47,11 @@ public class ReportPartsFactory {
 	}
 
 	public static String getStackTrace(IStatus operationStatus) {
-		final String[] stackTrace = new String[] { "" }; //$NON-NLS-1$
-		ReportPartsFactory.checkStatus(operationStatus, new IStatusVisitor() {
-
-			public boolean visit(IStatus status) {
-				String trace = ReportPartsFactory.getOutput(status);
-				stackTrace[0] += trace + "\n"; //$NON-NLS-1$
-				return false;
-			}
-
+		final String[] stackTrace = { "" }; //$NON-NLS-1$
+		ReportPartsFactory.checkStatus(operationStatus, status -> {
+			String trace = ReportPartsFactory.getOutput(status);
+			stackTrace[0] += trace + "\n"; //$NON-NLS-1$
+			return false;
 		});
 		return stackTrace[0];
 	}
@@ -66,10 +62,8 @@ public class ReportPartsFactory {
 		if (t != null) {
 			ByteArrayOutputStream output = new ByteArrayOutputStream();
 			PrintWriter writer = new PrintWriter(output);
-			try {
+			try (writer) {
 				t.printStackTrace(writer);
-			} finally {
-				writer.close();
 			}
 			message = output.toString();
 		}
@@ -77,24 +71,24 @@ public class ReportPartsFactory {
 	}
 
 	public static String removeHTMLTags(String report) {
-		report = report.replaceAll("<b>", ""); //$NON-NLS-1$ //$NON-NLS-2$
-		report = report.replaceAll("</b> ", "\t"); //$NON-NLS-1$ //$NON-NLS-2$
-		report = report.replaceAll("</b>", ""); //$NON-NLS-1$ //$NON-NLS-2$
-		report = report.replaceAll("<i>", ""); //$NON-NLS-1$ //$NON-NLS-2$
-		report = report.replaceAll("</i>", ""); //$NON-NLS-1$ //$NON-NLS-2$
-		report = report.replaceAll("<br>", "\n"); //$NON-NLS-1$ //$NON-NLS-2$
+		report = report.replace("<b>", ""); //$NON-NLS-1$ //$NON-NLS-2$
+		report = report.replace("</b> ", "\t"); //$NON-NLS-1$ //$NON-NLS-2$
+		report = report.replace("</b>", ""); //$NON-NLS-1$ //$NON-NLS-2$
+		report = report.replace("<i>", ""); //$NON-NLS-1$ //$NON-NLS-2$
+		report = report.replace("</i>", ""); //$NON-NLS-1$ //$NON-NLS-2$
+		report = report.replace("<br>", "\n"); //$NON-NLS-1$ //$NON-NLS-2$
 		return report;
 	}
 
 	public static String getStatusPart(IStatus status) {
 		String retVal = ""; //$NON-NLS-1$
 		String[] stackTraces = ReportPartsFactory.getStackTrace(status).split("\n\n"); //$NON-NLS-1$
-		for (int i = 0; i < stackTraces.length; i++) {
-			int idx = stackTraces[i].indexOf('\n');
+		for (String element : stackTraces) {
+			int idx = element.indexOf('\n');
 			if (idx == -1) {
-				retVal += stackTraces[i] + "<br><br>"; //$NON-NLS-1$
+				retVal += element + "<br><br>"; //$NON-NLS-1$
 			} else {
-				retVal += "<b>" + stackTraces[i].substring(0, idx) + "</b><br>" + stackTraces[i] + "<br><br>"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				retVal += "<b>" + element.substring(0, idx) + "</b><br>" + element + "<br><br>"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			}
 		}
 		retVal += "<br>"; //$NON-NLS-1$
@@ -121,7 +115,7 @@ public class ReportPartsFactory {
 	}
 
 	public static String getUserCommentPart(String userComment) {
-		userComment = (userComment != null && userComment.trim().length() > 0) ? userComment : "<i>[empty]</i>"; //$NON-NLS-1$
+		userComment = userComment != null && userComment.trim().length() > 0 ? userComment : "<i>[empty]</i>"; //$NON-NLS-1$
 		return "<b>User comment:</b><br>" + userComment + "<br><br>"; //$NON-NLS-1$//$NON-NLS-2$
 	}
 
@@ -134,7 +128,7 @@ public class ReportPartsFactory {
 	public static String getJVMPropertiesPart() {
 		Properties systemProps = System.getProperties();
 		Properties props = new Properties();
-		String[] keys = new String[] { "os.name", //$NON-NLS-1$
+		String[] keys = { "os.name", //$NON-NLS-1$
 				"os.version", //$NON-NLS-1$
 				"os.arch", //$NON-NLS-1$
 				"user.timezone", //$NON-NLS-1$
@@ -154,8 +148,7 @@ public class ReportPartsFactory {
 				"osgi.framework.version", //$NON-NLS-1$
 				"eclipse.commands" //$NON-NLS-1$
 		};
-		for (int i = 0; i < keys.length; i++) {
-			String key = keys[i];
+		for (String key : keys) {
 			if (systemProps.containsKey(key)) {
 				props.put(key, systemProps.getProperty(key));
 			}

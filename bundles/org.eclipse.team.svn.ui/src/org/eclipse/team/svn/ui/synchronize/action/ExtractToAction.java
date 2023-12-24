@@ -34,26 +34,29 @@ public class ExtractToAction extends AbstractSynchronizeModelAction {
 
 	public ExtractToAction(String text, ISynchronizePageConfiguration configuration) {
 		super(text, configuration);
-		this.actionHelper = new ExtractToActionHelper(this, configuration);
+		actionHelper = new ExtractToActionHelper(this, configuration);
 	}
 
+	@Override
 	protected FastSyncInfoFilter getSyncInfoFilter() {
-		return this.actionHelper.getSyncInfoFilter();
+		return actionHelper.getSyncInfoFilter();
 	}
 
+	@Override
 	protected boolean updateSelection(IStructuredSelection selection) {
 		super.updateSelection(selection);
-		AbstractSVNSyncInfo[] infos = this.getSVNSyncInfos();
-		for (int i = 0; i < infos.length; i++) {
-			if (SyncInfo.getDirection(infos[i].getKind()) == SyncInfo.CONFLICTING) {
+		AbstractSVNSyncInfo[] infos = getSVNSyncInfos();
+		for (AbstractSVNSyncInfo element : infos) {
+			if (SyncInfo.getDirection(element.getKind()) == SyncInfo.CONFLICTING) {
 				return false;
 			}
 		}
 		return infos.length > 0;
 	}
 
+	@Override
 	protected IActionOperation getOperation(ISynchronizePageConfiguration configuration, IDiffElement[] elements) {
-		return this.actionHelper.getOperation();
+		return actionHelper.getOperation();
 	}
 
 }

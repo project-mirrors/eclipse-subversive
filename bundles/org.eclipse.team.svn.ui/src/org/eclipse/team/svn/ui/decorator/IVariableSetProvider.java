@@ -21,9 +21,9 @@ package org.eclipse.team.svn.ui.decorator;
  *
  */
 public interface IVariableSetProvider {
-	public IVariable getVariable(String name);
+	IVariable getVariable(String name);
 
-	public IVariable getCenterVariable();
+	IVariable getCenterVariable();
 
-	public String getDomainName();
+	String getDomainName();
 }

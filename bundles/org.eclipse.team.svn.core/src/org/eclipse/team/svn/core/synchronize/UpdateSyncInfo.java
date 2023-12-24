@@ -32,15 +32,16 @@ public class UpdateSyncInfo extends AbstractSVNSyncInfo {
 		super(local, remote, comparator);
 	}
 
+	@Override
 	protected int calculateKind() throws TeamException {
-		String localKind = this.local == null ? IStateFilter.ST_NOTEXISTS : this.local.getStatus();
-		int localMask = this.local == null ? 0 : this.local.getChangeMask();
-		String remoteKind = this.remoteStatus == null
-				? (this.isNonVersioned(localKind, localMask) ? IStateFilter.ST_NOTEXISTS : IStateFilter.ST_NORMAL)
-				: this.remoteStatus.getStatus();
-		int remoteMask = this.remoteStatus == null ? 0 : this.remoteStatus.getChangeMask();
+		String localKind = local == null ? IStateFilter.ST_NOTEXISTS : local.getStatus();
+		int localMask = local == null ? 0 : local.getChangeMask();
+		String remoteKind = remoteStatus == null
+				? this.isNonVersioned(localKind, localMask) ? IStateFilter.ST_NOTEXISTS : IStateFilter.ST_NORMAL
+				: remoteStatus.getStatus();
+		int remoteMask = remoteStatus == null ? 0 : remoteStatus.getChangeMask();
 
-		if (this.isLinked(localKind, localMask)) {
+		if (isLinked(localKind, localMask)) {
 			// Corresponding resource can be added at remote site
 			if (this.isAdded(remoteKind, remoteMask)) {
 				this.localKind = SyncInfo.OUTGOING | SyncInfo.ADDITION;
@@ -50,7 +51,7 @@ public class UpdateSyncInfo extends AbstractSVNSyncInfo {
 			return SyncInfo.IN_SYNC;
 		}
 
-		if (this.isTreeConflicted(localKind, localMask)) {
+		if (isTreeConflicted(localKind, localMask)) {
 			this.localKind = SyncInfo.OUTGOING | SyncInfo.CHANGE;
 			this.remoteKind = SyncInfo.INCOMING | SyncInfo.CHANGE;
 			return SyncInfo.CONFLICTING | SyncInfo.CHANGE;
@@ -58,12 +59,12 @@ public class UpdateSyncInfo extends AbstractSVNSyncInfo {
 //		if (this.isTreeConflicted(remoteKind, remoteMask)) {
 //			this.localKind = SyncInfo.OUTGOING | SyncInfo.CHANGE;
 //			this.remoteKind = SyncInfo.INCOMING | SyncInfo.CHANGE;
-//			return SyncInfo.CONFLICTING | SyncInfo.CHANGE;        	
+//			return SyncInfo.CONFLICTING | SyncInfo.CHANGE;
 //		}
 
 		if (this.isReplaced(remoteKind, remoteMask)) {
 			this.remoteKind = SyncInfo.INCOMING | SyncInfo.CHANGE;
-			if (this.isNotModified(localKind, localMask)) {
+			if (isNotModified(localKind, localMask)) {
 				return SyncInfo.INCOMING | SyncInfo.CHANGE;
 			}
 			this.localKind = SyncInfo.OUTGOING | SyncInfo.CHANGE;
@@ -77,9 +78,9 @@ public class UpdateSyncInfo extends AbstractSVNSyncInfo {
 			this.localKind = SyncInfo.OUTGOING | SyncInfo.ADDITION;
 			return SyncInfo.CONFLICTING | SyncInfo.ADDITION;
 		}
-		if (this.isModified(remoteKind, remoteMask)) {
+		if (isModified(remoteKind, remoteMask)) {
 			this.remoteKind = SyncInfo.INCOMING | SyncInfo.CHANGE;
-			if (this.isNotModified(localKind, localMask)) {
+			if (isNotModified(localKind, localMask)) {
 				return SyncInfo.INCOMING | SyncInfo.CHANGE;
 			}
 			if (this.isDeleted(localKind, localMask)) {
@@ -91,7 +92,7 @@ public class UpdateSyncInfo extends AbstractSVNSyncInfo {
 		}
 		if (this.isDeleted(remoteKind, remoteMask)) {
 			this.remoteKind = SyncInfo.INCOMING | SyncInfo.DELETION;
-			if (this.isNotModified(localKind, localMask)) {
+			if (isNotModified(localKind, localMask)) {
 				return SyncInfo.INCOMING | SyncInfo.DELETION;
 			}
 			if (this.isDeleted(localKind, localMask)) {
@@ -110,12 +111,12 @@ public class UpdateSyncInfo extends AbstractSVNSyncInfo {
 		}
 
 		//if (this.isNotModified(remoteKind)) {...
-		if (this.isConflicted(localKind, localMask)) {
+		if (isConflicted(localKind, localMask)) {
 			this.localKind = SyncInfo.OUTGOING | SyncInfo.CHANGE;
 			this.remoteKind = SyncInfo.INCOMING | SyncInfo.CHANGE;
 			return SyncInfo.CONFLICTING | SyncInfo.CHANGE;
 		}
-		if (this.isReplaced(localKind, localMask) || this.isModified(localKind, localMask)) {
+		if (this.isReplaced(localKind, localMask) || isModified(localKind, localMask)) {
 			this.localKind = SyncInfo.OUTGOING | SyncInfo.CHANGE;
 			return SyncInfo.OUTGOING | SyncInfo.CHANGE;
 		}

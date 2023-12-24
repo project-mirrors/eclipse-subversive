@@ -15,6 +15,7 @@
 package org.eclipse.team.svn.core.operation.local;
 
 import java.net.URI;
+import java.util.Collections;
 import java.util.HashSet;
 
 import org.eclipse.core.resources.IContainer;
@@ -29,7 +30,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.core.runtime.jobs.MultiRule;
 import org.eclipse.team.svn.core.SVNMessages;
-import org.eclipse.team.svn.core.operation.IUnprotectedOperation;
 import org.eclipse.team.svn.core.operation.SVNResourceRuleFactory;
 import org.eclipse.team.svn.core.operation.UnreportableException;
 import org.eclipse.team.svn.core.resource.IResourceProvider;
@@ -92,41 +92,42 @@ public class RefreshResourcesOperation extends AbstractWorkingCopyOperation {
 		this.ignoreNestedProjects = ignoreNestedProjects;
 	}
 
+	@Override
 	public ISchedulingRule getSchedulingRule() {
 		ISchedulingRule rule = super.getSchedulingRule();
-		if (this.ignoreNestedProjects || rule == ResourcesPlugin.getWorkspace().getRoot()) {
+		if (ignoreNestedProjects || rule == ResourcesPlugin.getWorkspace().getRoot()) {
 			return rule;
 		}
-		IResource[] resources = this.operableData();
-		HashSet<ISchedulingRule> ruleSet = new HashSet<ISchedulingRule>();
-		for (int i = 0; i < resources.length; i++) {
-			ruleSet.add(SVNResourceRuleFactory.INSTANCE.refreshRule(resources[i]));
+		IResource[] resources = operableData();
+		HashSet<ISchedulingRule> ruleSet = new HashSet<>();
+		for (IResource element : resources) {
+			ruleSet.add(SVNResourceRuleFactory.INSTANCE.refreshRule(element));
 		}
 		return new MultiRule(ruleSet.toArray(new ISchedulingRule[ruleSet.size()]));
 	}
 
+	@Override
 	protected IResource[] operableData() {
 		IResource[] resources = super.operableData();
-		if (this.ignoreNestedProjects) {
+		if (ignoreNestedProjects) {
 			return resources;
 		}
-		return this.mindNestedProject(resources);
+		return mindNestedProject(resources);
 	}
 
 	protected IResource[] mindNestedProject(IResource[] resources) {
-		HashSet<IResource> resourceSet = new HashSet<IResource>();
-		for (int i = 0; i < resources.length; i++) {
-			URI uri = resources[i].getLocationURI();
+		HashSet<IResource> resourceSet = new HashSet<>();
+		for (IResource element : resources) {
+			URI uri = element.getLocationURI();
 			if (uri != null) {
 				IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
-				for (IResource resource : (resources[i].getType() != IResource.FILE
-						? root.findContainersForLocationURI(uri)
-						: root.findFilesForLocationURI(uri))) {
-					resourceSet.add(resource);
-				}
-				IPath path = FileUtility.getResourcePath(resources[i]);
+				Collections.addAll(resourceSet,
+						element.getType() != IResource.FILE
+								? root.findContainersForLocationURI(uri)
+								: root.findFilesForLocationURI(uri));
+				IPath path = FileUtility.getResourcePath(element);
 				for (IResource resource : root.getProjects()) {
-					if (path.isPrefixOf(FileUtility.getResourcePath(resource)) && this.depth != IResource.DEPTH_ZERO) {
+					if (path.isPrefixOf(FileUtility.getResourcePath(resource)) && depth != IResource.DEPTH_ZERO) {
 						resourceSet.add(resource);
 					}
 				}
@@ -135,50 +136,45 @@ public class RefreshResourcesOperation extends AbstractWorkingCopyOperation {
 		return resourceSet.toArray(new IResource[resourceSet.size()]);
 	}
 
+	@Override
 	protected void runImpl(IProgressMonitor monitor) throws Exception {
-		IResource[] original = this.operableData();
+		IResource[] original = operableData();
 		if (original.length == 0) {
 			return;
 		}
-		int tDepth = this.depth;
+		int tDepth = depth;
 		if (tDepth != IResource.DEPTH_ZERO) {
-			boolean allFiles = true; // reduce specified refresh depth in case all are files 
-			for (int i = 0; i < original.length; i++) {
-				allFiles &= original[i].getType() == IResource.FILE;
+			boolean allFiles = true; // reduce specified refresh depth in case all are files
+			for (IResource element : original) {
+				allFiles &= element.getType() == IResource.FILE;
 			}
 			if (allFiles) {
 				tDepth = IResource.DEPTH_ZERO;
 			}
 		}
-		final IResource[] resources = this.depth == IResource.DEPTH_INFINITE
+		final IResource[] resources = depth == IResource.DEPTH_INFINITE
 				? FileUtility.shrinkChildNodes(original)
 				: original;
 		final boolean isPriorToSVN17 = SVNUtility.isPriorToSVN17();
-		if (this.refreshType != RefreshResourcesOperation.REFRESH_CACHE) {
-			ResourcesPlugin.getWorkspace().run(new IWorkspaceRunnable() {
-				public void run(IProgressMonitor monitor) throws CoreException {
-					for (int i = 0; i < resources.length && !monitor.isCanceled(); i++) {
-						ProgressMonitorUtility.setTaskInfo(monitor, RefreshResourcesOperation.this,
-								resources[i].getName());
-						final IResource resource = resources[i];
-						RefreshResourcesOperation.this.protectStep(new IUnprotectedOperation() {
-							public void run(IProgressMonitor monitor) throws Exception {
-								if (isPriorToSVN17) {
-									if (resource.getType() != IResource.FILE
-											&& RefreshResourcesOperation.this.depth != IResource.DEPTH_INFINITE) {
-										// if depth is set to "infinite", then meta info will be refreshed together with the resource itself
-										RefreshResourcesOperation.this.refreshMetaInfo((IContainer) resource, monitor);
-									}
-									if (resource.getType() != IResource.PROJECT) {
-										// refresh parent's meta info if exists
-										RefreshResourcesOperation.this.refreshMetaInfo(resource.getParent(), monitor);
-									}
-								}
-								RefreshResourcesOperation.this.doRefresh(resource, RefreshResourcesOperation.this.depth,
-										monitor);
+		if (refreshType != RefreshResourcesOperation.REFRESH_CACHE) {
+			ResourcesPlugin.getWorkspace().run((IWorkspaceRunnable) monitor2 -> {
+				for (int i = 0; i < resources.length && !monitor2.isCanceled(); i++) {
+					ProgressMonitorUtility.setTaskInfo(monitor2, RefreshResourcesOperation.this,
+							resources[i].getName());
+					final IResource resource = resources[i];
+					RefreshResourcesOperation.this.protectStep(monitor1 -> {
+						if (isPriorToSVN17) {
+							if (resource.getType() != IResource.FILE && depth != IResource.DEPTH_INFINITE) {
+								// if depth is set to "infinite", then meta info will be refreshed together with the resource itself
+								RefreshResourcesOperation.this.refreshMetaInfo((IContainer) resource, monitor1);
 							}
-						}, monitor, resources.length);
-					}
+							if (resource.getType() != IResource.PROJECT) {
+								// refresh parent's meta info if exists
+								RefreshResourcesOperation.this.refreshMetaInfo(resource.getParent(), monitor1);
+							}
+						}
+						RefreshResourcesOperation.this.doRefresh(resource, depth, monitor1);
+					}, monitor2, resources.length);
 				}
 			}, null, IWorkspace.AVOID_UPDATE, monitor);
 		}
@@ -186,7 +182,7 @@ public class RefreshResourcesOperation extends AbstractWorkingCopyOperation {
 		// FIXME there could be event doubles when SVN 1.7 is used
 		if (RefreshResourcesOperation.this.refreshType != RefreshResourcesOperation.REFRESH_CHANGES
 				|| !isPriorToSVN17) {
-			SVNRemoteStorage.instance().refreshLocalResources(resources, this.depth);
+			SVNRemoteStorage.instance().refreshLocalResources(resources, depth);
 
 			IResource[] roots = FileUtility.getPathNodes(resources);
 			SVNRemoteStorage.instance()
@@ -197,12 +193,12 @@ public class RefreshResourcesOperation extends AbstractWorkingCopyOperation {
 							new ResourceStatesChangedEvent(original, tDepth, ResourceStatesChangedEvent.CHANGED_NODES));
 		}
 
-		if (this.ignoreNestedProjects) {
-			IResource[] withNested = this.mindNestedProject(original);
+		if (ignoreNestedProjects) {
+			IResource[] withNested = mindNestedProject(original);
 			// schedule refresh for nested projects
 			if (withNested.length != original.length) {
 				ProgressMonitorUtility.doTaskScheduledDefault(
-						new RefreshResourcesOperation(withNested, this.depth, this.refreshType), true);
+						new RefreshResourcesOperation(withNested, depth, refreshType), true);
 			}
 		}
 	}
@@ -210,7 +206,7 @@ public class RefreshResourcesOperation extends AbstractWorkingCopyOperation {
 	protected void refreshMetaInfo(IContainer container, IProgressMonitor monitor) throws CoreException {
 		IResource metaInfo = container.findMember(SVNUtility.getSVNFolderName());
 		if (metaInfo != null) {
-			this.doRefresh(metaInfo, IResource.DEPTH_INFINITE, monitor);
+			doRefresh(metaInfo, IResource.DEPTH_INFINITE, monitor);
 		}
 	}
 

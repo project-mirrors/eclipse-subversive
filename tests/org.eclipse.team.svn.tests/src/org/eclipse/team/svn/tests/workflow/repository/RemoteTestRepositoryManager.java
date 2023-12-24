@@ -30,7 +30,7 @@ import org.eclipse.team.svn.tests.core.misc.TestUtil;
 public class RemoteTestRepositoryManager extends FileTestRepositoryManager {
 
 	public RemoteTestRepositoryManager() {
-		this.svnStorage = SVNRemoteStorage.instance();
+		svnStorage = SVNRemoteStorage.instance();
 	}
 
 	@Override

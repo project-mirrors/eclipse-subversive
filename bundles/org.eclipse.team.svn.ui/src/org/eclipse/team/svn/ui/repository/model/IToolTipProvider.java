@@ -21,5 +21,5 @@ package org.eclipse.team.svn.ui.repository.model;
  *
  */
 public interface IToolTipProvider {
-	public String getToolTipMessage(String formatString);
+	String getToolTipMessage(String formatString);
 }

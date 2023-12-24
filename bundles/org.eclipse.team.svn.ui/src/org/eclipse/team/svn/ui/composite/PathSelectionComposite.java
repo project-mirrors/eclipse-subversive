@@ -18,18 +18,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.DirectoryDialog;
-import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.team.svn.ui.SVNUIMessages;
 import org.eclipse.team.svn.ui.dialog.DefaultDialog;
@@ -61,7 +57,7 @@ public class PathSelectionComposite extends Composite {
 
 	protected String selectedPath;
 
-	protected List<Control> controls = new ArrayList<Control>();
+	protected List<Control> controls = new ArrayList<>();
 
 	public PathSelectionComposite(String pathLabelName, String pathFieldName, String browseDialogTitle,
 			String browseDialogDescription, boolean isDirectorySelection, Composite parent,
@@ -74,17 +70,17 @@ public class PathSelectionComposite extends Composite {
 		this.browseDialogTitle = browseDialogTitle;
 		this.browseDialogDescription = browseDialogDescription;
 
-		this.createControls();
+		createControls();
 	}
 
 	public void setSelectedPath(String selectedPath) {
 		if (selectedPath != null) {
-			this.pathInput.setText(selectedPath);
+			pathInput.setText(selectedPath);
 		}
 	}
 
 	public String getSelectedPath() {
-		return this.selectedPath;
+		return selectedPath;
 	}
 
 	protected void createControls() {
@@ -92,67 +88,62 @@ public class PathSelectionComposite extends Composite {
 		layout.marginHeight = 0;
 		layout.marginWidth = 0;
 		layout.numColumns = 3;
-		this.setLayout(layout);
+		setLayout(layout);
 		GridData data = new GridData(GridData.FILL_HORIZONTAL);
-		this.setLayoutData(data);
+		setLayoutData(data);
 
 		Label pathLabel = new Label(this, SWT.NONE);
 		data = new GridData();
 		pathLabel.setLayoutData(data);
-		pathLabel.setText(this.pathLabelName);
-		this.controls.add(pathLabel);
+		pathLabel.setText(pathLabelName);
+		controls.add(pathLabel);
 
-		this.pathInput = new Text(this, SWT.BORDER | SWT.SINGLE);
+		pathInput = new Text(this, SWT.BORDER | SWT.SINGLE);
 		data = new GridData(GridData.FILL_HORIZONTAL);
-		this.pathInput.setLayoutData(data);
-		this.controls.add(this.pathInput);
+		pathInput.setLayoutData(data);
+		controls.add(pathInput);
 
 		Button browseButton = new Button(this, SWT.PUSH);
 		browseButton.setText(SVNUIMessages.Button_Browse);
 		data = new GridData();
 		data.widthHint = DefaultDialog.computeButtonWidth(browseButton);
 		browseButton.setLayoutData(data);
-		this.controls.add(browseButton);
+		controls.add(browseButton);
 
 		//validation
-		String name = this.pathFieldName;
+		String name = pathFieldName;
 		CompositeVerifier cVerifier = new CompositeVerifier();
 		cVerifier.add(new NonEmptyFieldVerifier(name));
 		cVerifier.add(new ResourcePathVerifier(name));
-		this.validationManager.attachTo(this.pathInput, cVerifier);
+		validationManager.attachTo(pathInput, cVerifier);
 
-		this.pathInput.addModifyListener(new ModifyListener() {
-			public void modifyText(ModifyEvent e) {
-				PathSelectionComposite.this.selectedPath = PathSelectionComposite.this.pathInput.getText();
-			}
-		});
+		pathInput.addModifyListener(e -> selectedPath = pathInput.getText());
 
-		browseButton.addListener(SWT.Selection, new Listener() {
-			public void handleEvent(Event event) {
-				if (PathSelectionComposite.this.isDirectorySelection) {
-					DirectoryDialog dlg = new DirectoryDialog(PathSelectionComposite.this.getShell());
-					dlg.setText(PathSelectionComposite.this.browseDialogTitle);
-					dlg.setMessage(PathSelectionComposite.this.browseDialogDescription);
-					String path = dlg.open();
-					if (path != null) {
-						PathSelectionComposite.this.pathInput.setText(path);
-					}
-				} else {
-					FileDialog dlg = new FileDialog(PathSelectionComposite.this.getShell());
-					dlg.setText(PathSelectionComposite.this.browseDialogTitle);
-					String path = dlg.open();
-					if (path != null) {
-						PathSelectionComposite.this.pathInput.setText(path);
-					}
+		browseButton.addListener(SWT.Selection, event -> {
+			if (isDirectorySelection) {
+				DirectoryDialog dlg = new DirectoryDialog(PathSelectionComposite.this.getShell());
+				dlg.setText(browseDialogTitle);
+				dlg.setMessage(browseDialogDescription);
+				String path = dlg.open();
+				if (path != null) {
+					pathInput.setText(path);
+				}
+			} else {
+				FileDialog dlg = new FileDialog(PathSelectionComposite.this.getShell());
+				dlg.setText(browseDialogTitle);
+				String path = dlg.open();
+				if (path != null) {
+					pathInput.setText(path);
 				}
 			}
 		});
 	}
 
+	@Override
 	public void setEnabled(boolean enabled) {
 		super.setEnabled(enabled);
 
-		for (Control control : this.controls) {
+		for (Control control : controls) {
 			control.setEnabled(enabled);
 		}
 	}

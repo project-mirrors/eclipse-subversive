@@ -49,27 +49,28 @@ public class InfoOperation extends AbstractActionOperation {
 	}
 
 	public SVNEntryInfo getInfo() {
-		return this.info;
+		return info;
 	}
 
 	public ILocalResource getLocal() {
-		return this.local;
+		return local;
 	}
 
+	@Override
 	protected void runImpl(IProgressMonitor monitor) throws Exception {
-		this.info = null;
-		this.local = SVNRemoteStorage.instance().asLocalResourceAccessible(this.resource);
+		info = null;
+		local = SVNRemoteStorage.instance().asLocalResourceAccessible(resource);
 
-		if (IStateFilter.SF_ONREPOSITORY.accept(this.local)) {
-			IRepositoryLocation location = SVNRemoteStorage.instance().getRepositoryLocation(this.resource);
+		if (IStateFilter.SF_ONREPOSITORY.accept(local)) {
+			IRepositoryLocation location = SVNRemoteStorage.instance().getRepositoryLocation(resource);
 			ISVNConnector proxy = location.acquireSVNProxy();
 			try {
 //    			this.writeToConsole(IConsoleStream.LEVEL_CMD, "svn info \"" + this.local.getWorkingCopyPath() + "\"\n");
-				String path = FileUtility.getWorkingCopyPath(this.resource);
+				String path = FileUtility.getWorkingCopyPath(resource);
 				SVNEntryInfo[] infos = SVNUtility.info(proxy, new SVNEntryRevisionReference(path), SVNDepth.EMPTY,
 						new SVNProgressMonitor(this, monitor, null));
 				if (infos != null && infos.length > 0) {
-					this.info = infos[0];
+					info = infos[0];
 				}
 			} finally {
 				location.releaseSVNProxy(proxy);
@@ -77,8 +78,9 @@ public class InfoOperation extends AbstractActionOperation {
 		}
 	}
 
+	@Override
 	protected String getShortErrorMessage(Throwable t) {
-		return BaseMessages.format(super.getShortErrorMessage(t), new Object[] { this.resource.getName() });
+		return BaseMessages.format(super.getShortErrorMessage(t), new Object[] { resource.getName() });
 	}
 
 }

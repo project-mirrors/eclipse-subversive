@@ -39,17 +39,18 @@ import org.eclipse.team.svn.ui.utility.UIMonitorUtility;
  */
 public class SetExternalDefinitionAction extends AbstractNonRecursiveTeamAction {
 
+	@Override
 	public void runImpl(IAction action) {
 		IResource resource = this.getSelectedResources()[0];
-		IActionOperation op = SetExternalDefinitionAction.getAction(resource, this.getShell());
+		IActionOperation op = SetExternalDefinitionAction.getAction(resource, getShell());
 		if (op != null) {
-			this.runScheduled(op);
+			runScheduled(op);
 		}
 	}
 
+	@Override
 	public boolean isEnabled() {
-		return this.getSelectedResources().length == 1
-				&& this.checkForResourcesPresence(IStateFilter.SF_VERSIONED_FOLDERS);
+		return this.getSelectedResources().length == 1 && checkForResourcesPresence(IStateFilter.SF_VERSIONED_FOLDERS);
 	}
 
 	public static IActionOperation getAction(IResource resource, Shell shell) {

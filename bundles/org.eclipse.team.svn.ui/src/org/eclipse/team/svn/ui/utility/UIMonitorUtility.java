@@ -184,15 +184,13 @@ public final class UIMonitorUtility {
 
 	public static ICancellableOperationWrapper doTaskBusy(IActionOperation op, IOperationWrapperFactory factory) {
 		final ICancellableOperationWrapper runnable = factory.getCancellable(factory.getLogged(op));
-		BusyIndicator.showWhile(null, new Runnable() {
-			public void run() {
-				try {
-					runnable.run(new NullProgressMonitor());
-				} catch (InterruptedException e) {
-					runnable.setCancelled(true);
-				} catch (InvocationTargetException e) {
-					throw new RuntimeException(e);
-				}
+		BusyIndicator.showWhile(null, () -> {
+			try {
+				runnable.run(new NullProgressMonitor());
+			} catch (InterruptedException e) {
+				runnable.setCancelled(true);
+			} catch (InvocationTargetException e) {
+				throw new RuntimeException(e);
 			}
 		});
 		return runnable;

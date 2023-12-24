@@ -21,7 +21,7 @@ import java.util.ArrayList;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.action.IAction;
-import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.window.Window;
 import org.eclipse.team.svn.core.IStateFilter;
 import org.eclipse.team.svn.core.connector.SVNProperty;
 import org.eclipse.team.svn.core.extension.CoreExtensionsManager;
@@ -52,15 +52,15 @@ import org.eclipse.team.svn.ui.utility.UIMonitorUtility;
 public class SetPropertyAction extends AbstractNonRecursiveTeamAction {
 
 	public SetPropertyAction() {
-		super();
 	}
 
+	@Override
 	public void runImpl(IAction action) {
 		final IResource[] resources = this.getSelectedResources(IStateFilter.SF_EXCLUDE_PREREPLACED_AND_DELETED);
 
 		ResourcePropertyEditPanel panel = new ResourcePropertyEditPanel(null, resources, false);
-		DefaultDialog dialog = new DefaultDialog(this.getShell(), panel);
-		if (dialog.open() == Dialog.OK) {
+		DefaultDialog dialog = new DefaultDialog(getShell(), panel);
+		if (dialog.open() == Window.OK) {
 			SetPropertyAction.doSetProperty(resources, panel, null);
 		}
 	}
@@ -75,22 +75,17 @@ public class SetPropertyAction extends AbstractNonRecursiveTeamAction {
 	public static void doSetProperty(final IResource[] resources, String propertyName, String value, String fileName,
 			boolean isFileSelected, boolean isRecursive, final int applyMethod, boolean useMask, String filterMask,
 			boolean strict, IActionOperation addOn) {
-		final SVNProperty[] data = new SVNProperty[] { new SVNProperty(propertyName, value) };
+		final SVNProperty[] data = { new SVNProperty(propertyName, value) };
 		IActionOperation loadOp = null;
 		if (isFileSelected) {
 			final File f = new File(fileName);
 			loadOp = new AbstractActionOperation("Operation_SLoadFileContent", SVNUIMessages.class) { //$NON-NLS-1$
+				@Override
 				protected void runImpl(IProgressMonitor monitor) throws Exception {
-					FileInputStream input = null;
-					try {
-						input = new FileInputStream(f);
+					try (FileInputStream input = new FileInputStream(f)) {
 						byte[] binary = new byte[(int) f.length()];
 						input.read(binary);
 						data[0] = new SVNProperty(data[0].name, new String(binary));
-					} finally {
-						if (input != null) {
-							input.close();
-						}
 					}
 				}
 			};
@@ -102,8 +97,8 @@ public class SetPropertyAction extends AbstractNonRecursiveTeamAction {
 	public static void doSetProperty(final IResource[] resources, SVNProperty[] data, IActionOperation loadOp,
 			boolean isRecursive, final int applyMethod, boolean useMask, String filterMask, boolean strict,
 			IActionOperation addOn) {
-		ArrayList<SVNProperty> folderPropsList = new ArrayList<SVNProperty>();
-		ArrayList<SVNProperty> filePropsList = new ArrayList<SVNProperty>();
+		ArrayList<SVNProperty> folderPropsList = new ArrayList<>();
+		ArrayList<SVNProperty> filePropsList = new ArrayList<>();
 		IPredefinedPropertySet set = CoreExtensionsManager.instance().getPredefinedPropertySet();
 		for (SVNProperty prop : data) {
 			int type = PredefinedProperty.TYPE_COMMON;
@@ -125,11 +120,13 @@ public class SetPropertyAction extends AbstractNonRecursiveTeamAction {
 
 		final StringMatcher matcher = useMask ? new StringMatcher(filterMask) : null;
 		IStateFilter filter = new IStateFilter.AbstractStateFilter() {
+			@Override
 			protected boolean allowsRecursionImpl(ILocalResource local, IResource resource, String state, int mask) {
 				return IStateFilter.SF_EXCLUDE_PREREPLACED_AND_DELETED.allowsRecursion(resource, state, mask)
 						|| state == IStateFilter.ST_ADDED;
 			}
 
+			@Override
 			protected boolean acceptImpl(ILocalResource local, IResource resource, String state, int mask) {
 				if (applyMethod == PropertiesComposite.APPLY_TO_FILES && resource.getType() != IResource.FILE
 						|| applyMethod == PropertiesComposite.APPLY_TO_FOLDERS && resource.getType() == IResource.FILE
@@ -149,11 +146,7 @@ public class SetPropertyAction extends AbstractNonRecursiveTeamAction {
 					FileUtility.getResourcesRecursive(resources, filter, IResource.DEPTH_ZERO), data,
 					isRecursive & !strict);
 		} else {
-			IPropertyProvider propertyProvider = new IPropertyProvider() {
-				public SVNProperty[] getProperties(IResource resource) {
-					return resource.getType() == IResource.FILE ? fileProps : folderProps;
-				}
-			};
+			IPropertyProvider propertyProvider = resource -> resource.getType() == IResource.FILE ? fileProps : folderProps;
 			mainOp = new SetMultiPropertiesOperation(resources, propertyProvider, filter,
 					isRecursive && !strict ? IResource.DEPTH_INFINITE : IResource.DEPTH_ZERO);
 		}
@@ -172,8 +165,9 @@ public class SetPropertyAction extends AbstractNonRecursiveTeamAction {
 		UIMonitorUtility.doTaskScheduledWorkspaceModify(composite);
 	}
 
+	@Override
 	public boolean isEnabled() {
-		return this.checkForResourcesPresence(IStateFilter.SF_EXCLUDE_PREREPLACED_AND_DELETED);
+		return checkForResourcesPresence(IStateFilter.SF_EXCLUDE_PREREPLACED_AND_DELETED);
 	}
 
 }

@@ -41,19 +41,21 @@ import org.eclipse.ui.IWorkbenchPage;
  * @author Alexander Gurov
  */
 public class SVNLinkedTaskInfoAdapterFactory implements IAdapterFactory {
-	private static final Class[] ADAPTED_TYPES = new Class[] { AbstractTaskReference.class };
+	private static final Class[] ADAPTED_TYPES = { AbstractTaskReference.class };
 
+	@Override
 	public Class[] getAdapterList() {
 		return SVNLinkedTaskInfoAdapterFactory.ADAPTED_TYPES;
 	}
 
+	@Override
 	public Object getAdapter(Object adaptableObject, Class adapterType) {
 		if (!AbstractTaskReference.class.equals(adapterType)) {
 			return null;
 		}
 
 		if (adaptableObject instanceof ChangeSet) {
-			return this.createFromChangeSet((ChangeSet) adaptableObject);
+			return createFromChangeSet((ChangeSet) adaptableObject);
 		}
 
 		Object adapted = Platform.getAdapterManager().getAdapter(adaptableObject, SVNLogEntry.class);
@@ -68,8 +70,8 @@ public class SVNLinkedTaskInfoAdapterFactory implements IAdapterFactory {
 					IHistoryPage historyPage = ((IHistoryView) view).getHistoryPage();
 					if (historyPage instanceof SVNHistoryPage) {
 						IResource resource = ((SVNHistoryPage) historyPage).getResource();
-						return new SVNLinkedTaskInfo(this.getTaskRepositoryUrl(resource), null,
-								this.getTaskFullUrl(resource, comment), comment);
+						return new SVNLinkedTaskInfo(getTaskRepositoryUrl(resource), null,
+								getTaskFullUrl(resource, comment), comment);
 					}
 				}
 			}
@@ -82,8 +84,8 @@ public class SVNLinkedTaskInfoAdapterFactory implements IAdapterFactory {
 	protected AbstractTaskReference createFromChangeSet(ChangeSet set) {
 		IResource[] resources = set.getResources();
 		if (resources != null && resources.length > 0) {
-			return new SVNLinkedTaskInfo(this.getTaskRepositoryUrl(resources[0]), null,
-					this.getTaskFullUrl(resources[0], set.getComment()), set.getComment());
+			return new SVNLinkedTaskInfo(getTaskRepositoryUrl(resources[0]), null,
+					getTaskFullUrl(resources[0], set.getComment()), set.getComment());
 		}
 
 		return new SVNLinkedTaskInfo(null, null, null, set.getComment());

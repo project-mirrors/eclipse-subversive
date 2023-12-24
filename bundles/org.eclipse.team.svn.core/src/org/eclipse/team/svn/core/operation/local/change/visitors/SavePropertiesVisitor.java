@@ -39,9 +39,10 @@ public class SavePropertiesVisitor implements IResourceChangeVisitor {
 		this.foldersOnly = foldersOnly;
 	}
 
+	@Override
 	public void preVisit(ResourceChange change, IActionOperationProcessor processor, IProgressMonitor monitor)
 			throws Exception {
-		if (this.foldersOnly && !(change.getLocal() instanceof ILocalFolder)) {
+		if (foldersOnly && !(change.getLocal() instanceof ILocalFolder)) {
 			return;
 		}
 		ILocalResource local = change.getLocal();
@@ -52,6 +53,7 @@ public class SavePropertiesVisitor implements IResourceChangeVisitor {
 		}
 	}
 
+	@Override
 	public void postVisit(ResourceChange change, IActionOperationProcessor processor, IProgressMonitor monitor)
 			throws Exception {
 	}

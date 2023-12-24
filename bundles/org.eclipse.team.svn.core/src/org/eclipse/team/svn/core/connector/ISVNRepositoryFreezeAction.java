@@ -27,5 +27,5 @@ public interface ISVNRepositoryFreezeAction {
 	/**
 	 * Runs the action
 	 */
-	public void run();
+	void run();
 }

@@ -36,7 +36,7 @@ public class OperationErrorDialog extends MessageDialog {
 
 	public static final int ERR_DIFFPROJECTS = 1;
 
-	protected static final String[] errorMessages = new String[] { "OperationErrorDialog_Message_DifferentRepositories", //$NON-NLS-1$
+	protected static final String[] errorMessages = { "OperationErrorDialog_Message_DifferentRepositories", //$NON-NLS-1$
 			"OperationErrorDialog_Message_DifferentProjects" //$NON-NLS-1$
 	};
 

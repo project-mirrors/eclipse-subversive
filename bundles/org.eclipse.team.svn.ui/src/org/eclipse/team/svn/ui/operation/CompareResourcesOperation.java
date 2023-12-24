@@ -70,26 +70,25 @@ public class CompareResourcesOperation extends CompositeOperation {
 				SVNTeamDiffViewerPage.loadDiffViewerSettings());
 		this.add(externalCompareOp);
 
-		this.internalCompareOp = new CompareResourcesInternalOperation(local, remote, forceReuse, showInDialog,
-				options) {
+		internalCompareOp = new CompareResourcesInternalOperation(local, remote, forceReuse, showInDialog, options) {
+			@Override
 			protected void runImpl(IProgressMonitor monitor) throws Exception {
 				if (!externalCompareOp.isExecuted()) {
 					super.runImpl(monitor);
 				}
 			}
 		};
-		this.add(this.internalCompareOp, new IActionOperation[] { externalCompareOp });
+		this.add(internalCompareOp, new IActionOperation[] { externalCompareOp });
 	}
 
 	public void setDiffFile(String diffFile) {
 		if (diffFile != null) {
-			this.add(new UDiffGenerateOperation(this.local, this.remote, diffFile),
-					new IActionOperation[] { this.internalCompareOp });
+			this.add(new UDiffGenerateOperation(local, remote, diffFile), new IActionOperation[] { internalCompareOp });
 		}
 	}
 
 	public void setForceId(String forceId) {
-		this.internalCompareOp.setForceId(forceId);
+		internalCompareOp.setForceId(forceId);
 	}
 
 	/**

@@ -35,18 +35,21 @@ public class AddRepositoryLocationOperation extends AbstractActionOperation {
 		this.location = location;
 	}
 
+	@Override
 	public ISchedulingRule getSchedulingRule() {
 		return null;
 	}
 
+	@Override
 	protected void runImpl(IProgressMonitor monitor) throws Exception {
-		SVNRemoteStorage.instance().addRepositoryLocation(this.location);
+		SVNRemoteStorage.instance().addRepositoryLocation(location);
 		//try to fetch repository root URL and UUID
-		this.location.getRepositoryRootUrl();
+		location.getRepositoryRootUrl();
 	}
 
+	@Override
 	protected String getShortErrorMessage(Throwable t) {
-		return BaseMessages.format(super.getShortErrorMessage(t), new Object[] { this.location.getUrl() });
+		return BaseMessages.format(super.getShortErrorMessage(t), new Object[] { location.getUrl() });
 	}
 
 }

@@ -51,11 +51,13 @@ public class ExtractToActionHelper extends AbstractActionHelper {
 		super(action, configuration);
 	}
 
+	@Override
 	public FastSyncInfoFilter getSyncInfoFilter() {
 		return new FastSyncInfoFilter.SyncInfoDirectionFilter(
 				new int[] { SyncInfo.INCOMING, SyncInfo.OUTGOING, SyncInfo.CONFLICTING });
 	}
 
+	@Override
 	public IActionOperation getOperation() {
 		DirectoryDialog fileDialog = new DirectoryDialog(configuration.getSite().getShell());
 		fileDialog.setText(SVNUIMessages.ExtractToAction_Select_Title);
@@ -65,30 +67,28 @@ public class ExtractToActionHelper extends AbstractActionHelper {
 			return null;
 		}
 
-		IResource[] outgoingChanges = this.getSyncInfoSelector()
-				.getSelectedResources(
-						new ISyncStateFilter.StateFilterWrapper(new IStateFilter.OrStateFilter(
-								new IStateFilter[] { IStateFilter.SF_COMMITABLE, IStateFilter.SF_NEW }), null, true));
-		HashSet<IResource> outgoingResources = new HashSet<IResource>(Arrays.asList(outgoingChanges));
+		IResource[] outgoingChanges = getSyncInfoSelector().getSelectedResources(
+				new ISyncStateFilter.StateFilterWrapper(new IStateFilter.OrStateFilter(
+						new IStateFilter[] { IStateFilter.SF_COMMITABLE, IStateFilter.SF_NEW }), null, true));
+		HashSet<IResource> outgoingResources = new HashSet<>(Arrays.asList(outgoingChanges));
 		for (IResource current : outgoingChanges) {
 			outgoingResources.add(current.getProject());
 		}
 		outgoingChanges = outgoingResources.toArray(new IResource[outgoingResources.size()]);
-		IResource[] incomingChanges = this.getSyncInfoSelector()
-				.getSelectedResources(
-						new ISyncStateFilter.StateFilterWrapper(null, IStateFilter.SF_ANY_CHANGE, true));
-		HashSet<IResource> incomingWithProjects = new HashSet<IResource>(Arrays.asList(incomingChanges));
+		IResource[] incomingChanges = getSyncInfoSelector().getSelectedResources(
+				new ISyncStateFilter.StateFilterWrapper(null, IStateFilter.SF_ANY_CHANGE, true));
+		HashSet<IResource> incomingWithProjects = new HashSet<>(Arrays.asList(incomingChanges));
 		for (IResource current : incomingChanges) {
 			incomingWithProjects.add(current.getProject());
 		}
 		incomingChanges = incomingWithProjects.toArray(new IResource[incomingWithProjects.size()]);
-		HashSet<IResource> deletionsOnly = new HashSet<IResource>(Arrays.asList(this.getSyncInfoSelector()
-				.getSelectedResources(
+		HashSet<IResource> deletionsOnly = new HashSet<>(
+				Arrays.asList(getSyncInfoSelector().getSelectedResources(
 						new ISyncStateFilter.StateFilterWrapper(null, IStateFilter.SF_DELETED, false))));
-		HashSet<IRepositoryResource> incomingResourcesToOperate = new HashSet<IRepositoryResource>();
-		HashSet<String> markedForDelition = new HashSet<String>();
-		HashMap<String, String> resource2project = new HashMap<String, String>();
-		HashMap<String, String> url2status = new HashMap<String, String>();
+		HashSet<IRepositoryResource> incomingResourcesToOperate = new HashSet<>();
+		HashSet<String> markedForDelition = new HashSet<>();
+		HashMap<String, String> resource2project = new HashMap<>();
+		HashMap<String, String> url2status = new HashMap<>();
 		for (IResource current : incomingChanges) {
 			IRepositoryResource remote = SVNRemoteStorage.instance().asRepositoryResource(current);
 			IRepositoryResource projectRemote = SVNRemoteStorage.instance().asRepositoryResource(current.getProject());
@@ -100,7 +100,7 @@ public class ExtractToActionHelper extends AbstractActionHelper {
 				resource2project.put(remote.getUrl(), current.getFullPath().toString().substring(1));
 			}
 			incomingResourcesToOperate.add(remote);
-			AbstractSVNSyncInfo[] syncInfos = this.getSVNSyncInfos();
+			AbstractSVNSyncInfo[] syncInfos = getSVNSyncInfos();
 			for (AbstractSVNSyncInfo info : syncInfos) {
 				if (SyncInfo.getDirection(info.getKind()) == SyncInfo.INCOMING) {
 					IResourceChange change = (IResourceChange) info.getRemoteChangeResource();

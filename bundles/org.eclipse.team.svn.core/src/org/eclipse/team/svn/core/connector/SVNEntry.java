@@ -62,7 +62,7 @@ public class SVNEntry {
 			throw new IllegalArgumentException("Invalid entry kind: " + id); //$NON-NLS-1$
 		}
 
-		private Kind(int id) {
+		Kind(int id) {
 			this.id = id;
 		}
 	}
@@ -187,8 +187,9 @@ public class SVNEntry {
 		this.lock = lock;
 	}
 
+	@Override
 	public String toString() {
-		return this.path;
+		return path;
 	}
 
 }

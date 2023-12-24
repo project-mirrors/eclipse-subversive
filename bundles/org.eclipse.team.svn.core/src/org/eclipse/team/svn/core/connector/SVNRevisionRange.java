@@ -124,39 +124,41 @@ public class SVNRevisionRange {
 	 *             if the string does not contain a parsable <code>long</code>.
 	 */
 	public SVNRevisionRange(String revisionElement) {
-		this.inheritable = !revisionElement.endsWith("*");
-		if (!this.inheritable) {
+		inheritable = !revisionElement.endsWith("*");
+		if (!inheritable) {
 			revisionElement = revisionElement.substring(0, revisionElement.length() - 1);
 		}
 
 		int hyphen = revisionElement.indexOf('-');
 		if (hyphen > 0) {
-			this.from = SVNRevision.fromNumber(Long.parseLong(revisionElement.substring(0, hyphen)));
-			this.to = SVNRevision.fromNumber(Long.parseLong(revisionElement.substring(hyphen + 1)));
+			from = SVNRevision.fromNumber(Long.parseLong(revisionElement.substring(0, hyphen)));
+			to = SVNRevision.fromNumber(Long.parseLong(revisionElement.substring(hyphen + 1)));
 		} else {
 			long rev = Long.parseLong(revisionElement.trim());
-			this.to = SVNRevision.fromNumber(rev);
-			this.from = SVNRevision.fromNumber(rev - 1);
+			to = SVNRevision.fromNumber(rev);
+			from = SVNRevision.fromNumber(rev - 1);
 		}
 	}
 
+	@Override
 	public String toString() {
-		if (this.from.equals(this.to) || this.from.getKind() == SVNRevision.Kind.NUMBER
-				&& this.from.getKind() == this.to.getKind()
-				&& ((SVNRevision.Number) this.from).getNumber() == ((SVNRevision.Number) this.to).getNumber() - 1) {
-			return this.from.toString() + (this.inheritable ? "" : "*");
+		if (from.equals(to) || from.getKind() == SVNRevision.Kind.NUMBER && from.getKind() == to.getKind()
+				&& ((SVNRevision.Number) from).getNumber() == ((SVNRevision.Number) to).getNumber() - 1) {
+			return from.toString() + (inheritable ? "" : "*");
 		}
-		return this.from.toString() + '-' + this.to.toString() + (this.inheritable ? "" : "*");
+		return from.toString() + '-' + to.toString() + (inheritable ? "" : "*");
 	}
 
+	@Override
 	public int hashCode() {
 		final int prime = 31;
-		int result = this.inheritable ? 1 : 2;
-		result = prime * result + this.from.hashCode();
-		result = prime * result + this.to.hashCode();
+		int result = inheritable ? 1 : 2;
+		result = prime * result + from.hashCode();
+		result = prime * result + to.hashCode();
 		return result;
 	}
 
+	@Override
 	public boolean equals(Object range) {
 		if (this == range) {
 			return true;
@@ -166,7 +168,7 @@ public class SVNRevisionRange {
 		}
 
 		SVNRevisionRange other = (SVNRevisionRange) range;
-		return this.from.equals(other.from) && this.to.equals(other.to) && this.inheritable == other.inheritable;
+		return from.equals(other.from) && to.equals(other.to) && inheritable == other.inheritable;
 	}
 
 }

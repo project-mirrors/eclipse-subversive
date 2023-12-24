@@ -29,12 +29,12 @@ public interface ISynchronizeViewActionContributor {
 	 * 
 	 * @return collection of AbstractSynchronizeActionGroup
 	 */
-	public Collection<AbstractSynchronizeActionGroup> getUpdateContributions();
+	Collection<AbstractSynchronizeActionGroup> getUpdateContributions();
 
 	/**
 	 * This method returns synchronize view action contributions for merge mode
 	 * 
 	 * @return collection of AbstractSynchronizeActionGroup
 	 */
-	public Collection<AbstractSynchronizeActionGroup> getMergeContributions();
+	Collection<AbstractSynchronizeActionGroup> getMergeContributions();
 }

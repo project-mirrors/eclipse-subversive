@@ -35,27 +35,27 @@ public abstract class AbstractCopyMoveAction extends AbstractRepositoryTeamActio
 	protected String operationId;
 
 	public AbstractCopyMoveAction(String operationId) {
-		super();
 		this.operationId = operationId;
 	}
 
+	@Override
 	public void runImpl(IAction action) {
-		CopyMoveWizard copyMoveWizard = new CopyMoveWizard(this.getSelectedRepositoryResources(),
-				this.operationId.toLowerCase().contains("move"));
-		WizardDialog dlg = new WizardDialog(this.getShell(), copyMoveWizard);
+		CopyMoveWizard copyMoveWizard = new CopyMoveWizard(getSelectedRepositoryResources(),
+				operationId.toLowerCase().contains("move"));
+		WizardDialog dlg = new WizardDialog(getShell(), copyMoveWizard);
 		if (dlg.open() == 0) {
 			String message = copyMoveWizard.getComment();
-			IRepositoryResource[] selected = this.getSelectedRepositoryResources();
+			IRepositoryResource[] selected = getSelectedRepositoryResources();
 			IRepositoryResource destination = copyMoveWizard.getDestination();
 
-			AbstractCopyMoveResourcesOperation moveOp = this.makeCopyOperation(destination, selected, message,
+			AbstractCopyMoveResourcesOperation moveOp = makeCopyOperation(destination, selected, message,
 					copyMoveWizard.getNewName());
 			CompositeOperation op = new CompositeOperation(moveOp.getId(), moveOp.getMessagesClass());
 			op.add(moveOp);
 			op.add(new SetRevisionAuthorNameOperation(moveOp, Options.FORCE), new IActionOperation[] { moveOp });
-			op.add(this.makeRefreshOperation(destination, selected));
+			op.add(makeRefreshOperation(destination, selected));
 
-			this.runScheduled(op);
+			runScheduled(op);
 		}
 
 	}

@@ -18,6 +18,7 @@ import java.util.ArrayList;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.osgi.util.NLS;
+import org.eclipse.team.svn.core.BaseMessages;
 import org.eclipse.team.svn.core.SVNMessages;
 import org.eclipse.team.svn.core.connector.ISVNConnector;
 import org.eclipse.team.svn.core.connector.ISVNNotificationCallback;
@@ -53,15 +54,15 @@ public abstract class AbstractCopyMoveResourcesOperation extends AbstractReposit
 		this.resName = resName;
 	}
 
+	@Override
 	public RevisionPair[] getRevisions() {
-		return this.revisionsPairs == null
-				? null
-				: this.revisionsPairs.toArray(new RevisionPair[this.revisionsPairs.size()]);
+		return revisionsPairs == null ? null : revisionsPairs.toArray(new RevisionPair[revisionsPairs.size()]);
 	}
 
+	@Override
 	protected void runImpl(final IProgressMonitor monitor) throws Exception {
-		this.revisionsPairs = new ArrayList<RevisionPair>();
-		IRepositoryResource[] selectedResources = this.operableData();
+		revisionsPairs = new ArrayList<>();
+		IRepositoryResource[] selectedResources = operableData();
 		final SVNEntryRevisionReference[] refs = new SVNEntryRevisionReference[selectedResources.length];
 		String[] paths = new String[selectedResources.length];
 		for (int i = 0; i < selectedResources.length; i++) {
@@ -69,23 +70,23 @@ public abstract class AbstractCopyMoveResourcesOperation extends AbstractReposit
 			paths[i] = refs[i].path;
 		}
 		final IRepositoryLocation location = selectedResources[0].getRepositoryLocation();
-		final String dstUrl = this.destinationResource.getUrl() + (this.resName != null && this.resName.length() > 0
-				? "/" + this.resName //$NON-NLS-1$
-				: (selectedResources.length > 1 ? "" : "/" + selectedResources[0].getName())); //$NON-NLS-1$ //$NON-NLS-2$
+		final String dstUrl = destinationResource.getUrl() + (resName != null && resName.length() > 0
+				? "/" + resName //$NON-NLS-1$
+				: selectedResources.length > 1 ? "" : "/" + selectedResources[0].getName()); //$NON-NLS-1$ //$NON-NLS-2$
 		ISVNNotificationCallback notify = new ISVNNotificationCallback() {
 			private int i = 0;
 
+			@Override
 			public void notify(SVNNotification info) {
-				if (this.i == refs.length) {
+				if (i == refs.length) {
 					return;
 				}
-				String[] paths = AbstractCopyMoveResourcesOperation.this.getRevisionPaths(refs[this.i].path, dstUrl);
-				AbstractCopyMoveResourcesOperation.this.revisionsPairs
-						.add(new RevisionPair(info.revision, paths, location));
-				String message = SVNMessages.format(SVNMessages.Console_CommittedRevision,
+				String[] paths = AbstractCopyMoveResourcesOperation.this.getRevisionPaths(refs[i].path, dstUrl);
+				revisionsPairs.add(new RevisionPair(info.revision, paths, location));
+				String message = BaseMessages.format(SVNMessages.Console_CommittedRevision,
 						new String[] { String.valueOf(info.revision) });
 				AbstractCopyMoveResourcesOperation.this.writeToConsole(IConsoleStream.LEVEL_OK, message);
-				this.i++;
+				i++;
 			}
 		};
 		ISVNConnector proxy = location.acquireSVNProxy();
@@ -93,7 +94,7 @@ public abstract class AbstractCopyMoveResourcesOperation extends AbstractReposit
 		//NOTE JavaHL is crashed when empty folder is copied independently from MAKE_PARENTS option
 		SVNUtility.addSVNNotifyListener(proxy, notify);
 		try {
-			this.runCopyMove(proxy, refs, paths, SVNUtility.encodeURL(dstUrl), monitor);
+			runCopyMove(proxy, refs, paths, SVNUtility.encodeURL(dstUrl), monitor);
 		} finally {
 			SVNUtility.removeSVNNotifyListener(proxy, notify);
 			location.releaseSVNProxy(proxy);

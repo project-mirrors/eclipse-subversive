@@ -27,103 +27,128 @@ import org.eclipse.team.svn.core.connector.ssl.SSLServerCertificateInfo;
  * @author Alexander Gurov
  */
 public interface ISVNCredentialsPrompt {
-	public static final ISVNCredentialsPrompt DEFAULT_PROMPT = new ISVNCredentialsPrompt() {
+	ISVNCredentialsPrompt DEFAULT_PROMPT = new ISVNCredentialsPrompt() {
+		@Override
 		public boolean promptSSL(Object context, String realm) {
 			return false;
 		}
 
+		@Override
 		public boolean promptSSH(Object context, String realm) {
 			return false;
 		}
 
+		@Override
 		public boolean promptProxy(Object context) {
 			return false;
 		}
 
+		@Override
 		public boolean prompt(Object context, String realm) {
 			return false;
 		}
 
+		@Override
 		public boolean isSaveProxyPassword() {
 			return false;
 		}
 
+		@Override
 		public boolean isSaveCredentialsEnabled() {
 			return false;
 		}
 
+		@Override
 		public boolean isSSLSavePassphrase() {
 			return false;
 		}
 
+		@Override
 		public boolean isSSLAuthenticationEnabled() {
 			return false;
 		}
 
+		@Override
 		public boolean isSSHPublicKeySelected() {
 			return false;
 		}
 
+		@Override
 		public boolean isSSHPrivateKeyPassphraseSaved() {
 			return false;
 		}
 
+		@Override
 		public boolean isProxyEnabled() {
 			return false;
 		}
 
+		@Override
 		public boolean isProxyAuthenticationEnabled() {
 			return false;
 		}
 
+		@Override
 		public String getUsername() {
 			return null;
 		}
 
+		@Override
 		public String getSSLClientCertPath() {
 			return null;
 		}
 
+		@Override
 		public String getSSLClientCertPassword() {
 			return null;
 		}
 
+		@Override
 		public String getSSHPrivateKeyPath() {
 			return null;
 		}
 
+		@Override
 		public String getSSHPrivateKeyPassphrase() {
 			return null;
 		}
 
+		@Override
 		public int getSSHPort() {
 			return -1;
 		}
 
+		@Override
 		public String getRealmToSave() {
 			return ISVNCredentialsPrompt.ROOT_LOCATION;
 		}
 
+		@Override
 		public String getProxyUserName() {
 			return null;
 		}
 
+		@Override
 		public int getProxyPort() {
 			return -1;
 		}
 
+		@Override
 		public String getProxyPassword() {
 			return null;
 		}
 
+		@Override
 		public String getProxyHost() {
 			return null;
 		}
 
+		@Override
 		public String getPassword() {
 			return null;
 		}
 
+		@Override
 		public Answer askTrustSSLServer(Object context, SSLServerCertificateFailures failures,
 				SSLServerCertificateInfo info, boolean allowPermanently) {
 			return Answer.ACCEPT_TEMPORARY;
@@ -146,62 +171,62 @@ public interface ISVNCredentialsPrompt {
 
 		public final int id;
 
-		private Answer(int id) {
+		Answer(int id) {
 			this.id = id;
 		}
 	}
 
-	public static final String ROOT_LOCATION = "<Repository Location>"; //$NON-NLS-1$
+	String ROOT_LOCATION = "<Repository Location>"; //$NON-NLS-1$
 
-	public boolean prompt(Object context, String realm);
+	boolean prompt(Object context, String realm);
 
-	public boolean promptSSL(Object context, String realm);
+	boolean promptSSL(Object context, String realm);
 
-	public boolean promptSSH(Object context, String realm);
+	boolean promptSSH(Object context, String realm);
 
-	public boolean promptProxy(Object context);
+	boolean promptProxy(Object context);
 
-	public Answer askTrustSSLServer(Object context, SSLServerCertificateFailures failures,
-			SSLServerCertificateInfo info, boolean allowPermanently);
+	Answer askTrustSSLServer(Object context, SSLServerCertificateFailures failures, SSLServerCertificateInfo info,
+			boolean allowPermanently);
 
-	public String getSSHPrivateKeyPath();
+	String getSSHPrivateKeyPath();
 
-	public String getSSHPrivateKeyPassphrase();
+	String getSSHPrivateKeyPassphrase();
 
-	public boolean isSSHPrivateKeyPassphraseSaved();
+	boolean isSSHPrivateKeyPassphraseSaved();
 
-	public int getSSHPort();
+	int getSSHPort();
 
-	public String getSSLClientCertPath();
+	String getSSLClientCertPath();
 
-	public String getSSLClientCertPassword();
+	String getSSLClientCertPassword();
 
-	public String getUsername();
+	String getUsername();
 
-	public String getPassword();
+	String getPassword();
 
-	public boolean isSaveCredentialsEnabled();
+	boolean isSaveCredentialsEnabled();
 
-	public boolean isSSHPublicKeySelected();
+	boolean isSSHPublicKeySelected();
 
-	public boolean isSSLAuthenticationEnabled();
+	boolean isSSLAuthenticationEnabled();
 
-	public boolean isSSLSavePassphrase();
+	boolean isSSLSavePassphrase();
 
-	public boolean isProxyEnabled();
+	boolean isProxyEnabled();
 
-	public boolean isProxyAuthenticationEnabled();
+	boolean isProxyAuthenticationEnabled();
 
-	public String getProxyHost();
+	String getProxyHost();
 
-	public int getProxyPort();
+	int getProxyPort();
 
-	public String getProxyUserName();
+	String getProxyUserName();
 
-	public String getProxyPassword();
+	String getProxyPassword();
 
-	public boolean isSaveProxyPassword();
+	boolean isSaveProxyPassword();
 
-	public String getRealmToSave();
+	String getRealmToSave();
 
 }

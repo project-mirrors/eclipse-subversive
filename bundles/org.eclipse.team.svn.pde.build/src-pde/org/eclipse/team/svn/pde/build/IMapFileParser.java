@@ -16,6 +16,8 @@ package org.eclipse.team.svn.pde.build;
 
 import java.util.Properties;
 
+import org.eclipse.pde.build.IFetchFactory;
+
 /**
  * Map file parser Each parser supports its own map file format
  * 
@@ -42,88 +44,55 @@ public interface IMapFileParser {
 
 	}
 
-	public FetchData parse(String rawEntry, String[] arguments, Properties overrideTags);
+	FetchData parse(String rawEntry, String[] arguments, Properties overrideTags);
 
-	public static IMapFileParser DEFAULT = new IMapFileParser() {
-		/*
-		 * Map file entry format:
-		 * mapEntry
-		 * 	:	elementType '@' elementID (',' elementVersion)? = svnContent
-		 * 	;
-		 * elementType
-		 * 	:	'bundle' | 'feature' | 'plugin' | 'fragment'
-		 * 	;
-		 * elementID
-		 * 	:	... //plug-in, feature, fragment or bundle ID
-		 * 	;
-		 * elementVersion
-		 *  :	... //plug-in, feature, fragment or bundle version
-		 *  ;
-		 * svnContent
-		 * 	:	'SVN' (',' arg)+
-		 * 	;
-		 * arg
-		 * 	:	key '=' value
-		 * 	;
-		 * key
-		 * 	:	'url'		// project root URL
-		 * 	|	'tag'		// optional tag name (trunk, tags/some_name etc.)
-		 * 	|	'path'		// optional element, path relative to project root URL
-		 * 	|	'revision'	// optional element, revision
-		 * 	|	'peg'		// optional element, peg revision
-		 * 	|	'username'
-		 * 	|	'password'
-		 *  |   'force'
-		 * 	;
-		 */
-		public FetchData parse(String rawEntry, String[] arguments, Properties overrideTags) {
-			FetchData data = new FetchData();
-			for (String argument : arguments) {
-				int idx = argument.indexOf(SVNFetchFactory.VALUE_PAIR_SEPARATOR);
-				if (idx != -1) {
-					String key = argument.substring(0, idx);
-					String value = argument.substring(idx + 1);
+	IMapFileParser DEFAULT = (rawEntry, arguments, overrideTags) -> {
+		FetchData data = new FetchData();
+		for (String argument : arguments) {
+			int idx = argument.indexOf(SVNFetchFactory.VALUE_PAIR_SEPARATOR);
+			if (idx != -1) {
+				String key = argument.substring(0, idx);
+				String value = argument.substring(idx + 1);
 
-					if (SVNFetchFactory.KEY_URL.equals(key)) {
-						data.url = value;
-					} else if (SVNFetchFactory.KEY_ELEMENT_TAG.equals(key)) {
-						data.tag = value;
-					} else if (SVNFetchFactory.KEY_PATH.equals(key)) {
-						data.path = value;
-					} else if (SVNFetchFactory.KEY_REVISION.equals(key)) {
-						data.revision = value;
-					} else if (SVNFetchFactory.KEY_PEG.equals(key)) {
-						data.peg = value;
-					} else if (SVNFetchFactory.KEY_USERNAME.equals(key)) {
-						data.username = value;
-					} else if (SVNFetchFactory.KEY_PASSWORD.equals(key)) {
-						data.password = value;
-					} else if (SVNFetchFactory.KEY_FORCE.equals(key)) {
-						data.force = value;
-					}
+				if (SVNFetchFactory.KEY_URL.equals(key)) {
+					data.url = value;
+				} else if (IFetchFactory.KEY_ELEMENT_TAG.equals(key)) {
+					data.tag = value;
+				} else if (SVNFetchFactory.KEY_PATH.equals(key)) {
+					data.path = value;
+				} else if (SVNFetchFactory.KEY_REVISION.equals(key)) {
+					data.revision = value;
+				} else if (SVNFetchFactory.KEY_PEG.equals(key)) {
+					data.peg = value;
+				} else if (SVNFetchFactory.KEY_USERNAME.equals(key)) {
+					data.username = value;
+				} else if (SVNFetchFactory.KEY_PASSWORD.equals(key)) {
+					data.password = value;
+				} else if (SVNFetchFactory.KEY_FORCE.equals(key)) {
+					data.force = value;
 				}
 			}
+		}
 
-			if (overrideTags != null) {
-				String overrideTag = overrideTags.getProperty(SVNFetchFactory.OVERRIDE_TAG);
-				if (overrideTag != null && overrideTag.length() > 0) {
-					data.tag = overrideTag;
-				}
+		if (overrideTags != null) {
+			String overrideTag = overrideTags.getProperty(SVNFetchFactory.OVERRIDE_TAG);
+			if (overrideTag != null && overrideTag.length() > 0) {
+				data.tag = overrideTag;
 			}
+		}
 
-			// handle optional path
+		// handle optional path
 //			if (data.path == null) {
 //				data.path = IFetchFactory.KEY_ELEMENT_NAME;
-//			}						
-			// handle optional tag			
+//			}
+		// handle optional tag
 //			if (data.tag == null) {
 //				data.tag = ""; //$NON-NLS-1$
 //			}
-			return data;
-		}
+		return data;
 	};
 
-	public static IMapFileParser SOURCE_FORGE_PARSER = new IMapFileParser() {
+	IMapFileParser SOURCE_FORGE_PARSER = new IMapFileParser() {
 
 		public static final String HEAD = "HEAD"; //$NON-NLS-1$
 
@@ -133,6 +102,7 @@ public interface IMapFileParser {
 		 * SVN map files format
 		 * <type>@<id>=SVN,<tag>[:revision],<svnRepositoryURL>,<preTagPath>,<postTagPath>
 		 */
+		@Override
 		public FetchData parse(String rawEntry, String[] arguments, Properties overrideTags) {
 			FetchData data = new FetchData();
 			if (arguments.length < 2) {
@@ -150,10 +120,10 @@ public interface IMapFileParser {
 			//path = <postTagPath>
 			data.path = arguments.length > 3 && !arguments[3].equals("") ? arguments[3] : null; //$NON-NLS-1$
 
-			String tagText = this.getTagText(overrideTags, arguments);
-			data.tag = this.getSvnTag(tagText);
+			String tagText = getTagText(overrideTags, arguments);
+			data.tag = getSvnTag(tagText);
 
-			data.revision = this.getRevision(tagText);
+			data.revision = getRevision(tagText);
 			data.peg = data.revision;
 
 			data.username = ""; //$NON-NLS-1$
@@ -165,10 +135,11 @@ public interface IMapFileParser {
 		protected String getSvnTag(String tagText) {
 			int index = tagText.indexOf(":"); //$NON-NLS-1$
 			String string = index > 0 ? tagText.substring(0, index) : tagText;
-			if (HEAD.equals(string) || TRUNK.equals(string))
+			if (HEAD.equals(string) || TRUNK.equals(string)) {
 				return TRUNK;
-			else
+			} else {
 				return string;
+			}
 		}
 
 		protected String getRevision(String tagText) {

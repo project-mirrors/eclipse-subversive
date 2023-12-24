@@ -15,6 +15,7 @@
 package org.eclipse.team.svn.ui.verifier;
 
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.team.svn.core.BaseMessages;
 import org.eclipse.team.svn.ui.SVNUIMessages;
 
 /**
@@ -29,14 +30,15 @@ public class ResourceNameVerifier extends AbstractFormattedVerifier {
 
 	public ResourceNameVerifier(String fieldName, boolean allowMultipart) {
 		super(fieldName);
-		ResourceNameVerifier.ERROR_MESSAGE = SVNUIMessages.format(SVNUIMessages.Verifier_ResourceName,
+		ResourceNameVerifier.ERROR_MESSAGE = BaseMessages.format(SVNUIMessages.Verifier_ResourceName,
 				new String[] { AbstractFormattedVerifier.FIELD_NAME });
 		this.allowMultipart = allowMultipart;
 	}
 
+	@Override
 	protected String getErrorMessageImpl(Control input) {
-		String fileName = this.getText(input);
-		if (fileName.length() != 0 && !this.isValidSegment(fileName)) {
+		String fileName = getText(input);
+		if (fileName.length() != 0 && !isValidSegment(fileName)) {
 			return ResourceNameVerifier.ERROR_MESSAGE;
 		}
 		return null;
@@ -47,7 +49,7 @@ public class ResourceNameVerifier extends AbstractFormattedVerifier {
 		boolean nameCharactersFound = false;
 		for (int i = 0; i < size; i++) {
 			char c = segment.charAt(i);
-			if (c == '?' || c == '*' || c == ':' || !this.allowMultipart && (c == '\\' || c == '/')) {
+			if (c == '?' || c == '*' || c == ':' || !allowMultipart && (c == '\\' || c == '/')) {
 				return false;
 			} else if (c != '\\' && c != '/' && c != '.') {
 				nameCharactersFound = true;
@@ -56,6 +58,7 @@ public class ResourceNameVerifier extends AbstractFormattedVerifier {
 		return nameCharactersFound;
 	}
 
+	@Override
 	protected String getWarningMessageImpl(Control input) {
 		return null;
 	}

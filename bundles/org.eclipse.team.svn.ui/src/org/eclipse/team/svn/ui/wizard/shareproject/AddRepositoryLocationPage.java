@@ -24,6 +24,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.team.svn.core.BaseMessages;
 import org.eclipse.team.svn.core.connector.ISVNConnector;
 import org.eclipse.team.svn.core.connector.SVNDepth;
 import org.eclipse.team.svn.core.connector.SVNEntryInfo;
@@ -81,57 +82,59 @@ public class AddRepositoryLocationPage extends AbstractVerifiedWizardPage {
 		super(AddRepositoryLocationPage.class.getName(), SVNUIMessages.AddRepositoryLocationPage_Title,
 				SVNTeamUIPlugin.instance().getImageDescriptor("icons/wizards/newconnect.gif")); //$NON-NLS-1$
 
-		this.setDescription(SVNUIMessages.AddRepositoryLocationPage_Description);
+		setDescription(SVNUIMessages.AddRepositoryLocationPage_Description);
 		this.editable = editable;
 		if (editable != null) {
-			this.oldUrl = editable.getUrl();
-			this.oldLabel = editable.getLabel();
+			oldUrl = editable.getUrl();
+			oldLabel = editable.getLabel();
 		}
-		this.alreadyConnected = false;
-		this.createNew = true;
+		alreadyConnected = false;
+		createNew = true;
 	}
 
+	@Override
 	protected Composite createControlImpl(Composite parent) {
-		this.propertiesTabFolder = new RepositoryPropertiesTabFolder(parent, SWT.NONE, this, this.editable);
-		this.propertiesTabFolder.initialize();
-		this.propertiesTabFolder.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		propertiesTabFolder = new RepositoryPropertiesTabFolder(parent, SWT.NONE, this, editable);
+		propertiesTabFolder.initialize();
+		propertiesTabFolder.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
-		this.propertiesTabFolder.resetChanges();
+		propertiesTabFolder.resetChanges();
 
 //		Setting context help
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(parent, "org.eclipse.team.svn.help.newReposWizContext"); //$NON-NLS-1$
 
-		return this.propertiesTabFolder;
+		return propertiesTabFolder;
 
 	}
 
 	public void setInitialUrl(String initialUrl) {
 		this.initialUrl = initialUrl;
-		if (this.alreadyConnected = initialUrl != null) {
-			this.createNew = initialUrl.trim().length() == 0;
-			this.getRepositoryLocation().setUrl(initialUrl);
-			this.propertiesTabFolder.resetChanges();
+		if (alreadyConnected = initialUrl != null) {
+			createNew = initialUrl.trim().length() == 0;
+			getRepositoryLocation().setUrl(initialUrl);
+			propertiesTabFolder.resetChanges();
 		}
 	}
 
 	public void setForceDisableRoots(boolean force) {
-		this.propertiesTabFolder.setForceDisableRoots(force,
-				this.initialUrl == null || this.initialUrl.length() == 0
+		propertiesTabFolder.setForceDisableRoots(force,
+				initialUrl == null || initialUrl.length() == 0
 						? null
 						: new AbstractFormattedVerifier(SVNUIMessages.AddRepositoryLocationPage_RootURL) {
+							@Override
 							protected String getErrorMessageImpl(Control input) {
-								String url = this.getText(input);
+								String url = getText(input);
 								if (!SVNUtility.createPathForSVNUrl(url)
 										.isPrefixOf(SVNUtility.createPathForSVNUrl(
-												SVNUtility.decodeURL(AddRepositoryLocationPage.this.initialUrl)))) {
-									return SVNUIMessages.format(
+												SVNUtility.decodeURL(initialUrl)))) {
+									return BaseMessages.format(
 											SVNUIMessages.AddRepositoryLocationPage_FixedURL_Verifier_Error,
-											new String[] { AbstractFormattedVerifier.FIELD_NAME,
-													AddRepositoryLocationPage.this.initialUrl });
+											new String[] { AbstractFormattedVerifier.FIELD_NAME, initialUrl });
 								}
 								return null;
 							}
 
+							@Override
 							protected String getWarningMessageImpl(Control input) {
 								return null;
 							}
@@ -139,63 +142,62 @@ public class AddRepositoryLocationPage extends AbstractVerifiedWizardPage {
 	}
 
 	public IRepositoryLocation getRepositoryLocation() {
-		return this.propertiesTabFolder.getRepositoryLocation();
+		return propertiesTabFolder.getRepositoryLocation();
 	}
 
+	@Override
 	public boolean canFlipToNextPage() {
-		return (!this.alreadyConnected || this.createNew) && this.isPageComplete();
+		return (!alreadyConnected || createNew) && isPageComplete();
 	}
 
+	@Override
 	public IWizardPage getNextPage() {
-		return this.performFinish() ? super.getNextPage() : this;
+		return performFinish() ? super.getNextPage() : this;
 	}
 
+	@Override
 	public IWizardPage getPreviousPage() {
-		this.performCancel();
+		performCancel();
 		return super.getPreviousPage();
 	}
 
 	public void performCancel() {
-		this.operationToPerform = null;
+		operationToPerform = null;
 	}
 
 	public boolean performFinish() {
-		String newUrl = this.propertiesTabFolder.getLocationUrl();
+		String newUrl = propertiesTabFolder.getLocationUrl();
 		String oldUuid = null;
-		IProject[] projectsArray = new IProject[0];
-		if (this.editable != null && SVNRemoteStorage.instance().getRepositoryLocation(this.editable.getId()) != null
-				&& !newUrl.equals(this.oldUrl)) {
-			FindRelatedProjectsOperation op = new FindRelatedProjectsOperation(this.editable);
+		IProject[] projectsArray = {};
+		if (editable != null && SVNRemoteStorage.instance().getRepositoryLocation(editable.getId()) != null
+				&& !newUrl.equals(oldUrl)) {
+			FindRelatedProjectsOperation op = new FindRelatedProjectsOperation(editable);
 			UIMonitorUtility.doTaskBusyDefault(op);
 			projectsArray = (IProject[]) op.getResources();
 
 			if (projectsArray.length > 0) {
-				SVNEntryInfo info = this.getLocationInfo(this.editable);
+				SVNEntryInfo info = getLocationInfo(editable);
 				oldUuid = info == null ? null : info.reposUUID;
 			}
 		}
-		this.propertiesTabFolder.saveChanges();
+		propertiesTabFolder.saveChanges();
 
-		if (this.propertiesTabFolder.isStructureEnabled()) {
+		if (propertiesTabFolder.isStructureEnabled()) {
 			String endsPart = SVNUtility.createPathForSVNUrl(newUrl).lastSegment();
-			if (endsPart.equals(this.propertiesTabFolder.getRepositoryLocation().getTrunkLocation())
-					|| endsPart.equals(this.propertiesTabFolder.getRepositoryLocation().getBranchesLocation())
-					|| endsPart.equals(this.propertiesTabFolder.getRepositoryLocation().getTagsLocation())) {
+			if (endsPart.equals(propertiesTabFolder.getRepositoryLocation().getTrunkLocation())
+					|| endsPart.equals(propertiesTabFolder.getRepositoryLocation().getBranchesLocation())
+					|| endsPart.equals(propertiesTabFolder.getRepositoryLocation().getTagsLocation())) {
 				final int[] result = new int[1];
-				final MessageDialog dialog = new MessageDialog(this.getShell(),
+				final MessageDialog dialog = new MessageDialog(getShell(),
 						SVNUIMessages.AddRepositoryLocationPage_Normalize_Title, null,
 						SVNUIMessages.AddRepositoryLocationPage_Normalize_Message, MessageDialog.WARNING,
 						new String[] { IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL }, 0);
-				UIMonitorUtility.getDisplay().syncExec(new Runnable() {
-					public void run() {
-						result[0] = dialog.open();
-					}
-				});
+				UIMonitorUtility.getDisplay().syncExec(() -> result[0] = dialog.open());
 				if (result[0] == IDialogConstants.OK_ID) {
-					IRepositoryLocation location = this.editable == null ? this.getRepositoryLocation() : this.editable;
+					IRepositoryLocation location = editable == null ? getRepositoryLocation() : editable;
 					boolean useCustomLabel = false;
 					useCustomLabel = !location.getUrl().equals(location.getLabel());
-					newUrl = (SVNUtility.createPathForSVNUrl(newUrl)).removeLastSegments(1).toString();
+					newUrl = SVNUtility.createPathForSVNUrl(newUrl).removeLastSegments(1).toString();
 					location.setUrl(newUrl);
 					if (!useCustomLabel) {
 						location.setLabel(newUrl);
@@ -207,28 +209,29 @@ public class AddRepositoryLocationPage extends AbstractVerifiedWizardPage {
 
 		ProjectListPanel panel = null;
 		if (projectsArray.length > 0) {
-			this.editable.reconfigure();
-			SVNEntryInfo newInfo = this.getLocationInfo(this.editable);
+			editable.reconfigure();
+			SVNEntryInfo newInfo = getLocationInfo(editable);
 			if (newInfo == null) {
 				panel = new ProjectListPanel(projectsArray, false);
 			} else if (oldUuid != null && !oldUuid.equals(newInfo.reposUUID)) {
 				panel = new ProjectListPanel(projectsArray, true);
 			}
 			if (panel != null) {
-				this.editable.setUrl(this.oldUrl);
-				this.editable.setLabel(this.oldLabel);
-				this.editable.reconfigure();
-				new DefaultDialog(this.getShell(), panel).open();
+				editable.setUrl(oldUrl);
+				editable.setLabel(oldLabel);
+				editable.reconfigure();
+				new DefaultDialog(getShell(), panel).open();
 			}
 		}
 
-		if (this.propertiesTabFolder.isValidateOnFinishRequested() && panel == null) {
+		if (propertiesTabFolder.isValidateOnFinishRequested() && panel == null) {
 			final Exception[] problem = new Exception[1];
-			boolean cancelled = UIMonitorUtility.doTaskNowDefault(this.getShell(),
+			boolean cancelled = UIMonitorUtility.doTaskNowDefault(getShell(),
 					new AbstractActionOperation("Operation_ValidateLocation", SVNUIMessages.class) { //$NON-NLS-1$
+						@Override
 						protected void runImpl(IProgressMonitor monitor) throws Exception {
 							problem[0] = SVNUtility.validateRepositoryLocation(
-									AddRepositoryLocationPage.this.propertiesTabFolder.getRepositoryLocation(),
+									propertiesTabFolder.getRepositoryLocation(),
 									new SVNProgressMonitor(this, monitor, null));
 						}
 					}, true).isCancelled();
@@ -236,7 +239,7 @@ public class AddRepositoryLocationPage extends AbstractVerifiedWizardPage {
 				return false;
 			}
 			if (problem[0] != null) {
-				NonValidLocationErrorDialog dialog = new NonValidLocationErrorDialog(this.getShell(),
+				NonValidLocationErrorDialog dialog = new NonValidLocationErrorDialog(getShell(),
 						problem[0].getMessage());
 				if (dialog.open() != 0) {
 					return false;
@@ -244,33 +247,34 @@ public class AddRepositoryLocationPage extends AbstractVerifiedWizardPage {
 			}
 		}
 
-		boolean shouldntBeAdded = this.editable == null
+		boolean shouldntBeAdded = editable == null
 				? false
-				: (SVNRemoteStorage.instance().getRepositoryLocation(this.editable.getId()) != null);
+				: SVNRemoteStorage.instance().getRepositoryLocation(editable.getId()) != null;
 
 		AbstractActionOperation mainOp = shouldntBeAdded
 				? new AbstractActionOperation("Operation_CommitLocationChanges", SVNUIMessages.class) { //$NON-NLS-1$
+					@Override
 					protected void runImpl(IProgressMonitor monitor) throws Exception {
-						AddRepositoryLocationPage.this.editable.reconfigure();
+						editable.reconfigure();
 					}
 				}
-				: (AbstractActionOperation) new AddRepositoryLocationOperation(this.getRepositoryLocation());
+				: (AbstractActionOperation) new AddRepositoryLocationOperation(getRepositoryLocation());
 
 		CompositeOperation op = new CompositeOperation(mainOp.getId(), mainOp.getMessagesClass());
 
 		op.add(mainOp);
 		op.add(new SaveRepositoryLocationsOperation());
 		op.add(shouldntBeAdded
-				? new RefreshRepositoryLocationsOperation(new IRepositoryLocation[] { this.editable }, true)
+				? new RefreshRepositoryLocationsOperation(new IRepositoryLocation[] { editable }, true)
 				: new RefreshRepositoryLocationsOperation(false));
 
-		this.operationToPerform = op;
+		operationToPerform = op;
 
 		return true;
 	}
 
 	public IActionOperation getOperationToPeform() {
-		return this.operationToPerform;
+		return operationToPerform;
 	}
 
 	protected static class ProjectListPanel extends AbstractDialogPanel {
@@ -281,22 +285,25 @@ public class AddRepositoryLocationPage extends AbstractVerifiedWizardPage {
 		public ProjectListPanel(IProject[] input, boolean differentUuid) {
 			super(new String[] { IDialogConstants.OK_LABEL });
 
-			this.dialogTitle = SVNUIMessages.AddRepositoryLocationPage_ProjectList_Title;
-			this.dialogDescription = SVNUIMessages.AddRepositoryLocationPage_ProjectList_Description;
-			this.defaultMessage = differentUuid
+			dialogTitle = SVNUIMessages.AddRepositoryLocationPage_ProjectList_Title;
+			dialogDescription = SVNUIMessages.AddRepositoryLocationPage_ProjectList_Description;
+			defaultMessage = differentUuid
 					? SVNUIMessages.AddRepositoryLocationPage_ProjectList_Message1
 					: SVNUIMessages.AddRepositoryLocationPage_ProjectList_Message2;
-			this.resources = input;
+			resources = input;
 		}
 
+		@Override
 		public void createControlsImpl(Composite parent) {
-			ProjectListComposite composite = new ProjectListComposite(parent, SWT.FILL, this.resources, false);
+			ProjectListComposite composite = new ProjectListComposite(parent, SWT.FILL, resources, false);
 			composite.initialize();
 		}
 
+		@Override
 		protected void saveChangesImpl() {
 		}
 
+		@Override
 		protected void cancelChangesImpl() {
 		}
 	}

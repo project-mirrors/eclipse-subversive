@@ -30,6 +30,7 @@ public class SVNRepositoryTags extends SVNRepositoryRootBase {
 		super(location, url, selectedRevision);
 	}
 
+	@Override
 	public int getKind() {
 		return IRepositoryRoot.KIND_TAGS;
 	}

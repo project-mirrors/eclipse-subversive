@@ -34,20 +34,21 @@ public class CompareRepositoryResourcesOperation extends CompositeOperation {
 	protected CompareRepositoryResourcesInernalOperation internalCompare;
 
 	public CompareRepositoryResourcesOperation(IRepositoryResourceProvider provider, boolean forceReuse, long options) {
-		super("Operation_CompareRepository", SVNUIMessages.class); //$NON-NLS-1$		
+		super("Operation_CompareRepository", SVNUIMessages.class); //$NON-NLS-1$
 
 		final RunExternalRepositoryCompareOperation externalCompare = new RunExternalRepositoryCompareOperation(
 				provider, SVNTeamDiffViewerPage.loadDiffViewerSettings());
 		this.add(externalCompare);
 
-		this.internalCompare = new CompareRepositoryResourcesInernalOperation(provider, forceReuse, options) {
+		internalCompare = new CompareRepositoryResourcesInernalOperation(provider, forceReuse, options) {
+			@Override
 			protected void runImpl(IProgressMonitor monitor) throws Exception {
 				if (!externalCompare.isExecuted()) {
 					super.runImpl(monitor);
 				}
 			}
 		};
-		this.add(this.internalCompare, new IActionOperation[] { externalCompare });
+		this.add(internalCompare, new IActionOperation[] { externalCompare });
 	}
 
 	public CompareRepositoryResourcesOperation(IRepositoryResource prev, IRepositoryResource next, boolean forceReuse,
@@ -65,6 +66,6 @@ public class CompareRepositoryResourcesOperation extends CompositeOperation {
 	}
 
 	public void setForceId(String forceId) {
-		this.internalCompare.setForceId(forceId);
+		internalCompare.setForceId(forceId);
 	}
 }

@@ -40,43 +40,45 @@ public class CopyMoveWizard extends AbstractSVNWizard {
 	protected String newName;
 
 	public CopyMoveWizard(IRepositoryResource[] selectedResources, boolean isMove) {
-		super();
 		this.selectedResources = selectedResources;
-		this.setWindowTitle((this.isMove = isMove)
+		setWindowTitle((this.isMove = isMove)
 				? SVNUIMessages.MoveToAction_Select_Title
 				: SVNUIMessages.CopyToAction_Select_Title);
 	}
 
+	@Override
 	public void addPages() {
-		this.addPage(this.destinationPage = new SelectDestinationPage(this.selectedResources));
-		this.addPage(this.commentPage = new CommentWizardPage(this.isMove));
+		addPage(destinationPage = new SelectDestinationPage(selectedResources));
+		addPage(commentPage = new CommentWizardPage(isMove));
 	}
 
+	@Override
 	public boolean canFinish() {
-		IWizardPage currentPage = this.getContainer().getCurrentPage();
+		IWizardPage currentPage = getContainer().getCurrentPage();
 		if (currentPage instanceof SelectDestinationPage) {
 			return false;
 		}
 		return super.canFinish();
 	}
 
+	@Override
 	public boolean performFinish() {
-		this.destination = this.destinationPage.getDestination();
-		this.newName = this.destinationPage.getNewResourceName();
-		this.comment = this.commentPage.getComment();
+		destination = destinationPage.getDestination();
+		newName = destinationPage.getNewResourceName();
+		comment = commentPage.getComment();
 		return true;
 	}
 
 	public String getComment() {
-		return this.comment;
+		return comment;
 	}
 
 	public String getNewName() {
-		return this.newName;
+		return newName;
 	}
 
 	public IRepositoryResource getDestination() {
-		return this.destination;
+		return destination;
 	}
 
 }

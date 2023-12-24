@@ -37,8 +37,9 @@ public class DisconnectOperation extends AbstractFileOperation {
 		super("Operation_DisconnectFile", SVNMessages.class, provider); //$NON-NLS-1$
 	}
 
+	@Override
 	protected void runImpl(IProgressMonitor monitor) throws Exception {
-		this.disconnect(this.operableData(), monitor);
+		disconnect(operableData(), monitor);
 	}
 
 	protected void disconnect(File[] files, IProgressMonitor monitor) {
@@ -47,7 +48,7 @@ public class DisconnectOperation extends AbstractFileOperation {
 			File meta = new File(files[i].getAbsolutePath() + "/" + SVNUtility.getSVNFolderName()); //$NON-NLS-1$
 			FileUtility.deleteRecursive(meta, monitor);
 			if (files[i].isDirectory()) {
-				this.disconnect(files[i].listFiles(), monitor);
+				disconnect(files[i].listFiles(), monitor);
 			}
 		}
 	}

@@ -37,17 +37,19 @@ public class ShowHistoryModelAction extends AbstractSynchronizeLogicalModelActio
 
 	public ShowHistoryModelAction(String text, ISynchronizePageConfiguration configuration) {
 		super(text, configuration);
-		this.actionHelper = new ShowHistoryActionHelper(this, configuration);
+		actionHelper = new ShowHistoryActionHelper(this, configuration);
 	}
 
+	@Override
 	protected boolean needsToSaveDirtyEditors() {
 		return false;
 	}
 
+	@Override
 	protected boolean updateSelection(IStructuredSelection selection) {
 		if (super.updateSelection(selection)) {
 			if (selection.size() == 1) {
-				AbstractSVNSyncInfo syncInfo = this.getSelectedSVNSyncInfo();
+				AbstractSVNSyncInfo syncInfo = getSelectedSVNSyncInfo();
 				if (syncInfo != null) {
 					ILocalResource incoming = syncInfo.getRemoteChangeResource();
 					if (incoming instanceof IResourceChange) {
@@ -56,7 +58,7 @@ public class ShowHistoryModelAction extends AbstractSynchronizeLogicalModelActio
 								: IStateFilter.ST_DELETED != incoming.getStatus();
 					}
 				}
-				IResource selectedResource = this.getSelectedResource();
+				IResource selectedResource = getSelectedResource();
 				if (selectedResource != null) {
 					return IStateFilter.SF_ONREPOSITORY
 							.accept(SVNRemoteStorage.instance().asLocalResource(selectedResource));
@@ -66,8 +68,9 @@ public class ShowHistoryModelAction extends AbstractSynchronizeLogicalModelActio
 		return false;
 	}
 
+	@Override
 	protected IActionOperation getOperation() {
-		return this.actionHelper.getOperation();
+		return actionHelper.getOperation();
 	}
 
 }

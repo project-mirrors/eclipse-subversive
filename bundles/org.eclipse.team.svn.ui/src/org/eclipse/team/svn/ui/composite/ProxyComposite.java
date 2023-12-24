@@ -23,6 +23,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.team.svn.core.BaseMessages;
 import org.eclipse.team.svn.ui.SVNUIMessages;
 import org.eclipse.team.svn.ui.utility.UserInputHistory;
 import org.eclipse.team.svn.ui.verifier.IValidationManager;
@@ -62,41 +63,45 @@ public class ProxyComposite extends AbstractDynamicComposite implements IPropert
 	}
 
 	public void setProxySettingsDirect(String username, String password) {
-		this.usernameText.setText(username);
-		this.passwordText.setText(password);
-		if (this.callback) {
+		usernameText.setText(username);
+		passwordText.setText(password);
+		if (callback) {
 			if (this.username != null && this.username.trim().length() > 0) {
-				this.passwordText.setFocus();
-				this.passwordText.selectAll();
+				passwordText.setFocus();
+				passwordText.selectAll();
 			} else {
-				this.usernameText.setFocus();
+				usernameText.setFocus();
 			}
 		}
 	}
 
+	@Override
 	public void saveChanges() {
-		this.userHistory.addLine(this.usernameText.getText());
-		this.username = this.usernameText.getText();
-		this.password = this.passwordText.getText();
+		userHistory.addLine(usernameText.getText());
+		username = usernameText.getText();
+		password = passwordText.getText();
 	}
 
+	@Override
 	public void resetChanges() {
-		this.usernameText.setText(this.username != null ? this.username : ""); //$NON-NLS-1$
-		this.passwordText.setText(this.password != null ? this.password : ""); //$NON-NLS-1$
-		if (this.callback) {
-			if (this.username != null && this.username.trim().length() > 0) {
-				this.passwordText.setFocus();
-				this.passwordText.selectAll();
+		usernameText.setText(username != null ? username : ""); //$NON-NLS-1$
+		passwordText.setText(password != null ? password : ""); //$NON-NLS-1$
+		if (callback) {
+			if (username != null && username.trim().length() > 0) {
+				passwordText.setFocus();
+				passwordText.selectAll();
 			} else {
-				this.usernameText.setFocus();
+				usernameText.setFocus();
 			}
 		}
 	}
 
+	@Override
 	public void cancelChanges() {
 
 	}
 
+	@Override
 	public void initialize() {
 		GridLayout layout = null;
 		GridData data = null;
@@ -104,14 +109,14 @@ public class ProxyComposite extends AbstractDynamicComposite implements IPropert
 		layout = new GridLayout();
 		layout.verticalSpacing = 12;
 		layout.marginHeight = 7;
-		this.setLayout(layout);
+		setLayout(layout);
 		data = new GridData(GridData.FILL_BOTH);
-		this.setLayoutData(data);
+		setLayoutData(data);
 
 		Label description = new Label(this, SWT.WRAP);
 		data = new GridData(GridData.FILL_HORIZONTAL);
 		description.setLayoutData(data);
-		description.setText(SVNUIMessages.format(SVNUIMessages.ProxyComposite_Description, new String[] { this.host }));
+		description.setText(BaseMessages.format(SVNUIMessages.ProxyComposite_Description, new String[] { host }));
 
 		//Authentication group
 		Group authGroup = new Group(this, SWT.NULL);
@@ -139,29 +144,29 @@ public class ProxyComposite extends AbstractDynamicComposite implements IPropert
 		description.setLayoutData(data);
 		description.setText(SVNUIMessages.ProxyComposite_Username);
 
-		this.userHistory = new UserInputHistory(ProxyComposite.USER_HISTORY_NAME);
+		userHistory = new UserInputHistory(ProxyComposite.USER_HISTORY_NAME);
 
-		this.usernameText = new Combo(inner, SWT.DROP_DOWN);
+		usernameText = new Combo(inner, SWT.DROP_DOWN);
 		data = new GridData(GridData.FILL_HORIZONTAL);
 		data.widthHint = IDialogConstants.ENTRY_FIELD_WIDTH;
-		this.usernameText.setLayoutData(data);
-		this.usernameText.setVisibleItemCount(this.userHistory.getDepth());
-		this.usernameText.setItems(this.userHistory.getHistory());
-		this.usernameText.setText(this.getUsername());
+		usernameText.setLayoutData(data);
+		usernameText.setVisibleItemCount(userHistory.getDepth());
+		usernameText.setItems(userHistory.getHistory());
+		usernameText.setText(getUsername());
 
 		description = new Label(inner, SWT.NULL);
 		description.setText(SVNUIMessages.ProxyComposite_Password);
 		data = new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
 		description.setLayoutData(data);
 
-		this.passwordText = new Text(inner, SWT.PASSWORD | SWT.BORDER);
+		passwordText = new Text(inner, SWT.PASSWORD | SWT.BORDER);
 		data = new GridData(GridData.FILL_HORIZONTAL);
 		data.widthHint = IDialogConstants.ENTRY_FIELD_WIDTH;
-		this.passwordText.setLayoutData(data);
+		passwordText.setLayoutData(data);
 	}
 
 	public String getPassword() {
-		return this.password;
+		return password;
 	}
 
 	public void setPassword(String password) {
@@ -169,7 +174,7 @@ public class ProxyComposite extends AbstractDynamicComposite implements IPropert
 	}
 
 	public String getUsername() {
-		return this.username;
+		return username;
 	}
 
 	public void setUsername(String username) {
@@ -177,20 +182,23 @@ public class ProxyComposite extends AbstractDynamicComposite implements IPropert
 	}
 
 	public String getHost() {
-		return this.host;
+		return host;
 	}
 
 	public void setHost(String host) {
 		this.host = host;
 	}
 
+	@Override
 	public void revalidateContent() {
-		this.validationManager.validateContent();
+		validationManager.validateContent();
 	}
 
+	@Override
 	public void restoreAppearance() {
 	}
 
+	@Override
 	public void saveAppearance() {
 	}
 

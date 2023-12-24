@@ -22,8 +22,6 @@ import java.util.HashSet;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.team.svn.core.SVNMessages;
 import org.eclipse.team.svn.core.connector.ISVNConnector;
-import org.eclipse.team.svn.core.connector.ISVNEntryStatusCallback;
-import org.eclipse.team.svn.core.connector.SVNChangeStatus;
 import org.eclipse.team.svn.core.connector.SVNDepth;
 import org.eclipse.team.svn.core.operation.SVNProgressMonitor;
 import org.eclipse.team.svn.core.resource.IRepositoryLocation;
@@ -42,25 +40,23 @@ public class GetAllFilesOperation extends AbstractFileOperation implements IFile
 		super("Operation_GetAllFiles", SVNMessages.class, new File[] { file }); //$NON-NLS-1$
 	}
 
+	@Override
 	public File[] getFiles() {
-		return this.children;
+		return children;
 	}
 
+	@Override
 	protected void runImpl(IProgressMonitor monitor) throws Exception {
-		this.children = new File[0];
+		children = new File[0];
 
-		File file = this.operableData()[0];
+		File file = operableData()[0];
 		if (!file.exists() || file.isFile()) {
 			return;
 		}
 
-		final HashSet<File> allFiles = new HashSet<File>();
+		final HashSet<File> allFiles = new HashSet<>();
 
-		File[] children = file.listFiles(new FileFilter() {
-			public boolean accept(File arg0) {
-				return !arg0.getName().equals(SVNUtility.getSVNFolderName());
-			}
-		});
+		File[] children = file.listFiles((FileFilter) arg0 -> !arg0.getName().equals(SVNUtility.getSVNFolderName()));
 		if (children != null) {
 			allFiles.addAll(Arrays.asList(children));
 		}
@@ -73,11 +69,7 @@ public class GetAllFilesOperation extends AbstractFileOperation implements IFile
 				proxy.status(
 						file.getAbsolutePath(), SVNDepth.IMMEDIATES, ISVNConnector.Options.INCLUDE_UNCHANGED
 								| ISVNConnector.Options.INCLUDE_IGNORED | ISVNConnector.Options.LOCAL_SIDE,
-						null, new ISVNEntryStatusCallback() {
-							public void next(SVNChangeStatus status) {
-								allFiles.add(new File(status.path));
-							}
-						}, new SVNProgressMonitor(this, monitor, null));
+						null, status -> allFiles.add(new File(status.path)), new SVNProgressMonitor(this, monitor, null));
 			} finally {
 				location.releaseSVNProxy(proxy);
 			}

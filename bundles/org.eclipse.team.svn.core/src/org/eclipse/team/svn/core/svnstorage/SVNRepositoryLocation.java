@@ -46,7 +46,6 @@ import org.eclipse.team.svn.core.extension.CoreExtensionsManager;
 import org.eclipse.team.svn.core.extension.options.IOptionProvider;
 import org.eclipse.team.svn.core.operation.AbstractActionOperation;
 import org.eclipse.team.svn.core.operation.ActivityCancelledException;
-import org.eclipse.team.svn.core.operation.IActionOperation;
 import org.eclipse.team.svn.core.operation.LoggedOperation;
 import org.eclipse.team.svn.core.operation.SVNProgressMonitor;
 import org.eclipse.team.svn.core.operation.UnreportableException;
@@ -61,7 +60,6 @@ import org.eclipse.team.svn.core.resource.SSLSettings;
 import org.eclipse.team.svn.core.resource.events.IRepositoryLocationStateListener;
 import org.eclipse.team.svn.core.resource.events.ISSHSettingsStateListener;
 import org.eclipse.team.svn.core.resource.events.ISSLSettingsStateListener;
-import org.eclipse.team.svn.core.utility.ILoggedOperationFactory;
 import org.eclipse.team.svn.core.utility.ProgressMonitorUtility;
 import org.eclipse.team.svn.core.utility.SVNURLStreamHandler;
 import org.eclipse.team.svn.core.utility.SVNUtility;
@@ -137,21 +135,21 @@ public class SVNRepositoryLocation extends SVNRepositoryBase
 	private Map<String, IRepositoryLocation> additionalRealms;
 
 	//used for differed in time realms initialization
-	private transient List<String> rawRealms = new ArrayList<String>();
+	private transient List<String> rawRealms = new ArrayList<>();
 
-	private transient List<IRepositoryLocationStateListener> changeListeners = new ArrayList<IRepositoryLocationStateListener>();
+	private transient List<IRepositoryLocationStateListener> changeListeners = new ArrayList<>();
 
-	private transient Integer lazyInitLock = new Integer(0);
+	private transient Integer lazyInitLock = 0;
 
-	private transient Integer proxyManagerLock = new Integer(0);
+	private transient Integer proxyManagerLock = 0;
 
-	private transient Integer repositoryRootLock = new Integer(0);
+	private transient Integer repositoryRootLock = 0;
 
-	private transient Integer authInitLock = new Integer(0);
+	private transient Integer authInitLock = 0;
 
 	/*
 	 * Used for differed in time authentication retrieving.
-	 * We need it in order to avoid deadlocks in case of loading 
+	 * We need it in order to avoid deadlocks in case of loading
 	 * authentication info initiated from Plugin#start.
 	 */
 	protected transient boolean isRetrieveAuthInfo;
@@ -165,34 +163,37 @@ public class SVNRepositoryLocation extends SVNRepositoryBase
 		this.id = id;
 	}
 
+	@Override
 	public void addStateListener(IRepositoryLocationStateListener listener) {
-		synchronized (this.changeListeners) {
-			this.changeListeners.add(listener);
+		synchronized (changeListeners) {
+			changeListeners.add(listener);
 		}
 	}
 
+	@Override
 	public void removeStateListener(IRepositoryLocationStateListener listener) {
-		synchronized (this.changeListeners) {
-			this.changeListeners.remove(listener);
+		synchronized (changeListeners) {
+			changeListeners.remove(listener);
 		}
 	}
 
+	@Override
 	public String asReference(LocationReferenceTypeEnum locationReferenceType) {
-		String reference = this.id;
-		reference += ";" + this.getUrlAsIs(); //$NON-NLS-1$
+		String reference = id;
+		reference += ";" + getUrlAsIs(); //$NON-NLS-1$
 		if (locationReferenceType == LocationReferenceTypeEnum.ONLY_REQUIRED_DATA) {
 			return reference;
 		}
-		reference += ";" + this.getLabel(); //$NON-NLS-1$
-		reference += ";" + this.getBranchesLocation(); //$NON-NLS-1$
-		reference += ";" + this.getTagsLocation(); //$NON-NLS-1$
-		reference += ";" + this.getTrunkLocation(); //$NON-NLS-1$
-		reference += ";" + this.trunkEnabled; //$NON-NLS-1$
-		reference += ";" + ((this.repositoryUUID == null) ? "" : this.repositoryUUID); //$NON-NLS-1$ //$NON-NLS-2$
-		reference += ";" + ((this.repositoryRootUrl == null) ? "" : this.repositoryRootUrl); //$NON-NLS-1$ //$NON-NLS-2$
-		reference += ";" + this.getAuthorName(); //$NON-NLS-1$
-		reference += ";" + this.authorNameEnabled + ";"; //$NON-NLS-1$ //$NON-NLS-2$
-		String[] realms = this.getRealms().toArray(new String[0]);
+		reference += ";" + getLabel(); //$NON-NLS-1$
+		reference += ";" + getBranchesLocation(); //$NON-NLS-1$
+		reference += ";" + getTagsLocation(); //$NON-NLS-1$
+		reference += ";" + getTrunkLocation(); //$NON-NLS-1$
+		reference += ";" + trunkEnabled; //$NON-NLS-1$
+		reference += ";" + (repositoryUUID == null ? "" : repositoryUUID); //$NON-NLS-1$ //$NON-NLS-2$
+		reference += ";" + (repositoryRootUrl == null ? "" : repositoryRootUrl); //$NON-NLS-1$ //$NON-NLS-2$
+		reference += ";" + getAuthorName(); //$NON-NLS-1$
+		reference += ";" + authorNameEnabled + ";"; //$NON-NLS-1$ //$NON-NLS-2$
+		String[] realms = getRealms().toArray(new String[0]);
 		for (int i = 0; i < realms.length; i++) {
 			if (i < realms.length - 1) {
 				reference += realms[i] + "^"; //$NON-NLS-1$
@@ -202,7 +203,7 @@ public class SVNRepositoryLocation extends SVNRepositoryBase
 		}
 		reference += ";"; //$NON-NLS-1$
 
-		IRevisionLink[] revisionLinks = this.getRevisionLinks();
+		IRevisionLink[] revisionLinks = getRevisionLinks();
 		for (int i = 0; i < revisionLinks.length; i++) {
 			String base64revLink = new String(Base64.encode(SVNRemoteStorage.instance()
 					.revisionLinkAsBytes(revisionLinks[i],
@@ -220,11 +221,12 @@ public class SVNRepositoryLocation extends SVNRepositoryBase
 		return reference;
 	}
 
+	@Override
 	public void fillLocationFromReference(String[] referenceParts) {
 		boolean containRevisionLinks = false;
 		switch (referenceParts.length) {
 			case 14:
-				//check ssh port for compatibility issues 
+				//check ssh port for compatibility issues
 				int sshPort = Integer.parseInt(referenceParts[13]);
 				if (sshPort != 0) {
 					this.getSSHSettings().setPort(sshPort);
@@ -235,153 +237,179 @@ public class SVNRepositoryLocation extends SVNRepositoryBase
 				}
 			case 12:
 				if (!referenceParts[11].equals("")) { //$NON-NLS-1$
-					this.rawRealms.addAll(Arrays.asList(referenceParts[11].split("\\^"))); //$NON-NLS-1$
+					rawRealms.addAll(Arrays.asList(referenceParts[11].split("\\^"))); //$NON-NLS-1$
 				}
 			case 11:
-				this.setAuthorNameEnabled(referenceParts[10].equals("true")); //$NON-NLS-1$
+				setAuthorNameEnabled(referenceParts[10].equals("true")); //$NON-NLS-1$
 			case 10:
-				this.setAuthorName(referenceParts[9].trim());
+				setAuthorName(referenceParts[9].trim());
 			case 9:
-				this.repositoryRootUrl = (referenceParts[8].trim().equals("") ? null : referenceParts[8].trim()); //$NON-NLS-1$
+				repositoryRootUrl = referenceParts[8].trim().equals("") ? null : referenceParts[8].trim(); //$NON-NLS-1$
 			case 8:
-				this.repositoryUUID = (referenceParts[7].trim().equals("") ? null : referenceParts[7].trim()); //$NON-NLS-1$
+				repositoryUUID = referenceParts[7].trim().equals("") ? null : referenceParts[7].trim(); //$NON-NLS-1$
 			case 7:
-				this.setStructureEnabled(referenceParts[6].equals("true")); //$NON-NLS-1$
+				setStructureEnabled(referenceParts[6].equals("true")); //$NON-NLS-1$
 			case 6:
-				this.setTrunkLocation(referenceParts[5].trim());
+				setTrunkLocation(referenceParts[5].trim());
 			case 5:
-				this.setTagsLocation(referenceParts[4].trim());
+				setTagsLocation(referenceParts[4].trim());
 			case 4:
-				this.setBranchesLocation(referenceParts[3].trim());
+				setBranchesLocation(referenceParts[3].trim());
 			case 3:
 				String label = referenceParts[2].trim();
 				if (label.length() > 0) {
-					this.setLabel(label);
+					setLabel(label);
 				}
 			case 2:
-				this.setUrl(referenceParts[1].trim());
+				setUrl(referenceParts[1].trim());
 			case 1:
 		}
-		if (this.label == null || this.label.length() == 0) {
-			this.label = this.url;
+		if (label == null || label.length() == 0) {
+			label = url;
 		}
 		if (containRevisionLinks) {
 			String[] revLinks = referenceParts[12].split("\\^"); //$NON-NLS-1$
-			for (int i = 0; i < revLinks.length; i++) {
-				this.addRevisionLink(
-						SVNRemoteStorage.instance().revisionLinkFromBytes(Base64.decode(revLinks[i].getBytes()), this));
+			for (String revLink : revLinks) {
+				addRevisionLink(
+						SVNRemoteStorage.instance().revisionLinkFromBytes(Base64.decode(revLink.getBytes()), this));
 			}
 		}
-		this.setRetrieveAuthInfo(true);
+		setRetrieveAuthInfo(true);
 	}
 
+	@Override
 	public Collection<String> getRealms() {
 		return this.getAdditionalRealms().keySet();
 	}
 
+	@Override
 	public void addRealm(String realm, IRepositoryLocation location) {
 		this.getAdditionalRealms(false).put(realm, location);
-		this.fireRealmAdded(realm, location);
+		fireRealmAdded(realm, location);
 	}
 
+	@Override
 	public void removeRealm(String realm) {
-		this.fireRealmRemoved(realm);
+		fireRealmRemoved(realm);
 		this.getAdditionalRealms().remove(realm);
 	}
 
+	@Override
 	public Collection<IRepositoryLocation> getRealmLocations() {
 		return this.getAdditionalRealms().values();
 	}
 
+	@Override
 	public IRepositoryLocation getLocationForRealm(String realm) {
 		return this.getAdditionalRealms().get(realm);
 	}
 
+	@Override
 	public String getId() {
-		return this.id;
+		return id;
 	}
 
+	@Override
 	public String getName() {
-		return this.getUrl();
+		return getUrl();
 	}
 
+	@Override
 	public String getUrlAsIs() {
 		return super.getUrl();
 	}
 
+	@Override
 	public String getUrl() {
-		return this.getUrlImpl(super.getUrl());
+		return getUrlImpl(super.getUrl());
 	}
 
+	@Override
 	public String getLabel() {
-		return this.label == null ? this.getUrl() : this.label;
+		return label == null ? getUrl() : label;
 	}
 
+	@Override
 	public String getRepositoryRootUrl() {
 		this.fetchRepoInfo();
-		return this.repositoryRootUrl == null ? this.getUrl() : this.repositoryRootUrl;
+		return repositoryRootUrl == null ? getUrl() : repositoryRootUrl;
 	}
 
+	@Override
 	public String getRepositoryUUID() {
 		this.fetchRepoInfo();
-		return this.repositoryUUID;
+		return repositoryUUID;
 	}
 
+	@Override
 	public IRepositoryRoot getRepositoryRoot() {
 		return new SVNRepositoryRoot(this);
 	}
 
+	@Override
 	public IRepositoryRoot getRoot() {
 		return new SVNRepositoryLocationRoot(this);
 	}
 
+	@Override
 	public boolean isStructureEnabled() {
-		return this.trunkEnabled;
+		return trunkEnabled;
 	}
 
+	@Override
 	public void setStructureEnabled(boolean structureEnabled) {
-		boolean oldValue = this.trunkEnabled;
-		this.trunkEnabled = structureEnabled;
-		this.fireChanged(IRepositoryLocationStateListener.STRUCTURE_ENABLED, Boolean.valueOf(oldValue),
-				Boolean.valueOf(this.trunkEnabled));
+		boolean oldValue = trunkEnabled;
+		trunkEnabled = structureEnabled;
+		fireChanged(IRepositoryLocationStateListener.STRUCTURE_ENABLED, Boolean.valueOf(oldValue),
+				Boolean.valueOf(trunkEnabled));
 	}
 
+	@Override
 	public String getUserInputTrunk() {
-		return this.trunk == null ? "" : this.trunk; //$NON-NLS-1$
+		return trunk == null ? "" : trunk; //$NON-NLS-1$
 	}
 
+	@Override
 	public String getUserInputTags() {
-		return this.tags == null ? "" : this.tags; //$NON-NLS-1$
+		return tags == null ? "" : tags; //$NON-NLS-1$
 	}
 
+	@Override
 	public String getUserInputBranches() {
-		return this.branches == null ? "" : this.branches; //$NON-NLS-1$
+		return branches == null ? "" : branches; //$NON-NLS-1$
 	}
 
+	@Override
 	public String getTrunkLocation() {
-		return (this.trunk == null || !this.isStructureEnabled()) ? "" : this.trunk; //$NON-NLS-1$
+		return trunk == null || !isStructureEnabled() ? "" : trunk; //$NON-NLS-1$
 	}
 
+	@Override
 	public String getBranchesLocation() {
-		return (this.branches == null || !this.isStructureEnabled()) ? "" : this.branches; //$NON-NLS-1$
+		return branches == null || !isStructureEnabled() ? "" : branches; //$NON-NLS-1$
 	}
 
+	@Override
 	public String getTagsLocation() {
-		return (this.tags == null || !this.isStructureEnabled()) ? "" : this.tags; //$NON-NLS-1$
+		return tags == null || !isStructureEnabled() ? "" : tags; //$NON-NLS-1$
 	}
 
+	@Override
 	public boolean isAuthorNameEnabled() {
-		return this.authorNameEnabled;
+		return authorNameEnabled;
 	}
 
+	@Override
 	public String getAuthorName() {
-		return this.authorName == null ? "" : this.authorName; //$NON-NLS-1$
+		return authorName == null ? "" : authorName; //$NON-NLS-1$
 	}
 
+	@Override
 	public IRepositoryContainer asRepositoryContainer(String url, boolean allowsNull) {
 		return SVNRepositoryLocation.asRepositoryContainer(this, url, allowsNull);
 	}
 
+	@Override
 	public IRepositoryFile asRepositoryFile(String url, boolean allowsNull) {
 		return SVNRepositoryLocation.asRepositoryFile(this, url, allowsNull);
 	}
@@ -443,40 +471,43 @@ public class SVNRepositoryLocation extends SVNRepositoryBase
 		return new SVNRepositoryFile(location, url, SVNRevision.HEAD);
 	}
 
+	@Override
 	public String getUsername() {
-		this.checkAuthInfo();
-		return this.username;
+		checkAuthInfo();
+		return username;
 	}
 
+	@Override
 	public String getPassword() {
-		this.checkAuthInfo();
-		return this.passwordSaved
-				? SVNUtility.base64Decode(this.password)
-				: SVNUtility.base64Decode(this.passwordTemporary);
+		checkAuthInfo();
+		return passwordSaved ? SVNUtility.base64Decode(password) : SVNUtility.base64Decode(passwordTemporary);
 	}
 
+	@Override
 	public boolean isPasswordSaved() {
-		this.checkAuthInfo();
-		return this.passwordSaved;
+		checkAuthInfo();
+		return passwordSaved;
 	}
 
+	@Override
 	public IRevisionLink[] getRevisionLinks() {
-		synchronized (this.lazyInitLock) {
-			if (this.revisionLinks == null) {
-				List<byte[]> serialized = this.getSerializedRevisionLinks();
-				this.revisionLinks = new IRevisionLink[serialized.size()];
-				for (int i = 0; i < this.revisionLinks.length; i++) {
-					byte[] data = (byte[]) serialized.get(i);
-					this.revisionLinks[i] = SVNRemoteStorage.instance().revisionLinkFromBytes(data, this);
+		synchronized (lazyInitLock) {
+			if (revisionLinks == null) {
+				List<byte[]> serialized = getSerializedRevisionLinks();
+				revisionLinks = new IRevisionLink[serialized.size()];
+				for (int i = 0; i < revisionLinks.length; i++) {
+					byte[] data = serialized.get(i);
+					revisionLinks[i] = SVNRemoteStorage.instance().revisionLinkFromBytes(data, this);
 				}
 			}
-			return this.revisionLinks;
+			return revisionLinks;
 		}
 	}
 
+	@Override
 	public void addRevisionLink(IRevisionLink link) {
-		synchronized (this.lazyInitLock) {
-			IRevisionLink[] links = this.getRevisionLinks();
+		synchronized (lazyInitLock) {
+			IRevisionLink[] links = getRevisionLinks();
 			int idx = -1;
 			for (int i = 0; i < links.length; i++) {
 				if (links[i].equals(link) && links[i].getRepositoryResource()
@@ -487,18 +518,19 @@ public class SVNRepositoryLocation extends SVNRepositoryBase
 				}
 			}
 			if (idx == -1) {
-				List<byte[]> serialized = this.getSerializedRevisionLinks();
+				List<byte[]> serialized = getSerializedRevisionLinks();
 				serialized.add(SVNRemoteStorage.instance().revisionLinkAsBytes(link, true));
-				this.revisionLinks = null;
+				revisionLinks = null;
 			}
 		}
-		this.fireRevisionLinkAdded(link);
+		fireRevisionLinkAdded(link);
 	}
 
+	@Override
 	public void removeRevisionLink(IRevisionLink link) {
-		this.fireRevisionLinkRemoved(link);
-		synchronized (this.lazyInitLock) {
-			IRevisionLink[] links = this.getRevisionLinks();
+		fireRevisionLinkRemoved(link);
+		synchronized (lazyInitLock) {
+			IRevisionLink[] links = getRevisionLinks();
 			int idx = -1;
 			for (int i = 0; i < links.length; i++) {
 				if (links[i].equals(link) && links[i].getRepositoryResource()
@@ -509,36 +541,38 @@ public class SVNRepositoryLocation extends SVNRepositoryBase
 				}
 			}
 			if (idx != -1) {
-				List<byte[]> serialized = this.getSerializedRevisionLinks();
+				List<byte[]> serialized = getSerializedRevisionLinks();
 				serialized.remove(idx);
-				this.revisionLinks = null;
+				revisionLinks = null;
 			}
 		}
 	}
 
+	@Override
 	public void setLabel(String label) {
 		String oldValue = this.label;
 		this.label = label;
-		this.fireChanged(IRepositoryLocationStateListener.LABEL, oldValue, this.label);
+		fireChanged(IRepositoryLocationStateListener.LABEL, oldValue, this.label);
 	}
 
+	@Override
 	public void setUrl(String url) {
 		String oldValue = this.url;
 
-		String oldRootUrl = this.getRepositoryRootUrl();
-		IRevisionLink[] oldLinks = this.getRevisionLinks();
-		List<byte[]> serialized = this.getSerializedRevisionLinks();
+		String oldRootUrl = getRepositoryRootUrl();
+		IRevisionLink[] oldLinks = getRevisionLinks();
+		List<byte[]> serialized = getSerializedRevisionLinks();
 
 		this.url = url;
 
-		if (oldRootUrl != null && !SVNUtility.createPathForSVNUrl(oldRootUrl)
-				.isPrefixOf(SVNUtility.createPathForSVNUrl(this.getUrl()))) {
-			this.repositoryRootUrl = null;
-			this.repositoryUUID = null;
+		if (oldRootUrl != null
+				&& !SVNUtility.createPathForSVNUrl(oldRootUrl).isPrefixOf(SVNUtility.createPathForSVNUrl(getUrl()))) {
+			repositoryRootUrl = null;
+			repositoryUUID = null;
 
 			if (oldLinks.length > 0) {
-				String newRootUrl = this.getRepositoryRootUrl();
-				synchronized (this.lazyInitLock) {
+				String newRootUrl = getRepositoryRootUrl();
+				synchronized (lazyInitLock) {
 					for (int i = 0; i < oldLinks.length; i++) {
 						String linkUrl = oldLinks[i].getRepositoryResource().getUrl();
 						int idx = linkUrl.indexOf(oldRootUrl);
@@ -563,147 +597,157 @@ public class SVNRepositoryLocation extends SVNRepositoryBase
 							it.remove();
 						}
 					}
-					this.revisionLinks = null;
+					revisionLinks = null;
 				}
 			}
 		}
-		this.fireChanged(IRepositoryLocationStateListener.URL, oldValue, this.url);
+		fireChanged(IRepositoryLocationStateListener.URL, oldValue, this.url);
 	}
 
+	@Override
 	public void setTrunkLocation(String location) {
-		String oldValue = this.trunk;
-		this.trunk = location;
-		this.fireChanged(IRepositoryLocationStateListener.TRUNK_LOCATION, oldValue, this.trunk);
+		String oldValue = trunk;
+		trunk = location;
+		fireChanged(IRepositoryLocationStateListener.TRUNK_LOCATION, oldValue, trunk);
 	}
 
+	@Override
 	public void setBranchesLocation(String location) {
-		String oldValue = this.branches;
-		this.branches = location;
-		this.fireChanged(IRepositoryLocationStateListener.BRANCHES_LOCATION, oldValue, this.branches);
+		String oldValue = branches;
+		branches = location;
+		fireChanged(IRepositoryLocationStateListener.BRANCHES_LOCATION, oldValue, branches);
 	}
 
+	@Override
 	public void setTagsLocation(String location) {
-		String oldValue = this.tags;
-		this.tags = location;
-		this.fireChanged(IRepositoryLocationStateListener.TAGS_LOCATION, oldValue, this.tags);
+		String oldValue = tags;
+		tags = location;
+		fireChanged(IRepositoryLocationStateListener.TAGS_LOCATION, oldValue, tags);
 	}
 
+	@Override
 	public void setUsername(String username) {
 		String oldValue = this.username;
 		this.username = username;
-		this.fireChanged(IRepositoryLocationStateListener.USERNAME, oldValue, this.username);
+		fireChanged(IRepositoryLocationStateListener.USERNAME, oldValue, this.username);
 	}
 
+	@Override
 	public void setAuthorNameEnabled(boolean isEnabled) {
-		boolean oldValue = this.authorNameEnabled;
-		this.authorNameEnabled = isEnabled;
-		this.fireChanged(IRepositoryLocationStateListener.AUTHOR_NAME_ENABLED, Boolean.valueOf(oldValue),
-				Boolean.valueOf(this.authorNameEnabled));
+		boolean oldValue = authorNameEnabled;
+		authorNameEnabled = isEnabled;
+		fireChanged(IRepositoryLocationStateListener.AUTHOR_NAME_ENABLED, Boolean.valueOf(oldValue),
+				Boolean.valueOf(authorNameEnabled));
 	}
 
+	@Override
 	public void setAuthorName(String name) {
-		String oldValue = this.authorName;
-		this.authorName = name;
-		this.fireChanged(IRepositoryLocationStateListener.AUTHOR_NAME, oldValue, this.authorName);
+		String oldValue = authorName;
+		authorName = name;
+		fireChanged(IRepositoryLocationStateListener.AUTHOR_NAME, oldValue, authorName);
 	}
 
+	@Override
 	public void setPassword(String password) {
-		String oldValue = !this.passwordSaved ? this.passwordTemporary : this.password;
+		String oldValue = !passwordSaved ? passwordTemporary : this.password;
 		oldValue = oldValue != null ? SVNUtility.base64Decode(oldValue) : oldValue;
-		if (!this.passwordSaved) {
-			this.passwordTemporary = SVNUtility.base64Encode(password);
+		if (!passwordSaved) {
+			passwordTemporary = SVNUtility.base64Encode(password);
 		} else {
 			this.password = SVNUtility.base64Encode(password);
 		}
-		this.fireChanged(IRepositoryLocationStateListener.PASSWORD, oldValue, password);
+		fireChanged(IRepositoryLocationStateListener.PASSWORD, oldValue, password);
 	}
 
+	@Override
 	public void setPasswordSaved(boolean saved) {
-		if (this.passwordSaved == saved) {
+		if (passwordSaved == saved) {
 			return;
 		}
-		boolean oldValue = this.passwordSaved;
-		this.passwordSaved = saved;
+		boolean oldValue = passwordSaved;
+		passwordSaved = saved;
 		if (!saved) {
-			this.passwordTemporary = this.password;
-			this.password = null;
+			passwordTemporary = password;
+			password = null;
 		} else {
-			this.password = this.passwordTemporary;
+			password = passwordTemporary;
 		}
-		this.fireChanged(IRepositoryLocationStateListener.PASSWORD_SAVED, Boolean.valueOf(oldValue),
-				Boolean.valueOf(this.passwordSaved));
+		fireChanged(IRepositoryLocationStateListener.PASSWORD_SAVED, Boolean.valueOf(oldValue),
+				Boolean.valueOf(passwordSaved));
 	}
 
+	@Override
 	public ISVNConnector acquireSVNProxy() {
 		ISVNConnector retVal = null;
 		boolean isNew = false;
-		synchronized (this.proxyManagerLock) {
+		synchronized (proxyManagerLock) {
 			try {
 				// initialize proxy cache, usedProxies list and thread2Proxy map
-				List<ISVNConnector> cache = this.getProxyCache();
+				List<ISVNConnector> cache = getProxyCache();
 
 				// make the method reenterable: the same thread must use the same proxy. Access from call-backs must be controlled by programmer
 				Thread current = Thread.currentThread();
-				ProxyHolder holder = this.thread2Proxy.get(current);
+				ProxyHolder holder = thread2Proxy.get(current);
 				if (holder != null) {
 					holder.referenceCounter++;
 					return holder.proxy;
 				}
 
-				if (this.proxyConfigurationState == 1) {
+				if (proxyConfigurationState == 1) {
 					try {
-						this.proxyManagerLock.wait();
+						proxyManagerLock.wait();
 					} catch (InterruptedException ex) {
 					}
-					if (this.proxyConfigurationState != 2) {
+					if (proxyConfigurationState != 2) {
 						throw new ActivityCancelledException(
 								SVNMessages.getErrorString("Error_AuthenticationCancelled")); //$NON-NLS-1$
 					}
-				} else if (this.proxyConfigurationState == 0) {
-					this.proxyConfigurationState = 1;
+				} else if (proxyConfigurationState == 0) {
+					proxyConfigurationState = 1;
 				}
 
 				if (cache.size() == 0) {
-					retVal = this.newProxyInstance();
+					retVal = newProxyInstance();
 					isNew = true;
 				} else {
 					retVal = cache.remove(0);
 				}
 
-				this.usedProxies.add(retVal);
-				this.thread2Proxy.put(current, new ProxyHolder(retVal));
+				usedProxies.add(retVal);
+				thread2Proxy.put(current, new ProxyHolder(retVal));
 			} catch (RuntimeException e) {
-				this.proxyConfigurationState = 0;
-				this.proxyManagerLock.notifyAll();
+				proxyConfigurationState = 0;
+				proxyManagerLock.notifyAll();
 				throw e;
 			} catch (Throwable e) {
-				this.proxyConfigurationState = 0;
-				this.proxyManagerLock.notifyAll();
+				proxyConfigurationState = 0;
+				proxyManagerLock.notifyAll();
 				throw new RuntimeException(e);
 			}
 		}
 		if (isNew) { // configure a new proxy later in order to avoid recursive deadlocks when there is a misconfiguration of some sort
 			SVNUtility.configureProxy(retVal, this);
 		}
-		this.fireProxyAcquired(retVal);
+		fireProxyAcquired(retVal);
 		return retVal;
 	}
 
+	@Override
 	public void releaseSVNProxy(ISVNConnector proxy) {
-		this.fireProxyDisposed(proxy);
-		synchronized (this.proxyManagerLock) {
-			List<ISVNConnector> proxies = this.getProxyCache();
+		fireProxyDisposed(proxy);
+		synchronized (proxyManagerLock) {
+			List<ISVNConnector> proxies = getProxyCache();
 
 			Thread current = Thread.currentThread();
-			ProxyHolder holder = this.thread2Proxy.get(current);
+			ProxyHolder holder = thread2Proxy.get(current);
 
 			if (--holder.referenceCounter > 0) {
 				return;
 			}
 
-			this.thread2Proxy.remove(current);
+			thread2Proxy.remove(current);
 			// Proxy should be always removed from the usedProxies list. So, do it first.
-			if (!this.usedProxies.remove(proxy) || proxies.size() >= SVNRepositoryLocation.PROXY_CACHE_SIZE) {
+			if (!usedProxies.remove(proxy) || proxies.size() >= SVNRepositoryLocation.PROXY_CACHE_SIZE) {
 				// The function code is sensitive to exceptions. So, disallow error reporting in that case.
 				try {
 					proxy.dispose();
@@ -713,71 +757,74 @@ public class SVNRepositoryLocation extends SVNRepositoryBase
 				proxies.add(proxy);
 			}
 
-			if (this.proxyConfigurationState == 1) {
-				this.proxyConfigurationState = 2;
+			if (proxyConfigurationState == 1) {
+				proxyConfigurationState = 2;
 			}
-			this.proxyManagerLock.notifyAll();
+			proxyManagerLock.notifyAll();
 		}
 	}
 
+	@Override
 	public void reconfigure() {
-		synchronized (this.proxyManagerLock) {
-			this.proxyConfigurationState = 0;
-			this.reconfigureImpl();
+		synchronized (proxyManagerLock) {
+			proxyConfigurationState = 0;
+			reconfigureImpl();
 		}
 	}
 
+	@Override
 	public void dispose() {
-		synchronized (this.proxyManagerLock) {
-			this.reconfigureProxies(new IProxyVisitor() {
-				public void visit(ISVNConnector proxy) {
-					// When exiting Eclipse IDE connector plug-in's can be stopped before Core. So, disallow error reporting in that case. 
-					try {
-						proxy.dispose();
-					} catch (Throwable ex) {
-					}
+		synchronized (proxyManagerLock) {
+			reconfigureProxies(proxy -> {
+				// When exiting Eclipse IDE connector plug-in's can be stopped before Core. So, disallow error reporting in that case.
+				try {
+					proxy.dispose();
+				} catch (Throwable ex) {
 				}
 			});
-			this.getProxyCache().clear();
+			getProxyCache().clear();
 		}
 	}
 
+	@Override
 	public SSLSettings getSSLSettings() {
 		return this.getSSLSettings(true);
 	}
 
 	public SSLSettings getSSLSettings(boolean isCheckAuthInfo) {
 		if (isCheckAuthInfo) {
-			this.checkAuthInfo();
+			checkAuthInfo();
 		}
-		synchronized (this.lazyInitLock) {
-			if (this.sslSettings == null) {
-				this.sslSettings = new SSLSettings();
+		synchronized (lazyInitLock) {
+			if (sslSettings == null) {
+				sslSettings = new SSLSettings();
 			}
-			return this.sslSettings;
+			return sslSettings;
 		}
 	}
 
 	public SSHSettings getSSHSettings(boolean isCheckAuthInfo) {
 		if (isCheckAuthInfo) {
-			this.checkAuthInfo();
+			checkAuthInfo();
 		}
-		synchronized (this.lazyInitLock) {
-			if (this.sshSettings == null) {
-				this.sshSettings = new SSHSettings(this);
+		synchronized (lazyInitLock) {
+			if (sshSettings == null) {
+				sshSettings = new SSHSettings(this);
 			}
-			return this.sshSettings;
+			return sshSettings;
 		}
 	}
 
+	@Override
 	public SSHSettings getSSHSettings() {
 		return this.getSSHSettings(true);
 	}
 
+	@Override
 	public boolean equals(Object obj) {
 		if (obj != null && obj instanceof IRepositoryLocation) {
 			IRepositoryLocation other = (IRepositoryLocation) obj;
-			return this.getId().equals(other.getId());
+			return getId().equals(other.getId());
 		}
 		return false;
 	}
@@ -810,12 +857,12 @@ public class SVNRepositoryLocation extends SVNRepositoryBase
 	}
 
 	protected void fetchRepoInfo() {
-		synchronized (this.repositoryRootLock) {
-			if (this.repositoryRootUrl == null && this.url != null && SVNUtility.isValidSVNURL(this.getUrl())) {
+		synchronized (repositoryRootLock) {
+			if (repositoryRootUrl == null && url != null && SVNUtility.isValidSVNURL(getUrl())) {
 				String[] values = SVNRepositoryLocation.fetchRepoInfo(this, false);
-				this.repositoryRootUrl = values[0];
-				this.repositoryUUID = values[1];
-				if (this.repositoryUUID != null) {
+				repositoryRootUrl = values[0];
+				repositoryUUID = values[1];
+				if (repositoryUUID != null) {
 					SVNTeamPlugin.instance().setLocationsDirty(true);
 				}
 			}
@@ -827,6 +874,7 @@ public class SVNRepositoryLocation extends SVNRepositoryBase
 		final String[] retVal = new String[2];
 		ProgressMonitorUtility
 				.doTaskExternal(new AbstractActionOperation("Operation_FetchRepositoryRoot", SVNMessages.class) { //$NON-NLS-1$
+					@Override
 					protected void runImpl(IProgressMonitor monitor) throws Exception {
 						ISVNConnector proxy = CoreExtensionsManager.instance()
 								.getSVNConnectorFactory()
@@ -866,40 +914,32 @@ public class SVNRepositoryLocation extends SVNRepositoryBase
 							retVal[1] = infos[0].reposUUID;
 						}
 					}
-				}, new NullProgressMonitor(), new ILoggedOperationFactory() {
-					public IActionOperation getLogged(IActionOperation operation) {
-						return operation;
-					}
-				});
+				}, new NullProgressMonitor(), operation -> operation);
 		return retVal;
 	}
 
 	protected void reconfigureImpl() {
-		this.reconfigureProxies(new IProxyVisitor() {
-			public void visit(ISVNConnector proxy) {
-				SVNUtility.configureProxy(proxy, SVNRepositoryLocation.this);
-			}
-		});
+		reconfigureProxies(proxy -> SVNUtility.configureProxy(proxy, SVNRepositoryLocation.this));
 	}
 
 	protected void reconfigureProxies(IProxyVisitor visitor) {
-		this.visitProxies(visitor);
-		this.usedProxies.clear();
+		visitProxies(visitor);
+		usedProxies.clear();
 	}
 
 	protected void visitProxies(IProxyVisitor visitor) {
-		for (ISVNConnector proxy : this.getProxyCache()) {
+		for (ISVNConnector proxy : getProxyCache()) {
 			visitor.visit(proxy);
 		}
 	}
 
 	protected List<ISVNConnector> getProxyCache() {
-		if (this.proxyCache == null) {
-			this.proxyCache = new ArrayList<ISVNConnector>();
-			this.usedProxies = new HashSet<ISVNConnector>();
-			this.thread2Proxy = new HashMap<Thread, ProxyHolder>();
+		if (proxyCache == null) {
+			proxyCache = new ArrayList<>();
+			usedProxies = new HashSet<>();
+			thread2Proxy = new HashMap<>();
 		}
-		return this.proxyCache;
+		return proxyCache;
 	}
 
 	protected ISVNConnector newProxyInstance() {
@@ -915,10 +955,10 @@ public class SVNRepositoryLocation extends SVNRepositoryBase
 	}
 
 	protected List<byte[]> getSerializedRevisionLinks() {
-		if (this.serializedRevisionLinks == null) {
-			this.serializedRevisionLinks = new ArrayList<byte[]>();
+		if (serializedRevisionLinks == null) {
+			serializedRevisionLinks = new ArrayList<>();
 		}
-		return this.serializedRevisionLinks;
+		return serializedRevisionLinks;
 	}
 
 	protected String getUrlImpl(String url) {
@@ -939,73 +979,75 @@ public class SVNRepositoryLocation extends SVNRepositoryBase
 
 	protected Map<String, IRepositoryLocation> getAdditionalRealms(boolean isCheckAuthInfo) {
 		if (isCheckAuthInfo) {
-			this.checkAuthInfo();
+			checkAuthInfo();
 		}
 		synchronized (this) {
-			if (this.additionalRealms == null) {
-				this.additionalRealms = new LinkedHashMap<String, IRepositoryLocation>();
+			if (additionalRealms == null) {
+				additionalRealms = new LinkedHashMap<>();
 			}
 		}
-		return this.additionalRealms;
+		return additionalRealms;
 	}
 
 	protected void fireChanged(String field, Object oldValue, Object newValue) {
-		for (IRepositoryLocationStateListener listener : this.getStateListeners()) {
+		for (IRepositoryLocationStateListener listener : getStateListeners()) {
 			listener.changed(this, field, oldValue, newValue);
 		}
 	}
 
+	@Override
 	public void sslChanged(IRepositoryLocation where, String field, Object oldValue, Object newValue) {
-		for (IRepositoryLocationStateListener listener : this.getStateListeners()) {
+		for (IRepositoryLocationStateListener listener : getStateListeners()) {
 			listener.sslChanged(this, field, oldValue, newValue);
 		}
 	}
 
+	@Override
 	public void sshChanged(IRepositoryLocation where, String field, Object oldValue, Object newValue) {
-		for (IRepositoryLocationStateListener listener : this.getStateListeners()) {
+		for (IRepositoryLocationStateListener listener : getStateListeners()) {
 			listener.sshChanged(this, field, oldValue, newValue);
 		}
 	}
 
 	protected void fireRealmAdded(String realm, IRepositoryLocation location) {
-		for (IRepositoryLocationStateListener listener : this.getStateListeners()) {
+		for (IRepositoryLocationStateListener listener : getStateListeners()) {
 			listener.realmAdded(this, realm, location);
 		}
 	}
 
 	protected void fireRealmRemoved(String realm) {
-		for (IRepositoryLocationStateListener listener : this.getStateListeners()) {
+		for (IRepositoryLocationStateListener listener : getStateListeners()) {
 			listener.realmRemoved(this, realm);
 		}
 	}
 
 	protected void fireRevisionLinkAdded(IRevisionLink link) {
-		for (IRepositoryLocationStateListener listener : this.getStateListeners()) {
+		for (IRepositoryLocationStateListener listener : getStateListeners()) {
 			listener.revisionLinkAdded(this, link);
 		}
 	}
 
 	protected void fireRevisionLinkRemoved(IRevisionLink link) {
-		for (IRepositoryLocationStateListener listener : this.getStateListeners()) {
+		for (IRepositoryLocationStateListener listener : getStateListeners()) {
 			listener.revisionLinkRemoved(this, link);
 		}
 	}
 
 	protected void fireProxyAcquired(ISVNConnector proxy) {
-		for (IRepositoryLocationStateListener listener : this.getStateListeners()) {
+		for (IRepositoryLocationStateListener listener : getStateListeners()) {
 			listener.proxyAcquired(this, proxy);
 		}
 	}
 
 	protected void fireProxyDisposed(ISVNConnector proxy) {
-		for (IRepositoryLocationStateListener listener : this.getStateListeners()) {
+		for (IRepositoryLocationStateListener listener : getStateListeners()) {
 			listener.proxyDisposed(this, proxy);
 		}
 	}
 
 	protected IRepositoryLocationStateListener[] getStateListeners() {
-		synchronized (this.changeListeners) {
-			return this.changeListeners.toArray(new IRepositoryLocationStateListener[this.changeListeners.size()]);
+		synchronized (changeListeners) {
+			return changeListeners.toArray(new IRepositoryLocationStateListener[changeListeners.size()]);
 		}
 	}
 
@@ -1013,13 +1055,13 @@ public class SVNRepositoryLocation extends SVNRepositoryBase
 	}
 
 	private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
-		this.lazyInitLock = new Integer(0);
-		this.proxyManagerLock = new Integer(0);
-		this.repositoryRootLock = new Integer(0);
+		lazyInitLock = 0;
+		proxyManagerLock = 0;
+		repositoryRootLock = 0;
 	}
 
 	protected interface IProxyVisitor {
-		public void visit(ISVNConnector proxy);
+		void visit(ISVNConnector proxy);
 	}
 
 	public static class BaseCredentialsPromptWrapper implements ISVNCredentialsPrompt {
@@ -1038,131 +1080,154 @@ public class SVNRepositoryLocation extends SVNRepositoryBase
 			this.location = location;
 		}
 
+		@Override
 		public Answer askTrustSSLServer(Object context, SSLServerCertificateFailures failures,
 				SSLServerCertificateInfo info, boolean allowPermanently) {
-			return this.prompt.askTrustSSLServer(this.location, failures, info, allowPermanently);
+			return prompt.askTrustSSLServer(location, failures, info, allowPermanently);
 		}
 
+		@Override
 		public String getRealmToSave() {
-			return this.prompt.getRealmToSave();
+			return prompt.getRealmToSave();
 		}
 
+		@Override
 		public String getProxyHost() {
-			return this.prompt.getProxyHost();
+			return prompt.getProxyHost();
 		}
 
+		@Override
 		public String getProxyPassword() {
-			return this.prompt.getProxyPassword();
+			return prompt.getProxyPassword();
 		}
 
+		@Override
 		public int getProxyPort() {
-			return this.prompt.getProxyPort();
+			return prompt.getProxyPort();
 		}
 
+		@Override
 		public String getProxyUserName() {
-			return this.prompt.getProxyUserName();
+			return prompt.getProxyUserName();
 		}
 
+		@Override
 		public int getSSHPort() {
-			return this.realmLocation != null
-					? this.realmLocation.getSSHSettings().getPort()
-					: this.prompt.getSSHPort();
+			return realmLocation != null ? realmLocation.getSSHSettings().getPort() : prompt.getSSHPort();
 		}
 
+		@Override
 		public String getSSHPrivateKeyPassphrase() {
-			return this.realmLocation != null
-					? this.realmLocation.getSSHSettings().getPassPhrase()
-					: this.prompt.getSSHPrivateKeyPassphrase();
+			return realmLocation != null
+					? realmLocation.getSSHSettings().getPassPhrase()
+					: prompt.getSSHPrivateKeyPassphrase();
 		}
 
+		@Override
 		public String getSSHPrivateKeyPath() {
-			return this.realmLocation != null
-					? this.realmLocation.getSSHSettings().getPrivateKeyPath()
-					: this.prompt.getSSHPrivateKeyPath();
+			return realmLocation != null
+					? realmLocation.getSSHSettings().getPrivateKeyPath()
+					: prompt.getSSHPrivateKeyPath();
 		}
 
+		@Override
 		public String getSSLClientCertPassword() {
-			return this.realmLocation != null
-					? this.realmLocation.getSSLSettings().getPassPhrase()
-					: this.prompt.getSSLClientCertPassword();
+			return realmLocation != null
+					? realmLocation.getSSLSettings().getPassPhrase()
+					: prompt.getSSLClientCertPassword();
 		}
 
+		@Override
 		public String getSSLClientCertPath() {
-			return this.realmLocation != null
-					? this.realmLocation.getSSLSettings().getCertificatePath()
-					: this.prompt.getSSLClientCertPath();
+			return realmLocation != null
+					? realmLocation.getSSLSettings().getCertificatePath()
+					: prompt.getSSLClientCertPath();
 		}
 
+		@Override
 		public String getUsername() {
-			return this.realmLocation != null ? this.realmLocation.getUsername() : this.prompt.getUsername();
+			return realmLocation != null ? realmLocation.getUsername() : prompt.getUsername();
 		}
 
+		@Override
 		public String getPassword() {
-			return this.realmLocation != null ? this.realmLocation.getPassword() : this.prompt.getPassword();
+			return realmLocation != null ? realmLocation.getPassword() : prompt.getPassword();
 		}
 
+		@Override
 		public boolean isProxyAuthenticationEnabled() {
-			return this.prompt.isProxyAuthenticationEnabled();
+			return prompt.isProxyAuthenticationEnabled();
 		}
 
+		@Override
 		public boolean isProxyEnabled() {
-			return this.prompt.isProxyEnabled();
+			return prompt.isProxyEnabled();
 		}
 
+		@Override
 		public boolean isSSHPrivateKeyPassphraseSaved() {
-			return this.prompt.isSSHPrivateKeyPassphraseSaved();
+			return prompt.isSSHPrivateKeyPassphraseSaved();
 		}
 
+		@Override
 		public boolean isSSHPublicKeySelected() {
-			return this.prompt.isSSHPublicKeySelected();
+			return prompt.isSSHPublicKeySelected();
 		}
 
+		@Override
 		public boolean isSSLAuthenticationEnabled() {
-			return this.prompt.isSSLAuthenticationEnabled();
+			return prompt.isSSLAuthenticationEnabled();
 		}
 
+		@Override
 		public boolean isSSLSavePassphrase() {
-			return this.prompt.isSSLSavePassphrase();
+			return prompt.isSSLSavePassphrase();
 		}
 
+		@Override
 		public boolean isSaveCredentialsEnabled() {
-			return this.prompt.isSaveCredentialsEnabled();
+			return prompt.isSaveCredentialsEnabled();
 		}
 
+		@Override
 		public boolean isSaveProxyPassword() {
-			return this.prompt.isSaveProxyPassword();
+			return prompt.isSaveProxyPassword();
 		}
 
+		@Override
 		public boolean promptProxy(Object context) {
-			boolean retVal = this.prompt.promptProxy(this.location);
-			this.checkForSave(retVal, SVNRepositoryLocation.PROXY_CONNECTION);
+			boolean retVal = prompt.promptProxy(location);
+			checkForSave(retVal, SVNRepositoryLocation.PROXY_CONNECTION);
 			return retVal;
 		}
 
+		@Override
 		public boolean prompt(Object context, String realm) {
-			if (this.tryCachedRealm(realm)) {
+			if (tryCachedRealm(realm)) {
 				return true;
 			}
-			boolean retVal = this.prompt.prompt(this.location, realm);
-			this.checkForSave(retVal, SVNRepositoryLocation.DEFAULT_CONNECTION);
+			boolean retVal = prompt.prompt(location, realm);
+			checkForSave(retVal, SVNRepositoryLocation.DEFAULT_CONNECTION);
 			return retVal;
 		}
 
+		@Override
 		public boolean promptSSH(Object context, String realm) {
-			if (this.tryCachedRealm(realm)) {
+			if (tryCachedRealm(realm)) {
 				return true;
 			}
-			boolean retVal = this.prompt.promptSSH(this.location, realm);
-			this.checkForSave(retVal, SVNRepositoryLocation.SSH_CONNECTION);
+			boolean retVal = prompt.promptSSH(location, realm);
+			checkForSave(retVal, SVNRepositoryLocation.SSH_CONNECTION);
 			return retVal;
 		}
 
+		@Override
 		public boolean promptSSL(Object context, String realm) {
-			if (this.tryCachedRealm(realm)) {
+			if (tryCachedRealm(realm)) {
 				return true;
 			}
-			boolean retVal = this.prompt.promptSSL(this.location, realm);
-			this.checkForSave(retVal, SVNRepositoryLocation.SSL_CONNECTION);
+			boolean retVal = prompt.promptSSL(location, realm);
+			checkForSave(retVal, SVNRepositoryLocation.SSL_CONNECTION);
 			return retVal;
 		}
 
@@ -1171,23 +1236,23 @@ public class SVNRepositoryLocation extends SVNRepositoryBase
 			 * There shouldn't be any checks on emptiness of the basic authentication password, since there might be other than basic authentication access method used (SSH key-file, for example).
 			 */
 			String threadName = Thread.currentThread().getName();
-			if (this.tryRealm == null || !this.tryRealm.equals(realm) || !threadName.equals(this.threadName)) {
-				this.realmLocation = this.location.getLocationForRealm(realm);
-				if (this.realmLocation != null && this.realmLocation.getUsername() != null
-						&& !this.realmLocation.getUsername().equals("")) {
-					this.tryRealm = realm;
+			if (tryRealm == null || !tryRealm.equals(realm) || !threadName.equals(this.threadName)) {
+				realmLocation = location.getLocationForRealm(realm);
+				if (realmLocation != null && realmLocation.getUsername() != null
+						&& !realmLocation.getUsername().equals("")) {
+					tryRealm = realm;
 					this.threadName = threadName;
 					return true;
 				}
-				if (this.realmLocation == null
+				if (realmLocation == null
 						&& CoreExtensionsManager.instance().getSVNConnectorFactory().getId().indexOf("svnkit") != -1) {
 					String protocol = "file"; //$NON-NLS-1$
 					try {
 						URL url = SVNUtility.getSVNUrl(location.getUrl());
 						protocol = url.getProtocol();
 						if (protocol.equals("file")) { //$NON-NLS-1$
-							this.realmLocation = this.location;
-							this.tryRealm = realm;
+							realmLocation = location;
+							tryRealm = realm;
 							this.threadName = threadName;
 							return true;
 						}
@@ -1196,8 +1261,8 @@ public class SVNRepositoryLocation extends SVNRepositoryBase
 					}
 				}
 			} else {
-				this.tryRealm = null;
-				this.realmLocation = null;
+				tryRealm = null;
+				realmLocation = null;
 				this.threadName = null;
 			}
 			return false;
@@ -1206,7 +1271,7 @@ public class SVNRepositoryLocation extends SVNRepositoryBase
 		protected void checkForSave(boolean retVal, int connectionType) {
 			if (retVal) {
 				IRepositoryLocation location = this.location;
-				String realmToSave = this.getRealmToSave();
+				String realmToSave = getRealmToSave();
 				if (!ISVNCredentialsPrompt.ROOT_LOCATION.equals(realmToSave)) {
 					location = this.location.getLocationForRealm(realmToSave);
 					if (location == null) {
@@ -1215,33 +1280,33 @@ public class SVNRepositoryLocation extends SVNRepositoryBase
 						this.location.addRealm(realmToSave, location);
 					}
 				}
-				this.checkForSaveImpl(location, retVal, connectionType);
+				checkForSaveImpl(location, retVal, connectionType);
 			}
 		}
 
 		protected void checkForSaveImpl(IRepositoryLocation location, boolean retVal, int connectionType) {
-			location.setUsername(this.prompt.getUsername());
-			location.setPassword(this.prompt.getPassword());
-			location.setPasswordSaved(this.prompt.isSaveCredentialsEnabled());
+			location.setUsername(prompt.getUsername());
+			location.setPassword(prompt.getPassword());
+			location.setPasswordSaved(prompt.isSaveCredentialsEnabled());
 			SVNTeamPlugin.instance().setLocationsDirty(true);
 
 			if (connectionType == SVNRepositoryLocation.SSH_CONNECTION) {
 				SSHSettings settings = location.getSSHSettings();
-				settings.setPort(this.prompt.getSSHPort());
-				settings.setUseKeyFile(this.prompt.isSSHPublicKeySelected());
+				settings.setPort(prompt.getSSHPort());
+				settings.setUseKeyFile(prompt.isSSHPublicKeySelected());
 				if (settings.isUseKeyFile()) {
-					settings.setPrivateKeyPath(this.prompt.getSSHPrivateKeyPath());
-					settings.setPassPhraseSaved(this.prompt.isSSHPrivateKeyPassphraseSaved());
-					settings.setPassPhrase(this.prompt.getSSHPrivateKeyPassphrase());
+					settings.setPrivateKeyPath(prompt.getSSHPrivateKeyPath());
+					settings.setPassPhraseSaved(prompt.isSSHPrivateKeyPassphraseSaved());
+					settings.setPassPhrase(prompt.getSSHPrivateKeyPassphrase());
 				}
 			}
 			if (connectionType == SVNRepositoryLocation.SSL_CONNECTION) {
 				SSLSettings settings = location.getSSLSettings();
-				settings.setAuthenticationEnabled(this.prompt.isSSLAuthenticationEnabled());
+				settings.setAuthenticationEnabled(prompt.isSSLAuthenticationEnabled());
 				if (settings.isAuthenticationEnabled()) {
-					settings.setCertificatePath(this.prompt.getSSLClientCertPath());
-					settings.setPassPhrase(this.prompt.getSSLClientCertPassword());
-					settings.setPassPhraseSaved(this.prompt.isSSLSavePassphrase());
+					settings.setCertificatePath(prompt.getSSLClientCertPath());
+					settings.setPassPhrase(prompt.getSSLClientCertPassword());
+					settings.setPassPhraseSaved(prompt.isSSLSavePassphrase());
 				}
 			}
 		}
@@ -1253,29 +1318,30 @@ public class SVNRepositoryLocation extends SVNRepositoryBase
 			super(prompt, SVNRepositoryLocation.this);
 		}
 
+		@Override
 		public Answer askTrustSSLServer(Object context, SSLServerCertificateFailures failures,
 				SSLServerCertificateInfo info, boolean allowPermanently) {
-			if (!SVNRepositoryLocation.this.trustSiteDefined) {
-				SVNRepositoryLocation.this.trustSite = super.askTrustSSLServer(SVNRepositoryLocation.this, failures,
-						info, allowPermanently);
-				if (SVNRepositoryLocation.this.trustSite != ISVNCredentialsPrompt.Answer.REJECT) {
-					SVNRepositoryLocation.this.trustSiteDefined = true;
+			if (!trustSiteDefined) {
+				trustSite = super.askTrustSSLServer(SVNRepositoryLocation.this, failures, info, allowPermanently);
+				if (trustSite != ISVNCredentialsPrompt.Answer.REJECT) {
+					trustSiteDefined = true;
 				} else {
-					SVNRepositoryLocation.this.proxyConfigurationState = 0;
+					proxyConfigurationState = 0;
 				}
-				return SVNRepositoryLocation.this.trustSite;
+				return trustSite;
 			}
-			return SVNRepositoryLocation.this.trustSite;
+			return trustSite;
 		}
 
+		@Override
 		protected void checkForSave(boolean retVal, int connectionType) {
-			synchronized (SVNRepositoryLocation.this.proxyManagerLock) {
+			synchronized (proxyManagerLock) {
 				if (retVal) {
 					super.checkForSave(retVal, connectionType);
 				} else {
-					SVNRepositoryLocation.this.proxyConfigurationState = 0;
+					proxyConfigurationState = 0;
 				}
-				SVNRepositoryLocation.this.reconfigureImpl();
+				reconfigureImpl();
 			}
 		}
 
@@ -1288,10 +1354,11 @@ public class SVNRepositoryLocation extends SVNRepositoryBase
 
 		public ProxyHolder(ISVNConnector proxy) {
 			this.proxy = proxy;
-			this.referenceCounter = 1;
+			referenceCounter = 1;
 		}
 	}
 
+	@Override
 	public boolean isPasswordSavedForRealm(String realm) {
 		IRepositoryLocation locationForRealm = this.getAdditionalRealms().get(realm);
 		if (locationForRealm != null && locationForRealm.isPasswordSaved()) {
@@ -1301,23 +1368,23 @@ public class SVNRepositoryLocation extends SVNRepositoryBase
 	}
 
 	protected void setRetrieveAuthInfo(boolean isRetrieveAuthInfo) {
-		synchronized (this.authInitLock) {
+		synchronized (authInitLock) {
 			this.isRetrieveAuthInfo = isRetrieveAuthInfo;
 		}
 	}
 
 	private void checkAuthInfo() {
-		synchronized (this.authInitLock) {
-			if (this.isRetrieveAuthInfo) {
+		synchronized (authInitLock) {
+			if (isRetrieveAuthInfo) {
 				try {
 					SVNRemoteStorage.instance().loadAuthInfo(this, ""); //$NON-NLS-1$
-					for (String realm : this.rawRealms) {
+					for (String realm : rawRealms) {
 						SVNRemoteStorage.instance().loadAuthInfo(this, realm);
 					}
 				} catch (Exception ex) {
 					LoggedOperation.reportError("fillLocationFromReference", ex); //$NON-NLS-1$
 				} finally {
-					this.isRetrieveAuthInfo = false;
+					isRetrieveAuthInfo = false;
 				}
 			}
 		}

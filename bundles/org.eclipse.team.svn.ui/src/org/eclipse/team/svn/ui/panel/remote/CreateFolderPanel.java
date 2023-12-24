@@ -25,9 +25,10 @@ public class CreateFolderPanel extends AbstractGetResourceNamePanel {
 
 	public CreateFolderPanel() {
 		super(SVNUIMessages.CreateFolderPanel_Title, true);
-		this.dialogDescription = SVNUIMessages.CreateFolderPanel_Description;
+		dialogDescription = SVNUIMessages.CreateFolderPanel_Description;
 	}
 
+	@Override
 	public String getHelpId() {
 		return "org.eclipse.team.svn.help.remote_createFolderDialogContext"; //$NON-NLS-1$
 	}

@@ -71,37 +71,40 @@ public class ShowUpdateViewOperation extends AbstractWorkingCopyOperation {
 		this.resourcesMapping = resourcesMapping;
 	}
 
+	@Override
 	public ISchedulingRule getSchedulingRule() {
 		return null;
 	}
 
+	@Override
 	public int getOperationWeight() {
 		return 0;
 	}
 
+	@Override
 	protected void runImpl(IProgressMonitor monitor) throws Exception {
 		if (ModelHelper.isShowModelSync()) {
 
-			if (this.resourcesMapping.length == 0) {
+			if (resourcesMapping.length == 0) {
 				return;
 			}
 
 			String messsage = SVNUIMessages.ConsultChangeSets_message1;
 			boolean consultChangeSets = CommitActionHelper.isIncludeChangeSets(messsage);
-			SubscriberScopeManager manager = UpdateSubscriberContext.createWorkspaceScopeManager(this.resourcesMapping,
-					true, consultChangeSets);
+			SubscriberScopeManager manager = UpdateSubscriberContext.createWorkspaceScopeManager(resourcesMapping, true,
+					consultChangeSets);
 			UpdateSubscriberContext context = UpdateSubscriberContext.createContext(manager,
 					ISynchronizationContext.THREE_WAY);
 			UpdateModelParticipant participant = new UpdateModelParticipant(context);
 			TeamUI.getSynchronizeManager().addSynchronizeParticipants(new ISynchronizeParticipant[] { participant });
-			participant.run(this.part);
+			participant.run(part);
 		} else {
 			IResource[] resources;
-			if (this.scope == null) {
-				resources = this.operableData();
-				this.scope = new ResourceScope(resources);
+			if (scope == null) {
+				resources = operableData();
+				scope = new ResourceScope(resources);
 			} else {
-				resources = this.scope.getRoots();
+				resources = scope.getRoots();
 			}
 
 			UpdateParticipant participant = null;
@@ -110,11 +113,11 @@ public class ShowUpdateViewOperation extends AbstractWorkingCopyOperation {
 						.getMatchingParticipant(UpdateParticipant.PARTICIPANT_ID, resources);
 			}
 			if (participant == null) {
-				participant = new UpdateParticipant(this.scope);
+				participant = new UpdateParticipant(scope);
 				TeamUI.getSynchronizeManager()
 						.addSynchronizeParticipants(new ISynchronizeParticipant[] { participant });
 			}
-			participant.run(this.part);
+			participant.run(part);
 		}
 	}
 

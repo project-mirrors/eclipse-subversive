@@ -58,6 +58,7 @@ public class SVNFileStorage extends AbstractSVNStorage implements IFileStorage {
 		return SVNFileStorage.instance;
 	}
 
+	@Override
 	public void initialize(Map<String, Object> preferences) throws Exception {
 		preferences.put(AbstractSVNStorage.IPREF_STATE_INFO_FILE, SVNFileStorage.STATE_INFO_FILE_NAME);
 		preferences.put(AbstractSVNStorage.IPREF_REPO_NODE_NAME, SVNFileStorage.PREF_REPOSITORIES_NODE);
@@ -65,6 +66,7 @@ public class SVNFileStorage extends AbstractSVNStorage implements IFileStorage {
 		super.initialize(preferences);
 	}
 
+	@Override
 	public IRepositoryResource asRepositoryResource(File file, boolean allowsNull) {
 		// check if this resource is placed in working copy
 		File wcRoot = file;
@@ -90,7 +92,7 @@ public class SVNFileStorage extends AbstractSVNStorage implements IFileStorage {
 
 		String wcUrl = SVNUtility.decodeURL(info.url);
 		String rootUrl = SVNUtility.decodeURL(info.reposRootUrl);
-		IRepositoryLocation location = this.findLocation(wcUrl, rootUrl);
+		IRepositoryLocation location = findLocation(wcUrl, rootUrl);
 
 		if (wcRoot != file) {
 			wcUrl += file.getAbsolutePath().substring(wcRoot.getAbsolutePath().length());
@@ -103,27 +105,27 @@ public class SVNFileStorage extends AbstractSVNStorage implements IFileStorage {
 
 	protected IRepositoryLocation findLocation(String resourceUrl, String rootUrl) {
 		IPath url = SVNUtility.createPathForSVNUrl(resourceUrl);
-		IRepositoryLocation[] locations = this.getRepositoryLocations();
-		for (int i = 0; i < locations.length; i++) {
-			if (SVNUtility.createPathForSVNUrl(locations[i].getUrl()).isPrefixOf(url)) {
-				return locations[i];
+		IRepositoryLocation[] locations = getRepositoryLocations();
+		for (IRepositoryLocation location : locations) {
+			if (SVNUtility.createPathForSVNUrl(location.getUrl()).isPrefixOf(url)) {
+				return location;
 			}
 		}
-		for (int i = 0; i < locations.length; i++) {
-			if (locations[i].getRepositoryRootUrl().equals(rootUrl)) {
-				return locations[i];
+		for (IRepositoryLocation location : locations) {
+			if (location.getRepositoryRootUrl().equals(rootUrl)) {
+				return location;
 			}
 		}
 		IRepositoryLocation location = this.newRepositoryLocation();
 		SVNUtility.initializeRepositoryLocation(location, rootUrl);
-		this.addRepositoryLocation(location);
+		addRepositoryLocation(location);
 		return location;
 	}
 
 	private SVNFileStorage() {
-		super();
 	}
 
+	@Override
 	protected IRepositoryLocation wrapLocationIfRequired(IRepositoryLocation location, String url, boolean isFile) {
 		return location;
 	}

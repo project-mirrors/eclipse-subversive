@@ -54,33 +54,34 @@ public class ReplaceWithRemoteOperation extends AbstractActionOperation {
 			boolean ignoreExternals) {
 		super("Operation_ReplaceWithRemote", SVNMessages.class); //$NON-NLS-1$
 		this.toReplace = toReplace;
-		this.remoteRoot = remoteResource;
+		remoteRoot = remoteResource;
 		this.ignoreExternals = ignoreExternals;
 	}
 
+	@Override
 	protected void runImpl(IProgressMonitor monitor) throws Exception {
 		//perform export into temp folder
-		IRepositoryLocation location = this.remoteRoot.getRepositoryLocation();
-		String toReplacePath = FileUtility.getWorkingCopyPath(this.toReplace);
-		File f = File.createTempFile("svn", "", FileUtility.getResourcePath(this.toReplace.getParent()).toFile()); //$NON-NLS-1$ //$NON-NLS-2$
+		IRepositoryLocation location = remoteRoot.getRepositoryLocation();
+		String toReplacePath = FileUtility.getWorkingCopyPath(toReplace);
+		File f = File.createTempFile("svn", "", FileUtility.getResourcePath(toReplace.getParent()).toFile()); //$NON-NLS-1$ //$NON-NLS-2$
 		f.delete();
 		f.mkdir();
 		String tempPath = toReplacePath.substring(0, toReplacePath.lastIndexOf("/") + 1) + f.getName() + "/"; //$NON-NLS-1$ //$NON-NLS-2$
 		final ISVNConnector proxy = location.acquireSVNProxy();
-		final String path = tempPath + this.remoteRoot.getName();
-		final SVNEntryRevisionReference entryRef = SVNUtility.getEntryRevisionReference(this.remoteRoot);
+		final String path = tempPath + remoteRoot.getName();
+		final SVNEntryRevisionReference entryRef = SVNUtility.getEntryRevisionReference(remoteRoot);
 		try {
 			long options = ISVNConnector.Options.FORCE;
-			if (this.ignoreExternals) {
+			if (ignoreExternals) {
 				options |= ISVNConnector.Options.IGNORE_EXTERNALS;
 			}
 			proxy.exportTo(entryRef, path, null, SVNDepth.INFINITY, options,
 					new SVNProgressMonitor(this, monitor, null));
 			//perform replacement
-			if (this.toReplace instanceof IFile) {
+			if (toReplace instanceof IFile) {
 				FileUtility.copyFile(new File(toReplacePath), new File(path), monitor);
 			} else {
-				this.performReplacementRecursively(toReplacePath, path, proxy, monitor);
+				performReplacementRecursively(toReplacePath, path, proxy, monitor);
 			}
 		} finally {
 			location.releaseSVNProxy(proxy);
@@ -92,17 +93,17 @@ public class ReplaceWithRemoteOperation extends AbstractActionOperation {
 			ISVNConnector connectorProxy, IProgressMonitor monitor) throws Exception {
 		File dirToReplace = new File(pathForReplacement);
 		File sourceDir = new File(sourcePath);
-		ArrayList<String> toReplaceChildren = new ArrayList<String>();
+		ArrayList<String> toReplaceChildren = new ArrayList<>();
 		String[] children = dirToReplace.list();
 		if (children != null) {
 			toReplaceChildren.addAll(Arrays.asList(children));
 		}
 		children = sourceDir.list();
-		ArrayList<String> sourceChildren = new ArrayList<String>();
+		ArrayList<String> sourceChildren = new ArrayList<>();
 		if (children != null) {
 			sourceChildren.addAll(Arrays.asList(children));
 		}
-		ArrayList<String> pathsToDelete = new ArrayList<String>();
+		ArrayList<String> pathsToDelete = new ArrayList<>();
 		for (String currentToReplace : toReplaceChildren) {
 			if (!currentToReplace.equalsIgnoreCase(".svn") && !sourceChildren.contains(currentToReplace)) { //$NON-NLS-1$
 				pathsToDelete.add(pathForReplacement + "/" + currentToReplace); //$NON-NLS-1$
@@ -118,7 +119,7 @@ public class ReplaceWithRemoteOperation extends AbstractActionOperation {
 				if (!toReplace.exists()) {
 					toReplace.mkdir();
 				}
-				this.performReplacementRecursively(pathForReplacement + "/" + currentFromSource, //$NON-NLS-1$
+				performReplacementRecursively(pathForReplacement + "/" + currentFromSource, //$NON-NLS-1$
 						sourcePath + "/" + currentFromSource, connectorProxy, monitor); //$NON-NLS-1$
 			} else {
 				// If a file is locked, this fails (a locked file has read-only permissions).
@@ -133,12 +134,13 @@ public class ReplaceWithRemoteOperation extends AbstractActionOperation {
 						left = new BufferedReader(new FileReader(source));
 						right = new BufferedReader(new FileReader(toReplace));
 						while (identical) {
-							if (left.ready() != right.ready())
+							if (left.ready() != right.ready()) {
 								identical = false;
-							else if (!left.ready())
+							} else if (!left.ready()) {
 								break;
-							else if (left.read() != right.read())
+							} else if (left.read() != right.read()) {
 								identical = false;
+							}
 						}
 					} catch (IOException ioe) {
 						identical = false;

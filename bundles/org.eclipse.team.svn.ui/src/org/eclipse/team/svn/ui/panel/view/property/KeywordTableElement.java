@@ -43,11 +43,11 @@ public class KeywordTableElement {
 		this.description = description;
 		this.sample = sample;
 		this.initialState = initialState;
-		this.currentState = initialState;
+		currentState = initialState;
 	}
 
 	public int getCurrentState() {
-		return this.currentState;
+		return currentState;
 	}
 
 	public void setCurrentState(int currentState) {
@@ -55,11 +55,11 @@ public class KeywordTableElement {
 	}
 
 	public String getDescription() {
-		return this.description;
+		return description;
 	}
 
 	public int getInitialState() {
-		return this.initialState;
+		return initialState;
 	}
 
 	public void setInitialState(int initialState) {
@@ -67,11 +67,11 @@ public class KeywordTableElement {
 	}
 
 	public String getName() {
-		return this.name;
+		return name;
 	}
 
 	public String getSample() {
-		return this.sample;
+		return sample;
 	}
 
 }

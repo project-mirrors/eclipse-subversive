@@ -22,15 +22,15 @@ import org.eclipse.team.svn.core.resource.IRepositoryLocation;
  * @author Alexander Gurov
  */
 public interface ISSHSettingsStateListener {
-	public final String SSH_PASS_PHRASE = "sshPassPhrase";
+	String SSH_PASS_PHRASE = "sshPassPhrase";
 
-	public final String SSH_PORT = "sshPort";
+	String SSH_PORT = "sshPort";
 
-	public final String SSH_PRIVATE_KEY_PATH = "sshPrivateKeyPath";
+	String SSH_PRIVATE_KEY_PATH = "sshPrivateKeyPath";
 
-	public final String SSH_USE_KEY_FILE = "sshUseKeyFile";
+	String SSH_USE_KEY_FILE = "sshUseKeyFile";
 
-	public final String SSH_PASS_PHRASE_SAVED = "sshPassPhraseSaved";
+	String SSH_PASS_PHRASE_SAVED = "sshPassPhraseSaved";
 
-	public void sshChanged(IRepositoryLocation where, String field, Object oldValue, Object newValue);
+	void sshChanged(IRepositoryLocation where, String field, Object oldValue, Object newValue);
 }

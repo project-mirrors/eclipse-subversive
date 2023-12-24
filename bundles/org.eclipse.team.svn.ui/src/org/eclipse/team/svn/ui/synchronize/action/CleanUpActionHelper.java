@@ -35,11 +35,12 @@ public class CleanUpActionHelper extends AbstractActionHelper {
 		super(action, configuration);
 	}
 
+	@Override
 	public IActionOperation getOperation() {
 		/*
-		 * Cleanup versioned selected folder 
+		 * Cleanup versioned selected folder
 		 */
-		IResource[] selectedResources = this.getAllSelectedResources();
+		IResource[] selectedResources = getAllSelectedResources();
 		IResource[] filteredResources = FileUtility.filterResources(selectedResources,
 				IStateFilter.SF_VERSIONED_FOLDERS, IResource.DEPTH_ZERO);
 		CleanupOperation mainOp = new CleanupOperation(filteredResources);

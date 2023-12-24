@@ -69,83 +69,89 @@ public class ResourcePropertyEditPanel extends AbstractPropertyEditPanel {
 				SVNUIMessages.PropertyEditPanel_Description);
 		this.strict = strict;
 		this.selectedResources = selectedResources;
-		this.resourcesType = this.computeResourcesType();
-		this.mask = PredefinedProperty.TYPE_NONE;
+		resourcesType = computeResourcesType();
+		mask = PredefinedProperty.TYPE_NONE;
 		for (IResource resource : this.selectedResources) {
 			if (resource.getType() == IResource.FOLDER || resource.getType() == IResource.PROJECT) {
-				this.mask |= PredefinedProperty.TYPE_COMMON;
+				mask |= PredefinedProperty.TYPE_COMMON;
 			} else if (resource.getType() == IResource.FILE) {
-				this.mask |= PredefinedProperty.TYPE_FILE;
+				mask |= PredefinedProperty.TYPE_FILE;
 			}
 		}
-		this.fillVerifiersMap();
+		fillVerifiersMap();
 	}
 
+	@Override
 	protected boolean isPropertyAccepted(PredefinedProperty property) {
 		// is there any properties that could be used for both: revisions and resources?
 		return (property.type & PredefinedProperty.TYPE_REVISION) == PredefinedProperty.TYPE_NONE
-				&& (property.type & this.mask) != PredefinedProperty.TYPE_NONE;
+				&& (property.type & mask) != PredefinedProperty.TYPE_NONE;
 	}
 
+	@Override
 	protected IRepositoryResource getRepostioryResource() {
-		return SVNRemoteStorage.instance().asRepositoryResource(this.selectedResources[0]);
+		return SVNRemoteStorage.instance().asRepositoryResource(selectedResources[0]);
 	}
 
 	public boolean isStrict() {
-		return this.strict;
+		return strict;
 	}
 
 	public boolean isRecursiveSelected() {
-		return this.recursiveSelected;
+		return recursiveSelected;
 	}
 
 	public int getApplyMethod() {
-		return this.applyComposite == null ? PropertiesComposite.APPLY_TO_ALL : this.applyComposite.getApplyMethod();
+		return applyComposite == null ? PropertiesComposite.APPLY_TO_ALL : applyComposite.getApplyMethod();
 	}
 
 	public String getFilterMask() {
-		return this.applyComposite == null ? "" : this.applyComposite.getFilterMask(); //$NON-NLS-1$
+		return applyComposite == null ? "" : applyComposite.getFilterMask(); //$NON-NLS-1$
 	}
 
 	public boolean useMask() {
-		return this.applyComposite == null ? false : this.applyComposite.useMask();
+		return applyComposite == null ? false : applyComposite.useMask();
 	}
 
+	@Override
 	public void createControlsImpl(Composite parent) {
 		super.createControlsImpl(parent);
-		if (this.resourcesType != ResourcePropertyEditPanel.SINGLE_FILE) {
-			if (this.resourcesType == ResourcePropertyEditPanel.MIXED_RESOURCES && !this.strict) {
-				this.recursiveButton = new Button(parent, SWT.CHECK);
-				this.recursiveButton.setText(SVNUIMessages.PropertyEditPanel_Recursively);
+		if (resourcesType != ResourcePropertyEditPanel.SINGLE_FILE) {
+			if (resourcesType == ResourcePropertyEditPanel.MIXED_RESOURCES && !strict) {
+				recursiveButton = new Button(parent, SWT.CHECK);
+				recursiveButton.setText(SVNUIMessages.PropertyEditPanel_Recursively);
 
-				this.recursiveButton.addSelectionListener(new SelectionListener() {
+				recursiveButton.addSelectionListener(new SelectionListener() {
+					@Override
 					public void widgetSelected(SelectionEvent e) {
 						ResourcePropertyEditPanel.this.refreshControlsEnablement();
 						ResourcePropertyEditPanel.this.validateContent();
 					}
 
+					@Override
 					public void widgetDefaultSelected(SelectionEvent e) {
 					}
 				});
 			}
-			this.applyComposite = new ApplyPropertyMethodComposite(parent, SWT.NONE, this, this.resourcesType);
-			this.applyComposite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+			applyComposite = new ApplyPropertyMethodComposite(parent, SWT.NONE, this, resourcesType);
+			applyComposite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		}
 
-		if (this.resourcesType == ResourcePropertyEditPanel.MIXED_RESOURCES && !this.strict) {
-			this.refreshControlsEnablement();
+		if (resourcesType == ResourcePropertyEditPanel.MIXED_RESOURCES && !strict) {
+			refreshControlsEnablement();
 		}
 	}
 
+	@Override
 	public String getHelpId() {
 		return "org.eclipse.team.svn.help.setPropsDialogContext"; //$NON-NLS-1$
 	}
 
 	protected int computeResourcesType() {
-		boolean singleResource = this.selectedResources.length == 1;
+		boolean singleResource = selectedResources.length == 1;
 		boolean allFiles = true;
-		for (int i = 0; i < this.selectedResources.length; i++) {
-			if (!(this.selectedResources[i] instanceof IFile)) {
+		for (IResource element : selectedResources) {
+			if (!(element instanceof IFile)) {
 				allFiles = false;
 				break;
 			}
@@ -156,22 +162,24 @@ public class ResourcePropertyEditPanel extends AbstractPropertyEditPanel {
 		return ResourcePropertyEditPanel.MIXED_RESOURCES;
 	}
 
+	@Override
 	protected void saveChangesImpl() {
 		super.saveChangesImpl();
-		if (this.resourcesType != ResourcePropertyEditPanel.SINGLE_FILE) {
-			if (this.resourcesType == ResourcePropertyEditPanel.MIXED_RESOURCES && !this.strict) {
-				this.recursiveSelected = this.recursiveButton.getSelection();
+		if (resourcesType != ResourcePropertyEditPanel.SINGLE_FILE) {
+			if (resourcesType == ResourcePropertyEditPanel.MIXED_RESOURCES && !strict) {
+				recursiveSelected = recursiveButton.getSelection();
 			}
-			if (this.applyComposite.isEnabled()) {
-				this.applyComposite.saveChanges();
+			if (applyComposite.isEnabled()) {
+				applyComposite.saveChanges();
 			}
 		}
 	}
 
 	protected void refreshControlsEnablement() {
-		this.applyComposite.setEnabled(this.recursiveButton.getSelection());
+		applyComposite.setEnabled(recursiveButton.getSelection());
 	}
 
+	@Override
 	protected Point getPrefferedSizeImpl() {
 		return new Point(590, SWT.DEFAULT);
 	}

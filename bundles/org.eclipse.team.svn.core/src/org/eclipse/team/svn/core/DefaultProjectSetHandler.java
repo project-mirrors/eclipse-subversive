@@ -23,8 +23,8 @@ import org.eclipse.team.svn.core.connector.SVNDepth;
 import org.eclipse.team.svn.core.operation.CompositeOperation;
 import org.eclipse.team.svn.core.operation.remote.CheckoutAsOperation;
 import org.eclipse.team.svn.core.resource.IRepositoryLocation;
-import org.eclipse.team.svn.core.resource.IRepositoryResource;
 import org.eclipse.team.svn.core.resource.IRepositoryLocation.LocationReferenceTypeEnum;
+import org.eclipse.team.svn.core.resource.IRepositoryResource;
 import org.eclipse.team.svn.core.svnstorage.SVNRemoteStorage;
 import org.eclipse.team.svn.core.utility.FileUtility;
 import org.eclipse.team.svn.core.utility.SVNUtility;
@@ -38,14 +38,16 @@ public class DefaultProjectSetHandler implements IProjectSetHandler {
 
 	protected static final String PLUGIN_INFORMATION = "1.0.1"; //$NON-NLS-1$
 
+	@Override
 	public String getProjectNameForReference(String fullReference) {
 		String[] parts = fullReference.split(","); //$NON-NLS-1$
-		if (parts.length < 3 || !(parts[0].equals(DefaultProjectSetHandler.PLUGIN_INFORMATION))) {
+		if (parts.length < 3 || !parts[0].equals(DefaultProjectSetHandler.PLUGIN_INFORMATION)) {
 			return null;
 		}
 		return parts[2];
 	}
 
+	@Override
 	public String asReference(IProject project) throws TeamException {
 		IRepositoryResource resource = SVNRemoteStorage.instance().asRepositoryResource(project);
 		IRepositoryLocation location = resource.getRepositoryLocation();
@@ -65,6 +67,7 @@ public class DefaultProjectSetHandler implements IProjectSetHandler {
 		return fullReference;
 	}
 
+	@Override
 	public String asReference(String resourceUrl, String projectName) {
 		String fullReference = DefaultProjectSetHandler.PLUGIN_INFORMATION;
 		fullReference += "," + resourceUrl; //$NON-NLS-1$
@@ -72,11 +75,12 @@ public class DefaultProjectSetHandler implements IProjectSetHandler {
 		return fullReference;
 	}
 
+	@Override
 	public IProject configureCheckoutOperation(CompositeOperation op, IProject project, String fullReference)
 			throws TeamException {
 		String[] parts = fullReference.split(","); //$NON-NLS-1$
 
-		IRepositoryLocation location = this.getLocationForReference(parts);
+		IRepositoryLocation location = getLocationForReference(parts);
 		IRepositoryResource resource = location.asRepositoryContainer(parts[1], true);
 
 		if (resource != null) {
@@ -101,9 +105,9 @@ public class DefaultProjectSetHandler implements IProjectSetHandler {
 		}
 		IRepositoryLocation[] locations = SVNRemoteStorage.instance().getRepositoryLocations();
 		IPath awaitingFor = SVNUtility.createPathForSVNUrl(location != null ? location.getUrl() : parts[1]);
-		for (int i = 0; i < locations.length; i++) {
-			if (SVNUtility.createPathForSVNUrl(locations[i].getUrl()).isPrefixOf(awaitingFor)) {
-				return locations[i];
+		for (IRepositoryLocation location2 : locations) {
+			if (SVNUtility.createPathForSVNUrl(location2.getUrl()).isPrefixOf(awaitingFor)) {
+				return location2;
 			}
 		}
 		if (location == null) {
@@ -114,6 +118,7 @@ public class DefaultProjectSetHandler implements IProjectSetHandler {
 		return location;
 	}
 
+	@Override
 	public boolean accept(String referenceString) {
 		return referenceString.startsWith(DefaultProjectSetHandler.PLUGIN_INFORMATION);
 	}

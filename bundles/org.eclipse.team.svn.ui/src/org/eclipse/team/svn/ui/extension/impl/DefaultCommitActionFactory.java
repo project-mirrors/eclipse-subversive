@@ -34,14 +34,17 @@ import org.eclipse.ui.IWorkbenchPart;
  */
 public class DefaultCommitActionFactory implements ICommitActionFactory {
 
+	@Override
 	public ICommitDialog getCommitDialog(final Shell shell, Collection allFilesToCommit,
 			final ICommentDialogPanel commentPanel) {
 		return new ICommitDialog() {
 
+			@Override
 			public String getMessage() {
 				return commentPanel.getMessage();
 			}
 
+			@Override
 			public int open() {
 				DefaultDialog dialog = new DefaultDialog(shell, commentPanel);
 				return dialog.open();
@@ -50,18 +53,22 @@ public class DefaultCommitActionFactory implements ICommitActionFactory {
 		};
 	}
 
+	@Override
 	public void performAfterCommitTasks(CompositeOperation operation, IRevisionProvider revisionProvider,
 			IActionOperation[] dependsOn, IWorkbenchPart part) {
 
 	}
 
+	@Override
 	public void initCommentManager(ICommentManager commentManager) {
 	}
 
+	@Override
 	public void confirmMessage(ICommentManager commentManager) {
 
 	}
 
+	@Override
 	public void cancelMessage(ICommentManager commentManager) {
 
 	}

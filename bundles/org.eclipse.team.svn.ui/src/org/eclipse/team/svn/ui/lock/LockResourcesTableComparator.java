@@ -28,10 +28,11 @@ public class LockResourcesTableComparator extends ColumnedViewerComparator {
 		super(tableViewer);
 	}
 
+	@Override
 	public int compareImpl(Viewer viewer, Object row1, Object row2) {
 		LockResource data1 = (LockResource) row1;
 		LockResource data2 = (LockResource) row2;
-		switch (this.column) {
+		switch (column) {
 			case LockResourceSelectionComposite.COLUMN_NAME: {
 				return ColumnedViewerComparator.compare(data1.getName(), data2.getName());
 			}

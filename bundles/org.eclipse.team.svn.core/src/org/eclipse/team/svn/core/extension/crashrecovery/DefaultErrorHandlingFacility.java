@@ -31,24 +31,27 @@ public class DefaultErrorHandlingFacility implements IErrorHandlingFacility {
 	private boolean extensionsFetched;
 
 	public DefaultErrorHandlingFacility() {
-		this.helpers = new ArrayList<IResolutionHelper>();
-		this.extensionsFetched = false;
+		helpers = new ArrayList<>();
+		extensionsFetched = false;
 	}
 
+	@Override
 	public synchronized void addResolutionHelper(IResolutionHelper helper) {
-		if (helper != this && !this.helpers.contains(helper)) {
-			this.helpers.add(helper);
+		if (helper != this && !helpers.contains(helper)) {
+			helpers.add(helper);
 		}
 	}
 
+	@Override
 	public synchronized void removeResolutionHelper(IResolutionHelper helper) {
-		this.helpers.remove(helper);
+		helpers.remove(helper);
 	}
 
+	@Override
 	public boolean acquireResolution(ErrorDescription description) {
-		IResolutionHelper[] helpers = this.getHelpers();
-		for (int i = 0; i < helpers.length; i++) {
-			if (helpers[i].acquireResolution(description)) {
+		IResolutionHelper[] helpers = getHelpers();
+		for (IResolutionHelper helper : helpers) {
+			if (helper.acquireResolution(description)) {
 				return true;
 			}
 		}
@@ -56,11 +59,11 @@ public class DefaultErrorHandlingFacility implements IErrorHandlingFacility {
 	}
 
 	protected synchronized IResolutionHelper[] getHelpers() {
-		if (!this.extensionsFetched) {
-			this.helpers.addAll(Arrays.asList(CoreExtensionsManager.instance().getResolutionHelpers()));
-			this.extensionsFetched = true;
+		if (!extensionsFetched) {
+			helpers.addAll(Arrays.asList(CoreExtensionsManager.instance().getResolutionHelpers()));
+			extensionsFetched = true;
 		}
-		return this.helpers.toArray(new IResolutionHelper[this.helpers.size()]);
+		return helpers.toArray(new IResolutionHelper[helpers.size()]);
 	}
 
 }

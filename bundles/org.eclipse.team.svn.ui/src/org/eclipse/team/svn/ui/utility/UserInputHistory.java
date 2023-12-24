@@ -49,46 +49,47 @@ public class UserInputHistory extends InputHistory {
 		super(name, InputHistory.TYPE_STRING, null);
 		this.depth = depth;
 
-		this.loadHistoryLines();
+		loadHistoryLines();
 
-		if (this.history.size() > this.depth) {
-			ListIterator iter = this.history.listIterator(this.depth);
+		if (history.size() > this.depth) {
+			ListIterator iter = history.listIterator(this.depth);
 			while (iter.hasNext()) {
 				iter.next();
 				iter.remove();
 			}
-			this.saveHistoryLines();
+			saveHistoryLines();
 		}
 	}
 
 	public int getDepth() {
-		return this.depth;
+		return depth;
 	}
 
 	public String[] getHistory() {
-		return (String[]) this.history.toArray(new String[this.history.size()]);
+		return (String[]) history.toArray(new String[history.size()]);
 	}
 
 	public void addLine(String line) {
 		if (line == null || line.trim().length() == 0) {
 			return;
 		}
-		this.history.remove(line);
-		this.history.add(0, line);
-		if (this.history.size() > this.depth) {
-			this.history.remove(this.history.size() - 1);
+		history.remove(line);
+		history.add(0, line);
+		if (history.size() > depth) {
+			history.remove(history.size() - 1);
 		}
-		this.saveHistoryLines();
+		saveHistoryLines();
 	}
 
+	@Override
 	public void clear() {
-		this.history.clear();
+		history.clear();
 		super.clear();
 	}
 
 	protected void loadHistoryLines() {
-		this.history = new ArrayList();
-		String historyData = (String) this.value;
+		history = new ArrayList();
+		String historyData = (String) value;
 		if (historyData != null && historyData.length() > 0) {
 			String[] historyArray = historyData.split(";"); //$NON-NLS-1$
 			for (int i = 0; i < historyArray.length; i++) {
@@ -99,22 +100,22 @@ public class UserInputHistory extends InputHistory {
 					historyArray[i] = new String(Base64.decode(historyArray[i].getBytes()));
 				}
 			}
-			this.history.addAll(Arrays.asList(historyArray));
+			history.addAll(Arrays.asList(historyArray));
 		}
 	}
 
 	protected void saveHistoryLines() {
 		String result = ""; //$NON-NLS-1$
-		for (Iterator it = this.history.iterator(); it.hasNext();) {
+		for (Iterator it = history.iterator(); it.hasNext();) {
 			String str = (String) it.next();
 			try {
 				str = new String(Base64.encode(str.getBytes(UserInputHistory.ENCODING)), UserInputHistory.ENCODING);
 			} catch (UnsupportedEncodingException e) {
 				str = new String(Base64.encode(str.getBytes()));
 			}
-			result += result.length() == 0 ? str : (";" + str); //$NON-NLS-1$
+			result += result.length() == 0 ? str : ";" + str; //$NON-NLS-1$
 		}
-		this.setValue(result);
+		setValue(result);
 	}
 
 }

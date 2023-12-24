@@ -46,22 +46,24 @@ public class UpdateSyncInfoForMerge extends UpdateSyncInfo implements IMergeSync
 	public UpdateSyncInfoForMerge(ILocalResource local, IResourceChange baseStatus, IResourceChange remoteStatus,
 			IResourceVariantComparator comparator) {
 		super(local, null, comparator);
-		this.mergeBaseStatus = baseStatus;
-		this.mergeRemoteStatus = remoteStatus;
+		mergeBaseStatus = baseStatus;
+		mergeRemoteStatus = remoteStatus;
 	}
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.team.svn.core.synchronize.IMergeSyncInfo#getBaseResource()
 	 */
+	@Override
 	public IResourceChange getBaseResource() {
-		return this.mergeBaseStatus;
+		return mergeBaseStatus;
 	}
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.team.svn.core.synchronize.IMergeSyncInfo#getRemoteResource()
 	 */
+	@Override
 	public IResourceChange getRemoteResource() {
-		return this.mergeRemoteStatus;
+		return mergeRemoteStatus;
 	}
 
 }

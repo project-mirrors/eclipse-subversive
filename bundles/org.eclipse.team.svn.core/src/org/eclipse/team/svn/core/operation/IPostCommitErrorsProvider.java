@@ -22,5 +22,5 @@ import org.eclipse.team.svn.core.connector.SVNCommitStatus;
  * @author Alexander Gurov
  */
 public interface IPostCommitErrorsProvider {
-	public SVNCommitStatus[] getPostCommitErrors();
+	SVNCommitStatus[] getPostCommitErrors();
 }

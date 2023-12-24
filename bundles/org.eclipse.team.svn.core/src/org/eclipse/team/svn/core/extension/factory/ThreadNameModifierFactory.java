@@ -29,40 +29,49 @@ public class ThreadNameModifierFactory implements ISVNConnectorFactory {
 		this.factory = factory;
 	}
 
+	@Override
 	public String getClientVersion() {
-		return this.factory.getClientVersion();
+		return factory.getClientVersion();
 	}
 
+	@Override
 	public String getCompatibilityVersion() {
-		return this.factory.getCompatibilityVersion();
+		return factory.getCompatibilityVersion();
 	}
 
+	@Override
 	public String getId() {
-		return this.factory.getId();
+		return factory.getId();
 	}
 
+	@Override
 	public String getName() {
-		return this.factory.getName();
+		return factory.getName();
 	}
 
+	@Override
 	public String getVersion() {
-		return this.factory.getVersion();
+		return factory.getVersion();
 	}
 
+	@Override
 	public int getSupportedFeatures() {
-		return this.factory.getSupportedFeatures();
+		return factory.getSupportedFeatures();
 	}
 
+	@Override
 	public int getSVNAPIVersion() {
-		return this.factory.getSVNAPIVersion();
+		return factory.getSVNAPIVersion();
 	}
 
+	@Override
 	public ISVNConnector createConnector() {
-		return new ThreadNameModifier(this.factory.createConnector());
+		return new ThreadNameModifier(factory.createConnector());
 	}
 
+	@Override
 	public ISVNManager createManager() {
-		return this.factory.createManager();
+		return factory.createManager();
 	}
 
 }

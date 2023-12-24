@@ -46,7 +46,6 @@ import org.eclipse.team.svn.core.operation.local.refactor.MoveResourceOperation;
 import org.eclipse.team.svn.core.resource.ILocalResource;
 import org.eclipse.team.svn.core.svnstorage.SVNRemoteStorage;
 import org.eclipse.team.svn.core.utility.FileUtility;
-import org.eclipse.team.svn.core.utility.ILoggedOperationFactory;
 import org.eclipse.team.svn.core.utility.ProgressMonitorUtility;
 
 /**
@@ -63,35 +62,41 @@ public class SVNTeamMoveDeleteHook implements IMoveDeleteHook {
 
 	static {
 		SVNTeamMoveDeleteHook.sPool = Executors.newScheduledThreadPool(1);
-		SVNTeamMoveDeleteHook.deleteQueue = new ArrayList<IResource>();
+		SVNTeamMoveDeleteHook.deleteQueue = new ArrayList<>();
 	}
 
 	public SVNTeamMoveDeleteHook() {
 	}
 
+	@Override
 	public boolean deleteFile(IResourceTree tree, IFile file, int updateFlags, IProgressMonitor monitor) {
-		return this.doScheduledDelete(tree, file, updateFlags, monitor);
+		return doScheduledDelete(tree, file, updateFlags, monitor);
 	}
 
+	@Override
 	public boolean deleteFolder(IResourceTree tree, final IFolder folder, int updateFlags, IProgressMonitor monitor) {
-		return this.doScheduledDelete(tree, folder, updateFlags, monitor);
+		return doScheduledDelete(tree, folder, updateFlags, monitor);
 	}
 
+	@Override
 	public boolean moveFile(final IResourceTree tree, final IFile source, final IFile destination, int updateFlags,
 			IProgressMonitor monitor) {
-		return this.doMove(tree, source, destination, updateFlags, monitor);
+		return doMove(tree, source, destination, updateFlags, monitor);
 	}
 
+	@Override
 	public boolean moveFolder(final IResourceTree tree, final IFolder source, final IFolder destination,
 			int updateFlags, IProgressMonitor monitor) {
-		return this.doMove(tree, source, destination, updateFlags, monitor);
+		return doMove(tree, source, destination, updateFlags, monitor);
 	}
 
+	@Override
 	public boolean deleteProject(IResourceTree tree, IProject project, int updateFlags, IProgressMonitor monitor) {
 		//NOTE Eclipse bug ? Project should be disconnected first but it is not possible due to different resource locking rules used by project deletion and project unmpaping code.
 		return false;
 	}
 
+	@Override
 	public boolean moveProject(IResourceTree tree, IProject source, IProjectDescription description, int updateFlags,
 			IProgressMonitor monitor) {
 		return false;
@@ -132,7 +137,7 @@ public class SVNTeamMoveDeleteHook implements IMoveDeleteHook {
 					IStateFilter.SF_UNVERSIONED, true);
 			AbstractActionOperation addToSVNOp = new AddToSVNWithPropertiesOperation(scheduledForAddition, false);
 			op.add(addToSVNOp);
-			if (this.checkBug281557(source, monitor)) {
+			if (checkBug281557(source, monitor)) {
 				CopyResourceWithHistoryOperation copyOp = new CopyResourceWithHistoryOperation(source, destination);
 				op.add(copyOp);
 				// do overwrite file content in order to restore original keywords values
@@ -149,12 +154,12 @@ public class SVNTeamMoveDeleteHook implements IMoveDeleteHook {
 				op.add(new TrackMoveResultOperation(tree, source, destination, new IActionOperation[] { moveOp }));
 			}
 			op.add(new RestoreProjectMetaOperation(saveOp));
-			ArrayList<IResource> fullSet = new ArrayList<IResource>(Arrays.asList(scheduledForAddition));
-			fullSet.addAll(Arrays.asList(new IResource[] { source, destination }));
+			ArrayList<IResource> fullSet = new ArrayList<>(Arrays.asList(scheduledForAddition));
+			fullSet.addAll(Arrays.asList(source, destination));
 			op.add(new RefreshResourcesOperation(fullSet.toArray(new IResource[fullSet.size()]),
 					IResource.DEPTH_INFINITE, RefreshResourcesOperation.REFRESH_ALL));
 		} else {
-			if (this.checkBug281557(source, monitor)) {
+			if (checkBug281557(source, monitor)) {
 				CopyResourceWithHistoryOperation copyOp = new CopyResourceWithHistoryOperation(source, destination);
 				op.add(copyOp);
 				// do overwrite file content in order to restore original keywords values
@@ -174,7 +179,7 @@ public class SVNTeamMoveDeleteHook implements IMoveDeleteHook {
 			op.add(new RefreshResourcesOperation(new IResource[] { source, destination }, IResource.DEPTH_INFINITE,
 					RefreshResourcesOperation.REFRESH_ALL));
 		}
-		this.runOperation(op, monitor);
+		runOperation(op, monitor);
 
 		return true;
 	}
@@ -186,11 +191,11 @@ public class SVNTeamMoveDeleteHook implements IMoveDeleteHook {
 				.getString(IOptionProvider.SVN_CONNECTOR_ID)
 				.startsWith("org.eclipse.team.svn.connector.javahl")) {
 			GetPropertiesOperation op = new GetPropertiesOperation(source);
-			this.runOperation(op, monitor);
+			runOperation(op, monitor);
 			SVNProperty[] props = op.getProperties();
 			if (props != null) {
-				for (int i = 0; i < props.length; i++) {
-					if (SVNProperty.BuiltIn.KEYWORDS.equals(props[i].name)) {
+				for (SVNProperty prop : props) {
+					if (SVNProperty.BuiltIn.KEYWORDS.equals(prop.name)) {
 						return true;
 					}
 				}
@@ -201,21 +206,19 @@ public class SVNTeamMoveDeleteHook implements IMoveDeleteHook {
 
 	protected void runOperation(IActionOperation op, IProgressMonitor monitor) {
 		// already in WorkspaceModifyOperation context
-		//don't log errors from operations, because errors are logged by caller code (IMoveDeleteHook infrastructure)		    
-		ProgressMonitorUtility.doTaskExternal(op, monitor, new ILoggedOperationFactory() {
-			public IActionOperation getLogged(IActionOperation operation) {
-				//set only console stream to operation
-				IActionOperation wrappedOperation = SVNTeamPlugin.instance()
-						.getOptionProvider()
-						.getLoggedOperationFactory()
-						.getLogged(operation);
-				operation.setConsoleStream(wrappedOperation.getConsoleStream());
-				return operation;
-			}
+		//don't log errors from operations, because errors are logged by caller code (IMoveDeleteHook infrastructure)
+		ProgressMonitorUtility.doTaskExternal(op, monitor, operation -> {
+			//set only console stream to operation
+			IActionOperation wrappedOperation = SVNTeamPlugin.instance()
+					.getOptionProvider()
+					.getLoggedOperationFactory()
+					.getLogged(operation);
+			operation.setConsoleStream(wrappedOperation.getConsoleStream());
+			return operation;
 		});
 	}
 
-	// It is to slow to access working copy on per-file basis when the projects are large enough, but the workflow of the actual operation heavily depends 
+	// It is to slow to access working copy on per-file basis when the projects are large enough, but the workflow of the actual operation heavily depends
 	//	on how the calling code is implemented. So, there are cases when recursive deletes are performed one by one and JDT is the fine example of such an approach.
 	//	So, in order to reduce overhead we'll try to group the files using a reasonable timeout.
 	protected boolean doScheduledDelete(IResourceTree tree, IResource resource, int updateFlags,
@@ -245,33 +248,31 @@ public class SVNTeamMoveDeleteHook implements IMoveDeleteHook {
 			}
 			if (SVNTeamMoveDeleteHook.deleteQueue.size() > 0) {
 				// if there are files to delete
-				SVNTeamMoveDeleteHook.sf = SVNTeamMoveDeleteHook.sPool.schedule(new Runnable() {
-					public void run() {
-						IResource[] resources;
-						synchronized (SVNTeamMoveDeleteHook.deleteQueue) {
-							resources = SVNTeamMoveDeleteHook.deleteQueue
-									.toArray(new IResource[SVNTeamMoveDeleteHook.deleteQueue.size()]);
-							SVNTeamMoveDeleteHook.deleteQueue.clear();
-						}
-						if (resources.length > 0) {
-							resources = FileUtility.shrinkChildNodes(resources);
+				SVNTeamMoveDeleteHook.sf = SVNTeamMoveDeleteHook.sPool.schedule(() -> {
+					IResource[] resources;
+					synchronized (SVNTeamMoveDeleteHook.deleteQueue) {
+						resources = SVNTeamMoveDeleteHook.deleteQueue
+								.toArray(new IResource[SVNTeamMoveDeleteHook.deleteQueue.size()]);
+						SVNTeamMoveDeleteHook.deleteQueue.clear();
+					}
+					if (resources.length > 0) {
+						resources = FileUtility.shrinkChildNodes(resources);
 
-							DeleteResourceOperation mainOp = new DeleteResourceOperation(resources);
-							CompositeOperation op = new CompositeOperation(mainOp.getId(), mainOp.getMessagesClass());
-							SaveProjectMetaOperation saveOp = new SaveProjectMetaOperation(resources);
-							op.add(saveOp);
-							op.add(mainOp);
-							op.add(new RestoreProjectMetaOperation(saveOp));
-							op.add(new RefreshResourcesOperation(resources, IResource.DEPTH_INFINITE,
-									RefreshResourcesOperation.REFRESH_CACHE));
+						DeleteResourceOperation mainOp = new DeleteResourceOperation(resources);
+						CompositeOperation op = new CompositeOperation(mainOp.getId(), mainOp.getMessagesClass());
+						SaveProjectMetaOperation saveOp = new SaveProjectMetaOperation(resources);
+						op.add(saveOp);
+						op.add(mainOp);
+						op.add(new RestoreProjectMetaOperation(saveOp));
+						op.add(new RefreshResourcesOperation(resources, IResource.DEPTH_INFINITE,
+								RefreshResourcesOperation.REFRESH_CACHE));
 
-							IActionOperation wrappedOperation = SVNTeamPlugin.instance()
-									.getOptionProvider()
-									.getLoggedOperationFactory()
-									.getLogged(op);
+						IActionOperation wrappedOperation = SVNTeamPlugin.instance()
+								.getOptionProvider()
+								.getLoggedOperationFactory()
+								.getLogged(op);
 
-							ProgressMonitorUtility.doTaskScheduledDefault(wrappedOperation);
-						}
+						ProgressMonitorUtility.doTaskScheduledDefault(wrappedOperation);
 					}
 				}, 200, TimeUnit.MILLISECONDS);
 			}
@@ -292,8 +293,8 @@ public class SVNTeamMoveDeleteHook implements IMoveDeleteHook {
 
 		@Override
 		protected void runImpl(IProgressMonitor monitor) throws Exception {
-			if (this.resource.getType() == IResource.FILE) {
-				this.tree.addToLocalHistory((IFile) this.resource);
+			if (resource.getType() == IResource.FILE) {
+				tree.addToLocalHistory((IFile) resource);
 			}
 		}
 	}
@@ -319,19 +320,19 @@ public class SVNTeamMoveDeleteHook implements IMoveDeleteHook {
 		@Override
 		protected void runImpl(IProgressMonitor monitor) throws Exception {
 			boolean failed = false;
-			if (this.operationsToTrack != null) {
-				for (int i = 0; i < this.operationsToTrack.length; i++) {
-					if (this.operationsToTrack[i].getExecutionState() == IActionOperation.ERROR) {
-						this.tree.failed(this.operationsToTrack[i].getStatus());
+			if (operationsToTrack != null) {
+				for (IActionOperation element : operationsToTrack) {
+					if (element.getExecutionState() == IActionOperation.ERROR) {
+						tree.failed(element.getStatus());
 						failed = true;
 					}
 				}
 			}
 			if (!failed) {
-				if (this.source.getType() == IResource.FILE) {
-					this.tree.movedFile((IFile) this.source, (IFile) this.destination);
-				} else if (this.source.getType() == IResource.FOLDER) {
-					this.tree.movedFolderSubtree((IFolder) this.source, (IFolder) this.destination);
+				if (source.getType() == IResource.FILE) {
+					tree.movedFile((IFile) source, (IFile) destination);
+				} else if (source.getType() == IResource.FOLDER) {
+					tree.movedFolderSubtree((IFolder) source, (IFolder) destination);
 				}
 			}
 		}

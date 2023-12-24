@@ -34,9 +34,10 @@ import org.eclipse.team.svn.ui.verifier.AbstractVerifierProxy;
 public class CreateProjectStructurePanel extends AbstractGetResourceNamePanel {
 	public CreateProjectStructurePanel() {
 		super(SVNUIMessages.CreateProjectStructurePanel_Title, true);
-		this.dialogDescription = SVNUIMessages.CreateProjectStructurePanel_Description;
+		dialogDescription = SVNUIMessages.CreateProjectStructurePanel_Description;
 	}
 
+	@Override
 	public void createControlsImpl(Composite parent) {
 		GridData data = null;
 		GridLayout layout = null;
@@ -54,6 +55,7 @@ public class CreateProjectStructurePanel extends AbstractGetResourceNamePanel {
 		monolythicButton.setLayoutData(data);
 		monolythicButton.setText(SVNUIMessages.CreateProjectStructurePanel_Monolythic);
 		monolythicButton.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				if (((Button) e.widget).getSelection()) {
 					CreateProjectStructurePanel.this.resourceName = ""; //$NON-NLS-1$
@@ -69,6 +71,7 @@ public class CreateProjectStructurePanel extends AbstractGetResourceNamePanel {
 		otherButton.setLayoutData(data);
 		otherButton.setText(SVNUIMessages.CreateProjectStructurePanel_SingleOrMulti);
 		otherButton.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				if (((Button) e.widget).getSelection()) {
 					CreateProjectStructurePanel.this.resourceName = CreateProjectStructurePanel.this.text.getText();
@@ -81,15 +84,18 @@ public class CreateProjectStructurePanel extends AbstractGetResourceNamePanel {
 
 		super.createControlsImpl(projectComposite);
 
-		this.text.setFocus();
+		text.setFocus();
 	}
 
+	@Override
 	public String getHelpId() {
 		return "org.eclipse.team.svn.help.remote_createProjectStructureDialogContext"; //$NON-NLS-1$
 	}
 
+	@Override
 	protected AbstractVerifier createNonEmptyNameFieldVerifier() {
 		return new AbstractVerifierProxy(super.createNonEmptyNameFieldVerifier()) {
+			@Override
 			protected boolean isVerificationEnabled(Control input) {
 				return CreateProjectStructurePanel.this.text.isEnabled();
 			}

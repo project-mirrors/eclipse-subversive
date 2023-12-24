@@ -34,18 +34,15 @@ public class NotifyUnresolvedConflictOperation extends AbstractActionOperation {
 		this.sign = sign;
 	}
 
+	@Override
 	public int getOperationWeight() {
 		return 0;
 	}
 
+	@Override
 	protected void runImpl(IProgressMonitor monitor) throws Exception {
-		if (this.sign.hasUnresolvedConflicts()) {
-			UIMonitorUtility.getDisplay().syncExec(new Runnable() {
-				public void run() {
-					new NotifyUnresolvedConflictDialog(UIMonitorUtility.getShell(),
-							NotifyUnresolvedConflictOperation.this.sign.getMessage()).open();
-				}
-			});
+		if (sign.hasUnresolvedConflicts()) {
+			UIMonitorUtility.getDisplay().syncExec(() -> new NotifyUnresolvedConflictDialog(UIMonitorUtility.getShell(), sign.getMessage()).open());
 		}
 	}
 

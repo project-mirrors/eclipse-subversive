@@ -30,30 +30,31 @@ public class SVNRepositoryNotificationComposite implements ISVNRepositoryNotific
 	protected ISVNRepositoryNotificationCallback[] listeners;
 
 	public SVNRepositoryNotificationComposite() {
-		this.listeners = new ISVNRepositoryNotificationCallback[0];
+		listeners = new ISVNRepositoryNotificationCallback[0];
 	}
 
 	public void add(ISVNRepositoryNotificationCallback listener) {
-		List<ISVNRepositoryNotificationCallback> tmp = new ArrayList<ISVNRepositoryNotificationCallback>(
-				Arrays.asList(this.listeners));
+		List<ISVNRepositoryNotificationCallback> tmp = new ArrayList<>(
+				Arrays.asList(listeners));
 		if (!tmp.contains(listener)) {
 			tmp.add(listener);
 		}
-		this.listeners = tmp.toArray(new ISVNRepositoryNotificationCallback[tmp.size()]);
+		listeners = tmp.toArray(new ISVNRepositoryNotificationCallback[tmp.size()]);
 	}
 
 	public void remove(ISVNRepositoryNotificationCallback listener) {
-		List<ISVNRepositoryNotificationCallback> tmp = new ArrayList<ISVNRepositoryNotificationCallback>(
-				Arrays.asList(this.listeners));
+		List<ISVNRepositoryNotificationCallback> tmp = new ArrayList<>(
+				Arrays.asList(listeners));
 		tmp.remove(listener);
-		this.listeners = tmp.toArray(new ISVNRepositoryNotificationCallback[tmp.size()]);
+		listeners = tmp.toArray(new ISVNRepositoryNotificationCallback[tmp.size()]);
 	}
 
+	@Override
 	public void notify(SVNRepositoryNotification info) {
 		// thread safe...
-		ISVNRepositoryNotificationCallback[] tmp = this.listeners;
-		for (int i = 0; i < tmp.length; i++) {
-			tmp[i].notify(info);
+		ISVNRepositoryNotificationCallback[] tmp = listeners;
+		for (ISVNRepositoryNotificationCallback element : tmp) {
+			element.notify(info);
 		}
 	}
 

@@ -32,27 +32,29 @@ public class OptionsActionGroup extends AbstractSynchronizeActionGroup {
 
 	protected IAction contiguousOptionAction;
 
+	@Override
 	public void configureMenuGroups(ISynchronizePageConfiguration configuration) {
 		configuration.addMenuGroup(
 				ISynchronizePageConfiguration.P_VIEW_MENU, OptionsActionGroup.GROUP_SYNCH_OPTIONS);
 	}
 
+	@Override
 	protected void configureActions(ISynchronizePageConfiguration configuration) {
-		this.contiguousOptionAction = new Action(SVNUIMessages.OptionsActionGroup_ShowInfoContiguous,
-				IAction.AS_CHECK_BOX) {
+		contiguousOptionAction = new Action(SVNUIMessages.OptionsActionGroup_ShowInfoContiguous, IAction.AS_CHECK_BOX) {
+			@Override
 			public void run() {
 				boolean fastReportMode = AbstractSVNSubscriber.getSynchInfoContigous();
 				AbstractSVNSubscriber.setSynchInfoContigous(!fastReportMode);
 				SVNTeamPlugin.instance().savePreferences();
 			}
 		};
-		this.refreshOptionButtons();
+		refreshOptionButtons();
 		this.appendToGroup(
 				ISynchronizePageConfiguration.P_VIEW_MENU, OptionsActionGroup.GROUP_SYNCH_OPTIONS,
-				this.contiguousOptionAction);
+				contiguousOptionAction);
 	}
 
 	protected void refreshOptionButtons() {
-		this.contiguousOptionAction.setChecked(AbstractSVNSubscriber.getSynchInfoContigous());
+		contiguousOptionAction.setChecked(AbstractSVNSubscriber.getSynchInfoContigous());
 	}
 }

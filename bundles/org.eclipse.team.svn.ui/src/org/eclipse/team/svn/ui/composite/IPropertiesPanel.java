@@ -21,12 +21,12 @@ package org.eclipse.team.svn.ui.composite;
  */
 public interface IPropertiesPanel {
 
-	public void saveChanges();
+	void saveChanges();
 
-	public void resetChanges();
+	void resetChanges();
 
-	public void cancelChanges();
+	void cancelChanges();
 
-	public void initialize();
+	void initialize();
 
 }

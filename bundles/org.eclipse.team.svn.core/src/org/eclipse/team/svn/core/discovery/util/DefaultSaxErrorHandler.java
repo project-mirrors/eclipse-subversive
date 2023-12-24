@@ -25,14 +25,17 @@ import org.xml.sax.SAXParseException;
  * @author Igor Burilo
  */
 public class DefaultSaxErrorHandler implements ErrorHandler {
+	@Override
 	public void warning(SAXParseException exception) throws SAXException {
 		// ignore
 	}
 
+	@Override
 	public void fatalError(SAXParseException exception) throws SAXException {
 		throw exception;
 	}
 
+	@Override
 	public void error(SAXParseException exception) throws SAXException {
 		throw exception;
 	}

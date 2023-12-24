@@ -22,13 +22,10 @@ import java.util.List;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.team.svn.core.connector.ISVNConnector;
-import org.eclipse.team.svn.core.connector.ISVNEntryInfoCallback;
 import org.eclipse.team.svn.core.connector.ISVNEntryStatusCallback;
 import org.eclipse.team.svn.core.connector.SVNChangeStatus;
 import org.eclipse.team.svn.core.connector.SVNDepth;
-import org.eclipse.team.svn.core.connector.SVNEntryInfo;
 import org.eclipse.team.svn.core.connector.SVNEntryRevisionReference;
-import org.eclipse.team.svn.core.operation.IUnprotectedOperation;
 import org.eclipse.team.svn.core.operation.SVNProgressMonitor;
 import org.eclipse.team.svn.core.resource.IRepositoryLocation;
 import org.eclipse.team.svn.core.resource.IRepositoryResource;
@@ -56,21 +53,20 @@ public abstract class AbstractStatusOperation extends AbstractFileOperation {
 	}
 
 	public SVNChangeStatus[] getStatuses() {
-		return this.statuses;
+		return statuses;
 	}
 
+	@Override
 	protected void runImpl(IProgressMonitor monitor) throws Exception {
-		File[] files = this.operableData();
+		File[] files = operableData();
 
-		final List<SVNChangeStatus> result = new ArrayList<SVNChangeStatus>();
-		final List<SVNChangeStatus> conflicts = new ArrayList<SVNChangeStatus>();
+		final List<SVNChangeStatus> result = new ArrayList<>();
+		final List<SVNChangeStatus> conflicts = new ArrayList<>();
 
-		ISVNEntryStatusCallback cb = new ISVNEntryStatusCallback() {
-			public void next(SVNChangeStatus status) {
-				result.add(status);
-				if (status.hasConflict && status.treeConflicts == null) {
-					conflicts.add(status);
-				}
+		ISVNEntryStatusCallback cb = status -> {
+			result.add(status);
+			if (status.hasConflict && status.treeConflicts == null) {
+				conflicts.add(status);
 			}
 		};
 		for (int i = 0; i < files.length && !monitor.isCanceled(); i++) {
@@ -81,40 +77,27 @@ public abstract class AbstractStatusOperation extends AbstractFileOperation {
 
 			conflicts.clear();
 
-			this.reportStatuses(proxy, cb, files[i], monitor, files.length);
+			reportStatuses(proxy, cb, files[i], monitor, files.length);
 
 			for (Iterator<SVNChangeStatus> it = conflicts.iterator(); it.hasNext() && !monitor.isCanceled();) {
 				final SVNChangeStatus svnChangeStatus = it.next();
-				this.protectStep(new IUnprotectedOperation() {
-					public void run(IProgressMonitor monitor) throws Exception {
-						proxy.getInfo(new SVNEntryRevisionReference(svnChangeStatus.path), SVNDepth.EMPTY,
-								ISVNConnector.Options.FETCH_ACTUAL_ONLY, null, new ISVNEntryInfoCallback() {
-									public void next(SVNEntryInfo info) {
-										svnChangeStatus.setTreeConflicts(info.treeConflicts);
-									}
-								}, new SVNProgressMonitor(AbstractStatusOperation.this, monitor, null, false));
-					}
-				}, monitor, files.length);
+				this.protectStep(monitor1 -> proxy.getInfo(new SVNEntryRevisionReference(svnChangeStatus.path), SVNDepth.EMPTY,
+						ISVNConnector.Options.FETCH_ACTUAL_ONLY, null, info -> svnChangeStatus.setTreeConflicts(info.treeConflicts), new SVNProgressMonitor(AbstractStatusOperation.this, monitor1, null, false)), monitor, files.length);
 			}
 
 			location.releaseSVNProxy(proxy);
 		}
-		this.statuses = result.toArray(new SVNChangeStatus[result.size()]);
+		statuses = result.toArray(new SVNChangeStatus[result.size()]);
 	}
 
 	protected void reportStatuses(final ISVNConnector proxy, final ISVNEntryStatusCallback cb, final File current,
 			IProgressMonitor monitor, int tasks) {
-		this.protectStep(new IUnprotectedOperation() {
-			public void run(IProgressMonitor monitor) throws Exception {
-				proxy.status(
-						current.getAbsolutePath(),
-						SVNDepth.infinityOrImmediates(AbstractStatusOperation.this.recursive),
-						AbstractStatusOperation.this.isRemote()
-								? ISVNConnector.Options.SERVER_SIDE
-								: ISVNConnector.Options.LOCAL_SIDE,
-						null, cb, new SVNProgressMonitor(AbstractStatusOperation.this, monitor, null, false));
-			}
-		}, monitor, tasks);
+		this.protectStep(monitor1 -> proxy.status(
+				current.getAbsolutePath(), SVNDepth.infinityOrImmediates(recursive),
+				AbstractStatusOperation.this.isRemote()
+						? ISVNConnector.Options.SERVER_SIDE
+						: ISVNConnector.Options.LOCAL_SIDE,
+				null, cb, new SVNProgressMonitor(AbstractStatusOperation.this, monitor1, null, false)), monitor, tasks);
 	}
 
 	protected abstract boolean isRemote();

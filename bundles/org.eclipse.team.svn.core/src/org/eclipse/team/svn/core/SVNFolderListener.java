@@ -21,12 +21,10 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.resources.IResourceDelta;
-import org.eclipse.core.resources.IResourceDeltaVisitor;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.team.core.RepositoryProvider;
 import org.eclipse.team.svn.core.connector.SVNChangeStatus;
@@ -55,103 +53,98 @@ public class SVNFolderListener implements IResourceChangeListener {
 
 	}
 
+	@Override
 	public void resourceChanged(final IResourceChangeEvent event) {
 		try {
-			ResourcesPlugin.getWorkspace().run(new IWorkspaceRunnable() {
-				public void run(final IProgressMonitor monitor) throws CoreException {
-					event.getDelta().accept(new IResourceDeltaVisitor() {
-						public boolean visit(IResourceDelta delta) throws CoreException {
-							IResource resource = delta.getResource();
+			ResourcesPlugin.getWorkspace().run((IWorkspaceRunnable) monitor -> event.getDelta().accept(delta -> {
+				IResource resource = delta.getResource();
 
-							if (!resource.isAccessible()) {
-								return false;
-							}
-
-							if (resource.getType() == IResource.ROOT) {
-								return true;
-							}
-
-							if (resource.getType() == IResource.PROJECT && delta.getKind() == IResourceDelta.ADDED
-									&& delta.getFlags() == IResourceDelta.OPEN && ((IProject) resource).isOpen()
-									&& SVNUtility.hasSVNFolderInOrAbove(resource) && // prevent UI plug-in activation when it is unnecessary
-									SVNTeamPlugin.instance()
-											.getOptionProvider()
-											.is(IOptionProvider.AUTOMATIC_PROJECT_SHARE_ENABLED)) {
-
-								/*
-								 * If project is already connected, then don't reconnect it again. 
-								 * Project may be connected and we can get such event if we just checked out project.
-								 * Also this may cause problem if there are several locations with the same url, see bug 298862.  
-								 */
-								if (RepositoryProvider.getProvider((IProject) resource,
-										SVNTeamPlugin.NATURE_ID) != null) {
-									return false;
-								}
-
-								SVNChangeStatus info = SVNUtility.getSVNInfoForNotConnected(resource);
-								if (info != null && info.url != null) {
-									String url = SVNUtility.decodeURL(info.url);
-									IRepositoryRoot[] roots = SVNUtility.findRoots(url, true);
-									IRepositoryLocation location = null;
-									if (roots.length == 0) {
-										String rootNode = "/" + CoreExtensionsManager.instance() //$NON-NLS-1$
-												.getOptionProvider()
-												.getString(IOptionProvider.DEFAULT_TRUNK_NAME);
-										int idx = url.lastIndexOf(rootNode);
-										if (idx == -1 || !url.endsWith(rootNode)
-												&& url.charAt(idx + rootNode.length()) != '/') {
-											rootNode = "/" + CoreExtensionsManager.instance() //$NON-NLS-1$
-													.getOptionProvider()
-													.getString(IOptionProvider.DEFAULT_BRANCHES_NAME);
-											idx = url.lastIndexOf(rootNode);
-											if (idx == -1 || !url.endsWith(rootNode)
-													&& url.charAt(idx + rootNode.length()) != '/') {
-												rootNode = "/" + CoreExtensionsManager.instance() //$NON-NLS-1$
-														.getOptionProvider()
-														.getString(IOptionProvider.DEFAULT_TAGS_NAME);
-												idx = url.lastIndexOf(rootNode);
-												if (idx != -1 && !url.endsWith(rootNode)
-														&& url.charAt(idx + rootNode.length()) != '/') {
-													idx = -1;
-												}
-											}
-										}
-										if (idx != -1) {
-											url = url.substring(0, idx);
-										}
-										location = SVNRemoteStorage.instance().newRepositoryLocation();
-										SVNUtility.initializeRepositoryLocation(location, url);
-									} else {
-										location = roots[0].getRepositoryLocation();
-									}
-									ReconnectProjectOperation mainOp = new ReconnectProjectOperation(
-											new IProject[] { (IProject) resource }, location);
-									CompositeOperation op = new CompositeOperation(mainOp.getId(),
-											mainOp.getMessagesClass());
-									if (roots.length == 0) {
-										// important! location doubles when it is added asynchronously and several projects for the same location are imported
-										//	that is why we're doing it here and now
-										op.add(new AddRepositoryLocationOperation(location));
-										op.add(new SaveRepositoryLocationsOperation());
-									}
-									op.add(mainOp);
-									// do not use asynchronous execution, this is PRE_BUILD event, so we shouldn't defer marking resources as team-private
-									ProgressMonitorUtility.doTaskExternal(op, monitor);
-									return false;
-								}
-							}
-
-							if (delta.getKind() == IResourceDelta.ADDED && (resource instanceof IContainer)
-									&& !resource.isTeamPrivateMember() && FileUtility.isSVNInternals(resource)) {
-								FileUtility.findAndMarkSVNInternals(resource, true);
-								return false;
-							}
-
-							return true;
-						}
-					});
+				if (!resource.isAccessible()) {
+					return false;
 				}
-			}, null, IWorkspace.AVOID_UPDATE, new NullProgressMonitor());
+
+				if (resource.getType() == IResource.ROOT) {
+					return true;
+				}
+
+				if (resource.getType() == IResource.PROJECT && delta.getKind() == IResourceDelta.ADDED
+						&& delta.getFlags() == IResourceDelta.OPEN && ((IProject) resource).isOpen()
+						&& SVNUtility.hasSVNFolderInOrAbove(resource) && // prevent UI plug-in activation when it is unnecessary
+						SVNTeamPlugin.instance()
+								.getOptionProvider()
+								.is(IOptionProvider.AUTOMATIC_PROJECT_SHARE_ENABLED)) {
+
+					/*
+					 * If project is already connected, then don't reconnect it again.
+					 * Project may be connected and we can get such event if we just checked out project.
+					 * Also this may cause problem if there are several locations with the same url, see bug 298862.
+					 */
+					if (RepositoryProvider.getProvider((IProject) resource,
+							SVNTeamPlugin.NATURE_ID) != null) {
+						return false;
+					}
+
+					SVNChangeStatus info = SVNUtility.getSVNInfoForNotConnected(resource);
+					if (info != null && info.url != null) {
+						String url = SVNUtility.decodeURL(info.url);
+						IRepositoryRoot[] roots = SVNUtility.findRoots(url, true);
+						IRepositoryLocation location = null;
+						if (roots.length == 0) {
+							String rootNode = "/" + CoreExtensionsManager.instance() //$NON-NLS-1$
+									.getOptionProvider()
+									.getString(IOptionProvider.DEFAULT_TRUNK_NAME);
+							int idx = url.lastIndexOf(rootNode);
+							if (idx == -1 || !url.endsWith(rootNode)
+									&& url.charAt(idx + rootNode.length()) != '/') {
+								rootNode = "/" + CoreExtensionsManager.instance() //$NON-NLS-1$
+										.getOptionProvider()
+										.getString(IOptionProvider.DEFAULT_BRANCHES_NAME);
+								idx = url.lastIndexOf(rootNode);
+								if (idx == -1 || !url.endsWith(rootNode)
+										&& url.charAt(idx + rootNode.length()) != '/') {
+									rootNode = "/" + CoreExtensionsManager.instance() //$NON-NLS-1$
+											.getOptionProvider()
+											.getString(IOptionProvider.DEFAULT_TAGS_NAME);
+									idx = url.lastIndexOf(rootNode);
+									if (idx != -1 && !url.endsWith(rootNode)
+											&& url.charAt(idx + rootNode.length()) != '/') {
+										idx = -1;
+									}
+								}
+							}
+							if (idx != -1) {
+								url = url.substring(0, idx);
+							}
+							location = SVNRemoteStorage.instance().newRepositoryLocation();
+							SVNUtility.initializeRepositoryLocation(location, url);
+						} else {
+							location = roots[0].getRepositoryLocation();
+						}
+						ReconnectProjectOperation mainOp = new ReconnectProjectOperation(
+								new IProject[] { (IProject) resource }, location);
+						CompositeOperation op = new CompositeOperation(mainOp.getId(),
+								mainOp.getMessagesClass());
+						if (roots.length == 0) {
+							// important! location doubles when it is added asynchronously and several projects for the same location are imported
+							//	that is why we're doing it here and now
+							op.add(new AddRepositoryLocationOperation(location));
+							op.add(new SaveRepositoryLocationsOperation());
+						}
+						op.add(mainOp);
+						// do not use asynchronous execution, this is PRE_BUILD event, so we shouldn't defer marking resources as team-private
+						ProgressMonitorUtility.doTaskExternal(op, monitor);
+						return false;
+					}
+				}
+
+				if (delta.getKind() == IResourceDelta.ADDED && resource instanceof IContainer
+						&& !resource.isTeamPrivateMember() && FileUtility.isSVNInternals(resource)) {
+					FileUtility.findAndMarkSVNInternals(resource, true);
+					return false;
+				}
+
+				return true;
+			}), null, IWorkspace.AVOID_UPDATE, new NullProgressMonitor());
 		} catch (CoreException ex) {
 			LoggedOperation.reportError(this.getClass().getName(), ex);
 		}

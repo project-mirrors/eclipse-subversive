@@ -31,21 +31,22 @@ public class LogTemplatesPropFindVisitor implements IPropFindVisitor {
 	protected HashSet<String> logTemplates;
 
 	public LogTemplatesPropFindVisitor() {
-		this.logTemplates = new HashSet<String>();
+		logTemplates = new HashSet<>();
 	}
 
+	@Override
 	public boolean visit(SVNProperty propertyParam) {
-		if (this.logTemplates.size() == LogTemplatesPropFindVisitor.MAXIMUM_LOG_TEMPLATE_SIZE) {
+		if (logTemplates.size() == LogTemplatesPropFindVisitor.MAXIMUM_LOG_TEMPLATE_SIZE) {
 			return false;
 		}
 		if (propertyParam.name.equals("tsvn:logtemplate")) { //$NON-NLS-1$
-			this.logTemplates.add(propertyParam.value);
+			logTemplates.add(propertyParam.value);
 		}
 		return true;
 	}
 
 	public HashSet<String> getLogTemplates() {
-		return this.logTemplates;
+		return logTemplates;
 	}
 
 }

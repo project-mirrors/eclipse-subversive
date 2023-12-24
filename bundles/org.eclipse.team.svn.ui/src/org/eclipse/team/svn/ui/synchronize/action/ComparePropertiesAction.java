@@ -37,13 +37,15 @@ public class ComparePropertiesAction extends AbstractSynchronizeModelAction {
 
 	public ComparePropertiesAction(String text, ISynchronizePageConfiguration configuration) {
 		super(text, configuration);
-		this.actionHelper = new ComparePropertiesActionHelper(this, configuration);
+		actionHelper = new ComparePropertiesActionHelper(this, configuration);
 	}
 
+	@Override
 	protected boolean needsToSaveDirtyEditors() {
 		return false;
 	}
 
+	@Override
 	protected boolean updateSelection(IStructuredSelection selection) {
 		super.updateSelection(selection);
 		if (selection.size() == 1 && selection.getFirstElement() instanceof SyncInfoModelElement) {
@@ -64,8 +66,9 @@ public class ComparePropertiesAction extends AbstractSynchronizeModelAction {
 		return false;
 	}
 
+	@Override
 	protected IActionOperation getOperation(ISynchronizePageConfiguration configuration, IDiffElement[] elements) {
-		return this.actionHelper.getOperation();
+		return actionHelper.getOperation();
 	}
 
 }

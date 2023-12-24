@@ -43,68 +43,71 @@ public class SubProgressMonitorWithInfo extends ProgressMonitorWrapper {
 		this.parentTicks = parentTicks;
 	}
 
+	@Override
 	public void beginTask(String name, int totalWork) {
-		this.lastTime = 0;
-		this.currentProgress = 0;
-		this.unknownProgress = 0;
+		lastTime = 0;
+		currentProgress = 0;
+		unknownProgress = 0;
 		this.totalWork = totalWork > 0 ? totalWork : ProgressMonitorUtility.TOTAL_WORK;
-		this.scale = this.parentTicks / this.totalWork;
+		scale = parentTicks / this.totalWork;
 	}
 
+	@Override
 	public void done() {
-		this.subTaskOp = null;
-		this.internalWorked(this.totalWork - this.currentProgress);
+		subTaskOp = null;
+		internalWorked(totalWork - currentProgress);
 	}
 
+	@Override
 	public void internalWorked(double work) {
-		if (this.currentProgress + work > this.totalWork) {
-			work = this.totalWork - this.currentProgress;
+		if (currentProgress + work > totalWork) {
+			work = totalWork - currentProgress;
 		}
-		if (this.currentProgress < this.totalWork) {
-			this.currentProgress += work;
-			super.internalWorked(work * this.scale);
+		if (currentProgress < totalWork) {
+			currentProgress += work;
+			super.internalWorked(work * scale);
 		}
 	}
 
+	@Override
 	public void worked(int work) {
 		if (work == IProgressMonitor.UNKNOWN) {
-			double delta = (this.totalWork - this.currentProgress) / this.totalWork;
-			delta /= this.unknownProgress < 25
+			double delta = (totalWork - currentProgress) / totalWork;
+			delta /= unknownProgress < 25
 					? 0.5
-					: (this.unknownProgress < 50
+					: unknownProgress < 50
 							? 1
-							: (this.unknownProgress < 75
-									? 2
-									: (this.unknownProgress < 85 ? 8 : (this.unknownProgress < 95 ? 25 : 100))));
-			this.unknownProgress += delta;
-			int offset = (int) (this.unknownProgress - this.currentProgress);
-			this.internalWorked(offset);
+							: unknownProgress < 75 ? 2 : unknownProgress < 85 ? 8 : unknownProgress < 95 ? 25 : 100;
+			unknownProgress += delta;
+			int offset = (int) (unknownProgress - currentProgress);
+			internalWorked(offset);
 		} else {
-			this.internalWorked(work);
+			internalWorked(work);
 		}
 	}
 
 	public void unknownProgress(int current) {
-		this.worked(IProgressMonitor.UNKNOWN);
+		worked(IProgressMonitor.UNKNOWN);
 	}
 
+	@Override
 	public void subTask(String name) {
 		long time = System.currentTimeMillis();
 		// redraw four times per second or if operation was changed
-		boolean operationChanged = this.subTaskOp == null || !name.startsWith(this.subTaskOp)
-				|| name.charAt(this.subTaskOp.length()) != ':' || name.endsWith(SVNMessages.Progress_Done);
-		if (this.lastTime == 0 || (time - this.lastTime) >= 250 || operationChanged) {
-			this.lastTime = time;
+		boolean operationChanged = subTaskOp == null || !name.startsWith(subTaskOp)
+				|| name.charAt(subTaskOp.length()) != ':' || name.endsWith(SVNMessages.Progress_Done);
+		if (lastTime == 0 || time - lastTime >= 250 || operationChanged) {
+			lastTime = time;
 			int idx = name.indexOf(':');
 			if (idx != -1) {
-				this.subTaskOp = name.endsWith(SVNMessages.Progress_Running) ? name.substring(0, idx) : null;
+				subTaskOp = name.endsWith(SVNMessages.Progress_Running) ? name.substring(0, idx) : null;
 			}
 			super.subTask(name);
 		}
 	}
 
 	public int getCurrentProgress() {
-		return (int) this.currentProgress;
+		return (int) currentProgress;
 	}
 
 }

@@ -17,6 +17,7 @@ package org.eclipse.team.svn.ui.crashrecovery;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.team.svn.core.BaseMessages;
 import org.eclipse.team.svn.core.extension.crashrecovery.ErrorDescription;
 import org.eclipse.team.svn.core.extension.crashrecovery.IResolutionHelper;
 import org.eclipse.team.svn.core.operation.CompositeOperation;
@@ -35,6 +36,7 @@ import org.eclipse.team.svn.ui.utility.UIMonitorUtility;
  */
 public class DiscardedLocationHelper implements IResolutionHelper {
 
+	@Override
 	public boolean acquireResolution(ErrorDescription description) {
 		if (description.code == ErrorDescription.REPOSITORY_LOCATION_IS_DISCARDED) {
 			Object[] context = (Object[]) description.context;
@@ -53,17 +55,15 @@ public class DiscardedLocationHelper implements IResolutionHelper {
 
 			final IProject project = (IProject) context[0];
 
-			final boolean[] solved = new boolean[] { false };
-			UIMonitorUtility.parallelSyncExec(new Runnable() {
-				public void run() {
-					MessageDialog dlg = new MessageDialog(
-							UIMonitorUtility.getShell(), SVNUIMessages.DiscardedLocationHelper_Dialog_Title, null,
-							SVNUIMessages.format(SVNUIMessages.DiscardedLocationHelper_Dialog_Message,
-									new String[] { project.getName(), location.getLabel() }),
-							MessageDialog.WARNING,
-							new String[] { IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL }, 0);
-					solved[0] = dlg.open() == 0;
-				}
+			final boolean[] solved = { false };
+			UIMonitorUtility.parallelSyncExec(() -> {
+				MessageDialog dlg = new MessageDialog(
+						UIMonitorUtility.getShell(), SVNUIMessages.DiscardedLocationHelper_Dialog_Title, null,
+						BaseMessages.format(SVNUIMessages.DiscardedLocationHelper_Dialog_Message,
+								new String[] { project.getName(), location.getLabel() }),
+						MessageDialog.WARNING,
+						new String[] { IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL }, 0);
+				solved[0] = dlg.open() == 0;
 			});
 
 			if (solved[0]) {

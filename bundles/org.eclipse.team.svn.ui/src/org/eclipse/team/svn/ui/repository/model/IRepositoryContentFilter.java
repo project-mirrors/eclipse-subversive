@@ -20,6 +20,6 @@ package org.eclipse.team.svn.ui.repository.model;
  * @author Sergiy Logvin
  */
 public interface IRepositoryContentFilter {
-	public boolean accept(Object obj);
+	boolean accept(Object obj);
 
 }

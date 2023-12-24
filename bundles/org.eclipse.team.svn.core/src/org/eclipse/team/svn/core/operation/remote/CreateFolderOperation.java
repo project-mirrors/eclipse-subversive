@@ -23,7 +23,6 @@ import org.eclipse.team.svn.core.BaseMessages;
 import org.eclipse.team.svn.core.SVNMessages;
 import org.eclipse.team.svn.core.connector.ISVNConnector;
 import org.eclipse.team.svn.core.connector.ISVNNotificationCallback;
-import org.eclipse.team.svn.core.connector.SVNNotification;
 import org.eclipse.team.svn.core.operation.IConsoleStream;
 import org.eclipse.team.svn.core.operation.IRevisionProvider;
 import org.eclipse.team.svn.core.operation.SVNProgressMonitor;
@@ -55,48 +54,44 @@ public class CreateFolderOperation extends AbstractRepositoryOperation implement
 		this.comment = comment;
 	}
 
+	@Override
 	protected void runImpl(final IProgressMonitor monitor) throws Exception {
-		this.revisionPair = new RevisionPair[1];
-		IRepositoryResource parent = this.operableData()[0];
+		revisionPair = new RevisionPair[1];
+		IRepositoryResource parent = operableData()[0];
 		final IRepositoryLocation location = parent.getRepositoryLocation();
-		ProgressMonitorUtility.setTaskInfo(monitor, this, parent.getUrl() + "/" + this.names[0]); //$NON-NLS-1$
+		ProgressMonitorUtility.setTaskInfo(monitor, this, parent.getUrl() + "/" + names[0]); //$NON-NLS-1$
 
-		Set<IRepositoryResource> fullSet = new HashSet<IRepositoryResource>();
-		for (int i = 0; i < this.names.length; i++) {
-			fullSet.addAll(Arrays.asList(SVNUtility.makeResourceSet(parent, this.names[i], false)));
+		Set<IRepositoryResource> fullSet = new HashSet<>();
+		for (String name2 : names) {
+			fullSet.addAll(Arrays.asList(SVNUtility.makeResourceSet(parent, name2, false)));
 		}
 		IRepositoryResource[] toBeCreated = fullSet.toArray(new IRepositoryResource[fullSet.size()]);
 
 		final String[] childUrls = SVNUtility.asURLArray(toBeCreated, true);
 		Arrays.sort(childUrls);
 
-		ISVNNotificationCallback notify = new ISVNNotificationCallback() {
-			public void notify(SVNNotification info) {
-				String[] path = childUrls;
-				CreateFolderOperation.this.revisionPair[0] = new RevisionPair(info.revision, path, location);
-				String message = SVNMessages.format(SVNMessages.Console_CommittedRevision,
-						new String[] { String.valueOf(info.revision) });
-				CreateFolderOperation.this.writeToConsole(IConsoleStream.LEVEL_OK, message);
-			}
+		ISVNNotificationCallback notify = info -> {
+			String[] path = childUrls;
+			revisionPair[0] = new RevisionPair(info.revision, path, location);
+			String message = BaseMessages.format(SVNMessages.Console_CommittedRevision,
+					new String[] { String.valueOf(info.revision) });
+			CreateFolderOperation.this.writeToConsole(IConsoleStream.LEVEL_OK, message);
 		};
 
-		this.complexWriteToConsole(new Runnable() {
-			public void run() {
-				CreateFolderOperation.this.writeToConsole(IConsoleStream.LEVEL_CMD, "svn mkdir"); //$NON-NLS-1$
-				for (int i = 0; i < childUrls.length && !monitor.isCanceled(); i++) {
-					CreateFolderOperation.this.writeToConsole(IConsoleStream.LEVEL_CMD,
-							" \"" + SVNUtility.decodeURL(childUrls[i]) + "\""); //$NON-NLS-1$ //$NON-NLS-2$
-				}
+		complexWriteToConsole(() -> {
+			CreateFolderOperation.this.writeToConsole(IConsoleStream.LEVEL_CMD, "svn mkdir"); //$NON-NLS-1$
+			for (int i = 0; i < childUrls.length && !monitor.isCanceled(); i++) {
 				CreateFolderOperation.this.writeToConsole(IConsoleStream.LEVEL_CMD,
-						" -m \"" + CreateFolderOperation.this.comment + "\"" //$NON-NLS-1$//$NON-NLS-2$
-								+ FileUtility.getUsernameParam(location.getUsername()) + "\n"); //$NON-NLS-1$
+						" \"" + SVNUtility.decodeURL(childUrls[i]) + "\""); //$NON-NLS-1$ //$NON-NLS-2$
 			}
+			CreateFolderOperation.this.writeToConsole(IConsoleStream.LEVEL_CMD, " -m \"" + comment + "\"" //$NON-NLS-1$//$NON-NLS-2$
+					+ FileUtility.getUsernameParam(location.getUsername()) + "\n"); //$NON-NLS-1$
 		});
 
 		ISVNConnector proxy = location.acquireSVNProxy();
 		try {
 			SVNUtility.addSVNNotifyListener(proxy, notify);
-			proxy.mkdir(childUrls, this.comment, ISVNConnector.Options.NONE, null,
+			proxy.mkdir(childUrls, comment, ISVNConnector.Options.NONE, null,
 					new SVNProgressMonitor(this, monitor, null));
 		} finally {
 			SVNUtility.removeSVNNotifyListener(proxy, notify);
@@ -106,12 +101,14 @@ public class CreateFolderOperation extends AbstractRepositoryOperation implement
 		ProgressMonitorUtility.progress(monitor, 1, 1);
 	}
 
+	@Override
 	public RevisionPair[] getRevisions() {
-		return this.revisionPair;
+		return revisionPair;
 	}
 
+	@Override
 	protected String getShortErrorMessage(Throwable t) {
-		return BaseMessages.format(super.getShortErrorMessage(t), new Object[] { this.name });
+		return BaseMessages.format(super.getShortErrorMessage(t), new Object[] { name });
 	}
 
 }

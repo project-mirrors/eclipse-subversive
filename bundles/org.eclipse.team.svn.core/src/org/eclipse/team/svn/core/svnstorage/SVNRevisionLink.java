@@ -32,32 +32,37 @@ public class SVNRevisionLink implements IRevisionLink {
 		this.repositoryResource = repositoryResource;
 	}
 
+	@Override
 	public String getComment() {
-		return this.comment == null ? "" : this.comment; //$NON-NLS-1$
+		return comment == null ? "" : comment; //$NON-NLS-1$
 	}
 
+	@Override
 	public void setComment(String comment) {
 		this.comment = comment;
 	}
 
+	@Override
 	public IRepositoryResource getRepositoryResource() {
-		return this.repositoryResource;
+		return repositoryResource;
 	}
 
+	@Override
 	public boolean equals(Object obj) {
 		if (obj == null || !(obj instanceof IRevisionLink)) {
 			return false;
 		}
 		IRevisionLink link = (IRevisionLink) obj;
-		return this.repositoryResource.equals(link.getRepositoryResource())
-				&& this.getComment().equals(link.getComment());
+		return repositoryResource.equals(link.getRepositoryResource()) && getComment().equals(link.getComment());
 	}
 
+	@Override
 	public int hashCode() {
-		return this.repositoryResource.hashCode();
+		return repositoryResource.hashCode();
 	}
 
+	@Override
 	public String toString() {
-		return this.repositoryResource.toString();
+		return repositoryResource.toString();
 	}
 }

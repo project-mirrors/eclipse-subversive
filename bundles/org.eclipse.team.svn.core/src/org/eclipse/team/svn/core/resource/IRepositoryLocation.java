@@ -37,19 +37,19 @@ public interface IRepositoryLocation extends IRepositoryBase, IRepositoryResourc
 	 * ONLY_REQUIRED_DATA - it's stored only necessary data required for restoring location. For example, it's used by setting location
 	 * property for project; we make location size as small as possible because project's property size is limited by Eclipse.
 	 */
-	public static enum LocationReferenceTypeEnum {
+	public enum LocationReferenceTypeEnum {
 		ALL, WITHOUT_REVISION_COMMENTS, ONLY_REQUIRED_DATA
 	}
 
-	public void addStateListener(IRepositoryLocationStateListener listener);
+	void addStateListener(IRepositoryLocationStateListener listener);
 
-	public void removeStateListener(IRepositoryLocationStateListener listener);
+	void removeStateListener(IRepositoryLocationStateListener listener);
 
-	public String getId();
+	String getId();
 
-	public void setLabel(String label);
+	void setLabel(String label);
 
-	public String getLabel();
+	String getLabel();
 
 	/*
 	 * As in some cases there can be limitations on reference string size or some
@@ -57,91 +57,91 @@ public interface IRepositoryLocation extends IRepositoryBase, IRepositoryResourc
 	 * information should be saved.
 	 * For more details, see LocationReferenceTypeEnum
 	 */
-	public String asReference(LocationReferenceTypeEnum locationReferenceType);
+	String asReference(LocationReferenceTypeEnum locationReferenceType);
 
-	public void fillLocationFromReference(String[] referenceParts);
+	void fillLocationFromReference(String[] referenceParts);
 
-	public String getUrlAsIs();
+	String getUrlAsIs();
 
-	public void setUrl(String url);
+	void setUrl(String url);
 
-	public String getRepositoryRootUrl();
+	String getRepositoryRootUrl();
 
-	public String getRepositoryUUID();
+	String getRepositoryUUID();
 
-	public IRepositoryRoot getRepositoryRoot();
+	IRepositoryRoot getRepositoryRoot();
 
-	public IRepositoryRoot getRoot();
+	IRepositoryRoot getRoot();
 
-	public void setStructureEnabled(boolean enabled);
+	void setStructureEnabled(boolean enabled);
 
-	public boolean isStructureEnabled();
+	boolean isStructureEnabled();
 
-	public void setTrunkLocation(String location);
+	void setTrunkLocation(String location);
 
-	public String getTrunkLocation();
+	String getTrunkLocation();
 
-	public String getUserInputTrunk();
+	String getUserInputTrunk();
 
-	public String getBranchesLocation();
+	String getBranchesLocation();
 
-	public void setBranchesLocation(String location);
+	void setBranchesLocation(String location);
 
-	public String getUserInputBranches();
+	String getUserInputBranches();
 
-	public String getTagsLocation();
+	String getTagsLocation();
 
-	public void setTagsLocation(String location);
+	void setTagsLocation(String location);
 
-	public String getUserInputTags();
+	String getUserInputTags();
 
-	public IRevisionLink[] getRevisionLinks();
+	IRevisionLink[] getRevisionLinks();
 
-	public void addRevisionLink(IRevisionLink link);
+	void addRevisionLink(IRevisionLink link);
 
-	public void removeRevisionLink(IRevisionLink link);
+	void removeRevisionLink(IRevisionLink link);
 
-	public String getUsername();
+	String getUsername();
 
-	public void setUsername(String username);
+	void setUsername(String username);
 
-	public String getPassword();
+	String getPassword();
 
-	public void setPassword(String password);
+	void setPassword(String password);
 
-	public boolean isPasswordSavedForRealm(String realm);
+	boolean isPasswordSavedForRealm(String realm);
 
-	public boolean isPasswordSaved();
+	boolean isPasswordSaved();
 
-	public void setPasswordSaved(boolean saved);
+	void setPasswordSaved(boolean saved);
 
-	public ISVNConnector acquireSVNProxy();
+	ISVNConnector acquireSVNProxy();
 
-	public void releaseSVNProxy(ISVNConnector proxy);
+	void releaseSVNProxy(ISVNConnector proxy);
 
-	public void reconfigure();
+	void reconfigure();
 
-	public void dispose();
+	void dispose();
 
-	public SSLSettings getSSLSettings();
+	SSLSettings getSSLSettings();
 
-	public SSHSettings getSSHSettings();
+	SSHSettings getSSHSettings();
 
-	public Collection<String> getRealms();
+	Collection<String> getRealms();
 
-	public void addRealm(String realm, IRepositoryLocation location);
+	void addRealm(String realm, IRepositoryLocation location);
 
-	public void removeRealm(String realm);
+	void removeRealm(String realm);
 
-	public Collection<IRepositoryLocation> getRealmLocations();
+	Collection<IRepositoryLocation> getRealmLocations();
 
-	public IRepositoryLocation getLocationForRealm(String realm);
+	IRepositoryLocation getLocationForRealm(String realm);
 
-	public boolean isAuthorNameEnabled();
+	boolean isAuthorNameEnabled();
 
-	public String getAuthorName();
+	String getAuthorName();
 
-	public void setAuthorNameEnabled(boolean isEnabled);
+	void setAuthorNameEnabled(boolean isEnabled);
 
-	public void setAuthorName(String name);
+	void setAuthorName(String name);
 }

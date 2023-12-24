@@ -20,7 +20,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.team.svn.core.SVNMessages;
 import org.eclipse.team.svn.core.connector.ISVNConnector;
 import org.eclipse.team.svn.core.operation.IConsoleStream;
-import org.eclipse.team.svn.core.operation.IUnprotectedOperation;
 import org.eclipse.team.svn.core.operation.SVNProgressMonitor;
 import org.eclipse.team.svn.core.operation.file.AbstractFileOperation;
 import org.eclipse.team.svn.core.operation.file.IFileProvider;
@@ -44,8 +43,9 @@ public class DeleteOperation extends AbstractFileOperation {
 		super("Operation_DeleteFile", SVNMessages.class, provider); //$NON-NLS-1$
 	}
 
+	@Override
 	protected void runImpl(IProgressMonitor monitor) throws Exception {
-		File[] files = FileUtility.shrinkChildNodes(this.operableData(), false);
+		File[] files = FileUtility.shrinkChildNodes(operableData(), false);
 		for (int i = 0; i < files.length && !monitor.isCanceled(); i++) {
 			final File current = files[i];
 			IRepositoryResource remote = SVNFileStorage.instance().asRepositoryResource(current, true);
@@ -56,14 +56,12 @@ public class DeleteOperation extends AbstractFileOperation {
 			} else {
 				IRepositoryLocation location = remote.getRepositoryLocation();
 				final ISVNConnector proxy = location.acquireSVNProxy();
-				this.protectStep(new IUnprotectedOperation() {
-					public void run(IProgressMonitor monitor) throws Exception {
-						DeleteOperation.this.writeToConsole(IConsoleStream.LEVEL_CMD,
-								"svn delete \"" + FileUtility.normalizePath(current.getAbsolutePath()) + "\"" //$NON-NLS-1$//$NON-NLS-2$
-										+ ISVNConnector.Options.asCommandLine(ISVNConnector.Options.FORCE) + "\n");
-						proxy.removeLocal(new String[] { current.getAbsolutePath() }, ISVNConnector.Options.FORCE,
-								new SVNProgressMonitor(DeleteOperation.this, monitor, null)); //$NON-NLS-1$
-					}
+				this.protectStep(monitor1 -> {
+					DeleteOperation.this.writeToConsole(IConsoleStream.LEVEL_CMD,
+							"svn delete \"" + FileUtility.normalizePath(current.getAbsolutePath()) + "\"" //$NON-NLS-1$//$NON-NLS-2$
+									+ ISVNConnector.Options.asCommandLine(ISVNConnector.Options.FORCE) + "\n");
+					proxy.removeLocal(new String[] { current.getAbsolutePath() }, ISVNConnector.Options.FORCE,
+							new SVNProgressMonitor(DeleteOperation.this, monitor1, null));
 				}, monitor, files.length);
 				location.releaseSVNProxy(proxy);
 			}

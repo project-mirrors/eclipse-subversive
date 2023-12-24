@@ -40,16 +40,17 @@ public abstract class AbstractGetFileContentOperation extends AbstractActionOper
 	}
 
 	public String getTemporaryPath() {
-		return this.tmpFile == null ? null : this.tmpFile.getAbsolutePath();
+		return tmpFile == null ? null : tmpFile.getAbsolutePath();
 	}
 
 	public InputStream getContent() {
-		final InputStream[] retVal = new InputStream[] { new ByteArrayInputStream(new byte[0]) };
-		if (this.tmpFile != null && this.tmpFile.exists()) {
+		final InputStream[] retVal = { new ByteArrayInputStream(new byte[0]) };
+		if (tmpFile != null && tmpFile.exists()) {
 			ProgressMonitorUtility.doTaskExternal(
 					new AbstractActionOperation("Operation_GetFileContent_CreateStream", SVNMessages.class) { //$NON-NLS-1$
+						@Override
 						protected void runImpl(IProgressMonitor monitor) throws Exception {
-							retVal[0] = new FileInputStream(AbstractGetFileContentOperation.this.tmpFile);
+							retVal[0] = new FileInputStream(tmpFile);
 						}
 					}, new NullProgressMonitor());
 		}
@@ -59,16 +60,16 @@ public abstract class AbstractGetFileContentOperation extends AbstractActionOper
 	public void setContent(final byte[] data) {
 		ProgressMonitorUtility
 				.doTaskExternal(new AbstractActionOperation("Operation_GetFileContent_SetContent", SVNMessages.class) { //$NON-NLS-1$
+					@Override
 					protected void runImpl(IProgressMonitor monitor) throws Exception {
-						if (AbstractGetFileContentOperation.this.tmpFile == null) {
-							AbstractGetFileContentOperation.this.tmpFile = AbstractGetFileContentOperation.this
-									.createTempFile();
+						if (tmpFile == null) {
+							tmpFile = AbstractGetFileContentOperation.this.createTempFile();
 						}
-						File parent = AbstractGetFileContentOperation.this.tmpFile.getParentFile();
+						File parent = tmpFile.getParentFile();
 						if (parent != null && !parent.exists()) {
 							parent.mkdirs();
 						}
-						FileOutputStream stream = new FileOutputStream(AbstractGetFileContentOperation.this.tmpFile);
+						FileOutputStream stream = new FileOutputStream(tmpFile);
 						try {
 							stream.write(data);
 						} finally {
@@ -82,7 +83,7 @@ public abstract class AbstractGetFileContentOperation extends AbstractActionOper
 	}
 
 	protected File createTempFile() throws IOException {
-		String extension = this.getExtension();
+		String extension = getExtension();
 		return SVNTeamPlugin.instance()
 				.getTemporaryFile(null,
 						"getfilecontent" + (extension != null && extension.length() > 0 ? "." + extension : ".tmp")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$

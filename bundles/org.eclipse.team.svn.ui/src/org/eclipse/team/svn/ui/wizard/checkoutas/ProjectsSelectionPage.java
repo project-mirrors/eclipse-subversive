@@ -20,10 +20,8 @@ import java.util.List;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.ColumnPixelData;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.ITableLabelProvider;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TableLayout;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -73,44 +71,45 @@ public class ProjectsSelectionPage extends AbstractVerifiedWizardPage {
 	}
 
 	public boolean isCheckoutAsFoldersSelected() {
-		return this.checkoutAsFolders;
+		return checkoutAsFolders;
 	}
 
 	public List getSelectedProjects() {
-		return this.selectedProjects;
+		return selectedProjects;
 	}
 
 	public boolean isRespectHierarchy() {
-		return !this.checkoutAsFolders && this.respectHierarchy;
+		return !checkoutAsFolders && respectHierarchy;
 	}
 
 	public void postInit(ProjectLocationSelectionPage locationPage, IRepositoryResource[] projects,
 			ITableLabelProvider labelProvider, IStructuredContentProvider contentProvider) {
 		this.locationPage = locationPage;
 		this.projects = projects;
-		this.listViewer.setLabelProvider(labelProvider);
-		this.listViewer.setContentProvider(contentProvider);
+		listViewer.setLabelProvider(labelProvider);
+		listViewer.setContentProvider(contentProvider);
 		if (projects.length > 1) {
-			this.setTitle(SVNUIMessages.ProjectsSelectionPage_Title_Multi);
-			this.setDescription(SVNUIMessages.ProjectsSelectionPage_Description_Multi);
+			setTitle(SVNUIMessages.ProjectsSelectionPage_Title_Multi);
+			setDescription(SVNUIMessages.ProjectsSelectionPage_Description_Multi);
 		} else {
-			this.setTitle(SVNUIMessages.ProjectsSelectionPage_Title_Single);
-			this.setDescription(SVNUIMessages.ProjectsSelectionPage_Description_Single);
+			setTitle(SVNUIMessages.ProjectsSelectionPage_Title_Single);
+			setDescription(SVNUIMessages.ProjectsSelectionPage_Description_Single);
 		}
 
-		this.checkoutAsFolderButton.setText(this.projects.length > 0
+		checkoutAsFolderButton.setText(this.projects.length > 0
 				? SVNUIMessages.ProjectsSelectionPage_CheckoutAsFolder_Multi
 				: SVNUIMessages.ProjectsSelectionPage_CheckoutAsFolder_Single);
-		this.checkoutAsProjectButton.setText(this.projects.length > 0
+		checkoutAsProjectButton.setText(this.projects.length > 0
 				? SVNUIMessages.ProjectsSelectionPage_CheckoutAsProject_Multi
 				: SVNUIMessages.ProjectsSelectionPage_CheckoutAsProject_Single);
 
-		this.listViewer.setInput(projects);
-		this.listViewer.setAllChecked(true);
-		this.refreshSelectedResult();
-		this.validateContent();
+		listViewer.setInput(projects);
+		listViewer.setAllChecked(true);
+		refreshSelectedResult();
+		validateContent();
 	}
 
+	@Override
 	public Composite createControlImpl(Composite parent) {
 		Composite composite = new Composite(parent, SWT.NONE);
 		GridLayout layout = new GridLayout();
@@ -126,50 +125,52 @@ public class ProjectsSelectionPage extends AbstractVerifiedWizardPage {
 		data = new GridData(GridData.FILL_HORIZONTAL);
 		coTypeComposite.setLayoutData(data);
 
-		this.checkoutAsFolderButton = new Button(coTypeComposite, SWT.RADIO);
+		checkoutAsFolderButton = new Button(coTypeComposite, SWT.RADIO);
 		data = new GridData(GridData.FILL_HORIZONTAL);
-		this.checkoutAsFolderButton.setLayoutData(data);
-		this.checkoutAsFolderButton.addSelectionListener(new SelectionAdapter() {
+		checkoutAsFolderButton.setLayoutData(data);
+		checkoutAsFolderButton.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
-				ProjectsSelectionPage.this.checkoutAsFolders = true;
-				ProjectsSelectionPage.this.respectHierarchyButton.setEnabled(false);
+				checkoutAsFolders = true;
+				respectHierarchyButton.setEnabled(false);
 				ProjectsSelectionPage.this.validateContent();
 			}
 		});
-		this.checkoutAsFolderButton.setSelection(false);
+		checkoutAsFolderButton.setSelection(false);
 
-		this.checkoutAsProjectButton = new Button(coTypeComposite, SWT.RADIO);
+		checkoutAsProjectButton = new Button(coTypeComposite, SWT.RADIO);
 		data = new GridData(GridData.FILL_HORIZONTAL);
-		this.checkoutAsProjectButton.setLayoutData(data);
-		this.checkoutAsProjectButton.addSelectionListener(new SelectionAdapter() {
+		checkoutAsProjectButton.setLayoutData(data);
+		checkoutAsProjectButton.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
-				ProjectsSelectionPage.this.checkoutAsFolders = false;
-				ProjectsSelectionPage.this.respectHierarchyButton.setEnabled(true);
+				checkoutAsFolders = false;
+				respectHierarchyButton.setEnabled(true);
 				ProjectsSelectionPage.this.validateContent();
 			}
 		});
-		this.checkoutAsProjectButton.setSelection(true);
+		checkoutAsProjectButton.setSelection(true);
 
-		this.listViewer = this.createViewer(composite);
+		listViewer = createViewer(composite);
 		data = new GridData(GridData.FILL_BOTH);
 		data.widthHint = IDialogConstants.ENTRY_FIELD_WIDTH;
-		this.listViewer.getTable().setLayoutData(data);
+		listViewer.getTable().setLayoutData(data);
 
-		this.listViewer.addSelectionChangedListener(new ISelectionChangedListener() {
-			public void selectionChanged(SelectionChangedEvent event) {
-				ProjectsSelectionPage.this.refreshSelectedResult();
-				ProjectsSelectionPage.this.validateContent();
-			}
+		listViewer.addSelectionChangedListener(event -> {
+			ProjectsSelectionPage.this.refreshSelectedResult();
+			ProjectsSelectionPage.this.validateContent();
 		});
 		layout = null;
 
-		this.attachTo(this.listViewer.getTable(), new AbstractVerifier() {
+		attachTo(listViewer.getTable(), new AbstractVerifier() {
+			@Override
 			protected String getWarningMessage(Control input) {
 				return null;
 			}
 
+			@Override
 			protected String getErrorMessage(Control input) {
-				Object[] elements = ProjectsSelectionPage.this.listViewer.getCheckedElements();
+				Object[] elements = listViewer.getCheckedElements();
 				return elements == null || elements.length == 0
 						? SVNUIMessages.ProjectsSelectionPage_CheckoutAsProject_Verifier_Error
 						: null;
@@ -200,8 +201,9 @@ public class ProjectsSelectionPage extends AbstractVerifiedWizardPage {
 		data.widthHint = DefaultDialog.computeButtonWidth(selectButton);
 		selectButton.setLayoutData(data);
 		selectButton.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
-				ProjectsSelectionPage.this.listViewer.setAllChecked(true);
+				listViewer.setAllChecked(true);
 				ProjectsSelectionPage.this.refreshSelectedResult();
 				ProjectsSelectionPage.this.validateContent();
 			}
@@ -213,24 +215,24 @@ public class ProjectsSelectionPage extends AbstractVerifiedWizardPage {
 		data.widthHint = DefaultDialog.computeButtonWidth(deselectButton);
 		deselectButton.setLayoutData(data);
 		deselectButton.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
-				ProjectsSelectionPage.this.listViewer.setAllChecked(false);
+				listViewer.setAllChecked(false);
 				ProjectsSelectionPage.this.refreshSelectedResult();
 				ProjectsSelectionPage.this.validateContent();
 			}
 		});
 
-		this.respectHierarchyButton = new Button(bottomPart, SWT.CHECK);
-		this.respectHierarchyButton.setText(SVNUIMessages.ProjectsSelectionPage_RespectHierarchy);
-		this.respectHierarchyButton
-				.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END | GridData.FILL_HORIZONTAL));
-		this.respectHierarchyButton.addSelectionListener(new SelectionAdapter() {
+		respectHierarchyButton = new Button(bottomPart, SWT.CHECK);
+		respectHierarchyButton.setText(SVNUIMessages.ProjectsSelectionPage_RespectHierarchy);
+		respectHierarchyButton.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END | GridData.FILL_HORIZONTAL));
+		respectHierarchyButton.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
-				ProjectsSelectionPage.this.respectHierarchy = ((Button) e.widget).getSelection();
-				if (ProjectsSelectionPage.this.locationPage != null) {
-					ProjectsSelectionPage.this.locationPage
-							.setUseDefaultLocation(!ProjectsSelectionPage.this.respectHierarchy);
-					ProjectsSelectionPage.this.locationPage.validateContent();
+				respectHierarchy = ((Button) e.widget).getSelection();
+				if (locationPage != null) {
+					locationPage.setUseDefaultLocation(!respectHierarchy);
+					locationPage.validateContent();
 				}
 				ProjectsSelectionPage.this.validateContent();
 			}
@@ -272,14 +274,14 @@ public class ProjectsSelectionPage extends AbstractVerifiedWizardPage {
 	}
 
 	public void refreshSelectedResult() {
-		if (this.projects != null) {
+		if (projects != null) {
 			ArrayList list = new ArrayList();
-			for (int i = 0; i < this.projects.length; i++) {
-				if (this.listViewer.getChecked(this.projects[i])) {
-					list.add(this.projects[i]);
+			for (IRepositoryResource project : projects) {
+				if (listViewer.getChecked(project)) {
+					list.add(project);
 				}
 			}
-			this.selectedProjects = list;
+			selectedProjects = list;
 		}
 	}
 

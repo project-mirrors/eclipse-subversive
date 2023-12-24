@@ -58,15 +58,15 @@ public abstract class AbstractSVNSyncInfo extends SyncInfo {
 	}
 
 	public ILocalResource getLocalResource() {
-		return this.local;
+		return local;
 	}
 
 	public int getLocalKind() {
-		return this.localKind;
+		return localKind;
 	}
 
 	public int getRemoteKind() {
-		return this.remoteKind;
+		return remoteKind;
 	}
 
 	/**
@@ -76,19 +76,19 @@ public abstract class AbstractSVNSyncInfo extends SyncInfo {
 	 * remote resource which if there are no remote changes is equal to local resource from which we can easily determine status.
 	 */
 	public ILocalResource getRemoteChangeResource() {
-		return this.remoteStatus != null ? this.remoteStatus : this.local;
+		return remoteStatus != null ? remoteStatus : local;
 	}
 
 	public ILocalResource getBaseChangeResource() {
-		return this.local;
+		return local;
 	}
 
 	protected boolean isLinked(String kind, int mask) {
-		return IStateFilter.SF_LINKED.accept(this.getLocal(), kind, mask);
+		return IStateFilter.SF_LINKED.accept(getLocal(), kind, mask);
 	}
 
 	protected boolean isReplaced(String kind, int mask) {
-		return AbstractSVNSyncInfo.isReplaced(this.getLocal(), kind, mask);
+		return AbstractSVNSyncInfo.isReplaced(getLocal(), kind, mask);
 	}
 
 	protected static boolean isReplaced(IResource resource, String kind, int mask) {
@@ -96,7 +96,7 @@ public abstract class AbstractSVNSyncInfo extends SyncInfo {
 	}
 
 	protected boolean isDeleted(String kind, int mask) {
-		return AbstractSVNSyncInfo.isDeleted(this.getLocal(), kind, mask);
+		return AbstractSVNSyncInfo.isDeleted(getLocal(), kind, mask);
 	}
 
 	protected static boolean isDeleted(IResource resource, String kind, int mask) {
@@ -104,23 +104,23 @@ public abstract class AbstractSVNSyncInfo extends SyncInfo {
 	}
 
 	protected boolean isModified(String kind, int mask) {
-		return IStateFilter.SF_MODIFIED.accept(this.getLocal(), kind, mask);
+		return IStateFilter.SF_MODIFIED.accept(getLocal(), kind, mask);
 	}
 
 	protected boolean isConflicted(String kind, int mask) {
-		return IStateFilter.SF_CONFLICTING.accept(this.getLocal(), kind, mask);
+		return IStateFilter.SF_CONFLICTING.accept(getLocal(), kind, mask);
 	}
 
 	protected boolean isTreeConflicted(String kind, int mask) {
-		return IStateFilter.SF_TREE_CONFLICTING.accept(this.getLocal(), kind, mask);
+		return IStateFilter.SF_TREE_CONFLICTING.accept(getLocal(), kind, mask);
 	}
 
 	protected boolean isNotModified(String kind, int mask) {
-		return IStateFilter.SF_NOTMODIFIED.accept(this.getLocal(), kind, mask);
+		return IStateFilter.SF_NOTMODIFIED.accept(getLocal(), kind, mask);
 	}
 
 	protected boolean isNonVersioned(String kind, int mask) {
-		return AbstractSVNSyncInfo.isNonVersioned(this.getLocal(), kind, mask);
+		return AbstractSVNSyncInfo.isNonVersioned(getLocal(), kind, mask);
 	}
 
 	protected static boolean isNonVersioned(IResource resource, String kind, int mask) {
@@ -128,7 +128,7 @@ public abstract class AbstractSVNSyncInfo extends SyncInfo {
 	}
 
 	protected boolean isNotExists(String kind, int mask) {
-		return AbstractSVNSyncInfo.isNotExists(this.getLocal(), kind, mask);
+		return AbstractSVNSyncInfo.isNotExists(getLocal(), kind, mask);
 	}
 
 	protected static boolean isNotExists(IResource resource, String kind, int mask) {
@@ -136,7 +136,7 @@ public abstract class AbstractSVNSyncInfo extends SyncInfo {
 	}
 
 	protected boolean isIgnored(String kind, int mask) {
-		return AbstractSVNSyncInfo.isIgnored(this.getLocal(), kind, mask);
+		return AbstractSVNSyncInfo.isIgnored(getLocal(), kind, mask);
 	}
 
 	protected static boolean isIgnored(IResource resource, String kind, int mask) {
@@ -144,7 +144,7 @@ public abstract class AbstractSVNSyncInfo extends SyncInfo {
 	}
 
 	protected boolean isAdded(String kind, int mask) {
-		return AbstractSVNSyncInfo.isAdded(this.getLocal(), kind, mask);
+		return AbstractSVNSyncInfo.isAdded(getLocal(), kind, mask);
 	}
 
 	protected static boolean isAdded(IResource resource, String kind, int mask) {
@@ -159,7 +159,7 @@ public abstract class AbstractSVNSyncInfo extends SyncInfo {
 			return null;
 		}
 
-		return (local instanceof ILocalFolder)
+		return local instanceof ILocalFolder
 				? (IResourceVariant) new BaseFolderVariant(local)
 				: new BaseFileVariant(local);
 	}
@@ -174,17 +174,13 @@ public abstract class AbstractSVNSyncInfo extends SyncInfo {
 		IResource resource = local.getResource();
 
 		String remoteKind = remote == null
-				? (isNonVersioned(resource, localKind, localMask) ? IStateFilter.ST_NOTEXISTS : IStateFilter.ST_NORMAL)
+				? isNonVersioned(resource, localKind, localMask) ? IStateFilter.ST_NOTEXISTS : IStateFilter.ST_NORMAL
 				: remote.getStatus();
 		int remoteMask = remote == null ? 0 : remote.getChangeMask();
 
 		//remote: not_exist remotely
-		if (isNonVersioned(resource, remoteKind, remoteMask)) {
-			return null;
-		}
-
 		//deleted remotely
-		if (!isReplaced(resource, remoteKind, remoteMask) && isDeleted(resource, remoteKind, remoteMask)) {
+		if (isNonVersioned(resource, remoteKind, remoteMask) || (!isReplaced(resource, remoteKind, remoteMask) && isDeleted(resource, remoteKind, remoteMask))) {
 			return null;
 		}
 
@@ -194,11 +190,11 @@ public abstract class AbstractSVNSyncInfo extends SyncInfo {
 		}
 
 		if (remote == null) {
-			return (local instanceof ILocalFolder)
+			return local instanceof ILocalFolder
 					? (IResourceVariant) new VirtualRemoteFolderVariant(local)
 					: new VirtualRemoteFileVariant(local);
 		}
-		return (remote instanceof ILocalFolder)
+		return remote instanceof ILocalFolder
 				? (IResourceVariant) new RemoteFolderVariant(remote)
 				: new RemoteFileVariant(remote);
 	}

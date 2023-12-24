@@ -25,33 +25,33 @@ import org.eclipse.osgi.util.NLS;
  * @author Alexander Gurov
  */
 public interface IActionOperation {
-	public static final int OK = 0;
+	int OK = 0;
 
-	public static final int ERROR = 1;
+	int ERROR = 1;
 
-	public static final int NOTEXECUTED = 2;
+	int NOTEXECUTED = 2;
 
-	public static final int DEFAULT_WEIGHT = 1;
+	int DEFAULT_WEIGHT = 1;
 
-	public IActionOperation run(IProgressMonitor monitor);
+	IActionOperation run(IProgressMonitor monitor);
 
-	public IStatus getStatus();
+	IStatus getStatus();
 
-	public void reportStatus(int severity, String message, Throwable t);
+	void reportStatus(int severity, String message, Throwable t);
 
-	public int getExecutionState();
+	int getExecutionState();
 
-	public String getOperationName();
+	String getOperationName();
 
-	public int getOperationWeight();
+	int getOperationWeight();
 
-	public String getId();
+	String getId();
 
-	public Class<? extends NLS> getMessagesClass();
+	Class<? extends NLS> getMessagesClass();
 
-	public ISchedulingRule getSchedulingRule();
+	ISchedulingRule getSchedulingRule();
 
-	public void setConsoleStream(IConsoleStream stream);
+	void setConsoleStream(IConsoleStream stream);
 
-	public IConsoleStream getConsoleStream();
+	IConsoleStream getConsoleStream();
 }

@@ -28,16 +28,18 @@ import org.eclipse.ui.model.IWorkbenchAdapter;
  * @author Sergiy Logvin
  */
 public class RepositoryBrowserContentProvider extends BaseWorkbenchContentProvider {
+	@Override
 	public boolean hasChildren(Object element) {
-		IWorkbenchAdapter adapter = this.getAdapter(element);
+		IWorkbenchAdapter adapter = getAdapter(element);
 		if (adapter instanceof IParentTreeNode) {
 			return ((IParentTreeNode) adapter).hasChildren();
 		}
 		return false;
 	}
 
+	@Override
 	public Object[] getChildren(Object parentElement) {
-		IWorkbenchAdapter adapter = this.getAdapter(parentElement);
+		IWorkbenchAdapter adapter = getAdapter(parentElement);
 
 		if (adapter instanceof RepositoryFolder) {
 			RepositoryFolder folder = (RepositoryFolder) adapter;

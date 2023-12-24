@@ -64,33 +64,34 @@ public class CreatePatchOperation extends AbstractRepositoryOperation {
 		this.diffOptions = diffOptions;
 	}
 
+	@Override
 	protected void runImpl(IProgressMonitor monitor) throws Exception {
-		IRepositoryResource first = this.operableData()[0];
-		IRepositoryResource second = this.operableData()[1];
+		IRepositoryResource first = operableData()[0];
+		IRepositoryResource second = operableData()[1];
 		IRepositoryLocation location = first.getRepositoryLocation();
 		ISVNConnector proxy = location.acquireSVNProxy();
 		try {
 			SVNEntryRevisionReference ref1 = SVNUtility.getEntryRevisionReference(first);
 			SVNEntryRevisionReference ref2 = SVNUtility.getEntryRevisionReference(second);
 			if (SVNUtility.useSingleReferenceSignature(ref1, ref2)) {
-				this.writeToConsole(IConsoleStream.LEVEL_CMD,
+				writeToConsole(IConsoleStream.LEVEL_CMD,
 						"svn diff -r " + ref1.revision + ":" + ref2.revision + " \"" + first.getUrl() + "@" //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$//$NON-NLS-4$
-								+ ref1.pegRevision + "\"" + (this.recurse ? "" : " -N") //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
-								+ ISVNConnector.Options.asCommandLine(this.options)
-								+ ISVNConnector.DiffOptions.asCommandLine(this.diffOptions)
+								+ ref1.pegRevision + "\"" + (recurse ? "" : " -N") //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
+								+ ISVNConnector.Options.asCommandLine(options)
+								+ ISVNConnector.DiffOptions.asCommandLine(diffOptions)
 								+ FileUtility.getUsernameParam(location.getUsername()) + "\n"); //$NON-NLS-1$
-				proxy.diff(ref1, new SVNRevisionRange(ref1.revision, ref2.revision), null, this.fileName,
-						this.recurse ? SVNDepth.INFINITY : SVNDepth.IMMEDIATES, this.options, null, this.diffOptions,
+				proxy.diff(ref1, new SVNRevisionRange(ref1.revision, ref2.revision), null, fileName,
+						recurse ? SVNDepth.INFINITY : SVNDepth.IMMEDIATES, options, null, diffOptions,
 						new SVNProgressMonitor(this, monitor, null));
 			} else {
-				this.writeToConsole(IConsoleStream.LEVEL_CMD,
+				writeToConsole(IConsoleStream.LEVEL_CMD,
 						"svn diff \"" + first.getUrl() + "@" + first.getSelectedRevision() + "\" \"" + second.getUrl() //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
-								+ "@" + second.getSelectedRevision() + "\"" + (this.recurse ? "" : " -N") //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$//$NON-NLS-4$
-								+ ISVNConnector.Options.asCommandLine(this.options)
-								+ ISVNConnector.DiffOptions.asCommandLine(this.diffOptions)
+								+ "@" + second.getSelectedRevision() + "\"" + (recurse ? "" : " -N") //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$//$NON-NLS-4$
+								+ ISVNConnector.Options.asCommandLine(options)
+								+ ISVNConnector.DiffOptions.asCommandLine(diffOptions)
 								+ FileUtility.getUsernameParam(location.getUsername()) + "\n"); //$NON-NLS-1$
-				proxy.diffTwo(ref1, ref2, null, this.fileName, this.recurse ? SVNDepth.INFINITY : SVNDepth.IMMEDIATES,
-						this.options, null, this.diffOptions, new SVNProgressMonitor(this, monitor, null));
+				proxy.diffTwo(ref1, ref2, null, fileName, recurse ? SVNDepth.INFINITY : SVNDepth.IMMEDIATES, options,
+						null, diffOptions, new SVNProgressMonitor(this, monitor, null));
 			}
 		} finally {
 			location.releaseSVNProxy(proxy);

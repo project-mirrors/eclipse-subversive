@@ -19,7 +19,6 @@ import org.eclipse.team.svn.core.SVNMessages;
 import org.eclipse.team.svn.core.connector.ISVNConnector;
 import org.eclipse.team.svn.core.connector.SVNEntryRevisionReference;
 import org.eclipse.team.svn.core.connector.SVNRevision.Kind;
-import org.eclipse.team.svn.core.operation.IUnprotectedOperation;
 import org.eclipse.team.svn.core.operation.SVNProgressMonitor;
 import org.eclipse.team.svn.core.resource.IRepositoryFile;
 import org.eclipse.team.svn.core.resource.IRepositoryLocation;
@@ -45,25 +44,22 @@ public class LocateResourceURLInHistoryOperation extends AbstractRepositoryOpera
 		super("Operation_LocateURLInHistory", SVNMessages.class, provider); //$NON-NLS-1$
 	}
 
+	@Override
 	public IRepositoryResource[] getRepositoryResources() {
-		return this.converted;
+		return converted;
 	}
 
+	@Override
 	protected void runImpl(final IProgressMonitor monitor) throws Exception {
-		IRepositoryResource[] resources = this.operableData();
-		this.converted = new IRepositoryResource[resources.length];
-		System.arraycopy(resources, 0, this.converted, 0, resources.length);
+		IRepositoryResource[] resources = operableData();
+		converted = new IRepositoryResource[resources.length];
+		System.arraycopy(resources, 0, converted, 0, resources.length);
 
 		for (int i = 0; i < resources.length && !monitor.isCanceled(); i++) {
 			final int idx = i;
 			ProgressMonitorUtility.setTaskInfo(monitor, this, resources[i].getUrl());
-			if (this.converted[i].getSelectedRevision().getKind() == Kind.NUMBER) {
-				this.protectStep(new IUnprotectedOperation() {
-					public void run(IProgressMonitor monitor) throws Exception {
-						LocateResourceURLInHistoryOperation.this.converted[idx] = LocateResourceURLInHistoryOperation.this
-								.processEntry(LocateResourceURLInHistoryOperation.this.converted[idx], monitor);
-					}
-				}, monitor, resources.length);
+			if (converted[i].getSelectedRevision().getKind() == Kind.NUMBER) {
+				this.protectStep(monitor1 -> converted[idx] = LocateResourceURLInHistoryOperation.this.processEntry(converted[idx], monitor1), monitor, resources.length);
 			}
 		}
 	}

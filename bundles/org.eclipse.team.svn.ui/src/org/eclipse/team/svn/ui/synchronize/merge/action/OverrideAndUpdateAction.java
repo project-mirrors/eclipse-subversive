@@ -56,8 +56,10 @@ public class OverrideAndUpdateAction extends AbstractSynchronizeModelAction {
 		super(text, configuration);
 	}
 
+	@Override
 	protected FastSyncInfoFilter getSyncInfoFilter() {
 		return new FastSyncInfoFilter.SyncInfoDirectionFilter(new int[] { SyncInfo.CONFLICTING, SyncInfo.INCOMING }) {
+			@Override
 			public boolean select(SyncInfo info) {
 				if (super.select(info) && info instanceof IMergeSyncInfo) {
 					//check if there's a tree conflict
@@ -74,16 +76,17 @@ public class OverrideAndUpdateAction extends AbstractSynchronizeModelAction {
 		};
 	}
 
+	@Override
 	protected IActionOperation getOperation(ISynchronizePageConfiguration configuration, IDiffElement[] elements) {
-		AbstractSVNSyncInfo[] infos = this.getSVNSyncInfos();
-		HashMap<String, String> remote2local = new HashMap<String, String>();
-		ArrayList<IRepositoryResource> remoteSet = new ArrayList<IRepositoryResource>();
-		ArrayList<IResource> localSet = new ArrayList<IResource>();
-		for (int i = 0; i < infos.length; i++) {
-			IResource resource = infos[i].getLocal();
+		AbstractSVNSyncInfo[] infos = getSVNSyncInfos();
+		HashMap<String, String> remote2local = new HashMap<>();
+		ArrayList<IRepositoryResource> remoteSet = new ArrayList<>();
+		ArrayList<IResource> localSet = new ArrayList<>();
+		for (AbstractSVNSyncInfo element : infos) {
+			IResource resource = element.getLocal();
 			localSet.add(resource);
-			if (infos[i] instanceof IMergeSyncInfo) {
-				IResourceChange resourceChange = ((IMergeSyncInfo) infos[i]).getRemoteResource();
+			if (element instanceof IMergeSyncInfo) {
+				IResourceChange resourceChange = ((IMergeSyncInfo) element).getRemoteResource();
 				if (resourceChange != null) {
 					IRepositoryResource remote = resourceChange.getOriginator();
 					remoteSet.add(remote);

@@ -35,9 +35,10 @@ public class EditTreeConflictsAction extends AbstractSynchronizeModelAction {
 
 	public EditTreeConflictsAction(String text, ISynchronizePageConfiguration configuration) {
 		super(text, configuration);
-		this.actionHelper = new EditTreeConflictsActionHelper(this, configuration);
+		actionHelper = new EditTreeConflictsActionHelper(this, configuration);
 	}
 
+	@Override
 	protected boolean updateSelection(IStructuredSelection selection) {
 		if (super.updateSelection(selection) && selection.size() == 1) {
 			if (selection.getFirstElement() instanceof SyncInfoModelElement) {
@@ -54,7 +55,8 @@ public class EditTreeConflictsAction extends AbstractSynchronizeModelAction {
 		return false;
 	}
 
+	@Override
 	protected IActionOperation getOperation(ISynchronizePageConfiguration configuration, IDiffElement[] elements) {
-		return this.actionHelper.getOperation();
+		return actionHelper.getOperation();
 	}
 }

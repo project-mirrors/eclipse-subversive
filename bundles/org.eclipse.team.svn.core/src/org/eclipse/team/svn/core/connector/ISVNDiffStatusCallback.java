@@ -30,5 +30,5 @@ public interface ISVNDiffStatusCallback {
 	 * @param status
 	 *            the {@link SVNDiffStatus} entry instance
 	 */
-	public void next(SVNDiffStatus status);
+	void next(SVNDiffStatus status);
 }

@@ -24,6 +24,7 @@ public class UserVariable extends PredefinedVariable {
 		super(domain, data);
 	}
 
+	@Override
 	public String getDescription() {
 		return this.getDescription("_user_defined_data"); //$NON-NLS-1$
 	}

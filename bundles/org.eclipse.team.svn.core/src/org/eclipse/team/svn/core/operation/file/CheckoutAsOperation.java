@@ -54,9 +54,10 @@ public class CheckoutAsOperation extends AbstractFileOperation {
 		this.override = override;
 	}
 
+	@Override
 	protected void runImpl(IProgressMonitor monitor) throws Exception {
-		File to = this.operableData()[0];
-		if (this.override) {
+		File to = operableData()[0];
+		if (override) {
 			File[] children = to.listFiles();
 			if (children != null) {
 				for (File child : children) {
@@ -67,12 +68,12 @@ public class CheckoutAsOperation extends AbstractFileOperation {
 
 		to.mkdirs();
 
-		IRepositoryLocation location = this.resource.getRepositoryLocation();
+		IRepositoryLocation location = resource.getRepositoryLocation();
 		ISVNConnector proxy = location.acquireSVNProxy();
 		try {
 			String path = to.getAbsolutePath();
 			//this.writeToConsole(IConsoleStream.LEVEL_CMD, "svn checkout \"" + this.resource.getUrl() + "@" + this.resource.getPegRevision() + "\" -r " + this.resource.getSelectedRevision() + (this.recursive ? "" : " -N") + " --ignore-externals \"" + FileUtility.normalizePath(path) + "\"" + FileUtility.getUsernameParam(location.getUsername()) + "\n");
-			proxy.checkout(SVNUtility.getEntryRevisionReference(this.resource), path, this.depth, this.options,
+			proxy.checkout(SVNUtility.getEntryRevisionReference(resource), path, depth, options,
 					new SVNProgressMonitor(this, monitor, null));
 		} finally {
 			location.releaseSVNProxy(proxy);

@@ -20,7 +20,7 @@ package org.eclipse.team.svn.ui.decorator;
  * @author Alexander Gurov
  */
 public interface IVariable {
-	public String getName();
+	String getName();
 
-	public String getDescription();
+	String getDescription();
 }

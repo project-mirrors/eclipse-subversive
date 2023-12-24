@@ -41,21 +41,22 @@ import org.eclipse.team.svn.ui.panel.local.RevertPanel;
 public class RevertAction extends AbstractRecursiveTeamAction {
 
 	public RevertAction() {
-		super();
 	}
 
+	@Override
 	public void runImpl(IAction action) {
 		IResource[] changedResources = this.getSelectedResourcesRecursive(RevertAction.SF_REVERTABLE_OR_NEW);
 		IResource[] userSelectedResources = this.getSelectedResources();
-		CompositeOperation revertOp = RevertAction.getRevertOperation(this.getShell(), changedResources,
+		CompositeOperation revertOp = RevertAction.getRevertOperation(getShell(), changedResources,
 				userSelectedResources);
 		if (revertOp != null) {
-			this.runScheduled(revertOp);
+			runScheduled(revertOp);
 		}
 	}
 
+	@Override
 	public boolean isEnabled() {
-		return this.checkForResourcesPresenceRecursive(RevertAction.SF_REVERTABLE_OR_NEW);
+		return checkForResourcesPresenceRecursive(RevertAction.SF_REVERTABLE_OR_NEW);
 	}
 
 	public static CompositeOperation getRevertOperation(Shell shell, IResource[] changedResources,
@@ -93,11 +94,13 @@ public class RevertAction extends AbstractRecursiveTeamAction {
 
 	public static IStateFilter SF_REVERTABLE_OR_NEW = new IStateFilter.AbstractStateFilter() {
 
+		@Override
 		protected boolean acceptImpl(ILocalResource local, IResource resource, String state, int mask) {
 			return IStateFilter.SF_REVERTABLE.accept(resource, state, mask)
 					|| IStateFilter.SF_NEW.accept(resource, state, mask);
 		}
 
+		@Override
 		protected boolean allowsRecursionImpl(ILocalResource local, IResource resource, String state, int mask) {
 			return IStateFilter.SF_REVERTABLE.allowsRecursion(resource, state, mask)
 					|| IStateFilter.SF_NEW.allowsRecursion(resource, state, mask);

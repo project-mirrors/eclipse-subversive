@@ -34,19 +34,21 @@ public class ShowOutgoingPropertiesAction extends AbstractSynchronizeModelAction
 
 	public ShowOutgoingPropertiesAction(String text, ISynchronizePageConfiguration configuration) {
 		super(text, configuration);
-		this.actionHelper = new ShowOutgoingPropertiesActionHelper(this, configuration);
+		actionHelper = new ShowOutgoingPropertiesActionHelper(this, configuration);
 	}
 
 	public ShowOutgoingPropertiesAction(String text, ISynchronizePageConfiguration configuration,
 			ISelectionProvider selectionProvider) {
 		super(text, configuration, selectionProvider);
-		this.actionHelper = new ShowOutgoingPropertiesActionHelper(this, configuration);
+		actionHelper = new ShowOutgoingPropertiesActionHelper(this, configuration);
 	}
 
+	@Override
 	protected boolean needsToSaveDirtyEditors() {
 		return false;
 	}
 
+	@Override
 	protected boolean updateSelection(IStructuredSelection selection) {
 		super.updateSelection(selection);
 		if (selection.size() == 1) {
@@ -56,8 +58,9 @@ public class ShowOutgoingPropertiesAction extends AbstractSynchronizeModelAction
 		return false;
 	}
 
+	@Override
 	protected IActionOperation getOperation(ISynchronizePageConfiguration configuration, IDiffElement[] elements) {
-		return this.actionHelper.getOperation();
+		return actionHelper.getOperation();
 	}
 
 }

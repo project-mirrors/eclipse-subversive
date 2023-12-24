@@ -25,17 +25,17 @@ public interface ICommentManager {
 	/**
 	 * Previous comments section key
 	 */
-	public static final String PREVIOUS_COMMENTS_HEADER = "CommentComposite_Previous"; //$NON-NLS-1$
+	String PREVIOUS_COMMENTS_HEADER = "CommentComposite_Previous"; //$NON-NLS-1$
 
 	/**
 	 * Header of the section of the template comments which are defined in preferences
 	 */
-	public static final String TEMPLATE_HEADER = "CommentComposite_Template"; //$NON-NLS-1$
+	String TEMPLATE_HEADER = "CommentComposite_Template"; //$NON-NLS-1$
 
 	/**
 	 * Header of the section of comment templates defined in the tsvn:logtemplate property
 	 */
-	public static final String TSVN_LOGTEMPLATE_HEADER = "CommentComposite_LogTemplate"; //$NON-NLS-1$
+	String TSVN_LOGTEMPLATE_HEADER = "CommentComposite_LogTemplate"; //$NON-NLS-1$
 
 	/**
 	 * Adds a comment template section. Should be called at the initialization time. Calling later is basically useless. The sections
@@ -47,7 +47,7 @@ public interface ICommentManager {
 	 * @param sectionHint
 	 *            section hint, visible when there are no templates to display in the section
 	 */
-	public void addCommentsSection(String sectionHeader, String sectionHint);
+	void addCommentsSection(String sectionHeader, String sectionHint);
 
 	/**
 	 * Adds comment templates to the section's end. Should be called at the initialization time. Calling later is basically useless.
@@ -55,14 +55,14 @@ public interface ICommentManager {
 	 * @param sectionHeader
 	 * @param templates
 	 */
-	public void addCommentsToSection(String sectionHeader, Collection<String> templates);
+	void addCommentsToSection(String sectionHeader, Collection<String> templates);
 
 	/**
 	 * Returns the current message text. Could be called any time.
 	 * 
 	 * @return
 	 */
-	public String getMessage();
+	String getMessage();
 
 	/**
 	 * Redefines the current message text. Should be called in UI thread context if called not at the initialization time (using saved
@@ -70,7 +70,7 @@ public interface ICommentManager {
 	 * 
 	 * @param message
 	 */
-	public void setMessage(String message);
+	void setMessage(String message);
 
 	/**
 	 * Returns the comment which was entered by user before pressing the cancel button. It will be stored until "Ok" button is pressed or
@@ -79,5 +79,5 @@ public interface ICommentManager {
 	 * 
 	 * @return
 	 */
-	public String getTemporarySavedComment();
+	String getTemporarySavedComment();
 }

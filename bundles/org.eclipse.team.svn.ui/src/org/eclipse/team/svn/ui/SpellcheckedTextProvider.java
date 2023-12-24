@@ -17,14 +17,13 @@ package org.eclipse.team.svn.ui;
 import java.util.Iterator;
 
 import org.eclipse.jface.text.Document;
+import org.eclipse.jface.text.ITextOperationTarget;
 import org.eclipse.jface.text.MarginPainter;
 import org.eclipse.jface.text.source.AnnotationModel;
 import org.eclipse.jface.text.source.IAnnotationAccess;
 import org.eclipse.jface.text.source.SourceViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyledText;
-import org.eclipse.swt.events.DisposeEvent;
-import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.layout.GridData;
@@ -72,11 +71,7 @@ public class SpellcheckedTextProvider {
 			support.setAnnotationPreference((AnnotationPreference) e.next());
 		}
 		support.install(EditorsUI.getPreferenceStore());
-		sourceViewer.getTextWidget().addDisposeListener(new DisposeListener() {
-			public void widgetDisposed(DisposeEvent e) {
-				support.uninstall();
-			}
-		});
+		sourceViewer.getTextWidget().addDisposeListener(e -> support.uninstall());
 		Document document = new Document();
 		sourceViewer.configure(new TextSourceViewerConfiguration(EditorsUI.getPreferenceStore()));
 		sourceViewer.setDocument(document, annotationModel);
@@ -89,14 +84,15 @@ public class SpellcheckedTextProvider {
 		sourceViewer.getTextWidget().setIndent(0);
 
 		sourceViewer.getTextWidget().addKeyListener(new KeyAdapter() {
+			@Override
 			public void keyPressed(KeyEvent e) {
 				if (e.keyCode == 'z' && e.stateMask == SWT.CONTROL) {
-					if (sourceViewer.canDoOperation(SourceViewer.UNDO)) {
-						sourceViewer.doOperation(SourceViewer.UNDO);
+					if (sourceViewer.canDoOperation(ITextOperationTarget.UNDO)) {
+						sourceViewer.doOperation(ITextOperationTarget.UNDO);
 					}
 				} else if (e.keyCode == 'y' && e.stateMask == SWT.CONTROL) {
-					if (sourceViewer.canDoOperation(SourceViewer.REDO)) {
-						sourceViewer.doOperation(SourceViewer.REDO);
+					if (sourceViewer.canDoOperation(ITextOperationTarget.REDO)) {
+						sourceViewer.doOperation(ITextOperationTarget.REDO);
 					}
 				}
 			}

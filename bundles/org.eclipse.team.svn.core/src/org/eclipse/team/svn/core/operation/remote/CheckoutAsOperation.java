@@ -36,7 +36,6 @@ import org.eclipse.team.svn.core.connector.ISVNConnector;
 import org.eclipse.team.svn.core.connector.SVNDepth;
 import org.eclipse.team.svn.core.operation.AbstractActionOperation;
 import org.eclipse.team.svn.core.operation.IConsoleStream;
-import org.eclipse.team.svn.core.operation.IUnprotectedOperation;
 import org.eclipse.team.svn.core.operation.SVNProgressMonitor;
 import org.eclipse.team.svn.core.operation.SVNResourceRuleFactory;
 import org.eclipse.team.svn.core.operation.UnreportableException;
@@ -99,37 +98,36 @@ public class CheckoutAsOperation extends AbstractActionOperation {
 		if (FileUtility.isCaseInsensitiveOS()) {
 			IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
 			IProject projectToCheckOut = null;
-			for (int i = 0; i < projects.length; i++) {
-				if (projects[i].getName().equalsIgnoreCase(projectName)) {
-					projectToCheckOut = projects[i];
+			for (IProject project2 : projects) {
+				if (project2.getName().equalsIgnoreCase(projectName)) {
+					projectToCheckOut = project2;
 				}
 			}
-			this.project = projectToCheckOut != null
+			project = projectToCheckOut != null
 					? projectToCheckOut
 					: ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
 		} else {
-			this.project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
+			project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
 		}
 		this.resource = resource;
 		this.projectLocation = projectLocation;
 		this.depth = depth;
 		this.options = options & ISVNConnector.CommandMasks.CHECKOUT;
-		this.overlappingProjects = new ArrayList<IProject>();
+		overlappingProjects = new ArrayList<>();
 		IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
-		for (int i = 0; i < projects.length; i++) {
-			if (!FileUtility.isRemoteProject(projects[i])
-					&& new Path(this.projectLocation).append(this.project.getName())
-							.isPrefixOf(projects[i].getLocation())) {
-				this.overlappingProjects.add(projects[i]);
+		for (IProject project2 : projects) {
+			if (!FileUtility.isRemoteProject(project2)
+					&& new Path(this.projectLocation).append(project.getName()).isPrefixOf(project2.getLocation())) {
+				overlappingProjects.add(project2);
 			}
 		}
-		this.overlappingProjects.add(this.project);
+		overlappingProjects.add(project);
 	}
 
 	@Override
 	public ISchedulingRule getSchedulingRule() {
-		IProject[] projects = this.overlappingProjects.toArray(new IProject[this.overlappingProjects.size()]);
-		ISchedulingRule[] rules = new ISchedulingRule[this.overlappingProjects.size()];
+		IProject[] projects = overlappingProjects.toArray(new IProject[overlappingProjects.size()]);
+		ISchedulingRule[] rules = new ISchedulingRule[overlappingProjects.size()];
 		for (int i = 0; i < projects.length; i++) {
 			rules[i] = SVNResourceRuleFactory.INSTANCE.modifyRule(projects[i]);
 		}
@@ -137,7 +135,7 @@ public class CheckoutAsOperation extends AbstractActionOperation {
 	}
 
 	public IProject getProject() {
-		return this.project;
+		return project;
 	}
 
 	public void setRestoreOperation(RestoreProjectMetaOperation restoreOp) {
@@ -146,65 +144,55 @@ public class CheckoutAsOperation extends AbstractActionOperation {
 
 	@Override
 	protected void runImpl(IProgressMonitor monitor) throws Exception {
-		String projectName = this.project.isAccessible() && !FileUtility.isRemoteProject(this.project)
-				? this.project.getLocation()
-						.toString()
-						.substring(this.project.getLocation().toString().lastIndexOf("/") + 1) //$NON-NLS-1$
-				: this.project.getName();
-		final IPath destination = new Path(this.projectLocation).append(projectName);
+		String projectName = project.isAccessible() && !FileUtility.isRemoteProject(project)
+				? project.getLocation().toString().substring(project.getLocation().toString().lastIndexOf("/") + 1) //$NON-NLS-1$
+				: project.getName();
+		final IPath destination = new Path(projectLocation).append(projectName);
 
-		ProgressMonitorUtility.doSubTask(this, new IUnprotectedOperation() {
-			public void run(IProgressMonitor monitor) throws Exception {
-				CheckoutAsOperation.this.doCheckout(monitor, destination);
-			}
-		}, monitor, 20, 19);
+		ProgressMonitorUtility.doSubTask(this, monitor1 -> CheckoutAsOperation.this.doCheckout(monitor1, destination), monitor, 20, 19);
 
-		ProgressMonitorUtility.doSubTask(this, new IUnprotectedOperation() {
-			public void run(IProgressMonitor monitor) throws Exception {
-				CheckoutAsOperation.this.doOpen(monitor, destination);
-			}
-		}, monitor, 20, 1);
+		ProgressMonitorUtility.doSubTask(this, monitor1 -> CheckoutAsOperation.this.doOpen(monitor1, destination), monitor, 20, 1);
 	}
 
 	protected void doOpen(IProgressMonitor monitor, IPath destination) throws Exception {
-		if (this.restoreOp != null) {
-			this.reportStatus(this.restoreOp.run(monitor).getStatus());
+		if (restoreOp != null) {
+			this.reportStatus(restoreOp.run(monitor).getStatus());
 		}
 
-		IProjectDescription description = ResourcesPlugin.getWorkspace().newProjectDescription(this.project.getName());
-		if (!Platform.getLocation().equals(new Path(this.projectLocation))) {
+		IProjectDescription description = ResourcesPlugin.getWorkspace().newProjectDescription(project.getName());
+		if (!Platform.getLocation().equals(new Path(projectLocation))) {
 			description.setLocation(destination);
 		}
-		this.project.create(description, monitor);
-		this.project.open(new SubProgressMonitor(monitor, IProgressMonitor.UNKNOWN));
-		SVNTeamProjectMapper.map(this.project, this.resource);
+		project.create(description, monitor);
+		project.open(new SubProgressMonitor(monitor, IProgressMonitor.UNKNOWN));
+		SVNTeamProjectMapper.map(project, resource);
 	}
 
 	protected void doCheckout(IProgressMonitor monitor, IPath destination) throws Exception {
 		// prepare workspace...
-		ProgressMonitorUtility.setTaskInfo(monitor, this, this.getOperationResource("PrepareFS")); //$NON-NLS-1$
+		ProgressMonitorUtility.setTaskInfo(monitor, this, getOperationResource("PrepareFS")); //$NON-NLS-1$
 
-		for (Iterator<IProject> it = this.overlappingProjects.iterator(); it.hasNext() && !monitor.isCanceled();) {
+		for (Iterator<IProject> it = overlappingProjects.iterator(); it.hasNext() && !monitor.isCanceled();) {
 			IProject overlappingProject = it.next();
-			this.deleteProject(overlappingProject, monitor);
+			deleteProject(overlappingProject, monitor);
 		}
-		this.deleteFolderContent(destination.toString(), monitor);
+		deleteFolderContent(destination.toString(), monitor);
 
 		// check out files from the repository
-		IRepositoryLocation location = this.resource.getRepositoryLocation();
+		IRepositoryLocation location = resource.getRepositoryLocation();
 		// using parent because deleted project does not have any location (null value
 		// returned)
 		ISVNConnector proxy = location.acquireSVNProxy();
 		try {
 			String path = destination.toString();
-			this.writeToConsole(IConsoleStream.LEVEL_CMD,
-					"svn checkout \"" + this.resource.getUrl() + "@" + this.resource.getPegRevision() + "\" -r " //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-							+ this.resource.getSelectedRevision() + ISVNConnector.Options.asCommandLine(this.options)
-							+ SVNUtility.getDepthArg(this.depth, ISVNConnector.Options.NONE) + " \"" //$NON-NLS-1$
+			writeToConsole(IConsoleStream.LEVEL_CMD,
+					"svn checkout \"" + resource.getUrl() + "@" + resource.getPegRevision() + "\" -r " //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+							+ resource.getSelectedRevision() + ISVNConnector.Options.asCommandLine(options)
+							+ SVNUtility.getDepthArg(depth, ISVNConnector.Options.NONE) + " \"" //$NON-NLS-1$
 							+ FileUtility.normalizePath(path) + "\"" //$NON-NLS-1$
 							+ FileUtility.getUsernameParam(location.getUsername()) + "\n"); //$NON-NLS-1$
-			proxy.checkout(SVNUtility.getEntryRevisionReference(this.resource), path, this.depth, this.options,
-					new SVNProgressMonitor(this, monitor, this.project.getFullPath()));
+			proxy.checkout(SVNUtility.getEntryRevisionReference(resource), path, depth, options,
+					new SVNProgressMonitor(this, monitor, project.getFullPath()));
 		} finally {
 			location.releaseSVNProxy(proxy);
 		}
@@ -214,7 +202,7 @@ public class CheckoutAsOperation extends AbstractActionOperation {
 		IPath location = project.getLocation();
 		project.delete(false, true, null);
 		if (location != null) {
-			this.deleteFolderContent(location.toString(), monitor);
+			deleteFolderContent(location.toString(), monitor);
 		}
 	}
 
@@ -227,7 +215,7 @@ public class CheckoutAsOperation extends AbstractActionOperation {
 			}
 			children = target.listFiles();
 			if (children != null && children.length > 0) {
-				String message = this.getNationalizedString("Error_LockedExternally"); //$NON-NLS-1$
+				String message = getNationalizedString("Error_LockedExternally"); //$NON-NLS-1$
 				throw new UnreportableException(
 						BaseMessages.format(message, new Object[] { children[0].getAbsolutePath() }));
 			}
@@ -236,7 +224,7 @@ public class CheckoutAsOperation extends AbstractActionOperation {
 
 	@Override
 	protected String getShortErrorMessage(Throwable t) {
-		return BaseMessages.format(super.getShortErrorMessage(t), new Object[] { this.resource.getUrl() });
+		return BaseMessages.format(super.getShortErrorMessage(t), new Object[] { resource.getUrl() });
 	}
 
 }

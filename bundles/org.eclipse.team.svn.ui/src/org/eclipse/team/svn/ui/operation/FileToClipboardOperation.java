@@ -54,13 +54,15 @@ public class FileToClipboardOperation extends AbstractActionOperation {
 		this.charset = charset;
 	}
 
+	@Override
 	public int getOperationWeight() {
 		return 0;
 	}
 
+	@Override
 	protected void runImpl(final IProgressMonitor monitor) throws Exception {
 		ByteArrayOutputStream data = new ByteArrayOutputStream();
-		File tempFile = new File(this.fileName);
+		File tempFile = new File(fileName);
 		FileInputStream stream = new FileInputStream(tempFile);
 		try {
 			byte[] buf = new byte[2048];
@@ -74,19 +76,17 @@ public class FileToClipboardOperation extends AbstractActionOperation {
 			} catch (Exception ex) {
 			}
 		}
-		if (this.deleteFile) {
+		if (deleteFile) {
 			tempFile.delete();
 		}
-		final String text = data.toString(this.charset);
+		final String text = data.toString(charset);
 		if (data.size() > 0) {
 			final Display display = UIMonitorUtility.getDisplay();
-			display.syncExec(new Runnable() {
-				public void run() {
-					TextTransfer plainTextTransfer = TextTransfer.getInstance();
-					Clipboard clipboard = new Clipboard(display);
-					clipboard.setContents(new String[] { text }, new Transfer[] { plainTextTransfer });
-					clipboard.dispose();
-				}
+			display.syncExec(() -> {
+				TextTransfer plainTextTransfer = TextTransfer.getInstance();
+				Clipboard clipboard = new Clipboard(display);
+				clipboard.setContents(new String[] { text }, new Transfer[] { plainTextTransfer });
+				clipboard.dispose();
 			});
 		}
 	}

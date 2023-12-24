@@ -51,41 +51,36 @@ public class SVNMergeHelper {
 	protected void mergeStatus(SVNEntryReference reference1, SVNEntryRevisionReference reference2,
 			SVNRevisionRange[] revisions, String path, SVNDepth depth, long options, ISVNMergeStatusCallback cb,
 			ISVNProgressMonitor monitor) throws SVNConnectorException {
-		final ArrayList<SVNNotification> tmp = new ArrayList<SVNNotification>();
-		ISVNNotificationCallback listener = new ISVNNotificationCallback() {
-			public void notify(SVNNotification info) {
-				tmp.add(info);
-			}
-		};
-		SVNUtility.addSVNNotifyListener(this.connector, listener);
+		final ArrayList<SVNNotification> tmp = new ArrayList<>();
+		ISVNNotificationCallback listener = info -> tmp.add(info);
+		SVNUtility.addSVNNotifyListener(connector, listener);
 
 		try {
 			if (reference2 != null) {
-				this.connector.mergeTwo((SVNEntryRevisionReference) reference1, reference2, path, depth, options,
-						monitor);
+				connector.mergeTwo((SVNEntryRevisionReference) reference1, reference2, path, depth, options, monitor);
 			} else if (revisions != null) {
-				this.connector.merge(reference1, revisions, path, depth, options, monitor);
+				connector.merge(reference1, revisions, path, depth, options, monitor);
 			} else {
-				this.connector.mergeReintegrate(reference1, path, options, monitor);
+				connector.mergeReintegrate(reference1, path, options, monitor);
 			}
 		} finally {
-			SVNUtility.removeSVNNotifyListener(this.connector, listener);
+			SVNUtility.removeSVNNotifyListener(connector, listener);
 		}
 
 		SVNRevision from = reference2 == null
-				? (revisions != null ? revisions[0].from : SVNRevision.fromNumber(1))
+				? revisions != null ? revisions[0].from : SVNRevision.fromNumber(1)
 				: ((SVNEntryRevisionReference) reference1).revision;
 		SVNRevision to = reference2 == null
-				? (revisions != null ? revisions[revisions.length - 1].to : reference1.pegRevision)
+				? revisions != null ? revisions[revisions.length - 1].to : reference1.pegRevision
 				: reference2.revision;
 		if (from.getKind() != SVNRevision.Kind.NUMBER) {
-			SVNLogEntry[] entries = SVNUtility.logEntries(this.connector, reference1, from, SVNRevision.fromNumber(1),
+			SVNLogEntry[] entries = SVNUtility.logEntries(connector, reference1, from, SVNRevision.fromNumber(1),
 					ISVNConnector.Options.NONE, ISVNConnector.EMPTY_LOG_ENTRY_PROPS, 1, monitor);
 			from = SVNRevision.fromNumber(entries[0].revision);
 		}
 		if (to.getKind() != SVNRevision.Kind.NUMBER) {
-			SVNLogEntry[] entries = SVNUtility.logEntries(this.connector, reference2 == null ? reference1 : reference2,
-					to, SVNRevision.fromNumber(1), ISVNConnector.Options.NONE, ISVNConnector.EMPTY_LOG_ENTRY_PROPS, 1,
+			SVNLogEntry[] entries = SVNUtility.logEntries(connector, reference2 == null ? reference1 : reference2, to,
+					SVNRevision.fromNumber(1), ISVNConnector.Options.NONE, ISVNConnector.EMPTY_LOG_ENTRY_PROPS, 1,
 					monitor);
 			to = SVNRevision.fromNumber(entries[0].revision);
 		}
@@ -98,17 +93,17 @@ public class SVNMergeHelper {
 		boolean reversed = reference2 == null
 				? SVNUtility.compareRevisions(from, to,
 						new SVNEntryRevisionReference(reference1.path, reference1.pegRevision, from),
-						new SVNEntryRevisionReference(reference1.path, reference1.pegRevision, to), this.connector) == 1
+						new SVNEntryRevisionReference(reference1.path, reference1.pegRevision, to), connector) == 1
 				: SVNUtility.compareRevisions(from, to, (SVNEntryRevisionReference) reference1, reference2,
-						this.connector) == 1;
+						connector) == 1;
 
 		String startUrlPref = reference1.path;
 		String endUrlPref = reference2 == null ? reference1.path : reference2.path;
 		SVNLogEntry[] allMsgs = reversed
-				? SVNUtility.logEntries(this.connector,
-						reference2 == null ? reference1 : this.getValidReference(reference2, from, monitor), from, to,
+				? SVNUtility.logEntries(connector,
+						reference2 == null ? reference1 : getValidReference(reference2, from, monitor), from, to,
 						ISVNConnector.Options.DISCOVER_PATHS, ISVNConnector.DEFAULT_LOG_ENTRY_PROPS, 0, monitor)
-				: SVNUtility.logEntries(this.connector, reference2 == null ? reference1 : reference2, to, from,
+				: SVNUtility.logEntries(connector, reference2 == null ? reference1 : reference2, to, from,
 						ISVNConnector.Options.DISCOVER_PATHS, ISVNConnector.DEFAULT_LOG_ENTRY_PROPS, 0, monitor);
 		long minRev = ((SVNRevision.Number) (reversed ? to : from)).getNumber();
 		for (Iterator<SVNNotification> it = tmp.iterator(); it.hasNext() && !monitor.isActivityCancelled();) {
@@ -125,7 +120,7 @@ public class SVNMergeHelper {
 			boolean hasTreeConflict = state.action == org.eclipse.team.svn.core.connector.SVNNotification.PerformedAction.TREE_CONFLICT;
 			SVNConflictDescriptor treeConflict = null;
 			if (hasTreeConflict) {
-				SVNEntryInfo[] infos = SVNUtility.info(this.connector, new SVNEntryRevisionReference(state.path),
+				SVNEntryInfo[] infos = SVNUtility.info(connector, new SVNEntryRevisionReference(state.path),
 						SVNDepth.EMPTY, monitor);
 				if (infos.length > 0 && infos[0].treeConflicts != null && infos[0].treeConflicts.length > 0) {
 					treeConflict = infos[0].treeConflicts[0];
@@ -148,15 +143,15 @@ public class SVNMergeHelper {
 			} else if (state.action == org.eclipse.team.svn.core.connector.SVNNotification.PerformedAction.UPDATE_UPDATE) {
 				pState = state.propState == org.eclipse.team.svn.core.connector.SVNNotification.NodeStatus.CHANGED
 						? org.eclipse.team.svn.core.connector.SVNEntryStatus.Kind.MODIFIED
-						: (state.propState == org.eclipse.team.svn.core.connector.SVNNotification.NodeStatus.CONFLICTED
+						: state.propState == org.eclipse.team.svn.core.connector.SVNNotification.NodeStatus.CONFLICTED
 								? org.eclipse.team.svn.core.connector.SVNEntryStatus.Kind.CONFLICTED
-								: org.eclipse.team.svn.core.connector.SVNEntryStatus.Kind.NONE);
-				cState = (state.contentState == org.eclipse.team.svn.core.connector.SVNNotification.NodeStatus.CHANGED
-						|| state.contentState == org.eclipse.team.svn.core.connector.SVNNotification.NodeStatus.MERGED)
+								: org.eclipse.team.svn.core.connector.SVNEntryStatus.Kind.NONE;
+				cState = state.contentState == org.eclipse.team.svn.core.connector.SVNNotification.NodeStatus.CHANGED
+						|| state.contentState == org.eclipse.team.svn.core.connector.SVNNotification.NodeStatus.MERGED
 								? org.eclipse.team.svn.core.connector.SVNEntryStatus.Kind.MODIFIED
-								: (state.contentState == org.eclipse.team.svn.core.connector.SVNNotification.NodeStatus.CONFLICTED
+								: state.contentState == org.eclipse.team.svn.core.connector.SVNNotification.NodeStatus.CONFLICTED
 										? org.eclipse.team.svn.core.connector.SVNEntryStatus.Kind.CONFLICTED
-										: org.eclipse.team.svn.core.connector.SVNEntryStatus.Kind.NONE);
+										: org.eclipse.team.svn.core.connector.SVNEntryStatus.Kind.NONE;
 			} else if (state.action == org.eclipse.team.svn.core.connector.SVNNotification.PerformedAction.SKIP) {
 				if (state.contentState == org.eclipse.team.svn.core.connector.SVNNotification.NodeStatus.MISSING) {
 					try {
@@ -164,8 +159,8 @@ public class SVNMergeHelper {
 						if (reference2 != null) {
 							pegRev = reference2.pegRevision;
 						}
-						SVNUtility.info(this.connector, new SVNEntryRevisionReference(endUrl, pegRev, to),
-								SVNDepth.EMPTY, monitor);
+						SVNUtility.info(connector, new SVNEntryRevisionReference(endUrl, pegRev, to), SVNDepth.EMPTY,
+								monitor);
 						pState = org.eclipse.team.svn.core.connector.SVNEntryStatus.Kind.MODIFIED;
 						cState = org.eclipse.team.svn.core.connector.SVNEntryStatus.Kind.MODIFIED;
 					} catch (Exception ex) {
@@ -185,9 +180,9 @@ public class SVNMergeHelper {
 				String message = null;
 				if (cState == org.eclipse.team.svn.core.connector.SVNEntryStatus.Kind.ADDED && !reversed
 						|| cState == org.eclipse.team.svn.core.connector.SVNEntryStatus.Kind.DELETED && reversed
-						|| (hasTreeConflict && (treeConflict.action == Action.ADD && !reversed
-								|| treeConflict.action == Action.DELETE && reversed))) {
-					int idx = this.getLogIndex(allMsgs, endUrl, false);
+						|| hasTreeConflict && (treeConflict.action == Action.ADD && !reversed
+								|| treeConflict.action == Action.DELETE && reversed)) {
+					int idx = getLogIndex(allMsgs, endUrl, false);
 					if (idx != -1) {
 						endRevision = allMsgs[idx].revision;
 						date = allMsgs[idx].date;
@@ -198,25 +193,25 @@ public class SVNMergeHelper {
 						|| cState == org.eclipse.team.svn.core.connector.SVNEntryStatus.Kind.CONFLICTED
 						|| pState == org.eclipse.team.svn.core.connector.SVNEntryStatus.Kind.MODIFIED
 						|| pState == org.eclipse.team.svn.core.connector.SVNEntryStatus.Kind.CONFLICTED
-						|| (hasTreeConflict && treeConflict.action == Action.MODIFY)) {
-					int idx = this.getLogIndex(allMsgs, endUrl, false);
+						|| hasTreeConflict && treeConflict.action == Action.MODIFY) {
+					int idx = getLogIndex(allMsgs, endUrl, false);
 					if (idx != -1) {
 						endRevision = allMsgs[idx].revision;
 						date = allMsgs[idx].date;
 						author = allMsgs[idx].author;
 						message = allMsgs[idx].message;
 					}
-					idx = this.getLogIndex(allMsgs, startUrl, true);
+					idx = getLogIndex(allMsgs, startUrl, true);
 					startRevision = idx != -1 ? Math.max(allMsgs[idx].revision, minRev) : minRev;
 				} else {
-					int idx = this.getLogIndex(allMsgs, endUrl, false);
+					int idx = getLogIndex(allMsgs, endUrl, false);
 					if (idx != -1) {
 						endRevision = allMsgs[idx].revision;
 						date = allMsgs[idx].date;
 						author = allMsgs[idx].author;
 						message = allMsgs[idx].message;
 					} else {
-						idx = this.getLogIndex(allMsgs, startUrl, false);
+						idx = getLogIndex(allMsgs, startUrl, false);
 						if (idx != -1) {
 							endUrl = startUrl;
 							endRevision = allMsgs[idx].revision;
@@ -225,7 +220,7 @@ public class SVNMergeHelper {
 							message = allMsgs[idx].message;
 						}
 					}
-					idx = this.getLogIndex(allMsgs, startUrl, true);
+					idx = getLogIndex(allMsgs, startUrl, true);
 					startRevision = idx != -1 ? Math.max(allMsgs[idx].revision, minRev) : minRev;
 				}
 				if (reversed) {
@@ -261,27 +256,27 @@ public class SVNMergeHelper {
 		long start = ((SVNRevision.Number) referenceToExisting.pegRevision).getNumber();
 		long end = ((SVNRevision.Number) lastRevision).getNumber();
 		while (end > start) {
-			referenceToExisting = this.getLastValidReference(referenceToExisting, lastRevision, monitor);
+			referenceToExisting = getLastValidReference(referenceToExisting, lastRevision, monitor);
 			if (!referenceToExisting.pegRevision.equals(lastRevision)) {
 				start = ((SVNRevision.Number) referenceToExisting.pegRevision).getNumber() + 1;
 				SVNEntryReference tRef = new SVNEntryReference(referenceToExisting.path, SVNRevision.fromNumber(start));
-				while (!this.exists(tRef, monitor)) {
+				while (!exists(tRef, monitor)) {
 					tRef = new SVNEntryReference(tRef.path.substring(0, tRef.path.lastIndexOf("/")), tRef.pegRevision);
 				}
-				SVNLogEntry[] log = SVNUtility.logEntries(this.connector, tRef, tRef.pegRevision,
+				SVNLogEntry[] log = SVNUtility.logEntries(connector, tRef, tRef.pegRevision,
 						referenceToExisting.pegRevision, ISVNConnector.Options.DISCOVER_PATHS,
 						ISVNConnector.DEFAULT_LOG_ENTRY_PROPS, 0, monitor);
 				SVNLogPath[] paths = log[0].changedPaths;
 				boolean renamed = false;
 				if (paths != null) {
 					String decodedUrl = SVNUtility.decodeURL(referenceToExisting.path);
-					for (int k = 0; k < paths.length; k++) {
-						if (paths[k].copiedFromPath != null) {
-							int idx = decodedUrl.indexOf(paths[k].copiedFromPath);
-							if (idx != -1 && (decodedUrl.charAt(idx + paths[k].copiedFromPath.length()) == '/'
-									|| decodedUrl.endsWith(paths[k].copiedFromPath))) {
-								decodedUrl = decodedUrl.substring(0, idx) + paths[k].path
-										+ decodedUrl.substring(idx + paths[k].copiedFromPath.length());
+					for (SVNLogPath path : paths) {
+						if (path.copiedFromPath != null) {
+							int idx = decodedUrl.indexOf(path.copiedFromPath);
+							if (idx != -1 && (decodedUrl.charAt(idx + path.copiedFromPath.length()) == '/'
+									|| decodedUrl.endsWith(path.copiedFromPath))) {
+								decodedUrl = decodedUrl.substring(0, idx) + path.path
+										+ decodedUrl.substring(idx + path.copiedFromPath.length());
 								tRef = new SVNEntryReference(SVNUtility.encodeURL(decodedUrl), tRef.pegRevision);
 								renamed = true;
 								break;
@@ -305,7 +300,7 @@ public class SVNMergeHelper {
 		do {
 			long middle = end - (end - start) / 2; //long is largest type and (end + start) could out of type ranges
 			SVNEntryReference tRef = new SVNEntryReference(referenceToExisting.path, SVNRevision.fromNumber(middle));
-			if (this.exists(tRef, monitor)) {
+			if (exists(tRef, monitor)) {
 				start = middle;
 				referenceToExisting = tRef;
 			} else {
@@ -320,7 +315,7 @@ public class SVNMergeHelper {
 
 	protected boolean exists(SVNEntryReference reference, ISVNProgressMonitor monitor) {
 		try {
-			SVNUtility.logEntries(this.connector, reference, reference.pegRevision, reference.pegRevision,
+			SVNUtility.logEntries(connector, reference, reference.pegRevision, reference.pegRevision,
 					ISVNConnector.Options.NONE, ISVNConnector.EMPTY_LOG_ENTRY_PROPS, 1, monitor);
 			return true;
 		} catch (SVNConnectorException e) {

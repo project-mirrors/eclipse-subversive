@@ -65,13 +65,11 @@ public class SVNTeamUIPlugin extends AbstractUIPlugin {
 	private Timer timer;
 
 	public SVNTeamUIPlugin() {
-		super();
-
 		SVNTeamUIPlugin.instance = this;
 
-		this.pcListener = new ProjectCloseListener();
+		pcListener = new ProjectCloseListener();
 //        this.problemListener = new ProblemListener();
-		this.timer = new Timer();
+		timer = new Timer();
 	}
 
 	public static SVNTeamUIPlugin instance() {
@@ -81,6 +79,7 @@ public class SVNTeamUIPlugin extends AbstractUIPlugin {
 	/**
 	 * @deprecated
 	 */
+	@Deprecated
 	public SVNConsole getConsole() {
 		return SVNConsoleFactory.getConsole();
 	}
@@ -88,13 +87,14 @@ public class SVNTeamUIPlugin extends AbstractUIPlugin {
 	/**
 	 * @deprecated
 	 */
+	@Deprecated
 	public IConsoleStream getConsoleStream() {
 		return SVNConsoleFactory.getConsole().getConsoleStream();
 	}
 
 	public ImageDescriptor getImageDescriptor(String path) {
 		try {
-			return ImageDescriptor.createFromURL(new URL(this.baseUrl, path));
+			return ImageDescriptor.createFromURL(new URL(baseUrl, path));
 		} catch (MalformedURLException e) {
 			LoggedOperation.reportError(SVNUIMessages.getErrorString("Error_GetImageDescriptor"), e); //$NON-NLS-1$
 			return null;
@@ -102,11 +102,11 @@ public class SVNTeamUIPlugin extends AbstractUIPlugin {
 	}
 
 	public String getVersionString() {
-		return (String) this.getBundle().getHeaders().get(org.osgi.framework.Constants.BUNDLE_VERSION);
+		return getBundle().getHeaders().get(org.osgi.framework.Constants.BUNDLE_VERSION);
 	}
 
 	public IEclipsePreferences getPreferences() {
-		return new InstanceScope().getNode(this.getBundle().getSymbolicName());
+		return new InstanceScope().getNode(getBundle().getSymbolicName());
 	}
 
 	public void savePreferences() {
@@ -124,36 +124,38 @@ public class SVNTeamUIPlugin extends AbstractUIPlugin {
 	 * Subversive core calls CoreExtensionsManager, where CoreExtensionsManager calls SVNTeamUIPlugin.start
 	 * but SVNTeamUIPlugin.start calls CoreExtensionsManager
 	 */
+	@Override
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 
 //		Platform.addLogListener(this.problemListener);
 
-		this.baseUrl = context.getBundle().getEntry("/"); //$NON-NLS-1$
+		baseUrl = context.getBundle().getEntry("/"); //$NON-NLS-1$
 
 		IWorkspace workspace = ResourcesPlugin.getWorkspace();
 		workspace.addResourceChangeListener(SVNTeamUIPlugin.this.pcListener,
 				IResourceChangeEvent.PRE_CLOSE | IResourceChangeEvent.PRE_DELETE);
 
-		IPreferenceStore store = this.getPreferenceStore();
+		IPreferenceStore store = getPreferenceStore();
 		if (store.getBoolean(SVNTeamPreferences.FIRST_STARTUP)) {
 			store.setValue(SVNTeamPreferences.FIRST_STARTUP, false);
-			this.savePreferences();
+			savePreferences();
 			// If we enable the decorator in the XML, the SVN plug-in will be loaded
-			// on startup even if the user never uses SVN. Therefore, we enable the 
-			// decorator on the first start of the SVN plug-in since this indicates that 
+			// on startup even if the user never uses SVN. Therefore, we enable the
+			// decorator on the first start of the SVN plug-in since this indicates that
 			// the user has done something with SVN. Subsequent startups will load
 			// the SVN plug-in unless the user disables the decorator. In this case,
 			// we will not re-enable since we only enable automatically on the first startup.
 			PlatformUI.getWorkbench().getDecoratorManager().setEnabled(SVNLightweightDecorator.ID, true);
 		}
 
-		if (this.connectorsAreRequired()) {
+		if (connectorsAreRequired()) {
 			//run connectors discovery feature
-			this.discoveryConnectors();
+			discoveryConnectors();
 		}
 
-		this.timer.scheduleAtFixedRate(new TimerTask() {
+		timer.scheduleAtFixedRate(new TimerTask() {
+			@Override
 			public void run() {
 				SVNRemoteStorage.instance().checkForExternalChanges();
 			}
@@ -175,15 +177,16 @@ public class SVNTeamUIPlugin extends AbstractUIPlugin {
 		/*
 		 * We can't run Discovery Connectors through IActionOperation, because
 		 * it uses CoreExtensionsManager (for getting nationalized operation name),
-		 * which isn't allowed here, see bug 300592; so instead we use Job. 
+		 * which isn't allowed here, see bug 300592; so instead we use Job.
 		 */
 		Job job = new Job(SVNUIMessages.Operation_DiscoveryConnectors) {
+			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				try {
 					DiscoveryConnectorsHelper discovery = new DiscoveryConnectorsHelper();
 					discovery.run(monitor);
 				} catch (Throwable t) {
-					//shouldn't prevent plug-in start 
+					//shouldn't prevent plug-in start
 					LoggedOperation.reportError(SVNUIMessages.Operation_DiscoveryConnectors_Error, t);
 				}
 				return Status.OK_STATUS;
@@ -194,13 +197,14 @@ public class SVNTeamUIPlugin extends AbstractUIPlugin {
 		job.schedule();
 	}
 
+	@Override
 	public void stop(BundleContext context) throws Exception {
-		this.timer.cancel();
+		timer.cancel();
 		SVNConsoleFactory.destroyConsole();
 
 		IWorkspace workspace = ResourcesPlugin.getWorkspace();
 
-		workspace.removeResourceChangeListener(this.pcListener);
+		workspace.removeResourceChangeListener(pcListener);
 
 //		Platform.removeLogListener(this.problemListener);
 		super.stop(context);

@@ -66,9 +66,10 @@ public class PredefinedProperty {
 		this.type = type;
 	}
 
+	@Override
 	public boolean equals(Object arg0) {
 		if (arg0 instanceof PredefinedProperty) {
-			return ((PredefinedProperty) arg0).name.equals(this.name);
+			return ((PredefinedProperty) arg0).name.equals(name);
 		}
 		return false;
 	}

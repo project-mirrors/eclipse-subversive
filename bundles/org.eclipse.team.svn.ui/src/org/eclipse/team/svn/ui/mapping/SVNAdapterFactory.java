@@ -15,7 +15,6 @@
 package org.eclipse.team.svn.ui.mapping;
 
 import org.eclipse.core.runtime.IAdapterFactory;
-
 import org.eclipse.team.ui.mapping.ISynchronizationCompareAdapter;
 
 /**
@@ -26,18 +25,20 @@ public class SVNAdapterFactory implements IAdapterFactory {
 
 	protected ChangeSetCompareAdapter compareAdapter;
 
+	@Override
 	@SuppressWarnings("unchecked")
 	public Object getAdapter(Object adaptableObject, Class adapterType) {
 		if (ISynchronizationCompareAdapter.class == adapterType) {
-			if (this.compareAdapter == null) {
-				this.compareAdapter = new ChangeSetCompareAdapter();
+			if (compareAdapter == null) {
+				compareAdapter = new ChangeSetCompareAdapter();
 			}
-			return this.compareAdapter;
+			return compareAdapter;
 		}
 
 		return null;
 	}
 
+	@Override
 	@SuppressWarnings("unchecked")
 	public Class[] getAdapterList() {
 		return new Class[] { ISynchronizationCompareAdapter.class };

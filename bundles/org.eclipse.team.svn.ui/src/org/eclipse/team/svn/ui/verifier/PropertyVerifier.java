@@ -19,6 +19,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.team.svn.core.BaseMessages;
 import org.eclipse.team.svn.core.resource.IRepositoryResource;
 import org.eclipse.team.svn.core.utility.SVNUtility;
 import org.eclipse.team.svn.ui.SVNUIMessages;
@@ -40,78 +41,80 @@ public class PropertyVerifier extends AbstractFormattedVerifier {
 	public PropertyVerifier(String fieldName, String regExp, String propName, IRepositoryResource base) {
 		super(fieldName);
 		if (regExp == null) {
-			this.toValidate = false;
+			toValidate = false;
 		} else {
-			this.toValidate = true;
-			this.pattern = Pattern.compile(regExp);
+			toValidate = true;
+			pattern = Pattern.compile(regExp);
 		}
 		this.base = base;
 		String[] parts = propName.split(":"); //$NON-NLS-1$
 		this.propName = ""; //$NON-NLS-1$
-		for (int i = 0; i < parts.length; i++) {
-			this.propName += parts[i];
+		for (String part : parts) {
+			this.propName += part;
 		}
 	}
 
+	@Override
 	protected String getErrorMessageImpl(Control input) {
-		if (!this.toValidate || this.propName.equals("svnlog") || this.propName.equals("svnauthor")) { //$NON-NLS-1$ //$NON-NLS-2$
+		if (!toValidate || propName.equals("svnlog") || propName.equals("svnauthor")) { //$NON-NLS-1$ //$NON-NLS-2$
 			return null;
 		}
-		String inputText = this.getText(input);
-		if (this.propName.equals("bugtraqlogregex")) { //$NON-NLS-1$
+		String inputText = getText(input);
+		if (propName.equals("bugtraqlogregex")) { //$NON-NLS-1$
 			try {
 				String[] logs = inputText.split("\r\n"); //$NON-NLS-1$
-				for (int i = 0; i < logs.length; i++) {
-					Pattern.compile(logs[i]);
+				for (String log : logs) {
+					Pattern.compile(log);
 				}
 			} catch (Exception ex) {
-				return SVNUIMessages.getString("PropertyEditPanel_Verifier_" + this.propName); //$NON-NLS-1$
+				return SVNUIMessages.getString("PropertyEditPanel_Verifier_" + propName); //$NON-NLS-1$
 			}
 			return null;
 		}
-		if (this.propName.equals("bugtraqmessage")) { //$NON-NLS-1$
+		if (propName.equals("bugtraqmessage")) { //$NON-NLS-1$
 			if (!inputText.contains("%BUGID%")) { //$NON-NLS-1$
-				return SVNUIMessages.getString("PropertyEditPanel_Verifier_" + this.propName); //$NON-NLS-1$
+				return SVNUIMessages.getString("PropertyEditPanel_Verifier_" + propName); //$NON-NLS-1$
 			}
 			return null;
 		}
-		if (this.propName.equals("svnexternals")) { //$NON-NLS-1$
+		if (propName.equals("svnexternals")) { //$NON-NLS-1$
 			try {
-				SVNUtility.parseSVNExternalsProperty(inputText, this.base);
+				SVNUtility.parseSVNExternalsProperty(inputText, base);
 			} catch (Exception ex) {
-				return SVNUIMessages.getString("PropertyEditPanel_Verifier_" + this.propName); //$NON-NLS-1$
+				return SVNUIMessages.getString("PropertyEditPanel_Verifier_" + propName); //$NON-NLS-1$
 			}
 			return null;
 		}
-		if (this.propName.equals("svndate")) { //$NON-NLS-1$
+		if (propName.equals("svndate")) { //$NON-NLS-1$
 			try {
 				new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").parse(inputText); //$NON-NLS-1$
 			} catch (Exception ex) {
-				return SVNUIMessages.format("PropertyEditPanel_Verifier_" + this.propName, //$NON-NLS-1$
+				return BaseMessages.format("PropertyEditPanel_Verifier_" + propName, //$NON-NLS-1$
 						new String[] { "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'" }); //$NON-NLS-1$
 			}
 			return null;
 		}
-		Matcher matcher = this.pattern.matcher(inputText);
+		Matcher matcher = pattern.matcher(inputText);
 		if (!matcher.matches()) {
-			String retVal = SVNUIMessages.getString("PropertyEditPanel_Verifier_" + this.propName); //$NON-NLS-1$		
-			if (retVal.equals("PropertyEditPanel_Verifier_" + this.propName)) { //$NON-NLS-1$
-				return SVNUIMessages.format(SVNUIMessages.PropertyEditPanel_regExp_Verifier,
-						new String[] { this.pattern.pattern() });
+			String retVal = SVNUIMessages.getString("PropertyEditPanel_Verifier_" + propName); //$NON-NLS-1$
+			if (retVal.equals("PropertyEditPanel_Verifier_" + propName)) { //$NON-NLS-1$
+				return BaseMessages.format(SVNUIMessages.PropertyEditPanel_regExp_Verifier,
+						new String[] { pattern.pattern() });
 			}
-			return SVNUIMessages.getString("PropertyEditPanel_Verifier_" + this.propName); //$NON-NLS-1$
+			return SVNUIMessages.getString("PropertyEditPanel_Verifier_" + propName); //$NON-NLS-1$
 		}
 		return null;
 	}
 
+	@Override
 	protected String getWarningMessageImpl(Control input) {
-		if (!this.toValidate) {
+		if (!toValidate) {
 			return null;
 		}
-		if (this.propName.equals("svnauthor") //$NON-NLS-1$
-				|| this.propName.equals("svnlog") //$NON-NLS-1$
-				|| this.propName.equals("svndate")) { //$NON-NLS-1$
-			return SVNUIMessages.getString("PropertyEditPanel_Verifier_Warning_" + this.propName); //$NON-NLS-1$
+		if (propName.equals("svnauthor") //$NON-NLS-1$
+				|| propName.equals("svnlog") //$NON-NLS-1$
+				|| propName.equals("svndate")) { //$NON-NLS-1$
+			return SVNUIMessages.getString("PropertyEditPanel_Verifier_Warning_" + propName); //$NON-NLS-1$
 		}
 		return null;
 	}

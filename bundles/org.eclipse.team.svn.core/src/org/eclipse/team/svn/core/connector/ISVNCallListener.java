@@ -26,165 +26,165 @@ import java.util.Map;
  * @author Alexander Gurov
  */
 public interface ISVNCallListener {
-	public final String GET_CONFIG_DIRECTORY = "getConfigDirectory";
+	String GET_CONFIG_DIRECTORY = "getConfigDirectory";
 
-	public final String SET_CONFIG_DIRECTORY = "setConfigDirectory";
+	String SET_CONFIG_DIRECTORY = "setConfigDirectory";
 
-	public final String SET_USERNAME = "setUsername";
+	String SET_USERNAME = "setUsername";
 
-	public final String SET_PASSWORD = "setPassword";
+	String SET_PASSWORD = "setPassword";
 
-	public final String SET_PROMPT = "setPrompt";
+	String SET_PROMPT = "setPrompt";
 
-	public final String GET_PROMPT = "getPrompt";
+	String GET_PROMPT = "getPrompt";
 
-	public final String SET_SSH_CREDENTIALS = "setSSHCredentials";
+	String SET_SSH_CREDENTIALS = "setSSHCredentials";
 
-	public final String SET_NOTIFICATION_CALLBACK = "setNotificationCallback";
+	String SET_NOTIFICATION_CALLBACK = "setNotificationCallback";
 
-	public final String GET_NOTIFICATION_CALLBACK = "getNotificationCallback";
+	String GET_NOTIFICATION_CALLBACK = "getNotificationCallback";
 
-	public final String CHECKOUT = "checkout";
+	String CHECKOUT = "checkout";
 
-	public final String LOCK = "lock";
+	String LOCK = "lock";
 
-	public final String UNLOCK = "unlock";
+	String UNLOCK = "unlock";
 
-	public final String ADD = "add";
+	String ADD = "add";
 
-	public final String COMMIT = "commit";
+	String COMMIT = "commit";
 
-	public final String UPDATE = "update";
+	String UPDATE = "update";
 
-	public final String SWITCH = "switchTo";
+	String SWITCH = "switchTo";
 
-	public final String REVERT = "revert";
+	String REVERT = "revert";
 
-	public final String STATUS = "status";
+	String STATUS = "status";
 
-	public final String RELOCATE = "relocate";
+	String RELOCATE = "relocate";
 
-	public final String CLEANUP = "cleanup";
+	String CLEANUP = "cleanup";
 
-	public final String MERGE = "merge";
+	String MERGE = "merge";
 
-	public final String MERGE_TWO = "mergeTwo";
+	String MERGE_TWO = "mergeTwo";
 
-	public final String MERGE_REINTEGRATE = "mergeReintegrate";
+	String MERGE_REINTEGRATE = "mergeReintegrate";
 
-	public final String GET_MERGE_INFO = "getMergeInfo";
+	String GET_MERGE_INFO = "getMergeInfo";
 
-	public final String LIST_MERGE_INFO_LOG = "listMergeInfoLog";
+	String LIST_MERGE_INFO_LOG = "listMergeInfoLog";
 
-	public final String SUGGEST_MERGE_SOURCES = "suggestMergeSources";
+	String SUGGEST_MERGE_SOURCES = "suggestMergeSources";
 
-	public final String RESOLVE = "resolve";
+	String RESOLVE = "resolve";
 
-	public final String SET_CONFLICT_RESOLVER = "setConflictResolver";
+	String SET_CONFLICT_RESOLVER = "setConflictResolver";
 
-	public final String GET_CONFLICT_RESOLVER = "getConflictResolver";
+	String GET_CONFLICT_RESOLVER = "getConflictResolver";
 
-	public final String ADD_TO_CHANGE_LIST = "addToChangeList";
+	String ADD_TO_CHANGE_LIST = "addToChangeList";
 
-	public final String REMOVE_FROM_CHANGE_LISTS = "removeFromChangeLists";
+	String REMOVE_FROM_CHANGE_LISTS = "removeFromChangeLists";
 
-	public final String DUMP_CHANGE_LISTS = "dumpChangeLists";
+	String DUMP_CHANGE_LISTS = "dumpChangeLists";
 
-	public final String IMPORT = "importTo";
+	String IMPORT = "importTo";
 
-	public final String EXPORT = "exportTo";
+	String EXPORT = "exportTo";
 
-	public final String DIFF_FILE = "diff";
+	String DIFF_FILE = "diff";
 
-	public final String DIFF_TWO_FILE = "diffTwoFile";
+	String DIFF_TWO_FILE = "diffTwoFile";
 
-	public final String DIFF_STREAM = "diffStream";
+	String DIFF_STREAM = "diffStream";
 
-	public final String DIFF_TWO_STREAM = "diffTwoStream";
+	String DIFF_TWO_STREAM = "diffTwoStream";
 
-	public final String DIFF_STATUS = "diffStatus";
+	String DIFF_STATUS = "diffStatus";
 
-	public final String DIFF_STATUS_TWO = "diffStatusTwo";
+	String DIFF_STATUS_TWO = "diffStatusTwo";
 
-	public final String GET_INFO = "getInfo";
+	String GET_INFO = "getInfo";
 
-	public final String STREAM_FILE_CONTENT = "streamFileContent";
+	String STREAM_FILE_CONTENT = "streamFileContent";
 
-	public final String MKDIR = "mkdir";
+	String MKDIR = "mkdir";
 
-	public final String MOVE_REMOTE = "moveRemote";
+	String MOVE_REMOTE = "moveRemote";
 
-	public final String MOVE_LOCAL = "moveLocal";
+	String MOVE_LOCAL = "moveLocal";
 
-	public final String COPY_REMOTE = "copyRemote";
+	String COPY_REMOTE = "copyRemote";
 
-	public final String COPY_LOCAL = "copyLocal";
+	String COPY_LOCAL = "copyLocal";
 
-	public final String REMOVE_REMOTE = "removeRemote";
+	String REMOVE_REMOTE = "removeRemote";
 
-	public final String REMOVE_LOCAL = "removeLocal";
+	String REMOVE_LOCAL = "removeLocal";
 
-	public final String LIST_HISTORY_LOG = "listHistoryLog";
+	String LIST_HISTORY_LOG = "listHistoryLog";
 
-	public final String ANNOTATE = "annotate";
+	String ANNOTATE = "annotate";
 
-	public final String LIST = "list";
+	String LIST = "list";
 
-	public final String GET_PROPERTIES = "getProperties";
+	String GET_PROPERTIES = "getProperties";
 
-	public final String GET_PROPERTY = "getProperty";
+	String GET_PROPERTY = "getProperty";
 
-	public final String SET_PROPERTY_LOCAL = "setPropertyLocal";
+	String SET_PROPERTY_LOCAL = "setPropertyLocal";
 
-	public final String SET_PROPERTY_REMOTE = "setPropertyRemote";
+	String SET_PROPERTY_REMOTE = "setPropertyRemote";
 
-	public final String LIST_REVISION_PROPERTIES = "listRevisionProperties";
+	String LIST_REVISION_PROPERTIES = "listRevisionProperties";
 
-	public final String GET_REVISION_PROPERTY = "getRevisionProperty";
+	String GET_REVISION_PROPERTY = "getRevisionProperty";
 
-	public final String SET_REVISION_PROPERTY = "setRevisionProperty";
+	String SET_REVISION_PROPERTY = "setRevisionProperty";
 
-	public final String UPGRADE = "upgrade";
+	String UPGRADE = "upgrade";
 
-	public final String PATCH = "patch";
+	String PATCH = "patch";
 
-	public final String GET_CONFIGURATION_EVENT_HANDLER = "getConfigurationEventHandler";
+	String GET_CONFIGURATION_EVENT_HANDLER = "getConfigurationEventHandler";
 
-	public final String SET_CONFIGURATION_EVENT_HANDLER = "setConfigurationEventHandler";
+	String SET_CONFIGURATION_EVENT_HANDLER = "setConfigurationEventHandler";
 
-	public final String VACUUM = "vacuum";
+	String VACUUM = "vacuum";
 
-	public final String CREATE = "createRepository";
+	String CREATE = "createRepository";
 
-	public final String DELTIFY = "deltify";
+	String DELTIFY = "deltify";
 
-	public final String HOT_COPY = "hotCopy";
+	String HOT_COPY = "hotCopy";
 
-	public final String DUMP = "dump";
+	String DUMP = "dump";
 
-	public final String LIST_DB_LOGS = "listDBLogs";
+	String LIST_DB_LOGS = "listDBLogs";
 
-	public final String LOAD = "load";
+	String LOAD = "load";
 
-	public final String LIST_TRANSACTIONS = "listTransactions";
+	String LIST_TRANSACTIONS = "listTransactions";
 
-	public final String RECOVER = "recover";
+	String RECOVER = "recover";
 
-	public final String FREEZE = "freeze";
+	String FREEZE = "freeze";
 
-	public final String REMOVE_TRANSACTIONS = "removeTransaction";
+	String REMOVE_TRANSACTIONS = "removeTransaction";
 
-	public final String SET_REPOSITORY_REVISION_PROPERTY = "setReppositoryRevisionProperty";
+	String SET_REPOSITORY_REVISION_PROPERTY = "setReppositoryRevisionProperty";
 
-	public final String VERIFY = "verify";
+	String VERIFY = "verify";
 
-	public final String LIST_LOCKS = "listLocks";
+	String LIST_LOCKS = "listLocks";
 
-	public final String REMOVE_LOCKS = "removeLocks";
+	String REMOVE_LOCKS = "removeLocks";
 
-	public final String REPOSITORY_UPGRADE = "repositoryUpgrade";
+	String REPOSITORY_UPGRADE = "repositoryUpgrade";
 
-	public final String PACK = "pack";
+	String PACK = "pack";
 
 	/**
 	 * Allows to modify parameters before call (for example, you can wrap progress monitor in order to intercept progress notifications)
@@ -194,7 +194,7 @@ public interface ISVNCallListener {
 	 * @param parameters
 	 *            the call parameters
 	 */
-	public void asked(String methodName, Map<String, Object> parameters);
+	void asked(String methodName, Map<String, Object> parameters);
 
 	/**
 	 * The method is called if SVN call was completed successfully.
@@ -206,7 +206,7 @@ public interface ISVNCallListener {
 	 * @param returnValue
 	 *            the return value if any, null otherwise
 	 */
-	public void succeeded(String methodName, Map<String, Object> parameters, Object returnValue);
+	void succeeded(String methodName, Map<String, Object> parameters, Object returnValue);
 
 	/**
 	 * The method is called if there was a failure while calling SVN.
@@ -218,5 +218,5 @@ public interface ISVNCallListener {
 	 * @param exception
 	 *            the failure reason
 	 */
-	public void failed(String methodName, Map<String, Object> parameters, SVNConnectorException exception);
+	void failed(String methodName, Map<String, Object> parameters, SVNConnectorException exception);
 }

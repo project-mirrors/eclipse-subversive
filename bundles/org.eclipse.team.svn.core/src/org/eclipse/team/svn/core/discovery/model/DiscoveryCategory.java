@@ -24,7 +24,7 @@ import java.util.List;
 public class DiscoveryCategory extends ConnectorCategory {
 	private AbstractDiscoverySource source;
 
-	private List<DiscoveryConnector> connectors = new ArrayList<DiscoveryConnector>();
+	private List<DiscoveryConnector> connectors = new ArrayList<>();
 
 	public List<DiscoveryConnector> getConnectors() {
 		return connectors;

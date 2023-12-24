@@ -30,11 +30,11 @@ import org.eclipse.team.svn.ui.action.QueryResourceAddition;
  */
 public class AddToSVNAction extends AbstractRecursiveTeamAction {
 	public AddToSVNAction() {
-		super();
 	}
 
+	@Override
 	public void runImpl(IAction action) {
-		IResource[][] resources = new QueryResourceAddition(this, this.getShell()).queryAdditionsSeparated();
+		IResource[][] resources = new QueryResourceAddition(this, getShell()).queryAdditionsSeparated();
 		if (resources != null) {
 			AddToSVNWithPropertiesOperation mainOp = new AddToSVNWithPropertiesOperation(resources[0], false);
 
@@ -47,15 +47,17 @@ public class AddToSVNAction extends AbstractRecursiveTeamAction {
 			op.add(new RefreshResourcesOperation(
 					resources[2]/*, IResource.DEPTH_INFINITE, RefreshResourcesOperation.REFRESH_ALL*/));
 
-			this.runScheduled(op);
+			runScheduled(op);
 		}
 	}
 
+	@Override
 	public boolean isEnabled() {
-		return this.checkForResourcesPresence(IStateFilter.SF_IGNORED_NOT_FORBIDDEN)
-				|| this.checkForResourcesPresenceRecursive(IStateFilter.SF_NEW);
+		return checkForResourcesPresence(IStateFilter.SF_IGNORED_NOT_FORBIDDEN)
+				|| checkForResourcesPresenceRecursive(IStateFilter.SF_NEW);
 	}
 
+	@Override
 	protected boolean needsToSaveDirtyEditors() {
 		return true;
 	}

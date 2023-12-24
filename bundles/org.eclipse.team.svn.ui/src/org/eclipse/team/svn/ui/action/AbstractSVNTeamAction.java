@@ -40,7 +40,6 @@ import org.eclipse.team.svn.ui.utility.IOperationWrapperFactory;
 import org.eclipse.team.svn.ui.utility.UIMonitorUtility;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.ISelectionListener;
-import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.ide.IDE;
 
@@ -55,16 +54,13 @@ public abstract class AbstractSVNTeamAction extends TeamAction {
 
 	private Shell shell;
 
-	private ISelectionListener selectionListener = new ISelectionListener() {
-		public void selectionChanged(IWorkbenchPart part, ISelection selection) {
-			if (selection instanceof IStructuredSelection) {
-				AbstractSVNTeamAction.this.checkSelection((IStructuredSelection) selection);
-			}
+	private ISelectionListener selectionListener = (part, selection) -> {
+		if (selection instanceof IStructuredSelection) {
+			this.checkSelection((IStructuredSelection) selection);
 		}
 	};
 
 	public AbstractSVNTeamAction() {
-		super();
 	}
 
 	/**
@@ -77,16 +73,19 @@ public abstract class AbstractSVNTeamAction extends TeamAction {
 	 * @return boolean false if the operation was canceled.
 	 */
 	public final boolean saveAllEditors(boolean confirm) {
-		return IDE.saveAllEditors(this.getOriginalSelectedResources(), confirm);
+		return IDE.saveAllEditors(getOriginalSelectedResources(), confirm);
 	}
 
+	@Override
 	public abstract boolean isEnabled();
 
 	public abstract void runImpl(IAction action);
 
+	@Override
 	protected final void execute(final IAction action) throws InvocationTargetException, InterruptedException {
 		ProgressMonitorUtility
 				.doTaskExternal(new AbstractActionOperation("Operation_CallMenuAction", SVNUIMessages.class) { //$NON-NLS-1$
+					@Override
 					protected void runImpl(IProgressMonitor monitor) throws Exception {
 						if (AbstractSVNTeamAction.this.isEnabled()) {
 							if (AbstractSVNTeamAction.this.needsToSaveDirtyEditors() && !AbstractSVNTeamAction.this
@@ -118,11 +117,11 @@ public abstract class AbstractSVNTeamAction extends TeamAction {
 	}
 
 	protected ICancellableOperationWrapper runBusy(IActionOperation operation) {
-		return UIMonitorUtility.doTaskBusy(operation, this.getOperationWrapperFactory());
+		return UIMonitorUtility.doTaskBusy(operation, getOperationWrapperFactory());
 	}
 
 	protected ICancellableOperationWrapper runScheduled(IActionOperation operation) {
-		return UIMonitorUtility.doTaskScheduled(this.getTargetPart(), operation, this.getOperationWrapperFactory());
+		return UIMonitorUtility.doTaskScheduled(getTargetPart(), operation, getOperationWrapperFactory());
 	}
 
 	protected IOperationWrapperFactory getOperationWrapperFactory() {
@@ -133,13 +132,14 @@ public abstract class AbstractSVNTeamAction extends TeamAction {
 		this.handle(ex, SVNUIMessages.getErrorString("Error_ActionFailed"), SVNUIMessages.Error_ActionFailed_Message); //$NON-NLS-1$
 	}
 
+	@Override
 	public void selectionChanged(IAction action, ISelection selection) {
 		try {
 			IStructuredSelection structuredSelection = null;
 			if (selection instanceof ITextSelection) {
-				IEditorPart part = this.getTargetPage().getActiveEditor();
+				IEditorPart part = getTargetPage().getActiveEditor();
 				if (part != null) {
-					IResource resource = (IResource) part.getEditorInput().getAdapter(IResource.class);
+					IResource resource = part.getEditorInput().getAdapter(IResource.class);
 					if (resource != null && resource.getType() == IResource.FILE) {
 						structuredSelection = new StructuredSelection(resource);
 					}
@@ -152,7 +152,7 @@ public abstract class AbstractSVNTeamAction extends TeamAction {
 					action.setEnabled(false);
 				}
 			} else {
-				this.checkSelection(structuredSelection);
+				checkSelection(structuredSelection);
 				super.selectionChanged(action, structuredSelection);
 			}
 		} catch (Throwable ex) {
@@ -160,23 +160,27 @@ public abstract class AbstractSVNTeamAction extends TeamAction {
 		}
 	}
 
+	@Override
 	protected Shell getShell() {
-		return this.shell != null ? this.shell : super.getShell();
+		return shell != null ? shell : super.getShell();
 	}
 
+	@Override
 	public IWorkbenchWindow getWindow() {
-		return this.window;
+		return window;
 	}
 
+	@Override
 	public void init(IWorkbenchWindow window) {
 		this.window = window;
-		this.shell = this.window.getShell();
-		this.window.getSelectionService().addPostSelectionListener(this.selectionListener);
+		shell = this.window.getShell();
+		this.window.getSelectionService().addPostSelectionListener(selectionListener);
 	}
 
+	@Override
 	public void dispose() {
-		if (this.window != null) {
-			this.window.getSelectionService().removePostSelectionListener(this.selectionListener);
+		if (window != null) {
+			window.getSelectionService().removePostSelectionListener(selectionListener);
 		}
 		super.dispose();
 	}
@@ -184,9 +188,10 @@ public abstract class AbstractSVNTeamAction extends TeamAction {
 	/* (non-Javadoc)
 	 * @see org.eclipse.team.internal.ui.actions.TeamAction#getSelectedResources()
 	 */
+	@Override
 	protected IResource[] getSelectedResources() {
-		//filters out not valid resources   		
-		List<IResource> res = new ArrayList<IResource>();
+		//filters out not valid resources
+		List<IResource> res = new ArrayList<>();
 		IResource[] resources = super.getSelectedResources();
 		for (IResource resource : resources) {
 			if (!FileUtility.isNotSupervised(resource)) {
@@ -202,6 +207,7 @@ public abstract class AbstractSVNTeamAction extends TeamAction {
 
 	protected abstract void checkSelection(IStructuredSelection selection);
 
+	@Override
 	protected abstract IStructuredSelection getSelection();
 
 }

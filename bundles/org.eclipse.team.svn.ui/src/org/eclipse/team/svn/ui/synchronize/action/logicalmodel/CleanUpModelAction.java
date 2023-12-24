@@ -34,17 +34,19 @@ public class CleanUpModelAction extends AbstractSynchronizeLogicalModelAction {
 
 	public CleanUpModelAction(String text, ISynchronizePageConfiguration configuration) {
 		super(text, configuration);
-		this.actionHelper = new CleanUpActionHelper(this, configuration);
+		actionHelper = new CleanUpActionHelper(this, configuration);
 	}
 
+	@Override
 	protected boolean needsToSaveDirtyEditors() {
 		return false;
 	}
 
+	@Override
 	protected boolean updateSelection(IStructuredSelection selection) {
 		super.updateSelection(selection);
 
-		IResource[] selectedResources = this.getAllSelectedResources();
+		IResource[] selectedResources = getAllSelectedResources();
 		if (FileUtility.checkForResourcesPresence(selectedResources, IStateFilter.SF_VERSIONED_FOLDERS,
 				IResource.DEPTH_ZERO)) {
 			return true;
@@ -52,8 +54,9 @@ public class CleanUpModelAction extends AbstractSynchronizeLogicalModelAction {
 		return false;
 	}
 
+	@Override
 	protected IActionOperation getOperation() {
-		return this.actionHelper.getOperation();
+		return actionHelper.getOperation();
 	}
 
 }

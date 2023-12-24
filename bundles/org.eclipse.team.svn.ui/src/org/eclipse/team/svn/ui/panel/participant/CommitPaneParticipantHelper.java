@@ -29,12 +29,12 @@ import org.eclipse.team.svn.ui.panel.local.CommitPanel;
 public class CommitPaneParticipantHelper extends PaneParticipantHelper {
 
 	public CommitPaneParticipantHelper() {
-		super();
 	}
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.team.svn.ui.panel.participant.PaneParticipantHelper#getPaneSyncInfoSet()
 	 */
+	@Override
 	protected SyncInfoSet getPaneSyncInfoSetToProcess() {
 		SyncInfoSet resultSet = new SyncInfoSet();
 
@@ -55,10 +55,11 @@ public class CommitPaneParticipantHelper extends PaneParticipantHelper {
 			super(paneParticipantHelper);
 		}
 
+		@Override
 		protected String getErrorMessage(Control input) {
 			String errorMessage = super.getErrorMessage(input);
 			if (errorMessage == null) {
-				IResource[] resourcesToProcess = this.paneParticipantHelper.getSelectedResources();
+				IResource[] resourcesToProcess = paneParticipantHelper.getSelectedResources();
 				if (FileUtility.checkForResourcesPresenceRecursive(resourcesToProcess, new IStateFilter.OrStateFilter(
 						new IStateFilter[] { IStateFilter.SF_CONFLICTING, IStateFilter.SF_TREE_CONFLICTING }))) {
 					return SVNUIMessages.CommitPanel_Pane_Conflicting_Error;
@@ -68,10 +69,11 @@ public class CommitPaneParticipantHelper extends PaneParticipantHelper {
 			return errorMessage;
 		}
 
+		@Override
 		protected String getWarningMessage(Control input) {
 			String message = super.getWarningMessage(input);
 			if (message == null) {
-				IResource[] resourcesToProcess = this.paneParticipantHelper.getSelectedResources();
+				IResource[] resourcesToProcess = paneParticipantHelper.getSelectedResources();
 				if (resourcesToProcess != null && resourcesToProcess.length > 0) {
 					message = CommitPanel.validateResources(resourcesToProcess);
 				}

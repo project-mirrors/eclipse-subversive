@@ -27,11 +27,13 @@ public class FileChange extends ResourceChange {
 		super(parent, local, needsTemporary);
 	}
 
+	@Override
 	protected void preTraverse(IResourceChangeVisitor visitor, int depth, IActionOperationProcessor processor,
 			IProgressMonitor monitor) throws Exception {
 		visitor.preVisit(this, processor, monitor);
 	}
 
+	@Override
 	protected void postTraverse(IResourceChangeVisitor visitor, int depth, IActionOperationProcessor processor,
 			IProgressMonitor monitor) throws Exception {
 		visitor.postVisit(this, processor, monitor);

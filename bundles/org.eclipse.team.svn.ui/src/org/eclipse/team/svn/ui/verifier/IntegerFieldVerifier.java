@@ -15,6 +15,7 @@
 package org.eclipse.team.svn.ui.verifier;
 
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.team.svn.core.BaseMessages;
 import org.eclipse.team.svn.ui.SVNUIMessages;
 
 /**
@@ -32,17 +33,18 @@ public class IntegerFieldVerifier extends AbstractFormattedVerifier {
 	public IntegerFieldVerifier(String fieldName, boolean positive) {
 		super(fieldName);
 		this.positive = positive;
-		IntegerFieldVerifier.ERROR_NAN = SVNUIMessages.format(SVNUIMessages.Verifier_IntegerField_NaN,
+		IntegerFieldVerifier.ERROR_NAN = BaseMessages.format(SVNUIMessages.Verifier_IntegerField_NaN,
 				new String[] { AbstractFormattedVerifier.FIELD_NAME });
-		IntegerFieldVerifier.ERROR_NEGATIVE = SVNUIMessages.format(SVNUIMessages.Verifier_IntegerField_Negative,
+		IntegerFieldVerifier.ERROR_NEGATIVE = BaseMessages.format(SVNUIMessages.Verifier_IntegerField_Negative,
 				new String[] { AbstractFormattedVerifier.FIELD_NAME });
 	}
 
+	@Override
 	protected String getErrorMessageImpl(Control input) {
-		String text = this.getText(input);
+		String text = getText(input);
 		try {
 			long i = Long.parseLong(text);
-			if (this.positive && i < 0) {
+			if (positive && i < 0) {
 				return IntegerFieldVerifier.ERROR_NEGATIVE;
 			}
 		} catch (Exception ex) {
@@ -51,6 +53,7 @@ public class IntegerFieldVerifier extends AbstractFormattedVerifier {
 		return null;
 	}
 
+	@Override
 	protected String getWarningMessageImpl(Control input) {
 		return null;
 	}

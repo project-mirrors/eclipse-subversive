@@ -30,6 +30,7 @@ public class SVNRepositoryFolder extends SVNRepositoryContainer implements IRepo
 		super(location, url, selectedRevision);
 	}
 
+	@Override
 	public boolean equals(Object obj) {
 		if (obj == null || !(obj instanceof IRepositoryFolder)) {
 			return false;

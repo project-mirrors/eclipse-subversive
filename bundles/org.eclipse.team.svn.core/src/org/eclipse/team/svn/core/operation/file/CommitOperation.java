@@ -22,6 +22,7 @@ import java.util.Map;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.team.svn.core.BaseMessages;
 import org.eclipse.team.svn.core.SVNMessages;
 import org.eclipse.team.svn.core.connector.ISVNConnector;
 import org.eclipse.team.svn.core.connector.SVNCommitStatus;
@@ -33,7 +34,6 @@ import org.eclipse.team.svn.core.extension.factory.ISVNConnectorFactory;
 import org.eclipse.team.svn.core.operation.IConsoleStream;
 import org.eclipse.team.svn.core.operation.IPostCommitErrorsProvider;
 import org.eclipse.team.svn.core.operation.IRevisionProvider;
-import org.eclipse.team.svn.core.operation.IUnprotectedOperation;
 import org.eclipse.team.svn.core.operation.SVNProgressMonitor;
 import org.eclipse.team.svn.core.resource.IRepositoryLocation;
 import org.eclipse.team.svn.core.utility.FileUtility;
@@ -82,26 +82,25 @@ public class CommitOperation extends AbstractFileConflictDetectionOperation
 		this.options = options & ISVNConnector.CommandMasks.COMMIT;
 	}
 
+	@Override
 	public RevisionPair[] getRevisions() {
-		return this.revisionsPairs == null
-				? null
-				: this.revisionsPairs.toArray(new RevisionPair[this.revisionsPairs.size()]);
+		return revisionsPairs == null ? null : revisionsPairs.toArray(new RevisionPair[revisionsPairs.size()]);
 	}
 
+	@Override
 	public SVNCommitStatus[] getPostCommitErrors() {
-		return this.postCommitErrors == null
-				? null
-				: this.postCommitErrors.toArray(new SVNCommitStatus[this.postCommitErrors.size()]);
+		return postCommitErrors == null ? null : postCommitErrors.toArray(new SVNCommitStatus[postCommitErrors.size()]);
 	}
 
+	@Override
 	protected void runImpl(IProgressMonitor monitor) throws Exception {
-		this.revisionsPairs = new ArrayList<RevisionPair>();
-		this.postCommitErrors = new ArrayList<SVNCommitStatus>();
-		File[] files = this.operableData();
+		revisionsPairs = new ArrayList<>();
+		postCommitErrors = new ArrayList<>();
+		File[] files = operableData();
 
-		this.defineInitialResourceSet(files);
+		defineInitialResourceSet(files);
 
-		if (this.depth == SVNDepth.INFINITY) {
+		if (depth == SVNDepth.INFINITY) {
 			files = FileUtility.shrinkChildNodes(files, false);
 		} else {
 			FileUtility.reorder(files, true);
@@ -113,7 +112,7 @@ public class CommitOperation extends AbstractFileConflictDetectionOperation
 			for (Iterator it = proxy2Resources.entrySet().iterator(); it.hasNext() && !monitor.isCanceled();) {
 				Map.Entry entry = (Map.Entry) it.next();
 				IRepositoryLocation location = (IRepositoryLocation) entry.getKey();
-				this.performCommit(location, (List) entry.getValue(), monitor, proxy2Resources.size());
+				performCommit(location, (List) entry.getValue(), monitor, proxy2Resources.size());
 			}
 		} else {
 			Map project2Resources = SVNUtility.splitWorkingCopies(files);
@@ -123,68 +122,61 @@ public class CommitOperation extends AbstractFileConflictDetectionOperation
 				IRepositoryLocation location = SVNFileStorage.instance()
 						.asRepositoryResource((File) entry.getKey(), false)
 						.getRepositoryLocation();
-				this.performCommit(location, (List) entry.getValue(), monitor, project2Resources.size());
+				performCommit(location, (List) entry.getValue(), monitor, project2Resources.size());
 			}
 		}
 	}
 
 	protected void performCommit(final IRepositoryLocation location, List files, final IProgressMonitor monitor,
 			int total) {
-		this.paths = FileUtility.asPathArray((File[]) files.toArray(new File[files.size()]));
+		paths = FileUtility.asPathArray((File[]) files.toArray(new File[files.size()]));
 
-		this.complexWriteToConsole(new Runnable() {
-			public void run() {
-				CommitOperation.this.writeToConsole(IConsoleStream.LEVEL_CMD,
-						"svn commit" + ISVNConnector.Options.asCommandLine(CommitOperation.this.options)); //$NON-NLS-1$
-				for (int i = 0; i < CommitOperation.this.paths.length && !monitor.isCanceled(); i++) {
-					CommitOperation.this.writeToConsole(IConsoleStream.LEVEL_CMD,
-							" \"" + CommitOperation.this.paths[i] + "\""); //$NON-NLS-1$ //$NON-NLS-2$
-				}
-				CommitOperation.this.writeToConsole(IConsoleStream.LEVEL_CMD,
-						(CommitOperation.this.depth == SVNDepth.INFINITY ? "" : " -N") //$NON-NLS-1$//$NON-NLS-2$
-								+ ((CommitOperation.this.options & ISVNConnector.Options.KEEP_LOCKS) != 0
-										? " --no-unlock" //$NON-NLS-1$
-										: "") //$NON-NLS-1$
-								+ " -m \"" + CommitOperation.this.message + "\"" //$NON-NLS-1$//$NON-NLS-2$
-								+ FileUtility.getUsernameParam(location.getUsername()) + "\n"); //$NON-NLS-1$
+		complexWriteToConsole(() -> {
+			CommitOperation.this.writeToConsole(IConsoleStream.LEVEL_CMD,
+					"svn commit" + ISVNConnector.Options.asCommandLine(options)); //$NON-NLS-1$
+			for (int i = 0; i < paths.length && !monitor.isCanceled(); i++) {
+				CommitOperation.this.writeToConsole(IConsoleStream.LEVEL_CMD, " \"" + paths[i] + "\""); //$NON-NLS-1$ //$NON-NLS-2$
 			}
+			CommitOperation.this.writeToConsole(IConsoleStream.LEVEL_CMD, (depth == SVNDepth.INFINITY ? "" : " -N") //$NON-NLS-1$//$NON-NLS-2$
+					+ ((options & ISVNConnector.Options.KEEP_LOCKS) != 0
+							? " --no-unlock" //$NON-NLS-1$
+							: "") //$NON-NLS-1$
+					+ " -m \"" + message + "\"" //$NON-NLS-1$//$NON-NLS-2$
+					+ FileUtility.getUsernameParam(location.getUsername()) + "\n"); //$NON-NLS-1$
 		});
 
 		final ISVNConnector proxy = location.acquireSVNProxy();
-		this.protectStep(new IUnprotectedOperation() {
-			public void run(IProgressMonitor monitor) throws Exception {
-				SVNProgressMonitor svnMonitor = new SVNProgressMonitor(CommitOperation.this, monitor, null);
-				proxy.commit(
-						CommitOperation.this.paths, CommitOperation.this.message, null, CommitOperation.this.depth,
-						CommitOperation.this.options, null, svnMonitor);
-				SVNCommitStatus status = svnMonitor.getCommitStatuses().isEmpty()
-						? null
-						: svnMonitor.getCommitStatuses().iterator().next();
-				if (status != null && status.revision != SVNRevision.INVALID_REVISION_NUMBER) {
-					CommitOperation.this.revisionsPairs
-							.add(new RevisionPair(status.revision, CommitOperation.this.paths, location));
-					String message = SVNMessages.format(SVNMessages.Console_CommittedRevision,
-							new String[] { String.valueOf(status.revision) });
-					CommitOperation.this.writeToConsole(IConsoleStream.LEVEL_OK, message);
-				}
-				if (svnMonitor.getPostCommitErrors() != null) {
-					CommitOperation.this.postCommitErrors.addAll(svnMonitor.getPostCommitErrors());
-				}
+		this.protectStep(monitor1 -> {
+			SVNProgressMonitor svnMonitor = new SVNProgressMonitor(CommitOperation.this, monitor1, null);
+			proxy.commit(
+					paths, message, null, depth, options, null, svnMonitor);
+			SVNCommitStatus status = svnMonitor.getCommitStatuses().isEmpty()
+					? null
+					: svnMonitor.getCommitStatuses().iterator().next();
+			if (status != null && status.revision != SVNRevision.INVALID_REVISION_NUMBER) {
+				revisionsPairs.add(new RevisionPair(status.revision, paths, location));
+				String message = BaseMessages.format(SVNMessages.Console_CommittedRevision,
+						new String[] { String.valueOf(status.revision) });
+				CommitOperation.this.writeToConsole(IConsoleStream.LEVEL_OK, message);
+			}
+			if (svnMonitor.getPostCommitErrors() != null) {
+				postCommitErrors.addAll(svnMonitor.getPostCommitErrors());
 			}
 		}, monitor, total);
 		location.releaseSVNProxy(proxy);
 	}
 
+	@Override
 	public void reportStatus(int severity, String message, Throwable t) {
 		if (t instanceof SVNConnectorUnresolvedConflictException) {
-			this.hasUnresolvedConflict = true;
-			this.conflictMessage = t.getMessage();
-			for (int i = 0; i < this.paths.length; i++) {
-				for (Iterator it = this.processed.iterator(); it.hasNext();) {
+			hasUnresolvedConflict = true;
+			conflictMessage = t.getMessage();
+			for (String path : paths) {
+				for (Iterator it = processed.iterator(); it.hasNext();) {
 					File res = (File) it.next();
-					if (new Path(res.getAbsolutePath()).equals(new Path(this.paths[i]))) {
+					if (new Path(res.getAbsolutePath()).equals(new Path(path))) {
 						it.remove();
-						this.unprocessed.add(res);
+						unprocessed.add(res);
 						break;
 					}
 				}

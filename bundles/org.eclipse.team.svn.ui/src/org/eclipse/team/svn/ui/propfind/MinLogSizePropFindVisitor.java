@@ -25,15 +25,16 @@ public class MinLogSizePropFindVisitor implements IPropFindVisitor {
 	protected int minLogSize;
 
 	public MinLogSizePropFindVisitor() {
-		this.minLogSize = 0;
+		minLogSize = 0;
 	}
 
+	@Override
 	public boolean visit(SVNProperty propertyParam) {
 		if (propertyParam.name.equals("tsvn:logminsize")) { //$NON-NLS-1$
 			try {
 				int currMinSize = Integer.decode(propertyParam.value);
-				if (this.minLogSize < currMinSize) {
-					this.minLogSize = currMinSize;
+				if (minLogSize < currMinSize) {
+					minLogSize = currMinSize;
 				}
 			} catch (NumberFormatException ex) {
 				//we ignore the exception
@@ -43,7 +44,7 @@ public class MinLogSizePropFindVisitor implements IPropFindVisitor {
 	}
 
 	public int getMinLogSize() {
-		return this.minLogSize;
+		return minLogSize;
 	}
 
 }

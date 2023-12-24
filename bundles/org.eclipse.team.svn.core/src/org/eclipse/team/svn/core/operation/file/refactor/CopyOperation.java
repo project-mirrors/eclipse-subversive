@@ -15,7 +15,6 @@
 package org.eclipse.team.svn.core.operation.file.refactor;
 
 import java.io.File;
-import java.io.FileFilter;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
@@ -25,7 +24,6 @@ import org.eclipse.team.svn.core.SVNMessages;
 import org.eclipse.team.svn.core.connector.ISVNConnector;
 import org.eclipse.team.svn.core.connector.SVNEntryRevisionReference;
 import org.eclipse.team.svn.core.connector.SVNRevision;
-import org.eclipse.team.svn.core.operation.IUnprotectedOperation;
 import org.eclipse.team.svn.core.operation.SVNProgressMonitor;
 import org.eclipse.team.svn.core.operation.UnreportableException;
 import org.eclipse.team.svn.core.operation.file.AbstractFileOperation;
@@ -58,34 +56,34 @@ public class CopyOperation extends AbstractFileOperation {
 		this.forceNonSVN = forceNonSVN;
 	}
 
+	@Override
 	public ISchedulingRule getSchedulingRule() {
 		ISchedulingRule parentRule = super.getSchedulingRule();
-		return MultiRule.combine(new LockingRule(this.localTo), parentRule);
+		return MultiRule.combine(new LockingRule(localTo), parentRule);
 	}
 
+	@Override
 	protected void runImpl(IProgressMonitor monitor) throws Exception {
-		File[] files = this.operableData();
+		File[] files = operableData();
 
-		IRepositoryResource remoteTo = SVNFileStorage.instance().asRepositoryResource(this.localTo, true);
+		IRepositoryResource remoteTo = SVNFileStorage.instance().asRepositoryResource(localTo, true);
 		IRepositoryLocation location = remoteTo == null ? null : remoteTo.getRepositoryLocation();
 		final ISVNConnector proxy = location == null ? null : location.acquireSVNProxy();
 
 		for (int i = 0; i < files.length && !monitor.isCanceled(); i++) {
 			final File current = files[i];
-			this.protectStep(new IUnprotectedOperation() {
-				public void run(IProgressMonitor monitor) throws Exception {
-					IRepositoryResource remote = SVNFileStorage.instance().asRepositoryResource(current, true);
-					File checked = CopyOperation.this.getCopyTo(current);
-					if (remote == null || proxy == null || CopyOperation.this.forceNonSVN) {
-						CopyOperation.this.nonSVNCopy(current, monitor);
-					} else {
-						proxy.copyLocal(
-								new SVNEntryRevisionReference[] { new SVNEntryRevisionReference(
-										current.getAbsolutePath(), null, SVNRevision.WORKING) },
-								checked.getAbsolutePath(), ISVNConnector.Options.NONE,
-								ISVNConnector.NO_EXTERNALS_TO_PIN,
-								new SVNProgressMonitor(CopyOperation.this, monitor, null));
-					}
+			this.protectStep(monitor1 -> {
+				IRepositoryResource remote = SVNFileStorage.instance().asRepositoryResource(current, true);
+				File checked = CopyOperation.this.getCopyTo(current);
+				if (remote == null || proxy == null || forceNonSVN) {
+					CopyOperation.this.nonSVNCopy(current, monitor1);
+				} else {
+					proxy.copyLocal(
+							new SVNEntryRevisionReference[] { new SVNEntryRevisionReference(
+									current.getAbsolutePath(), null, SVNRevision.WORKING) },
+							checked.getAbsolutePath(), ISVNConnector.Options.NONE,
+							ISVNConnector.NO_EXTERNALS_TO_PIN,
+							new SVNProgressMonitor(CopyOperation.this, monitor1, null));
 				}
 			}, monitor, files.length);
 		}
@@ -96,20 +94,16 @@ public class CopyOperation extends AbstractFileOperation {
 	}
 
 	protected File getCopyTo(File what) {
-		File checked = new File(this.localTo.getAbsolutePath() + "/" + what.getName()); //$NON-NLS-1$
+		File checked = new File(localTo.getAbsolutePath() + "/" + what.getName()); //$NON-NLS-1$
 		if (checked.exists()) {
-			String message = this.getNationalizedString("Error_AlreadyExists"); //$NON-NLS-1$
+			String message = getNationalizedString("Error_AlreadyExists"); //$NON-NLS-1$
 			throw new UnreportableException(BaseMessages.format(message, new Object[] { checked.getAbsolutePath() }));
 		}
 		return checked;
 	}
 
 	protected void nonSVNCopy(File what, IProgressMonitor monitor) throws Exception {
-		FileUtility.copyAll(this.localTo, what, FileUtility.COPY_NO_OPTIONS, new FileFilter() {
-			public boolean accept(File pathname) {
-				return !pathname.getName().equals(SVNUtility.getSVNFolderName());
-			}
-		}, monitor);
+		FileUtility.copyAll(localTo, what, FileUtility.COPY_NO_OPTIONS, pathname -> !pathname.getName().equals(SVNUtility.getSVNFolderName()), monitor);
 	}
 
 }

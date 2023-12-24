@@ -27,9 +27,10 @@ public class RevisionLogEntryFilter implements ILogEntryFilter {
 
 	protected long to;
 
+	@Override
 	public boolean accept(SVNLogEntry logEntry) {
 		long current = logEntry.revision;
-		return (current > this.to || current < this.from);
+		return current > to || current < from;
 	}
 
 	/**

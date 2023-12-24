@@ -61,11 +61,12 @@ public class ProjectListComposite extends Composite {
 		super(parent, style);
 		this.resources = resources;
 		this.remoteMode = remoteMode;
-		this.images = new HashMap<ImageDescriptor, Image>();
+		images = new HashMap<>();
 	}
 
+	@Override
 	public void dispose() {
-		for (Image img : this.images.values()) {
+		for (Image img : images.values()) {
 			img.dispose();
 		}
 		super.dispose();
@@ -76,17 +77,17 @@ public class ProjectListComposite extends Composite {
 		gLayout.marginHeight = gLayout.marginWidth = 0;
 		GridData data = new GridData(GridData.FILL_BOTH);
 		data.heightHint = 150;
-		this.setLayout(gLayout);
-		this.setLayoutData(data);
+		setLayout(gLayout);
+		setLayoutData(data);
 		Table table = new Table(this, SWT.H_SCROLL | SWT.V_SCROLL | SWT.FULL_SELECTION | SWT.SINGLE | SWT.BORDER);
 		TableLayout layout = new TableLayout();
 		table.setLayout(layout);
 
-		this.tableViewer = new TableViewer(table);
+		tableViewer = new TableViewer(table);
 		data = new GridData(GridData.FILL_BOTH);
-		this.tableViewer.getTable().setLayoutData(data);
-		this.tableViewer.getTable().setHeaderVisible(true);
-		this.tableViewer.getTable().setLinesVisible(true);
+		tableViewer.getTable().setLayoutData(data);
+		tableViewer.getTable().setHeaderVisible(true);
+		tableViewer.getTable().setLinesVisible(true);
 
 		TableColumn col = new TableColumn(table, SWT.NONE);
 		col.setResizable(false);
@@ -99,16 +100,16 @@ public class ProjectListComposite extends Composite {
 
 		col = new TableColumn(table, SWT.NONE);
 		col.setResizable(true);
-		col.setText(this.remoteMode
+		col.setText(remoteMode
 				? SVNUIMessages.ProjectListComposite_RepositoryLabel
 				: SVNUIMessages.ProjectListComposite_RepositoryURL);
 		layout.addColumnData(new ColumnWeightData(70, true));
 
-		this.tableViewer.setLabelProvider(new ITableLabelProvider() {
+		tableViewer.setLabelProvider(new ITableLabelProvider() {
+			@Override
 			public Image getColumnImage(Object element, int columnIndex) {
 				if (columnIndex == 0) {
-					IWorkbenchAdapter adapter = (IWorkbenchAdapter) ((IAdaptable) element)
-							.getAdapter(IWorkbenchAdapter.class);
+					IWorkbenchAdapter adapter = ((IAdaptable) element).getAdapter(IWorkbenchAdapter.class);
 					if (adapter == null) {
 						return null;
 					}
@@ -116,16 +117,17 @@ public class ProjectListComposite extends Composite {
 					if (descriptor == null) {
 						return null;
 					}
-					Image image = ProjectListComposite.this.images.get(descriptor);
+					Image image = images.get(descriptor);
 					if (image == null) {
 						image = descriptor.createImage();
-						ProjectListComposite.this.images.put(descriptor, image);
+						images.put(descriptor, image);
 					}
 					return image;
 				}
 				return null;
 			}
 
+			@Override
 			public String getColumnText(Object element, int columnIndex) {
 				IResource resource = (IResource) element;
 				if (columnIndex == 1) {
@@ -133,7 +135,7 @@ public class ProjectListComposite extends Composite {
 				}
 				if (columnIndex == 2) {
 					IRemoteStorage storage = SVNRemoteStorage.instance();
-					if (ProjectListComposite.this.remoteMode) {
+					if (remoteMode) {
 						return storage.getRepositoryLocation(resource).getLabel();
 					}
 					return storage.asRepositoryResource(resource).getUrl();
@@ -141,23 +143,27 @@ public class ProjectListComposite extends Composite {
 				return ""; //$NON-NLS-1$
 			}
 
+			@Override
 			public void addListener(ILabelProviderListener listener) {
 			}
 
+			@Override
 			public void dispose() {
 			}
 
+			@Override
 			public boolean isLabelProperty(Object element, String property) {
 				return false;
 			}
 
+			@Override
 			public void removeListener(ILabelProviderListener listener) {
 			}
 		});
 
-		this.tableViewer.setContentProvider(new ArrayStructuredContentProvider());
+		tableViewer.setContentProvider(new ArrayStructuredContentProvider());
 
-		this.tableViewer.setInput(this.resources);
+		tableViewer.setInput(resources);
 
 	}
 

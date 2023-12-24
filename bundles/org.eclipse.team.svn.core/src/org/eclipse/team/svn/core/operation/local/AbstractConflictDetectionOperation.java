@@ -31,49 +31,57 @@ public abstract class AbstractConflictDetectionOperation extends AbstractWorking
 	public AbstractConflictDetectionOperation(String operationName, Class<? extends NLS> messagesClass,
 			IResource[] resources) {
 		super(operationName, messagesClass, resources);
-		this.conflictDetectorHelper = new UnresolvedConflictDetectorHelper();
+		conflictDetectorHelper = new UnresolvedConflictDetectorHelper();
 	}
 
 	public AbstractConflictDetectionOperation(String operationName, Class<? extends NLS> messagesClass,
 			IResourceProvider provider) {
 		super(operationName, messagesClass, provider);
-		this.conflictDetectorHelper = new UnresolvedConflictDetectorHelper();
+		conflictDetectorHelper = new UnresolvedConflictDetectorHelper();
 	}
 
+	@Override
 	public void setUnresolvedConflict(boolean hasUnresolvedConflict) {
-		this.conflictDetectorHelper.setUnresolvedConflict(hasUnresolvedConflict);
+		conflictDetectorHelper.setUnresolvedConflict(hasUnresolvedConflict);
 	}
 
+	@Override
 	public boolean hasUnresolvedConflicts() {
-		return this.conflictDetectorHelper.hasUnresolvedConflicts();
+		return conflictDetectorHelper.hasUnresolvedConflicts();
 	}
 
+	@Override
 	public String getMessage() {
-		return this.conflictDetectorHelper.getMessage();
+		return conflictDetectorHelper.getMessage();
 	}
 
+	@Override
 	public IResource[] getUnprocessed() {
-		return this.conflictDetectorHelper.getUnprocessed();
+		return conflictDetectorHelper.getUnprocessed();
 	}
 
+	@Override
 	public IResource[] getProcessed() {
-		return this.conflictDetectorHelper.getProcessed();
+		return conflictDetectorHelper.getProcessed();
 	}
 
 	public void defineInitialResourceSet(IResource[] resources) {
-		this.conflictDetectorHelper.defineInitialResourceSet(resources);
+		conflictDetectorHelper.defineInitialResourceSet(resources);
 	}
 
+	@Override
 	public void addUnprocessed(IResource unprocessed) {
-		this.conflictDetectorHelper.addUnprocessed(unprocessed);
+		conflictDetectorHelper.addUnprocessed(unprocessed);
 	}
 
+	@Override
 	public void setConflictMessage(String message) {
-		this.conflictDetectorHelper.setConflictMessage(message);
+		conflictDetectorHelper.setConflictMessage(message);
 	}
 
+	@Override
 	public void removeProcessed(IResource resource) {
-		this.conflictDetectorHelper.removeProcessed(resource);
+		conflictDetectorHelper.removeProcessed(resource);
 	}
 
 }

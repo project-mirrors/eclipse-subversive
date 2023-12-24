@@ -30,9 +30,9 @@ import org.eclipse.team.svn.ui.action.AbstractWorkingCopyAction;
 public class CleanupAction extends AbstractWorkingCopyAction {
 
 	public CleanupAction() {
-		super();
 	}
 
+	@Override
 	public void runImpl(IAction action) {
 		IResource[] resources = this.getSelectedResources(IStateFilter.SF_VERSIONED_FOLDERS);
 
@@ -41,13 +41,15 @@ public class CleanupAction extends AbstractWorkingCopyAction {
 
 		op.add(mainOp);
 		op.add(new RefreshResourcesOperation(resources));
-		this.runScheduled(op);
+		runScheduled(op);
 	}
 
+	@Override
 	public boolean isEnabled() {
-		return this.checkForResourcesPresence(IStateFilter.SF_VERSIONED_FOLDERS);
+		return checkForResourcesPresence(IStateFilter.SF_VERSIONED_FOLDERS);
 	}
 
+	@Override
 	protected boolean needsToSaveDirtyEditors() {
 		return true;
 	}

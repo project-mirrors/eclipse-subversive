@@ -39,34 +39,36 @@ public class OpenFileWithAction extends AbstractRepositoryTeamAction {
 	}
 
 	public OpenFileWithAction(String editorId, boolean allowsMultiple) {
-		super();
 		this.editorId = editorId;
 		this.allowsMultiple = allowsMultiple;
 	}
 
+	@Override
 	public void runImpl(IAction action) {
-		RepositoryFile[] resources = (RepositoryFile[]) this.getAdaptedSelection(RepositoryFile.class);
+		RepositoryFile[] resources = this.getAdaptedSelection(RepositoryFile.class);
 		IRepositoryFile[] files = new IRepositoryFile[resources.length];
 		for (int i = 0; i < resources.length; i++) {
 			files[i] = (IRepositoryFile) resources[i].getRepositoryResource();
 		}
-		this.runScheduled(new OpenRemoteFileOperation(files, OpenRemoteFileOperation.OPEN_SPECIFIED, this.editorId));
+		runScheduled(new OpenRemoteFileOperation(files, OpenRemoteFileOperation.OPEN_SPECIFIED, editorId));
 	}
 
+	@Override
 	public void selectionChanged(IAction action, ISelection selection) {
 		super.selectionChanged(action, selection);
 		if (action.getImageDescriptor() == null) {
 			IEditorDescriptor descriptor = SVNTeamUIPlugin.instance()
 					.getWorkbench()
 					.getEditorRegistry()
-					.findEditor(this.editorId);
+					.findEditor(editorId);
 			action.setImageDescriptor(descriptor == null ? null : descriptor.getImageDescriptor());
 		}
 	}
 
+	@Override
 	public boolean isEnabled() {
 		Object[] items = this.getAdaptedSelection(RepositoryFile.class);
-		return this.allowsMultiple ? items.length > 0 : items.length == 1;
+		return allowsMultiple ? items.length > 0 : items.length == 1;
 	}
 
 }

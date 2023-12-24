@@ -33,20 +33,23 @@ public class RepositoryFictiveWorkingDirectory extends RepositoryFictiveNode {
 		this.associatedDirectory = associatedDirectory;
 	}
 
+	@Override
 	public Object[] getChildren(Object o) {
 		return null;
 	}
 
+	@Override
 	public ImageDescriptor getImageDescriptor(Object object) {
 		return PlatformUI.getWorkbench().getSharedImages().getImageDescriptor(ISharedImages.IMG_OBJ_FOLDER);
 	}
 
+	@Override
 	public String getLabel(Object o) {
 		return RepositoryFictiveWorkingDirectory.WORKING_DIR_LABEL;
 	}
 
 	public Object getAssociatedDirectory() {
-		return this.associatedDirectory;
+		return associatedDirectory;
 	}
 
 }

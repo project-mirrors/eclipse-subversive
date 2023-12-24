@@ -9,8 +9,8 @@
  *
  * Contributors:
  *     Tasktop Technologies - initial API and implementation
- *     IBM Corporation - helper methods from 
- *       org.eclipse.wst.common.frameworks.internal.ui.WTPActivityHelper 
+ *     IBM Corporation - helper methods from
+ *       org.eclipse.wst.common.frameworks.internal.ui.WTPActivityHelper
  *     Alexander Fedorov (ArSysOp) - ongoing support
  *******************************************************************************/
 
@@ -24,6 +24,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
+import org.eclipse.team.svn.core.BaseMessages;
 import org.eclipse.team.svn.core.SVNTeamPlugin;
 import org.eclipse.team.svn.core.operation.LoggedOperation;
 import org.eclipse.team.svn.ui.SVNUIMessages;
@@ -108,7 +109,7 @@ public class WorkbenchUtil {
 				MessageDialog.openWarning(UIMonitorUtility.getShell(), SVNUIMessages.WorkbenchUtil_Open_Location_Title,
 						status.getMessage());
 			} else {
-				Status status = new Status(IStatus.ERROR, SVNTeamPlugin.NATURE_ID, SVNUIMessages.format(
+				Status status = new Status(IStatus.ERROR, SVNTeamPlugin.NATURE_ID, BaseMessages.format(
 						SVNUIMessages.WorkbenchUtil_Invalid_URL_Error, location), e);
 				MessageDialog.openError(UIMonitorUtility.getShell(), SVNUIMessages.WorkbenchUtil_Open_Location_Title,
 						status.getMessage());

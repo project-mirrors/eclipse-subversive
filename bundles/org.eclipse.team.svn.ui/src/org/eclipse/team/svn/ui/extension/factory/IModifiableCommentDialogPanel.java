@@ -21,10 +21,11 @@ package org.eclipse.team.svn.ui.extension.factory;
  * 
  * @deprecated use {@link ICommentManager} instead.
  */
+@Deprecated
 public interface IModifiableCommentDialogPanel extends ICommentDialogPanel {
 	/**
 	 * Changes message in the commit panel. Be sure to call it from UI thread and before the actual widget is disposed or you'll get an
 	 * exception.
 	 */
-	public void setMessage(String message);
+	void setMessage(String message);
 }

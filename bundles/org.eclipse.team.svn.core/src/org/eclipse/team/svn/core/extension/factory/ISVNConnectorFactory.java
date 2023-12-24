@@ -25,9 +25,9 @@ import org.eclipse.team.svn.core.operation.UnreportableException;
  * @author Alexander Gurov
  */
 public interface ISVNConnectorFactory {
-	public static final String DEFAULT_ID = "org.eclipse.team.svn.connector.svnkit18"; //$NON-NLS-1$
+	String DEFAULT_ID = "org.eclipse.team.svn.connector.svnkit18"; //$NON-NLS-1$
 
-	public static final String CURRENT_COMPATIBILITY_VERSION = "4.0.0.I20160427-1700"; //$NON-NLS-1$
+	String CURRENT_COMPATIBILITY_VERSION = "4.0.0.I20160427-1700"; //$NON-NLS-1$
 
 	/**
 	 * Enumeration of connector API compatibility levels
@@ -139,39 +139,48 @@ public interface ISVNConnectorFactory {
 		public static final int CREATE_REPOSITORY = CREATE_REPOSITORY_FSFS | CREATE_REPOSITORY_BDB;
 	}
 
-	public static final ISVNConnectorFactory EMPTY = new ISVNConnectorFactory() {
+	ISVNConnectorFactory EMPTY = new ISVNConnectorFactory() {
+		@Override
 		public ISVNConnector createConnector() {
-			throw new UnreportableException(this.getName());
+			throw new UnreportableException(getName());
 		}
 
+		@Override
 		public ISVNManager createManager() {
-			throw new UnreportableException(this.getName());
+			throw new UnreportableException(getName());
 		}
 
+		@Override
 		public int getSupportedFeatures() {
 			return OptionalFeatures.NO_OPTIONAL_FEATURES;
 		}
 
+		@Override
 		public String getVersion() {
 			return ""; //$NON-NLS-1$
 		}
 
+		@Override
 		public String getName() {
-			return SVNMessages.getErrorString(this.getId());
+			return SVNMessages.getErrorString(getId());
 		}
 
+		@Override
 		public String getId() {
 			return "Error_NoSVNClient"; //$NON-NLS-1$
 		}
 
+		@Override
 		public String getCompatibilityVersion() {
 			return ISVNConnectorFactory.CURRENT_COMPATIBILITY_VERSION;
 		}
 
+		@Override
 		public String getClientVersion() {
 			return ""; //$NON-NLS-1$
 		}
 
+		@Override
 		public int getSVNAPIVersion() {
 			return APICompatibility.SVNAPI_NOT_SPECIFIED;
 		}
@@ -182,62 +191,62 @@ public interface ISVNConnectorFactory {
 	 * 
 	 * @return SVN Client Library instance
 	 */
-	public ISVNConnector createConnector();
+	ISVNConnector createConnector();
 
 	/**
 	 * Makes new SVN Client Library instance
 	 * 
 	 * @return SVN Client Library instance
 	 */
-	public ISVNManager createManager();
+	ISVNManager createManager();
 
 	/**
 	 * Returns unique SVN Client library plug-in id
 	 * 
 	 * @return SVN Client library plug-in id
 	 */
-	public String getId();
+	String getId();
 
 	/**
 	 * Returns user-friendly SVN Client library plug-in name
 	 * 
 	 * @return SVN Client library plug-in name
 	 */
-	public String getName();
+	String getName();
 
 	/**
 	 * Returns SVN Client library plug-in version
 	 * 
 	 * @return plug-in version
 	 */
-	public String getVersion();
+	String getVersion();
 
 	/**
 	 * Returns SVN Client library plug-in API compatibility version
 	 * 
 	 * @return plug-in version
 	 */
-	public String getCompatibilityVersion();
+	String getCompatibilityVersion();
 
 	/**
 	 * Returns SVN Client library version
 	 * 
 	 * @return connector version
 	 */
-	public String getClientVersion();
+	String getClientVersion();
 
 	/**
 	 * Returns supported optional features set
 	 * 
 	 * @return supported optional features set
 	 */
-	public int getSupportedFeatures();
+	int getSupportedFeatures();
 
 	/**
 	 * Tell which SVN API version supported
 	 * 
 	 * @return API version Id
 	 */
-	public int getSVNAPIVersion();
+	int getSVNAPIVersion();
 
 }

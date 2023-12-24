@@ -33,12 +33,15 @@ public class SetKeywordsModelAction extends AbstractSynchronizeLogicalModelActio
 		super(text, configuration);
 	}
 
+	@Override
 	protected boolean needsToSaveDirtyEditors() {
 		return false;
 	}
 
+	@Override
 	protected FastSyncInfoFilter getSyncInfoFilter() {
 		return new FastSyncInfoFilter() {
+			@Override
 			public boolean select(SyncInfo info) {
 				return super.select(info)
 						&& IStateFilter.SF_VERSIONED_FILES.accept(((AbstractSVNSyncInfo) info).getLocalResource());
@@ -46,9 +49,9 @@ public class SetKeywordsModelAction extends AbstractSynchronizeLogicalModelActio
 		};
 	}
 
+	@Override
 	protected IActionOperation getOperation() {
-		org.eclipse.team.svn.ui.action.local.SetKeywordsAction
-				.doSetKeywords(this.syncInfoSelector.getSelectedResources());
+		org.eclipse.team.svn.ui.action.local.SetKeywordsAction.doSetKeywords(syncInfoSelector.getSelectedResources());
 		return null;
 	}
 

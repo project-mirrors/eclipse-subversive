@@ -33,9 +33,9 @@ import org.eclipse.team.svn.ui.preferences.SVNTeamPreferences;
  */
 public class MarkAsMergedAction extends AbstractNonRecursiveTeamAction {
 	public MarkAsMergedAction() {
-		super();
 	}
 
+	@Override
 	public void runImpl(IAction action) {
 		IResource[] resources = this.getSelectedResources(IStateFilter.SF_CONFLICTING);
 		boolean ignoreExternals = SVNTeamPreferences.getBehaviourBoolean(
@@ -46,13 +46,15 @@ public class MarkAsMergedAction extends AbstractNonRecursiveTeamAction {
 		op.add(new ShowPostCommitErrorsOperation(mainOp));
 		op.add(new RefreshResourcesOperation(FileUtility.getParents(resources, false)));
 
-		this.runScheduled(op);
+		runScheduled(op);
 	}
 
+	@Override
 	public boolean isEnabled() {
-		return this.getSelectedResources().length == 1 && this.checkForResourcesPresence(IStateFilter.SF_CONFLICTING);
+		return this.getSelectedResources().length == 1 && checkForResourcesPresence(IStateFilter.SF_CONFLICTING);
 	}
 
+	@Override
 	protected boolean needsToSaveDirtyEditors() {
 		return true;
 	}

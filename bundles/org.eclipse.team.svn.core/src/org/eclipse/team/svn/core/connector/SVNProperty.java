@@ -131,8 +131,8 @@ public class SVNProperty {
 	 */
 	public SVNProperty(String name) {
 		this.name = name;
-		this.value = null;
-		this.binValue = null;
+		value = null;
+		binValue = null;
 	}
 
 	/**
@@ -146,7 +146,7 @@ public class SVNProperty {
 	public SVNProperty(String name, String value) {
 		this.name = name;
 		this.value = SVNProperty.processTextProperty(value);
-		this.binValue = value == null ? null : this.value.getBytes();
+		binValue = value == null ? null : this.value.getBytes();
 	}
 
 	/**
@@ -160,7 +160,7 @@ public class SVNProperty {
 	public SVNProperty(String name, byte[] value) {
 		this.name = name;
 		this.value = value == null ? null : SVNProperty.processTextProperty(new String(value));
-		this.binValue = value == null ? null : this.value.getBytes();
+		binValue = value == null ? null : this.value.getBytes();
 	}
 
 	protected static String processTextProperty(String str) {

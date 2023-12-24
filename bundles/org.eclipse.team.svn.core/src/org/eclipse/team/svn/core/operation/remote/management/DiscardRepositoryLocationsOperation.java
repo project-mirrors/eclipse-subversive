@@ -17,7 +17,6 @@ package org.eclipse.team.svn.core.operation.remote.management;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.team.svn.core.SVNMessages;
 import org.eclipse.team.svn.core.operation.AbstractActionOperation;
-import org.eclipse.team.svn.core.operation.IUnprotectedOperation;
 import org.eclipse.team.svn.core.resource.IRepositoryLocation;
 import org.eclipse.team.svn.core.svnstorage.SVNRemoteStorage;
 
@@ -34,18 +33,15 @@ public class DiscardRepositoryLocationsOperation extends AbstractActionOperation
 		this.locations = locations;
 	}
 
+	@Override
 	public int getOperationWeight() {
 		return 0;
 	}
 
+	@Override
 	protected void runImpl(IProgressMonitor monitor) throws Exception {
-		for (int i = 0; i < this.locations.length; i++) {
-			final IRepositoryLocation current = this.locations[i];
-			this.protectStep(new IUnprotectedOperation() {
-				public void run(IProgressMonitor monitor) throws Exception {
-					SVNRemoteStorage.instance().removeRepositoryLocation(current);
-				}
-			}, monitor, this.locations.length);
+		for (final IRepositoryLocation current : locations) {
+			this.protectStep(monitor1 -> SVNRemoteStorage.instance().removeRepositoryLocation(current), monitor, locations.length);
 		}
 	}
 

@@ -30,8 +30,8 @@ public class SVNTeamSupportHandler extends AbstractSupportHandler {
 	public void preProcess(ISupportRequest request) {
 		super.preProcess(request);
 		ITaskContribution contribution = request.getDefaultContribution();
-		if (this.isSubversiveReport(contribution)) {
-			this.appendToDescription(contribution);
+		if (isSubversiveReport(contribution)) {
+			appendToDescription(contribution);
 		}
 	}
 
@@ -61,9 +61,9 @@ public class SVNTeamSupportHandler extends AbstractSupportHandler {
 
 		IReportingDescriptor[] providers = ExtensionsManager.getInstance().getReportingDescriptors();
 		String report = "";
-		for (int i = 0; i < providers.length; i++) {
-			report += ReportPartsFactory.getProductPart(providers[i]);
-			report += ReportPartsFactory.getVersionPart(providers[i]);
+		for (IReportingDescriptor provider : providers) {
+			report += ReportPartsFactory.getProductPart(provider);
+			report += ReportPartsFactory.getVersionPart(provider);
 		}
 		report += ReportPartsFactory.getSVNClientPart();
 

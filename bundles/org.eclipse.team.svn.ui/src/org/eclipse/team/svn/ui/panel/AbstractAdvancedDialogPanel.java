@@ -35,12 +35,12 @@ public abstract class AbstractAdvancedDialogPanel extends AbstractDialogPanel {
 	}
 
 	public String[] getButtonNamesEx() {
-		return this.buttonNamesEx;
+		return buttonNamesEx;
 	}
 
 	public void extendedButtonPressed(int idx) {
 		if (idx == 0) {
-			this.showDetails();
+			showDetails();
 		}
 	}
 

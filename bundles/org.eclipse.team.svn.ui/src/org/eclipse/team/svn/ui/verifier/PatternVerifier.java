@@ -36,17 +36,19 @@ public class PatternVerifier extends AbstractFormattedVerifier {
 		this.resources = resources;
 	}
 
+	@Override
 	protected String getErrorMessageImpl(Control input) {
-		String pattern = this.getText(input);
+		String pattern = getText(input);
 		StringMatcher matcher = new StringMatcher(pattern, true, false);
-		for (int i = 0; i < this.resources.length; i++) {
-			if (!matcher.match(this.resources[i].getName())) {
-				return BaseMessages.format(PatternVerifier.message, new Object[] { this.resources[i].getName() });
+		for (IResource element : resources) {
+			if (!matcher.match(element.getName())) {
+				return BaseMessages.format(PatternVerifier.message, new Object[] { element.getName() });
 			}
 		}
 		return null;
 	}
 
+	@Override
 	protected String getWarningMessageImpl(Control input) {
 		return null;
 	}

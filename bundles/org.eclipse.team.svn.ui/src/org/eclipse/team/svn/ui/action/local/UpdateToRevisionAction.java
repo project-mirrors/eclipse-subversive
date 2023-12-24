@@ -32,16 +32,17 @@ import org.eclipse.team.svn.ui.utility.UnacceptableOperationNotificator;
  */
 public class UpdateToRevisionAction extends AbstractRecursiveTeamAction {
 
+	@Override
 	public void runImpl(IAction action) {
 		IResource[] resources = UnacceptableOperationNotificator.shrinkResourcesWithNotOnRespositoryParents(
-				this.getShell(), this.getSelectedResources(IStateFilter.SF_ONREPOSITORY));
+				getShell(), this.getSelectedResources(IStateFilter.SF_ONREPOSITORY));
 		if (resources == null || resources.length == 0) {
 			return;
 		}
 
-		if (this.checkForResourcesPresenceRecursive(IStateFilter.SF_REVERTABLE)) {
+		if (checkForResourcesPresenceRecursive(IStateFilter.SF_REVERTABLE)) {
 			IResource[] missing = this.getSelectedResourcesRecursive(UpdateAction.SF_MISSING_RESOURCES);
-			if (missing.length > 0 && !UpdateAction.updateMissing(this.getShell(), missing)) {
+			if (missing.length > 0 && !UpdateAction.updateMissing(getShell(), missing)) {
 				return;
 			}
 		}
@@ -62,17 +63,19 @@ public class UpdateToRevisionAction extends AbstractRecursiveTeamAction {
 		IRepositoryResource repositoryResource = SVNRemoteStorage.instance()
 				.asRepositoryResource(resourceForRevisionSelection);
 		UpdateToRevisionPanel panel = new UpdateToRevisionPanel(repositoryResource, canShowUpdateDepthPath);
-		DefaultDialog dialog = new DefaultDialog(this.getShell(), panel);
+		DefaultDialog dialog = new DefaultDialog(getShell(), panel);
 		if (dialog.open() == 0) {
-			this.runScheduled(UpdateAction.getUpdateOperation(resources, panel.getRevision(), panel.getDepth(),
+			runScheduled(UpdateAction.getUpdateOperation(resources, panel.getRevision(), panel.getDepth(),
 					panel.isStickyDepth(), panel.getUpdateDepthPath()));
 		}
 	}
 
+	@Override
 	public boolean isEnabled() {
-		return this.checkForResourcesPresence(IStateFilter.SF_ONREPOSITORY);
+		return checkForResourcesPresence(IStateFilter.SF_ONREPOSITORY);
 	}
 
+	@Override
 	protected boolean needsToSaveDirtyEditors() {
 		return true;
 	}

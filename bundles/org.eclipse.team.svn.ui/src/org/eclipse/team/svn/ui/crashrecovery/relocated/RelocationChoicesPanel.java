@@ -22,6 +22,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.team.svn.core.BaseMessages;
 import org.eclipse.team.svn.ui.SVNUIMessages;
 import org.eclipse.team.svn.ui.panel.AbstractDialogPanel;
 
@@ -44,17 +45,17 @@ public class RelocationChoicesPanel extends AbstractDialogPanel {
 	protected int recoveryAction;
 
 	public RelocationChoicesPanel(IProject project) {
-		super();
-		this.dialogTitle = SVNUIMessages.RelocationChoicesPanel_Title;
-		this.dialogDescription = SVNUIMessages.format(SVNUIMessages.RelocationChoicesPanel_Description,
+		dialogTitle = SVNUIMessages.RelocationChoicesPanel_Title;
+		dialogDescription = BaseMessages.format(SVNUIMessages.RelocationChoicesPanel_Description,
 				new String[] { project.getName() });
-		this.defaultMessage = SVNUIMessages.RelocationChoicesPanel_Message;
+		defaultMessage = SVNUIMessages.RelocationChoicesPanel_Message;
 	}
 
 	public int getRecoveryAction() {
-		return this.recoveryAction;
+		return recoveryAction;
 	}
 
+	@Override
 	protected void createControlsImpl(Composite parent) {
 		GridLayout layout = null;
 		GridData data = null;
@@ -72,11 +73,12 @@ public class RelocationChoicesPanel extends AbstractDialogPanel {
 		relocateOthers.setLayoutData(data);
 		relocateOthers.setText(SVNUIMessages.RelocationChoicesPanel_ChangeLocation);
 		relocateOthers.setSelection(true);
-		this.recoveryAction = RelocationChoicesPanel.RELOCATE_REST_OF_PROJECTS;
+		recoveryAction = RelocationChoicesPanel.RELOCATE_REST_OF_PROJECTS;
 		relocateOthers.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				if (((Button) e.widget).getSelection()) {
-					RelocationChoicesPanel.this.recoveryAction = RelocationChoicesPanel.RELOCATE_REST_OF_PROJECTS;
+					recoveryAction = RelocationChoicesPanel.RELOCATE_REST_OF_PROJECTS;
 				}
 			}
 		});
@@ -87,9 +89,10 @@ public class RelocationChoicesPanel extends AbstractDialogPanel {
 		relocateBack.setText(SVNUIMessages.RelocationChoicesPanel_RelocateBack);
 		relocateBack.setSelection(false);
 		relocateBack.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				if (((Button) e.widget).getSelection()) {
-					RelocationChoicesPanel.this.recoveryAction = RelocationChoicesPanel.RELOCATE_THE_PROJECT_BACK;
+					recoveryAction = RelocationChoicesPanel.RELOCATE_THE_PROJECT_BACK;
 				}
 			}
 		});
@@ -100,18 +103,21 @@ public class RelocationChoicesPanel extends AbstractDialogPanel {
 		runShareWizard.setText(SVNUIMessages.RelocationChoicesPanel_CreateLocation);
 		runShareWizard.setSelection(false);
 		runShareWizard.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				if (((Button) e.widget).getSelection()) {
-					RelocationChoicesPanel.this.recoveryAction = RelocationChoicesPanel.SHARE_WITH_ANOTHER_LOCATION;
+					recoveryAction = RelocationChoicesPanel.SHARE_WITH_ANOTHER_LOCATION;
 				}
 			}
 		});
 	}
 
+	@Override
 	protected void cancelChangesImpl() {
-		this.recoveryAction = RelocationChoicesPanel.DISCONNECT_PROJECT;
+		recoveryAction = RelocationChoicesPanel.DISCONNECT_PROJECT;
 	}
 
+	@Override
 	protected void saveChangesImpl() {
 	}
 

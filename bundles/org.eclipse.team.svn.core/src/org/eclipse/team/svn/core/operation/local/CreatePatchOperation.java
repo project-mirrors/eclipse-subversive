@@ -30,7 +30,6 @@ import org.eclipse.core.resources.IEncodedStorage;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IResourceVisitor;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -79,11 +78,11 @@ public class CreatePatchOperation extends AbstractActionOperation {
 
 	protected int rootPoint;
 
-	protected String lineFeed = System.getProperty("line.separator"); //$NON-NLS-1$
+	protected String lineFeed = System.lineSeparator();
 
 	protected String contentSeparatorLine = "==================================================================="; //$NON-NLS-1$
 
-	protected String contentSeparator = this.lineFeed + this.contentSeparatorLine + this.lineFeed;
+	protected String contentSeparator = lineFeed + contentSeparatorLine + lineFeed;
 
 	protected String indexEntry = "Index: "; //$NON-NLS-1$
 
@@ -91,13 +90,13 @@ public class CreatePatchOperation extends AbstractActionOperation {
 
 	protected String addSign = "+++ "; //$NON-NLS-1$
 
-	protected String revisionMark = "\t(revision 0)" + this.lineFeed; //$NON-NLS-1$
+	protected String revisionMark = "\t(revision 0)" + lineFeed; //$NON-NLS-1$
 
-	protected String noLF = this.lineFeed + "\\ No newline at end of file" + this.lineFeed; //$NON-NLS-1$
+	protected String noLF = lineFeed + "\\ No newline at end of file" + lineFeed; //$NON-NLS-1$
 
 	protected String rangeStart = "@@ -0,0 +1"; //$NON-NLS-1$
 
-	protected String rangeEnd = " @@" + this.lineFeed; //$NON-NLS-1$
+	protected String rangeEnd = " @@" + lineFeed; //$NON-NLS-1$
 
 	public CreatePatchOperation(IResource[] resources, String fileName, boolean recurse, boolean ignoreDeleted,
 			boolean processBinary, boolean processUnversioned) {
@@ -126,49 +125,48 @@ public class CreatePatchOperation extends AbstractActionOperation {
 		this.diffOptions = diffOptions;
 	}
 
+	@Override
 	protected void runImpl(final IProgressMonitor monitor) throws Exception {
-		Map<IProject, List<IResource>> workingCopies = new HashMap<IProject, List<IResource>>();//SVNUtility.splitWorkingCopies(this.resources);
-		for (IResource res : this.resources) {
+		Map<IProject, List<IResource>> workingCopies = new HashMap<>();//SVNUtility.splitWorkingCopies(this.resources);
+		for (IResource res : resources) {
 			List<IResource> list = workingCopies.get(res.getProject());
 			if (list == null) {
-				workingCopies.put(res.getProject(), list = new ArrayList<IResource>());
+				workingCopies.put(res.getProject(), list = new ArrayList<>());
 			}
 			list.add(res);
 		}
-		final FileOutputStream stream = new FileOutputStream(this.fileName);
+		final FileOutputStream stream = new FileOutputStream(fileName);
 		try {
 //			this.writeToConsole(IConsoleStream.LEVEL_CMD, "svn diff " + (this.recurse ? "" : " -N") + (this.ignoreDeleted ? " --no-diff-deleted" : "") + "\n");
-			if (workingCopies.size() > 1 || this.rootPoint == CreatePatchOperation.WORKSPACE) {
-				this.rootPoint = CreatePatchOperation.WORKSPACE;
+			if (workingCopies.size() > 1 || rootPoint == CreatePatchOperation.WORKSPACE) {
+				rootPoint = CreatePatchOperation.WORKSPACE;
 				stream.write("### Eclipse Workspace Patch 1.0".getBytes());
-				stream.write(this.lineFeed.getBytes());
-			} else if (this.rootPoint == CreatePatchOperation.SELECTION) {
-				this.selection = FileUtility.shrinkChildNodes(this.resources);
+				stream.write(lineFeed.getBytes());
+			} else if (rootPoint == CreatePatchOperation.SELECTION) {
+				selection = FileUtility.shrinkChildNodes(resources);
 			}
 			for (Iterator<?> it = workingCopies.entrySet().iterator(); it.hasNext() && !monitor.isCanceled();) {
 				Map.Entry entry = (Map.Entry) it.next();
 				IProject project = (IProject) entry.getKey();
-				if (this.rootPoint == CreatePatchOperation.WORKSPACE) {
+				if (rootPoint == CreatePatchOperation.WORKSPACE) {
 					stream.write("#P ".getBytes());
 					stream.write(project.getName().getBytes());
-					stream.write(this.lineFeed.getBytes());
+					stream.write(lineFeed.getBytes());
 				}
 				IResource[] resources = ((List<?>) entry.getValue()).toArray(new IResource[0]);
 				FileUtility.reorder(resources, true);
 				for (int i = 0; i < resources.length && !monitor.isCanceled(); i++) {
 					if (resources[i] instanceof IFile) {
-						this.addFileDiff(stream, (IFile) resources[i], monitor);
-					} else if (this.recurse) {
-						FileUtility.visitNodes(resources[i], new IResourceVisitor() {
-							public boolean visit(IResource resource) throws CoreException {
-								if (monitor.isCanceled() || FileUtility.isNotSupervised(resource)) {
-									return false;
-								}
-								if (resource instanceof IFile) {
-									CreatePatchOperation.this.addFileDiff(stream, (IFile) resource, monitor);
-								}
-								return true;
+						addFileDiff(stream, (IFile) resources[i], monitor);
+					} else if (recurse) {
+						FileUtility.visitNodes(resources[i], resource -> {
+							if (monitor.isCanceled() || FileUtility.isNotSupervised(resource)) {
+								return false;
 							}
+							if (resource instanceof IFile) {
+								CreatePatchOperation.this.addFileDiff(stream, (IFile) resource, monitor);
+							}
+							return true;
 						}, IResource.DEPTH_INFINITE, true, true);
 					}
 				}
@@ -190,14 +188,14 @@ public class CreatePatchOperation extends AbstractActionOperation {
 			String wcPath = FileUtility.getWorkingCopyPath(resource);
 			String projectPath = FileUtility.getWorkingCopyPath(resource.getProject());
 			String fileName = wcPath.substring(projectPath.length() + 1);
-			if (this.rootPoint == CreatePatchOperation.SELECTION) {
+			if (rootPoint == CreatePatchOperation.SELECTION) {
 				IPath resourcePath = resource.getFullPath();
-				for (int i = 0; i < this.selection.length; i++) {
-					IPath selectionPath = this.selection[i].getFullPath();
+				for (IResource element : selection) {
+					IPath selectionPath = element.getFullPath();
 					if (selectionPath.isPrefixOf(resourcePath)) {
-						fileName = this.selection[i].getType() == IResource.FILE
+						fileName = element.getType() == IResource.FILE
 								? fileName = resource.getName()
-								: (resourcePath.toString().substring(selectionPath.toString().length() + 1));
+								: resourcePath.toString().substring(selectionPath.toString().length() + 1);
 						break;
 					}
 				}
@@ -212,7 +210,7 @@ public class CreatePatchOperation extends AbstractActionOperation {
 				try {
 					proxy.diffTwo(new SVNEntryRevisionReference(wcPath, null, SVNRevision.BASE),
 							new SVNEntryRevisionReference(wcPath, null, SVNRevision.WORKING), projectPath,
-							tmp.getAbsolutePath(), SVNDepth.EMPTY, this.options, null, this.diffOptions,
+							tmp.getAbsolutePath(), SVNDepth.EMPTY, options, null, diffOptions,
 							new SVNProgressMonitor(this, monitor, null));
 
 					int len = (int) tmp.length();
@@ -228,14 +226,14 @@ public class CreatePatchOperation extends AbstractActionOperation {
 							}
 						}
 
-						int idx = CreatePatchOperation.findOffset(data, this.contentSeparatorLine.getBytes(), 0);
+						int idx = CreatePatchOperation.findOffset(data, contentSeparatorLine.getBytes(), 0);
 						if (idx != -1) {
-							byte[] rs = this.removeSign.getBytes();
-							byte[] as = this.addSign.getBytes();
+							byte[] rs = removeSign.getBytes();
+							byte[] as = addSign.getBytes();
 							byte[] fn = fileName.getBytes();
-							stream.write(this.indexEntry.getBytes());
+							stream.write(indexEntry.getBytes());
 							stream.write(fn);
-							stream.write(this.lineFeed.getBytes());
+							stream.write(lineFeed.getBytes());
 							int idx0 = CreatePatchOperation.findOffset(data, rs, idx);
 							int idx1 = CreatePatchOperation.findOffset(data, "\t(".getBytes(), idx0);
 							if (idx0 != -1 && idx1 != -1) {
@@ -259,17 +257,13 @@ public class CreatePatchOperation extends AbstractActionOperation {
 					location.releaseSVNProxy(proxy);
 					tmp.delete();
 				}
-			} else if (this.processUnversioned && !IStateFilter.SF_IGNORED.accept(local)) {
+			} else if (processUnversioned && !IStateFilter.SF_IGNORED.accept(local)) {
 				int type = FileUtility.getMIMEType(resource);
-				if ((this.options & ISVNConnector.Options.FORCE) != 0 || type != Team.BINARY) {
-					stream.write(this.getNewFileDiff(wcPath, fileName, charset).getBytes(charset));
+				if ((options & ISVNConnector.Options.FORCE) != 0 || type != Team.BINARY) {
+					stream.write(getNewFileDiff(wcPath, fileName, charset).getBytes(charset));
 				}
 			}
-		} catch (IOException ex) {
-			throw new UnreportableException(ex);
-		} catch (SVNConnectorException ex) {
-			throw new UnreportableException(ex);
-		} catch (CoreException ex) {
+		} catch (IOException | SVNConnectorException | CoreException ex) {
 			throw new UnreportableException(ex);
 		}
 	}
@@ -280,7 +274,7 @@ public class CreatePatchOperation extends AbstractActionOperation {
 		InputStream stream = new FileInputStream(file);
 		try {
 			stream.read(data);
-			return this.getNewContentDiff(fileName, new String(data, charset));
+			return getNewContentDiff(fileName, new String(data, charset));
 		} finally {
 			try {
 				stream.close();
@@ -291,9 +285,9 @@ public class CreatePatchOperation extends AbstractActionOperation {
 
 	protected String getNewContentDiff(String fileName, String content) {
 		if (content.length() == 0) {
-			return this.getEmptyNewContentDiff(fileName);
+			return getEmptyNewContentDiff(fileName);
 		}
-		ArrayList<String> tLines = new ArrayList<String>();
+		ArrayList<String> tLines = new ArrayList<>();
 		for (int i = 0, lineStart = 0, m = content.length(); i < m;) {
 			if (content.charAt(i) == '\n') {
 				tLines.add(content.substring(lineStart, ++i));
@@ -313,25 +307,24 @@ public class CreatePatchOperation extends AbstractActionOperation {
 			}
 		}
 		String[] lines = tLines.toArray(new String[tLines.size()]);
-		String retVal = this.getFilledNewContentDiff(fileName, lines);
+		String retVal = getFilledNewContentDiff(fileName, lines);
 		if (!content.endsWith("\r\n") && !content.endsWith("\r") && !content.endsWith("\n")) { //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-			retVal += this.noLF;
+			retVal += noLF;
 		}
 		return retVal;
 	}
 
 	protected String getFilledNewContentDiff(String fileName, String[] lines) {
-		String retVal = this.getEmptyNewContentDiff(fileName) + this.removeSign + fileName + this.revisionMark
-				+ this.addSign + fileName + this.revisionMark + this.rangeStart
-				+ (lines.length == 1 ? "" : ("," + lines.length)) + this.rangeEnd; //$NON-NLS-1$ //$NON-NLS-2$
-		for (int i = 0; i < lines.length; i++) {
-			retVal += "+" + lines[i]; //$NON-NLS-1$
+		String retVal = getEmptyNewContentDiff(fileName) + removeSign + fileName + revisionMark + addSign + fileName
+				+ revisionMark + rangeStart + (lines.length == 1 ? "" : "," + lines.length) + rangeEnd; //$NON-NLS-1$ //$NON-NLS-2$
+		for (String line : lines) {
+			retVal += "+" + line; //$NON-NLS-1$
 		}
 		return retVal;
 	}
 
 	protected String getEmptyNewContentDiff(String fileName) {
-		return this.indexEntry + fileName + this.contentSeparator;
+		return indexEntry + fileName + contentSeparator;
 	}
 
 	protected static int findOffset(byte[] where, byte[] what, int offset) {

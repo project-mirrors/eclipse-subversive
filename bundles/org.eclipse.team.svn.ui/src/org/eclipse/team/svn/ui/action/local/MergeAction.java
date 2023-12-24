@@ -44,14 +44,13 @@ import org.eclipse.team.svn.ui.preferences.SVNTeamPreferences;
 public class MergeAction extends AbstractNonRecursiveTeamAction {
 
 	public MergeAction() {
-		super();
 	}
 
+	@Override
 	public void runImpl(IAction action) {
 		IResource[] resources = this.getSelectedResources(IStateFilter.SF_EXCLUDE_DELETED);
 
-		if (!OperationErrorDialog.isAcceptableAtOnce(resources, SVNUIMessages.MergeAction_MergeError,
-				this.getShell())) {
+		if (!OperationErrorDialog.isAcceptableAtOnce(resources, SVNUIMessages.MergeAction_MergeError, getShell())) {
 			return;
 		}
 
@@ -64,7 +63,7 @@ public class MergeAction extends AbstractNonRecursiveTeamAction {
 		}
 
 		MergePanel panel = new MergePanel(resources, remote, revision);
-		AdvancedDialog dialog = new AdvancedDialog(this.getShell(), panel);
+		AdvancedDialog dialog = new AdvancedDialog(getShell(), panel);
 		if (dialog.open() == 0) {
 			// 2URL mode requires peg as revision
 			IRepositoryResourceProvider firstSet = new IRepositoryResourceProvider.DefaultRepositoryResourceProvider(
@@ -98,23 +97,25 @@ public class MergeAction extends AbstractNonRecursiveTeamAction {
 				mergeOp = op;
 			} else if (panel.getMode() == MergePanel.MODE_2URL) {
 				mergeOp = new ShowMergeViewOperation(resources, firstSet, secondSet, panel.getIgnoreAncestry(),
-						panel.getDepth(), this.getTargetPart());
+						panel.getDepth(), getTargetPart());
 				((ShowMergeViewOperation) mergeOp).setRecordOnly(panel.getRecordOnly());
 			} else if (panel.getMode() == MergePanel.MODE_1URL) {
 				mergeOp = new ShowMergeViewOperation(resources, firstSet, panel.getSelectedRevisions(),
-						panel.getIgnoreAncestry(), panel.getDepth(), this.getTargetPart());
+						panel.getIgnoreAncestry(), panel.getDepth(), getTargetPart());
 				((ShowMergeViewOperation) mergeOp).setRecordOnly(panel.getRecordOnly());
 			} else {
-				mergeOp = new ShowMergeViewOperation(resources, firstSet, this.getTargetPart());
+				mergeOp = new ShowMergeViewOperation(resources, firstSet, getTargetPart());
 			}
-			this.runScheduled(mergeOp);
+			runScheduled(mergeOp);
 		}
 	}
 
+	@Override
 	public boolean isEnabled() {
-		return this.checkForResourcesPresence(IStateFilter.SF_EXCLUDE_DELETED);
+		return checkForResourcesPresence(IStateFilter.SF_EXCLUDE_DELETED);
 	}
 
+	@Override
 	protected boolean needsToSaveDirtyEditors() {
 		return true;
 	}

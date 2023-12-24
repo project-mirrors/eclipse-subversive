@@ -28,12 +28,14 @@ public abstract class VirtualRemoteResourceVariant extends RemoteResourceVariant
 		super(local);
 	}
 
+	@Override
 	public String getStatus() {
-		return this.isNotOnRepository() ? IStateFilter.ST_NOTEXISTS : IStateFilter.ST_NORMAL;
+		return isNotOnRepository() ? IStateFilter.ST_NOTEXISTS : IStateFilter.ST_NORMAL;
 	}
 
+	@Override
 	protected boolean isNotOnRepository() {
-		return !IStateFilter.SF_ONREPOSITORY.accept(this.local);
+		return !IStateFilter.SF_ONREPOSITORY.accept(local);
 	}
 
 }

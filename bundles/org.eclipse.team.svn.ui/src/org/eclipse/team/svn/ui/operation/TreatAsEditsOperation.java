@@ -20,7 +20,6 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.team.svn.core.connector.ISVNConnector;
 import org.eclipse.team.svn.core.connector.SVNDepth;
-import org.eclipse.team.svn.core.operation.IUnprotectedOperation;
 import org.eclipse.team.svn.core.operation.SVNProgressMonitor;
 import org.eclipse.team.svn.core.operation.local.AbstractWorkingCopyOperation;
 import org.eclipse.team.svn.core.resource.IRepositoryLocation;
@@ -43,8 +42,9 @@ public class TreatAsEditsOperation extends AbstractWorkingCopyOperation {
 		super("Operation_TreatAsEdits", SVNUIMessages.class, provider); //$NON-NLS-1$
 	}
 
+	@Override
 	protected void runImpl(IProgressMonitor monitor) throws Exception {
-		IResource[] resources = this.operableData();
+		IResource[] resources = operableData();
 		for (int i = 0; i < resources.length && !monitor.isCanceled(); i++) {
 			if (resources[i].getType() == IResource.FILE) {
 				IRepositoryLocation location = SVNRemoteStorage.instance().getRepositoryLocation(resources[i]);
@@ -52,13 +52,9 @@ public class TreatAsEditsOperation extends AbstractWorkingCopyOperation {
 				File tmpFile = new File(originalFile.getAbsolutePath() + ".svntmp"); //$NON-NLS-1$
 				originalFile.renameTo(tmpFile);
 				final ISVNConnector proxy = location.acquireSVNProxy();
-				this.protectStep(new IUnprotectedOperation() {
-					public void run(IProgressMonitor monitor) throws Exception {
-						proxy.revert(new String[] { originalFile.getAbsolutePath() }, SVNDepth.EMPTY, null,
-								ISVNConnector.Options.NONE,
-								new SVNProgressMonitor(TreatAsEditsOperation.this, monitor, null));
-					}
-				}, monitor, resources.length);
+				this.protectStep(monitor1 -> proxy.revert(new String[] { originalFile.getAbsolutePath() }, SVNDepth.EMPTY, null,
+						ISVNConnector.Options.NONE,
+						new SVNProgressMonitor(TreatAsEditsOperation.this, monitor1, null)), monitor, resources.length);
 				location.releaseSVNProxy(proxy);
 				originalFile.delete();
 				tmpFile.renameTo(originalFile);

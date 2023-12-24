@@ -79,6 +79,6 @@ public class SVNChangedPathData {
 	 * @return full resource path
 	 */
 	public String getFullResourcePath() {
-		return this.resourcePath + (this.resourcePath.length() > 0 ? "/" : "") + this.resourceName; //$NON-NLS-1$ //$NON-NLS-2$
+		return resourcePath + (resourcePath.length() > 0 ? "/" : "") + resourceName; //$NON-NLS-1$ //$NON-NLS-2$
 	}
 }

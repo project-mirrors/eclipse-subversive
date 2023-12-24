@@ -66,6 +66,7 @@ public class UpdateModelActionGroup extends AbstractSynchronizeModelActionGroup 
 
 	public static final String GROUP_SYNC_CONFLICTS = "modelSyncConflicting"; //$NON-NLS-1$
 
+	@Override
 	protected void configureMergeAction(String mergeActionId, Action action) {
 		if (mergeActionId == SynchronizationActionProvider.MERGE_ACTION_ID) {
 			action.setText(SVNUIMessages.SynchronizeActionGroup_Update);
@@ -84,9 +85,10 @@ public class UpdateModelActionGroup extends AbstractSynchronizeModelActionGroup 
 		}
 	}
 
+	@Override
 	protected void addToContextMenu(String mergeActionId, Action action, IMenuManager manager) {
 		IContributionItem group = null;
-		;
+
 		if (mergeActionId == SynchronizationActionProvider.MERGE_ACTION_ID) {
 			group = manager.find(UpdateModelActionGroup.GROUP_SYNC_NORMAL);
 		} else if (mergeActionId == SynchronizationActionProvider.OVERWRITE_ACTION_ID) {
@@ -104,6 +106,7 @@ public class UpdateModelActionGroup extends AbstractSynchronizeModelActionGroup 
 		}
 	}
 
+	@Override
 	protected void configureActions(ISynchronizePageConfiguration configuration) {
 		//open in external compare
 		OpenInExternalCompareEditorModelAction externalCompareAction = new OpenInExternalCompareEditorModelAction(
@@ -136,7 +139,7 @@ public class UpdateModelActionGroup extends AbstractSynchronizeModelActionGroup 
 		this.appendToGroup(
 				ISynchronizePageConfiguration.P_CONTEXT_MENU, UpdateModelActionGroup.GROUP_SYNC_NORMAL, commitAction);
 
-		//override and commit			
+		//override and commit
 		OverrideAndCommitModelAction overrideCommitAction = new OverrideAndCommitModelAction(
 				SVNUIMessages.UpdateActionGroup_OverrideAndCommit, configuration);
 		this.appendToGroup(
@@ -150,7 +153,7 @@ public class UpdateModelActionGroup extends AbstractSynchronizeModelActionGroup 
 				ISynchronizePageConfiguration.P_CONTEXT_MENU, UpdateModelActionGroup.SVN_SYNC_CONFLICTS,
 				editConflictsAction);
 
-		//edit tree conflicts		
+		//edit tree conflicts
 		EditTreeConflictsModelAction editTreeConflictsAction = new EditTreeConflictsModelAction(
 				SVNUIMessages.UpdateActionGroup_EditTreeConflicts, configuration);
 		this.appendToGroup(
@@ -170,7 +173,8 @@ public class UpdateModelActionGroup extends AbstractSynchronizeModelActionGroup 
 		revertAction
 				.setImageDescriptor(SVNTeamUIPlugin.instance().getImageDescriptor("icons/common/actions/revert.gif")); //$NON-NLS-1$
 		this.appendToGroup(
-				ISynchronizePageConfiguration.P_CONTEXT_MENU, UpdateModelActionGroup.GROUP_MANAGE_LOCALS, revertAction);
+				ISynchronizePageConfiguration.P_CONTEXT_MENU, AbstractSynchronizeModelActionGroup.GROUP_MANAGE_LOCALS,
+				revertAction);
 
 		//show history
 		ShowHistoryModelAction showHistoryAction = new ShowHistoryModelAction(
@@ -178,39 +182,41 @@ public class UpdateModelActionGroup extends AbstractSynchronizeModelActionGroup 
 		showHistoryAction.setImageDescriptor(
 				SVNTeamUIPlugin.instance().getImageDescriptor("icons/common/actions/showhistory.gif")); //$NON-NLS-1$
 		this.appendToGroup(
-				ISynchronizePageConfiguration.P_CONTEXT_MENU, UpdateModelActionGroup.GROUP_MANAGE_LOCALS,
+				ISynchronizePageConfiguration.P_CONTEXT_MENU, AbstractSynchronizeModelActionGroup.GROUP_MANAGE_LOCALS,
 				showHistoryAction);
 
 		//add to SVN
 		AddToSVNModelAction addToSVNAction = new AddToSVNModelAction(
 				SVNUIMessages.UpdateActionGroup_AddToVersionControl, configuration);
 		this.appendToGroup(
-				ISynchronizePageConfiguration.P_CONTEXT_MENU, UpdateModelActionGroup.GROUP_MANAGE_LOCALS,
+				ISynchronizePageConfiguration.P_CONTEXT_MENU, AbstractSynchronizeModelActionGroup.GROUP_MANAGE_LOCALS,
 				addToSVNAction);
 
 		//add to SVN ignore
 		AddToSVNIgnoreModelAction addToSVNIgnoreAction = new AddToSVNIgnoreModelAction(
 				SVNUIMessages.UpdateActionGroup_AddToIgnore, configuration);
 		this.appendToGroup(
-				ISynchronizePageConfiguration.P_CONTEXT_MENU, UpdateModelActionGroup.GROUP_MANAGE_LOCALS,
+				ISynchronizePageConfiguration.P_CONTEXT_MENU, AbstractSynchronizeModelActionGroup.GROUP_MANAGE_LOCALS,
 				addToSVNIgnoreAction);
 
 		//extract to
 		ExtractToModelAction extractTo = new ExtractToModelAction(SVNUIMessages.ExtractAllToAction_Label,
 				configuration);
 		this.appendToGroup(
-				ISynchronizePageConfiguration.P_CONTEXT_MENU, UpdateModelActionGroup.GROUP_MANAGE_LOCALS, extractTo);
+				ISynchronizePageConfiguration.P_CONTEXT_MENU, AbstractSynchronizeModelActionGroup.GROUP_MANAGE_LOCALS,
+				extractTo);
 
 		//add revision link
 		AddRevisionLinkModelAction addRevisionLink = new AddRevisionLinkModelAction(
 				SVNUIMessages.AddRevisionLinkAction_label, configuration);
 		this.appendToGroup(
-				ISynchronizePageConfiguration.P_CONTEXT_MENU, UpdateModelActionGroup.GROUP_MANAGE_LOCALS,
+				ISynchronizePageConfiguration.P_CONTEXT_MENU, AbstractSynchronizeModelActionGroup.GROUP_MANAGE_LOCALS,
 				addRevisionLink);
 
-		this.addSpecificActions(extractTo, configuration);
+		addSpecificActions(extractTo, configuration);
 	}
 
+	@Override
 	protected void addLocalActions(IMenuManager manager, ISynchronizePageConfiguration configuration) {
 		//show properties
 		ShowOutgoingPropertiesModelAction showPropertiesAction = new ShowOutgoingPropertiesModelAction(
@@ -252,7 +258,7 @@ public class UpdateModelActionGroup extends AbstractSynchronizeModelActionGroup 
 				.setImageDescriptor(SVNTeamUIPlugin.instance().getImageDescriptor("icons/common/actions/unlock.gif")); //$NON-NLS-1$
 		manager.add(unlockAction);
 
-		//scan locks		
+		//scan locks
 		ScanLocksModelAction scanAction = new ScanLocksModelAction(SVNUIMessages.UpdateActionGroup_ScanLocks,
 				configuration);
 		manager.add(scanAction);
@@ -284,6 +290,7 @@ public class UpdateModelActionGroup extends AbstractSynchronizeModelActionGroup 
 		manager.add(cleanUpAction);
 	}
 
+	@Override
 	protected void addRemoteActions(IMenuManager manager, ISynchronizePageConfiguration configuration) {
 		//show properties
 		ShowIncomingPropertiesModelAction showIncomingPropertiesAction = new ShowIncomingPropertiesModelAction(

@@ -15,7 +15,6 @@
 package org.eclipse.team.svn.ui.mapping;
 
 import java.util.Collection;
-import java.util.Iterator;
 
 import org.eclipse.core.resources.mapping.ModelProvider;
 import org.eclipse.jface.viewers.ILabelDecorator;
@@ -36,33 +35,31 @@ public abstract class AbstractSVNModelParticipant extends ModelSynchronizePartic
 	protected ISynchronizePageConfiguration configuration;
 
 	public AbstractSVNModelParticipant() {
-		super();
 	}
 
 	public AbstractSVNModelParticipant(SynchronizationContext context) {
 		super(context);
 	}
 
+	@Override
 	protected void initializeConfiguration(ISynchronizePageConfiguration configuration) {
 		super.initializeConfiguration(configuration);
 
 		this.configuration = configuration;
 
-		Collection<AbstractSynchronizeActionGroup> actionGroups = this.getActionGroups();
+		Collection<AbstractSynchronizeActionGroup> actionGroups = getActionGroups();
 		// menu groups should be configured before actionGroups is added
-		for (Iterator<AbstractSynchronizeActionGroup> it = actionGroups.iterator(); it.hasNext();) {
-			AbstractSynchronizeActionGroup actionGroup = it.next();
+		for (AbstractSynchronizeActionGroup actionGroup : actionGroups) {
 			actionGroup.configureMenuGroups(configuration);
 		}
-		for (Iterator<AbstractSynchronizeActionGroup> it = actionGroups.iterator(); it.hasNext();) {
-			AbstractSynchronizeActionGroup actionGroup = it.next();
+		for (AbstractSynchronizeActionGroup actionGroup : actionGroups) {
 			configuration.addActionContribution(actionGroup);
 		}
 
-		configuration.addLabelDecorator(this.createLabelDecorator(configuration));
+		configuration.addLabelDecorator(createLabelDecorator(configuration));
 
-		configuration.setSupportedModes(this.getSupportedModes());
-		configuration.setMode(this.getDefaultMode());
+		configuration.setSupportedModes(getSupportedModes());
+		configuration.setMode(getDefaultMode());
 	}
 
 	protected ILabelDecorator createLabelDecorator(ISynchronizePageConfiguration configuration) {
@@ -77,18 +74,19 @@ public abstract class AbstractSVNModelParticipant extends ModelSynchronizePartic
 
 	/*
 	 * (non-Javadoc)
-	 * @see org.eclipse.team.ui.synchronize.ModelSynchronizeParticipant#getEnabledModelProviders() 
+	 * @see org.eclipse.team.ui.synchronize.ModelSynchronizeParticipant#getEnabledModelProviders()
 	 * 
 	 * see CVSModelSynchronizeParticipant
 	 * 
 	 */
+	@Override
 	public ModelProvider[] getEnabledModelProviders() {
 		ModelProvider[] enabledProviders = super.getEnabledModelProviders();
 		if (this instanceof IChangeSetProvider) {
-			for (int i = 0; i < enabledProviders.length; i++) {
-				ModelProvider provider = enabledProviders[i];
-				if (provider.getId().equals(SVNChangeSetModelProvider.ID))
+			for (ModelProvider provider : enabledProviders) {
+				if (provider.getId().equals(SVNChangeSetModelProvider.ID)) {
 					return enabledProviders;
+				}
 			}
 			ModelProvider[] extended = new ModelProvider[enabledProviders.length + 1];
 			for (int i = 0; i < enabledProviders.length; i++) {

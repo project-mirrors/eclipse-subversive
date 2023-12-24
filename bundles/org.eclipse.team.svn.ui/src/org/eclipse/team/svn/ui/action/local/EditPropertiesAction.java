@@ -30,19 +30,20 @@ import org.eclipse.team.svn.ui.operation.ShowPropertiesOperation;
 public class EditPropertiesAction extends AbstractWorkingCopyAction {
 
 	public EditPropertiesAction() {
-		super();
 	}
 
+	@Override
 	public void runImpl(IAction action) {
 		IResource[] resources = this.getSelectedResources(IStateFilter.SF_EXCLUDE_PREREPLACED_AND_DELETED);
 		IResourcePropertyProvider provider = new GetPropertiesOperation(resources[0]);
-		ShowPropertiesOperation op = new ShowPropertiesOperation(this.getTargetPage(), resources[0], provider);
-		this.runScheduled(op);
+		ShowPropertiesOperation op = new ShowPropertiesOperation(getTargetPage(), resources[0], provider);
+		runScheduled(op);
 	}
 
+	@Override
 	public boolean isEnabled() {
 		return this.getSelectedResources().length == 1
-				&& this.checkForResourcesPresence(IStateFilter.SF_EXCLUDE_PREREPLACED_AND_DELETED);
+				&& checkForResourcesPresence(IStateFilter.SF_EXCLUDE_PREREPLACED_AND_DELETED);
 	}
 
 }

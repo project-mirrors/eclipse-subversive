@@ -37,20 +37,24 @@ public class SVNLinkedTaskInfo extends AbstractTaskReference {
 		this.comment = comment;
 	}
 
+	@Override
 	public String getText() {
-		return this.comment;
+		return comment;
 	}
 
+	@Override
 	public String getRepositoryUrl() {
-		return this.repositoryUrl;
+		return repositoryUrl;
 	}
 
+	@Override
 	public String getTaskUrl() {
-		return this.taskFullUrl;
+		return taskFullUrl;
 	}
 
+	@Override
 	public String getTaskId() {
-		return this.taskId;
+		return taskId;
 	}
 
 }

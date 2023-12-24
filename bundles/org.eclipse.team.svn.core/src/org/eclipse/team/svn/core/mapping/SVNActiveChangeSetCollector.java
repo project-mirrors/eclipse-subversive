@@ -29,6 +29,7 @@ public class SVNActiveChangeSetCollector extends SubscriberChangeSetManager {
 		super(subscriber);
 	}
 
+	@Override
 	protected ActiveChangeSet doCreateSet(String name) {
 		return new SVNActiveChangeSet(this, name);
 	}

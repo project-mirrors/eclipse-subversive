@@ -73,10 +73,9 @@ public class HistoryFilterPanel extends AbstractDialogPanel {
 	protected UserInputHistory pathHistory;
 
 	public HistoryFilterPanel(String authorInput, String commentInput, String pathInput, String[] selectedAuthors) {
-		super();
-		this.dialogTitle = SVNUIMessages.HistoryFilterPanel_Title;
-		this.dialogDescription = SVNUIMessages.HistoryFilterPanel_Description;
-		this.defaultMessage = SVNUIMessages.HistoryFilterPanel_Message;
+		dialogTitle = SVNUIMessages.HistoryFilterPanel_Title;
+		dialogDescription = SVNUIMessages.HistoryFilterPanel_Description;
+		defaultMessage = SVNUIMessages.HistoryFilterPanel_Message;
 
 		this.selectedAuthors = selectedAuthors;
 		this.authorInput = authorInput;
@@ -85,21 +84,23 @@ public class HistoryFilterPanel extends AbstractDialogPanel {
 	}
 
 	public String getAuthor() {
-		return this.authorInput;
+		return authorInput;
 	}
 
 	public String getComment() {
-		return this.commentInput;
+		return commentInput;
 	}
 
 	public String getChangedPath() {
-		return this.pathInput;
+		return pathInput;
 	}
 
+	@Override
 	public Point getPrefferedSizeImpl() {
 		return new Point(470, 100);
 	}
 
+	@Override
 	public void createControlsImpl(Composite parent) {
 		Composite composite = new Composite(parent, SWT.NONE);
 		GridLayout layout = new GridLayout();
@@ -110,72 +111,76 @@ public class HistoryFilterPanel extends AbstractDialogPanel {
 		GridData data = new GridData(GridData.FILL_BOTH);
 		composite.setLayoutData(data);
 
-		this.authorButton = new Button(composite, SWT.CHECK);
-		this.authorButton.setText(SVNUIMessages.HistoryFilterPanel_Author);
+		authorButton = new Button(composite, SWT.CHECK);
+		authorButton.setText(SVNUIMessages.HistoryFilterPanel_Author);
 		data = new GridData();
-		this.authorButton.setLayoutData(data);
-		boolean enabledAuthor = this.authorInput != null;
-		this.authorButton.setSelection(enabledAuthor);
-		this.authorButton.addSelectionListener(new SelectionAdapter() {
+		authorButton.setLayoutData(data);
+		boolean enabledAuthor = authorInput != null;
+		authorButton.setSelection(enabledAuthor);
+		authorButton.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
-				HistoryFilterPanel.this.authorsCombo.setEnabled(((Button) e.widget).getSelection());
+				authorsCombo.setEnabled(((Button) e.widget).getSelection());
 			}
 		});
 
-		this.authorsHistory = new UserInputHistory(HistoryFilterPanel.FILTER_AUTHOR_HISTORY_NAME);
-		this.authorsCombo = new Combo(composite, SWT.NONE);
+		authorsHistory = new UserInputHistory(HistoryFilterPanel.FILTER_AUTHOR_HISTORY_NAME);
+		authorsCombo = new Combo(composite, SWT.NONE);
 		data = new GridData(GridData.FILL_HORIZONTAL);
-		this.authorsCombo.setLayoutData(data);
-		this.authorsCombo.setEnabled(enabledAuthor);
-		this.authorsCombo.setVisibleItemCount(this.authorsHistory.getDepth());
-		this.authorsCombo.setItems(this.mergeAuthorsList());
-		this.authorsCombo.setText(this.authorInput == null ? "" : this.authorInput); //$NON-NLS-1$
+		authorsCombo.setLayoutData(data);
+		authorsCombo.setEnabled(enabledAuthor);
+		authorsCombo.setVisibleItemCount(authorsHistory.getDepth());
+		authorsCombo.setItems(mergeAuthorsList());
+		authorsCombo.setText(authorInput == null ? "" : authorInput); //$NON-NLS-1$
 
-		this.commentButton = new Button(composite, SWT.CHECK);
-		this.commentButton.setText(SVNUIMessages.HistoryFilterPanel_Comment);
+		commentButton = new Button(composite, SWT.CHECK);
+		commentButton.setText(SVNUIMessages.HistoryFilterPanel_Comment);
 		data = new GridData();
-		this.commentButton.setLayoutData(data);
-		boolean enabledComment = this.commentInput != null;
-		this.commentButton.setSelection(enabledComment);
-		this.commentButton.addSelectionListener(new SelectionAdapter() {
+		commentButton.setLayoutData(data);
+		boolean enabledComment = commentInput != null;
+		commentButton.setSelection(enabledComment);
+		commentButton.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
-				HistoryFilterPanel.this.commentsCombo.setEnabled(((Button) e.widget).getSelection());
+				commentsCombo.setEnabled(((Button) e.widget).getSelection());
 			}
 		});
 
-		this.commentsHistory = new UserInputHistory(HistoryFilterPanel.FILTER_COMMENT_HISTORY_NAME);
-		this.commentsCombo = new Combo(composite, SWT.NONE);
+		commentsHistory = new UserInputHistory(HistoryFilterPanel.FILTER_COMMENT_HISTORY_NAME);
+		commentsCombo = new Combo(composite, SWT.NONE);
 		data = new GridData(GridData.FILL_HORIZONTAL);
-		this.commentsCombo.setLayoutData(data);
-		this.commentsCombo.setEnabled(enabledComment);
-		this.commentsCombo.setVisibleItemCount(this.commentsHistory.getDepth());
-		this.commentsCombo.setItems(this.commentsHistory.getHistory());
-		this.commentsCombo.setText(this.commentInput == null ? "" : this.commentInput); //$NON-NLS-1$
+		commentsCombo.setLayoutData(data);
+		commentsCombo.setEnabled(enabledComment);
+		commentsCombo.setVisibleItemCount(commentsHistory.getDepth());
+		commentsCombo.setItems(commentsHistory.getHistory());
+		commentsCombo.setText(commentInput == null ? "" : commentInput); //$NON-NLS-1$
 
-		this.pathButton = new Button(composite, SWT.CHECK);
-		this.pathButton.setText(SVNUIMessages.HistoryFilterPanel_Path);
+		pathButton = new Button(composite, SWT.CHECK);
+		pathButton.setText(SVNUIMessages.HistoryFilterPanel_Path);
 		data = new GridData();
-		this.pathButton.setLayoutData(data);
-		boolean enabledPath = this.pathInput != null;
-		this.pathButton.setSelection(enabledPath);
-		this.pathButton.addSelectionListener(new SelectionAdapter() {
+		pathButton.setLayoutData(data);
+		boolean enabledPath = pathInput != null;
+		pathButton.setSelection(enabledPath);
+		pathButton.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
-				HistoryFilterPanel.this.pathCombo.setEnabled(((Button) e.widget).getSelection());
+				pathCombo.setEnabled(((Button) e.widget).getSelection());
 				HistoryFilterPanel.this.validateContent();
 			}
 		});
 
-		this.pathHistory = new UserInputHistory(HistoryFilterPanel.FILTER_PATH_HISTORY_NAME);
-		this.pathCombo = new Combo(composite, SWT.NONE);
+		pathHistory = new UserInputHistory(HistoryFilterPanel.FILTER_PATH_HISTORY_NAME);
+		pathCombo = new Combo(composite, SWT.NONE);
 		data = new GridData(GridData.FILL_HORIZONTAL);
-		this.pathCombo.setLayoutData(data);
-		this.pathCombo.setEnabled(enabledPath);
-		this.pathCombo.setVisibleItemCount(this.pathHistory.getDepth());
-		this.pathCombo.setItems(this.pathHistory.getHistory());
-		this.pathCombo.setText(this.pathInput == null ? "" : this.pathInput); //$NON-NLS-1$
-		this.attachTo(this.pathCombo, new NonEmptyFieldVerifier(SVNUIMessages.HistoryFilterPanel_Path) {
+		pathCombo.setLayoutData(data);
+		pathCombo.setEnabled(enabledPath);
+		pathCombo.setVisibleItemCount(pathHistory.getDepth());
+		pathCombo.setItems(pathHistory.getHistory());
+		pathCombo.setText(pathInput == null ? "" : pathInput); //$NON-NLS-1$
+		attachTo(pathCombo, new NonEmptyFieldVerifier(SVNUIMessages.HistoryFilterPanel_Path) {
+			@Override
 			protected String getErrorMessageImpl(Control input) {
-				if (HistoryFilterPanel.this.pathCombo.isEnabled()) {
+				if (pathCombo.isEnabled()) {
 					return super.getErrorMessageImpl(input);
 				}
 				return null;
@@ -183,37 +188,40 @@ public class HistoryFilterPanel extends AbstractDialogPanel {
 		});
 	}
 
+	@Override
 	public String getHelpId() {
 		return "org.eclipse.team.svn.help.historyDialogContext"; //$NON-NLS-1$
 	}
 
+	@Override
 	protected void saveChangesImpl() {
-		if (this.authorButton.getSelection()) {
-			this.authorInput = this.authorsCombo.getText();
-			this.authorsHistory.addLine(this.authorInput);
+		if (authorButton.getSelection()) {
+			authorInput = authorsCombo.getText();
+			authorsHistory.addLine(authorInput);
 		} else {
-			this.authorInput = null;
+			authorInput = null;
 		}
-		if (this.commentButton.getSelection()) {
-			this.commentInput = this.commentsCombo.getText();
-			this.commentsHistory.addLine(this.commentInput);
+		if (commentButton.getSelection()) {
+			commentInput = commentsCombo.getText();
+			commentsHistory.addLine(commentInput);
 		} else {
-			this.commentInput = null;
+			commentInput = null;
 		}
-		if (this.pathButton.getSelection()) {
-			this.pathInput = this.pathCombo.getText();
-			this.pathHistory.addLine(this.pathInput);
+		if (pathButton.getSelection()) {
+			pathInput = pathCombo.getText();
+			pathHistory.addLine(pathInput);
 		} else {
-			this.pathInput = null;
+			pathInput = null;
 		}
 	}
 
+	@Override
 	protected void cancelChangesImpl() {
 	}
 
 	protected String[] mergeAuthorsList() {
-		HashSet<String> merged = new HashSet<String>(Arrays.asList(this.selectedAuthors));
-		merged.addAll(Arrays.asList(this.authorsHistory.getHistory()));
+		HashSet<String> merged = new HashSet<>(Arrays.asList(selectedAuthors));
+		merged.addAll(Arrays.asList(authorsHistory.getHistory()));
 		String[] retVal = merged.toArray(new String[merged.size()]);
 		Arrays.sort(retVal);
 		return retVal;

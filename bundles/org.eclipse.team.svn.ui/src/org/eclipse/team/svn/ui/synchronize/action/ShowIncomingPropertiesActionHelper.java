@@ -36,8 +36,9 @@ public class ShowIncomingPropertiesActionHelper extends AbstractActionHelper {
 		super(action, configuration);
 	}
 
+	@Override
 	public IActionOperation getOperation() {
-		AbstractSVNSyncInfo info = this.getSelectedSVNSyncInfo();
+		AbstractSVNSyncInfo info = getSelectedSVNSyncInfo();
 		if (info == null) {
 			return null;
 		}

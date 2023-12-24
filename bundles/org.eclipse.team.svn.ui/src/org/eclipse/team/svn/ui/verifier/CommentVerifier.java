@@ -31,15 +31,17 @@ public class CommentVerifier extends AbstractFormattedVerifier {
 		this.logMinSize = logMinSize;
 	}
 
+	@Override
 	protected String getErrorMessageImpl(Control input) {
-		if (this.getText(input).trim().length() < this.logMinSize) {
-			return BaseMessages.format(SVNUIMessages.Verifier_Comment_Error, this.logMinSize);
+		if (getText(input).trim().length() < logMinSize) {
+			return BaseMessages.format(SVNUIMessages.Verifier_Comment_Error, logMinSize);
 		}
 		return null;
 	}
 
+	@Override
 	protected String getWarningMessageImpl(Control input) {
-		if (this.getText(input).trim().length() == 0) {
+		if (getText(input).trim().length() == 0) {
 			return SVNUIMessages.Verifier_Comment_Warning;
 		}
 		return null;

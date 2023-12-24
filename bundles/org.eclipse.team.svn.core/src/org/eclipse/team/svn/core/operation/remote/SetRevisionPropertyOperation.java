@@ -17,10 +17,10 @@ package org.eclipse.team.svn.core.operation.remote;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.team.svn.core.SVNMessages;
 import org.eclipse.team.svn.core.connector.ISVNConnector;
+import org.eclipse.team.svn.core.connector.ISVNConnector.Options;
 import org.eclipse.team.svn.core.connector.SVNEntryReference;
 import org.eclipse.team.svn.core.connector.SVNProperty;
 import org.eclipse.team.svn.core.connector.SVNRevision;
-import org.eclipse.team.svn.core.connector.ISVNConnector.Options;
 import org.eclipse.team.svn.core.operation.AbstractActionOperation;
 import org.eclipse.team.svn.core.operation.SVNProgressMonitor;
 import org.eclipse.team.svn.core.operation.local.property.IRevisionPropertiesProvider;
@@ -52,11 +52,7 @@ public class SetRevisionPropertyOperation extends AbstractActionOperation {
 	 * @author Alexei Goncharov
 	 */
 	public SetRevisionPropertyOperation(IRepositoryLocation location, SVNRevision revision, final SVNProperty revProp) {
-		this(location, revision, new IRevisionPropertiesProvider() {
-			public SVNProperty[] getRevisionProperties() {
-				return new SVNProperty[] { revProp };
-			}
-		});
+		this(location, revision, () -> new SVNProperty[] { revProp });
 	}
 
 	/**
@@ -75,18 +71,19 @@ public class SetRevisionPropertyOperation extends AbstractActionOperation {
 			IRevisionPropertiesProvider revPropProvider) {
 		super("Operation_SetRevisionProperty", SVNMessages.class); //$NON-NLS-1$
 		this.revision = revision;
-		this.provider = revPropProvider;
+		provider = revPropProvider;
 		this.location = location;
 	}
 
+	@Override
 	protected void runImpl(IProgressMonitor monitor) throws Exception {
-		SVNProperty toSet = this.provider.getRevisionProperties()[0];
-		ISVNConnector proxy = this.location.acquireSVNProxy();
+		SVNProperty toSet = provider.getRevisionProperties()[0];
+		ISVNConnector proxy = location.acquireSVNProxy();
 		try {
-			proxy.setRevisionProperty(new SVNEntryReference(this.location.getUrl(), this.revision), toSet, null,
-					Options.FORCE, new SVNProgressMonitor(SetRevisionPropertyOperation.this, monitor, null));
+			proxy.setRevisionProperty(new SVNEntryReference(location.getUrl(), revision), toSet, null, Options.FORCE,
+					new SVNProgressMonitor(SetRevisionPropertyOperation.this, monitor, null));
 		} finally {
-			this.location.releaseSVNProxy(proxy);
+			location.releaseSVNProxy(proxy);
 		}
 	}
 

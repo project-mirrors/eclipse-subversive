@@ -55,36 +55,36 @@ public class AffectedPathsLabelProvider extends LabelProvider {
 				AffectedPathsLabelProvider.folderIcon = instance
 						.getImageDescriptor("icons/views/history/affected_folder.gif") //$NON-NLS-1$
 						.createImage();
-				AffectedPathsLabelProvider.overlayedFolderIcon = (new OverlayedImageDescriptor(
+				AffectedPathsLabelProvider.overlayedFolderIcon = new OverlayedImageDescriptor(
 						AffectedPathsLabelProvider.folderIcon, instance.getImageDescriptor("icons/overlays/empty.gif"), //$NON-NLS-1$
-						new Point(22, 16), OverlayedImageDescriptor.RIGHT | OverlayedImageDescriptor.CENTER_V))
+						new Point(22, 16), OverlayedImageDescriptor.RIGHT | OverlayedImageDescriptor.CENTER_V)
 								.createImage();
 				AffectedPathsLabelProvider.rootIcon = instance.getImageDescriptor("icons/objects/repository-root.gif") //$NON-NLS-1$
 						.createImage();
-				AffectedPathsLabelProvider.rootAdditionIcon = (new OverlayedImageDescriptor(
+				AffectedPathsLabelProvider.rootAdditionIcon = new OverlayedImageDescriptor(
 						AffectedPathsLabelProvider.rootIcon, instance.getImageDescriptor("icons/overlays/addition.gif"), //$NON-NLS-1$
-						new Point(22, 16), OverlayedImageDescriptor.RIGHT | OverlayedImageDescriptor.CENTER_V))
+						new Point(22, 16), OverlayedImageDescriptor.RIGHT | OverlayedImageDescriptor.CENTER_V)
 								.createImage();
-				AffectedPathsLabelProvider.overlayedRootIcon = (new OverlayedImageDescriptor(
+				AffectedPathsLabelProvider.overlayedRootIcon = new OverlayedImageDescriptor(
 						AffectedPathsLabelProvider.rootIcon, instance.getImageDescriptor("icons/overlays/empty.gif"), //$NON-NLS-1$
-						new Point(22, 16), OverlayedImageDescriptor.RIGHT | OverlayedImageDescriptor.CENTER_V))
+						new Point(22, 16), OverlayedImageDescriptor.RIGHT | OverlayedImageDescriptor.CENTER_V)
 								.createImage();
-				AffectedPathsLabelProvider.addedFolderIcon = (new OverlayedImageDescriptor(
+				AffectedPathsLabelProvider.addedFolderIcon = new OverlayedImageDescriptor(
 						AffectedPathsLabelProvider.folderIcon,
 						instance.getImageDescriptor("icons/overlays/addition.gif"), new Point(22, 16), //$NON-NLS-1$
-						OverlayedImageDescriptor.RIGHT | OverlayedImageDescriptor.CENTER_V)).createImage();
-				AffectedPathsLabelProvider.modifiedFolderIcon = (new OverlayedImageDescriptor(
+						OverlayedImageDescriptor.RIGHT | OverlayedImageDescriptor.CENTER_V).createImage();
+				AffectedPathsLabelProvider.modifiedFolderIcon = new OverlayedImageDescriptor(
 						AffectedPathsLabelProvider.folderIcon, instance.getImageDescriptor("icons/overlays/change.gif"), //$NON-NLS-1$
-						new Point(22, 16), OverlayedImageDescriptor.RIGHT | OverlayedImageDescriptor.CENTER_V))
+						new Point(22, 16), OverlayedImageDescriptor.RIGHT | OverlayedImageDescriptor.CENTER_V)
 								.createImage();
-				AffectedPathsLabelProvider.deletedFolderIcon = (new OverlayedImageDescriptor(
+				AffectedPathsLabelProvider.deletedFolderIcon = new OverlayedImageDescriptor(
 						AffectedPathsLabelProvider.folderIcon,
 						instance.getImageDescriptor("icons/overlays/deletion.gif"), new Point(22, 16), //$NON-NLS-1$
-						OverlayedImageDescriptor.RIGHT | OverlayedImageDescriptor.CENTER_V)).createImage();
-				AffectedPathsLabelProvider.replacedFolderIcon = (new OverlayedImageDescriptor(
+						OverlayedImageDescriptor.RIGHT | OverlayedImageDescriptor.CENTER_V).createImage();
+				AffectedPathsLabelProvider.replacedFolderIcon = new OverlayedImageDescriptor(
 						AffectedPathsLabelProvider.folderIcon,
 						instance.getImageDescriptor("icons/overlays/replacement.gif"), new Point(22, 16), //$NON-NLS-1$
-						OverlayedImageDescriptor.RIGHT | OverlayedImageDescriptor.CENTER_V)).createImage();
+						OverlayedImageDescriptor.RIGHT | OverlayedImageDescriptor.CENTER_V).createImage();
 				CompareUI.disposeOnShutdown(AffectedPathsLabelProvider.folderIcon);
 				CompareUI.disposeOnShutdown(AffectedPathsLabelProvider.overlayedFolderIcon);
 				CompareUI.disposeOnShutdown(AffectedPathsLabelProvider.rootIcon);
@@ -102,9 +102,10 @@ public class AffectedPathsLabelProvider extends LabelProvider {
 		this.currentRevision = currentRevision;
 	}
 
+	@Override
 	public Image getImage(Object element) {
 		if (((AffectedPathsNode) element).getParent() == null) {
-			return this.currentRevision == 0
+			return currentRevision == 0
 					? AffectedPathsLabelProvider.rootAdditionIcon
 					: AffectedPathsLabelProvider.overlayedRootIcon;
 		}

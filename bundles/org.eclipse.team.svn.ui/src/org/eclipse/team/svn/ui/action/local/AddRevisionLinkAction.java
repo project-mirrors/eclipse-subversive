@@ -33,9 +33,9 @@ import org.eclipse.team.svn.ui.action.remote.management.SelectResourceRevisionAc
 public class AddRevisionLinkAction extends AbstractNonRecursiveTeamAction {
 
 	public AddRevisionLinkAction() {
-		super();
 	}
 
+	@Override
 	public void runImpl(IAction action) {
 		IResource[] selectedResources = this.getSelectedResources(IStateFilter.SF_ONREPOSITORY);
 		IRepositoryResource[] resources = new IRepositoryResource[selectedResources.length];
@@ -44,14 +44,15 @@ public class AddRevisionLinkAction extends AbstractNonRecursiveTeamAction {
 			ILocalResource local = SVNRemoteStorage.instance().asLocalResource(selectedResources[i]);
 			resources[i].setSelectedRevision(SVNRevision.fromNumber(local.getRevision()));
 		}
-		IActionOperation op = SelectResourceRevisionAction.getAddRevisionLinkOperation(resources, this.getShell());
+		IActionOperation op = SelectResourceRevisionAction.getAddRevisionLinkOperation(resources, getShell());
 		if (op != null) {
-			this.runScheduled(op);
+			runScheduled(op);
 		}
 	}
 
+	@Override
 	public boolean isEnabled() {
-		return this.checkForResourcesPresence(IStateFilter.SF_ONREPOSITORY);
+		return checkForResourcesPresence(IStateFilter.SF_ONREPOSITORY);
 	}
 
 }

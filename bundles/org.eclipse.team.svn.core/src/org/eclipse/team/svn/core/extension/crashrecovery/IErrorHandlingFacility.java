@@ -27,7 +27,7 @@ public interface IErrorHandlingFacility extends IResolutionHelper {
 	 * @param helper
 	 *            resolution helper instance
 	 */
-	public void addResolutionHelper(IResolutionHelper helper);
+	void addResolutionHelper(IResolutionHelper helper);
 
 	/**
 	 * The method removes external resolution helper
@@ -35,5 +35,5 @@ public interface IErrorHandlingFacility extends IResolutionHelper {
 	 * @param helper
 	 *            resolution helper instance
 	 */
-	public void removeResolutionHelper(IResolutionHelper helper);
+	void removeResolutionHelper(IResolutionHelper helper);
 }

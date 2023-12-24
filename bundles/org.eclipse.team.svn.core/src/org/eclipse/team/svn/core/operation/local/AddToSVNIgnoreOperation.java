@@ -25,7 +25,6 @@ import org.eclipse.team.svn.core.connector.SVNDepth;
 import org.eclipse.team.svn.core.connector.SVNEntryRevisionReference;
 import org.eclipse.team.svn.core.connector.SVNProperty;
 import org.eclipse.team.svn.core.connector.SVNProperty.BuiltIn;
-import org.eclipse.team.svn.core.operation.IUnprotectedOperation;
 import org.eclipse.team.svn.core.operation.SVNNullProgressMonitor;
 import org.eclipse.team.svn.core.resource.IRemoteStorage;
 import org.eclipse.team.svn.core.resource.IRepositoryLocation;
@@ -58,19 +57,16 @@ public class AddToSVNIgnoreOperation extends AbstractWorkingCopyOperation {
 		this.pattern = pattern;
 	}
 
+	@Override
 	protected void runImpl(IProgressMonitor monitor) throws Exception {
-		IResource[] resources = this.operableData();
+		IResource[] resources = operableData();
 
 		final IRemoteStorage storage = SVNRemoteStorage.instance();
 
 		for (int i = 0; i < resources.length && !monitor.isCanceled(); i++) {
 			final IResource current = resources[i];
 
-			this.protectStep(new IUnprotectedOperation() {
-				public void run(IProgressMonitor monitor) throws Exception {
-					AddToSVNIgnoreOperation.this.handleResource(storage, current);
-				}
-			}, monitor, resources.length);
+			this.protectStep(monitor1 -> AddToSVNIgnoreOperation.this.handleResource(storage, current), monitor, resources.length);
 		}
 	}
 
@@ -79,7 +75,7 @@ public class AddToSVNIgnoreOperation extends AbstractWorkingCopyOperation {
 		IRepositoryLocation location = storage.getRepositoryLocation(parent);
 		ISVNConnector proxy = location.acquireSVNProxy();
 		try {
-			AddToSVNIgnoreOperation.changeIgnoreProperty(proxy, this.ignoreType, this.pattern,
+			AddToSVNIgnoreOperation.changeIgnoreProperty(proxy, ignoreType, pattern,
 					FileUtility.getWorkingCopyPath(parent), current.getName());
 		} finally {
 			location.releaseSVNProxy(proxy);
@@ -127,7 +123,7 @@ public class AddToSVNIgnoreOperation extends AbstractWorkingCopyOperation {
 			}
 		}
 
-		return found ? ignore : (ignore + (ignore.length() > 0 ? "\n" : "") + mask); //$NON-NLS-1$ //$NON-NLS-2$
+		return found ? ignore : ignore + (ignore.length() > 0 ? "\n" : "") + mask; //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 }

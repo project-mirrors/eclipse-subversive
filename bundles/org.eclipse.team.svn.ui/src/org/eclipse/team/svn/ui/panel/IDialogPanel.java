@@ -23,32 +23,32 @@ import org.eclipse.swt.widgets.Composite;
  * @author Alexander Gurov
  */
 public interface IDialogPanel {
-	public void initPanel(IDialogManager manager);
+	void initPanel(IDialogManager manager);
 
-	public void dispose();
+	void dispose();
 
-	public void addListeners();
+	void addListeners();
 
-	public void postInit();
+	void postInit();
 
-	public String getDialogTitle();
+	String getDialogTitle();
 
-	public String getDialogDescription();
+	String getDialogDescription();
 
-	public String getDefaultMessage();
+	String getDefaultMessage();
 
-	public String getImagePath();
+	String getImagePath();
 
-	public Point getPrefferedSize();
+	Point getPrefferedSize();
 
-	public void createControls(Composite parent);
+	void createControls(Composite parent);
 
-	public String[] getButtonNames();
+	String[] getButtonNames();
 
-	public void buttonPressed(int idx);
+	void buttonPressed(int idx);
 
-	public boolean canClose();
+	boolean canClose();
 
-	public String getHelpId();
+	String getHelpId();
 
 }

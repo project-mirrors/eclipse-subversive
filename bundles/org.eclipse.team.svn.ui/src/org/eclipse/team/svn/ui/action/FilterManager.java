@@ -56,51 +56,53 @@ public class FilterManager implements IPropertyChangeListener, IResourceStatesLi
 		return FilterManager.instance;
 	}
 
+	@Override
 	public void propertyChange(PropertyChangeEvent event) {
 		if (event.getProperty()
 				.equals(SVNTeamPreferences.fullDecorationName(SVNTeamPreferences.DECORATION_PRECISE_ENABLEMENTS_NAME))
 				|| event.getProperty()
 						.equals(SVNTeamPreferences.fullCoreName(SVNTeamPreferences.CORE_SVNCONNECTOR_NAME))) {
-			this.clear();
+			clear();
 		}
 	}
 
+	@Override
 	public void resourcesStateChanged(ResourceStatesChangedEvent event) {
-		this.clear();
+		clear();
 	}
 
 	public void clear() {
-		this.dirty = true;
+		dirty = true;
 	}
 
 	public boolean checkForResourcesPresenceRecursive(IResource[] selectedResources, IStateFilter stateFilter) {
-		return this.checkForResourcesPresence(selectedResources, stateFilter, true);
+		return checkForResourcesPresence(selectedResources, stateFilter, true);
 	}
 
 	public boolean checkForResourcesPresence(IResource[] selectedResources, IStateFilter stateFilter,
 			boolean recursive) {
 		boolean computeDeep = SVNTeamPreferences.getDecorationBoolean(SVNTeamUIPlugin.instance().getPreferenceStore(),
 				SVNTeamPreferences.DECORATION_PRECISE_ENABLEMENTS_NAME);
-		selectedResources = this.connectedToSVN(selectedResources);
-		if (this.dirty) {
-			this.dirty = false;
-			if (this.filters2condition.size() > 0) {
-				this.flatChecker.clearFilters();
-				FileUtility.checkForResourcesPresence(selectedResources, this.flatChecker, IResource.DEPTH_ZERO);
-				this.flatChecker.checkDisallowed();
+		selectedResources = connectedToSVN(selectedResources);
+		if (dirty) {
+			dirty = false;
+			if (filters2condition.size() > 0) {
+				flatChecker.clearFilters();
+				FileUtility.checkForResourcesPresence(selectedResources, flatChecker, IResource.DEPTH_ZERO);
+				flatChecker.checkDisallowed();
 			}
 			if (computeDeep) {
-				if (this.recursiveFilters2condition.size() > 0) {
-					this.recursiveChecker.clearFilters();
-					FileUtility.checkForResourcesPresence(selectedResources, this.recursiveChecker,
+				if (recursiveFilters2condition.size() > 0) {
+					recursiveChecker.clearFilters();
+					FileUtility.checkForResourcesPresence(selectedResources, recursiveChecker,
 							IResource.DEPTH_INFINITE);
-					this.recursiveChecker.checkDisallowed();
+					recursiveChecker.checkDisallowed();
 				}
 			} else {
-				this.recursiveChecker.setAllTo(Boolean.TRUE);
+				recursiveChecker.setAllTo(Boolean.TRUE);
 			}
 		}
-		Map filtersMap = recursive ? this.recursiveFilters2condition : this.filters2condition;
+		Map filtersMap = recursive ? recursiveFilters2condition : filters2condition;
 		Boolean retVal = (Boolean) filtersMap.get(stateFilter);
 		if (retVal == null) {
 			if (!computeDeep && recursive) {
@@ -108,28 +110,28 @@ public class FilterManager implements IPropertyChangeListener, IResourceStatesLi
 			} else {
 				boolean containsResources = FileUtility.checkForResourcesPresence(selectedResources, stateFilter,
 						recursive ? IResource.DEPTH_INFINITE : IResource.DEPTH_ZERO);
-				filtersMap.put(stateFilter, retVal = Boolean.valueOf(containsResources));
+				filtersMap.put(stateFilter, retVal = containsResources);
 			}
 		}
-		return retVal.booleanValue();
+		return retVal;
 	}
 
 	protected IResource[] connectedToSVN(IResource[] selectedResources) {
-		ArrayList<IResource> retVal = new ArrayList<IResource>(selectedResources.length);
-		for (int i = 0; i < selectedResources.length; i++) {
-			if (FileUtility.isConnected(selectedResources[i])) {
-				retVal.add(selectedResources[i]);
+		ArrayList<IResource> retVal = new ArrayList<>(selectedResources.length);
+		for (IResource element : selectedResources) {
+			if (FileUtility.isConnected(element)) {
+				retVal.add(element);
 			}
 		}
 		return retVal.toArray(new IResource[retVal.size()]);
 	}
 
 	private FilterManager() {
-		this.filters2condition = new HashMap();
-		this.recursiveFilters2condition = new HashMap();
+		filters2condition = new HashMap();
+		recursiveFilters2condition = new HashMap();
 
-		this.flatChecker = new MapChecker(this.filters2condition);
-		this.recursiveChecker = new MapChecker(this.recursiveFilters2condition);
+		flatChecker = new MapChecker(filters2condition);
+		recursiveChecker = new MapChecker(recursiveFilters2condition);
 		SVNTeamUIPlugin.instance().getPreferenceStore().addPropertyChangeListener(this);
 		SVNRemoteStorage.instance().addResourceStatesListener(ResourceStatesChangedEvent.class, this);
 	}
@@ -142,27 +144,28 @@ public class FilterManager implements IPropertyChangeListener, IResourceStatesLi
 		}
 
 		public void clearFilters() {
-			for (Iterator it = this.filterMap.keySet().iterator(); it.hasNext();) {
-				this.filterMap.put(it.next(), null);
+			for (Iterator it = filterMap.keySet().iterator(); it.hasNext();) {
+				filterMap.put(it.next(), null);
 			}
 		}
 
 		public void setAllTo(Boolean value) {
-			for (Iterator it = this.filterMap.keySet().iterator(); it.hasNext();) {
-				this.filterMap.put(it.next(), value);
+			for (Iterator it = filterMap.keySet().iterator(); it.hasNext();) {
+				filterMap.put(it.next(), value);
 			}
 		}
 
+		@Override
 		protected boolean acceptImpl(ILocalResource local, IResource resource, String state, int mask) {
 			boolean retVal = true;
-			for (Iterator it = this.filterMap.entrySet().iterator(); it.hasNext();) {
+			for (Iterator it = filterMap.entrySet().iterator(); it.hasNext();) {
 				Map.Entry entry = (Map.Entry) it.next();
 				if (entry.getValue() == null) {
 					IStateFilter filter = (IStateFilter) entry.getKey();
 					boolean value = local == null ? filter.accept(resource, state, mask) : filter.accept(local);
 					retVal &= value;
 					if (value) {
-						this.filterMap.put(filter, Boolean.TRUE);
+						filterMap.put(filter, Boolean.TRUE);
 					}
 				}
 			}
@@ -170,14 +173,15 @@ public class FilterManager implements IPropertyChangeListener, IResourceStatesLi
 		}
 
 		public void checkDisallowed() {
-			for (Iterator it = this.filterMap.entrySet().iterator(); it.hasNext();) {
+			for (Iterator it = filterMap.entrySet().iterator(); it.hasNext();) {
 				Map.Entry entry = (Map.Entry) it.next();
 				if (entry.getValue() == null) {
-					this.filterMap.put(entry.getKey(), Boolean.FALSE);
+					filterMap.put(entry.getKey(), Boolean.FALSE);
 				}
 			}
 		}
 
+		@Override
 		protected boolean allowsRecursionImpl(ILocalResource local, IResource resource, String state, int mask) {
 			return true;
 		}

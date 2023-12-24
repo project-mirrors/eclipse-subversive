@@ -21,8 +21,8 @@ import org.eclipse.team.svn.core.operation.AbstractGetFileContentOperation;
 import org.eclipse.team.svn.core.operation.CompositeOperation;
 import org.eclipse.team.svn.core.operation.IActionOperation;
 import org.eclipse.team.svn.core.operation.local.DiffViewerSettings;
-import org.eclipse.team.svn.core.operation.local.IExecutable;
 import org.eclipse.team.svn.core.operation.local.DiffViewerSettings.ExternalProgramParameters;
+import org.eclipse.team.svn.core.operation.local.IExecutable;
 import org.eclipse.team.svn.core.operation.local.RunExternalCompareOperation.DetectExternalCompareOperation;
 import org.eclipse.team.svn.core.operation.local.RunExternalCompareOperation.ExternalCompareOperationHelper;
 import org.eclipse.team.svn.core.operation.local.RunExternalCompareOperation.IExternalProgramParametersProvider;
@@ -47,12 +47,13 @@ public class RunExternalRepositoryCompareOperation extends CompositeOperation im
 				diffSettings);
 		this.add(detectOperation);
 
-		this.externalCompareOperation = new ExternalCompareRepositoryOperation(provider, detectOperation);
-		this.add(this.externalCompareOperation, new IActionOperation[] { detectOperation });
+		externalCompareOperation = new ExternalCompareRepositoryOperation(provider, detectOperation);
+		this.add(externalCompareOperation, new IActionOperation[] { detectOperation });
 	}
 
+	@Override
 	public boolean isExecuted() {
-		return this.externalCompareOperation.isExecuted();
+		return externalCompareOperation.isExecuted();
 	}
 
 	/**
@@ -80,44 +81,38 @@ public class RunExternalRepositoryCompareOperation extends CompositeOperation im
 
 			//get files operations
 			final AbstractGetFileContentOperation nextFileGetOp = new GetFileContentOperation(
-					new IRepositoryResourceProvider() {
-						public IRepositoryResource[] getRepositoryResources() {
-							return new IRepositoryResource[] { resourcesProvider.getRepositoryResources()[1] };
-						}
-					});
+					() -> new IRepositoryResource[] { resourcesProvider.getRepositoryResources()[1] });
 			this.add(nextFileGetOp);
 
 			final AbstractGetFileContentOperation prevFileGetOp = new GetFileContentOperation(
-					new IRepositoryResourceProvider() {
-						public IRepositoryResource[] getRepositoryResources() {
-							return new IRepositoryResource[] { resourcesProvider.getRepositoryResources()[0] };
-						}
-					});
+					() -> new IRepositoryResource[] { resourcesProvider.getRepositoryResources()[0] });
 			this.add(prevFileGetOp, new IActionOperation[] { nextFileGetOp });
 
 			//Run external program operation
 			this.add(new AbstractActionOperation("Operation_ExternalRepositoryCompare", SVNMessages.class) { //$NON-NLS-1$
+				@Override
 				protected void runImpl(IProgressMonitor monitor) throws Exception {
 					ExternalCompareOperationHelper externalRunHelper = new ExternalCompareOperationHelper(
 							prevFileGetOp.getTemporaryPath(), nextFileGetOp.getTemporaryPath(), null, null,
-							ExternalCompareRepositoryOperation.this.externalProgramParams);
+							externalProgramParams);
 					externalRunHelper.execute(monitor);
 				}
 			}, new IActionOperation[] { nextFileGetOp, prevFileGetOp });
 		}
 
+		@Override
 		protected void runImpl(IProgressMonitor monitor) throws Exception {
-			this.externalProgramParams = this.parametersProvider.getExternalProgramParameters();
-			if (this.externalProgramParams != null) {
-				this.isExecuted = true;
+			externalProgramParams = parametersProvider.getExternalProgramParameters();
+			if (externalProgramParams != null) {
+				isExecuted = true;
 				super.runImpl(monitor);
 			} else {
-				this.isExecuted = false;
+				isExecuted = false;
 			}
 		}
 
 		public boolean isExecuted() {
-			return this.isExecuted;
+			return isExecuted;
 		}
 	}
 

@@ -28,11 +28,10 @@ import org.eclipse.team.svn.core.operation.CompositeOperation;
 import org.eclipse.team.svn.core.operation.IActionOperation;
 import org.eclipse.team.svn.core.operation.local.AddToSVNIgnoreOperation;
 import org.eclipse.team.svn.core.operation.local.RefreshResourcesOperation;
-import org.eclipse.team.svn.core.resource.IRemoteStorage;
+import org.eclipse.team.svn.core.resource.ISVNStorage;
 import org.eclipse.team.svn.core.svnstorage.ResourcesParentsProvider;
 import org.eclipse.team.svn.ui.SVNTeamUIPlugin;
 import org.eclipse.team.svn.ui.SVNUIMessages;
-import org.eclipse.team.svn.ui.panel.participant.CommitPaneParticipant.CommitPaneActionGroup;
 import org.eclipse.team.svn.ui.synchronize.AbstractSynchronizeActionGroup;
 import org.eclipse.team.svn.ui.synchronize.action.AbstractSynchronizeModelAction;
 import org.eclipse.team.svn.ui.synchronize.action.DeletePaneAction;
@@ -51,9 +50,10 @@ public class AddToSVNPaneParticipant extends BasePaneParticipant {
 		super(scope, validationManager);
 	}
 
+	@Override
 	protected Collection<AbstractSynchronizeActionGroup> getActionGroups() {
-		List<AbstractSynchronizeActionGroup> actionGroups = new ArrayList<AbstractSynchronizeActionGroup>();
-		actionGroups.add(new AddToSVNPaneActionGroup(this.validationManager));
+		List<AbstractSynchronizeActionGroup> actionGroups = new ArrayList<>();
+		actionGroups.add(new AddToSVNPaneActionGroup(validationManager));
 		return actionGroups;
 	}
 
@@ -80,23 +80,25 @@ public class AddToSVNPaneParticipant extends BasePaneParticipant {
 				super(text, configuration);
 			}
 
+			@Override
 			protected IActionOperation getOperation(ISynchronizePageConfiguration configuration,
 					IDiffElement[] elements) {
-				IResource[] selectedResources = this.getAllSelectedResources();
+				IResource[] selectedResources = getAllSelectedResources();
 				CompositeOperation op = new CompositeOperation("Operation_AddToSVNIgnore", SVNMessages.class); //$NON-NLS-1$
-				op.add(new AddToSVNIgnoreOperation(selectedResources, IRemoteStorage.IGNORE_NAME, null));
+				op.add(new AddToSVNIgnoreOperation(selectedResources, ISVNStorage.IGNORE_NAME, null));
 				op.add(new RefreshResourcesOperation(new ResourcesParentsProvider(selectedResources),
 						IResource.DEPTH_INFINITE, RefreshResourcesOperation.REFRESH_ALL));
 				return op;
 			}
 
+			@Override
 			protected boolean updateSelection(IStructuredSelection selection) {
-				IResource[] selectedResources = this.getAllSelectedResources();
+				IResource[] selectedResources = getAllSelectedResources();
 				if (selectedResources.length == 1) {
-					this.setText(BaseMessages.format(SVNUIMessages.AddToSVNPanel_Ignore_Single,
+					setText(BaseMessages.format(SVNUIMessages.AddToSVNPanel_Ignore_Single,
 							selectedResources[0].getName()));
 				} else if (selectedResources.length > 1) {
-					this.setText(SVNUIMessages.AddToSVNPanel_IgnoreByNames_Multiple);
+					setText(SVNUIMessages.AddToSVNPanel_IgnoreByNames_Multiple);
 				}
 
 				return super.updateSelection(selection);
@@ -114,30 +116,32 @@ public class AddToSVNPaneParticipant extends BasePaneParticipant {
 				super(text, configuration);
 			}
 
+			@Override
 			protected IActionOperation getOperation(ISynchronizePageConfiguration configuration,
 					IDiffElement[] elements) {
-				IResource[] selectedResources = this.getAllSelectedResources();
+				IResource[] selectedResources = getAllSelectedResources();
 				CompositeOperation op = new CompositeOperation("Operation_AddToSVNIgnore", SVNMessages.class); //$NON-NLS-1$
-				op.add(new AddToSVNIgnoreOperation(selectedResources, IRemoteStorage.IGNORE_EXTENSION, null));
+				op.add(new AddToSVNIgnoreOperation(selectedResources, ISVNStorage.IGNORE_EXTENSION, null));
 				op.add(new RefreshResourcesOperation(new ResourcesParentsProvider(selectedResources),
 						IResource.DEPTH_INFINITE, RefreshResourcesOperation.REFRESH_ALL));
 				return op;
 			}
 
+			@Override
 			protected boolean updateSelection(IStructuredSelection selection) {
-				IResource[] selectedResources = this.getAllSelectedResources();
+				IResource[] selectedResources = getAllSelectedResources();
 				if (selectedResources.length == 1) {
-					String[] parts = this.getNameParts(selectedResources);
-					this.setText(BaseMessages.format(SVNUIMessages.AddToSVNPanel_Ignore_Single,
+					String[] parts = getNameParts(selectedResources);
+					setText(BaseMessages.format(SVNUIMessages.AddToSVNPanel_Ignore_Single,
 							"*." + parts[parts.length - 1])); //$NON-NLS-1$
 				} else if (selectedResources.length > 1) {
-					this.setText(SVNUIMessages.AddToSVNPanel_IgnoreByExtension_Multiple);
+					setText(SVNUIMessages.AddToSVNPanel_IgnoreByExtension_Multiple);
 				}
 
 				boolean isUpdate = false;
 				if (super.updateSelection(selection)) {
 					if (selectedResources.length == 1) {
-						String[] parts = this.getNameParts(selectedResources);
+						String[] parts = getNameParts(selectedResources);
 						if (parts.length != 0) {
 							isUpdate = true;
 						}
@@ -155,6 +159,7 @@ public class AddToSVNPaneParticipant extends BasePaneParticipant {
 			}
 		}
 
+		@Override
 		protected void configureActions(ISynchronizePageConfiguration configuration) {
 			super.configureActions(configuration);
 
@@ -162,19 +167,19 @@ public class AddToSVNPaneParticipant extends BasePaneParticipant {
 			AddToIgnoreByNameAction addToIgnoreByNameAction = new AddToIgnoreByNameAction(
 					SVNUIMessages.AddToSVNPanel_IgnoreByNames_Multiple, configuration);
 			this.appendToGroup(
-					ISynchronizePageConfiguration.P_CONTEXT_MENU, CommitPaneActionGroup.GROUP_SYNC_NORMAL,
+					ISynchronizePageConfiguration.P_CONTEXT_MENU, BasePaneActionGroup.GROUP_SYNC_NORMAL,
 					addToIgnoreByNameAction);
 
-			//add to ignore by extension 
+			//add to ignore by extension
 			AddToIgnoreByExtensionAction addToIgnoreByExtensionAction = new AddToIgnoreByExtensionAction(
 					SVNUIMessages.AddToSVNPanel_IgnoreByExtension_Multiple, configuration);
 			this.appendToGroup(
-					ISynchronizePageConfiguration.P_CONTEXT_MENU, CommitPaneActionGroup.GROUP_SYNC_NORMAL,
+					ISynchronizePageConfiguration.P_CONTEXT_MENU, BasePaneActionGroup.GROUP_SYNC_NORMAL,
 					addToIgnoreByExtensionAction);
 
 			//separator
 			this.appendToGroup(
-					ISynchronizePageConfiguration.P_CONTEXT_MENU, CommitPaneActionGroup.GROUP_SYNC_NORMAL,
+					ISynchronizePageConfiguration.P_CONTEXT_MENU, BasePaneActionGroup.GROUP_SYNC_NORMAL,
 					new Separator());
 
 			//delete
@@ -182,8 +187,7 @@ public class AddToSVNPaneParticipant extends BasePaneParticipant {
 					configuration);
 			deleteAction.setImageDescriptor(SVNTeamUIPlugin.instance().getImageDescriptor("icons/common/delete.gif")); //$NON-NLS-1$
 			this.appendToGroup(
-					ISynchronizePageConfiguration.P_CONTEXT_MENU, CommitPaneActionGroup.GROUP_SYNC_NORMAL,
-					deleteAction);
+					ISynchronizePageConfiguration.P_CONTEXT_MENU, BasePaneActionGroup.GROUP_SYNC_NORMAL, deleteAction);
 		}
 	}
 

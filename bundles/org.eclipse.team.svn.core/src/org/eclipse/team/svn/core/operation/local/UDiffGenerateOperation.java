@@ -50,30 +50,31 @@ public class UDiffGenerateOperation extends AbstractActionOperation {
 		this.diffFile = diffFile;
 	}
 
+	@Override
 	protected void runImpl(IProgressMonitor monitor) throws Exception {
-		IRepositoryLocation location = SVNRemoteStorage.instance().getRepositoryLocation(this.local.getResource());
+		IRepositoryLocation location = SVNRemoteStorage.instance().getRepositoryLocation(local.getResource());
 		ISVNConnector proxy = location.acquireSVNProxy();
 		try {
-			String wcPath = FileUtility.getWorkingCopyPath(this.local.getResource());
+			String wcPath = FileUtility.getWorkingCopyPath(local.getResource());
 			SVNEntryRevisionReference refPrev = new SVNEntryRevisionReference(wcPath, null, SVNRevision.WORKING);
-			SVNEntryRevisionReference refNext = SVNUtility.getEntryRevisionReference(this.remote);
+			SVNEntryRevisionReference refNext = SVNUtility.getEntryRevisionReference(remote);
 
-			String projectPath = FileUtility.getWorkingCopyPath(this.local.getResource().getProject());
+			String projectPath = FileUtility.getWorkingCopyPath(local.getResource().getProject());
 			String relativeToDir = projectPath;
 
 			SVNDepth depth = SVNDepth.INFINITY;
 			long options = ISVNConnector.Options.NONE;
-			//ISVNConnector.Options.IGNORE_ANCESTRY;					
-			String[] changelistNames = new String[0];
+			//ISVNConnector.Options.IGNORE_ANCESTRY;
+			String[] changelistNames = {};
 
-			this.writeToConsole(
+			writeToConsole(
 					IConsoleStream.LEVEL_CMD, "svn diff -r " //$NON-NLS-1$
 							+ refNext.revision + " \"" + wcPath + "\"" //$NON-NLS-1$ //$NON-NLS-2$
 							//+ "@" + refNext.pegRevision + "\""
 							+ ISVNConnector.Options.asCommandLine(options)
 							+ FileUtility.getUsernameParam(location.getUsername()) + "\n"); //$NON-NLS-1$
 
-			proxy.diffTwo(refPrev, refNext, relativeToDir, this.diffFile, depth, options, changelistNames,
+			proxy.diffTwo(refPrev, refNext, relativeToDir, diffFile, depth, options, changelistNames,
 					ISVNConnector.Options.NONE, new SVNProgressMonitor(this, monitor, null));
 		} finally {
 			location.releaseSVNProxy(proxy);

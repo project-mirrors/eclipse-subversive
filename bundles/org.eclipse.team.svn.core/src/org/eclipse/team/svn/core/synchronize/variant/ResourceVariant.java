@@ -37,51 +37,54 @@ public abstract class ResourceVariant extends CachedResourceVariant {
 	protected ILocalResource local;
 
 	public ResourceVariant(ILocalResource local) {
-		super();
-
 		this.local = local;
 	}
 
 	public ILocalResource getResource() {
-		return this.local;
+		return local;
 	}
 
+	@Override
 	protected String getCachePath() {
-		IRepositoryLocation location = SVNRemoteStorage.instance().getRepositoryLocation(this.local.getResource());
-		return location.getId() + this.local.getResource().getFullPath().toString() + " " + this.getContentIdentifier();
+		IRepositoryLocation location = SVNRemoteStorage.instance().getRepositoryLocation(local.getResource());
+		return location.getId() + local.getResource().getFullPath().toString() + " " + getContentIdentifier();
 	}
 
+	@Override
 	protected String getCacheId() {
 		return IRemoteStorage.class.getName();
 	}
 
+	@Override
 	public String getName() {
-		return this.local.getName();
+		return local.getName();
 	}
 
+	@Override
 	public byte[] asBytes() {
-		return this.getContentIdentifier().getBytes();
+		return getContentIdentifier().getBytes();
 	}
 
 	public String getStatus() {
-		return this.local.getStatus();
+		return local.getStatus();
 	}
 
+	@Override
 	public String getContentIdentifier() {
-		long revision = this.local.getRevision();
+		long revision = local.getRevision();
 		if (revision == SVNRevision.INVALID_REVISION_NUMBER
-				&& (IStateFilter.SF_ONREPOSITORY.accept(this.local) || this.local.isCopied())) {
+				&& (IStateFilter.SF_ONREPOSITORY.accept(local) || local.isCopied())) {
 			SVNEntryInfo[] st = SVNUtility
-					.info(new SVNEntryRevisionReference(FileUtility.getWorkingCopyPath(this.local.getResource())));
+					.info(new SVNEntryRevisionReference(FileUtility.getWorkingCopyPath(local.getResource())));
 			if (st != null && st.length > 0) {
-				revision = this.local.isCopied() ? st[0].copyFromRevision : st[0].lastChangedRevision;
+				revision = local.isCopied() ? st[0].copyFromRevision : st[0].lastChangedRevision;
 			}
 		}
 		if (revision == SVNRevision.INVALID_REVISION_NUMBER) {
-			if (this.isNotOnRepository()) {
+			if (isNotOnRepository()) {
 				return SVNMessages.ResourceVariant_unversioned;
 			}
-			if (IStateFilter.SF_DELETED.accept(this.local)) {
+			if (IStateFilter.SF_DELETED.accept(local)) {
 				return SVNMessages.ResourceVariant_deleted;
 			}
 		}
@@ -89,7 +92,7 @@ public abstract class ResourceVariant extends CachedResourceVariant {
 	}
 
 	protected boolean isNotOnRepository() {
-		return IStateFilter.SF_UNVERSIONED.accept(this.local);
+		return IStateFilter.SF_UNVERSIONED.accept(local);
 	}
 
 }

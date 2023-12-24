@@ -28,71 +28,82 @@ import org.eclipse.team.svn.core.utility.ILoggedOperationFactory;
  * @author Alexander Gurov
  */
 public abstract class AbstractOptionProvider implements IOptionProvider {
+	@Override
 	public String[] getCoveredProviders() {
 		return null;
 	}
 
+	@Override
 	public ISVNCredentialsPrompt getCredentialsPrompt() {
 		return null;
 	}
 
+	@Override
 	public ILoggedOperationFactory getLoggedOperationFactory() {
 		return ILoggedOperationFactory.DEFAULT;
 	}
 
+	@Override
 	public void addProjectSetCapabilityProcessing(CompositeOperation op) {
 	}
 
+	@Override
 	public FileModificationValidator getFileModificationValidator() {
 		return null;
 	}
 
+	@Override
 	public SVNProperty[] getAutomaticProperties(String template) {
 		return new SVNProperty[0];
 	}
 
+	@Override
 	public String getResource(String key) {
 		return SVNMessages.getErrorString(key);
 	}
 
+	@Override
 	public boolean is(String key) {
-		Object value = this.get(key);
+		Object value = get(key);
 		return value instanceof Boolean && ((Boolean) value).booleanValue();
 	}
 
+	@Override
 	public boolean has(String key) {
-		return this.get(key) != null;
+		return get(key) != null;
 	}
 
+	@Override
 	public String getString(String key) {
-		Object value = this.get(key);
+		Object value = get(key);
 		return value instanceof String ? (String) value : null;
 	}
 
+	@Override
 	public Object get(String key) {
 		if (IOptionProvider.SVN_CONNECTOR_ID.equals(key)) {
-			return this.getSVNConnectorId();
+			return getSVNConnectorId();
 		}
 		if (IOptionProvider.DEFAULT_TRUNK_NAME.equals(key)) {
-			return this.getDefaultTrunkName();
+			return getDefaultTrunkName();
 		}
 		if (IOptionProvider.DEFAULT_BRANCHES_NAME.equals(key)) {
-			return this.getDefaultBranchesName();
+			return getDefaultBranchesName();
 		}
 		if (IOptionProvider.DEFAULT_TAGS_NAME.equals(key)) {
-			return this.getDefaultTagsName();
+			return getDefaultTagsName();
 		}
 		if (IOptionProvider.PERSISTENT_SSH_ENABLED.equals(key)) {
-			return this.isPersistentSSHEnabled();
+			return isPersistentSSHEnabled();
 		}
 		if (IOptionProvider.TEXT_MIME_TYPE_REQUIRED.equals(key)) {
-			return this.isTextMIMETypeRequired();
+			return isTextMIMETypeRequired();
 		}
 		if (IOptionProvider.SVN_CACHE_ENABLED.equals(key)) {
-			return this.isSVNCacheEnabled();
+			return isSVNCacheEnabled();
 		}
 		if (IOptionProvider.AUTOMATIC_PROJECT_SHARE_ENABLED.equals(key)) {
-			return this.isAutomaticProjectShareEnabled();
+			return isAutomaticProjectShareEnabled();
 		}
 		return null;
 	}

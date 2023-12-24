@@ -49,64 +49,62 @@ public class SSHSettings implements Serializable {
 	}
 
 	public SSHSettings(ISSHSettingsStateListener parentLocation) {
-		this.port = SSHSettings.SSH_PORT_DEFAULT;
-		this.useKeyFile = false;
-		this.privateKeyPath = ""; //$NON-NLS-1$
-		this.passPhrase = ""; //$NON-NLS-1$
-		this.passPhraseSaved = false;
+		port = SSHSettings.SSH_PORT_DEFAULT;
+		useKeyFile = false;
+		privateKeyPath = ""; //$NON-NLS-1$
+		passPhrase = ""; //$NON-NLS-1$
+		passPhraseSaved = false;
 		this.parentLocation = parentLocation;
 	}
 
 	public String getPassPhrase() {
-		return this.passPhraseSaved
-				? SVNUtility.base64Decode(this.passPhrase)
-				: SVNUtility.base64Decode(this.passPhraseTemporary);
+		return passPhraseSaved ? SVNUtility.base64Decode(passPhrase) : SVNUtility.base64Decode(passPhraseTemporary);
 	}
 
 	public void setPassPhrase(String passPhrase) {
-		String oldValue = this.passPhraseSaved ? this.passPhrase : this.passPhraseTemporary;
+		String oldValue = passPhraseSaved ? this.passPhrase : passPhraseTemporary;
 		oldValue = oldValue != null ? SVNUtility.base64Decode(oldValue) : oldValue;
-		if (this.passPhraseSaved) {
+		if (passPhraseSaved) {
 			this.passPhrase = SVNUtility.base64Encode(passPhrase);
 		} else {
-			this.passPhraseTemporary = SVNUtility.base64Encode(passPhrase);
+			passPhraseTemporary = SVNUtility.base64Encode(passPhrase);
 		}
-		this.fireSSHChanged(ISSHSettingsStateListener.SSH_PASS_PHRASE, oldValue, passPhrase);
+		fireSSHChanged(ISSHSettingsStateListener.SSH_PASS_PHRASE, oldValue, passPhrase);
 	}
 
 	public int getPort() {
-		return this.port;
+		return port;
 	}
 
 	public void setPort(int port) {
 		int oldValue = this.port;
 		this.port = port;
-		this.fireSSHChanged(ISSHSettingsStateListener.SSH_PORT, Integer.valueOf(oldValue), Integer.valueOf(port));
+		fireSSHChanged(ISSHSettingsStateListener.SSH_PORT, Integer.valueOf(oldValue), Integer.valueOf(port));
 	}
 
 	public String getPrivateKeyPath() {
-		return this.privateKeyPath;
+		return privateKeyPath;
 	}
 
 	public void setPrivateKeyPath(String privateKeyPath) {
 		String oldValue = this.privateKeyPath;
 		this.privateKeyPath = privateKeyPath;
-		this.fireSSHChanged(ISSHSettingsStateListener.SSH_PRIVATE_KEY_PATH, oldValue, privateKeyPath);
+		fireSSHChanged(ISSHSettingsStateListener.SSH_PRIVATE_KEY_PATH, oldValue, privateKeyPath);
 	}
 
 	public boolean isUseKeyFile() {
-		return this.useKeyFile;
+		return useKeyFile;
 	}
 
 	public void setUseKeyFile(boolean useKeyFile) {
 		boolean oldValue = this.useKeyFile;
 		this.useKeyFile = useKeyFile;
-		this.fireSSHChanged(ISSHSettingsStateListener.SSH_USE_KEY_FILE, Boolean.valueOf(oldValue),
+		fireSSHChanged(ISSHSettingsStateListener.SSH_USE_KEY_FILE, Boolean.valueOf(oldValue),
 				Boolean.valueOf(useKeyFile));
 	}
 
 	public boolean isPassPhraseSaved() {
-		return this.passPhraseSaved;
+		return passPhraseSaved;
 	}
 
 	public void setPassPhraseSaved(boolean passPhraseSaved) {
@@ -116,18 +114,18 @@ public class SSHSettings implements Serializable {
 		boolean oldValue = this.passPhraseSaved;
 		this.passPhraseSaved = passPhraseSaved;
 		if (!passPhraseSaved) {
-			this.passPhraseTemporary = this.passPhrase;
-			this.passPhrase = null;
+			passPhraseTemporary = passPhrase;
+			passPhrase = null;
 		} else {
-			this.passPhrase = this.passPhraseTemporary;
+			passPhrase = passPhraseTemporary;
 		}
-		this.fireSSHChanged(ISSHSettingsStateListener.SSH_PASS_PHRASE_SAVED, Boolean.valueOf(oldValue),
+		fireSSHChanged(ISSHSettingsStateListener.SSH_PASS_PHRASE_SAVED, Boolean.valueOf(oldValue),
 				Boolean.valueOf(passPhraseSaved));
 	}
 
 	protected void fireSSHChanged(String field, Object oldValue, Object newValue) {
-		if (this.parentLocation != null) {
-			this.parentLocation.sshChanged(null, field, oldValue, newValue);
+		if (parentLocation != null) {
+			parentLocation.sshChanged(null, field, oldValue, newValue);
 		}
 	}
 

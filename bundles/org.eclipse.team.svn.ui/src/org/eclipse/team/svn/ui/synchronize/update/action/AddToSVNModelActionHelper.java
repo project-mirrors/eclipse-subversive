@@ -39,8 +39,10 @@ public class AddToSVNModelActionHelper extends AbstractActionHelper {
 		super(action, configuration);
 	}
 
+	@Override
 	public FastSyncInfoFilter getSyncInfoFilter() {
 		return new FastSyncInfoFilter.SyncInfoDirectionFilter(new int[] { SyncInfo.OUTGOING, SyncInfo.CONFLICTING }) {
+			@Override
 			public boolean select(SyncInfo info) {
 				UpdateSyncInfo sync = (UpdateSyncInfo) info;
 				return super.select(info) && (IStateFilter.SF_NEW.accept(sync.getLocalResource())
@@ -52,8 +54,9 @@ public class AddToSVNModelActionHelper extends AbstractActionHelper {
 	/* (non-Javadoc)
 	 * @see org.eclipse.team.svn.ui.synchronize.action.AbstractActionHelper#getOperation()
 	 */
+	@Override
 	public IActionOperation getOperation() {
-		QueryResourceAddition query = new QueryResourceAddition(this.getSyncInfoSelector(),
+		QueryResourceAddition query = new QueryResourceAddition(getSyncInfoSelector(),
 				configuration.getSite().getShell());
 		IResource[] resources = query.queryAddition();
 		if (resources == null) {

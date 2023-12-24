@@ -33,67 +33,78 @@ public abstract class AbstractVerifiedWizardPage extends WizardPage implements I
 
 	public AbstractVerifiedWizardPage(String pageName) {
 		super(pageName);
-		this.changeListener = new VerificationKeyListener();
+		changeListener = new VerificationKeyListener();
 	}
 
 	public AbstractVerifiedWizardPage(String pageName, String title, ImageDescriptor titleImage) {
 		super(pageName, title, titleImage);
-		this.changeListener = new VerificationKeyListener();
+		changeListener = new VerificationKeyListener();
 	}
 
+	@Override
 	public void createControl(Composite parent) {
-		this.setControl(this.createControlImpl(parent));
-		this.addListeners();
+		setControl(createControlImpl(parent));
+		addListeners();
 	}
 
+	@Override
 	public boolean isFilledRight() {
-		return this.changeListener.isFilledRight();
+		return changeListener.isFilledRight();
 	}
 
+	@Override
 	public void attachTo(Control cmp, AbstractVerifier verifier) {
-		this.changeListener.attachTo(cmp, verifier);
+		changeListener.attachTo(cmp, verifier);
 	}
 
 	public void addListeners() {
-		this.changeListener.addListeners();
-		this.validateContent();
-		this.setMessage(this.getDescription(), IMessageProvider.NONE);
+		changeListener.addListeners();
+		validateContent();
+		this.setMessage(getDescription(), IMessageProvider.NONE);
 	}
 
+	@Override
 	public void detachFrom(Control cmp) {
-		this.changeListener.detachFrom(cmp);
+		changeListener.detachFrom(cmp);
 	}
 
+	@Override
 	public void detachAll() {
-		this.changeListener.detachAll();
+		changeListener.detachAll();
 	}
 
+	@Override
 	public void validateContent() {
-		this.changeListener.validateContent();
+		changeListener.validateContent();
 	}
 
+	@Override
 	public boolean validateControl(Control cmp) {
-		return this.changeListener.validateControl(cmp);
+		return changeListener.validateControl(cmp);
 	}
 
+	@Override
 	public void setPageComplete(boolean complete) {
-		super.setPageComplete(complete && this.isFilledRight() && this.isPageCompleteImpl());
+		super.setPageComplete(complete && isFilledRight() && isPageCompleteImpl());
 	}
 
+	@Override
 	public boolean isPageComplete() {
-		if (this.getContainer().getCurrentPage() == this) {
+		if (getContainer().getCurrentPage() == this) {
 			return super.isPageComplete();
 		}
 		return true;
 	}
 
+	@Override
 	public void setVisible(boolean visible) {
 		super.setVisible(visible);
 		if (visible) {
-			this.getControl().setFocus();
+			getControl().setFocus();
 		}
 	}
 
+	@Override
 	public void setMessage(String newMessage, int newType) {
 		if (newType == IMessageProvider.WARNING) {
 			//NOTE Eclipse workaround: all warnings are rendered as animated but old message does not cleared. So, old error still visible after warning is shown.
@@ -121,27 +132,28 @@ public abstract class AbstractVerifiedWizardPage extends WizardPage implements I
 
 	protected class VerificationKeyListener extends AbstractVerificationKeyListener {
 		public VerificationKeyListener() {
-			super();
 		}
 
+		@Override
 		public void hasError(String errorReason) {
 			AbstractVerifiedWizardPage.this.setMessage(errorReason, IMessageProvider.ERROR);
-			this.handleButtons();
+			handleButtons();
 		}
 
+		@Override
 		public void hasWarning(String warningReason) {
 			AbstractVerifiedWizardPage.this.setMessage(warningReason, IMessageProvider.WARNING);
-			this.handleButtons();
+			handleButtons();
 		}
 
+		@Override
 		public void hasNoError() {
-			AbstractVerifiedWizardPage.this.setMessage(AbstractVerifiedWizardPage.this.getDescription(),
-					IMessageProvider.NONE);
-			this.handleButtons();
+			AbstractVerifiedWizardPage.this.setMessage(getDescription(), IMessageProvider.NONE);
+			handleButtons();
 		}
 
 		protected void handleButtons() {
-			AbstractVerifiedWizardPage.this.setPageComplete(this.isFilledRight());
+			setPageComplete(isFilledRight());
 		}
 
 	}

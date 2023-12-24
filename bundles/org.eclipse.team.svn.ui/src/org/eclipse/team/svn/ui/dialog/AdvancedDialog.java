@@ -43,22 +43,23 @@ public class AdvancedDialog extends DefaultDialog implements IDialogManagerEx {
 
 	public AdvancedDialog(Shell parentShell, AbstractAdvancedDialogPanel panel) {
 		super(parentShell, panel);
-		this.basePanelButtonsCount = panel.getButtonNames().length;
-		this.buttonLabelsEx = panel.getButtonNamesEx();
+		basePanelButtonsCount = panel.getButtonNames().length;
+		buttonLabelsEx = panel.getButtonNamesEx();
 	}
 
 	public AdvancedDialog(Shell parentShell, AbstractAdvancedDialogPanel panel, int focusButtonIdx) {
 		super(parentShell, panel);
-		this.basePanelButtonsCount = panel.getButtonNames().length;
-		this.buttonLabelsEx = panel.getButtonNamesEx();
+		basePanelButtonsCount = panel.getButtonNames().length;
+		buttonLabelsEx = panel.getButtonNamesEx();
 		this.focusButtonIdx = focusButtonIdx;
 	}
 
+	@Override
 	protected void buttonPressed(int buttonId) {
-		if (buttonId < this.basePanelButtonsCount) {
-			this.baseButtonPressed(buttonId);
+		if (buttonId < basePanelButtonsCount) {
+			baseButtonPressed(buttonId);
 		} else {
-			this.extendedButtonPressed(buttonId - this.basePanelButtonsCount);
+			extendedButtonPressed(buttonId - basePanelButtonsCount);
 		}
 	}
 
@@ -67,9 +68,10 @@ public class AdvancedDialog extends DefaultDialog implements IDialogManagerEx {
 	}
 
 	protected void extendedButtonPressed(int buttonId) {
-		((AbstractAdvancedDialogPanel) this.panel).extendedButtonPressed(buttonId);
+		((AbstractAdvancedDialogPanel) panel).extendedButtonPressed(buttonId);
 	}
 
+	@Override
 	protected Control createButtonPanel(Composite parent) {
 		GridLayout layout = null;
 		GridData data = null;
@@ -85,16 +87,16 @@ public class AdvancedDialog extends DefaultDialog implements IDialogManagerEx {
 		data = new GridData(GridData.FILL_HORIZONTAL);
 		buttonPanel.setLayoutData(data);
 
-		this.createExtendedButtonPanel(buttonPanel);
-		this.createBaseButtonPanel(buttonPanel);
+		createExtendedButtonPanel(buttonPanel);
+		createBaseButtonPanel(buttonPanel);
 
-		ArrayList<Button> allButtons = new ArrayList<Button>();
-		for (int i = 0; i < this.getButtonLabels().length; i++) {
-			allButtons.add(this.getButton(i));
+		ArrayList<Button> allButtons = new ArrayList<>();
+		for (int i = 0; i < getButtonLabels().length; i++) {
+			allButtons.add(getButton(i));
 		}
-		this.setButtons(allButtons.toArray(new Button[allButtons.size()]));
-		if (this.focusButtonIdx != 0) {
-			this.getShell().setDefaultButton(this.getButton(this.focusButtonIdx));
+		setButtons(allButtons.toArray(new Button[allButtons.size()]));
+		if (focusButtonIdx != 0) {
+			getShell().setDefaultButton(getButton(focusButtonIdx));
 		}
 		return buttonPanel;
 	}
@@ -112,7 +114,7 @@ public class AdvancedDialog extends DefaultDialog implements IDialogManagerEx {
 		data.horizontalAlignment = SWT.LEFT;
 		buttonPanel.setLayoutData(data);
 
-		return this.createExtendedButtonBar(buttonPanel);
+		return createExtendedButtonBar(buttonPanel);
 	}
 
 	protected Control createBaseButtonPanel(Composite parent) {
@@ -128,7 +130,7 @@ public class AdvancedDialog extends DefaultDialog implements IDialogManagerEx {
 		data.horizontalAlignment = SWT.RIGHT;
 		buttonPanel.setLayoutData(data);
 
-		return this.createButtonBar(buttonPanel);
+		return createButtonBar(buttonPanel);
 	}
 
 	protected Control createExtendedButtonBar(Composite parent) {
@@ -148,33 +150,35 @@ public class AdvancedDialog extends DefaultDialog implements IDialogManagerEx {
 		composite.setLayoutData(data);
 		composite.setFont(parent.getFont());
 		// Add the buttons to the left button bar.
-		this.createButtonsForExtendedButtonBar(composite);
+		createButtonsForExtendedButtonBar(composite);
 		return composite;
 	}
 
 	protected void createButtonsForExtendedButtonBar(Composite parent) {
-		this.buttonsEx = new Button[this.buttonLabelsEx.length];
-		for (int i = 0; i < this.buttonsEx.length; i++) {
-			String label = this.buttonLabelsEx[i];
-			Button button = this.createButton(parent, this.basePanelButtonsCount + i, label, false);
-			this.buttonsEx[i] = button;
+		buttonsEx = new Button[buttonLabelsEx.length];
+		for (int i = 0; i < buttonsEx.length; i++) {
+			String label = buttonLabelsEx[i];
+			Button button = createButton(parent, basePanelButtonsCount + i, label, false);
+			buttonsEx[i] = button;
 		}
 	}
 
 	public Button getButtonEx(int idx) {
-		return this.buttonsEx[idx];
+		return buttonsEx[idx];
 	}
 
 	public void setButtonEx(Button[] newButtons) {
-		this.buttonsEx = newButtons;
+		buttonsEx = newButtons;
 	}
 
+	@Override
 	public void setExtendedButtonEnabled(int idx, boolean enabled) {
-		this.buttonsEx[idx].setEnabled(enabled);
+		buttonsEx[idx].setEnabled(enabled);
 	}
 
+	@Override
 	public void setExtendedButtonCaption(int idx, String text) {
-		this.buttonsEx[idx].setText(text);
+		buttonsEx[idx].setText(text);
 	}
 
 }

@@ -43,42 +43,49 @@ public class GetRemotePropertiesOperation extends AbstractRepositoryOperation im
 		super("Operation_GetRevisionProperties", SVNMessages.class, provider); //$NON-NLS-1$
 	}
 
+	@Override
 	public SVNProperty[] getProperties() {
-		return this.properties;
+		return properties;
 	}
 
+	@Override
 	public boolean isEditAllowed() {
 		return false;
 	}
 
+	@Override
 	public void refresh() {
 
 	}
 
+	@Override
 	public IResource getLocal() {
 		return null;
 	}
 
+	@Override
 	public IRepositoryResource getRemote() {
-		return this.operableData()[0];
+		return operableData()[0];
 	}
 
+	@Override
 	protected void runImpl(IProgressMonitor monitor) throws Exception {
-		IRepositoryResource resource = this.operableData()[0];
-		this.properties = null;
+		IRepositoryResource resource = operableData()[0];
+		properties = null;
 		IRepositoryLocation location = resource.getRepositoryLocation();
 		ISVNConnector proxy = location.acquireSVNProxy();
 		try {
 //			this.writeToConsole(IConsoleStream.LEVEL_CMD, "svn proplist " + url + "@" + resource.getPegRevision() + " --revprop -r " + resource.getSelectedRevision() + " --username \"" + location.getUsername() + "\"\n");
-			this.properties = SVNUtility.properties(proxy, SVNUtility.getEntryRevisionReference(resource),
+			properties = SVNUtility.properties(proxy, SVNUtility.getEntryRevisionReference(resource),
 					ISVNConnector.Options.NONE, new SVNProgressMonitor(this, monitor, null));
 		} finally {
 			location.releaseSVNProxy(proxy);
 		}
 	}
 
+	@Override
 	protected String getShortErrorMessage(Throwable t) {
-		return BaseMessages.format(super.getShortErrorMessage(t), new Object[] { this.operableData()[0].getUrl() });
+		return BaseMessages.format(super.getShortErrorMessage(t), new Object[] { operableData()[0].getUrl() });
 	}
 
 }

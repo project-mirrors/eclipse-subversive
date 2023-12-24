@@ -34,8 +34,9 @@ public class ShowOutgoingPropertiesActionHelper extends AbstractActionHelper {
 		super(action, configuration);
 	}
 
+	@Override
 	public IActionOperation getOperation() {
-		IResource selectedResource = this.getSelectedResource();
+		IResource selectedResource = getSelectedResource();
 		IResourcePropertyProvider provider = new GetPropertiesOperation(selectedResource);
 		ShowPropertiesOperation op = new ShowPropertiesOperation(
 				PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage(), selectedResource, provider);

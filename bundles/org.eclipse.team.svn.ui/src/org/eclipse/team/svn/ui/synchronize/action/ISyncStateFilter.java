@@ -24,46 +24,54 @@ import org.eclipse.team.svn.core.resource.ILocalResource;
  * @author Alexander Gurov
  */
 public interface ISyncStateFilter extends IStateFilter {
-	public boolean acceptRemote(IResource resource, String state, int mask);
+	boolean acceptRemote(IResource resource, String state, int mask);
 
-	public boolean acceptGroupNodes();
+	boolean acceptGroupNodes();
 
 	public abstract class AbstractSyncStateFilter extends IStateFilter.AbstractStateFilter implements ISyncStateFilter {
 
 	}
 
-	public static ISyncStateFilter SF_ONREPOSITORY = new AbstractSyncStateFilter() {
+	ISyncStateFilter SF_ONREPOSITORY = new AbstractSyncStateFilter() {
+		@Override
 		public boolean acceptRemote(IResource resource, String state, int mask) {
 			return !IStateFilter.SF_NOTEXISTS.accept(resource, state, mask);
 		}
 
+		@Override
 		public boolean acceptGroupNodes() {
 			return true;
 		}
 
+		@Override
 		protected boolean acceptImpl(ILocalResource local, IResource resource, String state, int mask) {
 			return IStateFilter.SF_ONREPOSITORY.accept(resource, state, mask);
 		}
 
+		@Override
 		protected boolean allowsRecursionImpl(ILocalResource local, IResource resource, String state, int mask) {
 			return true;
 		}
 	};
 
-	public static ISyncStateFilter SF_OVERRIDE = new AbstractSyncStateFilter() {
+	ISyncStateFilter SF_OVERRIDE = new AbstractSyncStateFilter() {
+		@Override
 		public boolean acceptRemote(IResource resource, String state, int mask) {
 			return !IStateFilter.SF_NOTEXISTS.accept(resource, state, mask);
 		}
 
+		@Override
 		public boolean acceptGroupNodes() {
 			return true;
 		}
 
+		@Override
 		protected boolean acceptImpl(ILocalResource local, IResource resource, String state, int mask) {
 			return IStateFilter.SF_REVERTABLE.accept(resource, state, mask)
 					|| IStateFilter.SF_UNVERSIONED.accept(resource, state, mask);
 		}
 
+		@Override
 		protected boolean allowsRecursionImpl(ILocalResource local, IResource resource, String state, int mask) {
 			return true;
 		}
@@ -86,26 +94,32 @@ public interface ISyncStateFilter extends IStateFilter {
 			this.acceptGroupNodes = acceptGroupNodes;
 		}
 
+		@Override
 		public boolean acceptGroupNodes() {
-			return this.acceptGroupNodes;
+			return acceptGroupNodes;
 		}
 
+		@Override
 		public boolean acceptRemote(IResource resource, String state, int mask) {
-			return this.remote != null && this.remote.accept(resource, state, mask);
+			return remote != null && remote.accept(resource, state, mask);
 		}
 
+		@Override
 		public boolean accept(IResource resource, String state, int mask) {
-			return this.local != null && this.local.accept(resource, state, mask);
+			return local != null && local.accept(resource, state, mask);
 		}
 
+		@Override
 		public boolean accept(ILocalResource resource) {
-			return this.local != null && this.local.accept(resource);
+			return local != null && local.accept(resource);
 		}
 
+		@Override
 		public boolean allowsRecursion(IResource resource, String state, int mask) {
 			return true;
 		}
 
+		@Override
 		public boolean allowsRecursion(ILocalResource resource) {
 			return true;
 		}

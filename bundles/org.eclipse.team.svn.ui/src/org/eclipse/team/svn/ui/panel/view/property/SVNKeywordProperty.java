@@ -90,77 +90,78 @@ public class SVNKeywordProperty {
 
 	public SVNKeywordProperty(String keywordsValue) {
 		if (keywordsValue != null) {
-			this.parsePropertyValue(keywordsValue);
+			parsePropertyValue(keywordsValue);
 		}
 	}
 
 	public boolean isHeadUrlEnabled() {
-		return this.headURLEnabled;
+		return headURLEnabled;
 	}
 
 	public boolean isIdEnabled() {
-		return this.idEnabled;
+		return idEnabled;
 	}
 
 	public boolean isHeaderEnabled() {
-		return this.headerEnabled;
+		return headerEnabled;
 	}
 
 	public boolean isLastChangedByEnabled() {
-		return this.lastChangedByEnabled;
+		return lastChangedByEnabled;
 	}
 
 	public boolean isDateEnabled() {
-		return this.dateEnabled;
+		return dateEnabled;
 	}
 
 	public boolean isRevisionEnabled() {
-		return this.revisionEnabled;
+		return revisionEnabled;
 	}
 
 	public void setHeadUrlEnabled(boolean headURL) {
-		this.headURLEnabled = headURL;
+		headURLEnabled = headURL;
 	}
 
 	public void setIdEnabled(boolean id) {
-		this.idEnabled = id;
+		idEnabled = id;
 	}
 
 	public void setHeaderEnabled(boolean header) {
-		this.headerEnabled = header;
+		headerEnabled = header;
 	}
 
 	public void setLastChangedByEnabled(boolean lastChangedBy) {
-		this.lastChangedByEnabled = lastChangedBy;
+		lastChangedByEnabled = lastChangedBy;
 	}
 
 	public void setDateEnabled(boolean lastChangedDate) {
-		this.dateEnabled = lastChangedDate;
+		dateEnabled = lastChangedDate;
 	}
 
 	public void setRevisionEnabled(boolean lastChangedRev) {
-		this.revisionEnabled = lastChangedRev;
+		revisionEnabled = lastChangedRev;
 	}
 
+	@Override
 	public String toString() {
 		String result = ""; //$NON-NLS-1$
-		if (this.dateEnabled) {
-			result = this.addKeyword(result, SVNKeywordProperty.DATE_NAMES[0]);
+		if (dateEnabled) {
+			result = addKeyword(result, SVNKeywordProperty.DATE_NAMES[0]);
 		}
-		if (this.revisionEnabled) {
-			result = this.addKeyword(result, SVNKeywordProperty.REVISION_NAMES[0]);
+		if (revisionEnabled) {
+			result = addKeyword(result, SVNKeywordProperty.REVISION_NAMES[0]);
 		}
-		if (this.lastChangedByEnabled) {
-			result = this.addKeyword(result, SVNKeywordProperty.AUTHOR_NAMES[0]);
+		if (lastChangedByEnabled) {
+			result = addKeyword(result, SVNKeywordProperty.AUTHOR_NAMES[0]);
 		}
-		if (this.headURLEnabled) {
-			result = this.addKeyword(result, SVNKeywordProperty.HEAD_URL_NAMES[0]);
+		if (headURLEnabled) {
+			result = addKeyword(result, SVNKeywordProperty.HEAD_URL_NAMES[0]);
 		}
-		if (this.idEnabled) {
-			result = this.addKeyword(result, SVNKeywordProperty.ID_NAMES[0]);
+		if (idEnabled) {
+			result = addKeyword(result, SVNKeywordProperty.ID_NAMES[0]);
 		}
-		if (this.headerEnabled) {
-			result = this.addKeyword(result, SVNKeywordProperty.HEADER_NAMES[0]);
+		if (headerEnabled) {
+			result = addKeyword(result, SVNKeywordProperty.HEADER_NAMES[0]);
 		}
 
 		return result;
@@ -180,20 +181,20 @@ public class SVNKeywordProperty {
 		while (st.hasMoreTokens()) {
 			String name = st.nextToken();
 			if (name.equals(SVNKeywordProperty.DATE_NAMES[0]) || name.equals(SVNKeywordProperty.DATE_NAMES[1])) {
-				this.dateEnabled = true;
+				dateEnabled = true;
 			} else if (name.equals(SVNKeywordProperty.REVISION_NAMES[0])
 					|| name.equals(SVNKeywordProperty.REVISION_NAMES[1])) {
-				this.revisionEnabled = true;
+				revisionEnabled = true;
 			} else if (name.equals(SVNKeywordProperty.AUTHOR_NAMES[0])
 					|| name.equals(SVNKeywordProperty.AUTHOR_NAMES[1])) {
-				this.lastChangedByEnabled = true;
+				lastChangedByEnabled = true;
 			} else if (name.equals(SVNKeywordProperty.HEAD_URL_NAMES[0])
 					|| name.equals(SVNKeywordProperty.HEAD_URL_NAMES[1])) {
-				this.headURLEnabled = true;
+				headURLEnabled = true;
 			} else if (name.equals(SVNKeywordProperty.ID_NAMES[0])) {
-				this.idEnabled = true;
+				idEnabled = true;
 			} else if (name.equals(SVNKeywordProperty.HEADER_NAMES[0])) {
-				this.headerEnabled = true;
+				headerEnabled = true;
 			}
 		}
 	}

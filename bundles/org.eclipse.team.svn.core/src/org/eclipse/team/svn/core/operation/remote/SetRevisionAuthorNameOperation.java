@@ -22,9 +22,8 @@ import org.eclipse.team.svn.core.connector.SVNProperty;
 import org.eclipse.team.svn.core.connector.SVNRevision;
 import org.eclipse.team.svn.core.operation.AbstractActionOperation;
 import org.eclipse.team.svn.core.operation.IRevisionProvider;
-import org.eclipse.team.svn.core.operation.IUnprotectedOperation;
-import org.eclipse.team.svn.core.operation.SVNProgressMonitor;
 import org.eclipse.team.svn.core.operation.IRevisionProvider.RevisionPair;
+import org.eclipse.team.svn.core.operation.SVNProgressMonitor;
 import org.eclipse.team.svn.core.resource.IRepositoryLocation;
 
 /**
@@ -39,11 +38,7 @@ public class SetRevisionAuthorNameOperation extends AbstractActionOperation {
 	protected long options;
 
 	public SetRevisionAuthorNameOperation(final RevisionPair[] revisions, long options) {
-		this(new IRevisionProvider() {
-			public RevisionPair[] getRevisions() {
-				return revisions;
-			}
-		}, options);
+		this(() -> revisions, options);
 
 	}
 
@@ -53,8 +48,9 @@ public class SetRevisionAuthorNameOperation extends AbstractActionOperation {
 		this.options = options;
 	}
 
+	@Override
 	protected void runImpl(IProgressMonitor monitor) throws Exception {
-		final RevisionPair[] revisions = this.provider.getRevisions();
+		final RevisionPair[] revisions = provider.getRevisions();
 		if (revisions == null) {
 			return;
 		}
@@ -68,14 +64,9 @@ public class SetRevisionAuthorNameOperation extends AbstractActionOperation {
 			}
 			final ISVNConnector proxy = location.acquireSVNProxy();
 			final SVNRevision rev = SVNRevision.fromNumber(revisions[i].revision);
-			this.protectStep(new IUnprotectedOperation() {
-				public void run(IProgressMonitor monitor) throws Exception {
-					proxy.setRevisionProperty(new SVNEntryReference(location.getUrl(), rev),
-							new SVNProperty(SVNProperty.BuiltIn.REV_AUTHOR, location.getAuthorName()), null,
-							SetRevisionAuthorNameOperation.this.options,
-							new SVNProgressMonitor(SetRevisionAuthorNameOperation.this, monitor, null)); //$NON-NLS-1$
-				}
-			}, monitor, 1);
+			this.protectStep(monitor1 -> proxy.setRevisionProperty(new SVNEntryReference(location.getUrl(), rev),
+					new SVNProperty(SVNProperty.BuiltIn.REV_AUTHOR, location.getAuthorName()), null, options,
+					new SVNProgressMonitor(SetRevisionAuthorNameOperation.this, monitor1, null)), monitor, 1);
 			location.releaseSVNProxy(proxy);
 		}
 	}

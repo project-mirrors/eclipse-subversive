@@ -15,6 +15,7 @@
 package org.eclipse.team.svn.ui.verifier;
 
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.team.svn.core.BaseMessages;
 import org.eclipse.team.svn.ui.SVNUIMessages;
 
 /**
@@ -29,19 +30,20 @@ public class ProxyPortVerifier extends AbstractFormattedVerifier {
 
 	public ProxyPortVerifier(String fieldName) {
 		super(fieldName);
-		ProxyPortVerifier.ERROR_RANGE = SVNUIMessages.format(SVNUIMessages.Verifier_ProxyPort_Range,
+		ProxyPortVerifier.ERROR_RANGE = BaseMessages.format(SVNUIMessages.Verifier_ProxyPort_Range,
 				new String[] { AbstractFormattedVerifier.FIELD_NAME });
-		ProxyPortVerifier.ERROR_NAN = SVNUIMessages.format(SVNUIMessages.Verifier_ProxyPort_NaN,
+		ProxyPortVerifier.ERROR_NAN = BaseMessages.format(SVNUIMessages.Verifier_ProxyPort_NaN,
 				new String[] { AbstractFormattedVerifier.FIELD_NAME });
 	}
 
+	@Override
 	protected String getErrorMessageImpl(Control hostField) {
-		String portString = this.getText(hostField);
+		String portString = getText(hostField);
 		if (portString.trim().length() == 0) {
 			return null;
 		}
 		try {
-			int port = new Integer(portString).intValue();
+			int port = Integer.parseInt(portString);
 			if (port < 0 || port > 65535) {
 				return ProxyPortVerifier.ERROR_RANGE;
 			}
@@ -51,6 +53,7 @@ public class ProxyPortVerifier extends AbstractFormattedVerifier {
 		return null;
 	}
 
+	@Override
 	protected String getWarningMessageImpl(Control input) {
 		return null;
 	}

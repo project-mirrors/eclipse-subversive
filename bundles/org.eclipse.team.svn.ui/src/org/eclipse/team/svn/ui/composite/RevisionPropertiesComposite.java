@@ -15,19 +15,13 @@
 package org.eclipse.team.svn.ui.composite;
 
 import org.eclipse.jface.action.Action;
-import org.eclipse.jface.action.IMenuListener;
-import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.viewers.ColumnWeightData;
-import org.eclipse.jface.viewers.DoubleClickEvent;
-import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ILabelProviderListener;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITableLabelProvider;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TableLayout;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.Viewer;
@@ -78,39 +72,33 @@ public class RevisionPropertiesComposite extends Composite {
 
 	public RevisionPropertiesComposite(Composite parent) {
 		super(parent, SWT.NONE);
-		this.properties = new SVNProperty[0];
-		this.createControls(parent);
+		properties = new SVNProperty[0];
+		createControls(parent);
 	}
 
 	public void setPending(final boolean isPending) {
 		this.isPending = isPending;
-		UIMonitorUtility.getDisplay().syncExec(new Runnable() {
-			public void run() {
-				if (isPending) {
-					RevisionPropertiesComposite.this.propertyViewer.getTable().setLinesVisible(false);
-				} else {
-					RevisionPropertiesComposite.this.propertyViewer.getTable().setLinesVisible(true);
-				}
-				RevisionPropertiesComposite.this.rereshTableData();
+		UIMonitorUtility.getDisplay().syncExec(() -> {
+			if (isPending) {
+				propertyViewer.getTable().setLinesVisible(false);
+			} else {
+				propertyViewer.getTable().setLinesVisible(true);
 			}
+			RevisionPropertiesComposite.this.rereshTableData();
 		});
 	}
 
 	public synchronized void disconnectComposite() {
-		this.properties = new SVNProperty[0];
+		properties = new SVNProperty[0];
 	}
 
 	public void setInput(SVNProperty[] revProperties) {
-		this.properties = revProperties;
-		UIMonitorUtility.getDisplay().syncExec(new Runnable() {
-			public void run() {
-				RevisionPropertiesComposite.this.rereshTableData();
-			}
-		});
+		properties = revProperties;
+		UIMonitorUtility.getDisplay().syncExec(RevisionPropertiesComposite.this::rereshTableData);
 	}
 
 	public SVNProperty[] getSetProps() {
-		return this.properties;
+		return properties;
 	}
 
 	public void setLocationAndRevision(IRepositoryLocation location, SVNRevision revision) {
@@ -119,12 +107,12 @@ public class RevisionPropertiesComposite extends Composite {
 	}
 
 	protected void rereshTableData() {
-		if (this.isPending) {
-			this.propertyViewer.setInput(new String[] { "" }); //$NON-NLS-1$
+		if (isPending) {
+			propertyViewer.setInput(new String[] { "" }); //$NON-NLS-1$
 			return;
 		}
-		this.propertyViewer.setInput(RevisionPropertiesComposite.this.properties);
-		this.propertyText.setText(""); //$NON-NLS-1$
+		propertyViewer.setInput(RevisionPropertiesComposite.this.properties);
+		propertyText.setText(""); //$NON-NLS-1$
 	}
 
 	protected void createControls(Composite parent) {
@@ -134,7 +122,7 @@ public class RevisionPropertiesComposite extends Composite {
 		layout = new GridLayout();
 		layout.marginHeight = 0;
 		layout.marginWidth = 0;
-		this.setLayout(layout);
+		setLayout(layout);
 		SashForm innerSashForm = new SashForm(this, SWT.VERTICAL);
 
 		data = new GridData(GridData.FILL_BOTH);
@@ -149,34 +137,33 @@ public class RevisionPropertiesComposite extends Composite {
 		TableLayout tableLayout = new TableLayout();
 		table.setLayout(tableLayout);
 
-		this.propertyText = new Text(innerSashForm, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
-		this.propertyText.setBackground(this.propertyText.getBackground());
-		this.propertyText.setEditable(false);
+		propertyText = new Text(innerSashForm, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
+		propertyText.setBackground(propertyText.getBackground());
+		propertyText.setEditable(false);
 		data = new GridData(GridData.FILL_BOTH);
-		this.propertyText.setLayoutData(data);
+		propertyText.setLayoutData(data);
 
 		innerSashForm.setWeights(new int[] { 70, 30 });
 
-		this.propertyViewer = new TableViewer(table);
-		this.propertyViewer.addSelectionChangedListener(new ISelectionChangedListener() {
-			public void selectionChanged(SelectionChangedEvent event) {
-				if (event.getSelection() instanceof IStructuredSelection) {
-					Object selection = ((IStructuredSelection) event.getSelection()).getFirstElement();
-					if (selection != null && selection instanceof SVNProperty) {
-						RevisionPropertiesComposite.this.propertyText.setText(((SVNProperty) selection).value);
-					}
+		propertyViewer = new TableViewer(table);
+		propertyViewer.addSelectionChangedListener(event -> {
+			if (event.getSelection() instanceof IStructuredSelection) {
+				Object selection = ((IStructuredSelection) event.getSelection()).getFirstElement();
+				if (selection != null && selection instanceof SVNProperty) {
+					propertyText.setText(((SVNProperty) selection).value);
 				}
 			}
 		});
 
 		//creating a comparator right now to get column listeners
-		ColumnedViewerComparator comparator = new ColumnedViewerComparator(this.propertyViewer) {
+		ColumnedViewerComparator comparator = new ColumnedViewerComparator(propertyViewer) {
 
+			@Override
 			public int compareImpl(Viewer viewer, Object row1, Object row2) {
 				if (row1 instanceof SVNProperty) {
 					SVNProperty data1 = (SVNProperty) row1;
 					SVNProperty data2 = (SVNProperty) row2;
-					return this.column == RevisionPropertiesComposite.COLUMN_NAME
+					return column == RevisionPropertiesComposite.COLUMN_NAME
 							? ColumnedViewerComparator.compare(data1.name, data2.name)
 							: ColumnedViewerComparator.compare(data1.value, data2.value);
 				}
@@ -197,35 +184,40 @@ public class RevisionPropertiesComposite extends Composite {
 		tableLayout.addColumnData(new ColumnWeightData(70, true));
 
 		//adding a comparator and selecting a default sort column
-		this.propertyViewer.setComparator(comparator);
+		propertyViewer.setComparator(comparator);
 		comparator.setColumnNumber(RevisionPropertiesComposite.COLUMN_NAME);
-		this.propertyViewer.getTable()
-				.setSortColumn(this.propertyViewer.getTable().getColumn(RevisionPropertiesComposite.COLUMN_NAME));
-		this.propertyViewer.getTable().setSortDirection(SWT.UP);
+		propertyViewer.getTable()
+				.setSortColumn(propertyViewer.getTable().getColumn(RevisionPropertiesComposite.COLUMN_NAME));
+		propertyViewer.getTable().setSortDirection(SWT.UP);
 
-		this.propertyViewer.setContentProvider(new IStructuredContentProvider() {
+		propertyViewer.setContentProvider(new IStructuredContentProvider() {
+			@Override
 			public Object[] getElements(Object inputElement) {
-				if (RevisionPropertiesComposite.this.isPending) {
+				if (isPending) {
 					return (Object[]) inputElement;
 				}
-				return RevisionPropertiesComposite.this.properties;
+				return properties;
 			}
 
+			@Override
 			public void dispose() {
 			}
 
+			@Override
 			public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 			}
 		});
 
-		this.propertyViewer.setLabelProvider(new ITableLabelProvider() {
+		propertyViewer.setLabelProvider(new ITableLabelProvider() {
 
+			@Override
 			public Image getColumnImage(Object element, int columnIndex) {
 				return null;
 			}
 
+			@Override
 			public String getColumnText(Object element, int columnIndex) {
-				if (RevisionPropertiesComposite.this.isPending) {
+				if (isPending) {
 					if (columnIndex == RevisionPropertiesComposite.COLUMN_NAME) {
 						return SVNUIMessages.getString(RepositoryPending.PENDING);
 					}
@@ -238,69 +230,70 @@ public class RevisionPropertiesComposite extends Composite {
 				return FileUtility.formatMultilineText(data.value);
 			}
 
+			@Override
 			public void addListener(ILabelProviderListener listener) {
 			}
 
+			@Override
 			public void dispose() {
 			}
 
+			@Override
 			public boolean isLabelProperty(Object element, String property) {
 				return true;
 			}
 
+			@Override
 			public void removeListener(ILabelProviderListener listener) {
 			}
 		});
 
 		MenuManager menuMgr = new MenuManager();
 		Menu menu = menuMgr.createContextMenu(table);
-		menuMgr.addMenuListener(new IMenuListener() {
-			public void menuAboutToShow(IMenuManager manager) {
-				manager.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
-				final IStructuredSelection tSelection = (IStructuredSelection) RevisionPropertiesComposite.this.propertyViewer
-						.getSelection();
-				if (tSelection.size() == 1 && tSelection.getFirstElement() instanceof String) {
-					return;
-				}
-				Action tAction = null;
-				boolean isItitialized = RevisionPropertiesComposite.this.properties != null;
-				if (isItitialized) {
-					manager.add(tAction = new Action(SVNUIMessages.PropertiesComposite_Add) {
-						public void run() {
-							RevisionPropertiesComposite.this.editProperty(null);
-						}
-					});
-					tAction.setEnabled(RevisionPropertiesComposite.this.location != null);
-					manager.add(tAction = new Action(SVNUIMessages.PropertiesComposite_Edit) {
-						public void run() {
-							SVNProperty data = (SVNProperty) tSelection.getFirstElement();
-							RevisionPropertiesComposite.this.editProperty(data);
-						}
-					});
-					tAction.setEnabled(tSelection.size() == 1);
-				}
+		menuMgr.addMenuListener(manager -> {
+			manager.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
+			final IStructuredSelection tSelection = (IStructuredSelection) propertyViewer.getSelection();
+			if (tSelection.size() == 1 && tSelection.getFirstElement() instanceof String) {
+				return;
+			}
+			Action tAction = null;
+			boolean isItitialized = properties != null;
+			if (isItitialized) {
+				manager.add(tAction = new Action(SVNUIMessages.PropertiesComposite_Add) {
+					@Override
+					public void run() {
+						RevisionPropertiesComposite.this.editProperty(null);
+					}
+				});
+				tAction.setEnabled(location != null);
+				manager.add(tAction = new Action(SVNUIMessages.PropertiesComposite_Edit) {
+					@Override
+					public void run() {
+						SVNProperty data = (SVNProperty) tSelection.getFirstElement();
+						RevisionPropertiesComposite.this.editProperty(data);
+					}
+				});
+				tAction.setEnabled(tSelection.size() == 1);
 			}
 		});
 		menuMgr.setRemoveAllWhenShown(true);
 		table.setMenu(menu);
 
-		this.propertyViewer.addDoubleClickListener(new IDoubleClickListener() {
-			public void doubleClick(DoubleClickEvent e) {
-				IStructuredSelection selection = (IStructuredSelection) e.getSelection();
-				if (selection.size() == 1) {
-					SVNProperty data = (SVNProperty) selection.getFirstElement();
-					RevisionPropertiesComposite.this.editProperty(data);
-				}
+		propertyViewer.addDoubleClickListener(e -> {
+			IStructuredSelection selection = (IStructuredSelection) e.getSelection();
+			if (selection.size() == 1) {
+				SVNProperty data1 = (SVNProperty) selection.getFirstElement();
+				RevisionPropertiesComposite.this.editProperty(data1);
 			}
 		});
 
 	}
 
 	protected void editProperty(SVNProperty data) {
-		RevPropertiesEditPanel panel = new RevPropertiesEditPanel(this.properties, this.revision);
+		RevPropertiesEditPanel panel = new RevPropertiesEditPanel(properties, revision);
 		panel.setPropertyToEdit(data);
 		if (new DefaultDialog(UIMonitorUtility.getShell(), panel).open() == 0) {
-			RevPropertiesEditPanel.doSetRevisionProperty(panel, this.location, this.revision);
+			RevPropertiesEditPanel.doSetRevisionProperty(panel, location, revision);
 		}
 	}
 

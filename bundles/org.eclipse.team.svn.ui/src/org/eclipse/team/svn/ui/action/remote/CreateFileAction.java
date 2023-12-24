@@ -35,26 +35,27 @@ import org.eclipse.team.svn.ui.panel.remote.CreateFilePanel;
 public class CreateFileAction extends AbstractRepositoryTeamAction {
 
 	public CreateFileAction() {
-		super();
 	}
 
+	@Override
 	public void runImpl(IAction action) {
-		IRepositoryResource resource = this.getSelectedRepositoryResources()[0];
+		IRepositoryResource resource = getSelectedRepositoryResources()[0];
 		CreateFilePanel panel = new CreateFilePanel(resource.getUrl());
-		DefaultDialog dialog = new DefaultDialog(this.getShell(), panel);
+		DefaultDialog dialog = new DefaultDialog(getShell(), panel);
 		if (dialog.open() == 0) {
 			CreateFileOperation mainOp = new CreateFileOperation(resource, panel.getLocation(), panel.getMessage(),
 					panel.getFileNames());
 			CompositeOperation op = new CompositeOperation(mainOp.getId(), mainOp.getMessagesClass());
 			op.add(mainOp);
-			op.add(new RefreshRemoteResourcesOperation(this.getSelectedRepositoryResources()));
+			op.add(new RefreshRemoteResourcesOperation(getSelectedRepositoryResources()));
 			op.add(new SetRevisionAuthorNameOperation(mainOp, Options.FORCE), new IActionOperation[] { mainOp });
-			this.runScheduled(op);
+			runScheduled(op);
 		}
 	}
 
+	@Override
 	public boolean isEnabled() {
-		IRepositoryResource[] resources = this.getSelectedRepositoryResources();
+		IRepositoryResource[] resources = getSelectedRepositoryResources();
 		return resources.length == 1 && resources[0].getSelectedRevision().getKind() == Kind.HEAD;
 	}
 

@@ -61,7 +61,7 @@ public class SVNRepositoryNotification {
 			throw new IllegalArgumentException("Invalid node action kind: " + id); //$NON-NLS-1$
 		}
 
-		private NodeAction(int id) {
+		NodeAction(int id) {
 			this.id = id;
 		}
 	}
@@ -191,7 +191,7 @@ public class SVNRepositoryNotification {
 			throw new IllegalArgumentException("Invalid action kind: " + id); //$NON-NLS-1$
 		}
 
-		private Action(int id) {
+		Action(int id) {
 			this.id = id;
 		}
 	}

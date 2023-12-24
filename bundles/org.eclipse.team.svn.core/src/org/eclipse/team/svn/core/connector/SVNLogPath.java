@@ -53,7 +53,7 @@ public class SVNLogPath {
 			throw new IllegalArgumentException("Invalid change kind: " + id); //$NON-NLS-1$
 		}
 
-		private ChangeType(char id) {
+		ChangeType(char id) {
 			this.id = id;
 		}
 	}
@@ -110,8 +110,9 @@ public class SVNLogPath {
 		this.propertiesWereModified = propertiesWereModified;
 	}
 
+	@Override
 	public String toString() {
-		return String.valueOf(this.action) + ":" + this.path; //$NON-NLS-1$
+		return String.valueOf(action) + ":" + path; //$NON-NLS-1$
 	}
 
 }

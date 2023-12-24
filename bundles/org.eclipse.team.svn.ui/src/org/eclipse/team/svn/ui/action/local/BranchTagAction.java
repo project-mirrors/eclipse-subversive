@@ -72,12 +72,13 @@ public class BranchTagAction extends AbstractNonRecursiveTeamAction {
 		this.actionType = actionType;
 	}
 
+	@Override
 	public void runImpl(IAction action) {
 		IResource[] resources = this.getSelectedResources(IStateFilter.SF_EXCLUDE_DELETED);
 
-		IActionOperation op = BranchTagAction.getBranchTagOperation(this.getShell(), this.actionType, resources);
+		IActionOperation op = BranchTagAction.getBranchTagOperation(getShell(), actionType, resources);
 		if (op != null) {
-			this.runScheduled(op);
+			runScheduled(op);
 		}
 	}
 
@@ -96,7 +97,7 @@ public class BranchTagAction extends AbstractNonRecursiveTeamAction {
 			return null;
 		}
 
-		Set<String> nodeNames = new HashSet<String>();
+		Set<String> nodeNames = new HashSet<>();
 		boolean isStructureEnabled = remoteResources[0].getRepositoryLocation().isStructureEnabled()
 				&& SVNTeamPreferences.getRepositoryBoolean(SVNTeamUIPlugin.instance().getPreferenceStore(),
 						SVNTeamPreferences.BRANCH_TAG_CONSIDER_STRUCTURE_NAME);
@@ -132,7 +133,7 @@ public class BranchTagAction extends AbstractNonRecursiveTeamAction {
 				 * For more details, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=246268
 				 */
 				boolean isSingleProjectLayout = remoteResources[0] instanceof IRepositoryRoot
-						&& ((IRepositoryRoot) (remoteResources[0])).getKind() == IRepositoryRoot.KIND_TRUNK
+						&& ((IRepositoryRoot) remoteResources[0]).getKind() == IRepositoryRoot.KIND_TRUNK
 						|| org.eclipse.team.svn.ui.action.remote.BranchTagAction
 								.isSingleProjectLayout(remoteResources[0]);
 				forceCreate &= !isSingleProjectLayout;
@@ -147,17 +148,18 @@ public class BranchTagAction extends AbstractNonRecursiveTeamAction {
 					resourcesWithSpecifiedRevision[i].setSelectedRevision(panel.getRevisionForRemoteResources());
 					resourcesWithSpecifiedRevision[i].setPegRevision(remoteResources[i].getPegRevision());
 				}
-				mainOp = new PreparedBranchTagOperation((actionType == BRANCH_ACTION ? "Branch" : "Tag"),
+				mainOp = new PreparedBranchTagOperation(actionType == BRANCH_ACTION ? "Branch" : "Tag",
 						resourcesWithSpecifiedRevision, destination, panel.getMessage(), forceCreate);
 			} else {
-				mainOp = new PreparedBranchTagOperation((actionType == BRANCH_ACTION ? "Branch" : "Tag"), resources,
+				mainOp = new PreparedBranchTagOperation(actionType == BRANCH_ACTION ? "Branch" : "Tag", resources,
 						remoteResources, destination, panel.getMessage(), forceCreate);
 			}
 			switch (creationMode) {
 				case SVNTeamPreferences.CREATION_MODE_CHECKREVISION: {
-					final boolean notInSync[] = new boolean[] { false };
+					final boolean notInSync[] = { false };
 					boolean cancelled = UIMonitorUtility.doTaskNowDefault(
 							new AbstractActionOperation("Operation_CheckIfWCInSync", SVNUIMessages.class) { //$NON-NLS-1$
+								@Override
 								protected void runImpl(IProgressMonitor monitor) throws Exception {
 									if (!FilterManager.instance()
 											.checkForResourcesPresenceRecursive(resources,
@@ -255,10 +257,12 @@ public class BranchTagAction extends AbstractNonRecursiveTeamAction {
 		return null;
 	}
 
+	@Override
 	public boolean isEnabled() {
-		return this.checkForResourcesPresence(IStateFilter.SF_EXCLUDE_DELETED);
+		return checkForResourcesPresence(IStateFilter.SF_EXCLUDE_DELETED);
 	}
 
+	@Override
 	protected boolean needsToSaveDirtyEditors() {
 		return true;
 	}

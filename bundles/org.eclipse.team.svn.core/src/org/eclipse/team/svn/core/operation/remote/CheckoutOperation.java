@@ -46,9 +46,9 @@ public class CheckoutOperation extends AbstractActionOperation implements IResou
 			SVNDepth recureDepth, boolean ignoreExternals) {
 		super("Operation_CheckOut", SVNMessages.class); //$NON-NLS-1$
 
-		ArrayList<IProject> projects = new ArrayList<IProject>();
-		ArrayList<CheckoutAsOperation> operations = new ArrayList<CheckoutAsOperation>();
-		ArrayList<ISchedulingRule> rules = new ArrayList<ISchedulingRule>();
+		ArrayList<IProject> projects = new ArrayList<>();
+		ArrayList<CheckoutAsOperation> operations = new ArrayList<>();
+		ArrayList<ISchedulingRule> rules = new ArrayList<>();
 		for (Map.Entry<String, IRepositoryResource> entry : checkoutMap.entrySet()) {
 			CheckoutAsOperation coOp = CheckoutOperation.getCheckoutAsOperation(entry.getKey(), entry.getValue(),
 					respectHierarchy, location, recureDepth, ignoreExternals);
@@ -56,29 +56,33 @@ public class CheckoutOperation extends AbstractActionOperation implements IResou
 			projects.add(coOp.getProject());
 			rules.add(coOp.getSchedulingRule());
 		}
-		this.rule = new MultiRule(rules.toArray(new ISchedulingRule[rules.size()]));
+		rule = new MultiRule(rules.toArray(new ISchedulingRule[rules.size()]));
 		this.projects = projects.toArray(new IProject[projects.size()]);
 		this.operations = operations.toArray(new CheckoutAsOperation[operations.size()]);
 	}
 
+	@Override
 	public int getOperationWeight() {
 		return 19;
 	}
 
+	@Override
 	public IResource[] getResources() {
-		return this.projects;
+		return projects;
 	}
 
+	@Override
 	public ISchedulingRule getSchedulingRule() {
-		return this.rule;
+		return rule;
 	}
 
+	@Override
 	protected void runImpl(IProgressMonitor monitor) throws Exception {
-		for (int i = 0; i < this.operations.length && !monitor.isCanceled(); i++) {
-			this.operations[i].setConsoleStream(this.getConsoleStream());
-			ProgressMonitorUtility.doTask(this.operations[i], monitor,
-					IActionOperation.DEFAULT_WEIGHT * this.projects.length, IActionOperation.DEFAULT_WEIGHT);
-			this.reportStatus(this.operations[i].getStatus());
+		for (int i = 0; i < operations.length && !monitor.isCanceled(); i++) {
+			operations[i].setConsoleStream(getConsoleStream());
+			ProgressMonitorUtility.doTask(operations[i], monitor, IActionOperation.DEFAULT_WEIGHT * projects.length,
+					IActionOperation.DEFAULT_WEIGHT);
+			this.reportStatus(operations[i].getStatus());
 		}
 	}
 

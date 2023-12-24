@@ -41,8 +41,9 @@ public class CompareWithLatestRevisionPaneAction extends AbstractSynchronizeMode
 		super(text, configuration);
 	}
 
+	@Override
 	protected IActionOperation getOperation(ISynchronizePageConfiguration configuration, IDiffElement[] elements) {
-		IResource resource = this.getAllSelectedResources()[0];
+		IResource resource = getAllSelectedResources()[0];
 		ILocalResource local = SVNRemoteStorage.instance().asLocalResource(resource);
 		if (!IStateFilter.SF_INTERNAL_INVALID.accept(local)) {
 			IRepositoryResource remote = local.isCopied()
@@ -55,10 +56,11 @@ public class CompareWithLatestRevisionPaneAction extends AbstractSynchronizeMode
 		return null;
 	}
 
+	@Override
 	protected boolean updateSelection(IStructuredSelection selection) {
 		if (super.updateSelection(selection)) {
 			if (selection.size() == 1) {
-				IResource[] selectedResources = this.getAllSelectedResources();
+				IResource[] selectedResources = getAllSelectedResources();
 				return (CoreExtensionsManager.instance()
 						.getSVNConnectorFactory()
 						.getSVNAPIVersion() >= ISVNConnectorFactory.APICompatibility.SVNAPI_1_5_x

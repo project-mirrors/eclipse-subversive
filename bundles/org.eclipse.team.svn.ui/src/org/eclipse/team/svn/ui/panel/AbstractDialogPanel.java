@@ -20,6 +20,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.team.svn.core.BaseMessages;
 import org.eclipse.team.svn.core.resource.IRepositoryResource;
 import org.eclipse.team.svn.core.utility.FileUtility;
 import org.eclipse.team.svn.ui.SVNTeamUIPlugin;
@@ -57,104 +58,123 @@ public abstract class AbstractDialogPanel implements IDialogPanel, IValidationMa
 
 	public AbstractDialogPanel(String[] buttonNames) {
 		this.buttonNames = buttonNames;
-		this.changeListener = new VerificationKeyListener();
-		this.parent = null;
+		changeListener = new VerificationKeyListener();
+		parent = null;
 	}
 
+	@Override
 	public void initPanel(IDialogManager manager) {
 		this.manager = manager;
 	}
 
+	@Override
 	public void postInit() {
-		this.validateContent();
-		this.setMessage(IDialogManager.LEVEL_OK, null);
+		validateContent();
+		setMessage(IDialogManager.LEVEL_OK, null);
 	}
 
+	@Override
 	public void addListeners() {
-		this.changeListener.addListeners();
+		changeListener.addListeners();
 	}
 
+	@Override
 	public void dispose() {
-		this.detachAll();
+		detachAll();
 	}
 
+	@Override
 	public String getDialogTitle() {
-		return this.dialogTitle;
+		return dialogTitle;
 	}
 
+	@Override
 	public String getDialogDescription() {
-		return this.dialogDescription;
+		return dialogDescription;
 	}
 
+	@Override
 	public String getDefaultMessage() {
-		return this.defaultMessage;
+		return defaultMessage;
 	}
 
+	@Override
 	public String getImagePath() {
-		return this.imagePath;
+		return imagePath;
 	}
 
 	protected String getDialogID() {
 		return this.getClass().getName();
 	}
 
+	@Override
 	public final Point getPrefferedSize() {
 		IPreferenceStore store = SVNTeamUIPlugin.instance().getPreferenceStore();
-		int width = SVNTeamPreferences.getDialogInt(store, this.getDialogID() + ".width"); //$NON-NLS-1$
-		int height = SVNTeamPreferences.getDialogInt(store, this.getDialogID() + ".height"); //$NON-NLS-1$
-		Point prefSize = this.getPrefferedSizeImpl();
+		int width = SVNTeamPreferences.getDialogInt(store, getDialogID() + ".width"); //$NON-NLS-1$
+		int height = SVNTeamPreferences.getDialogInt(store, getDialogID() + ".height"); //$NON-NLS-1$
+		Point prefSize = getPrefferedSizeImpl();
 		width = Math.max(width, prefSize.x);
 		height = Math.max(height, prefSize.y);
 		return new Point(width, height);
 	}
 
+	@Override
 	public String[] getButtonNames() {
-		return this.buttonNames;
+		return buttonNames;
 	}
 
+	@Override
 	public String getHelpId() {
 		return null;
 	}
 
+	@Override
 	public final void createControls(Composite parent) {
 		this.parent = parent;
-		this.createControlsImpl(parent);
+		createControlsImpl(parent);
 	}
 
+	@Override
 	public void buttonPressed(int idx) {
 		if (idx == 0) {
-			this.saveChanges();
+			saveChanges();
 		} else {
-			this.cancelChanges();
+			cancelChanges();
 		}
 	}
 
+	@Override
 	public boolean isFilledRight() {
-		return this.changeListener.isFilledRight();
+		return changeListener.isFilledRight();
 	}
 
+	@Override
 	public void attachTo(Control cmp, AbstractVerifier verifier) {
-		this.changeListener.attachTo(cmp, verifier);
+		changeListener.attachTo(cmp, verifier);
 	}
 
+	@Override
 	public void detachFrom(Control cmp) {
-		this.changeListener.detachFrom(cmp);
+		changeListener.detachFrom(cmp);
 	}
 
+	@Override
 	public void detachAll() {
-		this.changeListener.detachAll();
+		changeListener.detachAll();
 	}
 
+	@Override
 	public void validateContent() {
-		this.changeListener.validateContent();
+		changeListener.validateContent();
 	}
 
+	@Override
 	public boolean validateControl(Control cmp) {
-		return this.changeListener.validateControl(cmp);
+		return changeListener.validateControl(cmp);
 	}
 
 	protected void setMessage(int level, String message) {
-		this.manager.setMessage(level, message);
+		manager.setMessage(level, message);
 	}
 
 	protected void setButtonsEnabled(boolean enabled) {
@@ -163,19 +183,19 @@ public abstract class AbstractDialogPanel implements IDialogPanel, IValidationMa
 
 	protected void retainSize() {
 		IPreferenceStore store = SVNTeamUIPlugin.instance().getPreferenceStore();
-		Point size = this.parent.getSize();
-		SVNTeamPreferences.setDialogInt(store, this.getDialogID() + ".width", size.x); //$NON-NLS-1$
-		SVNTeamPreferences.setDialogInt(store, this.getDialogID() + ".height", size.y); //$NON-NLS-1$
+		Point size = parent.getSize();
+		SVNTeamPreferences.setDialogInt(store, getDialogID() + ".width", size.x); //$NON-NLS-1$
+		SVNTeamPreferences.setDialogInt(store, getDialogID() + ".height", size.y); //$NON-NLS-1$
 	}
 
 	protected final void saveChanges() {
-		this.retainSize();
-		this.saveChangesImpl();
+		retainSize();
+		saveChangesImpl();
 	}
 
 	protected final void cancelChanges() {
-		this.retainSize();
-		this.cancelChangesImpl();
+		retainSize();
+		cancelChangesImpl();
 	}
 
 	protected Point getPrefferedSizeImpl() {
@@ -192,9 +212,10 @@ public abstract class AbstractDialogPanel implements IDialogPanel, IValidationMa
 	 * return false if dialog should not be closed
 	 * override if needed
 	 */
+	@Override
 	public boolean canClose() {
 		return true;
-	};
+	}
 
 	public static String makeToBeOperatedMessage(IRepositoryResource[] resources) {
 		String message;
@@ -205,32 +226,34 @@ public abstract class AbstractDialogPanel implements IDialogPanel, IValidationMa
 		} else {
 			message = SVNUIMessages.RepositoryTreePanel_Message_Multi;
 		}
-		return SVNUIMessages.format(message, new String[] { FileUtility.getNamesListAsString(resources) });
+		return BaseMessages.format(message, new String[] { FileUtility.getNamesListAsString(resources) });
 	}
 
 	protected class VerificationKeyListener extends AbstractVerificationKeyListener {
 		public VerificationKeyListener() {
-			super();
 		}
 
+		@Override
 		public void hasError(String errorReason) {
-			AbstractDialogPanel.this.setMessage(IDialogManager.LEVEL_ERROR, errorReason);
-			this.handleButtons();
+			setMessage(IDialogManager.LEVEL_ERROR, errorReason);
+			handleButtons();
 		}
 
+		@Override
 		public void hasWarning(String warningReason) {
-			AbstractDialogPanel.this.setMessage(IDialogManager.LEVEL_WARNING, warningReason);
-			this.handleButtons();
+			setMessage(IDialogManager.LEVEL_WARNING, warningReason);
+			handleButtons();
 		}
 
+		@Override
 		public void hasNoError() {
-			AbstractDialogPanel.this.setMessage(IDialogManager.LEVEL_OK, null);
-			this.handleButtons();
+			setMessage(IDialogManager.LEVEL_OK, null);
+			handleButtons();
 		}
 
 		protected void handleButtons() {
-			AbstractDialogPanel.this.manager.setButtonEnabled(0, this.isFilledRight());
-			AbstractDialogPanel.this.setButtonsEnabled(this.isFilledRight());
+			manager.setButtonEnabled(0, isFilledRight());
+			setButtonsEnabled(isFilledRight());
 		}
 
 	}

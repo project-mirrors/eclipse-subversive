@@ -25,6 +25,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.team.svn.core.BaseMessages;
 import org.eclipse.team.svn.core.utility.FileUtility;
 import org.eclipse.team.svn.ui.SVNUIMessages;
 
@@ -39,22 +40,24 @@ public class DisconnectDialog extends MessageDialog {
 
 	public DisconnectDialog(Shell parentShell, IProject[] projects) {
 		super(parentShell, SVNUIMessages.DisconnectDialog_Title, null,
-				SVNUIMessages.format(SVNUIMessages.DisconnectDialog_Message,
+				BaseMessages.format(SVNUIMessages.DisconnectDialog_Message,
 						new String[] { FileUtility.getNamesListAsString(projects) }),
 				MessageDialog.QUESTION, new String[] { IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL }, 0);
 
-		this.dropSVNFolders = false;
+		dropSVNFolders = false;
 	}
 
+	@Override
 	protected Control createCustomArea(Composite parent) {
 		Composite composite = new Composite(parent, SWT.NONE);
 		composite.setLayout(new GridLayout());
 
 		Button dropSVNFoldersButton = new Button(composite, SWT.RADIO);
 		dropSVNFoldersButton.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				Button button = (Button) e.widget;
-				DisconnectDialog.this.dropSVNFolders = button.getSelection();
+				dropSVNFolders = button.getSelection();
 			}
 		});
 
@@ -74,7 +77,7 @@ public class DisconnectDialog extends MessageDialog {
 	}
 
 	public boolean dropSVNFolders() {
-		return this.dropSVNFolders;
+		return dropSVNFolders;
 	}
 
 }

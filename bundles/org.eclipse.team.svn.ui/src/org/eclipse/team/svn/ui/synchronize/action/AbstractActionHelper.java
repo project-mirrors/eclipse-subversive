@@ -49,10 +49,10 @@ public abstract class AbstractActionHelper {
 
 	public IResourceSelector getSyncInfoSelector() {
 		IResourceSelector selector = null;
-		if (this.action instanceof AbstractSynchronizeLogicalModelAction) {
-			selector = ((AbstractSynchronizeLogicalModelAction) this.action).getSyncInfoSelector();
-		} else if (this.action instanceof AbstractSynchronizeModelAction) {
-			selector = ((AbstractSynchronizeModelAction) this.action).getSyncInfoSelector();
+		if (action instanceof AbstractSynchronizeLogicalModelAction) {
+			selector = ((AbstractSynchronizeLogicalModelAction) action).getSyncInfoSelector();
+		} else if (action instanceof AbstractSynchronizeModelAction) {
+			selector = ((AbstractSynchronizeModelAction) action).getSyncInfoSelector();
 		}
 		return selector;
 	}
@@ -69,40 +69,40 @@ public abstract class AbstractActionHelper {
 
 	public AbstractSVNSyncInfo[] getSVNSyncInfos() {
 		AbstractSVNSyncInfo[] syncInfos = null;
-		if (this.action instanceof AbstractSynchronizeLogicalModelAction) {
-			syncInfos = ((AbstractSynchronizeLogicalModelAction) this.action).getSVNSyncInfos();
-		} else if (this.action instanceof AbstractSynchronizeModelAction) {
-			syncInfos = ((AbstractSynchronizeModelAction) this.action).getSVNSyncInfos();
+		if (action instanceof AbstractSynchronizeLogicalModelAction) {
+			syncInfos = ((AbstractSynchronizeLogicalModelAction) action).getSVNSyncInfos();
+		} else if (action instanceof AbstractSynchronizeModelAction) {
+			syncInfos = ((AbstractSynchronizeModelAction) action).getSVNSyncInfos();
 		}
 		return syncInfos == null ? new AbstractSVNSyncInfo[0] : syncInfos;
 	}
 
 	public IResource getSelectedResource() {
 		IResource resource = null;
-		if (this.action instanceof AbstractSynchronizeLogicalModelAction) {
-			resource = ((AbstractSynchronizeLogicalModelAction) this.action).getSelectedResource();
-		} else if (this.action instanceof AbstractSynchronizeModelAction) {
-			resource = ((AbstractSynchronizeModelAction) this.action).getSelectedResource();
+		if (action instanceof AbstractSynchronizeLogicalModelAction) {
+			resource = ((AbstractSynchronizeLogicalModelAction) action).getSelectedResource();
+		} else if (action instanceof AbstractSynchronizeModelAction) {
+			resource = ((AbstractSynchronizeModelAction) action).getSelectedResource();
 		}
 		return resource;
 	}
 
 	public IResource[] getAllSelectedResources() {
 		IResource[] resources = null;
-		if (this.action instanceof AbstractSynchronizeLogicalModelAction) {
-			resources = ((AbstractSynchronizeLogicalModelAction) this.action).getAllSelectedResources();
-		} else if (this.action instanceof AbstractSynchronizeModelAction) {
-			resources = ((AbstractSynchronizeModelAction) this.action).getAllSelectedResources();
+		if (action instanceof AbstractSynchronizeLogicalModelAction) {
+			resources = ((AbstractSynchronizeLogicalModelAction) action).getAllSelectedResources();
+		} else if (action instanceof AbstractSynchronizeModelAction) {
+			resources = ((AbstractSynchronizeModelAction) action).getAllSelectedResources();
 		}
 		return resources;
 	}
 
 	public AbstractSVNSyncInfo getSelectedSVNSyncInfo() {
 		AbstractSVNSyncInfo syncInfo = null;
-		if (this.action instanceof AbstractSynchronizeLogicalModelAction) {
-			syncInfo = ((AbstractSynchronizeLogicalModelAction) this.action).getSelectedSVNSyncInfo();
-		} else if (this.action instanceof AbstractSynchronizeModelAction) {
-			syncInfo = ((AbstractSynchronizeModelAction) this.action).getSelectedSVNSyncInfo();
+		if (action instanceof AbstractSynchronizeLogicalModelAction) {
+			syncInfo = ((AbstractSynchronizeLogicalModelAction) action).getSelectedSVNSyncInfo();
+		} else if (action instanceof AbstractSynchronizeModelAction) {
+			syncInfo = ((AbstractSynchronizeModelAction) action).getSelectedSVNSyncInfo();
 		}
 		return syncInfo;
 	}

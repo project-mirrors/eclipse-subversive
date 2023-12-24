@@ -30,5 +30,5 @@ public interface ISVNMergeStatusCallback {
 	 * @param status
 	 *            the {@link SVNMergeStatus} entry instance
 	 */
-	public void next(SVNMergeStatus status);
+	void next(SVNMergeStatus status);
 }

@@ -40,15 +40,14 @@ public class TestPlugin extends AbstractUIPlugin {
 	private SVNRemoteStorage remoteStorage;
 
 	public TestPlugin() {
-		super();
 	}
 
 	public String getLocation() {
-		return this.location;
+		return location;
 	}
 
 	public ResourceBundle getResourceBundle() {
-		return Platform.getResourceBundle(this.getBundle());
+		return Platform.getResourceBundle(getBundle());
 	}
 
 	@Override
@@ -56,14 +55,14 @@ public class TestPlugin extends AbstractUIPlugin {
 		super.start(context);
 
 		URL url = FileLocator.toFileURL(context.getBundle().getEntry("/"));
-		this.location = url.getFile();
-		if (this.location.startsWith("/")) {
+		location = url.getFile();
+		if (location.startsWith("/")) {
 //			this.location = this.location.substring(1);// NIC review
 		}
-		this.remoteStorage = SVNRemoteStorage.instance();
+		remoteStorage = SVNRemoteStorage.instance();
 		HashMap preferences = new HashMap();
-		preferences.put(ISVNStorage.PREF_STATE_INFO_LOCATION, this.getStateLocation());
-		this.remoteStorage.initialize(preferences);
+		preferences.put(ISVNStorage.PREF_STATE_INFO_LOCATION, getStateLocation());
+		remoteStorage.initialize(preferences);
 
 		SVNTeamPlugin.instance().setOptionProvider(null);
 		CoreExtensionsManager.instance().setResolutionHelpersDisabled(true);

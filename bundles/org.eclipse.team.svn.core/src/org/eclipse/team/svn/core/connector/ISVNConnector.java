@@ -33,12 +33,12 @@ import org.eclipse.team.svn.core.connector.configuration.ISVNConfigurationEventH
  * @author Alexander Gurov
  */
 public interface ISVNConnector {
-	public static final String[] EMPTY_LOG_ENTRY_PROPS = new String[] {};
+	String[] EMPTY_LOG_ENTRY_PROPS = {};
 
-	public static final String[] DEFAULT_LOG_ENTRY_PROPS = new String[] { SVNProperty.BuiltIn.REV_LOG,
-			SVNProperty.BuiltIn.REV_DATE, SVNProperty.BuiltIn.REV_AUTHOR };
+	String[] DEFAULT_LOG_ENTRY_PROPS = { SVNProperty.BuiltIn.REV_LOG, SVNProperty.BuiltIn.REV_DATE,
+			SVNProperty.BuiltIn.REV_AUTHOR };
 
-	public static final Map<String, List<SVNExternalReference>> NO_EXTERNALS_TO_PIN = new HashMap<String, List<SVNExternalReference>>();
+	Map<String, List<SVNExternalReference>> NO_EXTERNALS_TO_PIN = new HashMap<>();
 
 	/**
 	 * All available SVN commands options
@@ -278,10 +278,9 @@ public interface ISVNConnector {
 		public static final long INCLUDE_UNVERSIONED = 0x100000000000L;
 
 		public static String asCommandLine(long options) {
-			StringBuffer retVal = new StringBuffer();
-			for (int i = 0; i < Options.optionNames.length; i++) {
+			StringBuilder retVal = new StringBuilder();
+			for (String option : Options.optionNames) {
 				if ((options & 1l) != 0) {
-					String option = Options.optionNames[i];
 					if (retVal.indexOf(option) == -1) {
 						retVal.append(option);
 					}
@@ -335,10 +334,10 @@ public interface ISVNConnector {
 		public static final long GIT_FORMAT = 0x00000010;
 
 		public static String asCommandLine(long options) {
-			StringBuffer retVal = new StringBuffer();
-			for (int i = 0; i < DiffOptions.optionNames.length; i++) {
+			StringBuilder retVal = new StringBuilder();
+			for (String optionName : DiffOptions.optionNames) {
 				if ((options & 1l) != 0) {
-					retVal.append(DiffOptions.optionNames[i]);
+					retVal.append(optionName);
 				}
 				options >>= 1;
 			}
@@ -447,14 +446,14 @@ public interface ISVNConnector {
 	 * 
 	 * @param listener
 	 */
-	public void addCallListener(ISVNCallListener listener);
+	void addCallListener(ISVNCallListener listener);
 
 	/**
 	 * Removes and SVN calls listener.
 	 * 
 	 * @param listener
 	 */
-	public void removeCallListener(ISVNCallListener listener);
+	void removeCallListener(ISVNCallListener listener);
 
 	/**
 	 * Returns the configuration directory path.
@@ -462,7 +461,7 @@ public interface ISVNConnector {
 	 * @return
 	 * @throws SVNConnectorException
 	 */
-	public String getConfigDirectory() throws SVNConnectorException;
+	String getConfigDirectory() throws SVNConnectorException;
 
 	/**
 	 * Sets the configuration directory path.
@@ -470,77 +469,77 @@ public interface ISVNConnector {
 	 * @param configDir
 	 * @throws SVNConnectorException
 	 */
-	public void setConfigDirectory(String configDir) throws SVNConnectorException;
+	void setConfigDirectory(String configDir) throws SVNConnectorException;
 
 	/**
 	 * Set an event handler that will be called every time the configuration is loaded by this client object.
 	 * 
 	 * @since 1.9
 	 */
-	public void setConfigurationEventHandler(ISVNConfigurationEventHandler configHandler) throws SVNConnectorException;
+	void setConfigurationEventHandler(ISVNConfigurationEventHandler configHandler) throws SVNConnectorException;
 
 	/**
 	 * Returns a reference to the installed configuration event handler. The returned value may be <code>null</code>.
 	 * 
 	 * @since 1.9
 	 */
-	public ISVNConfigurationEventHandler getConfigurationEventHandler() throws SVNConnectorException;
+	ISVNConfigurationEventHandler getConfigurationEventHandler() throws SVNConnectorException;
 
 	/**
 	 * Sets a username to access a repository.
 	 * 
 	 * @param username
 	 */
-	public void setUsername(String username);
+	void setUsername(String username);
 
 	/**
 	 * Sets a password to access a repository.
 	 * 
 	 * @param password
 	 */
-	public void setPassword(String password);
+	void setPassword(String password);
 
 	/**
 	 * Sets a credentials prompt which will be asked if the provided authentication data weren't accepted by the server.
 	 * 
 	 * @param prompt
 	 */
-	public void setPrompt(ISVNCredentialsPrompt prompt);
+	void setPrompt(ISVNCredentialsPrompt prompt);
 
 	/**
 	 * Returns installed credentials prompt
 	 * 
 	 * @return
 	 */
-	public ISVNCredentialsPrompt getPrompt();
+	ISVNCredentialsPrompt getPrompt();
 
 	/**
 	 * Installs a notification callback.
 	 * 
 	 * @param notify
 	 */
-	public void setNotificationCallback(ISVNNotificationCallback notify);
+	void setNotificationCallback(ISVNNotificationCallback notify);
 
 	/**
 	 * Returns the installed notification callback.
 	 * 
 	 * @return
 	 */
-	public ISVNNotificationCallback getNotificationCallback();
+	ISVNNotificationCallback getNotificationCallback();
 
 	/**
 	 * Installs a conflict resolver callback.
 	 * 
 	 * @param listener
 	 */
-	public void setConflictResolver(ISVNConflictResolutionCallback listener);
+	void setConflictResolver(ISVNConflictResolutionCallback listener);
 
 	/**
 	 * Returns the installed conflicts resolver callback.
 	 * 
 	 * @return
 	 */
-	public ISVNConflictResolutionCallback getConflictResolver();
+	ISVNConflictResolutionCallback getConflictResolver();
 
 	/**
 	 * Performs checkout from SVN into the local working copy.
@@ -552,13 +551,13 @@ public interface ISVNConnector {
 	 * @param depth
 	 *            checkout depth
 	 * @param options
-	 *            @see CommandMasks
+	 * @see CommandMasks
 	 * @param monitor
 	 *            operation progress monitor
 	 * @return working copy revision
 	 * @throws SVNConnectorException
 	 */
-	public long checkout(SVNEntryRevisionReference fromReference, String destPath, SVNDepth depth, long options,
+	long checkout(SVNEntryRevisionReference fromReference, String destPath, SVNDepth depth, long options,
 			ISVNProgressMonitor monitor) throws SVNConnectorException;
 
 	/**
@@ -569,13 +568,12 @@ public interface ISVNConnector {
 	 * @param comment
 	 *            lock reason or null if none
 	 * @param options
-	 *            @see CommandMasks
+	 * @see CommandMasks
 	 * @param monitor
 	 *            operation progress monitor
 	 * @throws SVNConnectorException
 	 */
-	public void lock(String[] path, String comment, long options, ISVNProgressMonitor monitor)
-			throws SVNConnectorException;
+	void lock(String[] path, String comment, long options, ISVNProgressMonitor monitor) throws SVNConnectorException;
 
 	/**
 	 * Unlocks the specified resource.
@@ -583,12 +581,12 @@ public interface ISVNConnector {
 	 * @param path
 	 *            the resource to be unlocked
 	 * @param options
-	 *            @see CommandMasks
+	 * @see CommandMasks
 	 * @param monitor
 	 *            operation progress monitor
 	 * @throws SVNConnectorException
 	 */
-	public void unlock(String[] path, long options, ISVNProgressMonitor monitor) throws SVNConnectorException;
+	void unlock(String[] path, long options, ISVNProgressMonitor monitor) throws SVNConnectorException;
 
 	/**
 	 * Adds resources to the source control.
@@ -598,13 +596,12 @@ public interface ISVNConnector {
 	 * @param depth
 	 *            processing depth
 	 * @param options
-	 *            @see CommandMasks
+	 * @see CommandMasks
 	 * @param monitor
 	 *            operation progress monitor
 	 * @throws SVNConnectorException
 	 */
-	public void add(String path, SVNDepth depth, long options, ISVNProgressMonitor monitor)
-			throws SVNConnectorException;
+	void add(String path, SVNDepth depth, long options, ISVNProgressMonitor monitor) throws SVNConnectorException;
 
 	/**
 	 * Commits all the selected resources.
@@ -617,14 +614,14 @@ public interface ISVNConnector {
 	 * @param depth
 	 *            processing depth
 	 * @param options
-	 *            @see CommandMasks
+	 * @see CommandMasks
 	 * @param revProps
 	 *            revision properties to be set
 	 * @param monitor
 	 *            operation progress monitor
 	 * @throws SVNConnectorException
 	 */
-	public void commit(String[] path, String message, String[] changeLists, SVNDepth depth, long options, Map revProps,
+	void commit(String[] path, String message, String[] changeLists, SVNDepth depth, long options, Map revProps,
 			ISVNProgressMonitor monitor) throws SVNConnectorException;
 
 	/**
@@ -637,13 +634,13 @@ public interface ISVNConnector {
 	 * @param depth
 	 *            processing depth
 	 * @param options
-	 *            @see CommandMasks
+	 * @see CommandMasks
 	 * @param monitor
 	 *            operation progress monitor
 	 * @return resulting working copy revisions
 	 * @throws SVNConnectorException
 	 */
-	public long[] update(String[] path, SVNRevision revision, SVNDepth depth, long options, ISVNProgressMonitor monitor)
+	long[] update(String[] path, SVNRevision revision, SVNDepth depth, long options, ISVNProgressMonitor monitor)
 			throws SVNConnectorException;
 
 	/**
@@ -656,13 +653,13 @@ public interface ISVNConnector {
 	 * @param depth
 	 *            processing depth
 	 * @param options
-	 *            @see CommandMasks
+	 * @see CommandMasks
 	 * @param monitor
 	 *            operation progress monitor
 	 * @return resulting working copy revision
 	 * @throws SVNConnectorException
 	 */
-	public long switchTo(String path, SVNEntryRevisionReference toReference, SVNDepth depth, long options,
+	long switchTo(String path, SVNEntryRevisionReference toReference, SVNDepth depth, long options,
 			ISVNProgressMonitor monitor) throws SVNConnectorException;
 
 	/**
@@ -674,7 +671,7 @@ public interface ISVNConnector {
 	 *            processing depth
 	 * @param changeLists
 	 * @param options
-	 *            @see CommandMasks
+	 * @see CommandMasks
 	 * @param monitor
 	 *            operation progress monitor
 	 * 
@@ -682,7 +679,7 @@ public interface ISVNConnector {
 	 * 
 	 * @throws SVNConnectorException
 	 */
-	public void revert(String[] paths, SVNDepth depth, String[] changeLists, long options, ISVNProgressMonitor monitor)
+	void revert(String[] paths, SVNDepth depth, String[] changeLists, long options, ISVNProgressMonitor monitor)
 			throws SVNConnectorException;
 
 	/**
@@ -695,7 +692,7 @@ public interface ISVNConnector {
 	 * @param depth
 	 *            processing depth
 	 * @param options
-	 *            @see CommandMasks
+	 * @see CommandMasks
 	 * @param changeLists
 	 * @param callback
 	 *            the node status callback
@@ -703,8 +700,8 @@ public interface ISVNConnector {
 	 *            operation progress monitor
 	 * @throws SVNConnectorException
 	 */
-	public void status(String path, SVNDepth depth, long options, String[] changeLists,
-			ISVNEntryStatusCallback callback, ISVNProgressMonitor monitor) throws SVNConnectorException;
+	void status(String path, SVNDepth depth, long options, String[] changeLists, ISVNEntryStatusCallback callback,
+			ISVNProgressMonitor monitor) throws SVNConnectorException;
 
 	/**
 	 * Relocates the attached working copy repository from one URL to another.
@@ -721,7 +718,7 @@ public interface ISVNConnector {
 	 *            operation progress monitor
 	 * @throws SVNConnectorException
 	 */
-	public void relocate(String from, String to, String path, SVNDepth depth, ISVNProgressMonitor monitor)
+	void relocate(String from, String to, String path, SVNDepth depth, ISVNProgressMonitor monitor)
 			throws SVNConnectorException;
 
 	/**
@@ -732,13 +729,13 @@ public interface ISVNConnector {
 	 * @param monitor
 	 *            operation progress monitor
 	 * @param options
-	 *            @see CommandMasks
+	 * @see CommandMasks
 	 * 
-	 *            Behaves like the 1.9 version without <code>INCLUDE_EXTERNALS</code>, and the other flags set
+	 *      Behaves like the 1.9 version without <code>INCLUDE_EXTERNALS</code>, and the other flags set
 	 * 
 	 * @throws SVNConnectorException
 	 */
-	public void cleanup(String path, long options, ISVNProgressMonitor monitor) throws SVNConnectorException;
+	void cleanup(String path, long options, ISVNProgressMonitor monitor) throws SVNConnectorException;
 
 	/**
 	 * Merges difference between 2 sources into the working copy
@@ -759,7 +756,7 @@ public interface ISVNConnector {
 	 *            operation progress monitor
 	 * @throws SVNConnectorException
 	 */
-	public void mergeTwo(SVNEntryRevisionReference reference1, SVNEntryRevisionReference reference2, String localPath,
+	void mergeTwo(SVNEntryRevisionReference reference1, SVNEntryRevisionReference reference2, String localPath,
 			SVNDepth depth, long options, ISVNProgressMonitor monitor) throws SVNConnectorException;
 
 	/**
@@ -781,7 +778,7 @@ public interface ISVNConnector {
 	 *            operation progress monitor
 	 * @throws SVNConnectorException
 	 */
-	public void merge(SVNEntryReference reference, SVNRevisionRange[] revisions, String localPath, SVNDepth depth,
+	void merge(SVNEntryReference reference, SVNRevisionRange[] revisions, String localPath, SVNDepth depth,
 			long options, ISVNProgressMonitor monitor) throws SVNConnectorException;
 
 	/**
@@ -802,8 +799,9 @@ public interface ISVNConnector {
 	 * @throws SVNConnectorException
 	 * @deprecated Will be removed in a future release
 	 */
-	public void mergeReintegrate(SVNEntryReference reference, String localPath, long options,
-			ISVNProgressMonitor monitor) throws SVNConnectorException;
+	@Deprecated
+	void mergeReintegrate(SVNEntryReference reference, String localPath, long options, ISVNProgressMonitor monitor)
+			throws SVNConnectorException;
 
 	/**
 	 * Return merge information for the selected node revision.
@@ -815,8 +813,7 @@ public interface ISVNConnector {
 	 * @return merge information
 	 * @throws SVNConnectorException
 	 */
-	public SVNMergeInfo getMergeInfo(SVNEntryReference reference, ISVNProgressMonitor monitor)
-			throws SVNConnectorException;
+	SVNMergeInfo getMergeInfo(SVNEntryReference reference, ISVNProgressMonitor monitor) throws SVNConnectorException;
 
 	/**
 	 * Retrieve either merged or eligible-to-be-merged revisions.
@@ -841,7 +838,7 @@ public interface ISVNConnector {
 	 *            operation progress monitor
 	 * @throws SVNConnectorException
 	 */
-	public void listMergeInfoLog(LogKind logKind, SVNEntryReference reference, SVNEntryReference mergeSourceReference,
+	void listMergeInfoLog(LogKind logKind, SVNEntryReference reference, SVNEntryReference mergeSourceReference,
 			SVNRevisionRange mergeSourceRange, String[] revProps, SVNDepth depth, long options, ISVNLogEntryCallback cb,
 			ISVNProgressMonitor monitor) throws SVNConnectorException;
 
@@ -855,8 +852,7 @@ public interface ISVNConnector {
 	 * @return
 	 * @throws SVNConnectorException
 	 */
-	public String[] suggestMergeSources(SVNEntryReference reference, ISVNProgressMonitor monitor)
-			throws SVNConnectorException;
+	String[] suggestMergeSources(SVNEntryReference reference, ISVNProgressMonitor monitor) throws SVNConnectorException;
 
 	/**
 	 * Resolves the conflicted state on a WC path (or tree).
@@ -871,7 +867,7 @@ public interface ISVNConnector {
 	 *            operation progress monitor
 	 * @throws SVNConnectorException
 	 */
-	public void resolve(String path, Choice conflictResult, SVNDepth depth, ISVNProgressMonitor monitor)
+	void resolve(String path, Choice conflictResult, SVNDepth depth, ISVNProgressMonitor monitor)
 			throws SVNConnectorException;
 
 	/**
@@ -889,7 +885,7 @@ public interface ISVNConnector {
 	 *            operation progress monitor
 	 * @throws SVNConnectorException
 	 */
-	public void addToChangeList(String[] paths, String targetChangeList, SVNDepth depth, String[] filterByChangeLists,
+	void addToChangeList(String[] paths, String targetChangeList, SVNDepth depth, String[] filterByChangeLists,
 			ISVNProgressMonitor monitor) throws SVNConnectorException;
 
 	/**
@@ -905,7 +901,7 @@ public interface ISVNConnector {
 	 *            operation progress monitor
 	 * @throws SVNConnectorException
 	 */
-	public void removeFromChangeLists(String[] paths, SVNDepth depth, String[] changeLists, ISVNProgressMonitor monitor)
+	void removeFromChangeLists(String[] paths, SVNDepth depth, String[] changeLists, ISVNProgressMonitor monitor)
 			throws SVNConnectorException;
 
 	/**
@@ -923,7 +919,7 @@ public interface ISVNConnector {
 	 *            operation progress monitor
 	 * @throws SVNConnectorException
 	 */
-	public void dumpChangeLists(String[] changeLists, String rootPath, SVNDepth depth, ISVNChangeListCallback cb,
+	void dumpChangeLists(String[] changeLists, String rootPath, SVNDepth depth, ISVNChangeListCallback cb,
 			ISVNProgressMonitor monitor) throws SVNConnectorException;
 
 	/**
@@ -947,7 +943,7 @@ public interface ISVNConnector {
 	 *            operation progress monitor
 	 * @throws SVNConnectorException
 	 */
-	public void importTo(String path, String url, String message, SVNDepth depth, long options, Map revProps,
+	void importTo(String path, String url, String message, SVNDepth depth, long options, Map revProps,
 			ISVNImportFilterCallback filter, ISVNProgressMonitor monitor) throws SVNConnectorException;
 
 	/**
@@ -970,7 +966,7 @@ public interface ISVNConnector {
 	 * @return the exported revision number
 	 * @throws SVNConnectorException
 	 */
-	public long exportTo(SVNEntryRevisionReference fromReference, String destPath, String nativeEOL, SVNDepth depth,
+	long exportTo(SVNEntryRevisionReference fromReference, String destPath, String nativeEOL, SVNDepth depth,
 			long options, ISVNProgressMonitor monitor) throws SVNConnectorException;
 
 	/**
@@ -996,7 +992,7 @@ public interface ISVNConnector {
 	 *            operation progress monitor
 	 * @throws SVNConnectorException
 	 */
-	public void diffTwo(SVNEntryRevisionReference refPrev, SVNEntryRevisionReference refNext, String relativeToDir,
+	void diffTwo(SVNEntryRevisionReference refPrev, SVNEntryRevisionReference refNext, String relativeToDir,
 			String fileName, SVNDepth depth, long options, String[] changeLists, long outputOptions,
 			ISVNProgressMonitor monitor) throws SVNConnectorException;
 
@@ -1023,7 +1019,7 @@ public interface ISVNConnector {
 	 *            operation progress monitor
 	 * @throws SVNConnectorException
 	 */
-	public void diff(SVNEntryReference reference, SVNRevisionRange range, String relativeToDir, String fileName,
+	void diff(SVNEntryReference reference, SVNRevisionRange range, String relativeToDir, String fileName,
 			SVNDepth depth, long options, String[] changeLists, long outputOptions, ISVNProgressMonitor monitor)
 			throws SVNConnectorException;
 
@@ -1050,7 +1046,7 @@ public interface ISVNConnector {
 	 *            operation progress monitor
 	 * @throws SVNConnectorException
 	 */
-	public void diffTwo(SVNEntryRevisionReference refPrev, SVNEntryRevisionReference refNext, String relativeToDir,
+	void diffTwo(SVNEntryRevisionReference refPrev, SVNEntryRevisionReference refNext, String relativeToDir,
 			OutputStream stream, SVNDepth depth, long options, String[] changeLists, long outputOptions,
 			ISVNProgressMonitor monitor) throws SVNConnectorException;
 
@@ -1077,7 +1073,7 @@ public interface ISVNConnector {
 	 *            operation progress monitor
 	 * @throws SVNConnectorException
 	 */
-	public void diff(SVNEntryReference reference, SVNRevisionRange range, String relativeToDir, OutputStream stream,
+	void diff(SVNEntryReference reference, SVNRevisionRange range, String relativeToDir, OutputStream stream,
 			SVNDepth depth, long options, String[] changeLists, long outputOptions, ISVNProgressMonitor monitor)
 			throws SVNConnectorException;
 
@@ -1100,7 +1096,7 @@ public interface ISVNConnector {
 	 *            operation progress monitor
 	 * @throws SVNConnectorException
 	 */
-	public void diffStatusTwo(SVNEntryRevisionReference refPrev, SVNEntryRevisionReference refNext, SVNDepth depth,
+	void diffStatusTwo(SVNEntryRevisionReference refPrev, SVNEntryRevisionReference refNext, SVNDepth depth,
 			long options, String[] changeLists, ISVNDiffStatusCallback cb, ISVNProgressMonitor monitor)
 			throws SVNConnectorException;
 
@@ -1123,7 +1119,7 @@ public interface ISVNConnector {
 	 *            operation progress monitor
 	 * @throws SVNConnectorException
 	 */
-	public void diffStatus(SVNEntryReference reference, SVNRevisionRange range, SVNDepth depth, long options,
+	void diffStatus(SVNEntryReference reference, SVNRevisionRange range, SVNDepth depth, long options,
 			String[] changeLists, ISVNDiffStatusCallback cb, ISVNProgressMonitor monitor) throws SVNConnectorException;
 
 	/**
@@ -1146,7 +1142,7 @@ public interface ISVNConnector {
 	 *            operation progress monitor
 	 * @throws SVNConnectorException
 	 */
-	public void getInfo(SVNEntryRevisionReference reference, SVNDepth depth, long options, String[] changeLists,
+	void getInfo(SVNEntryRevisionReference reference, SVNDepth depth, long options, String[] changeLists,
 			ISVNEntryInfoCallback cb, ISVNProgressMonitor monitor) throws SVNConnectorException;
 
 	/**
@@ -1155,7 +1151,7 @@ public interface ISVNConnector {
 	 * @param reference
 	 *            file reference
 	 * @param options
-	 *            @see CommandMasks
+	 * @see CommandMasks
 	 * @param stream
 	 *            the target output stream
 	 * @param monitor
@@ -1166,7 +1162,7 @@ public interface ISVNConnector {
 	 * 
 	 * @throws SVNConnectorException
 	 */
-	public SVNProperty[] streamFileContent(SVNEntryRevisionReference reference, long options, OutputStream stream,
+	SVNProperty[] streamFileContent(SVNEntryRevisionReference reference, long options, OutputStream stream,
 			ISVNProgressMonitor monitor) throws SVNConnectorException;
 
 	/**
@@ -1184,7 +1180,7 @@ public interface ISVNConnector {
 	 *            operation progress monitor
 	 * @throws SVNConnectorException
 	 */
-	public void mkdir(String[] path, String message, long options, Map revProps, ISVNProgressMonitor monitor)
+	void mkdir(String[] path, String message, long options, Map revProps, ISVNProgressMonitor monitor)
 			throws SVNConnectorException;
 
 	/**
@@ -1200,7 +1196,7 @@ public interface ISVNConnector {
 	 *            operation progress monitor
 	 * @throws SVNConnectorException
 	 */
-	public void moveLocal(String[] srcPaths, String dstPath, long options, ISVNProgressMonitor monitor)
+	void moveLocal(String[] srcPaths, String dstPath, long options, ISVNProgressMonitor monitor)
 			throws SVNConnectorException;
 
 	/**
@@ -1220,7 +1216,7 @@ public interface ISVNConnector {
 	 *            operation progress monitor
 	 * @throws SVNConnectorException
 	 */
-	public void moveRemote(String[] srcPaths, String dstPath, String message, long options, Map revProps,
+	void moveRemote(String[] srcPaths, String dstPath, String message, long options, Map revProps,
 			ISVNProgressMonitor monitor) throws SVNConnectorException;
 
 	/**
@@ -1243,7 +1239,7 @@ public interface ISVNConnector {
 	 *            operation progress monitor
 	 * @throws SVNConnectorException
 	 */
-	public void copyLocal(SVNEntryRevisionReference[] srcPaths, String destPath, long options,
+	void copyLocal(SVNEntryRevisionReference[] srcPaths, String destPath, long options,
 			Map<String, List<SVNExternalReference>> externalsToPin, ISVNProgressMonitor monitor)
 			throws SVNConnectorException;
 
@@ -1271,8 +1267,8 @@ public interface ISVNConnector {
 	 *            operation progress monitor
 	 * @throws SVNConnectorException
 	 */
-	public void copyRemote(SVNEntryRevisionReference[] srcPaths, String destPath, String message, long options,
-			Map revProps, Map<String, List<SVNExternalReference>> externalsToPin, ISVNProgressMonitor monitor)
+	void copyRemote(SVNEntryRevisionReference[] srcPaths, String destPath, String message, long options, Map revProps,
+			Map<String, List<SVNExternalReference>> externalsToPin, ISVNProgressMonitor monitor)
 			throws SVNConnectorException;
 
 	/**
@@ -1286,7 +1282,7 @@ public interface ISVNConnector {
 	 *            operation progress monitor
 	 * @throws SVNConnectorException
 	 */
-	public void removeLocal(String[] path, long options, ISVNProgressMonitor monitor) throws SVNConnectorException;
+	void removeLocal(String[] path, long options, ISVNProgressMonitor monitor) throws SVNConnectorException;
 
 	/**
 	 * Removes resources from the repository.
@@ -1303,7 +1299,7 @@ public interface ISVNConnector {
 	 *            operation progress monitor
 	 * @throws SVNConnectorException
 	 */
-	public void removeRemote(String[] path, String message, long options, Map revProps, ISVNProgressMonitor monitor)
+	void removeRemote(String[] path, String message, long options, Map revProps, ISVNProgressMonitor monitor)
 			throws SVNConnectorException;
 
 	/**
@@ -1325,9 +1321,8 @@ public interface ISVNConnector {
 	 *            operation progress monitor
 	 * @throws SVNConnectorException
 	 */
-	public void listHistoryLog(SVNEntryReference reference, SVNRevisionRange[] revisionRanges, String[] revProps,
-			long limit, long options, ISVNLogEntryCallback cb, ISVNProgressMonitor monitor)
-			throws SVNConnectorException;
+	void listHistoryLog(SVNEntryReference reference, SVNRevisionRange[] revisionRanges, String[] revProps, long limit,
+			long options, ISVNLogEntryCallback cb, ISVNProgressMonitor monitor) throws SVNConnectorException;
 
 	/**
 	 * Annotates changes in a non-binary file on the per-line basis.
@@ -1348,7 +1343,7 @@ public interface ISVNConnector {
 	 * 
 	 *             Works as 1.8 version with the diff options set to their default value.
 	 */
-	public void annotate(SVNEntryReference reference, SVNRevisionRange revisionRange, long options, long diffOptions,
+	void annotate(SVNEntryReference reference, SVNRevisionRange revisionRange, long options, long diffOptions,
 			ISVNAnnotationCallback callback, ISVNProgressMonitor monitor) throws SVNConnectorException;
 
 	/**
@@ -1368,7 +1363,7 @@ public interface ISVNConnector {
 	 *            operation progress monitor
 	 * @throws SVNConnectorException
 	 */
-	public void listEntries(SVNEntryRevisionReference reference, SVNDepth depth, int direntFields, long options,
+	void listEntries(SVNEntryRevisionReference reference, SVNDepth depth, int direntFields, long options,
 			ISVNEntryCallback cb, ISVNProgressMonitor monitor) throws SVNConnectorException;
 
 	/**
@@ -1388,7 +1383,7 @@ public interface ISVNConnector {
 	 *            operation progress monitor
 	 * @throws SVNConnectorException
 	 */
-	public void listProperties(SVNEntryRevisionReference reference, SVNDepth depth, String[] changeLists, long options,
+	void listProperties(SVNEntryRevisionReference reference, SVNDepth depth, String[] changeLists, long options,
 			ISVNPropertyCallback callback, ISVNProgressMonitor monitor) throws SVNConnectorException;
 
 	/**
@@ -1405,7 +1400,7 @@ public interface ISVNConnector {
 	 * @return
 	 * @throws SVNConnectorException
 	 */
-	public SVNProperty getProperty(SVNEntryRevisionReference reference, String name, String[] changeLists,
+	SVNProperty getProperty(SVNEntryRevisionReference reference, String name, String[] changeLists,
 			ISVNProgressMonitor monitor) throws SVNConnectorException;
 
 	/**
@@ -1425,8 +1420,8 @@ public interface ISVNConnector {
 	 *            operation progress monitor
 	 * @throws SVNConnectorException
 	 */
-	public void setPropertyLocal(String[] path, SVNProperty property, SVNDepth depth, long options,
-			String[] changeLists, ISVNProgressMonitor monitor) throws SVNConnectorException;
+	void setPropertyLocal(String[] path, SVNProperty property, SVNDepth depth, long options, String[] changeLists,
+			ISVNProgressMonitor monitor) throws SVNConnectorException;
 
 	/**
 	 * Sets the property to a repository resource.
@@ -1445,7 +1440,7 @@ public interface ISVNConnector {
 	 *            operation progress monitor
 	 * @throws SVNConnectorException
 	 */
-	public void setPropertyRemote(SVNEntryReference reference, SVNProperty property, String message, long options,
+	void setPropertyRemote(SVNEntryReference reference, SVNProperty property, String message, long options,
 			Map revProps, ISVNProgressMonitor monitor) throws SVNConnectorException;
 
 	/**
@@ -1458,7 +1453,7 @@ public interface ISVNConnector {
 	 * @return the list of revision properties
 	 * @throws SVNConnectorException
 	 */
-	public SVNProperty[] listRevisionProperties(SVNEntryReference reference, ISVNProgressMonitor monitor)
+	SVNProperty[] listRevisionProperties(SVNEntryReference reference, ISVNProgressMonitor monitor)
 			throws SVNConnectorException;
 
 	/**
@@ -1473,7 +1468,7 @@ public interface ISVNConnector {
 	 * @return
 	 * @throws SVNConnectorException
 	 */
-	public SVNProperty getRevisionProperty(SVNEntryReference reference, String name, ISVNProgressMonitor monitor)
+	SVNProperty getRevisionProperty(SVNEntryReference reference, String name, ISVNProgressMonitor monitor)
 			throws SVNConnectorException;
 
 	/**
@@ -1491,8 +1486,8 @@ public interface ISVNConnector {
 	 *            operation progress monitor
 	 * @throws SVNConnectorException
 	 */
-	public void setRevisionProperty(SVNEntryReference reference, SVNProperty property, String originalValue,
-			long options, ISVNProgressMonitor monitor) throws SVNConnectorException;
+	void setRevisionProperty(SVNEntryReference reference, SVNProperty property, String originalValue, long options,
+			ISVNProgressMonitor monitor) throws SVNConnectorException;
 
 	/**
 	 * Upgrades the working copy specified by the path.
@@ -1501,7 +1496,7 @@ public interface ISVNConnector {
 	 * @param monitor
 	 * @throws SVNConnectorException
 	 */
-	public void upgrade(String path, ISVNProgressMonitor monitor) throws SVNConnectorException;
+	void upgrade(String path, ISVNProgressMonitor monitor) throws SVNConnectorException;
 
 	/**
 	 * Applies the patch to the specified path.
@@ -1520,7 +1515,7 @@ public interface ISVNConnector {
 	 *            operation progress monitor
 	 * @throws SVNConnectorException
 	 */
-	public void patch(String patchPath, String targetPath, int stripCount, long options, ISVNPatchCallback callback,
+	void patch(String patchPath, String targetPath, int stripCount, long options, ISVNPatchCallback callback,
 			ISVNProgressMonitor monitor) throws SVNConnectorException;
 
 	/**
@@ -1538,12 +1533,12 @@ public interface ISVNConnector {
 	 * 
 	 * @since 1.9
 	 */
-	public void vacuum(String path, long options, ISVNProgressMonitor monitor) throws SVNConnectorException;
+	void vacuum(String path, long options, ISVNProgressMonitor monitor) throws SVNConnectorException;
 
 	// we do not provide the remote session support interface since it is currently marked as unstable
 
 	/**
 	 * Disposes of all the native resources allocated by the connector instance.
 	 */
-	public void dispose();
+	void dispose();
 }

@@ -33,11 +33,13 @@ public class MoveToAction extends AbstractCopyMoveAction {
 		super("MoveToAction");
 	}
 
+	@Override
 	protected AbstractCopyMoveResourcesOperation makeCopyOperation(IRepositoryResource destination,
 			IRepositoryResource[] selected, String message, String name) {
 		return new MoveResourcesOperation(destination, selected, message, name);
 	}
 
+	@Override
 	protected RefreshRemoteResourcesOperation makeRefreshOperation(IRepositoryResource destination,
 			IRepositoryResource[] selected) {
 		IRepositoryResource[] toRefresh = new IRepositoryResource[selected.length + 1];
@@ -46,19 +48,20 @@ public class MoveToAction extends AbstractCopyMoveAction {
 		return new RefreshRemoteResourcesOperation(SVNUtility.getCommonParents(toRefresh));
 	}
 
+	@Override
 	public boolean isEnabled() {
-		IRepositoryResource[] resources = this.getSelectedRepositoryResources();
+		IRepositoryResource[] resources = getSelectedRepositoryResources();
 		if (resources.length == 0) {
 			return false;
 		}
 		//disable transfer between different repositories
 		IRepositoryLocation first = resources[0].getRepositoryLocation();
-		for (int i = 0; i < resources.length; i++) {
-			IRepositoryLocation location = resources[i].getRepositoryLocation();
-			if (first != location || resources[i].getSelectedRevision().getKind() != Kind.HEAD
-					|| resources[i] instanceof IRepositoryRoot && (((IRepositoryRoot) resources[i])
-							.getKind() == IRepositoryRoot.KIND_ROOT
-							|| ((IRepositoryRoot) resources[i]).getKind() == IRepositoryRoot.KIND_LOCATION_ROOT)) {
+		for (IRepositoryResource element : resources) {
+			IRepositoryLocation location = element.getRepositoryLocation();
+			if (first != location || element.getSelectedRevision().getKind() != Kind.HEAD
+					|| element instanceof IRepositoryRoot
+							&& (((IRepositoryRoot) element).getKind() == IRepositoryRoot.KIND_ROOT
+									|| ((IRepositoryRoot) element).getKind() == IRepositoryRoot.KIND_LOCATION_ROOT)) {
 				return false;
 			}
 		}

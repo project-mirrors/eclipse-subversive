@@ -26,10 +26,12 @@ import org.eclipse.team.svn.core.SVNTeamPlugin;
  * @author Alexander Gurov
  */
 public class SVNActiveChangeSetProvider extends AbstractActiveChangeSetProvider {
+	@Override
 	public ActiveChangeSetManager getActiveChangeSetManager() {
 		return SVNTeamPlugin.instance().getModelChangeSetManager();
 	}
 
+	@Override
 	public IContextChangeSet createChangeSet(ITask task) {
 		return new SVNContextChangeSet(task, getActiveChangeSetManager());
 	}

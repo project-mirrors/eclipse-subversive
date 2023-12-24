@@ -27,10 +27,11 @@ public interface IRevisionLinkProvider {
 			this.links = links;
 		}
 
+		@Override
 		public IRevisionLink[] getRevisionLinks() {
-			return this.links;
+			return links;
 		}
 	}
 
-	public IRevisionLink[] getRevisionLinks();
+	IRevisionLink[] getRevisionLinks();
 }

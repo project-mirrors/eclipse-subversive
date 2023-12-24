@@ -33,7 +33,7 @@ public class DateFormatVerifier extends AbstractFormattedVerifier {
 	@Override
 	protected String getErrorMessageImpl(Control input) {
 		try {
-			new SimpleDateFormat(this.getText(input));
+			new SimpleDateFormat(getText(input));
 		} catch (IllegalArgumentException e) {
 			return SVNUIMessages.Verifier_DateFormat_Error;
 		}

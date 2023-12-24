@@ -33,36 +33,38 @@ import org.eclipse.ui.IWorkingSet;
 public class SynchronizeAction extends AbstractWorkingCopyAction {
 
 	public SynchronizeAction() {
-		super();
 	}
 
+	@Override
 	public void runImpl(IAction action) {
-		IWorkingSet[] sets = this.getSelectedWorkingSets();
+		IWorkingSet[] sets = getSelectedWorkingSets();
 		ShowUpdateViewOperation op;
 
 		if (ModelHelper.isShowModelSync()) {
 			ResourceMapping[] resourcesMapping = getSelectedResourceMappings(SVNTeamPlugin.NATURE_ID);
-			op = new ShowUpdateViewOperation(resourcesMapping, this.getTargetPart());
+			op = new ShowUpdateViewOperation(resourcesMapping, getTargetPart());
 		} else if (sets != null && sets.length > 0) {
-			op = new ShowUpdateViewOperation(new WorkingSetScope(sets), this.getTargetPart());
+			op = new ShowUpdateViewOperation(new WorkingSetScope(sets), getTargetPart());
 		} else {
 			IResource[] resources = this.getSelectedResources(IStateFilter.SF_VERSIONED);
-			op = new ShowUpdateViewOperation(resources, this.getTargetPart());
+			op = new ShowUpdateViewOperation(resources, getTargetPart());
 		}
 
-		this.runScheduled(op);
+		runScheduled(op);
 	}
 
+	@Override
 	public boolean isEnabled() {
-		return this.checkForResourcesPresence(IStateFilter.SF_VERSIONED);
+		return checkForResourcesPresence(IStateFilter.SF_VERSIONED);
 	}
 
+	@Override
 	protected boolean needsToSaveDirtyEditors() {
 		return true;
 	}
 
 	protected IWorkingSet[] getSelectedWorkingSets() {
-		return (IWorkingSet[]) this.getAdaptedSelection(IWorkingSet.class);
+		return this.getAdaptedSelection(IWorkingSet.class);
 	}
 
 }

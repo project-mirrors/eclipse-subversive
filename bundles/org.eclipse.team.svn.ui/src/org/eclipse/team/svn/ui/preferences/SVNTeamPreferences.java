@@ -88,7 +88,7 @@ public final class SVNTeamPreferences {
 
 	public static final String BEHAVIOUR_COMPUTE_KEYWORDS_NAME = "keywords.computeValues"; //$NON-NLS-1$
 
-	public static final String BEHAVIOUR_CASE_INSENSITIVE_TABLE_SORTING_NAME = "sorting.case.insensitive"; //$NON-NLS-1$	
+	public static final String BEHAVIOUR_CASE_INSENSITIVE_TABLE_SORTING_NAME = "sorting.case.insensitive"; //$NON-NLS-1$
 
 	public static final String BEHAVIOUR_IGNORE_EXTERNALS_NAME = "externals.ignore"; //$NON-NLS-1$
 
@@ -272,7 +272,7 @@ public final class SVNTeamPreferences {
 
 	public static final boolean PROPERTY_LINK_WITH_EDITOR_DEFAULT = false;
 
-	public static final String LOCKS_LINK_WITH_EDITOR_NAME = "locksLinkWithEditor"; //$NON-NLS-1$	
+	public static final String LOCKS_LINK_WITH_EDITOR_NAME = "locksLinkWithEditor"; //$NON-NLS-1$
 
 	public static final boolean LOCKS_LINK_WITH_EDITOR_DEFAULT = false;
 
@@ -478,7 +478,7 @@ public final class SVNTeamPreferences {
 
 	public static final String FORCE_TEXT_MIME_NAME = "forceTextMime"; //$NON-NLS-1$
 
-	public static final boolean FORCE_TEXT_MIME_DEFAULT = true; //$NON-NLS-1$
+	public static final boolean FORCE_TEXT_MIME_DEFAULT = true;
 
 	public static final String AUTO_PROPERTIES_LIST_NAME = "autoproperties"; //$NON-NLS-1$
 
@@ -492,7 +492,7 @@ public final class SVNTeamPreferences {
 
 	public static final boolean IGNORE_MASK_VALIDATION_ENABLED_DEFAULT = true;
 
-	public static final String DIFF_VIEWER_BASE = "preference.diffViewer."; //$NON-NLS-1$		
+	public static final String DIFF_VIEWER_BASE = "preference.diffViewer."; //$NON-NLS-1$
 
 	public static final String DIFF_VIEWER_RESOURCES_SPECIFIC_PARAMETERS = "resources.specific.parameters"; //$NON-NLS-1$
 

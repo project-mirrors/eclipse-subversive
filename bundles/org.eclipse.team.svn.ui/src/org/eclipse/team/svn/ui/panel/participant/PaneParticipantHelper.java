@@ -55,28 +55,28 @@ public class PaneParticipantHelper {
 
 	protected ParticipantPagePane pagePane;
 
-	protected List<IResource> resourcesRemovedFromPane = new ArrayList<IResource>();
+	protected List<IResource> resourcesRemovedFromPane = new ArrayList<>();
 
 	protected ISyncInfoSetChangeListener paneSyncInfoSetListener;
 
 	public PaneParticipantHelper() {
-		this.isParticipantPane = PaneParticipantHelper.isParticipantPaneOption();
+		isParticipantPane = PaneParticipantHelper.isParticipantPaneOption();
 	}
 
 	public void init(BasePaneParticipant participant) {
 		this.participant = participant;
-		this.syncPageConfiguration = this.participant.createPageConfiguration();
+		syncPageConfiguration = this.participant.createPageConfiguration();
 	}
 
 	public void initListeners() {
 		//sync view listener
-		SyncInfoSet paneSyncInfoSet = this.getPaneSyncInfoSet();
-		this.paneSyncInfoSetListener = new PaneSyncInfoSetListener();
-		paneSyncInfoSet.addSyncSetChangedListener(this.paneSyncInfoSetListener);
+		SyncInfoSet paneSyncInfoSet = getPaneSyncInfoSet();
+		paneSyncInfoSetListener = new PaneSyncInfoSetListener();
+		paneSyncInfoSet.addSyncSetChangedListener(paneSyncInfoSetListener);
 	}
 
 	public boolean isParticipantPane() {
-		return this.isParticipantPane;
+		return isParticipantPane;
 	}
 
 	public static boolean isParticipantPaneOption() {
@@ -85,15 +85,15 @@ public class PaneParticipantHelper {
 	}
 
 	public ISynchronizePageConfiguration getSyncPageConfiguration() {
-		return this.syncPageConfiguration;
+		return syncPageConfiguration;
 	}
 
 	public BasePaneParticipant getParticipant() {
-		return this.participant;
+		return participant;
 	}
 
 	public IResource[] getSelectedResources() {
-		SyncInfoSet syncInfoSet = this.getPaneSyncInfoSetToProcess();
+		SyncInfoSet syncInfoSet = getPaneSyncInfoSetToProcess();
 		return syncInfoSet.getResources();
 	}
 
@@ -102,19 +102,19 @@ public class PaneParticipantHelper {
 		 * As we can delete resources using 'Remove from View' action,
 		 * we need to process not selected resources.
 		 */
-		return this.resourcesRemovedFromPane.toArray(new IResource[0]);
+		return resourcesRemovedFromPane.toArray(new IResource[0]);
 	}
 
 	public Control createChangesPage(Composite composite) {
-		this.pagePane = new ParticipantPagePane(UIMonitorUtility.getShell(), true /* modal */,
-				this.syncPageConfiguration, this.participant);
-		Control control = this.pagePane.createPartControl(composite);
+		pagePane = new ParticipantPagePane(UIMonitorUtility.getShell(), true /* modal */, syncPageConfiguration,
+				participant);
+		Control control = pagePane.createPartControl(composite);
 		return control;
 	}
 
 	protected SyncInfoSet getPaneSyncInfoSet() {
 		SyncInfoSet syncInfoSet = null;
-		ISynchronizePage page = this.syncPageConfiguration.getPage();
+		ISynchronizePage page = syncPageConfiguration.getPage();
 		if (page instanceof SubscriberParticipantPage) {
 			WorkingSetFilteredSyncInfoCollector collector = ((SubscriberParticipantPage) page).getCollector();
 			syncInfoSet = collector.getWorkingSetSyncInfoSet();
@@ -124,17 +124,17 @@ public class PaneParticipantHelper {
 
 	protected SyncInfoSet getPaneSyncInfoSetToProcess() {
 		final SyncInfoSet infos = new SyncInfoSet();
-		if (this.syncPageConfiguration == null) {
-			return this.participant.getSyncInfoSet();
+		if (syncPageConfiguration == null) {
+			return participant.getSyncInfoSet();
 		}
 
-		final IDiffElement root = (ISynchronizeModelElement) this.syncPageConfiguration
+		final IDiffElement root = (ISynchronizeModelElement) syncPageConfiguration
 				.getProperty(SynchronizePageConfiguration.P_MODEL);
 		final IDiffElement[] elements = Utils.getDiffNodes(new IDiffElement[] { root });
 
-		for (int i = 0; i < elements.length; i++) {
-			if (elements[i] instanceof SyncInfoModelElement) {
-				SyncInfo syncInfo = ((SyncInfoModelElement) elements[i]).getSyncInfo();
+		for (IDiffElement element : elements) {
+			if (element instanceof SyncInfoModelElement) {
+				SyncInfo syncInfo = ((SyncInfoModelElement) element).getSyncInfo();
 				infos.add(syncInfo);
 			}
 		}
@@ -142,23 +142,23 @@ public class PaneParticipantHelper {
 	}
 
 	public void dispose() {
-		if (this.syncPageConfiguration != null) {
-			SyncInfoSet paneSyncInfoSet = this.getPaneSyncInfoSet();
-			paneSyncInfoSet.removeSyncSetChangedListener(this.paneSyncInfoSetListener);
+		if (syncPageConfiguration != null) {
+			SyncInfoSet paneSyncInfoSet = getPaneSyncInfoSet();
+			paneSyncInfoSet.removeSyncSetChangedListener(paneSyncInfoSetListener);
 		}
 
 		// Disposing of the page pane will dispose of the page and the configuration
-		if (this.pagePane != null) {
-			this.pagePane.dispose();
+		if (pagePane != null) {
+			pagePane.dispose();
 		}
 
-		if (this.participant != null) {
-			this.participant.dispose();
+		if (participant != null) {
+			participant.dispose();
 		}
 	}
 
 	public void expandPaneTree() {
-		Viewer viewer = this.syncPageConfiguration.getPage().getViewer();
+		Viewer viewer = syncPageConfiguration.getPage().getViewer();
 		if (viewer instanceof TreeViewer) {
 			try {
 				viewer.getControl().setRedraw(false);
@@ -180,14 +180,16 @@ public class PaneParticipantHelper {
 			this.paneParticipantHelper = paneParticipantHelper;
 		}
 
+		@Override
 		protected String getErrorMessage(Control input) {
-			IResource[] resources = this.paneParticipantHelper.getSelectedResources();
+			IResource[] resources = paneParticipantHelper.getSelectedResources();
 			if (resources.length == 0) {
 				return SVNUIMessages.ParticipantPagePane_Verifier_Error;
 			}
 			return null;
 		}
 
+		@Override
 		protected String getWarningMessage(Control input) {
 			return null;
 		}
@@ -200,16 +202,19 @@ public class PaneParticipantHelper {
 	 */
 	private class PaneSyncInfoSetListener implements ISyncInfoSetChangeListener {
 
+		@Override
 		public void syncInfoChanged(ISyncInfoSetChangeEvent event, IProgressMonitor monitor) {
 			IResource[] removed = event.getRemovedResources();
 			if (removed.length > 0) {
-				PaneParticipantHelper.this.resourcesRemovedFromPane.addAll(Arrays.asList(removed));
+				resourcesRemovedFromPane.addAll(Arrays.asList(removed));
 			}
 		}
 
+		@Override
 		public void syncInfoSetErrors(SyncInfoSet set, ITeamStatus[] errors, IProgressMonitor monitor) {
 		}
 
+		@Override
 		public void syncInfoSetReset(SyncInfoSet set, IProgressMonitor monitor) {
 		}
 	}

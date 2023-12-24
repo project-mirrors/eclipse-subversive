@@ -15,15 +15,14 @@
 package org.eclipse.team.svn.core.operation.remote;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.team.svn.core.BaseMessages;
 import org.eclipse.team.svn.core.SVNMessages;
 import org.eclipse.team.svn.core.connector.ISVNConnector;
 import org.eclipse.team.svn.core.connector.ISVNNotificationCallback;
 import org.eclipse.team.svn.core.connector.SVNDepth;
-import org.eclipse.team.svn.core.connector.SVNNotification;
 import org.eclipse.team.svn.core.connector.SVNRevision;
 import org.eclipse.team.svn.core.operation.IConsoleStream;
 import org.eclipse.team.svn.core.operation.IRevisionProvider;
-import org.eclipse.team.svn.core.operation.IUnprotectedOperation;
 import org.eclipse.team.svn.core.operation.SVNProgressMonitor;
 import org.eclipse.team.svn.core.resource.IRepositoryLocation;
 import org.eclipse.team.svn.core.resource.IRepositoryResource;
@@ -51,46 +50,43 @@ public class CreateFileOperation extends AbstractRepositoryOperation implements 
 		this.fileNames = fileNames;
 	}
 
+	@Override
 	public RevisionPair[] getRevisions() {
-		return this.revisionPair;
+		return revisionPair;
 	}
 
+	@Override
 	protected void runImpl(IProgressMonitor monitor) throws Exception {
-		final IRepositoryResource resource = this.operableData()[0];
+		final IRepositoryResource resource = operableData()[0];
 		final IRepositoryLocation location = resource.getRepositoryLocation();
-		this.revisionPair = new RevisionPair[1];
+		revisionPair = new RevisionPair[1];
 		final ISVNConnector proxy = location.acquireSVNProxy();
-		ISVNNotificationCallback notify = new ISVNNotificationCallback() {
-			public void notify(SVNNotification info) {
-				if (info.revision != SVNRevision.INVALID_REVISION_NUMBER) {
-					String[] path = new String[] { resource.getUrl() };
-					CreateFileOperation.this.revisionPair[0] = new RevisionPair(info.revision, path, location);
-					String message = SVNMessages.format(SVNMessages.Console_CommittedRevision,
-							new String[] { String.valueOf(info.revision) });
-					CreateFileOperation.this.writeToConsole(IConsoleStream.LEVEL_OK, message);
-				}
+		ISVNNotificationCallback notify = info -> {
+			if (info.revision != SVNRevision.INVALID_REVISION_NUMBER) {
+				String[] path = { resource.getUrl() };
+				revisionPair[0] = new RevisionPair(info.revision, path, location);
+				String message = BaseMessages.format(SVNMessages.Console_CommittedRevision,
+						new String[] { String.valueOf(info.revision) });
+				CreateFileOperation.this.writeToConsole(IConsoleStream.LEVEL_OK, message);
 			}
 		};
 		try {
 			SVNUtility.addSVNNotifyListener(proxy, notify);
-			for (int i = 0; i < this.fileNames.length; i++) {
-				final String[] currentFile = new String[] { this.fileNames[i] };
-				this.protectStep(new IUnprotectedOperation() {
-					public void run(IProgressMonitor monitor) throws Exception {
-						String path = FileUtility.normalizePath(CreateFileOperation.this.path + "/" + currentFile[0]); //$NON-NLS-1$
-						String url = resource.getUrl() + "/" + currentFile[0]; //$NON-NLS-1$
-						CreateFileOperation.this.writeToConsole(IConsoleStream.LEVEL_CMD,
-								"svn import \"" + path + "\" \"" + url + "\" -m \"" + CreateFileOperation.this.message //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
-										+ "\"" //$NON-NLS-1$
-										+ ISVNConnector.Options.asCommandLine(ISVNConnector.Options.INCLUDE_IGNORED
-												| ISVNConnector.Options.IGNORE_UNKNOWN_NODE_TYPES)
-										+ FileUtility.getUsernameParam(location.getUsername()) + " -N\n"); //$NON-NLS-1$
-						proxy.importTo(path, SVNUtility.encodeURL(url), CreateFileOperation.this.message,
-								SVNDepth.FILES,
-								ISVNConnector.Options.INCLUDE_IGNORED | ISVNConnector.Options.IGNORE_UNKNOWN_NODE_TYPES,
-								null, null, new SVNProgressMonitor(CreateFileOperation.this, monitor, null));
-					}
-				}, monitor, this.fileNames.length);
+			for (String fileName : fileNames) {
+				final String[] currentFile = { fileName };
+				this.protectStep(monitor1 -> {
+					String path = FileUtility.normalizePath(CreateFileOperation.this.path + "/" + currentFile[0]); //$NON-NLS-1$
+					String url = resource.getUrl() + "/" + currentFile[0]; //$NON-NLS-1$
+					CreateFileOperation.this.writeToConsole(IConsoleStream.LEVEL_CMD,
+							"svn import \"" + path + "\" \"" + url + "\" -m \"" + message //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
+									+ "\"" //$NON-NLS-1$
+									+ ISVNConnector.Options.asCommandLine(ISVNConnector.Options.INCLUDE_IGNORED
+											| ISVNConnector.Options.IGNORE_UNKNOWN_NODE_TYPES)
+									+ FileUtility.getUsernameParam(location.getUsername()) + " -N\n"); //$NON-NLS-1$
+					proxy.importTo(path, SVNUtility.encodeURL(url), message, SVNDepth.FILES,
+							ISVNConnector.Options.INCLUDE_IGNORED | ISVNConnector.Options.IGNORE_UNKNOWN_NODE_TYPES,
+							null, null, new SVNProgressMonitor(CreateFileOperation.this, monitor1, null));
+				}, monitor, fileNames.length);
 			}
 		} finally {
 			SVNUtility.removeSVNNotifyListener(proxy, notify);

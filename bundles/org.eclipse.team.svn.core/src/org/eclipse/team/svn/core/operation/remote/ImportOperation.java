@@ -21,7 +21,6 @@ import org.eclipse.team.svn.core.connector.ISVNConnector;
 import org.eclipse.team.svn.core.connector.ISVNImportFilterCallback;
 import org.eclipse.team.svn.core.connector.ISVNNotificationCallback;
 import org.eclipse.team.svn.core.connector.SVNDepth;
-import org.eclipse.team.svn.core.connector.SVNNotification;
 import org.eclipse.team.svn.core.connector.SVNRevision;
 import org.eclipse.team.svn.core.operation.IConsoleStream;
 import org.eclipse.team.svn.core.operation.IRevisionProvider;
@@ -60,34 +59,34 @@ public class ImportOperation extends AbstractRepositoryOperation implements IRev
 		this.filter = filter;
 	}
 
+	@Override
 	public RevisionPair[] getRevisions() {
-		return this.revisionPair;
+		return revisionPair;
 	}
 
+	@Override
 	protected void runImpl(IProgressMonitor monitor) throws Exception {
-		final IRepositoryResource resource = this.operableData()[0];
+		final IRepositoryResource resource = operableData()[0];
 		final IRepositoryLocation location = resource.getRepositoryLocation();
-		this.revisionPair = new RevisionPair[1];
+		revisionPair = new RevisionPair[1];
 		ISVNConnector proxy = location.acquireSVNProxy();
-		ISVNNotificationCallback notify = new ISVNNotificationCallback() {
-			public void notify(SVNNotification info) {
-				if (info.revision != SVNRevision.INVALID_REVISION_NUMBER) {
-					String[] path = new String[] { resource.getUrl() };
-					ImportOperation.this.revisionPair[0] = new RevisionPair(info.revision, path, location);
-					String message = SVNMessages.format(SVNMessages.Console_CommittedRevision,
-							new String[] { String.valueOf(info.revision) });
-					ImportOperation.this.writeToConsole(IConsoleStream.LEVEL_OK, message);
-				}
+		ISVNNotificationCallback notify = info -> {
+			if (info.revision != SVNRevision.INVALID_REVISION_NUMBER) {
+				String[] path = { resource.getUrl() };
+				revisionPair[0] = new RevisionPair(info.revision, path, location);
+				String message = BaseMessages.format(SVNMessages.Console_CommittedRevision,
+						new String[] { String.valueOf(info.revision) });
+				ImportOperation.this.writeToConsole(IConsoleStream.LEVEL_OK, message);
 			}
 		};
 		try {
 			SVNUtility.addSVNNotifyListener(proxy, notify);
-			this.writeToConsole(IConsoleStream.LEVEL_CMD, "svn import \"" + FileUtility.normalizePath(this.path) //$NON-NLS-1$
-					+ "\" \"" + SVNUtility.getDepthArg(this.depth, ISVNConnector.Options.NONE) //$NON-NLS-1$
+			writeToConsole(IConsoleStream.LEVEL_CMD, "svn import \"" + FileUtility.normalizePath(path) //$NON-NLS-1$
+					+ "\" \"" + SVNUtility.getDepthArg(depth, ISVNConnector.Options.NONE) //$NON-NLS-1$
 					+ ISVNConnector.Options.asCommandLine(
 							ISVNConnector.Options.INCLUDE_IGNORED | ISVNConnector.Options.IGNORE_UNKNOWN_NODE_TYPES)
-					+ " -m \"" + this.message + "\"" + FileUtility.getUsernameParam(location.getUsername()) + "\n"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-			proxy.importTo(this.path, SVNUtility.encodeURL(resource.getUrl()), this.message, this.depth,
+					+ " -m \"" + message + "\"" + FileUtility.getUsernameParam(location.getUsername()) + "\n"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			proxy.importTo(path, SVNUtility.encodeURL(resource.getUrl()), message, depth,
 					ISVNConnector.Options.INCLUDE_IGNORED | ISVNConnector.Options.IGNORE_UNKNOWN_NODE_TYPES, null,
 					filter, new SVNProgressMonitor(this, monitor, null));
 		} finally {
@@ -96,8 +95,9 @@ public class ImportOperation extends AbstractRepositoryOperation implements IRev
 		}
 	}
 
+	@Override
 	protected String getShortErrorMessage(Throwable t) {
-		return BaseMessages.format(super.getShortErrorMessage(t), new Object[] { this.operableData()[0].getUrl() });
+		return BaseMessages.format(super.getShortErrorMessage(t), new Object[] { operableData()[0].getUrl() });
 	}
 
 }

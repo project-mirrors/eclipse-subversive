@@ -61,13 +61,13 @@ public class SynchronizeLabelDecorator extends LabelProvider implements ILabelDe
 	protected ISynchronizePageConfiguration configuration;
 
 	public SynchronizeLabelDecorator(ISynchronizePageConfiguration configuration) {
-		super();
-		this.images = new HashMap<ImageDescriptor, Image>();
+		images = new HashMap<>();
 		this.configuration = configuration;
 	}
 
+	@Override
 	public Image decorateImage(Image image, Object element) {
-		AbstractSVNSyncInfo info = this.getSyncInfo(element);
+		AbstractSVNSyncInfo info = getSyncInfo(element);
 		if (info != null) {
 			ILocalResource left = info.getLocalResource();
 			ILocalResource right = info.getRemoteChangeResource();
@@ -92,7 +92,7 @@ public class SynchronizeLabelDecorator extends LabelProvider implements ILabelDe
 							new Point(22, 16), OverlayedImageDescriptor.RIGHT | OverlayedImageDescriptor.CENTER_V);
 				}
 			}
-			Image tmp = this.registerImageDescriptor(imgDescr);
+			Image tmp = registerImageDescriptor(imgDescr);
 			if (!(left.getResource() instanceof IContainer) && (IStateFilter.SF_HAS_PROPERTIES_CHANGES.accept(left)
 					|| IStateFilter.SF_HAS_PROPERTIES_CHANGES.accept(right))) {
 				if (tmp != null) {
@@ -100,15 +100,16 @@ public class SynchronizeLabelDecorator extends LabelProvider implements ILabelDe
 				}
 				imgDescr = new OverlayedImageDescriptor(image, AbstractSVNParticipant.OVR_PROPCHANGE, new Point(23, 16),
 						OverlayedImageDescriptor.RIGHT | OverlayedImageDescriptor.BOTTOM);
-				return this.registerImageDescriptor(imgDescr);
+				return registerImageDescriptor(imgDescr);
 			}
 			return tmp;
 		}
 		return null;
 	}
 
+	@Override
 	public String decorateText(String text, Object element) {
-		AbstractSVNSyncInfo info = this.getSyncInfo(element);
+		AbstractSVNSyncInfo info = getSyncInfo(element);
 		if (info != null) {
 			ResourceVariant variant = (ResourceVariant) info.getRemote();
 			if (variant != null) {
@@ -119,7 +120,7 @@ public class SynchronizeLabelDecorator extends LabelProvider implements ILabelDe
 			} else {
 				/* handle if resource was remotely deleted:
 				 * we need such processing because if resource is remotely deleted then its
-				 * remove variant is null 
+				 * remove variant is null
 				 */
 				ILocalResource incoming = info.getRemoteChangeResource();
 				if (incoming instanceof IResourceChange && IStateFilter.SF_DELETED.accept(incoming)) {
@@ -138,17 +139,18 @@ public class SynchronizeLabelDecorator extends LabelProvider implements ILabelDe
 
 	protected Image registerImageDescriptor(OverlayedImageDescriptor imgDescr) {
 		if (imgDescr != null) {
-			Image img = this.images.get(imgDescr);
+			Image img = images.get(imgDescr);
 			if (img == null) {
-				this.images.put(imgDescr, img = imgDescr.createImage());
+				images.put(imgDescr, img = imgDescr.createImage());
 			}
 			return img;
 		}
 		return null;
 	}
 
+	@Override
 	public void dispose() {
-		for (Image img : this.images.values()) {
+		for (Image img : images.values()) {
 			img.dispose();
 		}
 	}
@@ -159,7 +161,7 @@ public class SynchronizeLabelDecorator extends LabelProvider implements ILabelDe
 		}
 		IResource resource = getResource(element);
 		if (resource != null) {
-			ISynchronizeParticipant participant = this.configuration.getParticipant();
+			ISynchronizeParticipant participant = configuration.getParticipant();
 			if (participant instanceof ModelSynchronizeParticipant) {
 				ModelSynchronizeParticipant msp = (ModelSynchronizeParticipant) participant;
 				ISynchronizationContext context = msp.getContext();
@@ -180,8 +182,9 @@ public class SynchronizeLabelDecorator extends LabelProvider implements ILabelDe
 	}
 
 	protected IResource getResource(Object element) {
-		if (element instanceof ISynchronizeModelElement)
+		if (element instanceof ISynchronizeModelElement) {
 			return ((ISynchronizeModelElement) element).getResource();
+		}
 		return Utils.getResource(internalGetElement(element));
 	}
 

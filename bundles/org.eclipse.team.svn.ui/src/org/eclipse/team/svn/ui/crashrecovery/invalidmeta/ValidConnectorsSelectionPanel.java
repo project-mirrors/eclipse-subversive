@@ -15,7 +15,6 @@
 package org.eclipse.team.svn.ui.crashrecovery.invalidmeta;
 
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.List;
 
 import org.eclipse.core.resources.IProject;
@@ -28,6 +27,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.team.svn.core.BaseMessages;
 import org.eclipse.team.svn.core.extension.CoreExtensionsManager;
 import org.eclipse.team.svn.core.extension.factory.ISVNConnectorFactory;
 import org.eclipse.team.svn.core.extension.factory.SVNConnectorHelper;
@@ -50,24 +50,26 @@ public class ValidConnectorsSelectionPanel extends AbstractDialogPanel {
 	protected String svnConnector;
 
 	public ValidConnectorsSelectionPanel(IProject project, List validClients) {
-		super();
-		this.dialogTitle = SVNUIMessages.format(SVNUIMessages.ValidConnectorsSelectionPanel_Title,
+		dialogTitle = BaseMessages.format(SVNUIMessages.ValidConnectorsSelectionPanel_Title,
 				new String[] { project.getName() });
-		this.dialogDescription = SVNUIMessages.ValidConnectorsSelectionPanel_Description;
-		this.defaultMessage = SVNUIMessages.ValidConnectorsSelectionPanel_Message;
+		dialogDescription = SVNUIMessages.ValidConnectorsSelectionPanel_Description;
+		defaultMessage = SVNUIMessages.ValidConnectorsSelectionPanel_Message;
 
-		this.factories = (ISVNConnectorFactory[]) validClients.toArray(new ISVNConnectorFactory[validClients.size()]);
+		factories = (ISVNConnectorFactory[]) validClients.toArray(new ISVNConnectorFactory[validClients.size()]);
 	}
 
+	@Override
 	public Point getPrefferedSizeImpl() {
 		return new Point(500, 60);
 	}
 
+	@Override
 	public void postInit() {
 		super.postInit();
-		this.svnConnector = this.factories[this.svnConnectorField.getSelectionIndex()].getId();
+		svnConnector = factories[svnConnectorField.getSelectionIndex()].getId();
 	}
 
+	@Override
 	protected void createControlsImpl(Composite parent) {
 		GridLayout layout = null;
 		GridData data = null;
@@ -85,36 +87,34 @@ public class ValidConnectorsSelectionPanel extends AbstractDialogPanel {
 		label.setLayoutData(data);
 		label.setText(SVNUIMessages.ValidConnectorsSelectionPanel_Clients);
 
-		this.svnConnectorField = new Combo(composite, SWT.READ_ONLY);
+		svnConnectorField = new Combo(composite, SWT.READ_ONLY);
 		data = new GridData(GridData.FILL_HORIZONTAL);
-		this.svnConnectorField.setLayoutData(data);
-		Arrays.sort(this.factories, new Comparator() {
-			public int compare(Object o1, Object o2) {
-				return ((ISVNConnectorFactory) o1).getName().compareTo(((ISVNConnectorFactory) o2).getName());
-			}
-		});
-		String[] items = new String[this.factories.length];
+		svnConnectorField.setLayoutData(data);
+		Arrays.sort(factories, (o1, o2) -> ((ISVNConnectorFactory) o1).getName().compareTo(((ISVNConnectorFactory) o2).getName()));
+		String[] items = new String[factories.length];
 		for (int i = 0; i < items.length; i++) {
-			items[i] = SVNConnectorHelper.getConnectorName(this.factories[i]);
+			items[i] = SVNConnectorHelper.getConnectorName(factories[i]);
 		}
-		this.svnConnectorField.setItems(items);
-		this.svnConnectorField.select(0);
-		this.svnConnectorField.addSelectionListener(new SelectionAdapter() {
+		svnConnectorField.setItems(items);
+		svnConnectorField.select(0);
+		svnConnectorField.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
-				ValidConnectorsSelectionPanel.this.svnConnector = ValidConnectorsSelectionPanel.this.factories[ValidConnectorsSelectionPanel.this.svnConnectorField
-						.getSelectionIndex()].getId();
+				svnConnector = factories[svnConnectorField.getSelectionIndex()].getId();
 			}
 		});
 	}
 
+	@Override
 	protected void cancelChangesImpl() {
 	}
 
+	@Override
 	protected void saveChangesImpl() {
 		String oldId = CoreExtensionsManager.instance().getSVNConnectorFactory().getId();
-		if (!oldId.equals(this.svnConnector)) {
+		if (!oldId.equals(svnConnector)) {
 			SVNTeamPreferences.setCoreString(SVNTeamUIPlugin.instance().getPreferenceStore(),
-					SVNTeamPreferences.CORE_SVNCONNECTOR_NAME, this.svnConnector);
+					SVNTeamPreferences.CORE_SVNCONNECTOR_NAME, svnConnector);
 			SVNTeamUIPlugin.instance().savePreferences();
 			// destroy all cached proxies
 			SVNRemoteStorage.instance().dispose();

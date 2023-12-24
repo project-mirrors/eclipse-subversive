@@ -80,38 +80,41 @@ public class SVNLogEntry {
 		this.revision = revision;
 		this.author = author;
 		this.changedPaths = changedPaths;
-		this.children = hasChildren ? new ArrayList<SVNLogEntry>() : null;
+		children = hasChildren ? new ArrayList<>() : null;
 	}
 
 	public SVNLogEntry[] getChildren() {
-		return this.children == null ? null : this.children.toArray(new SVNLogEntry[this.children.size()]);
+		return children == null ? null : children.toArray(new SVNLogEntry[children.size()]);
 	}
 
 	public boolean hasChildren() {
-		return this.children != null;
+		return children != null;
 	}
 
 	public void add(SVNLogEntry child) {
-		this.children.add(child);
+		children.add(child);
 	}
 
 	public void addAll(SVNLogEntry[] child) {
-		this.children.addAll(Arrays.asList(child));
+		children.addAll(Arrays.asList(child));
 	}
 
+	@Override
 	public int hashCode() {
-		return (int) this.revision;
+		return (int) revision;
 	}
 
+	@Override
 	public boolean equals(Object obj) {
 		if (obj instanceof SVNLogEntry) {
-			return this.revision == ((SVNLogEntry) obj).revision;
+			return revision == ((SVNLogEntry) obj).revision;
 		}
 		return false;
 	}
 
+	@Override
 	public String toString() {
-		return this.revision + ", author: " + String.valueOf(this.author) + ", has children: " + this.hasChildren(); //$NON-NLS-1$ //$NON-NLS-2$
+		return revision + ", author: " + String.valueOf(author) + ", has children: " + hasChildren(); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 }

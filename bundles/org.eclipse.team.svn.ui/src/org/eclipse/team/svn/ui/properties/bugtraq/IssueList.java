@@ -24,7 +24,6 @@ import org.eclipse.team.svn.core.operation.LoggedOperation;
 
 public class IssueList extends LinkList {
 	public IssueList() {
-		super();
 	}
 
 	/**
@@ -84,8 +83,8 @@ public class IssueList extends LinkList {
 			}
 		} else if (model.getMessage() != null) {
 			modelMessage = model.getMessage();
-			prefix = this.getTemplatePrefix(modelMessage);
-			suffix = this.getTemplateSuffix(modelMessage);
+			prefix = getTemplatePrefix(modelMessage);
+			suffix = getTemplateSuffix(modelMessage);
 			if (model.isNumber()) {
 				issueRegex = "[0-9]+(?:,[0-9]+)*"; //$NON-NLS-1$
 				innerRegExp = "[0-9]+"; //$NON-NLS-1$
@@ -103,31 +102,29 @@ public class IssueList extends LinkList {
 		Matcher matcher = Pattern.compile(regex, Pattern.MULTILINE).matcher(message);
 		while (matcher.find()) {
 			if (innerRegExp == null) {
-				//start from 2 as we also encoded issueRegex in brackets 
+				//start from 2 as we also encoded issueRegex in brackets
 				for (int i = 2; i <= matcher.groupCount(); i++) {
-					this.links.add(new LinkPlacement(matcher.start(i), matcher.end(i), message));
+					links.add(new LinkPlacement(matcher.start(i), matcher.end(i), message));
 				}
-			} else {
-				//search between prefix and sufix												
-				if (matcher.groupCount() > 0) {
-					//group 1 contains regexp with bug id
-					String group = matcher.group(1);
+			} else //search between prefix and sufix
+			if (matcher.groupCount() > 0) {
+				//group 1 contains regexp with bug id
+				String group = matcher.group(1);
 
-					Matcher entryMatcher = Pattern.compile(innerRegExp).matcher(group);
-					while (entryMatcher.find()) {
-						String originalPrefix = modelMessage == null ? "" : this.getTemplatePrefix(modelMessage);
-						int prefixLength = matcher.start() + originalPrefix.length();
-						// FIXME generate debug report, since there is an error, check bug https://bugs.eclipse.org/bugs/show_bug.cgi?id=471473
-						if (prefixLength + entryMatcher.end() > message.length()) {
-							LoggedOperation.reportError(
-									prefix + "~~" + suffix + "~~" + issueRegex + "~~"
-											+ (innerRegExp == null ? "null" : innerRegExp) + "~~" + originalPrefix,
-									new StringIndexOutOfBoundsException(message));
-							continue;
-						}
-						this.links.add(new LinkPlacement(prefixLength + entryMatcher.start(),
-								prefixLength + entryMatcher.end(), message));
+				Matcher entryMatcher = Pattern.compile(innerRegExp).matcher(group);
+				while (entryMatcher.find()) {
+					String originalPrefix = modelMessage == null ? "" : getTemplatePrefix(modelMessage);
+					int prefixLength = matcher.start() + originalPrefix.length();
+					// FIXME generate debug report, since there is an error, check bug https://bugs.eclipse.org/bugs/show_bug.cgi?id=471473
+					if (prefixLength + entryMatcher.end() > message.length()) {
+						LoggedOperation.reportError(
+								prefix + "~~" + suffix + "~~" + issueRegex + "~~"
+										+ (innerRegExp == null ? "null" : innerRegExp) + "~~" + originalPrefix,
+								new StringIndexOutOfBoundsException(message));
+						continue;
 					}
+					links.add(new LinkPlacement(prefixLength + entryMatcher.start(), prefixLength + entryMatcher.end(),
+							message));
 				}
 			}
 		}
@@ -164,7 +161,7 @@ public class IssueList extends LinkList {
 //			if ("*\\/:.,?^&+()|".indexOf(original.charAt(i)) != -1) { //$NON-NLS-1$
 //				retVal = retVal + "\\" + original.charAt(i); //$NON-NLS-1$
 //			}
-//			else 
+//			else
 //			if (original.charAt(i) == '\n') {
 //				retVal = retVal + "(?:\r|\n|\r\n)"; //$NON-NLS-1$
 //			}
@@ -179,7 +176,7 @@ public class IssueList extends LinkList {
 //			}
 //		}
 //		return retVal;
-//	} 
+//	}
 
 	public static void main(String[] args) {
 		/*
@@ -200,26 +197,26 @@ public class IssueList extends LinkList {
 		List<LinkPlacement> links = null;
 
 		//My bug %BUGID%.
-		//Note to dot here				
+		//Note to dot here
 		messagePattern = "My bug %BUGID%.";
 		message = "\nMy bug 48.\n";
 		model.setMessage(messagePattern);
 		issue = new IssueList();
 		issue.parseMessage(message, model);
 		links = issue.getLinks();
-		assert (links.size() == 1);
-		assert ("48".equals(links.get(0).getURL()));
+		assert links.size() == 1;
+		assert "48".equals(links.get(0).getURL());
 
 		//My bug: %BUGID%
-		//Note to colon here				
+		//Note to colon here
 		messagePattern = "My bug: %BUGID%";
 		message = "\nMy bug: 48\n";
 		model.setMessage(messagePattern);
 		issue = new IssueList();
 		issue.parseMessage(message, model);
 		links = issue.getLinks();
-		assert (links.size() == 1);
-		assert ("48".equals(links.get(0).getURL()));
+		assert links.size() == 1;
+		assert "48".equals(links.get(0).getURL());
 
 		//My %BUGID%,and
 		messagePattern = "My %BUGID%,and";
@@ -228,8 +225,8 @@ public class IssueList extends LinkList {
 		issue = new IssueList();
 		issue.parseMessage(message, model);
 		links = issue.getLinks();
-		assert (links.size() == 1);
-		assert ("48".equals(links.get(0).getURL()));
+		assert links.size() == 1;
+		assert "48".equals(links.get(0).getURL());
 
 		//My (%BUGID%)
 		messagePattern = "My (%BUGID%)";
@@ -238,8 +235,8 @@ public class IssueList extends LinkList {
 		issue = new IssueList();
 		issue.parseMessage(message, model);
 		links = issue.getLinks();
-		assert (links.size() == 1);
-		assert ("48".equals(links.get(0).getURL()));
+		assert links.size() == 1;
+		assert "48".equals(links.get(0).getURL());
 
 		//My f%BUGID%f
 		messagePattern = "My f%BUGID%f";
@@ -248,8 +245,8 @@ public class IssueList extends LinkList {
 		issue = new IssueList();
 		issue.parseMessage(message, model);
 		links = issue.getLinks();
-		assert (links.size() == 1);
-		assert ("48".equals(links.get(0).getURL()));
+		assert links.size() == 1;
+		assert "48".equals(links.get(0).getURL());
 
 		//My111 %BUGID%
 		//note to numbers with prefix
@@ -259,8 +256,8 @@ public class IssueList extends LinkList {
 		issue = new IssueList();
 		issue.parseMessage(message, model);
 		links = issue.getLinks();
-		assert (links.size() == 1);
-		assert ("48".equals(links.get(0).getURL()));
+		assert links.size() == 1;
+		assert "48".equals(links.get(0).getURL());
 
 		//you can comma separate several numbers
 		messagePattern = "My111 %BUGID%";
@@ -269,9 +266,9 @@ public class IssueList extends LinkList {
 		issue = new IssueList();
 		issue.parseMessage(message, model);
 		links = issue.getLinks();
-		assert (links.size() == 2);
-		assert ("48".equals(links.get(0).getURL()) || "49".equals(links.get(0).getURL()));
-		assert ("48".equals(links.get(1).getURL()) || "49".equals(links.get(1).getURL()));
+		assert links.size() == 2;
+		assert "48".equals(links.get(0).getURL()) || "49".equals(links.get(0).getURL());
+		assert "48".equals(links.get(1).getURL()) || "49".equals(links.get(1).getURL());
 
 		//Prefix contains \n and \r characters
 		messagePattern = "My\n and \r prefix %BUGID%";
@@ -280,8 +277,8 @@ public class IssueList extends LinkList {
 		issue = new IssueList();
 		issue.parseMessage(message, model);
 		links = issue.getLinks();
-		assert (links.size() == 1);
-		assert ("48".equals(links.get(0).getURL()));
+		assert links.size() == 1;
+		assert "48".equals(links.get(0).getURL());
 
 		//---- bugtraq:logregex
 
@@ -295,8 +292,8 @@ public class IssueList extends LinkList {
 		issue = new IssueList();
 		issue.parseMessage(message, model);
 		links = issue.getLinks();
-		assert (links.size() == 1);
-		assert ("48".equals(links.get(0).getURL()));
+		assert links.size() == 1;
+		assert "48".equals(links.get(0).getURL());
 
 		//set two expressions separated by new line
 		//see TortoiseSVN's help for more details about this kind of message
@@ -307,12 +304,12 @@ public class IssueList extends LinkList {
 		issue = new IssueList();
 		issue.parseMessage(message, model);
 		links = issue.getLinks();
-		assert (links.size() == 3);
+		assert links.size() == 3;
 		String res = links.get(0).getURL();
-		assert ("23".equals(res) || "24".equals(res) || "25".equals(res));
+		assert "23".equals(res) || "24".equals(res) || "25".equals(res);
 		res = links.get(1).getURL();
-		assert ("23".equals(res) || "24".equals(res) || "25".equals(res));
+		assert "23".equals(res) || "24".equals(res) || "25".equals(res);
 		res = links.get(2).getURL();
-		assert ("23".equals(res) || "24".equals(res) || "25".equals(res));
+		assert "23".equals(res) || "24".equals(res) || "25".equals(res);
 	}
 }

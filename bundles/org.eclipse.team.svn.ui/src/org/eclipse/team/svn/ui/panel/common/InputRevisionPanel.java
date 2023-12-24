@@ -46,40 +46,38 @@ public class InputRevisionPanel extends AbstractDialogPanel {
 	protected SVNRevision selectedRevision;
 
 	public InputRevisionPanel(IRepositoryResource resource, boolean isEdit, String revisionComment) {
-		super();
 		this.resource = resource;
 		this.isEdit = isEdit;
 		this.revisionComment = revisionComment;
 
-		this.dialogTitle = isEdit
-				? SVNUIMessages.InputRevisionPanel_EditTitle
-				: SVNUIMessages.InputRevisionPanel_AddTitle;
-		this.dialogDescription = this.resource == null
+		dialogTitle = isEdit ? SVNUIMessages.InputRevisionPanel_EditTitle : SVNUIMessages.InputRevisionPanel_AddTitle;
+		dialogDescription = this.resource == null
 				? SVNUIMessages.InputRevisionPanel_SingleDescription
 				: SVNUIMessages.InputRevisionPanel_MultipleDescription;
-		this.defaultMessage = this.resource == null
+		defaultMessage = this.resource == null
 				? SVNUIMessages.InputRevisionPanel_SingleMessage
 				: SVNUIMessages.InputRevisionPanel_MultipleMessage;
 	}
 
 	public SVNRevision getSelectedRevision() {
-		return this.selectedRevision;
+		return selectedRevision;
 	}
 
 	public String getRevisionComment() {
-		return this.revisionComment;
+		return revisionComment;
 	}
 
+	@Override
 	protected void createControlsImpl(Composite parent) {
-		if (this.resource != null) {
-			this.revComposite = new RevisionComposite(parent, this, false, new String[] {
+		if (resource != null) {
+			revComposite = new RevisionComposite(parent, this, false, new String[] {
 					SVNUIMessages.InputRevisionPanel_Caption_First, SVNUIMessages.InputRevisionPanel_Caption_Second },
 					SVNRevision.HEAD, false);
 			GridData data = new GridData(GridData.FILL_HORIZONTAL);
-			this.revComposite.setLayoutData(data);
+			revComposite.setLayoutData(data);
 
-			this.revComposite.setSelectedResource(this.resource);
-			this.revComposite.setRevisionValue(this.resource.getSelectedRevision());
+			revComposite.setSelectedResource(resource);
+			revComposite.setRevisionValue(resource.getSelectedRevision());
 		}
 
 		Group group = new Group(parent, SWT.NULL);
@@ -88,30 +86,33 @@ public class InputRevisionPanel extends AbstractDialogPanel {
 		group.setLayoutData(data);
 		group.setText(SVNUIMessages.InputRevisionPanel_Comment);
 
-		this.commentComposite = new CommentComposite(group, this);
+		commentComposite = new CommentComposite(group, this);
 		data = new GridData(GridData.FILL_BOTH);
-		this.commentComposite.setLayoutData(data);
+		commentComposite.setLayoutData(data);
 
-		if (this.revisionComment != null) {
-			this.commentComposite.setMessage(this.revisionComment);
+		if (revisionComment != null) {
+			commentComposite.setMessage(revisionComment);
 		}
 	}
 
+	@Override
 	public String getHelpId() {
 		return "org.eclipse.team.svn.help.revisionDialogContext"; //$NON-NLS-1$
 	}
 
+	@Override
 	protected void saveChangesImpl() {
-		if (this.resource != null) {
-			this.resource = this.revComposite.getSelectedResource();
-			this.selectedRevision = this.revComposite.getSelectedRevision();
+		if (resource != null) {
+			resource = revComposite.getSelectedResource();
+			selectedRevision = revComposite.getSelectedRevision();
 		}
-		this.commentComposite.saveChanges();
-		this.revisionComment = this.commentComposite.getMessage();
+		commentComposite.saveChanges();
+		revisionComment = commentComposite.getMessage();
 	}
 
+	@Override
 	protected void cancelChangesImpl() {
-		this.commentComposite.cancelChanges();
+		commentComposite.cancelChanges();
 	}
 
 }

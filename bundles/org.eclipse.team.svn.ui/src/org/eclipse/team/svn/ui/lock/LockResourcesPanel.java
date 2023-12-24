@@ -30,8 +30,6 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.team.svn.ui.SVNTeamUIPlugin;
 import org.eclipse.team.svn.ui.SVNUIMessages;
 import org.eclipse.team.svn.ui.composite.CommentComposite;
-import org.eclipse.team.svn.ui.lock.LockResourceSelectionComposite.ILockResourceSelectionChangeListener;
-import org.eclipse.team.svn.ui.lock.LockResourceSelectionComposite.LockResourceSelectionChangedEvent;
 import org.eclipse.team.svn.ui.panel.AbstractDialogPanel;
 import org.eclipse.team.svn.ui.preferences.SVNTeamPreferences;
 import org.eclipse.team.svn.ui.verifier.AbstractVerifier;
@@ -75,6 +73,7 @@ public class LockResourcesPanel extends AbstractDialogPanel {
 		this.defaultMessage = defaultMessage;
 	}
 
+	@Override
 	public void createControlsImpl(Composite parent) {
 		GridLayout layout = null;
 		GridData data = null;
@@ -89,17 +88,17 @@ public class LockResourcesPanel extends AbstractDialogPanel {
 		data = new GridData(GridData.FILL_BOTH);
 		composite.setLayoutData(data);
 
-		if (this.hasComment) {
-			this.sForm = new SashForm(composite, SWT.VERTICAL);
+		if (hasComment) {
+			sForm = new SashForm(composite, SWT.VERTICAL);
 			layout = new GridLayout();
 			layout.marginHeight = layout.marginWidth = 0;
 			layout.verticalSpacing = 3;
-			this.sForm.setLayout(layout);
+			sForm.setLayout(layout);
 			data = new GridData(GridData.FILL_BOTH);
 			data.heightHint = 400;
-			this.sForm.setLayoutData(data);
+			sForm.setLayoutData(data);
 
-			Composite commentParent = new Composite(this.sForm, SWT.NONE);
+			Composite commentParent = new Composite(sForm, SWT.NONE);
 			commentParent.setLayoutData(new GridData(GridData.FILL_BOTH));
 			layout = new GridLayout();
 			layout.verticalSpacing = 4;
@@ -113,18 +112,19 @@ public class LockResourcesPanel extends AbstractDialogPanel {
 			group.setLayoutData(data);
 			group.setText(SVNUIMessages.LockPanel_Comment);
 
-			this.comment = new CommentComposite(group, this);
+			comment = new CommentComposite(group, this);
 			data = new GridData(GridData.FILL_BOTH);
-			this.comment.setLayoutData(data);
+			comment.setLayoutData(data);
 
-			this.forceButton = new Button(commentParent, SWT.CHECK);
+			forceButton = new Button(commentParent, SWT.CHECK);
 			data = new GridData();
-			this.forceButton.setLayoutData(data);
-			this.forceButton.setText(SVNUIMessages.LockResourcesPanel_StealLocks);
-			this.forceButton.setSelection(this.forceLock);
-			this.forceButton.addSelectionListener(new SelectionAdapter() {
+			forceButton.setLayoutData(data);
+			forceButton.setText(SVNUIMessages.LockResourcesPanel_StealLocks);
+			forceButton.setSelection(forceLock);
+			forceButton.addSelectionListener(new SelectionAdapter() {
+				@Override
 				public void widgetSelected(SelectionEvent e) {
-					LockResourcesPanel.this.forceLock = forceButton.getSelection();
+					forceLock = forceButton.getSelection();
 				}
 			});
 
@@ -132,17 +132,14 @@ public class LockResourcesPanel extends AbstractDialogPanel {
 			separator.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		}
 
-		this.selectionComposite = new LockResourceSelectionComposite(this.sForm != null ? this.sForm : composite,
-				SWT.NONE, true, true);
+		selectionComposite = new LockResourceSelectionComposite(sForm != null ? sForm : composite, SWT.NONE, true,
+				true);
 		data = new GridData(GridData.FILL_BOTH);
-		this.selectionComposite.setLayoutData(data);
-		this.selectionComposite.setInput(this.resources);
-		this.selectionComposite.addResourcesSelectionChangedListener(new ILockResourceSelectionChangeListener() {
-			public void resourcesSelectionChanged(LockResourceSelectionChangedEvent event) {
-				LockResourcesPanel.this.validateContent();
-			}
-		});
-		this.attachTo(this.selectionComposite, new AbstractVerifier() {
+		selectionComposite.setLayoutData(data);
+		selectionComposite.setInput(resources);
+		selectionComposite.addResourcesSelectionChangedListener(event -> LockResourcesPanel.this.validateContent());
+		attachTo(selectionComposite, new AbstractVerifier() {
+			@Override
 			protected String getErrorMessage(Control input) {
 				LockResource[] selection = LockResourcesPanel.this.getSelectedResources();
 				if (selection == null || selection.length == 0) {
@@ -151,50 +148,54 @@ public class LockResourcesPanel extends AbstractDialogPanel {
 				return null;
 			}
 
+			@Override
 			protected String getWarningMessage(Control input) {
 				return null;
 			}
 		});
 
-		if (this.hasComment) {
+		if (hasComment) {
 			IPreferenceStore store = SVNTeamUIPlugin.instance().getPreferenceStore();
 			int first = SVNTeamPreferences.getDialogInt(store, SVNTeamPreferences.LOCK_DIALOG_WEIGHT_NAME);
-			this.sForm.setWeights(new int[] { first, 100 - first });
+			sForm.setWeights(new int[] { first, 100 - first });
 		}
 	}
 
 	public String getMessage() {
-		return this.hasComment ? this.comment.getMessage() : null;
+		return hasComment ? comment.getMessage() : null;
 	}
 
 	public boolean getForce() {
-		return this.hasComment ? this.forceLock : false;
+		return hasComment ? forceLock : false;
 	}
 
 	public LockResource[] getSelectedResources() {
-		return this.selectionComposite.getSelectedResources();
+		return selectionComposite.getSelectedResources();
 	}
 
+	@Override
 	protected void saveChangesImpl() {
-		if (this.hasComment) {
-			this.comment.saveChanges();
-			this.savePreferences();
+		if (hasComment) {
+			comment.saveChanges();
+			savePreferences();
 		}
 	}
 
 	protected void savePreferences() {
-		int[] weights = this.sForm.getWeights();
+		int[] weights = sForm.getWeights();
 		IPreferenceStore store = SVNTeamUIPlugin.instance().getPreferenceStore();
 		SVNTeamPreferences.setDialogInt(store, SVNTeamPreferences.LOCK_DIALOG_WEIGHT_NAME, weights[0] / 10);
 	}
 
+	@Override
 	protected void cancelChangesImpl() {
-		if (this.hasComment) {
-			this.comment.cancelChanges();
-			this.savePreferences();
+		if (hasComment) {
+			comment.cancelChanges();
+			savePreferences();
 		}
 	}
 
+	@Override
 	public String getHelpId() {
 		return "org.eclipse.team.svn.help.lockDialogContext"; //$NON-NLS-1$
 	}

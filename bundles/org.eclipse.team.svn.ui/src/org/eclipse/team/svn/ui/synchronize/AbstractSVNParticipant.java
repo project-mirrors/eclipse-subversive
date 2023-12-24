@@ -16,7 +16,6 @@
 package org.eclipse.team.svn.ui.synchronize;
 
 import java.util.Collection;
-import java.util.Iterator;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -65,60 +64,61 @@ public abstract class AbstractSVNParticipant extends SubscriberParticipant imple
 	}
 
 	public AbstractSVNParticipant() {
-		super();
 	}
 
 	public AbstractSVNParticipant(ISynchronizeScope scope) {
 		super(scope);
-		this.setSubscriber(this.getMatchingSubscriber());
+		setSubscriber(getMatchingSubscriber());
 	}
 
+	@Override
 	public void init(String secondaryId, IMemento memento) throws PartInitException {
 		super.init(secondaryId, memento);
-		this.setSubscriber(this.getMatchingSubscriber());
+		setSubscriber(getMatchingSubscriber());
 	}
 
 	public ISynchronizePageConfiguration getConfiguration() {
-		return this.configuration;
+		return configuration;
 	}
 
 	// Change sets support
+	@Override
 	public synchronized ChangeSetCapability getChangeSetCapability() {
-		if (this.capability == null) {
-			this.capability = new SVNChangeSetCapability();
+		if (capability == null) {
+			capability = new SVNChangeSetCapability();
 		}
-		return this.capability;
+		return capability;
 	}
 
 	protected ISynchronizeParticipantDescriptor getDescriptor() {
-		return TeamUI.getSynchronizeManager().getParticipantDescriptor(this.getParticipantId());
+		return TeamUI.getSynchronizeManager().getParticipantDescriptor(getParticipantId());
 	}
 
+	@Override
 	protected boolean isViewerContributionsSupported() {
 		return true;
 	}
 
+	@Override
 	protected void initializeConfiguration(ISynchronizePageConfiguration configuration) {
 		super.initializeConfiguration(configuration);
 
 		this.configuration = configuration;
 
-		Collection<AbstractSynchronizeActionGroup> actionGroups = this.getActionGroups();
+		Collection<AbstractSynchronizeActionGroup> actionGroups = getActionGroups();
 		// menu groups should be configured before actionGroups is added
-		for (Iterator<AbstractSynchronizeActionGroup> it = actionGroups.iterator(); it.hasNext();) {
-			AbstractSynchronizeActionGroup actionGroup = it.next();
+		for (AbstractSynchronizeActionGroup actionGroup : actionGroups) {
 			actionGroup.configureMenuGroups(configuration);
 		}
-		for (Iterator<AbstractSynchronizeActionGroup> it = actionGroups.iterator(); it.hasNext();) {
-			AbstractSynchronizeActionGroup actionGroup = it.next();
+		for (AbstractSynchronizeActionGroup actionGroup : actionGroups) {
 			configuration.addActionContribution(actionGroup);
 		}
 
-		configuration.addLabelDecorator(this.createLabelDecorator(configuration));
+		configuration.addLabelDecorator(createLabelDecorator(configuration));
 
-		if (this.isSetModes()) {
-			configuration.setSupportedModes(this.getSupportedModes());
-			configuration.setMode(this.getDefaultMode());
+		if (isSetModes()) {
+			configuration.setSupportedModes(getSupportedModes());
+			configuration.setMode(getDefaultMode());
 		}
 	}
 
@@ -148,6 +148,7 @@ public abstract class AbstractSVNParticipant extends SubscriberParticipant imple
 	/* (non-Javadoc)
 	 * @see org.eclipse.team.ui.synchronize.subscriber.SubscriberParticipant#setSubscriber(org.eclipse.team.core.subscribers.Subscriber)
 	 */
+	@Override
 	protected void setSubscriber(Subscriber subscriber) {
 		super.setSubscriber(subscriber);
 		try {

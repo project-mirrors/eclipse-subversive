@@ -60,12 +60,14 @@ public class SVNScmUrlImportWizardPage extends WizardPage implements IScmUrlImpo
 
 	private class SvnLabelProvider extends StyledCellLabelProvider implements ILabelProvider {
 
+		@Override
 		public Image getImage(Object element) {
 			return PlatformUI.getWorkbench().getSharedImages().getImage(IDE.SharedImages.IMG_OBJ_PROJECT);
 		}
 
+		@Override
 		public String getText(Object element) {
-			return this.getStyledText(element).getString();
+			return getStyledText(element).getString();
 		}
 
 		@Override
@@ -103,23 +105,24 @@ public class SVNScmUrlImportWizardPage extends WizardPage implements IScmUrlImpo
 
 	public SVNScmUrlImportWizardPage() {
 		super("svn", SVNUIMessages.SVNScmUrlImportWizardPage_Title, null); //$NON-NLS-1$
-		this.setDescription(SVNUIMessages.SVNScmUrlImportWizardPage_Description);
+		setDescription(SVNUIMessages.SVNScmUrlImportWizardPage_Description);
 	}
 
+	@Override
 	public void createControl(Composite parent) {
 		Composite comp = SWTUtils.createHVFillComposite(parent, SWTUtils.MARGINS_NONE, 1);
 		Composite group = SWTUtils.createHFillComposite(comp, SWTUtils.MARGINS_NONE, 1);
 
 		Button versions = SWTUtils.createRadioButton(group, SVNUIMessages.SVNScmUrlImportWizardPage_ImportVersion);
-		this.useHead = SWTUtils.createRadioButton(group, SVNUIMessages.SVNScmUrlImportWizardPage_ImportHEAD);
+		useHead = SWTUtils.createRadioButton(group, SVNUIMessages.SVNScmUrlImportWizardPage_ImportHEAD);
 		SelectionListener listener = new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				SVNScmUrlImportWizardPage.this.bundlesViewer.refresh(true);
+				bundlesViewer.refresh(true);
 			}
 		};
 		versions.addSelectionListener(listener);
-		this.useHead.addSelectionListener(listener);
+		useHead.addSelectionListener(listener);
 
 		Table table = new Table(comp, SWT.BORDER | SWT.MULTI | SWT.V_SCROLL);
 		GridData gd = new GridData(GridData.FILL_BOTH);
@@ -127,12 +130,12 @@ public class SVNScmUrlImportWizardPage extends WizardPage implements IScmUrlImpo
 		gd.widthHint = 225;
 		table.setLayoutData(gd);
 
-		this.bundlesViewer = new TableViewer(table);
-		this.bundlesViewer.setLabelProvider(new SvnLabelProvider());
-		this.bundlesViewer.setContentProvider(new ArrayContentProvider());
-		this.bundlesViewer.setComparator(new ViewerComparator());
-		this.counterLabel = new Label(comp, SWT.NONE);
-		this.counterLabel.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		bundlesViewer = new TableViewer(table);
+		bundlesViewer.setLabelProvider(new SvnLabelProvider());
+		bundlesViewer.setContentProvider(new ArrayContentProvider());
+		bundlesViewer.setComparator(new ViewerComparator());
+		counterLabel = new Label(comp, SWT.NONE);
+		counterLabel.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		setControl(comp);
 		setPageComplete(true);
 
@@ -146,21 +149,22 @@ public class SVNScmUrlImportWizardPage extends WizardPage implements IScmUrlImpo
 		// versions.setSelection(!useHEAD);
 
 		// force using HEAD => see disabled code above
-		this.useHead.setSelection(true);
+		useHead.setSelection(true);
 		versions.setEnabled(false);
 
-		if (this.descriptions != null) {
-			this.bundlesViewer.setInput(this.descriptions);
+		if (descriptions != null) {
+			bundlesViewer.setInput(descriptions);
 			updateCount();
 		}
 
 	}
 
+	@Override
 	public boolean finish() {
 
 		boolean head = false;
 		if (getControl() != null) {
-			head = this.useHead.getSelection();
+			head = useHead.getSelection();
 			// store settings
 			IDialogSettings settings = getWizard().getDialogSettings();
 			if (settings != null) {
@@ -174,26 +178,28 @@ public class SVNScmUrlImportWizardPage extends WizardPage implements IScmUrlImpo
 			}
 		}
 
-		if (head && this.descriptions != null) {
+		if (head && descriptions != null) {
 			// modify tags on bundle import descriptions
-			for (int i = 0; i < this.descriptions.length; i++) {
-				URI scmUri = this.descriptions[i].getUri();
-				this.descriptions[i].setUrl(removeTag(scmUri));
+			for (ScmUrlImportDescription description : descriptions) {
+				URI scmUri = description.getUri();
+				description.setUrl(removeTag(scmUri));
 			}
 		}
 
 		return true;
 	}
 
+	@Override
 	public ScmUrlImportDescription[] getSelection() {
-		return this.descriptions;
+		return descriptions;
 	}
 
+	@Override
 	public void setSelection(ScmUrlImportDescription[] descriptions) {
 		this.descriptions = descriptions;
 		// fill viewer
-		if (this.bundlesViewer != null) {
-			this.bundlesViewer.setInput(descriptions);
+		if (bundlesViewer != null) {
+			bundlesViewer.setInput(descriptions);
 			updateCount();
 		}
 	}
@@ -202,9 +208,9 @@ public class SVNScmUrlImportWizardPage extends WizardPage implements IScmUrlImpo
 	 * Updates the count of bundles that will be imported
 	 */
 	private void updateCount() {
-		this.counterLabel.setText(
-				NLS.bind(SVNUIMessages.SVNScmUrlImportWizardPage_Counter, new Integer(this.descriptions.length)));
-		this.counterLabel.getParent().layout();
+		counterLabel.setText(
+				NLS.bind(SVNUIMessages.SVNScmUrlImportWizardPage_Counter, Integer.valueOf(descriptions.length)));
+		counterLabel.getParent().layout();
 	}
 
 	private static String getTag(URI scmUri) {

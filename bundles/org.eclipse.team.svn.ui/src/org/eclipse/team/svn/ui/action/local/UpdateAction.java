@@ -46,12 +46,14 @@ import org.eclipse.team.svn.ui.utility.UnacceptableOperationNotificator;
 public class UpdateAction extends AbstractRecursiveTeamAction {
 
 	public static IStateFilter SF_MISSING_RESOURCES = new IStateFilter.AbstractStateFilter() {
+		@Override
 		protected boolean acceptImpl(ILocalResource local, IResource resource, String state, int mask) {
-			//we shouldn't take into account resources with tree conflicts here 
+			//we shouldn't take into account resources with tree conflicts here
 			return IStateFilter.SF_MISSING.accept(resource, state, mask)
 					&& !IStateFilter.SF_TREE_CONFLICTING.accept(resource, state, mask);
 		}
 
+		@Override
 		protected boolean allowsRecursionImpl(ILocalResource local, IResource resource, String state, int mask) {
 			return IStateFilter.SF_ONREPOSITORY.accept(resource, state, mask)
 					|| IStateFilter.SF_UNVERSIONED_EXTERNAL.accept(resource, state, mask);
@@ -59,28 +61,29 @@ public class UpdateAction extends AbstractRecursiveTeamAction {
 	};
 
 	public UpdateAction() {
-		super();
 	}
 
+	@Override
 	public void runImpl(IAction action) {
 		IResource[] resources = UnacceptableOperationNotificator.shrinkResourcesWithNotOnRespositoryParents(
-				this.getShell(), this.getSelectedResources(IStateFilter.SF_ONREPOSITORY));
+				getShell(), this.getSelectedResources(IStateFilter.SF_ONREPOSITORY));
 		if (resources == null || resources.length == 0) {
 			return;
 		}
 
-		if (this.checkForResourcesPresenceRecursive(IStateFilter.SF_REVERTABLE)) {
+		if (checkForResourcesPresenceRecursive(IStateFilter.SF_REVERTABLE)) {
 			IResource[] missing = this.getSelectedResourcesRecursive(UpdateAction.SF_MISSING_RESOURCES);
-			if (missing.length > 0 && !UpdateAction.updateMissing(this.getShell(), missing)) {
+			if (missing.length > 0 && !UpdateAction.updateMissing(getShell(), missing)) {
 				return;
 			}
 		}
 
-		this.runScheduled(UpdateAction.getUpdateOperation(resources, SVNRevision.HEAD));
+		runScheduled(UpdateAction.getUpdateOperation(resources, SVNRevision.HEAD));
 	}
 
+	@Override
 	public boolean isEnabled() {
-		return this.checkForResourcesPresence(IStateFilter.SF_ONREPOSITORY);
+		return checkForResourcesPresence(IStateFilter.SF_ONREPOSITORY);
 	}
 
 	public static boolean updateMissing(Shell shell, IResource[] missing) {
@@ -115,6 +118,7 @@ public class UpdateAction extends AbstractRecursiveTeamAction {
 		return op;
 	}
 
+	@Override
 	protected boolean needsToSaveDirtyEditors() {
 		return true;
 	}

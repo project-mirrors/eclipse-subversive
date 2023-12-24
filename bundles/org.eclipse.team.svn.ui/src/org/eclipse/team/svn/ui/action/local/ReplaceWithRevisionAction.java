@@ -16,7 +16,7 @@ package org.eclipse.team.svn.ui.action.local;
 
 import org.eclipse.core.resources.IResource;
 import org.eclipse.jface.action.IAction;
-import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.team.svn.core.IStateFilter;
 import org.eclipse.team.svn.core.operation.CompositeOperation;
@@ -43,19 +43,20 @@ import org.eclipse.team.svn.ui.preferences.SVNTeamPreferences;
  */
 public class ReplaceWithRevisionAction extends AbstractNonRecursiveTeamAction {
 	public ReplaceWithRevisionAction() {
-		super();
 	}
 
+	@Override
 	public void runImpl(IAction action) {
 		IResource[] resources = this.getSelectedResources(IStateFilter.SF_ONREPOSITORY);
-		IActionOperation op = ReplaceWithRevisionAction.getReplaceOperation(resources, this.getShell());
+		IActionOperation op = ReplaceWithRevisionAction.getReplaceOperation(resources, getShell());
 		if (op != null) {
-			this.runScheduled(op);
+			runScheduled(op);
 		}
 	}
 
+	@Override
 	public boolean isEnabled() {
-		return this.getSelectedResources().length == 1 && this.checkForResourcesPresence(IStateFilter.SF_ONREPOSITORY);
+		return this.getSelectedResources().length == 1 && checkForResourcesPresence(IStateFilter.SF_ONREPOSITORY);
 	}
 
 	public static IActionOperation getReplaceOperation(IResource[] resources, Shell shell) {
@@ -65,7 +66,7 @@ public class ReplaceWithRevisionAction extends AbstractNonRecursiveTeamAction {
 		ReplaceWithUrlPanel panel = new ReplaceWithUrlPanel(remote, local.getRevision());
 		DefaultDialog selectionDialog = new DefaultDialog(shell, panel);
 
-		if (selectionDialog.open() == Dialog.OK) {
+		if (selectionDialog.open() == Window.OK) {
 			ReplaceWarningDialog dialog = new ReplaceWarningDialog(shell);
 			if (dialog.open() == 0) {
 				IRepositoryResource selected = panel.getSelectedResource();

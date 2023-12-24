@@ -32,14 +32,16 @@ public class MoveResourcesOperation extends AbstractCopyMoveResourcesOperation {
 		super("Operation_MoveRemote", SVNMessages.class, destinationResource, selectedResources, message, name); //$NON-NLS-1$
 	}
 
+	@Override
 	protected String[] getRevisionPaths(String srcUrl, String dstUrl) {
 		return new String[] { srcUrl, dstUrl };
 	}
 
+	@Override
 	protected void runCopyMove(ISVNConnector proxy, SVNEntryRevisionReference[] source, String[] sourcePaths,
 			String destinationUrl, IProgressMonitor monitor) throws Exception {
 		//this.writeToConsole(IConsoleStream.LEVEL_CMD, "svn move \"" + SVNUtility.decodeURL(sourceUrl) + "\" \"" + SVNUtility.decodeURL(destinationUrl) + "\" -m \"" + this.message + "\"" + FileUtility.getUsernameParam(current.getRepositoryLocation().getUsername()) + "\n");
-		proxy.moveRemote(sourcePaths, destinationUrl, this.message, ISVNConnector.CommandMasks.COPY_SERVER, null,
+		proxy.moveRemote(sourcePaths, destinationUrl, message, ISVNConnector.CommandMasks.COPY_SERVER, null,
 				new SVNProgressMonitor(this, monitor, null));
 	}
 

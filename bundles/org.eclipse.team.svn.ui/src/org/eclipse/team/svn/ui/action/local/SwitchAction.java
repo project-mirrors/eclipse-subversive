@@ -54,17 +54,17 @@ import org.eclipse.team.svn.ui.utility.UIMonitorUtility;
 public class SwitchAction extends AbstractNonRecursiveTeamAction {
 
 	public SwitchAction() {
-		super();
 	}
 
+	@Override
 	public void runImpl(IAction action) {
 		IResource[] resources = this.getSelectedResources(IStateFilter.SF_EXCLUDE_DELETED);
 
-		if (!OperationErrorDialog.isAcceptableAtOnce(resources, SVNUIMessages.SwitchAction_Error, this.getShell())) {
+		if (!OperationErrorDialog.isAcceptableAtOnce(resources, SVNUIMessages.SwitchAction_Error, getShell())) {
 			return;
 		}
 
-		// in case of multiple switch selected repository resource should be recognized as branch/tag/trunk (using copied from). If "copied from" inaccessible multi switch will fails, single switch for project should be performed like for folders 
+		// in case of multiple switch selected repository resource should be recognized as branch/tag/trunk (using copied from). If "copied from" inaccessible multi switch will fails, single switch for project should be performed like for folders
 
 		//FIXME peg revision, revision limitation ???
 		SwitchPanel panel;
@@ -86,7 +86,7 @@ public class SwitchAction extends AbstractNonRecursiveTeamAction {
 			panel = new SwitchPanel(remote, local.getRevision(), resources[0] instanceof IContainer);
 		}
 
-		DefaultDialog dialog = new DefaultDialog(this.getShell(), panel);
+		DefaultDialog dialog = new DefaultDialog(getShell(), panel);
 		if (dialog.open() == 0) {
 			IRepositoryResource[] destinations = panel.getSelection(resources);
 			boolean ignoreExternals = SVNTeamPreferences.getBehaviourBoolean(
@@ -98,7 +98,7 @@ public class SwitchAction extends AbstractNonRecursiveTeamAction {
 			CompositeOperation op = new CompositeOperation(mainOp.getId(), mainOp.getMessagesClass());
 
 			// see bug #406580
-			HashMap<IResource, String> externalsMap = new HashMap<IResource, String>();
+			HashMap<IResource, String> externalsMap = new HashMap<>();
 			for (int i = 0; i < resources.length; i++) {
 				ILocalResource local = SVNRemoteStorage.instance().asLocalResource(resources[i]);
 				if ((local.getChangeMask() & ILocalResource.IS_SVN_EXTERNALS) != 0) {
@@ -152,14 +152,16 @@ public class SwitchAction extends AbstractNonRecursiveTeamAction {
 			op.add(new RefreshResourcesOperation(resources));
 			op.add(new NotifyUnresolvedConflictOperation(mainOp));
 
-			this.runScheduled(op);
+			runScheduled(op);
 		}
 	}
 
+	@Override
 	public boolean isEnabled() {
-		return this.checkForResourcesPresence(IStateFilter.SF_EXCLUDE_DELETED);
+		return checkForResourcesPresence(IStateFilter.SF_EXCLUDE_DELETED);
 	}
 
+	@Override
 	protected boolean needsToSaveDirtyEditors() {
 		return true;
 	}

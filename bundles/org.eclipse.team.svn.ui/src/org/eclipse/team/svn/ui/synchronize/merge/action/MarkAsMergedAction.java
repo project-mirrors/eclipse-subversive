@@ -41,12 +41,15 @@ public class MarkAsMergedAction extends AbstractSynchronizeModelAction {
 		super(text, configuration);
 	}
 
+	@Override
 	protected boolean needsToSaveDirtyEditors() {
 		return false;
 	}
 
+	@Override
 	protected FastSyncInfoFilter getSyncInfoFilter() {
 		return new FastSyncInfoFilter.SyncInfoDirectionFilter(new int[] { SyncInfo.CONFLICTING }) {
+			@Override
 			public boolean select(SyncInfo info) {
 				return super.select(info)
 						&& !IStateFilter.SF_OBSTRUCTED.accept(((AbstractSVNSyncInfo) info).getLocalResource())
@@ -55,8 +58,9 @@ public class MarkAsMergedAction extends AbstractSynchronizeModelAction {
 		};
 	}
 
+	@Override
 	protected IActionOperation getOperation(ISynchronizePageConfiguration configuration, IDiffElement[] elements) {
-		IResource[] resources = this.syncInfoSelector.getSelectedResources();
+		IResource[] resources = syncInfoSelector.getSelectedResources();
 
 		MarkResolvedOperation mainOp = new MarkResolvedOperation(resources, SVNConflictResolution.Choice.CHOOSE_MERGED,
 				SVNDepth.INFINITY);

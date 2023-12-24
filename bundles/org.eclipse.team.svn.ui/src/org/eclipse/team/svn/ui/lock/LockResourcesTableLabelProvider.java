@@ -39,7 +39,7 @@ import org.eclipse.team.svn.ui.utility.UIMonitorUtility;
  */
 public class LockResourcesTableLabelProvider implements ITableLabelProvider, IFontProvider {
 
-	protected Map<ImageDescriptor, Image> images = new HashMap<ImageDescriptor, Image>();
+	protected Map<ImageDescriptor, Image> images = new HashMap<>();
 
 	protected boolean hasCheckBoxes;
 
@@ -62,20 +62,21 @@ public class LockResourcesTableLabelProvider implements ITableLabelProvider, IFo
 		//init font
 		Font defaultFont = JFaceResources.getDefaultFont();
 		FontData[] data = defaultFont.getFontData();
-		for (int i = 0; i < data.length; i++) {
-			data[i].setStyle(SWT.BOLD);
+		for (FontData element : data) {
+			element.setStyle(SWT.BOLD);
 		}
-		this.boldFont = new Font(UIMonitorUtility.getDisplay(), data);
+		boldFont = new Font(UIMonitorUtility.getDisplay(), data);
 	}
 
+	@Override
 	public Image getColumnImage(Object element, int columnIndex) {
 		LockResource node = (LockResource) element;
 		if (LockResourcesTableLabelProvider.isFakePending(node)) {
 			if (columnIndex == LockResourceSelectionComposite.COLUMN_NAME) {
-				Image img = this.images.get(PENDING_IMAGE_DESCRIPTOR);
+				Image img = images.get(PENDING_IMAGE_DESCRIPTOR);
 				if (img == null) {
 					img = PENDING_IMAGE_DESCRIPTOR.createImage();
-					this.images.put(PENDING_IMAGE_DESCRIPTOR, img);
+					images.put(PENDING_IMAGE_DESCRIPTOR, img);
 				}
 				return img;
 			}
@@ -84,23 +85,24 @@ public class LockResourcesTableLabelProvider implements ITableLabelProvider, IFo
 			return null;
 		}
 
-		if (this.hasCheckBoxes && columnIndex == LockResourceSelectionComposite.COLUMN_NAME
-				|| !this.hasCheckBoxes && columnIndex == 0) {
+		if (hasCheckBoxes && columnIndex == LockResourceSelectionComposite.COLUMN_NAME
+				|| !hasCheckBoxes && columnIndex == 0) {
 			String fileName = node.getName();
 			ImageDescriptor descr = SVNTeamUIPlugin.instance()
 					.getWorkbench()
 					.getEditorRegistry()
 					.getImageDescriptor(fileName);
-			Image img = this.images.get(descr);
+			Image img = images.get(descr);
 			if (img == null) {
 				img = descr.createImage();
-				this.images.put(descr, img);
+				images.put(descr, img);
 			}
 			return img;
 		}
 		return null;
 	}
 
+	@Override
 	public String getColumnText(Object element, int columnIndex) {
 		LockResource node = (LockResource) element;
 		if (LockResourcesTableLabelProvider.isFakePending(node)) {
@@ -145,27 +147,32 @@ public class LockResourcesTableLabelProvider implements ITableLabelProvider, IFo
 		return ""; //$NON-NLS-1$
 	}
 
+	@Override
 	public void dispose() {
-		for (Image img : this.images.values()) {
+		for (Image img : images.values()) {
 			img.dispose();
 		}
-		this.boldFont.dispose();
+		boldFont.dispose();
 	}
 
+	@Override
 	public boolean isLabelProperty(Object element, String property) {
 		return true;
 	}
 
+	@Override
 	public void addListener(ILabelProviderListener listener) {
 
 	}
 
+	@Override
 	public void removeListener(ILabelProviderListener listener) {
 
 	}
 
+	@Override
 	public Font getFont(Object element) {
-		return this.isRequireBoldFont(element) ? this.boldFont : null;
+		return isRequireBoldFont(element) ? boldFont : null;
 	}
 
 	protected boolean isRequireBoldFont(Object element) {

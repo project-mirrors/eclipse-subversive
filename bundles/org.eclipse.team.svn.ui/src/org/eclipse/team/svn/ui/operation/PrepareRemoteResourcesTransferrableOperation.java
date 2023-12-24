@@ -44,15 +44,17 @@ public class PrepareRemoteResourcesTransferrableOperation extends AbstractAction
 		this.operation = operation;
 	}
 
+	@Override
 	public int getOperationWeight() {
 		return 0;
 	}
 
+	@Override
 	protected void runImpl(IProgressMonitor monitor) throws Exception {
-		Clipboard clipboard = new Clipboard(this.display);
+		Clipboard clipboard = new Clipboard(display);
 		try {
 			clipboard.setContents(
-					new Object[] { new RemoteResourceTransferrable(this.resources, this.operation) },
+					new Object[] { new RemoteResourceTransferrable(resources, operation) },
 					new Transfer[] { RemoteResourceTransfer.getInstance() });
 		} finally {
 			clipboard.dispose();

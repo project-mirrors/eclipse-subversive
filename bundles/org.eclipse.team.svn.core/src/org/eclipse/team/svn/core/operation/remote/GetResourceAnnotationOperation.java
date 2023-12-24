@@ -60,12 +60,12 @@ public class GetResourceAnnotationOperation extends AbstractRepositoryOperation 
 	}
 
 	public boolean getIncludeMerged() {
-		return (this.options & ISVNConnector.Options.INCLUDE_MERGED_REVISIONS) != 0;
+		return (options & ISVNConnector.Options.INCLUDE_MERGED_REVISIONS) != 0;
 	}
 
 	public void setIncludeMerged(boolean includeMerged) {
-		this.options &= ~ISVNConnector.Options.INCLUDE_MERGED_REVISIONS;
-		this.options |= includeMerged ? ISVNConnector.Options.INCLUDE_MERGED_REVISIONS : ISVNConnector.Options.NONE;
+		options &= ~ISVNConnector.Options.INCLUDE_MERGED_REVISIONS;
+		options |= includeMerged ? ISVNConnector.Options.INCLUDE_MERGED_REVISIONS : ISVNConnector.Options.NONE;
 	}
 
 	public void setRetryIfMergeInfoNotSupported(boolean isRetryIfMergeInfoNotSupported) {
@@ -73,53 +73,51 @@ public class GetResourceAnnotationOperation extends AbstractRepositoryOperation 
 	}
 
 	public IRepositoryResource getRepositoryResource() {
-		return this.operableData()[0];
+		return operableData()[0];
 	}
 
 	public SVNAnnotationData[] getAnnotatedLines() {
-		return this.annotatedLines;
+		return annotatedLines;
 	}
 
 	public byte[] getContent() {
-		return this.content;
+		return content;
 	}
 
+	@Override
 	protected void runImpl(IProgressMonitor monitor) throws Exception {
 		final ByteArrayOutputStream stream = new ByteArrayOutputStream();
-		final ArrayList<SVNAnnotationData> lines = new ArrayList<SVNAnnotationData>();
-		IRepositoryResource resource = this.operableData()[0];
+		final ArrayList<SVNAnnotationData> lines = new ArrayList<>();
+		IRepositoryResource resource = operableData()[0];
 		IRepositoryLocation location = resource.getRepositoryLocation();
 		ISVNConnector proxy = location.acquireSVNProxy();
 		try {
 //			this.writeToConsole(IConsoleStream.LEVEL_CMD, "svn blame " + url + "@" + resource.getPegRevision() + " -r 0:" + resource.getSelectedRevision() + " --username \"" + location.getUsername() + "\"\n");
 
-			ISVNAnnotationCallback callback = new ISVNAnnotationCallback() {
-				public void annotate(String line, SVNAnnotationData data) {
-					lines.add(data);
-					try {
-						stream.write((line + "\n").getBytes()); //$NON-NLS-1$
-					} catch (IOException e) {
-						throw new RuntimeException(e);
-					}
+			ISVNAnnotationCallback callback = (line, data) -> {
+				lines.add(data);
+				try {
+					stream.write((line + "\n").getBytes()); //$NON-NLS-1$
+				} catch (IOException e) {
+					throw new RuntimeException(e);
 				}
 			};
 
 			try {
 				proxy.annotate(
-						SVNUtility.getEntryReference(resource),
-						new SVNRevisionRange(this.revisions.from, this.revisions.to), this.options,
-						ISVNConnector.DiffOptions.NONE, callback, new SVNProgressMonitor(this, monitor, null));
+						SVNUtility.getEntryReference(resource), new SVNRevisionRange(revisions.from, revisions.to),
+						options, ISVNConnector.DiffOptions.NONE, callback, new SVNProgressMonitor(this, monitor, null));
 			} catch (SVNConnectorException ex) {
 				/*
 				 * If SVN server doesn't support merged revisions, then we re-call without this option
 				 */
-				if (this.isRetryIfMergeInfoNotSupported && ex.getErrorId() == SVNErrorCodes.unsupportedFeature
-						&& (this.options & Options.INCLUDE_MERGED_REVISIONS) != 0) {
-					this.options &= ~Options.INCLUDE_MERGED_REVISIONS;
+				if (isRetryIfMergeInfoNotSupported && ex.getErrorId() == SVNErrorCodes.unsupportedFeature
+						&& (options & Options.INCLUDE_MERGED_REVISIONS) != 0) {
+					options &= ~Options.INCLUDE_MERGED_REVISIONS;
 					proxy.annotate(
-							SVNUtility.getEntryReference(resource),
-							new SVNRevisionRange(this.revisions.from, this.revisions.to), this.options,
-							ISVNConnector.DiffOptions.NONE, callback, new SVNProgressMonitor(this, monitor, null));
+							SVNUtility.getEntryReference(resource), new SVNRevisionRange(revisions.from, revisions.to),
+							options, ISVNConnector.DiffOptions.NONE, callback,
+							new SVNProgressMonitor(this, monitor, null));
 				} else {
 					throw ex;
 				}
@@ -127,16 +125,17 @@ public class GetResourceAnnotationOperation extends AbstractRepositoryOperation 
 		} finally {
 			location.releaseSVNProxy(proxy);
 		}
-		this.annotatedLines = lines.toArray(new SVNAnnotationData[lines.size()]);
-		this.content = stream.toByteArray();
+		annotatedLines = lines.toArray(new SVNAnnotationData[lines.size()]);
+		content = stream.toByteArray();
 	}
 
+	@Override
 	protected String getShortErrorMessage(Throwable t) {
 		if (t instanceof SVNConnectorException
 				&& ((SVNConnectorException) t).getErrorId() == SVNErrorCodes.clientIsBinaryFile) {
-			return this.getOperationResource("Error_IsBinary"); //$NON-NLS-1$
+			return getOperationResource("Error_IsBinary"); //$NON-NLS-1$
 		}
-		return BaseMessages.format(super.getShortErrorMessage(t), new Object[] { this.operableData()[0].getName() });
+		return BaseMessages.format(super.getShortErrorMessage(t), new Object[] { operableData()[0].getName() });
 	}
 
 }

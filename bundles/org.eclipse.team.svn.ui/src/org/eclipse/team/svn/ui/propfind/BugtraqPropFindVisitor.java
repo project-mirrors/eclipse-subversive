@@ -32,48 +32,44 @@ public class BugtraqPropFindVisitor implements IPropFindVisitor {
 	protected Set<String> bugtraqProperties;
 
 	public BugtraqPropFindVisitor() {
-		this.model = new BugtraqModel();
-		this.bugtraqProperties = new HashSet<String>(
-				Arrays.asList(new String[] { "bugtraq:url", //$NON-NLS-1$
-						"bugtraq:logregex", //$NON-NLS-1$
-						"bugtraq:label", //$NON-NLS-1$
-						"bugtraq:message", //$NON-NLS-1$
-						"bugtraq:number", //$NON-NLS-1$
-						"bugtraq:warnifnoissue", //$NON-NLS-1$
-						"bugtraq:append" })); //$NON-NLS-1$
+		model = new BugtraqModel();
+		bugtraqProperties = new HashSet<>(
+				Arrays.asList("bugtraq:url", "bugtraq:logregex", "bugtraq:label", "bugtraq:message", "bugtraq:number", //$NON-NLS-1$
+						"bugtraq:warnifnoissue", "bugtraq:append"));
 	}
 
+	@Override
 	public boolean visit(SVNProperty propertyParam) {
-		if (this.bugtraqProperties.contains(propertyParam.name)) {
-			this.processBugtraqProperty(propertyParam.name, propertyParam.value);
-			this.bugtraqProperties.remove(propertyParam.name);
+		if (bugtraqProperties.contains(propertyParam.name)) {
+			processBugtraqProperty(propertyParam.name, propertyParam.value);
+			bugtraqProperties.remove(propertyParam.name);
 		}
 		return true;
 	}
 
 	protected void processBugtraqProperty(String name, String value) {
 		if (name.equals("bugtraq:url")) { //$NON-NLS-1$
-			this.model.setUrl(value);
+			model.setUrl(value);
 		} else if (name.equals("bugtraq:logregex")) { //$NON-NLS-1$
-			this.model.setLogregex(value);
+			model.setLogregex(value);
 		} else if (name.equals("bugtraq:label")) { //$NON-NLS-1$
-			this.model.setLabel(value);
+			model.setLabel(value);
 		} else if (name.equals("bugtraq:message")) { //$NON-NLS-1$
-			this.model.setMessage(value);
+			model.setMessage(value);
 		} else if (name.equals("bugtraq:number")) { //$NON-NLS-1$
 			boolean number = value == null || !(value.trim().equals("false") || value.trim().equals("no")); //$NON-NLS-1$ //$NON-NLS-2$
-			this.model.setNumber(number);
+			model.setNumber(number);
 		} else if (name.equals("bugtraq:warnifnoissue")) { //$NON-NLS-1$
 			boolean warn = value != null && (value.trim().equals("yes") || value.trim().equals("true")); //$NON-NLS-1$ //$NON-NLS-2$
-			this.model.setWarnIfNoIssue(warn);
+			model.setWarnIfNoIssue(warn);
 		} else if (name.equals("bugtraq:append")) { //$NON-NLS-1$
 			boolean append = value == null || !(value.trim().equals("false") || value.trim().equals("no")); //$NON-NLS-1$ //$NON-NLS-2$
-			this.model.setAppend(append);
+			model.setAppend(append);
 		}
 	}
 
 	public BugtraqModel getBugtraqModel() {
-		return this.model;
+		return model;
 	}
 
 }

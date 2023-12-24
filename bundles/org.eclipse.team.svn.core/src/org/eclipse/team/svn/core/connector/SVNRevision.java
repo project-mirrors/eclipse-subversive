@@ -69,9 +69,10 @@ public class SVNRevision {
 
 		private final String name;
 
+		@Override
 		public String toString() {
 			// and there is no need for named representations of numeric/date kinds. So, they're empty.
-			return this.name;
+			return name;
 		}
 
 		public static Kind fromId(int id) {
@@ -83,7 +84,7 @@ public class SVNRevision {
 			throw new IllegalArgumentException("Invalid revision kind: " + id); //$NON-NLS-1$
 		}
 
-		private Kind(int id, String name) {
+		Kind(int id, String name) {
 			this.id = id;
 			this.name = name;
 		}
@@ -142,28 +143,31 @@ public class SVNRevision {
 		 * @return number
 		 */
 		public long getNumber() {
-			return this.revNumber;
+			return revNumber;
 		}
 
+		@Override
 		public String toString() {
-			return String.valueOf(this.revNumber);
+			return String.valueOf(revNumber);
 		}
 
+		@Override
 		public int hashCode() {
 			int result = 31;
-			result += this.revKind.id;
-			result = 31 * result + (int) this.revNumber;
-			result = 31 * result + (int) (this.revNumber >> 32);
+			result += revKind.id;
+			result = 31 * result + (int) revNumber;
+			result = 31 * result + (int) (revNumber >> 32);
 			return result;
 		}
 
+		@Override
 		public boolean equals(Object target) {
-			return super.equals(target) && ((SVNRevision.Number) target).revNumber == this.revNumber;
+			return super.equals(target) && ((SVNRevision.Number) target).revNumber == revNumber;
 		}
 
 		protected Number(long number) {
 			super(Kind.NUMBER);
-			this.revNumber = number;
+			revNumber = number;
 		}
 
 	}
@@ -180,30 +184,33 @@ public class SVNRevision {
 		 * @return the date
 		 */
 		public long getDate() {
-			return this.revDate;
+			return revDate;
 		}
 
+		@Override
 		public String toString() {
 			DateFormat dateTimeFormat = DateFormat.getDateTimeInstance(DateFormat.DEFAULT, DateFormat.DEFAULT,
 					Locale.getDefault());
-			return dateTimeFormat.format(new java.util.Date(this.revDate));
+			return dateTimeFormat.format(new java.util.Date(revDate));
 		}
 
+		@Override
 		public int hashCode() {
 			int result = 31;
-			result += this.revKind.id;
-			result = 31 * result + (int) this.revDate;
-			result = 31 * result + (int) (this.revDate >> 32);
+			result += revKind.id;
+			result = 31 * result + (int) revDate;
+			result = 31 * result + (int) (revDate >> 32);
 			return result;
 		}
 
+		@Override
 		public boolean equals(Object target) {
-			return super.equals(target) && ((SVNRevision.Date) target).revDate == this.revDate;
+			return super.equals(target) && ((SVNRevision.Date) target).revDate == revDate;
 		}
 
 		protected Date(long date) {
 			super(Kind.DATE);
-			this.revDate = date;
+			revDate = date;
 		}
 
 	}
@@ -331,17 +338,20 @@ public class SVNRevision {
 	 * @return the revision kind
 	 */
 	public Kind getKind() {
-		return this.revKind;
+		return revKind;
 	}
 
+	@Override
 	public String toString() {
-		return this.revKind.toString();
+		return revKind.toString();
 	}
 
+	@Override
 	public int hashCode() {
-		return this.revKind.id;
+		return revKind.id;
 	}
 
+	@Override
 	public boolean equals(Object target) {
 		if (this == target) {
 			return true;
@@ -350,11 +360,11 @@ public class SVNRevision {
 			return false;
 		}
 
-		return ((SVNRevision) target).revKind == this.revKind;
+		return ((SVNRevision) target).revKind == revKind;
 	}
 
 	protected SVNRevision(Kind kind) {
-		this.revKind = kind;
+		revKind = kind;
 	}
 
 }

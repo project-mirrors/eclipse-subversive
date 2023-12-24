@@ -35,11 +35,7 @@ public class BaseMessages extends NLS {
 	 * @return
 	 */
 	public static String getString(String key, Class clazz) {
-		if (key == null) {
-			return null;
-		}
-
-		if (clazz == null) {
+		if ((key == null) || (clazz == null)) {
 			return null;
 		}
 
@@ -63,7 +59,7 @@ public class BaseMessages extends NLS {
 		 * then replace not valid characters to underscore
 		 */
 		if (key.indexOf("-") != -1) { //$NON-NLS-1$
-			key = key.replaceAll("-", "_"); //$NON-NLS-1$ //$NON-NLS-2$
+			key = key.replace('-', '_'); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 
 		try {

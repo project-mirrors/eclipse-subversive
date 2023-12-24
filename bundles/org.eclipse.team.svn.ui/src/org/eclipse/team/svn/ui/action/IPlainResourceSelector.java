@@ -23,7 +23,7 @@ import org.eclipse.team.svn.core.IStateFilter;
  * @author Alexander Gurov
  */
 public interface IPlainResourceSelector {
-	public IResource[] getSelectedResources();
+	IResource[] getSelectedResources();
 
-	public IResource[] getSelectedResources(IStateFilter filter);
+	IResource[] getSelectedResources(IStateFilter filter);
 }

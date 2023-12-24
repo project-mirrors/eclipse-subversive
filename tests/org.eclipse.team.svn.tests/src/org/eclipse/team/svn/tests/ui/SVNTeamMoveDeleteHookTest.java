@@ -54,47 +54,43 @@ public class SVNTeamMoveDeleteHookTest {
 	public void testDeleteFile() throws Exception {
 		// Deleting commited file
 		SVNTeamMoveDeleteHook hook = new SVNTeamMoveDeleteHook();
-		IFile forDeleteCommited = this.getFirstProject().getFile("maven.xml");
+		IFile forDeleteCommited = getFirstProject().getFile("maven.xml");
 		assertTrue(forDeleteCommited.exists());
 		hook.deleteFile(null, forDeleteCommited, IResource.FORCE, new NullProgressMonitor());
 		assertFalse(forDeleteCommited.exists());
 
 		// Deleting unversioned file
-		FileOutputStream fos = null;
-		try {
-			fos = new FileOutputStream(this.getFirstProject().getLocation().toString() + "/testFile");
+		try (FileOutputStream fos = new FileOutputStream(getFirstProject().getLocation().toString() + "/testFile")) {
 			fos.write("contents".getBytes());
-		} finally {
-			fos.close();
 		}
-		IFile forDeleteUnversioned = this.getFirstProject().getFile("testFile");
+		IFile forDeleteUnversioned = getFirstProject().getFile("testFile");
 		assertFalse(hook.deleteFile(null, forDeleteUnversioned, 0, new NullProgressMonitor()));
 	}
 
 	@Test
 	public void testDeleteFolder() throws Exception {
 		// Deleting commited folder
-		IFolder forDeleteCommited = this.getSecondProject().getFolder("web");
+		IFolder forDeleteCommited = getSecondProject().getFolder("web");
 		assertTrue(forDeleteCommited.exists());
 		SVNTeamMoveDeleteHook hook = new SVNTeamMoveDeleteHook();
-		new RefreshResourcesOperation(new IResource[] { this.getSecondProject().getFolder("web"),
-				this.getSecondProject().getFile("web/site.css"), this.getSecondProject().getFile("web/site.xsl") })
+		new RefreshResourcesOperation(new IResource[] { getSecondProject().getFolder("web"),
+				getSecondProject().getFile("web/site.css"), getSecondProject().getFile("web/site.xsl") })
 						.run(new NullProgressMonitor());
 		hook.deleteFolder(null, forDeleteCommited, IResource.FORCE, new NullProgressMonitor());
-		assertFalse(this.getSecondProject().getFile("web/site.css").exists());
+		assertFalse(getSecondProject().getFile("web/site.css").exists());
 
 		// Deleting unversioned folder
-		File newFolder = new File(this.getFirstProject().getLocation().toString() + "/testFolder");
+		File newFolder = new File(getFirstProject().getLocation().toString() + "/testFolder");
 		newFolder.mkdir();
-		IFolder forDeleteUnversioned = this.getFirstProject().getFolder("testFolder");
+		IFolder forDeleteUnversioned = getFirstProject().getFolder("testFolder");
 		assertFalse(hook.deleteFolder(null, forDeleteUnversioned, 0, new NullProgressMonitor()));
 	}
 
 	@Test
 	public void testMoveFile() throws Exception {
 		// Moving commited file to the commited destination
-		IFile source = this.getFirstProject().getFile("maven.xml");
-		IFile destination = this.getFirstProject().getFile("src/maven.xml");
+		IFile source = getFirstProject().getFile("maven.xml");
+		IFile destination = getFirstProject().getFile("src/maven.xml");
 		assertTrue(source.exists());
 		SVNTeamMoveDeleteHook hook = new SVNTeamMoveDeleteHook();
 		hook.moveFile(null, source, destination, IResource.FORCE, new NullProgressMonitor());
@@ -102,72 +98,68 @@ public class SVNTeamMoveDeleteHookTest {
 		assertTrue(destination.exists());
 
 		// Moving commited file to the unversioned destination
-		IFile source2 = this.getSecondProject().getFile("site.xml");
-		File newFolder = new File(this.getFirstProject().getLocation().toString() + "/testFolder");
+		IFile source2 = getSecondProject().getFile("site.xml");
+		File newFolder = new File(getFirstProject().getLocation().toString() + "/testFolder");
 		newFolder.mkdirs();
-		IFile destination2 = this.getFirstProject().getFile("testFolder/site.xml");
+		IFile destination2 = getFirstProject().getFile("testFolder/site.xml");
 		hook.moveFile(null, source2, destination2, IResource.FORCE, new NullProgressMonitor());
 		assertFalse(source2.exists());
 		assertTrue(destination2.exists());
 
 		// Moving unversioned file to the unversioned destination
-		FileOutputStream fos = null;
-		try {
-			fos = new FileOutputStream(this.getSecondProject().getLocation().toString() + "/testFile.txt");
+		try (FileOutputStream fos = new FileOutputStream(getSecondProject().getLocation().toString() + "/testFile.txt")) {
 			fos.write("contents".getBytes());
-		} finally {
-			fos.close();
 		}
-		IFile source3 = this.getSecondProject().getFile("testFile.txt");
-		File newFolder2 = new File(this.getSecondProject().getLocation().toString() + "/testFolder2");
+		IFile source3 = getSecondProject().getFile("testFile.txt");
+		File newFolder2 = new File(getSecondProject().getLocation().toString() + "/testFolder2");
 		newFolder2.mkdir();
-		IFile destination3 = this.getSecondProject().getFile("testFolder2/testFile.txt");
+		IFile destination3 = getSecondProject().getFile("testFolder2/testFile.txt");
 		assertFalse(hook.moveFile(null, source3, destination3, IResource.FORCE, new NullProgressMonitor()));
 		assertFalse(destination3.exists());
 
 		// Moving unversioned file to the commited destination
-		assertFalse(hook.moveFile(null, source3, this.getSecondProject().getFile("web/testFile.txt"), IResource.FORCE,
+		assertFalse(hook.moveFile(null, source3, getSecondProject().getFile("web/testFile.txt"), IResource.FORCE,
 				new NullProgressMonitor()));
 	}
 
 	@Test
 	public void testMoveFolder() throws Exception {
 		// Moving commited folder to the commited destination
-		File sourceFolder = new File(this.getFirstProject().getLocation().toString() + "/commitedFolder");
+		File sourceFolder = new File(getFirstProject().getLocation().toString() + "/commitedFolder");
 		sourceFolder.mkdir();
-		IFolder[] commitedFolder = new IFolder[] { this.getFirstProject().getFolder("commitedFolder") };
+		IFolder[] commitedFolder = { getFirstProject().getFolder("commitedFolder") };
 		new AddToSVNOperation(commitedFolder).run(new NullProgressMonitor());
 		new CommitOperation(commitedFolder, "", false, false).run(new NullProgressMonitor());
 		SVNRemoteStorage.instance().refreshLocalResources(commitedFolder, IResource.DEPTH_INFINITE);
 		commitedFolder[0].refreshLocal(IResource.DEPTH_INFINITE, null);
-		IFolder destination = this.getFirstProject().getFolder("src/testFolder");
+		IFolder destination = getFirstProject().getFolder("src/testFolder");
 		SVNTeamMoveDeleteHook hook = new SVNTeamMoveDeleteHook();
 		IFolder source = commitedFolder[0];
 		assertTrue(hook.moveFolder(null, source, destination, IResource.FORCE, new NullProgressMonitor()));
 		assertTrue(destination.exists());
 
 		// Moving commited folder to the unversioned destination
-		sourceFolder = new File(this.getFirstProject().getLocation().toString() + "/commitedFolder2");
+		sourceFolder = new File(getFirstProject().getLocation().toString() + "/commitedFolder2");
 		sourceFolder.mkdir();
-		commitedFolder = new IFolder[] { this.getFirstProject().getFolder("commitedFolder2") };
+		commitedFolder = new IFolder[] { getFirstProject().getFolder("commitedFolder2") };
 		new AddToSVNOperation(commitedFolder).run(new NullProgressMonitor());
 		new CommitOperation(commitedFolder, "", false, false).run(new NullProgressMonitor());
 		SVNRemoteStorage.instance().refreshLocalResources(commitedFolder, IResource.DEPTH_INFINITE);
 		commitedFolder[0].refreshLocal(IResource.DEPTH_INFINITE, null);
-		File unversionedFolder = new File(this.getFirstProject().getLocation().toString() + "/destinationFolder");
+		File unversionedFolder = new File(getFirstProject().getLocation().toString() + "/destinationFolder");
 		unversionedFolder.mkdir();
-		destination = this.getSecondProject().getFolder("destinationFolder");
+		destination = getSecondProject().getFolder("destinationFolder");
 		source = commitedFolder[0];
 		assertTrue(hook.moveFolder(null, source, destination, IResource.FORCE, new NullProgressMonitor()));
 		assertTrue(destination.exists());
 
 		// Moving unversioned folder to the unversioned destination
-		sourceFolder = new File(this.getFirstProject().getLocation().toString() + "/unversionedSourceFolder");
+		sourceFolder = new File(getFirstProject().getLocation().toString() + "/unversionedSourceFolder");
 		sourceFolder.mkdir();
-		source = this.getFirstProject().getFolder("unversionedSourceFolder");
-		unversionedFolder = new File(this.getFirstProject().getLocation().toString() + "/destinationFolder2");
+		source = getFirstProject().getFolder("unversionedSourceFolder");
+		unversionedFolder = new File(getFirstProject().getLocation().toString() + "/destinationFolder2");
 		unversionedFolder.mkdir();
-		destination = this.getSecondProject().getFolder("destinationFolder2");
+		destination = getSecondProject().getFolder("destinationFolder2");
 		assertFalse(hook.moveFolder(null, source, destination, IResource.FORCE, new NullProgressMonitor()));
 
 		// Moving unversioned folder to the commited destination

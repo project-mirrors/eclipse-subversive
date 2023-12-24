@@ -23,10 +23,8 @@ import java.util.List;
 
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.mapping.ResourceMappingContext;
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Platform;
-import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.team.core.TeamException;
 import org.eclipse.team.core.diff.IDiff;
@@ -49,6 +47,7 @@ import org.eclipse.team.svn.ui.operation.UILoggedOperation;
 import org.eclipse.team.svn.ui.synchronize.action.logicalmodel.SVNSynchronizationResourceMappingContext;
 import org.eclipse.team.svn.ui.utility.UIMonitorUtility;
 import org.eclipse.team.ui.synchronize.ISynchronizePageConfiguration;
+import org.eclipse.team.ui.synchronize.SynchronizeModelAction;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.ide.IDE;
 
@@ -61,26 +60,30 @@ public abstract class AbstractSynchronizeLogicalModelAction extends ResourceMode
 
 	public AbstractSynchronizeLogicalModelAction(String text, ISynchronizePageConfiguration configuration) {
 		super(text, configuration);
-		this.setEnabled(false);
-		this.setToolTipText(text);
-		this.createSyncInfoSelector();
+		setEnabled(false);
+		setToolTipText(text);
+		createSyncInfoSelector();
 		//this.createTreeNodeSelector();
 	}
 
+	@Override
 	protected boolean isEnabledForSelection(IStructuredSelection selection) {
-		return this.getFilteredResources().length > 0;
+		return getFilteredResources().length > 0;
 	}
 
+	@Override
 	protected ResourceMappingContext getResourceMappingContext() {
-		return new SVNSynchronizationResourceMappingContext(this.getSynchronizationContext());
+		return new SVNSynchronizationResourceMappingContext(getSynchronizationContext());
 	}
 
 	protected void createSyncInfoSelector() {
-		this.syncInfoSelector = new IResourceSelector() {
+		syncInfoSelector = new IResourceSelector() {
+			@Override
 			public IResource[] getSelectedResources() {
 				return this.getSelectedResources(new ISyncStateFilter.StateFilterWrapper(IStateFilter.SF_ALL, false));
 			}
 
+			@Override
 			public IResource[] getSelectedResources(IStateFilter filter) {
 				if (filter instanceof ISyncStateFilter) {
 					return this.getSelectedResources((ISyncStateFilter) filter);
@@ -88,21 +91,23 @@ public abstract class AbstractSynchronizeLogicalModelAction extends ResourceMode
 				return this.getSelectedResources(new ISyncStateFilter.StateFilterWrapper(filter, false));
 			}
 
+			@Override
 			public IResource[] getSelectedResourcesRecursive(IStateFilter filter) {
 				return this.getSelectedResources(filter);
 			}
 
+			@Override
 			public IResource[] getSelectedResourcesRecursive(IStateFilter filter, int depth) {
 				return this.getSelectedResources(filter);
 			}
 
 			private IResource[] getSelectedResources(ISyncStateFilter filter) {
-				HashSet<IResource> retVal = new HashSet<IResource>();
+				HashSet<IResource> retVal = new HashSet<>();
 				try {
 					IResource[] filtered = AbstractSynchronizeLogicalModelAction.this.getFilteredResources();
-					for (int i = 0; i < filtered.length; i++) {
+					for (IResource element : filtered) {
 						AbstractSVNSyncInfo info = (AbstractSVNSyncInfo) UpdateSubscriber.instance()
-								.getSyncInfo(filtered[i]);
+								.getSyncInfo(element);
 						if (info == null) {
 							continue;
 						}
@@ -116,7 +121,7 @@ public abstract class AbstractSynchronizeLogicalModelAction extends ResourceMode
 					}
 					IResource[] filteredResources = retVal.toArray(new IResource[retVal.size()]);
 					/*
-					 * filteredResources variable contains now only changed resources. 
+					 * filteredResources variable contains now only changed resources.
 					 * But for some operations we need also to include all tree.
 					 * Example:
 					 * 	Project-1/
@@ -125,7 +130,7 @@ public abstract class AbstractSynchronizeLogicalModelAction extends ResourceMode
 					 * 				> ClassA.java
 					 * 
 					 * Here we have changed only ClassA.java and we have it as a resulted selected resource.
-					 * But some operations require all changes tree, i.e. we need to 
+					 * But some operations require all changes tree, i.e. we need to
 					 * include also Project-1, src, com.polarion in the result.
 					 * 
 					 * In order to indicate that operation needs all tree ISyncStateFilter.acceptGroupNodes method
@@ -134,10 +139,10 @@ public abstract class AbstractSynchronizeLogicalModelAction extends ResourceMode
 					 * In order to return all tree it, we process here parents of changed resources
 					 */
 					if (filter.acceptGroupNodes()) {
-						ArrayList<IResource> allSelected = new ArrayList<IResource>(
+						ArrayList<IResource> allSelected = new ArrayList<>(
 								Arrays.asList(AbstractSynchronizeLogicalModelAction.this.getAllSelectedResources()));
 						for (IResource filteredResource : filteredResources) {
-							ArrayList<IResource> parents = new ArrayList<IResource>();
+							ArrayList<IResource> parents = new ArrayList<>();
 							IResource parent = filteredResource.getParent();
 							while (parent != null) {
 								//As there can be unversioned externals in Sync View, don't process them
@@ -229,9 +234,9 @@ public abstract class AbstractSynchronizeLogicalModelAction extends ResourceMode
 	}
 
 	public AbstractSVNSyncInfo[] getSVNSyncInfos() {
-		List<AbstractSVNSyncInfo> filtered = new ArrayList<AbstractSVNSyncInfo>();
+		List<AbstractSVNSyncInfo> filtered = new ArrayList<>();
 		try {
-			for (IResource resource : this.getFilteredResources()) {
+			for (IResource resource : getFilteredResources()) {
 				AbstractSVNSyncInfo syncInfo = (AbstractSVNSyncInfo) UpdateSubscriber.instance().getSyncInfo(resource);
 				if (syncInfo != null) {
 					filtered.add(syncInfo);
@@ -245,12 +250,12 @@ public abstract class AbstractSynchronizeLogicalModelAction extends ResourceMode
 	}
 
 	protected IResource[] getFilteredResources() {
-		final HashSet<IResource> filtered = new HashSet<IResource>();
+		final HashSet<IResource> filtered = new HashSet<>();
 		try {
 			final IResourceDiffTree diffTree = AbstractSynchronizeLogicalModelAction.this.getSynchronizationContext()
 					.getDiffTree();
 			IDiff[] affectedDiffs = diffTree
-					.getDiffs(this.getResourceTraversals(this.getStructuredSelection(), new NullProgressMonitor()));
+					.getDiffs(getResourceTraversals(getStructuredSelection(), new NullProgressMonitor()));
 			for (IDiff currentDiff : affectedDiffs) {
 				IResource resource = ResourceDiffTree.getResourceFor(currentDiff);
 				SyncInfo info = UpdateSubscriber.instance().getSyncInfo(resource);
@@ -265,8 +270,8 @@ public abstract class AbstractSynchronizeLogicalModelAction extends ResourceMode
 	}
 
 	public IResource[] getAllSelectedResources() {
-		IStructuredSelection selection = this.getStructuredSelection();
-		ArrayList<IResource> retVal = new ArrayList<IResource>();
+		IStructuredSelection selection = getStructuredSelection();
+		ArrayList<IResource> retVal = new ArrayList<>();
 		for (Iterator<?> it = selection.iterator(); it.hasNext();) {
 			Object adapter = Platform.getAdapterManager().getAdapter(it.next(), IResource.class);
 			if (adapter == null) {
@@ -278,7 +283,7 @@ public abstract class AbstractSynchronizeLogicalModelAction extends ResourceMode
 	}
 
 	public IResource getSelectedResource() {
-		IStructuredSelection selection = this.getStructuredSelection();
+		IStructuredSelection selection = getStructuredSelection();
 		for (Iterator<?> it = selection.iterator(); it.hasNext();) {
 			Object adapter = Platform.getAdapterManager().getAdapter(it.next(), IResource.class);
 			if (adapter != null) {
@@ -289,7 +294,7 @@ public abstract class AbstractSynchronizeLogicalModelAction extends ResourceMode
 	}
 
 	public AbstractSVNSyncInfo getSelectedSVNSyncInfo() {
-		IResource resource = this.getSelectedResource();
+		IResource resource = getSelectedResource();
 		try {
 			return resource == null ? null : (AbstractSVNSyncInfo) UpdateSubscriber.instance().getSyncInfo(resource);
 		} catch (TeamException ex) {
@@ -301,6 +306,7 @@ public abstract class AbstractSynchronizeLogicalModelAction extends ResourceMode
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.action.Action#run()
 	 */
+	@Override
 	public void run() {
 		if (needsToSaveDirtyEditors()) {
 			if (!saveAllEditors(confirmSaveOfDirtyEditor())) {
@@ -344,7 +350,7 @@ public abstract class AbstractSynchronizeLogicalModelAction extends ResourceMode
 	 * @see SynchronizeModelAction.saveAllEditors
 	 */
 	public final boolean saveAllEditors(boolean confirm) {
-		IResource[] resources = this.getFilteredResources();
+		IResource[] resources = getFilteredResources();
 		return IDE.saveAllEditors(Utils.getResources(resources), confirm);
 	}
 
@@ -353,26 +359,19 @@ public abstract class AbstractSynchronizeLogicalModelAction extends ResourceMode
 		if (op == null) {
 			return;
 		}
-		UIMonitorUtility.getDisplay().syncExec(new Runnable() {
-			public void run() {
-				try {
-					PlatformUI.getWorkbench().getProgressService().run(true, true, new IRunnableWithProgress() {
-						public void run(IProgressMonitor monitor)
-								throws InvocationTargetException, InterruptedException {
-							ProgressMonitorUtility.doTaskExternal(op, monitor);
-						}
-					});
-				} catch (InvocationTargetException ex) {
-					UILoggedOperation.reportError(op.getOperationName(), ex);
-				} catch (InterruptedException ex) {
-					LoggedOperation.reportError(AbstractSynchronizeLogicalModelAction.this.getClass().getName(), ex);
-				}
+		UIMonitorUtility.getDisplay().syncExec(() -> {
+			try {
+				PlatformUI.getWorkbench().getProgressService().run(true, true, monitor -> ProgressMonitorUtility.doTaskExternal(op, monitor));
+			} catch (InvocationTargetException ex) {
+				UILoggedOperation.reportError(op.getOperationName(), ex);
+			} catch (InterruptedException ex) {
+				LoggedOperation.reportError(AbstractSynchronizeLogicalModelAction.this.getClass().getName(), ex);
 			}
 		});
 	}
 
 	public IResourceSelector getSyncInfoSelector() {
-		return this.syncInfoSelector;
+		return syncInfoSelector;
 	}
 
 	protected abstract IActionOperation getOperation();

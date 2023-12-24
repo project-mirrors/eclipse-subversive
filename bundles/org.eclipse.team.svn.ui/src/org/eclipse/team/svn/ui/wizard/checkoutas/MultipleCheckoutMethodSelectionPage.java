@@ -70,27 +70,28 @@ public class MultipleCheckoutMethodSelectionPage extends AbstractVerifiedWizardP
 				SVNUIMessages.MultipleCheckoutMethodSelectionPage_Title,
 				SVNTeamUIPlugin.instance().getImageDescriptor("icons/wizards/newconnect.gif")); //$NON-NLS-1$
 		this.selectedResources = selectedResources;
-		this.checkoutType = MultipleCheckoutMethodSelectionPage.FIND_PROJECTS;
+		checkoutType = MultipleCheckoutMethodSelectionPage.FIND_PROJECTS;
 
-		this.setDescription(SVNUIMessages.MultipleCheckoutMethodSelectionPage_Description);
+		setDescription(SVNUIMessages.MultipleCheckoutMethodSelectionPage_Description);
 	}
 
 	public boolean isFindProjectsSelected() {
-		return this.checkoutType == MultipleCheckoutMethodSelectionPage.FIND_PROJECTS;
+		return checkoutType == MultipleCheckoutMethodSelectionPage.FIND_PROJECTS;
 	}
 
 	public boolean isCheckoutAsFolderSelected() {
-		return this.checkoutType == MultipleCheckoutMethodSelectionPage.CHECKOUT_AS_FOLDER;
+		return checkoutType == MultipleCheckoutMethodSelectionPage.CHECKOUT_AS_FOLDER;
 	}
 
 	public SVNDepth getdepth() {
-		return this.depthSelector.getDepth();
+		return depthSelector.getDepth();
 	}
 
 	public SVNRevision getSelectedRevision() {
-		return this.revisionComposite.getSelectedRevision();
+		return revisionComposite.getSelectedRevision();
 	}
 
+	@Override
 	public Composite createControlImpl(Composite parent) {
 		Composite composite = new Composite(parent, SWT.NONE);
 
@@ -106,8 +107,9 @@ public class MultipleCheckoutMethodSelectionPage extends AbstractVerifiedWizardP
 		data = new GridData(GridData.FILL_HORIZONTAL);
 		findProjectsButton.setLayoutData(data);
 		findProjectsButton.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
-				MultipleCheckoutMethodSelectionPage.this.checkoutType = MultipleCheckoutMethodSelectionPage.FIND_PROJECTS;
+				checkoutType = MultipleCheckoutMethodSelectionPage.FIND_PROJECTS;
 				MultipleCheckoutMethodSelectionPage.this.validateContent();
 			}
 		});
@@ -118,8 +120,9 @@ public class MultipleCheckoutMethodSelectionPage extends AbstractVerifiedWizardP
 		data = new GridData(GridData.FILL_HORIZONTAL);
 		checkoutAsFolder.setLayoutData(data);
 		checkoutAsFolder.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
-				MultipleCheckoutMethodSelectionPage.this.checkoutType = MultipleCheckoutMethodSelectionPage.CHECKOUT_AS_FOLDER;
+				checkoutType = MultipleCheckoutMethodSelectionPage.CHECKOUT_AS_FOLDER;
 				MultipleCheckoutMethodSelectionPage.this.validateContent();
 			}
 		});
@@ -129,8 +132,9 @@ public class MultipleCheckoutMethodSelectionPage extends AbstractVerifiedWizardP
 		data = new GridData(GridData.FILL_HORIZONTAL);
 		simpleCheckoutButton.setLayoutData(data);
 		simpleCheckoutButton.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
-				MultipleCheckoutMethodSelectionPage.this.checkoutType = MultipleCheckoutMethodSelectionPage.CHECKOUT_AS_PROJECTS;
+				checkoutType = MultipleCheckoutMethodSelectionPage.CHECKOUT_AS_PROJECTS;
 				MultipleCheckoutMethodSelectionPage.this.validateContent();
 			}
 		});
@@ -145,9 +149,9 @@ public class MultipleCheckoutMethodSelectionPage extends AbstractVerifiedWizardP
 		TableViewer tableViewer = new TableViewer(table);
 		tableViewer.getTable().setLayoutData(data);
 
-		int maxLength = FileUtility.getMaxStringLength(SVNUtility.asURLArray(this.selectedResources, false));
-		this.initializeDialogUnits(composite);
-		int width = this.convertWidthInCharsToPixels(maxLength + 12);
+		int maxLength = FileUtility.getMaxStringLength(SVNUtility.asURLArray(selectedResources, false));
+		initializeDialogUnits(composite);
+		int width = convertWidthInCharsToPixels(maxLength + 12);
 
 		TableColumn col = new TableColumn(table, SWT.NONE);
 		col.setResizable(true);
@@ -160,43 +164,49 @@ public class MultipleCheckoutMethodSelectionPage extends AbstractVerifiedWizardP
 		tLayout.addColumnData(cData);
 
 		tableViewer.setLabelProvider(new ITableLabelProvider() {
+			@Override
 			public Image getColumnImage(Object element, int columnIndex) {
 				return null;
 			}
 
+			@Override
 			public String getColumnText(Object element, int columnIndex) {
 				IRepositoryResource resource = (IRepositoryResource) element;
 				return resource.getUrl();
 			}
 
+			@Override
 			public void addListener(ILabelProviderListener listener) {
 			}
 
+			@Override
 			public void dispose() {
 			}
 
+			@Override
 			public boolean isLabelProperty(Object element, String property) {
 				return false;
 			}
 
+			@Override
 			public void removeListener(ILabelProviderListener listener) {
 			}
 		});
 
 		tableViewer.setContentProvider(new ArrayStructuredContentProvider());
 
-		tableViewer.setInput(this.selectedResources);
+		tableViewer.setInput(selectedResources);
 
-		this.depthSelector = new DepthSelectionComposite(composite, SWT.NONE, false);
+		depthSelector = new DepthSelectionComposite(composite, SWT.NONE, false);
 		data = new GridData(GridData.FILL_HORIZONTAL);
-		this.depthSelector.setLayoutData(data);
+		depthSelector.setLayoutData(data);
 
-		this.revisionComposite = new RevisionComposite(composite, this, false,
+		revisionComposite = new RevisionComposite(composite, this, false,
 				new String[] { SVNUIMessages.RevisionComposite_Revision, SVNUIMessages.RevisionComposite_HeadRevision },
 				SVNRevision.HEAD, false);
 		data = new GridData(GridData.FILL_HORIZONTAL);
-		this.revisionComposite.setLayoutData(data);
-		this.revisionComposite.setSelectedResource(this.selectedResources[0].getRoot());
+		revisionComposite.setLayoutData(data);
+		revisionComposite.setSelectedResource(selectedResources[0].getRoot());
 
 //		Setting context help
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(composite, "org.eclipse.team.svn.help.multiSelectionContext"); //$NON-NLS-1$

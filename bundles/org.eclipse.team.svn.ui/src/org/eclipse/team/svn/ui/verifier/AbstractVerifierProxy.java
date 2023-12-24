@@ -25,36 +25,40 @@ public abstract class AbstractVerifierProxy extends AbstractVerifier {
 	protected AbstractVerifier verifier;
 
 	public AbstractVerifierProxy(AbstractVerifier verifier) {
-		super();
 		this.verifier = verifier;
 	}
 
+	@Override
 	public void addVerifierListener(IVerifierListener listener) {
-		this.verifier.addVerifierListener(listener);
+		verifier.addVerifierListener(listener);
 		super.addVerifierListener(listener);
 	}
 
+	@Override
 	public void removeVerifierListener(IVerifierListener listener) {
-		this.verifier.removeVerifierListener(listener);
+		verifier.removeVerifierListener(listener);
 		super.removeVerifierListener(listener);
 	}
 
+	@Override
 	public boolean verify(Control input) {
-		if (this.isVerificationEnabled(input)) {
-			return this.verifier.verify(input);
+		if (isVerificationEnabled(input)) {
+			return verifier.verify(input);
 		}
-		if (!(this.hasWarning = this.verifier.hasWarning())) {
-			this.fireOk();
+		if (!(hasWarning = verifier.hasWarning())) {
+			fireOk();
 		}
 		return true;
 	}
 
 	protected abstract boolean isVerificationEnabled(Control input);
 
+	@Override
 	protected String getErrorMessage(Control input) {
 		return null;
 	}
 
+	@Override
 	protected String getWarningMessage(Control input) {
 		return null;
 	}

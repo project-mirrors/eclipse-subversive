@@ -44,40 +44,44 @@ public class SVNChangeSetCapability extends ChangeSetCapability {
 	public static String getProposedComment(IResource[] resourcesToCommit) {
 		String retVal = null;
 		ChangeSet[] sets = SVNTeamPlugin.instance().getModelChangeSetManager().getSets();
-		for (int i = 0; i < sets.length; i++) {
-			if (SVNChangeSetCapability.containsOneOf(sets[i], resourcesToCommit)) {
-				String comment = sets[i].getComment();
-				retVal = retVal == null ? comment : (retVal + "\n" + comment); //$NON-NLS-1$
+		for (ChangeSet set : sets) {
+			if (SVNChangeSetCapability.containsOneOf(set, resourcesToCommit)) {
+				String comment = set.getComment();
+				retVal = retVal == null ? comment : retVal + "\n" + comment; //$NON-NLS-1$
 			}
 		}
 		return retVal;
 	}
 
 	public static boolean containsOneOf(ChangeSet set, IResource[] resourcesToCommit) {
-		for (int i = 0; i < resourcesToCommit.length; i++) {
-			if (set.contains(resourcesToCommit[i])) {
+		for (IResource element : resourcesToCommit) {
+			if (set.contains(element)) {
 				return true;
 			}
 		}
 		return false;
 	}
 
+	@Override
 	public boolean supportsCheckedInChangeSets() {
 		return true;
 	}
 
+	@Override
 	public SyncInfoSetChangeSetCollector createSyncInfoSetChangeSetCollector(
 			ISynchronizePageConfiguration configuration) {
 		SVNChangeSetCapability.isEnabled = true;
 		return new SVNChangeSetCollector(configuration);
 	}
 
+	@Override
 	public boolean supportsActiveChangeSets() {
 		return true;
 	}
 
+	@Override
 	public ActiveChangeSet createChangeSet(ISynchronizePageConfiguration configuration, IDiff[] diffs) {
-		ActiveChangeSet set = this.getActiveChangeSetManager().createSet(SVNUIMessages.ChangeSet_NewSet, new IDiff[0]);
+		ActiveChangeSet set = getActiveChangeSetManager().createSet(SVNUIMessages.ChangeSet_NewSet, new IDiff[0]);
 		CommitSetPanel panel = new CommitSetPanel(set, getResources(diffs), CommitSetPanel.MSG_CREATE);
 		DefaultDialog dialog = new DefaultDialog(configuration.getSite().getShell(), panel);
 		dialog.open();
@@ -89,9 +93,8 @@ public class SVNChangeSetCapability extends ChangeSetCapability {
 	}
 
 	private IResource[] getResources(IDiff[] diffs) {
-		Set<IResource> result = new HashSet<IResource>();
-		for (int i = 0; i < diffs.length; i++) {
-			IDiff diff = diffs[i];
+		Set<IResource> result = new HashSet<>();
+		for (IDiff diff : diffs) {
 			IResource resource = ResourceDiffTree.getResourceFor(diff);
 			if (resource != null) {
 				result.add(resource);
@@ -100,24 +103,26 @@ public class SVNChangeSetCapability extends ChangeSetCapability {
 		return result.toArray(new IResource[result.size()]);
 	}
 
+	@Override
 	public void editChangeSet(ISynchronizePageConfiguration configuration, ActiveChangeSet set) {
 		CommitSetPanel panel = new CommitSetPanel(set, set.getResources(), CommitSetPanel.MSG_EDIT);
 		DefaultDialog dialog = new DefaultDialog(configuration.getSite().getShell(), panel);
 		dialog.open();
 	}
 
+	@Override
 	public ActiveChangeSetManager getActiveChangeSetManager() {
 		return SVNTeamPlugin.instance().getModelChangeSetManager();
 	}
 
+	@Override
 	public boolean enableActiveChangeSetsFor(ISynchronizePageConfiguration configuration) {
-		return this.supportsActiveChangeSets()
-				&& configuration.getMode() != ISynchronizePageConfiguration.INCOMING_MODE;
+		return supportsActiveChangeSets() && configuration.getMode() != ISynchronizePageConfiguration.INCOMING_MODE;
 	}
 
+	@Override
 	public boolean enableCheckedInChangeSetsFor(ISynchronizePageConfiguration configuration) {
-		return this.supportsCheckedInChangeSets()
-				&& configuration.getMode() != ISynchronizePageConfiguration.OUTGOING_MODE;
+		return supportsCheckedInChangeSets() && configuration.getMode() != ISynchronizePageConfiguration.OUTGOING_MODE;
 	}
 
 }

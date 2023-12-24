@@ -16,7 +16,6 @@ package org.eclipse.team.svn.ui.extension;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
@@ -33,10 +32,10 @@ import org.eclipse.team.svn.ui.extension.factory.ICommitActionFactory;
 import org.eclipse.team.svn.ui.extension.factory.IHistoryViewFactory;
 import org.eclipse.team.svn.ui.extension.factory.IReporter;
 import org.eclipse.team.svn.ui.extension.factory.IReporterFactory;
+import org.eclipse.team.svn.ui.extension.factory.IReporterFactory.ReportType;
 import org.eclipse.team.svn.ui.extension.factory.IReportingDescriptor;
 import org.eclipse.team.svn.ui.extension.factory.IShareProjectFactory;
 import org.eclipse.team.svn.ui.extension.factory.ISynchronizeViewActionContributor;
-import org.eclipse.team.svn.ui.extension.factory.IReporterFactory.ReportType;
 import org.eclipse.team.svn.ui.extension.impl.DefaultCheckoutFactory;
 import org.eclipse.team.svn.ui.extension.impl.DefaultCommitActionFactory;
 import org.eclipse.team.svn.ui.extension.impl.DefaultDecorationFilter;
@@ -78,56 +77,56 @@ public class ExtensionsManager {
 	}
 
 	public ISynchronizeViewActionContributor getCurrentSynchronizeActionContributor() {
-		if (this.currentActionContributor == null) {
-			this.currentActionContributor = ExtensionsManager.getDefaultSynchronizeViewActionContributor();
+		if (currentActionContributor == null) {
+			currentActionContributor = ExtensionsManager.getDefaultSynchronizeViewActionContributor();
 		}
-		return this.currentActionContributor;
+		return currentActionContributor;
 	}
 
 	public void setCurrentSynchronizeActionContributor(ISynchronizeViewActionContributor contributor) {
-		this.currentActionContributor = contributor;
+		currentActionContributor = contributor;
 	}
 
 	public IDecorationFilter getCurrentDecorationFilter() {
-		if (this.currentDecorationFilter == null) {
-			this.currentDecorationFilter = ExtensionsManager.getDefaultDecorationFilter();
+		if (currentDecorationFilter == null) {
+			currentDecorationFilter = ExtensionsManager.getDefaultDecorationFilter();
 		}
-		return this.currentDecorationFilter;
+		return currentDecorationFilter;
 	}
 
 	public void setCurrentDecorationFilter(IDecorationFilter filter) {
-		this.currentDecorationFilter = filter;
+		currentDecorationFilter = filter;
 	}
 
 	public ICheckoutFactory getCurrentCheckoutFactory() {
-		if (this.currentCheckoutFactory == null) {
-			this.currentCheckoutFactory = ExtensionsManager.getDefaultCheckoutFactory();
+		if (currentCheckoutFactory == null) {
+			currentCheckoutFactory = ExtensionsManager.getDefaultCheckoutFactory();
 		}
-		return this.currentCheckoutFactory;
+		return currentCheckoutFactory;
 	}
 
 	public void setCurrentCheckoutFactory(ICheckoutFactory factory) {
-		this.currentCheckoutFactory = factory;
+		currentCheckoutFactory = factory;
 	}
 
 	public IShareProjectFactory getCurrentShareProjectFactory() {
-		if (this.currentShareProjectFactory == null) {
-			this.currentShareProjectFactory = ExtensionsManager.getDefaultShareProjectFactory();
+		if (currentShareProjectFactory == null) {
+			currentShareProjectFactory = ExtensionsManager.getDefaultShareProjectFactory();
 		}
-		return this.currentShareProjectFactory;
+		return currentShareProjectFactory;
 	}
 
 	public void setCurrentShareProjectFactory(IShareProjectFactory factory) {
-		this.currentShareProjectFactory = factory;
+		currentShareProjectFactory = factory;
 	}
 
 	public IReportingDescriptor[] getReportingDescriptors() {
-		return this.reportingDescriptors;
+		return reportingDescriptors;
 	}
 
 	public IReporter getReporter(IReportingDescriptor descriptor, ReportType type) {
-		for (int i = 0; i < this.reporterFactories.length; i++) {
-			IReporter reporter = this.reporterFactories[i].newReporter(descriptor, type);
+		for (IReporterFactory reporterFactory : reporterFactories) {
+			IReporter reporter = reporterFactory.newReporter(descriptor, type);
 			if (reporter != null) {
 				return reporter;
 			}
@@ -136,21 +135,21 @@ public class ExtensionsManager {
 	}
 
 	public ICommitActionFactory getCurrentCommitFactory() {
-		if (this.currentCommitFactory == null) {
-			this.currentCommitFactory = getDefaultTeamCommitFactory();
+		if (currentCommitFactory == null) {
+			currentCommitFactory = getDefaultTeamCommitFactory();
 		}
-		return this.currentCommitFactory;
+		return currentCommitFactory;
 	}
 
 	public void setCurrentCommitFactory(ICommitActionFactory currentFactory) {
-		this.currentCommitFactory = currentFactory;
+		currentCommitFactory = currentFactory;
 	}
 
 	public IHistoryViewFactory getCurrentMessageFactory() {
-		if (this.currentMessageFactory == null) {
-			this.currentMessageFactory = getDefaultCommitMessageFactory();
+		if (currentMessageFactory == null) {
+			currentMessageFactory = getDefaultCommitMessageFactory();
 		}
-		return this.currentMessageFactory;
+		return currentMessageFactory;
 	}
 
 	public void setCurrentMessageFactory(IHistoryViewFactory currentMessageFactory) {
@@ -160,6 +159,7 @@ public class ExtensionsManager {
 	/**
 	 * @deprecated
 	 */
+	@Deprecated
 	public IPredefinedPropertySet getPredefinedPropertySet() {
 		return CoreExtensionsManager.instance().getPredefinedPropertySet();
 	}
@@ -189,46 +189,43 @@ public class ExtensionsManager {
 	}
 
 	private ExtensionsManager() {
-		this.currentDecorationFilter = (IDecorationFilter) this.loadUIExtension("decoration"); //$NON-NLS-1$
-		this.currentMessageFactory = (IHistoryViewFactory) this.loadUIExtension("history"); //$NON-NLS-1$
-		this.currentCommitFactory = (ICommitActionFactory) this.loadUIExtension("commit"); //$NON-NLS-1$
-		this.currentCheckoutFactory = (ICheckoutFactory) this.loadUIExtension("checkout"); //$NON-NLS-1$
-		this.currentShareProjectFactory = (IShareProjectFactory) this.loadUIExtension("shareproject"); //$NON-NLS-1$
-		this.currentActionContributor = (ISynchronizeViewActionContributor) this
-				.loadUIExtension("synchronizeActionContribution"); //$NON-NLS-1$
-		Object[] extensions = this.loadUIExtensions("reportingdescriptor"); //$NON-NLS-1$
-		this.reportingDescriptors = Arrays.asList(extensions).toArray(new IReportingDescriptor[extensions.length]);
-		extensions = this.loadUIExtensions("reporterfactory"); //$NON-NLS-1$
-		this.reporterFactories = Arrays.asList(extensions).toArray(new IReporterFactory[extensions.length]);
-		Arrays.sort(this.reporterFactories, new Comparator<Object>() {
-			public int compare(Object o1, Object o2) {
-				IReporterFactory f1 = (IReporterFactory) o1;
-				IReporterFactory f2 = (IReporterFactory) o2;
-				return f1.isCustomEditorSupported() ^ f2.isCustomEditorSupported()
-						? (f1.isCustomEditorSupported() ? -1 : 1)
-						: 0;
-			}
+		currentDecorationFilter = (IDecorationFilter) loadUIExtension("decoration"); //$NON-NLS-1$
+		currentMessageFactory = (IHistoryViewFactory) loadUIExtension("history"); //$NON-NLS-1$
+		currentCommitFactory = (ICommitActionFactory) loadUIExtension("commit"); //$NON-NLS-1$
+		currentCheckoutFactory = (ICheckoutFactory) loadUIExtension("checkout"); //$NON-NLS-1$
+		currentShareProjectFactory = (IShareProjectFactory) loadUIExtension("shareproject"); //$NON-NLS-1$
+		currentActionContributor = (ISynchronizeViewActionContributor) loadUIExtension("synchronizeActionContribution"); //$NON-NLS-1$
+		Object[] extensions = loadUIExtensions("reportingdescriptor"); //$NON-NLS-1$
+		reportingDescriptors = Arrays.asList(extensions).toArray(new IReportingDescriptor[extensions.length]);
+		extensions = loadUIExtensions("reporterfactory"); //$NON-NLS-1$
+		reporterFactories = Arrays.asList(extensions).toArray(new IReporterFactory[extensions.length]);
+		Arrays.sort(reporterFactories, (o1, o2) -> {
+			IReporterFactory f1 = (IReporterFactory) o1;
+			IReporterFactory f2 = (IReporterFactory) o2;
+			return f1.isCustomEditorSupported() ^ f2.isCustomEditorSupported()
+					? f1.isCustomEditorSupported() ? -1 : 1
+					: 0;
 		});
 	}
 
 	private Object loadUIExtension(String extensionPoint) {
-		Object[] extensions = this.loadUIExtensions(extensionPoint);
+		Object[] extensions = loadUIExtensions(extensionPoint);
 		return extensions.length == 0 ? null : extensions[0];
 	}
 
 	private Object[] loadUIExtensions(String extensionPoint) {
-		return this.loadExtensions(ExtensionsManager.UI_EXTENSION_NAMESPACE, extensionPoint);
+		return loadExtensions(ExtensionsManager.UI_EXTENSION_NAMESPACE, extensionPoint);
 	}
 
 	private Object[] loadExtensions(String namespace, String extensionPoint) {
 		IExtensionPoint extension = Platform.getExtensionRegistry().getExtensionPoint(namespace, extensionPoint);
 		IExtension[] extensions = extension.getExtensions();
-		ArrayList<Object> retVal = new ArrayList<Object>();
-		for (int i = 0; i < extensions.length; i++) {
-			IConfigurationElement[] configElements = extensions[i].getConfigurationElements();
-			for (int j = 0; j < configElements.length; j++) {
+		ArrayList<Object> retVal = new ArrayList<>();
+		for (IExtension extension2 : extensions) {
+			IConfigurationElement[] configElements = extension2.getConfigurationElements();
+			for (IConfigurationElement configElement : configElements) {
 				try {
-					retVal.add(configElements[j].createExecutableExtension("class")); //$NON-NLS-1$
+					retVal.add(configElement.createExecutableExtension("class")); //$NON-NLS-1$
 				} catch (CoreException ex) {
 					LoggedOperation.reportError(SVNUIMessages.Error_LoadUIExtension, ex);
 				}

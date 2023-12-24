@@ -36,41 +36,45 @@ public abstract class AbstractSVNTeamPreferencesPage extends PreferencePage
 	private VerificationKeyListener changeListener;
 
 	public AbstractSVNTeamPreferencesPage() {
-		super();
-		this.changeListener = new VerificationKeyListener();
+		changeListener = new VerificationKeyListener();
 	}
 
+	@Override
 	public void init(IWorkbench workbench) {
 
 	}
 
+	@Override
 	public boolean performOk() {
-		this.saveValues(this.getPreferenceStore());
+		saveValues(getPreferenceStore());
 
 		SVNTeamUIPlugin.instance().savePreferences();
 
 		return true;
 	}
 
+	@Override
 	protected void performDefaults() {
 		super.performDefaults();
-		this.loadDefaultValues(this.getPreferenceStore());
-		this.initializeControls();
+		loadDefaultValues(getPreferenceStore());
+		initializeControls();
 
-		this.validateContent();
+		validateContent();
 	}
 
+	@Override
 	protected Control createContents(Composite parent) {
-		Control retVal = this.createContentsImpl(parent);
+		Control retVal = createContentsImpl(parent);
 
-		this.loadValues(this.getPreferenceStore());
-		this.initializeControls();
+		loadValues(getPreferenceStore());
+		initializeControls();
 
-		this.addListeners();
+		addListeners();
 
 		return retVal;
 	}
 
+	@Override
 	protected IPreferenceStore doGetPreferenceStore() {
 		return SVNTeamUIPlugin.instance().getPreferenceStore();
 	}
@@ -85,59 +89,66 @@ public abstract class AbstractSVNTeamPreferencesPage extends PreferencePage
 
 	protected abstract Control createContentsImpl(Composite parent);
 
+	@Override
 	public boolean isFilledRight() {
-		return this.changeListener.isFilledRight();
+		return changeListener.isFilledRight();
 	}
 
+	@Override
 	public void attachTo(Control cmp, AbstractVerifier verifier) {
-		this.changeListener.attachTo(cmp, verifier);
+		changeListener.attachTo(cmp, verifier);
 	}
 
 	public void addListeners() {
-		this.changeListener.addListeners();
-		this.validateContent();
-		this.setMessage(this.getTitle(), IMessageProvider.NONE);
+		changeListener.addListeners();
+		validateContent();
+		this.setMessage(getTitle(), IMessageProvider.NONE);
 	}
 
+	@Override
 	public void detachFrom(Control cmp) {
-		this.changeListener.detachFrom(cmp);
+		changeListener.detachFrom(cmp);
 	}
 
+	@Override
 	public void detachAll() {
-		this.changeListener.detachAll();
+		changeListener.detachAll();
 	}
 
+	@Override
 	public void validateContent() {
-		this.changeListener.validateContent();
+		changeListener.validateContent();
 	}
 
+	@Override
 	public boolean validateControl(Control cmp) {
-		return this.changeListener.validateControl(cmp);
+		return changeListener.validateControl(cmp);
 	}
 
 	protected class VerificationKeyListener extends AbstractVerificationKeyListener {
 		public VerificationKeyListener() {
-			super();
 		}
 
+		@Override
 		public void hasError(String errorReason) {
 			AbstractSVNTeamPreferencesPage.this.setMessage(errorReason, IMessageProvider.ERROR);
-			this.handleButtons();
+			handleButtons();
 		}
 
+		@Override
 		public void hasWarning(String warningReason) {
 			AbstractSVNTeamPreferencesPage.this.setMessage(warningReason, IMessageProvider.WARNING);
-			this.handleButtons();
+			handleButtons();
 		}
 
+		@Override
 		public void hasNoError() {
-			AbstractSVNTeamPreferencesPage.this.setMessage(AbstractSVNTeamPreferencesPage.this.getTitle(),
-					IMessageProvider.NONE);
-			this.handleButtons();
+			AbstractSVNTeamPreferencesPage.this.setMessage(getTitle(), IMessageProvider.NONE);
+			handleButtons();
 		}
 
 		protected void handleButtons() {
-			AbstractSVNTeamPreferencesPage.this.setValid(this.isFilledRight());
+			setValid(isFilledRight());
 		}
 
 	}

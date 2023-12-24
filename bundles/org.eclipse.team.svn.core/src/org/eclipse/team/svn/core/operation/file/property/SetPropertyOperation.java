@@ -22,7 +22,6 @@ import org.eclipse.team.svn.core.SVNMessages;
 import org.eclipse.team.svn.core.connector.ISVNConnector;
 import org.eclipse.team.svn.core.connector.SVNDepth;
 import org.eclipse.team.svn.core.connector.SVNProperty;
-import org.eclipse.team.svn.core.operation.IUnprotectedOperation;
 import org.eclipse.team.svn.core.operation.SVNProgressMonitor;
 import org.eclipse.team.svn.core.operation.file.AbstractFileOperation;
 import org.eclipse.team.svn.core.operation.file.IFileProvider;
@@ -47,7 +46,7 @@ public class SetPropertyOperation extends AbstractFileOperation {
 
 	public SetPropertyOperation(File[] files, SVNProperty[] data, boolean isRecursive) {
 		super("Operation_SetPropertiesFile", SVNMessages.class, files); //$NON-NLS-1$
-		this.propertyData = data;
+		propertyData = data;
 		this.isRecursive = isRecursive;
 	}
 
@@ -57,13 +56,14 @@ public class SetPropertyOperation extends AbstractFileOperation {
 
 	public SetPropertyOperation(IFileProvider provider, SVNProperty[] data, boolean isRecursive) {
 		super("Operation_SetPropertiesFile", SVNMessages.class, provider); //$NON-NLS-1$
-		this.propertyData = data;
+		propertyData = data;
 		this.isRecursive = isRecursive;
 	}
 
+	@Override
 	protected void runImpl(IProgressMonitor monitor) throws Exception {
-		File[] files = this.operableData();
-		if (this.isRecursive) {
+		File[] files = operableData();
+		if (isRecursive) {
 			files = FileUtility.shrinkChildNodes(files, false);
 		}
 
@@ -72,25 +72,19 @@ public class SetPropertyOperation extends AbstractFileOperation {
 			IRepositoryResource remote = SVNFileStorage.instance().asRepositoryResource(files[i], false);
 			IRepositoryLocation location = remote.getRepositoryLocation();
 			final ISVNConnector proxy = location.acquireSVNProxy();
-			this.protectStep(new IUnprotectedOperation() {
-				public void run(IProgressMonitor monitor) throws Exception {
-					for (int i = 0; i < SetPropertyOperation.this.propertyData.length && !monitor.isCanceled(); i++) {
-						final SVNProperty property = SetPropertyOperation.this.propertyData[i];
-						SetPropertyOperation.this.protectStep(new IUnprotectedOperation() {
-							public void run(IProgressMonitor monitor) throws Exception {
-								proxy.setPropertyLocal(new String[] { current.getAbsolutePath() }, property,
-										SVNDepth.infinityOrEmpty(SetPropertyOperation.this.isRecursive),
-										ISVNConnector.Options.NONE, null,
-										new SVNProgressMonitor(SetPropertyOperation.this, monitor, null));
-							}
-						}, monitor, SetPropertyOperation.this.propertyData.length);
-					}
+			this.protectStep(monitor2 -> {
+				for (int i1 = 0; i1 < propertyData.length && !monitor2.isCanceled(); i1++) {
+					final SVNProperty property = propertyData[i1];
+					SetPropertyOperation.this.protectStep(monitor1 -> proxy.setPropertyLocal(new String[] { current.getAbsolutePath() }, property,
+							SVNDepth.infinityOrEmpty(isRecursive), ISVNConnector.Options.NONE, null,
+							new SVNProgressMonitor(SetPropertyOperation.this, monitor1, null)), monitor2, propertyData.length);
 				}
 			}, monitor, files.length);
 			location.releaseSVNProxy(proxy);
 		}
 	}
 
+	@Override
 	protected ISchedulingRule getSchedulingRule(File file) {
 		return file.isDirectory() ? new LockingRule(file) : super.getSchedulingRule(file);
 	}

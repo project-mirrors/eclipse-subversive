@@ -15,7 +15,6 @@
 package org.eclipse.team.svn.ui.operation;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.team.svn.core.operation.IUnprotectedOperation;
 import org.eclipse.team.svn.core.operation.remote.AbstractRepositoryOperation;
 import org.eclipse.team.svn.core.resource.IRepositoryResource;
 import org.eclipse.team.svn.core.resource.IRepositoryResourceProvider;
@@ -40,29 +39,29 @@ public class RefreshRemoteResourcesOperation extends AbstractRepositoryOperation
 		super("Operation_RefreshRemote", SVNUIMessages.class, provider); //$NON-NLS-1$
 	}
 
+	@Override
 	public int getOperationWeight() {
 		return 0;
 	}
 
+	@Override
 	protected void runImpl(IProgressMonitor monitor) throws Exception {
-		IRepositoryResource[] resources = this.operableData();
+		IRepositoryResource[] resources = operableData();
 
-		for (int i = 0; i < resources.length; i++) {
-			final IRepositoryResource current = resources[i];
-			this.protectStep(new IUnprotectedOperation() {
-				public void run(IProgressMonitor monitor) throws Exception {
-					if (current instanceof IRepositoryRoot
-							&& ((IRepositoryRoot) current).getKind() == IRepositoryRoot.KIND_LOCATION_ROOT) {
-						RepositoriesView.refresh(current.getRepositoryLocation(), new RefreshVisitor());
-					} else {
-						RepositoriesView.refresh(current, new RefreshVisitor());
-					}
+		for (final IRepositoryResource current : resources) {
+			this.protectStep(monitor1 -> {
+				if (current instanceof IRepositoryRoot
+						&& ((IRepositoryRoot) current).getKind() == IRepositoryRoot.KIND_LOCATION_ROOT) {
+					RepositoriesView.refresh(current.getRepositoryLocation(), new RefreshVisitor());
+				} else {
+					RepositoriesView.refresh(current, new RefreshVisitor());
 				}
 			}, monitor, resources.length);
 		}
 	}
 
 	protected class RefreshVisitor implements RepositoryTreeViewer.IRefreshVisitor {
+		@Override
 		public void visit(Object element) {
 			if (element instanceof IDataTreeNode) {
 				((IDataTreeNode) element).refresh();

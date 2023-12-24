@@ -26,8 +26,8 @@ import org.eclipse.team.svn.core.operation.IActionOperation;
 
 public class AsynchronousActiveQueue<Data extends IQueuedElement<Data>> {
 
-	public static interface IRecordHandler<Data extends IQueuedElement<Data>> {
-		public void process(IProgressMonitor monitor, IActionOperation op, Data record);
+	public interface IRecordHandler<Data extends IQueuedElement<Data>> {
+		void process(IProgressMonitor monitor, IActionOperation op, Data record);
 	}
 
 	protected final String name;
@@ -41,19 +41,19 @@ public class AsynchronousActiveQueue<Data extends IQueuedElement<Data>> {
 	static final boolean DEBUG = SVNTeamPlugin.instance().isDebugging();
 
 	public AsynchronousActiveQueue(String queueName, IRecordHandler<Data> handler, boolean system) {
-		this.name = queueName;
-		this.queue = new LinkedList<Data>();
+		name = queueName;
+		queue = new LinkedList<>();
 		this.handler = handler;
 		this.system = system;
 	}
 
 	public void push(Data data) {
-		synchronized (this.queue) {
+		synchronized (queue) {
 			// avoid duplicated events, Start search from the end, the possibility
 			// to find similar events added recently is higher
-			if (!this.queue.isEmpty() && data.canSkip()) {
-				for (int i = this.queue.size() - 1; i >= 0; i--) {
-					Data old = this.queue.get(i);
+			if (!queue.isEmpty() && data.canSkip()) {
+				for (int i = queue.size() - 1; i >= 0; i--) {
+					Data old = queue.get(i);
 					if (old.equals(data)) {
 						if (DEBUG) {
 							logDebug("skipped: " + data);
@@ -62,13 +62,13 @@ public class AsynchronousActiveQueue<Data extends IQueuedElement<Data>> {
 					}
 				}
 			}
-			if (this.queue.size() > 1) {
+			if (queue.size() > 1) {
 				// try to merge with all except the first one, which could be
 				// being dispatched right now
-				for (int i = this.queue.size() - 1; i > 0; i--) {
-					Data old = this.queue.get(i);
+				for (int i = queue.size() - 1; i > 0; i--) {
+					Data old = queue.get(i);
 					if (old.canMerge(data)) {
-						this.queue.set(i, old.merge(data));
+						queue.set(i, old.merge(data));
 						if (DEBUG) {
 							logDebug("merged " + old + " with " + data);
 						}
@@ -76,12 +76,12 @@ public class AsynchronousActiveQueue<Data extends IQueuedElement<Data>> {
 					}
 				}
 			}
-			this.queue.add(data);
+			queue.add(data);
 			if (DEBUG) {
 				logDebug("added " + data);
 			}
-			if (this.queue.size() == 1) {
-				ProgressMonitorUtility.doTaskScheduledDefault(new QueuedOperation(this.name), this.system);
+			if (queue.size() == 1) {
+				ProgressMonitorUtility.doTaskScheduledDefault(new QueuedOperation(name), system);
 			}
 		}
 	}
@@ -123,7 +123,7 @@ public class AsynchronousActiveQueue<Data extends IQueuedElement<Data>> {
 
 	private void logDebug(String message) {
 		if (DEBUG) {
-			System.out.println("[" + this.name + "] size: " + this.queue.size() + ", " + message);
+			System.out.println("[" + name + "] size: " + queue.size() + ", " + message);
 		}
 	}
 }

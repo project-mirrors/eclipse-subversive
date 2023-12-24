@@ -51,37 +51,37 @@ public class CredentialsComposite extends Composite {
 
 	public CredentialsComposite(Composite parent, int style) {
 		super(parent, style);
-		this.createControls();
+		createControls();
 	}
 
 	public void initialize() {
-		if (this.usernameInput != null && this.usernameInput.trim().length() > 0) {
-			this.userName.setText(this.usernameInput);
+		if (usernameInput != null && usernameInput.trim().length() > 0) {
+			userName.setText(usernameInput);
 		} else {
-			this.userName.setFocus();
+			userName.setFocus();
 		}
 
-		if (this.passwordInput != null) {
-			this.password.setText(this.passwordInput);
+		if (passwordInput != null) {
+			password.setText(passwordInput);
 		}
-		if (this.usernameInput != null && this.usernameInput.trim().length() > 0) {
-			this.password.setFocus();
-			this.password.selectAll();
+		if (usernameInput != null && usernameInput.trim().length() > 0) {
+			password.setFocus();
+			password.selectAll();
 		}
 
-		this.savePassword.setSelection(this.passwordSaved);
+		savePassword.setSelection(passwordSaved);
 	}
 
 	public Text getPassword() {
-		return this.password;
+		return password;
 	}
 
 	public Button getSavePassword() {
-		return this.savePassword;
+		return savePassword;
 	}
 
 	public UserInputHistory getUserHistory() {
-		return this.userHistory;
+		return userHistory;
 	}
 
 	public void setUserHistory(UserInputHistory userHistory) {
@@ -89,7 +89,7 @@ public class CredentialsComposite extends Composite {
 	}
 
 	public Combo getUsername() {
-		return this.userName;
+		return userName;
 	}
 
 	public void setPasswordInput(String passwordInput) {
@@ -107,10 +107,10 @@ public class CredentialsComposite extends Composite {
 	private void createControls() {
 		GridLayout layout = new GridLayout();
 		layout.marginHeight = layout.marginWidth = 0;
-		this.setLayout(layout);
+		setLayout(layout);
 
 		GridData data = new GridData(GridData.FILL_BOTH);
-		this.setLayoutData(data);
+		setLayoutData(data);
 
 		Group authGroup = new Group(this, SWT.NONE);
 		layout = new GridLayout();
@@ -137,15 +137,15 @@ public class CredentialsComposite extends Composite {
 		description.setLayoutData(data);
 		description.setText(SVNUIMessages.CredentialsComposite_User);
 
-		this.userHistory = new UserInputHistory(CredentialsComposite.USER_HISTORY_NAME);
+		userHistory = new UserInputHistory(CredentialsComposite.USER_HISTORY_NAME);
 
-		this.userName = new Combo(inner, SWT.DROP_DOWN);
+		userName = new Combo(inner, SWT.DROP_DOWN);
 		data = new GridData(GridData.FILL_HORIZONTAL);
 		data.grabExcessHorizontalSpace = true;
 		data.widthHint = IDialogConstants.ENTRY_FIELD_WIDTH;
-		this.userName.setLayoutData(data);
-		this.userName.setVisibleItemCount(this.userHistory.getDepth());
-		this.userName.setItems(this.userHistory.getHistory());
+		userName.setLayoutData(data);
+		userName.setVisibleItemCount(userHistory.getDepth());
+		userName.setItems(userHistory.getHistory());
 
 		description = new Label(inner, SWT.NONE);
 		data = new GridData(GridData.FILL_HORIZONTAL);
@@ -154,11 +154,11 @@ public class CredentialsComposite extends Composite {
 		description.setLayoutData(data);
 		description.setText(SVNUIMessages.CredentialsComposite_Password);
 
-		this.password = new Text(inner, SWT.SINGLE | SWT.BORDER | SWT.PASSWORD);
+		password = new Text(inner, SWT.SINGLE | SWT.BORDER | SWT.PASSWORD);
 		data = new GridData(GridData.FILL_HORIZONTAL);
 		data.grabExcessHorizontalSpace = true;
 		data.widthHint = IDialogConstants.ENTRY_FIELD_WIDTH;
-		this.password.setLayoutData(data);
+		password.setLayoutData(data);
 
 		inner = new Composite(authGroup, SWT.FILL);
 		layout = new GridLayout();
@@ -168,10 +168,10 @@ public class CredentialsComposite extends Composite {
 		data.horizontalSpan = 2;
 		inner.setLayoutData(data);
 
-		this.savePassword = new Button(inner, SWT.CHECK);
+		savePassword = new Button(inner, SWT.CHECK);
 		data = new GridData();
-		this.savePassword.setLayoutData(data);
-		this.savePassword.setText(SVNUIMessages.CredentialsComposite_SavePassword);
+		savePassword.setLayoutData(data);
+		savePassword.setText(SVNUIMessages.CredentialsComposite_SavePassword);
 
 		new SecurityWarningComposite(inner);
 	}

@@ -15,6 +15,7 @@
 package org.eclipse.team.svn.ui.verifier;
 
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.team.svn.core.BaseMessages;
 import org.eclipse.team.svn.core.utility.StringMatcher;
 import org.eclipse.team.svn.ui.SVNUIMessages;
 
@@ -30,19 +31,21 @@ public class FileNameTemplateVerifier extends AbstractFormattedVerifier {
 
 	public FileNameTemplateVerifier(String fieldName) {
 		super(fieldName);
-		FileNameTemplateVerifier.ERROR_MESSAGE = SVNUIMessages.format(SVNUIMessages.Verifier_FileNameTemplate,
+		FileNameTemplateVerifier.ERROR_MESSAGE = BaseMessages.format(SVNUIMessages.Verifier_FileNameTemplate,
 				new String[] { AbstractFormattedVerifier.FIELD_NAME });
 	}
 
+	@Override
 	protected String getErrorMessageImpl(Control input) {
 		try {
-			new StringMatcher(this.getText(input));
+			new StringMatcher(getText(input));
 		} catch (Exception e) {
 			return FileNameTemplateVerifier.ERROR_MESSAGE;
 		}
 		return null;
 	}
 
+	@Override
 	protected String getWarningMessageImpl(Control input) {
 		return null;
 	}

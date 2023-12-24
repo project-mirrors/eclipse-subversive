@@ -31,7 +31,6 @@ public class M2ESVNPlugin extends AbstractUIPlugin {
 	private static M2ESVNPlugin instance;
 
 	public M2ESVNPlugin() {
-		super();
 		M2ESVNPlugin.instance = this;
 	}
 
@@ -40,7 +39,7 @@ public class M2ESVNPlugin extends AbstractUIPlugin {
 	}
 
 	public String getResource(String key) {
-		return FileUtility.getResource(Platform.getResourceBundle(this.getBundle()), key);
+		return FileUtility.getResource(Platform.getResourceBundle(getBundle()), key);
 	}
 
 	public String getResource(String key, Object[] args) {

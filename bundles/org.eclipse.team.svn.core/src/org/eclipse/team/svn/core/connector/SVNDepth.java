@@ -46,22 +46,22 @@ public enum SVNDepth {
 	public final int id;
 
 	public static final SVNDepth infinityOrEmpty(boolean recurse) {
-		return (recurse ? SVNDepth.INFINITY : SVNDepth.EMPTY);
+		return recurse ? SVNDepth.INFINITY : SVNDepth.EMPTY;
 	}
 
 	public static final SVNDepth infinityOrFiles(boolean recurse) {
-		return (recurse ? SVNDepth.INFINITY : SVNDepth.FILES);
+		return recurse ? SVNDepth.INFINITY : SVNDepth.FILES;
 	}
 
 	public static final SVNDepth infinityOrImmediates(boolean recurse) {
-		return (recurse ? SVNDepth.INFINITY : SVNDepth.IMMEDIATES);
+		return recurse ? SVNDepth.INFINITY : SVNDepth.IMMEDIATES;
 	}
 
 	public static final SVNDepth unknownOrFiles(boolean recurse) {
-		return (recurse ? SVNDepth.UNKNOWN : SVNDepth.FILES);
+		return recurse ? SVNDepth.UNKNOWN : SVNDepth.FILES;
 	}
 
-	private SVNDepth(int id) {
+	SVNDepth(int id) {
 		this.id = id;
 	}
 }

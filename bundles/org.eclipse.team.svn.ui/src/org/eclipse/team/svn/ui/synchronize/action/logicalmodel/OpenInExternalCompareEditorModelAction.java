@@ -47,10 +47,11 @@ public class OpenInExternalCompareEditorModelAction extends AbstractSynchronizeL
 		super(text, configuration);
 	}
 
+	@Override
 	protected IActionOperation getOperation() {
 		IActionOperation op = null;
 
-		IResource resource = this.getSelectedResource();
+		IResource resource = getSelectedResource();
 		DiffViewerSettings diffSettings = SVNTeamDiffViewerPage.loadDiffViewerSettings();
 		DetectExternalCompareOperationHelper detectCompareHelper = new DetectExternalCompareOperationHelper(resource,
 				diffSettings, true);
@@ -70,12 +71,15 @@ public class OpenInExternalCompareEditorModelAction extends AbstractSynchronizeL
 		return op;
 	}
 
+	@Override
 	protected boolean isEnabledForSelection(IStructuredSelection selection) {
 		return selection.size() == 1 && super.isEnabledForSelection(selection);
 	}
 
+	@Override
 	public FastSyncInfoFilter getSyncInfoFilter() {
 		return new FastSyncInfoFilter() {
+			@Override
 			public boolean select(SyncInfo info) {
 				ILocalResource local = ((AbstractSVNSyncInfo) info).getLocalResource();
 				return local.getResource().getType() == IResource.FILE

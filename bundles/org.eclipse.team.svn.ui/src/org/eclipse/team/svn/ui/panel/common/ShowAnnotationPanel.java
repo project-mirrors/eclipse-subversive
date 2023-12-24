@@ -41,55 +41,58 @@ public class ShowAnnotationPanel extends AbstractDialogPanel {
 	protected SVNRevisionRange revisions;
 
 	public ShowAnnotationPanel(IRepositoryResource resource) {
-		this.dialogTitle = SVNUIMessages.ShowAnnotationPanel_Title; //$NON-NLS-1$
-		this.dialogDescription = SVNUIMessages.ShowAnnotationPanel_Description; //$NON-NLS-1$
-		this.defaultMessage = SVNUIMessages.ShowAnnotationPanel_DefaultMessage; //$NON-NLS-1$
+		dialogTitle = SVNUIMessages.ShowAnnotationPanel_Title;
+		dialogDescription = SVNUIMessages.ShowAnnotationPanel_Description;
+		defaultMessage = SVNUIMessages.ShowAnnotationPanel_DefaultMessage;
 
 		this.resource = resource;
 	}
 
+	@Override
 	protected void createControlsImpl(Composite parent) {
 		//from
-		this.fromRevision = new RevisionComposite(parent, this, false, new String[] {
+		fromRevision = new RevisionComposite(parent, this, false, new String[] {
 				SVNUIMessages.ShowAnnotationPanel_FromRevision, SVNUIMessages.RevisionComposite_HeadRevision },
-				SVNRevision.HEAD, false); //$NON-NLS-1$
+				SVNRevision.HEAD, false);
 		GridLayout layout = new GridLayout();
 		GridData data = new GridData(GridData.FILL_HORIZONTAL);
-		this.fromRevision.setLayout(layout);
-		this.fromRevision.setLayoutData(data);
+		fromRevision.setLayout(layout);
+		fromRevision.setLayoutData(data);
 
-		IRepositoryResource fromResource = SVNUtility.copyOf(this.resource);
-		fromResource.setSelectedRevision(this.resource.getSelectedRevision());
-		this.fromRevision.setSelectedResource(fromResource);
-		this.fromRevision.setRevisionValue(SVNRevision.fromNumber(1));
+		IRepositoryResource fromResource = SVNUtility.copyOf(resource);
+		fromResource.setSelectedRevision(resource.getSelectedRevision());
+		fromRevision.setSelectedResource(fromResource);
+		fromRevision.setRevisionValue(SVNRevision.fromNumber(1));
 
 		//to
-		this.toRevision = new RevisionComposite(parent, this, false, new String[] {
+		toRevision = new RevisionComposite(parent, this, false, new String[] {
 				SVNUIMessages.ShowAnnotationPanel_ToRevision, SVNUIMessages.RevisionComposite_HeadRevision },
-				SVNRevision.HEAD, false); //$NON-NLS-1$
+				SVNRevision.HEAD, false);
 		layout = new GridLayout();
 		data = new GridData(GridData.FILL_HORIZONTAL);
-		this.toRevision.setLayout(layout);
-		this.toRevision.setLayoutData(data);
+		toRevision.setLayout(layout);
+		toRevision.setLayoutData(data);
 
-		IRepositoryResource toResource = SVNUtility.copyOf(this.resource);
-		toResource.setSelectedRevision(this.resource.getSelectedRevision());
-		this.toRevision.setSelectedResource(toResource);
+		IRepositoryResource toResource = SVNUtility.copyOf(resource);
+		toResource.setSelectedRevision(resource.getSelectedRevision());
+		toRevision.setSelectedResource(toResource);
 	}
 
 	public SVNRevisionRange getRevisions() {
-		return this.revisions;
+		return revisions;
 	}
 
+	@Override
 	protected void cancelChangesImpl() {
 
 	}
 
+	@Override
 	protected void saveChangesImpl() {
-		this.revisions = new SVNRevisionRange(this.fromRevision.getSelectedRevision(),
-				this.toRevision.getSelectedRevision());
+		revisions = new SVNRevisionRange(fromRevision.getSelectedRevision(), toRevision.getSelectedRevision());
 	}
 
+	@Override
 	public String getHelpId() {
 		return "org.eclipse.team.svn.help.showAnnotationDialogContext"; //$NON-NLS-1$
 	}

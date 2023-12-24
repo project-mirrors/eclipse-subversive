@@ -20,23 +20,18 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.internal.preferences.Base64;
 import org.eclipse.core.internal.utils.UniversalUniqueIdentifier;
-import org.eclipse.core.net.proxy.IProxyChangeEvent;
-import org.eclipse.core.net.proxy.IProxyChangeListener;
 import org.eclipse.core.net.proxy.IProxyData;
 import org.eclipse.core.net.proxy.IProxyService;
 import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences.IPreferenceChangeListener;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences.PreferenceChangeEvent;
@@ -102,85 +97,88 @@ public abstract class AbstractSVNStorage implements ISVNStorage {
 	protected boolean noStoredAuthentication;
 
 	protected class RepositoryPreferenceChangeListener implements IPreferenceChangeListener {
+		@Override
 		public void preferenceChange(PreferenceChangeEvent event) {
-			HashSet<IRepositoryLocation> readLocations = new HashSet<IRepositoryLocation>(
-					Arrays.asList(AbstractSVNStorage.this.repositories));
+			HashSet<IRepositoryLocation> readLocations = new HashSet<>(
+					Arrays.asList(repositories));
 			IRepositoryLocation location = AbstractSVNStorage.this.newRepositoryLocation((String) event.getNewValue());
 			readLocations.add(location);
-			AbstractSVNStorage.this.repositories = readLocations.toArray(new IRepositoryLocation[readLocations.size()]);
+			repositories = readLocations.toArray(new IRepositoryLocation[readLocations.size()]);
 			try {
 				((IEclipsePreferences) event.getSource()).flush();
 			} catch (BackingStoreException e) {
 				LoggedOperation.reportError("preferenceChange", e); //$NON-NLS-1$
 			}
-			AbstractSVNStorage.this.fireRepositoriesStateChanged(
+			fireRepositoriesStateChanged(
 					new RepositoriesStateChangedEvent(location, RepositoriesStateChangedEvent.ADDED));
 		}
 	}
 
 	public AbstractSVNStorage() {
-		this.repositories = new IRepositoryLocation[0];
-		this.repositoriesStateChangedListeners = new ArrayList<IRepositoriesStateChangedListener>();
-		this.revPropChangeListeners = new ArrayList<IRevisionPropertyChangeListener>();
+		repositories = new IRepositoryLocation[0];
+		repositoriesStateChangedListeners = new ArrayList<>();
+		revPropChangeListeners = new ArrayList<>();
 	}
 
+	@Override
 	public void dispose() {
 		// synchronization is innecessary
-		IRepositoryLocation[] locations = this.repositories;
+		IRepositoryLocation[] locations = repositories;
 		if (locations != null) {
-			for (int i = 0; i < locations.length; i++) {
-				locations[i].dispose();
+			for (IRepositoryLocation location : locations) {
+				location.dispose();
 			}
 		}
 	}
 
+	@Override
 	public void reconfigureLocations() {
 		// synchronization is innecessary
-		IRepositoryLocation[] locations = this.repositories;
+		IRepositoryLocation[] locations = repositories;
 		if (locations != null) {
-			for (int i = 0; i < locations.length; i++) {
-				locations[i].reconfigure();
+			for (IRepositoryLocation location : locations) {
+				location.reconfigure();
 			}
 		}
 	}
 
 	public void addRepositoriesStateChangedListener(IRepositoriesStateChangedListener listener) {
-		synchronized (this.repositoriesStateChangedListeners) {
-			this.repositoriesStateChangedListeners.add(listener);
+		synchronized (repositoriesStateChangedListeners) {
+			repositoriesStateChangedListeners.add(listener);
 		}
 	}
 
 	public void removeRepositoriesStateChangedListener(IRepositoriesStateChangedListener listener) {
-		synchronized (this.repositoriesStateChangedListeners) {
-			this.repositoriesStateChangedListeners.remove(listener);
+		synchronized (repositoriesStateChangedListeners) {
+			repositoriesStateChangedListeners.remove(listener);
 		}
 	}
 
 	public void fireRepositoriesStateChanged(RepositoriesStateChangedEvent event) {
-		synchronized (this.repositoriesStateChangedListeners) {
-			for (IRepositoriesStateChangedListener listener : this.repositoriesStateChangedListeners) {
+		synchronized (repositoriesStateChangedListeners) {
+			for (IRepositoriesStateChangedListener listener : repositoriesStateChangedListeners) {
 				listener.repositoriesStateChanged(event);
 			}
 		}
 	}
 
 	public void addRevisionPropertyChangeListener(IRevisionPropertyChangeListener listener) {
-		synchronized (this.revPropChangeListeners) {
-			this.revPropChangeListeners.add(listener);
+		synchronized (revPropChangeListeners) {
+			revPropChangeListeners.add(listener);
 		}
 	}
 
 	public void fireRevisionPropertyChangeEvent(RevisonPropertyChangeEvent event) {
-		synchronized (this.revPropChangeListeners) {
-			for (IRevisionPropertyChangeListener current : this.revPropChangeListeners) {
+		synchronized (revPropChangeListeners) {
+			for (IRevisionPropertyChangeListener current : revPropChangeListeners) {
 				current.revisionPropertyChanged(event);
 			}
 		}
 	}
 
 	public void removeRevisionPropertyChangeListener(IRevisionPropertyChangeListener listener) {
-		synchronized (this.revPropChangeListeners) {
-			this.revPropChangeListeners.remove(listener);
+		synchronized (revPropChangeListeners) {
+			revPropChangeListeners.remove(listener);
 		}
 	}
 
@@ -193,23 +191,27 @@ public abstract class AbstractSVNStorage implements ISVNStorage {
 		return (IEclipsePreferences) SVNTeamPlugin.instance().getPreferences().node(prefNode);
 	}
 
+	@Override
 	public IRepositoryLocation[] getRepositoryLocations() {
-		return this.repositories;
+		return repositories;
 	}
 
+	@Override
 	public IRepositoryLocation getRepositoryLocation(String id) {
-		for (int i = 0; i < this.repositories.length; i++) {
-			if (this.repositories[i].getId().equals(id)) {
-				return this.repositories[i];
+		for (IRepositoryLocation element : repositories) {
+			if (element.getId().equals(id)) {
+				return element;
 			}
 		}
 		return null;
 	}
 
+	@Override
 	public IRepositoryLocation newRepositoryLocation() {
 		return new SVNRepositoryLocation(new UniversalUniqueIdentifier().toString());
 	}
 
+	@Override
 	public void copyRepositoryLocation(IRepositoryLocation to, IRepositoryLocation from) {
 		to.setStructureEnabled(from.isStructureEnabled());
 		to.setBranchesLocation(from.getUserInputBranches());
@@ -245,16 +247,16 @@ public abstract class AbstractSVNStorage implements ISVNStorage {
 			tmpTo.repositoryUUID = tmpFrom.repositoryUUID;
 
 			tmpTo.getAdditionalRealms().clear();
-			for (Iterator<String> it = from.getRealms().iterator(); it.hasNext();) {
-				String realm = it.next();
+			for (String realm : from.getRealms()) {
 				IRepositoryLocation target = this.newRepositoryLocation();
 				IRepositoryLocation source = from.getLocationForRealm(realm);
-				this.copyRepositoryLocation(target, source);
+				copyRepositoryLocation(target, source);
 				to.addRealm(realm, target);
 			}
 		}
 	}
 
+	@Override
 	public IRepositoryLocation newRepositoryLocation(String reference) {
 		if (reference == null) {
 			return this.newRepositoryLocation();
@@ -263,7 +265,7 @@ public abstract class AbstractSVNStorage implements ISVNStorage {
 		if (parts.length == 0 || parts[0].length() == 0) {
 			return this.newRepositoryLocation();
 		}
-		IRepositoryLocation location = this.getRepositoryLocation(parts[0]);
+		IRepositoryLocation location = getRepositoryLocation(parts[0]);
 		if (location != null) {
 			return location;
 		}
@@ -278,55 +280,60 @@ public abstract class AbstractSVNStorage implements ISVNStorage {
 	}
 
 	/*
-	 * see IRepositoryLocation comments why we need LocationReferenceTypeEnum parameter 
+	 * see IRepositoryLocation comments why we need LocationReferenceTypeEnum parameter
 	 */
+	@Override
 	public String repositoryLocationAsReference(IRepositoryLocation location,
 			LocationReferenceTypeEnum locationReferenceType) {
 		return location.asReference(locationReferenceType);
 	}
 
+	@Override
 	public synchronized void addRepositoryLocation(IRepositoryLocation location) {
-		List<IRepositoryLocation> tmp = new ArrayList<IRepositoryLocation>(Arrays.asList(this.repositories));
+		List<IRepositoryLocation> tmp = new ArrayList<>(Arrays.asList(repositories));
 		if (!tmp.contains(location)) {
 			tmp.add(location);
-			this.repositories = tmp.toArray(new IRepositoryLocation[tmp.size()]);
+			repositories = tmp.toArray(new IRepositoryLocation[tmp.size()]);
 		}
-		this.fireRepositoriesStateChanged(
+		fireRepositoriesStateChanged(
 				new RepositoriesStateChangedEvent(location, RepositoriesStateChangedEvent.ADDED));
 	}
 
+	@Override
 	public synchronized void removeRepositoryLocation(IRepositoryLocation location) {
-		List<IRepositoryLocation> tmp = new ArrayList<IRepositoryLocation>(Arrays.asList(this.repositories));
-		this.removeAuthInfoForLocation(location, ""); //$NON-NLS-1$
+		List<IRepositoryLocation> tmp = new ArrayList<>(Arrays.asList(repositories));
+		removeAuthInfoForLocation(location, ""); //$NON-NLS-1$
 		String[] realms = location.getRealms().toArray(new String[0]);
 		for (String realm : realms) {
-			this.removeAuthInfoForLocation(location, realm);
+			removeAuthInfoForLocation(location, realm);
 		}
 		if (tmp.remove(location)) {
-			this.repositories = tmp.toArray(new IRepositoryLocation[tmp.size()]);
+			repositories = tmp.toArray(new IRepositoryLocation[tmp.size()]);
 		}
-		this.fireRepositoriesStateChanged(
+		fireRepositoriesStateChanged(
 				new RepositoriesStateChangedEvent(location, RepositoriesStateChangedEvent.REMOVED));
 	}
 
 	public SVNCachedProxyCredentialsManager getProxyCredentialsManager() {
-		return this.proxyCredentialsManager;
+		return proxyCredentialsManager;
 	}
 
+	@Override
 	public synchronized void saveConfiguration() throws Exception {
-		this.saveLocations();
+		saveLocations();
 	}
 
 	public byte[] revisionLinkAsBytes(IRevisionLink link, boolean saveRevisionLinksComments) {
-		String str = this.repositoryResourceAsString(link.getRepositoryResource());
+		String str = repositoryResourceAsString(link.getRepositoryResource());
 		if (str != null && saveRevisionLinksComments) {
 			str += ";" + new String(Base64.encode(link.getComment().getBytes())); //$NON-NLS-1$
 		}
 		return str != null ? str.getBytes() : null;
 	}
 
+	@Override
 	public byte[] repositoryResourceAsBytes(IRepositoryResource resource) {
-		String str = this.repositoryResourceAsString(resource);
+		String str = repositoryResourceAsString(resource);
 		return str != null ? str.getBytes() : null;
 	}
 
@@ -339,10 +346,10 @@ public abstract class AbstractSVNStorage implements ISVNStorage {
 				resource.getRepositoryLocation().getId() + ";" + //$NON-NLS-1$
 				new String(Base64.encode(resource.getUrl().getBytes())) + ";" + //$NON-NLS-1$
 				String.valueOf(resource.getSelectedRevision().getKind().id) + ";" + //$NON-NLS-1$
-				this.convertRevisionToString(resource.getSelectedRevision()) + ";" + //$NON-NLS-1$
+				convertRevisionToString(resource.getSelectedRevision()) + ";" + //$NON-NLS-1$
 				String.valueOf(IRepositoryRoot.KIND_ROOT) + ";" + //$NON-NLS-1$
 				String.valueOf(resource.getPegRevision().getKind().id) + ";" + //$NON-NLS-1$
-				this.convertRevisionToString(resource.getPegRevision()); //$NON-NLS-1$
+				convertRevisionToString(resource.getPegRevision());
 		return retVal;
 	}
 
@@ -374,6 +381,7 @@ public abstract class AbstractSVNStorage implements ISVNStorage {
 		return strRevision;
 	}
 
+	@Override
 	public IRepositoryResource repositoryResourceFromBytes(byte[] bytes) {
 		return this.repositoryResourceFromBytes(bytes, null);
 	}
@@ -381,7 +389,7 @@ public abstract class AbstractSVNStorage implements ISVNStorage {
 	public IRevisionLink revisionLinkFromBytes(byte[] bytes, IRepositoryLocation location) {
 		IRepositoryResource resource = this.repositoryResourceFromBytes(bytes, location);
 		if (resource != null) {
-			String[] data = new String(bytes).split(";"); //$NON-NLS-1$			
+			String[] data = new String(bytes).split(";"); //$NON-NLS-1$
 			String comment = null;
 			if (data.length > 8) {
 				comment = new String(Base64.decode(data[8].getBytes()));
@@ -407,7 +415,7 @@ public abstract class AbstractSVNStorage implements ISVNStorage {
 			base64Label = true;
 		}
 		if (location == null) {
-			location = this.getRepositoryLocation(data[1]);
+			location = getRepositoryLocation(data[1]);
 		}
 		if (location == null) {
 			return null;
@@ -419,7 +427,7 @@ public abstract class AbstractSVNStorage implements ISVNStorage {
 		} catch (NumberFormatException ex) { // in order to prevent crashing on improperly stored data (see bug 465812)
 			revisionKind = revNum > 0 ? SVNRevision.Kind.NUMBER.id : SVNRevision.Kind.HEAD.id;
 		}
-		SVNRevision selectedRevision = this.convertToRevision(revisionKind, revNum, false);
+		SVNRevision selectedRevision = convertToRevision(revisionKind, revNum, false);
 		SVNRevision pegRevision = null;
 		if (data.length > 6) {
 			long pegNum = Long.parseLong(data[7]);
@@ -429,7 +437,7 @@ public abstract class AbstractSVNStorage implements ISVNStorage {
 			} catch (NumberFormatException ex) { // in order to prevent crashing on improperly stored data (see bug 465812)
 				pegKind = pegNum > 0 ? SVNRevision.Kind.NUMBER.id : SVNRevision.Kind.HEAD.id;
 			}
-			pegRevision = this.convertToRevision(pegKind, pegNum, true);
+			pegRevision = convertToRevision(pegKind, pegNum, true);
 		}
 
 		String urlPart = base64Label ? new String(Base64.decode(data[2].getBytes())) : data[2];
@@ -441,7 +449,7 @@ public abstract class AbstractSVNStorage implements ISVNStorage {
 			urlPart = prefix + urlPart;
 		}
 
-		location = this.wrapLocationIfRequired(location, urlPart, !isFolder);
+		location = wrapLocationIfRequired(location, urlPart, !isFolder);
 
 		IRepositoryResource retVal = isFolder
 				? (IRepositoryResource) location.asRepositoryContainer(urlPart, false)
@@ -464,54 +472,54 @@ public abstract class AbstractSVNStorage implements ISVNStorage {
 			}
 			case IRepositoryRoot.KIND_TRUNK: {
 				return location.isStructureEnabled()
-						? (location.getUrl() + "/" + location.getTrunkLocation()) //$NON-NLS-1$
+						? location.getUrl() + "/" + location.getTrunkLocation() //$NON-NLS-1$
 						: location.getUrl();
 			}
 			case IRepositoryRoot.KIND_BRANCHES: {
 				return location.isStructureEnabled()
-						? (location.getUrl() + "/" + location.getBranchesLocation()) //$NON-NLS-1$
+						? location.getUrl() + "/" + location.getBranchesLocation() //$NON-NLS-1$
 						: location.getUrl();
 			}
 			case IRepositoryRoot.KIND_TAGS: {
 				return location.isStructureEnabled()
-						? (location.getUrl() + "/" + location.getTagsLocation()) //$NON-NLS-1$
+						? location.getUrl() + "/" + location.getTagsLocation() //$NON-NLS-1$
 						: location.getUrl();
 			}
 		}
 		return null;
 	}
 
+	@Override
 	public void initialize(IPath stateInfoLocation) throws Exception {
 		HashMap preferences = new HashMap();
 		preferences.put(ISVNStorage.PREF_STATE_INFO_LOCATION, stateInfoLocation);
 		this.initialize(preferences);
 	}
 
+	@Override
 	public void initialize(Map<String, Object> preferences) throws Exception {
 		Boolean noStoredAuthObj = (Boolean) preferences.get(ISVNStorage.PREF_NO_STORED_AUTHENTICATION);
-		this.noStoredAuthentication = noStoredAuthObj != null ? noStoredAuthObj.booleanValue() : false;
+		noStoredAuthentication = noStoredAuthObj != null ? noStoredAuthObj : false;
 
 		IPath stateInfoLocation = (IPath) preferences.get(ISVNStorage.PREF_STATE_INFO_LOCATION);
 		String infoFileName = (String) preferences.get(AbstractSVNStorage.IPREF_STATE_INFO_FILE);
 		String repositoriesPreferencesNode = (String) preferences.get(AbstractSVNStorage.IPREF_REPO_NODE_NAME);
 		String migrateFromAuthDBPreferenceNode = (String) preferences.get(AbstractSVNStorage.IPREF_AUTH_NODE_NAME);
 
-		this.stateInfoFile = stateInfoLocation.append(infoFileName).toFile();
+		stateInfoFile = stateInfoLocation.append(infoFileName).toFile();
 		IProxyService proxyService = SVNTeamPlugin.instance().getProxyService();
-		this.proxyCredentialsManager = new SVNCachedProxyCredentialsManager(proxyService);
+		proxyCredentialsManager = new SVNCachedProxyCredentialsManager(proxyService);
 
-		proxyService.addProxyChangeListener(new IProxyChangeListener() {
-			public void proxyInfoChanged(IProxyChangeEvent event) {
-				IProxyData[] newDatas = event.getChangedProxyData();
-				for (IProxyData current : newDatas) {
-					if (current.isRequiresAuthentication()) {
-						AbstractSVNStorage.this.proxyCredentialsManager.setPassword(current.getPassword());
-						AbstractSVNStorage.this.proxyCredentialsManager.setUsername(current.getUserId());
-						break;
-					}
+		proxyService.addProxyChangeListener(event -> {
+			IProxyData[] newDatas = event.getChangedProxyData();
+			for (IProxyData current : newDatas) {
+				if (current.isRequiresAuthentication()) {
+					proxyCredentialsManager.setPassword(current.getPassword());
+					proxyCredentialsManager.setUsername(current.getUserId());
+					break;
 				}
-				AbstractSVNStorage.this.dispose();
 			}
+			AbstractSVNStorage.this.dispose();
 		});
 
 		//set flag whether we migrated from Authorization Database
@@ -521,23 +529,23 @@ public abstract class AbstractSVNStorage implements ISVNStorage {
 				.node(this.migrateFromAuthDBPreferenceNode);
 
 		this.repositoriesPreferencesNode = repositoriesPreferencesNode;
-		this.repoPrefChangeListener = new RepositoryPreferenceChangeListener();
+		repoPrefChangeListener = new RepositoryPreferenceChangeListener();
 		IEclipsePreferences repositoryPreferences = AbstractSVNStorage
 				.getRepositoriesPreferences(this.repositoriesPreferencesNode);
-		repositoryPreferences.addPreferenceChangeListener(this.repoPrefChangeListener);
+		repositoryPreferences.addPreferenceChangeListener(repoPrefChangeListener);
 		// if the file exists, we should convert the data and delete the file.
-		if (this.stateInfoFile.exists()) {
+		if (stateInfoFile.exists()) {
 			try {
-				this.loadLocationsFromFile();
-				this.saveLocations();
+				loadLocationsFromFile();
+				saveLocations();
 			} catch (Exception ex) {
 				LoggedOperation.reportError(SVNMessages.getErrorString("Error_LoadLocationsFromFile"), ex); //$NON-NLS-1$
 			} finally {
-				this.stateInfoFile.delete();
+				stateInfoFile.delete();
 			}
 		} else {
 			try {
-				this.loadLocations();
+				loadLocations();
 			} catch (Exception ex) {
 				LoggedOperation.reportError(SVNMessages.getErrorString("Error_LoadLocations"), ex); //$NON-NLS-1$
 			}
@@ -546,22 +554,22 @@ public abstract class AbstractSVNStorage implements ISVNStorage {
 
 	protected void saveLocations() throws Exception {
 		IEclipsePreferences repositoryPreferences = AbstractSVNStorage
-				.getRepositoriesPreferences(this.repositoriesPreferencesNode);
-		repositoryPreferences.removePreferenceChangeListener(this.repoPrefChangeListener);
+				.getRepositoriesPreferences(repositoriesPreferencesNode);
+		repositoryPreferences.removePreferenceChangeListener(repoPrefChangeListener);
 		repositoryPreferences.clear();
-		for (IRepositoryLocation current : this.repositories) {
+		for (IRepositoryLocation current : repositories) {
 			repositoryPreferences.put(current.getId(),
-					this.repositoryLocationAsReference(current, LocationReferenceTypeEnum.ALL));
-			this.saveAuthInfo(current, ""); //$NON-NLS-1$
+					repositoryLocationAsReference(current, LocationReferenceTypeEnum.ALL));
+			saveAuthInfo(current, ""); //$NON-NLS-1$
 			String[] realms = current.getRealms().toArray(new String[0]);
 			for (String realm : realms) {
-				this.saveAuthInfo(current, realm);
+				saveAuthInfo(current, realm);
 			}
 		}
 
 		repositoryPreferences.flush();
 		SVNTeamPlugin.instance().savePreferences();
-		repositoryPreferences.addPreferenceChangeListener(this.repoPrefChangeListener);
+		repositoryPreferences.addPreferenceChangeListener(repoPrefChangeListener);
 	}
 
 	/*
@@ -586,8 +594,8 @@ public abstract class AbstractSVNStorage implements ISVNStorage {
 	}
 
 	protected void saveAuthInfo(IRepositoryLocation location, String realm) throws Exception {
-		if (!this.noStoredAuthentication) {
-			ISecurePreferences node = this.getSVNNodeForSecurePreferences(location, realm);
+		if (!noStoredAuthentication) {
+			ISecurePreferences node = getSVNNodeForSecurePreferences(location, realm);
 			if (node != null) {
 				try {
 					IRepositoryLocation tmp = realm.equals("") ? location : location.getLocationForRealm(realm); //$NON-NLS-1$
@@ -607,7 +615,7 @@ public abstract class AbstractSVNStorage implements ISVNStorage {
 					boolean useKeyFile = sshSettings.isUseKeyFile();
 					node.putBoolean("ssh_use_key", useKeyFile, false); //$NON-NLS-1$
 					boolean savePassphrase = sshSettings.isPassPhraseSaved();
-					node.putBoolean("ssh_passphrase_saved", useKeyFile ? savePassphrase : false, false); //$NON-NLS-1$ //$NON-NLS-2$
+					node.putBoolean("ssh_passphrase_saved", useKeyFile ? savePassphrase : false, false); //$NON-NLS-1$
 					node.put("ssh_key", useKeyFile ? sshSettings.getPrivateKeyPath() : "", false); //$NON-NLS-1$ //$NON-NLS-2$
 					if (useKeyFile && savePassphrase) {
 						node.put("ssh_passprase", sshSettings.getPassPhrase(), true); //$NON-NLS-1$
@@ -622,7 +630,7 @@ public abstract class AbstractSVNStorage implements ISVNStorage {
 					savePassphrase = sslSettings.isPassPhraseSaved();
 					node.putBoolean("ssl_enabled", clientAuthEnabled, false); //$NON-NLS-1$
 					node.put("ssl_certificate", clientAuthEnabled ? sslSettings.getCertificatePath() : "", false); //$NON-NLS-1$ //$NON-NLS-2$
-					node.putBoolean("ssl_passphrase_saved", clientAuthEnabled ? savePassphrase : false, false); //$NON-NLS-1$ //$NON-NLS-2$
+					node.putBoolean("ssl_passphrase_saved", clientAuthEnabled ? savePassphrase : false, false); //$NON-NLS-1$
 					if (clientAuthEnabled && savePassphrase) {
 						node.put("ssl_passphrase", sslSettings.getPassPhrase(), true); //$NON-NLS-1$
 					} else {
@@ -636,13 +644,13 @@ public abstract class AbstractSVNStorage implements ISVNStorage {
 	}
 
 	protected void loadAuthInfo(IRepositoryLocation location, String realm) throws Exception {
-		this.loadAuthInfoFromSecureStorage(location, realm);
+		loadAuthInfoFromSecureStorage(location, realm);
 	}
 
 	protected void loadAuthInfoFromSecureStorage(IRepositoryLocation location, String realm) throws Exception {
-		if (!this.noStoredAuthentication) {
+		if (!noStoredAuthentication) {
 			try {
-				ISecurePreferences node = this.getSVNNodeForSecurePreferences(location, realm);
+				ISecurePreferences node = getSVNNodeForSecurePreferences(location, realm);
 				if (node != null) {
 					IRepositoryLocation tmp;
 					boolean toAddRealm = !realm.equals(""); //$NON-NLS-1$
@@ -654,8 +662,8 @@ public abstract class AbstractSVNStorage implements ISVNStorage {
 
 					//recover normal password settings
 					tmp.setPasswordSaved(node.getBoolean("password_saved", false)); //$NON-NLS-1$
-					tmp.setUsername(node.get("username", "")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$				
-					tmp.setPassword(node.get("password", "")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					tmp.setUsername(node.get("username", "")); //$NON-NLS-1$ //$NON-NLS-2$
+					tmp.setPassword(node.get("password", "")); //$NON-NLS-1$ //$NON-NLS-2$
 
 					//recover SSH settings
 					SSHSettings sshSettings = tmp instanceof SVNRepositoryLocation
@@ -690,16 +698,15 @@ public abstract class AbstractSVNStorage implements ISVNStorage {
 	}
 
 	public void removeAuthInfoForLocation(IRepositoryLocation location, String realm) {
-		if (!this.noStoredAuthentication) {
-			ISecurePreferences node = this.getSVNNodeForSecurePreferences(location, realm);
-			if (node == null)
+		if (!noStoredAuthentication) {
+			ISecurePreferences node = getSVNNodeForSecurePreferences(location, realm);
+			if (node == null) {
 				return;
+			}
 			try {
 				node.clear();
 				node.flush(); // save immediately
-			} catch (IllegalStateException e) {
-				LoggedOperation.reportError(SVNMessages.getErrorString("Error_RemoveAuthorizationInfo"), e); //$NON-NLS-1$
-			} catch (IOException e) {
+			} catch (IllegalStateException | IOException e) {
 				LoggedOperation.reportError(SVNMessages.getErrorString("Error_RemoveAuthorizationInfo"), e); //$NON-NLS-1$
 			}
 		}
@@ -707,14 +714,14 @@ public abstract class AbstractSVNStorage implements ISVNStorage {
 
 	protected void loadLocations() throws Exception {
 		IEclipsePreferences repositoryPreferences = AbstractSVNStorage
-				.getRepositoriesPreferences(this.repositoriesPreferencesNode);
+				.getRepositoriesPreferences(repositoriesPreferencesNode);
 		String[] keys = repositoryPreferences.keys();
-		ArrayList<IRepositoryLocation> readLocations = new ArrayList<IRepositoryLocation>();
+		ArrayList<IRepositoryLocation> readLocations = new ArrayList<>();
 		for (String current : keys) {
 			IRepositoryLocation location = this.newRepositoryLocation(repositoryPreferences.get(current, null));
 			readLocations.add(location);
 		}
-		this.repositories = readLocations.toArray(new IRepositoryLocation[readLocations.size()]);
+		repositories = readLocations.toArray(new IRepositoryLocation[readLocations.size()]);
 	}
 
 	/**
@@ -724,10 +731,10 @@ public abstract class AbstractSVNStorage implements ISVNStorage {
 	 * @throws Exception
 	 */
 	protected void loadLocationsFromFile() throws Exception {
-		List<IRepositoryLocation> tmp = new ArrayList<IRepositoryLocation>(Arrays.asList(this.repositories));
+		List<IRepositoryLocation> tmp = new ArrayList<>(Arrays.asList(repositories));
 		ObjectInputStream stream = null;
 		try {
-			stream = new ObjectInputStream(new FileInputStream(this.stateInfoFile));
+			stream = new ObjectInputStream(new FileInputStream(stateInfoFile));
 
 			// stream.available() does not provide any EOF information
 			while (true) {
@@ -746,7 +753,7 @@ public abstract class AbstractSVNStorage implements ISVNStorage {
 				}
 			}
 		}
-		this.repositories = tmp.toArray(new IRepositoryLocation[tmp.size()]);
+		repositories = tmp.toArray(new IRepositoryLocation[tmp.size()]);
 	}
 
 }

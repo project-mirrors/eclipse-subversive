@@ -37,16 +37,16 @@ import org.eclipse.team.svn.ui.utility.CommitActionUtility;
  */
 public class CommitAction extends AbstractRecursiveTeamAction {
 	public CommitAction() {
-		super();
 	}
 
+	@Override
 	public void runImpl(IAction action) {
 		CommitActionUtility commitUtility = new CommitActionUtility(this);
 		IResource[] allResources = commitUtility.getAllResources();
 
 		IProject[] tagOperatedProjects = SVNUtility.getTagOperatedProjects(allResources);
 		if (tagOperatedProjects.length != 0) {
-			TagModifyWarningDialog dlg = new TagModifyWarningDialog(this.getShell(), tagOperatedProjects);
+			TagModifyWarningDialog dlg = new TagModifyWarningDialog(getShell(), tagOperatedProjects);
 			if (dlg.open() != 0) {
 				return;
 			}
@@ -56,31 +56,35 @@ public class CommitAction extends AbstractRecursiveTeamAction {
 				proposedComment);
 		ICommitDialog commitDialog = ExtensionsManager.getInstance()
 				.getCurrentCommitFactory()
-				.getCommitDialog(this.getShell(), commitUtility.getAllResourcesSet(), commitPanel);
+				.getCommitDialog(getShell(), commitUtility.getAllResourcesSet(), commitPanel);
 		if (commitDialog.open() == 0) {
 			if (commitPanel.getResourcesChanged()) {
 				commitUtility.initialize(this);
 			}
 			CompositeOperation op = commitUtility.getCompositeCommitOperation(commitPanel.getSelectedResources(),
 					commitPanel.getNotSelectedResources(), commitPanel.getTreatAsEdits(), commitDialog.getMessage(),
-					commitPanel.getKeepLocks(), this.getShell(), this.getTargetPart(), true);
-			this.runScheduled(op);
+					commitPanel.getKeepLocks(), getShell(), getTargetPart(), true);
+			runScheduled(op);
 		}
 	}
 
+	@Override
 	public boolean isEnabled() {
-		return this.checkForResourcesPresenceRecursive(CommitAction.SF_ANY_CHANGE);
+		return checkForResourcesPresenceRecursive(CommitAction.SF_ANY_CHANGE);
 	}
 
+	@Override
 	protected boolean needsToSaveDirtyEditors() {
 		return true;
 	}
 
 	public static final IStateFilter SF_ANY_CHANGE = new IStateFilter.AbstractStateFilter() {
+		@Override
 		protected boolean acceptImpl(ILocalResource local, IResource resource, String state, int mask) {
 			return IStateFilter.SF_ANY_CHANGE.accept(resource, state, mask) && state != IStateFilter.ST_CONFLICTING;
 		}
 
+		@Override
 		protected boolean allowsRecursionImpl(ILocalResource local, IResource resource, String state, int mask) {
 			return true;
 		}

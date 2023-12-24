@@ -31,5 +31,5 @@ public interface ISVNEntryCallback {
 	 *            the found entry
 	 * 
 	 */
-	public void next(SVNEntry entry);
+	void next(SVNEntry entry);
 }

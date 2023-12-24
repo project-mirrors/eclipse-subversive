@@ -28,7 +28,6 @@ import org.eclipse.team.svn.core.connector.SVNErrorCodes;
 import org.eclipse.team.svn.core.connector.SVNProperty;
 import org.eclipse.team.svn.core.connector.SVNProperty.BuiltIn;
 import org.eclipse.team.svn.core.operation.IConsoleStream;
-import org.eclipse.team.svn.core.operation.IUnprotectedOperation;
 import org.eclipse.team.svn.core.operation.SVNNullProgressMonitor;
 import org.eclipse.team.svn.core.operation.SVNProgressMonitor;
 import org.eclipse.team.svn.core.resource.IRemoteStorage;
@@ -63,13 +62,14 @@ public class AddToSVNOperation extends AbstractWorkingCopyOperation {
 		this.isRecursive = isRecursive;
 	}
 
+	@Override
 	protected void runImpl(IProgressMonitor monitor) throws Exception {
-		IResource[] resources = this.operableData();
+		IResource[] resources = operableData();
 
-		if (this.isRecursive) {
-			this.isRecursive = !FileUtility.checkForResourcesPresenceRecursive(resources, IStateFilter.SF_IGNORED);
+		if (isRecursive) {
+			isRecursive = !FileUtility.checkForResourcesPresenceRecursive(resources, IStateFilter.SF_IGNORED);
 		}
-		if (this.isRecursive) {
+		if (isRecursive) {
 			resources = FileUtility.shrinkChildNodesWithSwitched(resources);
 		} else {
 			FileUtility.reorder(resources, true);
@@ -81,11 +81,7 @@ public class AddToSVNOperation extends AbstractWorkingCopyOperation {
 			IRepositoryLocation location = storage.getRepositoryLocation(current);
 			final ISVNConnector proxy = location.acquireSVNProxy();
 
-			this.protectStep(new IUnprotectedOperation() {
-				public void run(IProgressMonitor monitor) throws Exception {
-					AddToSVNOperation.this.doAdd(current, proxy, monitor);
-				}
-			}, monitor, resources.length);
+			this.protectStep(monitor1 -> AddToSVNOperation.this.doAdd(current, proxy, monitor1), monitor, resources.length);
 			location.releaseSVNProxy(proxy);
 		}
 	}

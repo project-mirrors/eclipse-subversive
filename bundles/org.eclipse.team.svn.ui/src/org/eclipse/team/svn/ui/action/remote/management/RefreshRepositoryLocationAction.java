@@ -26,15 +26,16 @@ import org.eclipse.team.svn.ui.operation.RefreshRepositoryLocationsOperation;
 public class RefreshRepositoryLocationAction extends AbstractRepositoryTeamAction {
 
 	public RefreshRepositoryLocationAction() {
-		super();
 	}
 
+	@Override
 	public void runImpl(IAction action) {
-		this.runBusy(this.getSelection().isEmpty()
+		runBusy(getSelection().isEmpty()
 				? new RefreshRepositoryLocationsOperation(true)
-				: new RefreshRepositoryLocationsOperation(this.getSelectedRepositoryLocations(), true));
+				: new RefreshRepositoryLocationsOperation(getSelectedRepositoryLocations(), true));
 	}
 
+	@Override
 	public boolean isEnabled() {
 		return true;
 	}

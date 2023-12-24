@@ -9,7 +9,7 @@
  *
  * Contributors:
  *    Alexander Gurov - Initial API and implementation
- *    Zend Technologies - [patch] Workaround for 'thread "Worker-3" timed out waiting (5000ms) for thread...' problem 
+ *    Zend Technologies - [patch] Workaround for 'thread "Worker-3" timed out waiting (5000ms) for thread...' problem
  *    Alexander Fedorov (ArSysOp) - ongoing support
  *******************************************************************************/
 
@@ -72,7 +72,7 @@ public class SVNTeamPlugin extends Plugin {
 
 	private ServiceTracker tracker;
 
-	private FileReplaceListener fileReplaceListener; //FIXME see bug #276018 
+	private FileReplaceListener fileReplaceListener; //FIXME see bug #276018
 
 	private IErrorHandlingFacility errorHandlingFacility;
 
@@ -84,21 +84,19 @@ public class SVNTeamPlugin extends Plugin {
 	private ActiveChangeSetManager activeChangeSetManager;
 
 	public SVNTeamPlugin() {
-		super();
-
 		SVNTeamPlugin.instance = this;
 
-		this.pcListener = new ProjectCloseListener();
-		this.rcListener = new ResourceChangeListener();
-		this.svnListener = new SVNFolderListener();
-		this.fileReplaceListener = new FileReplaceListener();
+		pcListener = new ProjectCloseListener();
+		rcListener = new ResourceChangeListener();
+		svnListener = new SVNFolderListener();
+		fileReplaceListener = new FileReplaceListener();
 
-		this.errorHandlingFacility = new DefaultErrorHandlingFacility();
+		errorHandlingFacility = new DefaultErrorHandlingFacility();
 	}
 
 	public File getTemporaryFile(File parent, String fileName) {
 		File retVal = parent == null
-				? this.getStateLocation().append(".tmp" + System.currentTimeMillis()).append(fileName).toFile() //$NON-NLS-1$
+				? getStateLocation().append(".tmp" + System.currentTimeMillis()).append(fileName).toFile() //$NON-NLS-1$
 				: new File(parent, fileName);
 		retVal.deleteOnExit();
 		parent = retVal.getParentFile();
@@ -114,7 +112,7 @@ public class SVNTeamPlugin extends Plugin {
 	}
 
 	public boolean isLocationsDirty() {
-		return this.isLocationsDirty;
+		return isLocationsDirty;
 	}
 
 	public static SVNTeamPlugin instance() {
@@ -126,7 +124,7 @@ public class SVNTeamPlugin extends Plugin {
 	}
 
 	public IErrorHandlingFacility getErrorHandlingFacility() {
-		return this.errorHandlingFacility;
+		return errorHandlingFacility;
 	}
 
 	// FIXME remove later after Integration API is changed
@@ -139,23 +137,22 @@ public class SVNTeamPlugin extends Plugin {
 		// remove temporary files if IDE is crached time ago...
 		ProgressMonitorUtility
 				.doTaskScheduledDefault(new AbstractActionOperation("Remove Temporary Files", SVNMessages.class) {
+					@Override
 					protected void runImpl(IProgressMonitor monitor) throws Exception {
-						SVNTeamPlugin.instance().getStateLocation().toFile().listFiles(new FileFilter() {
-							public boolean accept(File pathname) {
-								String name = pathname.getName();
-								if (!name.equals(SVNRemoteStorage.STATE_INFO_FILE_NAME)
-										&& !name.equals(SVNFileStorage.STATE_INFO_FILE_NAME)) {
-									FileUtility.deleteRecursive(pathname);
-								}
-								return false;
+						SVNTeamPlugin.instance().getStateLocation().toFile().listFiles((FileFilter) pathname -> {
+							String name = pathname.getName();
+							if (!name.equals(SVNRemoteStorage.STATE_INFO_FILE_NAME)
+									&& !name.equals(SVNFileStorage.STATE_INFO_FILE_NAME)) {
+								FileUtility.deleteRecursive(pathname);
 							}
+							return false;
 						});
 					}
 				});
 	}
 
 	public IEclipsePreferences getPreferences() {
-		return new InstanceScope().getNode(this.getBundle().getSymbolicName());
+		return new InstanceScope().getNode(getBundle().getSymbolicName());
 	}
 
 	public void savePreferences() {
@@ -166,39 +163,40 @@ public class SVNTeamPlugin extends Plugin {
 		}
 	}
 
+	@Override
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 
-		this.tracker = new ServiceTracker(context, IProxyService.class.getName(), null);
-		this.tracker.open();
+		tracker = new ServiceTracker(context, IProxyService.class.getName(), null);
+		tracker.open();
 
 		HashMap preferences = new HashMap();
-		preferences.put(ISVNStorage.PREF_STATE_INFO_LOCATION, this.getStateLocation());
+		preferences.put(ISVNStorage.PREF_STATE_INFO_LOCATION, getStateLocation());
 		SVNFileStorage.instance().initialize(preferences);
 		SVNRemoteStorage.instance().initialize(preferences);
 
 		WorkspaceJob job = new WorkspaceJob("") { //$NON-NLS-1$
+			@Override
 			public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException {
 				IWorkspace workspace = ResourcesPlugin.getWorkspace();
 
-				workspace.addResourceChangeListener(SVNTeamPlugin.this.rcListener, IResourceChangeEvent.POST_CHANGE);
-				workspace.addResourceChangeListener(SVNTeamPlugin.this.svnListener, IResourceChangeEvent.PRE_BUILD);
-				workspace.addResourceChangeListener(SVNTeamPlugin.this.pcListener,
+				workspace.addResourceChangeListener(rcListener, IResourceChangeEvent.POST_CHANGE);
+				workspace.addResourceChangeListener(svnListener, IResourceChangeEvent.PRE_BUILD);
+				workspace.addResourceChangeListener(pcListener,
 						IResourceChangeEvent.PRE_CLOSE | IResourceChangeEvent.PRE_DELETE);
-				workspace.addResourceChangeListener(SVNTeamPlugin.this.fileReplaceListener,
-						IResourceChangeEvent.PRE_BUILD);
+				workspace.addResourceChangeListener(fileReplaceListener, IResourceChangeEvent.PRE_BUILD);
 
 				// shouldn't prevent plugin start
 				try {
-					SVNTeamPlugin.this.rcListener.handleInitialWorkspaceDelta();
+					rcListener.handleInitialWorkspaceDelta();
 				} catch (Throwable ex) {
 					LoggedOperation.reportError("Handle Initial Workspace Delta", ex);
 				}
 
 				// if some team provider is missing the code below "enables" team menu "Share Project" action...
 				IProject[] projects = workspace.getRoot().getProjects();
-				for (int i = 0; i < projects.length; i++) {
-					RepositoryProvider.getProvider(projects[i]);
+				for (IProject project : projects) {
+					RepositoryProvider.getProvider(project);
 				}
 				return Status.OK_STATUS;
 			}
@@ -209,51 +207,48 @@ public class SVNTeamPlugin extends Plugin {
 	}
 
 	public IProxyService getProxyService() {
-		return (IProxyService) this.tracker.getService();
+		return (IProxyService) tracker.getService();
 	}
 
+	@Override
 	public void stop(BundleContext context) throws Exception {
 		IWorkspace workspace = ResourcesPlugin.getWorkspace();
 
-		workspace.removeResourceChangeListener(this.svnListener);
-		workspace.removeResourceChangeListener(this.rcListener);
-		workspace.removeResourceChangeListener(this.pcListener);
-		workspace.removeResourceChangeListener(this.fileReplaceListener);
+		workspace.removeResourceChangeListener(svnListener);
+		workspace.removeResourceChangeListener(rcListener);
+		workspace.removeResourceChangeListener(pcListener);
+		workspace.removeResourceChangeListener(fileReplaceListener);
 
-		if (this.isLocationsDirty) {
+		if (isLocationsDirty) {
 			SVNRemoteStorage.instance().saveConfiguration();
 			SVNFileStorage.instance().saveConfiguration();
 		}
 		SVNRemoteStorage.instance().dispose();
 		SVNFileStorage.instance().dispose();
 
-		this.tracker.close();
+		tracker.close();
 
 		// cleanup temporary files if any
 		File temporaryFilesStorage = SVNTeamPlugin.instance().getStateLocation().toFile();
-		File[] files = temporaryFilesStorage.listFiles(new FileFilter() {
-			public boolean accept(File pathname) {
-				return pathname.getName().indexOf(".tmp") != -1; //$NON-NLS-1$
-			}
-		});
+		File[] files = temporaryFilesStorage.listFiles((FileFilter) pathname -> pathname.getName().indexOf(".tmp") != -1);
 		if (files != null) {
-			for (int i = 0; i < files.length; i++) {
-				FileUtility.deleteRecursive(files[i]);
+			for (File file : files) {
+				FileUtility.deleteRecursive(file);
 			}
 		}
 
-		if (this.activeChangeSetManager != null) {
-			this.activeChangeSetManager.dispose();
+		if (activeChangeSetManager != null) {
+			activeChangeSetManager.dispose();
 		}
 
 		super.stop(context);
 	}
 
 	public synchronized ActiveChangeSetManager getModelChangeSetManager() {
-		if (this.activeChangeSetManager == null) {
-			this.activeChangeSetManager = new SVNActiveChangeSetCollector(UpdateSubscriber.instance());
+		if (activeChangeSetManager == null) {
+			activeChangeSetManager = new SVNActiveChangeSetCollector(UpdateSubscriber.instance());
 		}
-		return this.activeChangeSetManager;
+		return activeChangeSetManager;
 	}
 
 }

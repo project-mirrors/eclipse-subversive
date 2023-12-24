@@ -76,40 +76,36 @@ public class ShowHistoryViewOperation extends AbstractActionOperation {
 		this.compareWith = compareWith;
 	}
 
+	@Override
 	public int getOperationWeight() {
 		return 0;
 	}
 
+	@Override
 	protected void runImpl(IProgressMonitor monitor) throws Exception {
-		if (this.provider != null) {
-			this.remote = this.provider.getRepositoryResources()[0];
+		if (provider != null) {
+			remote = provider.getRepositoryResources()[0];
 		}
-		UIMonitorUtility.getDisplay().syncExec(new Runnable() {
-			public void run() {
-				IWorkbenchPage page = UIMonitorUtility.getActivePage();
+		UIMonitorUtility.getDisplay().syncExec(() -> {
+			IWorkbenchPage page = UIMonitorUtility.getActivePage();
 
-				if (page != null) {
-					try {
-						IHistoryView historyView = (IHistoryView) page.showView(IHistoryView.VIEW_ID);
-						if (historyView != null) {
-							IHistoryPage tPage = historyView.showHistoryFor(ShowHistoryViewOperation.this.local != null
-									? (Object) ShowHistoryViewOperation.this.local
-									: ShowHistoryViewOperation.this.remote);
-							if (tPage != null && tPage instanceof SVNHistoryPage) {
-								SVNHistoryPage hPage = (SVNHistoryPage) tPage;
-								hPage.setOptions(ShowHistoryViewOperation.this.mask,
-										ShowHistoryViewOperation.this.options);
-								hPage.setCompareWith(ShowHistoryViewOperation.this.compareWith);
-								if (ShowHistoryViewOperation.this.local != null
-										&& !ShowHistoryViewOperation.this.local.equals(hPage.getResource())) {
-									// view is disconnected
-									hPage.showHistory(ShowHistoryViewOperation.this.local);
-								}
+			if (page != null) {
+				try {
+					IHistoryView historyView = (IHistoryView) page.showView(IHistoryView.VIEW_ID);
+					if (historyView != null) {
+						IHistoryPage tPage = historyView.showHistoryFor(local != null ? (Object) local : remote);
+						if (tPage != null && tPage instanceof SVNHistoryPage) {
+							SVNHistoryPage hPage = (SVNHistoryPage) tPage;
+							hPage.setOptions(mask, options);
+							hPage.setCompareWith(compareWith);
+							if (local != null && !local.equals(hPage.getResource())) {
+								// view is disconnected
+								hPage.showHistory(local);
 							}
 						}
-					} catch (PartInitException ex) {
-						ShowHistoryViewOperation.this.reportStatus(IStatus.ERROR, null, ex);
 					}
+				} catch (PartInitException ex) {
+					ShowHistoryViewOperation.this.reportStatus(IStatus.ERROR, null, ex);
 				}
 			}
 		});

@@ -55,16 +55,19 @@ public class CommitActionHelper extends AbstractActionHelper {
 		super(action, configuration);
 	}
 
+	@Override
 	public IActionOperation getOperation() {
-		return CommitActionHelper.getCommitOperation(this.getSyncInfoSelector(), this.configuration);
+		return CommitActionHelper.getCommitOperation(getSyncInfoSelector(), configuration);
 	}
 
+	@Override
 	public FastSyncInfoFilter getSyncInfoFilter() {
 		return CommitActionHelper.getCommitSyncInfoFilter();
 	}
 
 	public static FastSyncInfoFilter getCommitSyncInfoFilter() {
 		return new FastSyncInfoFilter.SyncInfoDirectionFilter(new int[] { SyncInfo.OUTGOING }) {
+			@Override
 			public boolean select(SyncInfo info) {
 				UpdateSyncInfo sync = (UpdateSyncInfo) info;
 				return super.select(info) && !IStateFilter.SF_OBSTRUCTED.accept(sync.getLocalResource());
@@ -106,8 +109,9 @@ public class CommitActionHelper extends AbstractActionHelper {
 	 * Ask preferences in order to determine whether to consult change sets during commit, synchronize or not
 	 */
 	public static boolean isIncludeChangeSets(final String message) {
-		if (SVNTeamPlugin.instance().getModelChangeSetManager().getSets().length == 0)
+		if (SVNTeamPlugin.instance().getModelChangeSetManager().getSets().length == 0) {
 			return false;
+		}
 
 		final IPreferenceStore store = SVNTeamUIPlugin.instance().getPreferenceStore();
 		String consultChangeSetsOption = SVNTeamPreferences.getConsultChangeSetsInCommit(store,
@@ -118,19 +122,17 @@ public class CommitActionHelper extends AbstractActionHelper {
 			return false;
 		}
 
-		final int[] result = new int[] { 0 };
+		final int[] result = { 0 };
 		// Ask the user whether to switch
-		UIMonitorUtility.getDisplay().syncExec(new Runnable() {
-			public void run() {
-				Shell shell = UIMonitorUtility.getShell();
+		UIMonitorUtility.getDisplay().syncExec(() -> {
+			Shell shell = UIMonitorUtility.getShell();
 
-				MessageDialogWithToggle m = MessageDialogWithToggle.openYesNoQuestion(
-						shell, SVNUIMessages.ConsultChangeSets_toggleDialog_title, message,
-						SVNUIMessages.ConsultChangeSets_toggleDialog_toggleMessage, false /* toggle state */, store,
-						SVNTeamPreferences.fullPromptName(SVNTeamPreferences.CONSULT_CHANGE_SETS_IN_COMMIT));
-				m.getReturnCode();
-				result[0] = m.getReturnCode();
-			}
+			MessageDialogWithToggle m = MessageDialogWithToggle.openYesNoQuestion(
+					shell, SVNUIMessages.ConsultChangeSets_toggleDialog_title, message,
+					SVNUIMessages.ConsultChangeSets_toggleDialog_toggleMessage, false /* toggle state */, store,
+					SVNTeamPreferences.fullPromptName(SVNTeamPreferences.CONSULT_CHANGE_SETS_IN_COMMIT));
+			m.getReturnCode();
+			result[0] = m.getReturnCode();
 		});
 
 		switch (result[0]) {

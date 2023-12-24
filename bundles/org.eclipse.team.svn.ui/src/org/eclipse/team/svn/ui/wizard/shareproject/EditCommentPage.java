@@ -51,17 +51,17 @@ public class EditCommentPage extends AbstractVerifiedWizardPage {
 	public EditCommentPage(IResourceProvider provider) {
 		super(EditCommentPage.class.getName(), SVNUIMessages.EditCommentPage_Title,
 				SVNTeamUIPlugin.instance().getImageDescriptor("icons/wizards/newconnect.gif")); //$NON-NLS-1$
-		this.setDescription(SVNUIMessages.EditCommentPage_Description);
+		setDescription(SVNUIMessages.EditCommentPage_Description);
 		this.provider = provider;
 	}
 
 	public boolean isShowCommitDialog() {
-		return this.showCommitDialog;
+		return showCommitDialog;
 	}
 
 	public String getCommitComment() {
-		this.commentComposite.saveChanges();
-		return this.commentComposite.getMessage();
+		commentComposite.saveChanges();
+		return commentComposite.getMessage();
 	}
 
 	public void setSelectedRepositoryLocation(IRepositoryLocation location) {
@@ -69,27 +69,28 @@ public class EditCommentPage extends AbstractVerifiedWizardPage {
 	}
 
 	public void setDefaultCommitMessage() {
-		this.commitComment = ""; //$NON-NLS-1$
-		IProject[] projects = this.getProjects();
-		for (int i = 0; i < projects.length; i++) {
-			String commentPart = ShareProjectOperation.getDefaultComment(projects[i], this.location.getRoot());
-			this.commitComment += this.commitComment.length() == 0 ? commentPart : ("\n" + commentPart); //$NON-NLS-1$
+		commitComment = ""; //$NON-NLS-1$
+		IProject[] projects = getProjects();
+		for (IProject project : projects) {
+			String commentPart = ShareProjectOperation.getDefaultComment(project, location.getRoot());
+			commitComment += commitComment.length() == 0 ? commentPart : "\n" + commentPart; //$NON-NLS-1$
 		}
-		this.commentComposite.setMessage(this.commitComment);
+		commentComposite.setMessage(commitComment);
 	}
 
 	protected IProject[] getProjects() {
-		return (IProject[]) this.provider.getResources();
+		return (IProject[]) provider.getResources();
 	}
 
+	@Override
 	protected Composite createControlImpl(Composite parent) {
 		Composite composite = new Composite(parent, SWT.NONE);
 		composite.setLayout(new GridLayout());
 		composite.setLayoutData(new GridData(GridData.FILL_BOTH));
 
-		this.commentComposite = new CommentComposite(composite, this.commitComment, this, null, null);
+		commentComposite = new CommentComposite(composite, commitComment, this, null, null);
 		GridData data = new GridData(GridData.FILL_BOTH);
-		this.commentComposite.setLayoutData(data);
+		commentComposite.setLayoutData(data);
 
 		Label separator = new Label(composite, SWT.SEPARATOR | SWT.HORIZONTAL);
 		separator.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
@@ -97,12 +98,14 @@ public class EditCommentPage extends AbstractVerifiedWizardPage {
 
 		Button showComment = new Button(composite, SWT.CHECK);
 		showComment.setText(SVNUIMessages.EditCommentPage_LaunchCommit);
-		showComment.setSelection(this.showCommitDialog = true);
+		showComment.setSelection(showCommitDialog = true);
 		showComment.addSelectionListener(new SelectionListener() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
-				EditCommentPage.this.showCommitDialog = ((Button) e.widget).getSelection();
+				showCommitDialog = ((Button) e.widget).getSelection();
 			}
 
+			@Override
 			public void widgetDefaultSelected(SelectionEvent e) {
 			}
 		});

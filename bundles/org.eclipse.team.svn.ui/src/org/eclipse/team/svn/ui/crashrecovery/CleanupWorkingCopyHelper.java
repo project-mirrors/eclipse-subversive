@@ -30,6 +30,7 @@ import org.eclipse.team.svn.core.utility.FileUtility;
  */
 public class CleanupWorkingCopyHelper implements IResolutionHelper {
 
+	@Override
 	public boolean acquireResolution(ErrorDescription description) {
 		if (description.code == ErrorDescription.WORKING_COPY_REQUIRES_CLEANUP) {
 			final IProject project = (IProject) description.context;

@@ -22,11 +22,11 @@ import java.io.File;
  * @author Alexander Gurov
  */
 public interface IUnresolvedConflictDetector {
-	public boolean hasUnresolvedConflicts();
+	boolean hasUnresolvedConflicts();
 
-	public File[] getUnprocessed();
+	File[] getUnprocessed();
 
-	public File[] getProcessed();
+	File[] getProcessed();
 
-	public String getMessage();
+	String getMessage();
 }

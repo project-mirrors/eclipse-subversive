@@ -61,14 +61,15 @@ public class RunExternalCompareOperation extends CompositeOperation implements I
 
 	public final static String PPTX_SCRIPT = "diff-ppt.vbs"; //$NON-NLS-1$
 
-	public final static String ODT_SCRIPT = "diff-odX.vbs"; //$NON-NLS-1$	
+	public final static String ODT_SCRIPT = "diff-odX.vbs"; //$NON-NLS-1$
 
 	public final static String ODS_SCRIPT = "diff-odX.vbs"; //$NON-NLS-1$
 
 	protected ExternalCompareOperation externalCompareOperation;
 
+	@Override
 	public boolean isExecuted() {
-		return this.externalCompareOperation.isExecuted();
+		return externalCompareOperation.isExecuted();
 	}
 
 	public interface IExternalProgramParametersProvider {
@@ -82,8 +83,9 @@ public class RunExternalCompareOperation extends CompositeOperation implements I
 			this.externalProgramParameters = externalProgramParameters;
 		}
 
+		@Override
 		public ExternalProgramParameters getExternalProgramParameters() {
-			return this.externalProgramParameters;
+			return externalProgramParameters;
 		}
 	}
 
@@ -119,68 +121,68 @@ public class RunExternalCompareOperation extends CompositeOperation implements I
 		}
 
 		public void execute(IProgressMonitor monitor) {
-			if (this.resource != null) {
-				this.detectWithResource(monitor);
-			} else if (this.repositoryResource != null) {
-				this.detectWithRepositoryResource(monitor);
+			if (resource != null) {
+				detectWithResource(monitor);
+			} else if (repositoryResource != null) {
+				detectWithRepositoryResource(monitor);
 			}
 
 			//check program path
-			if (this.externalProgramParams != null) {
+			if (externalProgramParams != null) {
 				String path = null;
-				if (this.isDiff) {
-					path = this.externalProgramParams.diffProgramPath;
+				if (isDiff) {
+					path = externalProgramParams.diffProgramPath;
 				} else {
-					path = this.externalProgramParams.mergeProgramPath;
+					path = externalProgramParams.mergeProgramPath;
 				}
 				if (path == null || path.length() == 0) {
-					this.externalProgramParams = null;
+					externalProgramParams = null;
 				}
 			}
 		}
 
 		protected void detectWithRepositoryResource(IProgressMonitor monitor) {
 			//apply only to files
-			if (this.repositoryResource instanceof IRepositoryFile) {
+			if (repositoryResource instanceof IRepositoryFile) {
 				//at first check extension
-				IRepositoryFile file = (IRepositoryFile) this.repositoryResource;
-				ResourceSpecificParameterKind specificKind = DiffViewerSettings
-						.getSpecificResourceKind(this.diffSettings, file, monitor);
+				IRepositoryFile file = (IRepositoryFile) repositoryResource;
+				ResourceSpecificParameterKind specificKind = DiffViewerSettings.getSpecificResourceKind(diffSettings,
+						file, monitor);
 				if (specificKind != null) {
-					this.externalProgramParams = this.diffSettings.getResourceSpecificParameters(specificKind).params;
+					externalProgramParams = diffSettings.getResourceSpecificParameters(specificKind).params;
 				}
 
 				//check default external program
 				ResourceSpecificParameters defaultResourceSpecificParameters = null;
-				if (this.externalProgramParams == null && (defaultResourceSpecificParameters = this.diffSettings
+				if (externalProgramParams == null && (defaultResourceSpecificParameters = diffSettings
 						.getDefaultResourceSpecificParameters()) != null) {
-					this.externalProgramParams = defaultResourceSpecificParameters.params;
+					externalProgramParams = defaultResourceSpecificParameters.params;
 				}
 			}
 		}
 
 		protected void detectWithResource(IProgressMonitor monitor) {
 			//apply only to files
-			if (this.resource instanceof IFile) {
+			if (resource instanceof IFile) {
 				//at first check extension
-				IFile file = (IFile) this.resource;
-				ResourceSpecificParameterKind specificKind = DiffViewerSettings
-						.getSpecificResourceKind(this.diffSettings, file, monitor);
+				IFile file = (IFile) resource;
+				ResourceSpecificParameterKind specificKind = DiffViewerSettings.getSpecificResourceKind(diffSettings,
+						file, monitor);
 				if (specificKind != null) {
-					this.externalProgramParams = this.diffSettings.getResourceSpecificParameters(specificKind).params;
+					externalProgramParams = diffSettings.getResourceSpecificParameters(specificKind).params;
 				}
 
 				//check default external program
 				ResourceSpecificParameters defaultResourceSpecificParameters = null;
-				if (this.externalProgramParams == null && (defaultResourceSpecificParameters = this.diffSettings
+				if (externalProgramParams == null && (defaultResourceSpecificParameters = diffSettings
 						.getDefaultResourceSpecificParameters()) != null) {
-					this.externalProgramParams = defaultResourceSpecificParameters.params;
+					externalProgramParams = defaultResourceSpecificParameters.params;
 				}
 			}
 		}
 
 		public ExternalProgramParameters getExternalProgramParameters() {
-			return this.externalProgramParams;
+			return externalProgramParams;
 		}
 	}
 
@@ -217,21 +219,23 @@ public class RunExternalCompareOperation extends CompositeOperation implements I
 			this.provider = provider;
 		}
 
+		@Override
 		protected void runImpl(IProgressMonitor monitor) throws Exception {
-			if (this.resource != null) {
-				this.helper = new DetectExternalCompareOperationHelper(this.resource, this.diffSettings, true);
+			if (resource != null) {
+				helper = new DetectExternalCompareOperationHelper(resource, diffSettings, true);
 			} else {
-				IRepositoryResource reposResource = this.provider != null
-						? this.provider.getRepositoryResources()[0]
-						: this.repositoryResource;
-				this.helper = new DetectExternalCompareOperationHelper(reposResource, this.diffSettings, true);
+				IRepositoryResource reposResource = provider != null
+						? provider.getRepositoryResources()[0]
+						: repositoryResource;
+				helper = new DetectExternalCompareOperationHelper(reposResource, diffSettings, true);
 			}
 
-			this.helper.execute(monitor);
+			helper.execute(monitor);
 		}
 
+		@Override
 		public ExternalProgramParameters getExternalProgramParameters() {
-			return this.helper.getExternalProgramParameters();
+			return helper.getExternalProgramParameters();
 		}
 	}
 
@@ -280,21 +284,21 @@ public class RunExternalCompareOperation extends CompositeOperation implements I
 		}
 
 		public void execute(IProgressMonitor monitor) throws Exception {
-			String programPath = this.isDiff
-					? this.externalProgramParams.diffProgramPath
-					: this.externalProgramParams.mergeProgramPath;
-			String programParameters = this.isDiff
-					? this.externalProgramParams.diffParamatersString
-					: this.externalProgramParams.mergeParamatersString;
+			String programPath = isDiff
+					? externalProgramParams.diffProgramPath
+					: externalProgramParams.mergeProgramPath;
+			String programParameters = isDiff
+					? externalProgramParams.diffParamatersString
+					: externalProgramParams.mergeParamatersString;
 
 			String processedCmd = programPath;
-			String diffParameters = this.prepareParameters(monitor, programParameters);
+			String diffParameters = prepareParameters(monitor, programParameters);
 			processedCmd += " " + diffParameters; //$NON-NLS-1$
 			//System.out.println("Exec: " + processedCmd);
 
 			/*Process process = */Runtime.getRuntime().exec(processedCmd);
 			/*
-			if (process != null) {															
+			if (process != null) {
 				new ReaderThread(process.getInputStream(), System.out).start();
 				new ReaderThread(process.getErrorStream(), System.err).start();
 				process.getOutputStream().close();
@@ -311,10 +315,10 @@ public class RunExternalCompareOperation extends CompositeOperation implements I
 
 		protected String prepareParameters(IProgressMonitor monitor, String params) throws IOException {
 			String paramaters = params;
-			paramaters = paramaters.replace("${base}", this.baseFile); //$NON-NLS-1$
-			paramaters = paramaters.replace("${mine}", this.currentFile); //$NON-NLS-1$
-			paramaters = paramaters.replace("${theirs}", this.newFile); //$NON-NLS-1$
-			paramaters = paramaters.replace("${merged}", this.targetFile); //$NON-NLS-1$
+			paramaters = paramaters.replace("${base}", baseFile); //$NON-NLS-1$
+			paramaters = paramaters.replace("${mine}", currentFile); //$NON-NLS-1$
+			paramaters = paramaters.replace("${theirs}", newFile); //$NON-NLS-1$
+			paramaters = paramaters.replace("${merged}", targetFile); //$NON-NLS-1$
 
 			if (paramaters.indexOf("${default-doc-program}") != -1) { //$NON-NLS-1$
 				paramaters = paramaters.replace("${default-doc-program}", //$NON-NLS-1$
@@ -388,29 +392,31 @@ public class RunExternalCompareOperation extends CompositeOperation implements I
 					: new GetLocalFileContentOperation(local.getResource(), Kind.BASE);
 			this.add(newFileGetOp, new IActionOperation[] { currentFileGetOp });
 
-			//Run external program					
+			//Run external program
 			this.add(new AbstractActionOperation("Operation_ExternalCompare", SVNMessages.class) { //$NON-NLS-1$
+				@Override
 				protected void runImpl(IProgressMonitor monitor) throws Exception {
 					ExternalCompareOperationHelper externalRunHelper = new ExternalCompareOperationHelper(
 							oldFileGetOp.getTemporaryPath(), currentFileGetOp.getTemporaryPath(),
-							newFileGetOp.getTemporaryPath(), ExternalCompareOperation.this.externalProgramParams);
+							newFileGetOp.getTemporaryPath(), externalProgramParams);
 					externalRunHelper.execute(monitor);
 				}
 			}, new IActionOperation[] { oldFileGetOp, currentFileGetOp, newFileGetOp });
 		}
 
+		@Override
 		protected void runImpl(IProgressMonitor monitor) throws Exception {
-			this.externalProgramParams = this.parametersProvider.getExternalProgramParameters();
-			if (this.externalProgramParams != null) {
-				this.isExecuted = true;
+			externalProgramParams = parametersProvider.getExternalProgramParameters();
+			if (externalProgramParams != null) {
+				isExecuted = true;
 				super.runImpl(monitor);
 			} else {
-				this.isExecuted = false;
+				isExecuted = false;
 			}
 		}
 
 		public boolean isExecuted() {
-			return this.isExecuted;
+			return isExecuted;
 		}
 	}
 
@@ -422,7 +428,7 @@ public class RunExternalCompareOperation extends CompositeOperation implements I
 				diffSettings);
 		this.add(detectOperation);
 
-		this.externalCompareOperation = new ExternalCompareOperation(local, remote, detectOperation);
+		externalCompareOperation = new ExternalCompareOperation(local, remote, detectOperation);
 		this.add(externalCompareOperation, new IActionOperation[] { detectOperation });
 	}
 
@@ -475,7 +481,7 @@ public class RunExternalCompareOperation extends CompositeOperation implements I
 //	    public ReaderThread(InputStream is, OutputStream os) {
 //	        myInputStream = is;
 //	        myOutputStream = os;
-//	        setDaemon(true);            
+//	        setDaemon(true);
 //	    }
 //
 //	    public void run() {

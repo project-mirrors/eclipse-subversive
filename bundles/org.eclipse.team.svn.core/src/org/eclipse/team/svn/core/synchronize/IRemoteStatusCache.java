@@ -26,7 +26,7 @@ import org.eclipse.team.core.TeamException;
 public interface IRemoteStatusCache {
 
 	public interface ICacheVisitor {
-		public void visit(IPath path, byte[] data);
+		void visit(IPath path, byte[] data);
 	}
 
 	boolean containsData() throws TeamException;

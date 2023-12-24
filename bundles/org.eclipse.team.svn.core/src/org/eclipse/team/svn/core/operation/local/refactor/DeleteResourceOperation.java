@@ -72,18 +72,20 @@ public class DeleteResourceOperation extends AbstractActionOperation {
 		this.options = options;
 	}
 
+	@Override
 	public ISchedulingRule getSchedulingRule() {
-		ISchedulingRule[] rules = new ISchedulingRule[this.resources.length];
-		for (int i = 0; i < this.resources.length; i++) {
-			rules[i] = SVNResourceRuleFactory.INSTANCE.deleteRule(this.resources[i]);
+		ISchedulingRule[] rules = new ISchedulingRule[resources.length];
+		for (int i = 0; i < resources.length; i++) {
+			rules[i] = SVNResourceRuleFactory.INSTANCE.deleteRule(resources[i]);
 		}
 		return new MultiRule(rules);
 	}
 
+	@Override
 	protected void runImpl(IProgressMonitor monitor) throws Exception {
 		// Clean up obstructed and new resources
-		ArrayList<IResource> resourcesList = new ArrayList<IResource>(Arrays.asList(this.resources));
-		this.cleanupResourcesList(resourcesList, DeleteResourceOperation.SF_OBSTRUCTED_OR_NEW);
+		ArrayList<IResource> resourcesList = new ArrayList<>(Arrays.asList(resources));
+		cleanupResourcesList(resourcesList, DeleteResourceOperation.SF_OBSTRUCTED_OR_NEW);
 		if (resourcesList.size() == 0) {
 			return;
 		}
@@ -105,9 +107,9 @@ public class DeleteResourceOperation extends AbstractActionOperation {
 			}
 			ISVNConnector proxy = location.acquireSVNProxy();
 			try {
-				this.writeToConsole(IConsoleStream.LEVEL_CMD,
-						"svn delete " + printedPath + ISVNConnector.Options.asCommandLine(this.options) + "\n");
-				proxy.removeLocal(wcPaths, this.options, new SVNProgressMonitor(this, monitor, null)); //$NON-NLS-1$
+				writeToConsole(IConsoleStream.LEVEL_CMD,
+						"svn delete " + printedPath + ISVNConnector.Options.asCommandLine(options) + "\n");
+				proxy.removeLocal(wcPaths, options, new SVNProgressMonitor(this, monitor, null));
 			} finally {
 				location.releaseSVNProxy(proxy);
 			}
@@ -125,20 +127,23 @@ public class DeleteResourceOperation extends AbstractActionOperation {
 		}
 	}
 
+	@Override
 	protected String getShortErrorMessage(Throwable t) {
-		Object[] wcPaths = new String[this.resources.length];
-		for (int i = 0; i < this.resources.length; i++) {
-			wcPaths[i] = FileUtility.getWorkingCopyPath(this.resources[i]);
+		Object[] wcPaths = new String[resources.length];
+		for (int i = 0; i < resources.length; i++) {
+			wcPaths[i] = FileUtility.getWorkingCopyPath(resources[i]);
 		}
 		return BaseMessages.format(super.getShortErrorMessage(t), wcPaths);
 	}
 
 	protected static final IStateFilter SF_OBSTRUCTED_OR_NEW = new IStateFilter.AbstractStateFilter() {
+		@Override
 		public boolean acceptImpl(ILocalResource local, IResource resource, String state, int mask) {
 			return IStateFilter.SF_OBSTRUCTED.accept(resource, state, mask)
 					|| IStateFilter.SF_NEW.accept(resource, state, mask);
 		}
 
+		@Override
 		public boolean allowsRecursionImpl(ILocalResource local, IResource resource, String state, int mask) {
 			return IStateFilter.SF_OBSTRUCTED.allowsRecursion(resource, state, mask)
 					|| IStateFilter.SF_NEW.allowsRecursion(resource, state, mask);

@@ -20,9 +20,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.DirectoryDialog;
-import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.team.svn.core.connector.SVNDepth;
 import org.eclipse.team.svn.core.connector.SVNRevision;
@@ -52,33 +50,33 @@ public class ExportPanel extends AbstractDialogPanel {
 	protected DepthSelectionComposite depthSelector;
 
 	public ExportPanel(IRepositoryResource baseResource) {
-		super();
-		this.dialogTitle = SVNUIMessages.ExportPanel_Title;
-		this.dialogDescription = SVNUIMessages.ExportPanel_Description;
-		this.defaultMessage = SVNUIMessages.ExportPanel_Message;
-		this.selectedResource = baseResource;
+		dialogTitle = SVNUIMessages.ExportPanel_Title;
+		dialogDescription = SVNUIMessages.ExportPanel_Description;
+		defaultMessage = SVNUIMessages.ExportPanel_Message;
+		selectedResource = baseResource;
 	}
 
 	public SVNRevision getSelectedRevision() {
-		return this.revisionComposite != null
-				? this.revisionComposite.getSelectedRevision()
-				: SVNRevision.INVALID_REVISION;
+		return revisionComposite != null ? revisionComposite.getSelectedRevision() : SVNRevision.INVALID_REVISION;
 	}
 
+	@Override
 	protected void saveChangesImpl() {
-		this.location = this.locationField.getText();
+		location = locationField.getText();
 	}
 
+	@Override
 	protected void cancelChangesImpl() {
 	}
 
 	public SVNDepth getDepth() {
-		if (this.depthSelector == null) {
+		if (depthSelector == null) {
 			return SVNDepth.INFINITY;
 		}
-		return this.depthSelector.getDepth();
+		return depthSelector.getDepth();
 	}
 
+	@Override
 	public void createControlsImpl(Composite parent) {
 		GridLayout layout = null;
 		GridData data = null;
@@ -96,52 +94,51 @@ public class ExportPanel extends AbstractDialogPanel {
 		label.setLayoutData(data);
 		label.setText(SVNUIMessages.ExportPanel_Folder);
 
-		this.locationField = new Text(folderComposite, SWT.SINGLE | SWT.BORDER);
+		locationField = new Text(folderComposite, SWT.SINGLE | SWT.BORDER);
 		data = new GridData(GridData.FILL_HORIZONTAL);
-		this.locationField.setLayoutData(data);
-		this.attachTo(this.locationField, new ExistingResourceVerifier(label.getText(), false));
+		locationField.setLayoutData(data);
+		attachTo(locationField, new ExistingResourceVerifier(label.getText(), false));
 
 		Button browseButton = new Button(folderComposite, SWT.PUSH);
 		browseButton.setText(SVNUIMessages.Button_Browse);
 		data = new GridData();
 		data.widthHint = DefaultDialog.computeButtonWidth(browseButton);
 		browseButton.setLayoutData(data);
-		browseButton.addListener(SWT.Selection, new Listener() {
-			public void handleEvent(Event event) {
-				DirectoryDialog fileDialog = new DirectoryDialog(ExportPanel.this.manager.getShell());
-				fileDialog.setText(SVNUIMessages.ExportPanel_ExportFolder);
-				fileDialog.setMessage(SVNUIMessages.ExportPanel_ExportFolder_Msg);
-				String path = fileDialog.open();
-				if (path != null) {
-					ExportPanel.this.locationField.setText(path);
-				}
+		browseButton.addListener(SWT.Selection, event -> {
+			DirectoryDialog fileDialog = new DirectoryDialog(ExportPanel.this.manager.getShell());
+			fileDialog.setText(SVNUIMessages.ExportPanel_ExportFolder);
+			fileDialog.setMessage(SVNUIMessages.ExportPanel_ExportFolder_Msg);
+			String path = fileDialog.open();
+			if (path != null) {
+				locationField.setText(path);
 			}
 		});
 
-		if (this.selectedResource != null) {
-			this.revisionComposite = new RevisionComposite(parent, this, false, null, SVNRevision.HEAD, false);
+		if (selectedResource != null) {
+			revisionComposite = new RevisionComposite(parent, this, false, null, SVNRevision.HEAD, false);
 			data = new GridData(GridData.FILL_HORIZONTAL);
-			this.revisionComposite.setLayoutData(data);
-			this.revisionComposite.setSelectedResource(this.selectedResource);
+			revisionComposite.setLayoutData(data);
+			revisionComposite.setSelectedResource(selectedResource);
 		}
 
-		if (this.selectedResource instanceof IRepositoryContainer || this.selectedResource == null) {
+		if (selectedResource instanceof IRepositoryContainer || selectedResource == null) {
 			Label separator = new Label(parent, SWT.HORIZONTAL | SWT.SEPARATOR);
 			separator.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 			separator.setVisible(false);
 
-			this.depthSelector = new DepthSelectionComposite(parent, SWT.NONE, false);
+			depthSelector = new DepthSelectionComposite(parent, SWT.NONE, false);
 			data = new GridData(GridData.FILL_HORIZONTAL);
-			this.depthSelector.setLayoutData(data);
+			depthSelector.setLayoutData(data);
 		}
 	}
 
+	@Override
 	public String getHelpId() {
 		return "org.eclipse.team.svn.help.remote_exportDialogContext"; //$NON-NLS-1$
 	}
 
 	public String getLocation() {
-		return this.location;
+		return location;
 	}
 
 }

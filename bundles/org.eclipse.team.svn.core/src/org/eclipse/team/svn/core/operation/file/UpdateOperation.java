@@ -28,7 +28,6 @@ import org.eclipse.team.svn.core.connector.SVNDepth;
 import org.eclipse.team.svn.core.connector.SVNRevision;
 import org.eclipse.team.svn.core.operation.IActionOperation;
 import org.eclipse.team.svn.core.operation.IConsoleStream;
-import org.eclipse.team.svn.core.operation.IUnprotectedOperation;
 import org.eclipse.team.svn.core.operation.SVNConflictDetectionProgressMonitor;
 import org.eclipse.team.svn.core.resource.IRepositoryLocation;
 import org.eclipse.team.svn.core.resource.IRepositoryResource;
@@ -79,20 +78,22 @@ public class UpdateOperation extends AbstractFileConflictDetectionOperation impl
 
 	public void setDepthOptions(SVNDepth depth, boolean isStickyDepth, String updateDepthPath) {
 		this.depth = depth;
-		this.options &= ~ISVNConnector.Options.DEPTH_IS_STICKY;
-		this.options |= isStickyDepth ? ISVNConnector.Options.DEPTH_IS_STICKY : ISVNConnector.Options.NONE;
+		options &= ~ISVNConnector.Options.DEPTH_IS_STICKY;
+		options |= isStickyDepth ? ISVNConnector.Options.DEPTH_IS_STICKY : ISVNConnector.Options.NONE;
 		this.updateDepthPath = updateDepthPath;
 	}
 
+	@Override
 	public File[] getFiles() {
-		return this.getProcessed();
+		return getProcessed();
 	}
 
+	@Override
 	protected void runImpl(final IProgressMonitor monitor) throws Exception {
-		File[] files = this.operableData();
+		File[] files = operableData();
 
 		// container with resources that is really updated
-		this.defineInitialResourceSet(files);
+		defineInitialResourceSet(files);
 
 		Map wc2Resources = SVNUtility.splitWorkingCopies(files);
 		for (Iterator it = wc2Resources.entrySet().iterator(); it.hasNext() && !monitor.isCanceled();) {
@@ -104,35 +105,27 @@ public class UpdateOperation extends AbstractFileConflictDetectionOperation impl
 			final String[] paths = FileUtility.asPathArray((File[]) ((List) entry.getValue()).toArray(new File[0]));
 
 			//append update depth path
-			if ((UpdateOperation.this.options & ISVNConnector.Options.DEPTH_IS_STICKY) != 0
-					&& this.updateDepthPath != null && paths.length == 1) {
-				String newPath = paths[0] + "/" + this.updateDepthPath;
+			if ((UpdateOperation.this.options & ISVNConnector.Options.DEPTH_IS_STICKY) != 0 && updateDepthPath != null
+					&& paths.length == 1) {
+				String newPath = paths[0] + "/" + updateDepthPath;
 				newPath = FileUtility.normalizePath(newPath);
 				paths[0] = newPath;
 			}
 
-			this.complexWriteToConsole(new Runnable() {
-				public void run() {
-					UpdateOperation.this.writeToConsole(IConsoleStream.LEVEL_CMD,
-							"svn update" + ISVNConnector.Options.asCommandLine(UpdateOperation.this.options)); //$NON-NLS-1$
-					for (int i = 0; i < paths.length && !monitor.isCanceled(); i++) {
-						UpdateOperation.this.writeToConsole(IConsoleStream.LEVEL_CMD, " \"" + paths[i] + "\""); //$NON-NLS-1$ //$NON-NLS-2$
-					}
-					UpdateOperation.this.writeToConsole(IConsoleStream.LEVEL_CMD,
-							" -r " + UpdateOperation.this.selectedRevision //$NON-NLS-1$
-									+ SVNUtility.getDepthArg(UpdateOperation.this.depth, UpdateOperation.this.options)
-									+ FileUtility.getUsernameParam(location.getUsername()) + "\n"); //$NON-NLS-1$
+			complexWriteToConsole(() -> {
+				UpdateOperation.this.writeToConsole(IConsoleStream.LEVEL_CMD,
+						"svn update" + ISVNConnector.Options.asCommandLine(options)); //$NON-NLS-1$
+				for (int i = 0; i < paths.length && !monitor.isCanceled(); i++) {
+					UpdateOperation.this.writeToConsole(IConsoleStream.LEVEL_CMD, " \"" + paths[i] + "\""); //$NON-NLS-1$ //$NON-NLS-2$
 				}
+				UpdateOperation.this.writeToConsole(IConsoleStream.LEVEL_CMD, " -r " + selectedRevision //$NON-NLS-1$
+						+ SVNUtility.getDepthArg(depth, options)
+						+ FileUtility.getUsernameParam(location.getUsername()) + "\n"); //$NON-NLS-1$
 			});
 
 			final ISVNConnector proxy = location.acquireSVNProxy();
-			this.protectStep(new IUnprotectedOperation() {
-				public void run(IProgressMonitor monitor) throws Exception {
-					proxy.update(paths, UpdateOperation.this.selectedRevision, UpdateOperation.this.depth,
-							UpdateOperation.this.options,
-							new ConflictDetectionProgressMonitor(UpdateOperation.this, monitor, null));
-				}
-			}, monitor, wc2Resources.size());
+			this.protectStep(monitor1 -> proxy.update(paths, selectedRevision, depth, options,
+					new ConflictDetectionProgressMonitor(UpdateOperation.this, monitor1, null)), monitor, wc2Resources.size());
 
 			location.releaseSVNProxy(proxy);
 		}
@@ -143,6 +136,7 @@ public class UpdateOperation extends AbstractFileConflictDetectionOperation impl
 			super(parent, monitor, root);
 		}
 
+		@Override
 		protected void processConflict(ItemState state) {
 			UpdateOperation.this.hasUnresolvedConflict = true;
 			UpdateOperation.this.unprocessed.add(new File(state.path));

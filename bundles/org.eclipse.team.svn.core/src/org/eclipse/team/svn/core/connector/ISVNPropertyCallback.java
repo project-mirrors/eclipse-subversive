@@ -43,5 +43,5 @@ public interface ISVNPropertyCallback {
 	 * @param inheritedProps
 	 *            the list of properties that were inherited from the parent nodes
 	 */
-	public void next(Pair personalProps, Pair[] inheritedProps);
+	void next(Pair personalProps, Pair[] inheritedProps);
 }

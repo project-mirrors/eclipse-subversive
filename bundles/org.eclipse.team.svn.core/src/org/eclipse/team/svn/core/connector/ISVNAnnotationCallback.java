@@ -32,5 +32,5 @@ public interface ISVNAnnotationCallback {
 	 * @param data
 	 *            the line annotation information. See {@link SVNAnnotationData}.
 	 */
-	public void annotate(String line, SVNAnnotationData data);
+	void annotate(String line, SVNAnnotationData data);
 }

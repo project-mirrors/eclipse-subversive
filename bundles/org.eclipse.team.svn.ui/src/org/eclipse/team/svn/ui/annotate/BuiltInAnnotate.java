@@ -25,7 +25,6 @@ import org.eclipse.jface.text.revisions.RevisionInformation;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.team.svn.core.SVNMessages;
 import org.eclipse.team.svn.core.connector.ISVNConnector;
@@ -127,7 +126,7 @@ public class BuiltInAnnotate {
 		annotateOp.setIncludeMerged(SVNTeamPreferences.getMergeBoolean(SVNTeamUIPlugin.instance().getPreferenceStore(),
 				SVNTeamPreferences.MERGE_INCLUDE_MERGED_NAME));
 		annotateOp.setRetryIfMergeInfoNotSupported(true);
-		IActionOperation showOp = this.prepareBuiltInAnnotate(annotateOp, page, remote, resource);
+		IActionOperation showOp = prepareBuiltInAnnotate(annotateOp, page, remote, resource);
 		CompositeOperation op = new CompositeOperation(showOp.getId(), showOp.getMessagesClass());
 		op.add(annotateOp);
 		op.add(showOp, new IActionOperation[] { annotateOp });
@@ -140,15 +139,16 @@ public class BuiltInAnnotate {
 		final RevisionInformation info = new RevisionInformation();
 		IActionOperation prepareRevisions = new AbstractActionOperation("Operation_PrepareRevisions", //$NON-NLS-1$
 				SVNUIMessages.class) {
+			@Override
 			protected void runImpl(IProgressMonitor monitor) throws Exception {
-				Map<String, BuiltInAnnotateRevision> revisions = new HashMap<String, BuiltInAnnotateRevision>();
+				Map<String, BuiltInAnnotateRevision> revisions = new HashMap<>();
 				SVNAnnotationData[] data = annotateOp.getAnnotatedLines();
 				if (data == null || data.length == 0) {
 					return;
 				}
 				String noAuthor = SVNMessages.SVNInfo_NoAuthor;
 				for (int i = 0; i < data.length; i++) {
-					//if we specified revisions range for annotation then some revisions can be skipped, so don't show them 
+					//if we specified revisions range for annotation then some revisions can be skipped, so don't show them
 					if (data[i].revision == SVNRevision.INVALID_REVISION_NUMBER) {
 						continue;
 					}
@@ -190,10 +190,10 @@ public class BuiltInAnnotate {
 					SVNLogEntry[] msgs = SVNUtility.logEntries(proxy, SVNUtility.getEntryReference(resource),
 							SVNRevision.fromNumber(to), SVNRevision.fromNumber(from), ISVNConnector.Options.NONE,
 							ISVNConnector.DEFAULT_LOG_ENTRY_PROPS, 0, new SVNProgressMonitor(this, monitor, null));
-					for (int i = 0; i < msgs.length; i++) {
-						BuiltInAnnotateRevision revision = revisions.get(String.valueOf(msgs[i].revision));
+					for (SVNLogEntry msg : msgs) {
+						BuiltInAnnotateRevision revision = revisions.get(String.valueOf(msg.revision));
 						if (revision != null) {
-							revision.setLogMessage(msgs[i]);
+							revision.setLogMessage(msg);
 						}
 					}
 				} finally {
@@ -204,17 +204,16 @@ public class BuiltInAnnotate {
 		op.add(prepareRevisions, new IActionOperation[] { annotateOp });
 		IActionOperation attachMessages = new AbstractActionOperation("Operation_BuiltInShowView", //$NON-NLS-1$
 				SVNUIMessages.class) {
+			@Override
 			protected void runImpl(IProgressMonitor monitor) throws Exception {
 				if (page.getActivePart() == null || page.getActivePart().getSite() == null) {
 					return;
 				}
-				page.getActivePart().getSite().getShell().getDisplay().syncExec(new Runnable() {
-					public void run() {
-						try {
-							BuiltInAnnotate.this.initializeEditor(page, remote, resource, info);
-						} catch (PartInitException ex) {
-							throw new RuntimeException(ex);
-						}
+				page.getActivePart().getSite().getShell().getDisplay().syncExec(() -> {
+					try {
+						BuiltInAnnotate.this.initializeEditor(page, remote, resource, info);
+					} catch (PartInitException ex) {
+						throw new RuntimeException(ex);
 					}
 				});
 			}
@@ -227,46 +226,48 @@ public class BuiltInAnnotate {
 			RevisionInformation info) throws PartInitException {
 		IEditorPart editor = resource != null ? this.openEditor(page, resource) : this.openEditor(page, remote);
 		if (editor instanceof AbstractDecoratedTextEditor) {
-			this.textEditor = (AbstractDecoratedTextEditor) editor;
-			final ISelectionProvider provider = (ISelectionProvider) this.textEditor
-					.getAdapter(RevisionSelectionProvider.class);
+			textEditor = (AbstractDecoratedTextEditor) editor;
+			final ISelectionProvider provider = textEditor.getAdapter(RevisionSelectionProvider.class);
 			if (provider != null) {
-				final ISelectionChangedListener selectionListener = new ISelectionChangedListener() {
-					public void selectionChanged(SelectionChangedEvent event) {
-						if (event.getSelection() instanceof IStructuredSelection) {
-							BuiltInAnnotateRevision selected = (BuiltInAnnotateRevision) ((IStructuredSelection) event
-									.getSelection()).getFirstElement();
-							if (selected != null) {
-								if (BuiltInAnnotate.this.historyPage != null) {
-									BuiltInAnnotate.this.historyPage.selectRevision(Long.parseLong(selected.getId()));
-								}
+				final ISelectionChangedListener selectionListener = event -> {
+					if (event.getSelection() instanceof IStructuredSelection) {
+						BuiltInAnnotateRevision selected = (BuiltInAnnotateRevision) ((IStructuredSelection) event
+								.getSelection()).getFirstElement();
+						if (selected != null) {
+							if (historyPage != null) {
+								historyPage.selectRevision(Long.parseLong(selected.getId()));
 							}
 						}
 					}
 				};
 				provider.addSelectionChangedListener(selectionListener);
 				page.addPartListener(new IPartListener() {
+					@Override
 					public void partClosed(IWorkbenchPart part) {
-						if (part instanceof IHistoryView || part == BuiltInAnnotate.this.textEditor) {
+						if (part instanceof IHistoryView || part == textEditor) {
 							page.removePartListener(this);
 							provider.removeSelectionChangedListener(selectionListener);
 						}
 					}
 
+					@Override
 					public void partActivated(IWorkbenchPart part) {
 					}
 
+					@Override
 					public void partBroughtToTop(IWorkbenchPart part) {
 					}
 
+					@Override
 					public void partDeactivated(IWorkbenchPart part) {
 					}
 
+					@Override
 					public void partOpened(IWorkbenchPart part) {
 					}
 				});
 			}
-			this.textEditor.showRevisionInformation(info, SVNTeamQuickDiffProvider.class.getName());
+			textEditor.showRevisionInformation(info, SVNTeamQuickDiffProvider.class.getName());
 		}
 	}
 
@@ -288,7 +289,7 @@ public class BuiltInAnnotate {
 		ProgressMonitorUtility.doTaskExternal(op, new NullProgressMonitor());
 		if (op.getExecutionState() == IActionOperation.OK) {
 			IEditorPart part = op.getEditors()[0];
-			return this.findTextEditorPart(page, part, op.getRepositoryEditorInputs()[0]);
+			return findTextEditorPart(page, part, op.getRepositoryEditorInputs()[0]);
 		}
 		return null;
 	}
@@ -303,13 +304,13 @@ public class BuiltInAnnotate {
 
 	protected AbstractDecoratedTextEditor findTextEditorPart(IWorkbenchPage page, IEditorPart editor,
 			IEditorInput input) {
-		if (editor instanceof AbstractDecoratedTextEditor)
+		if (editor instanceof AbstractDecoratedTextEditor) {
 			return (AbstractDecoratedTextEditor) editor;
+		}
 		if (editor instanceof MultiPageEditorPart) {
 			MultiPageEditorPart mpep = (MultiPageEditorPart) editor;
 			IEditorPart[] parts = mpep.findEditors(input);
-			for (int i = 0; i < parts.length; i++) {
-				IEditorPart editorPart = parts[i];
+			for (IEditorPart editorPart : parts) {
 				if (editorPart instanceof AbstractDecoratedTextEditor) {
 					page.activate(mpep);
 					mpep.setActiveEditor(editorPart);

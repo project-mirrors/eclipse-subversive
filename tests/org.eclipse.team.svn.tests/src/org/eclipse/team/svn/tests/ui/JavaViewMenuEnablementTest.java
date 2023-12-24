@@ -76,15 +76,15 @@ public class JavaViewMenuEnablementTest {
 	public void setUp() throws Exception {
 		ActionOperationWorkflowBuilder workflowBuilder = new ActionOperationWorkflowBuilder();
 		workflowBuilder.buildShareAddCommitWorkflow().execute();
-		File newResource = new File(this.getFirstProject().getLocation().toString() + "/newResource");
+		File newResource = new File(getFirstProject().getLocation().toString() + "/newResource");
 		newResource.mkdir();
-		newResource = new File(this.getSecondProject().getLocation().toString() + "/newResource");
+		newResource = new File(getSecondProject().getLocation().toString() + "/newResource");
 		newResource.mkdir();
-		File newFolder = new File(this.getFirstProject().getLocation().toString() + "/testFolder");
+		File newFolder = new File(getFirstProject().getLocation().toString() + "/testFolder");
 		newFolder.mkdir();
-		newFolder = new File(this.getSecondProject().getLocation().toString() + "/testFolder");
+		newFolder = new File(getSecondProject().getLocation().toString() + "/testFolder");
 		newFolder.mkdir();
-		IResource[] projects = new IResource[] { this.getFirstProject(), this.getSecondProject() };
+		IResource[] projects = { getFirstProject(), getSecondProject() };
 		new RefreshResourcesOperation(projects).run(new NullProgressMonitor());
 		new AddToSVNOperation(new IResource[] { getSecondProject().getFolder("testFolder") })
 				.run(new NullProgressMonitor());
@@ -93,217 +93,217 @@ public class JavaViewMenuEnablementTest {
 	@Test
 	public void testIgnoreAction() throws Exception {
 		IActionDelegate action = new AddToSVNIgnoreAction();
-		this.assertEnablement(action, this.getModifiedResources(), false);
-		this.assertEnablement(action, this.getVersionedResources(), false);
-		this.assertEnablement(action, this.getIgnoredResources(), false);
-		this.assertEnablement(action, this.getAddedResources(), true);
-		this.assertEnablement(action, this.getNewResources(), true);
-		this.assertDisabledForCommonReasons(action, this.getAllResources());
+		this.assertEnablement(action, getModifiedResources(), false);
+		this.assertEnablement(action, getVersionedResources(), false);
+		this.assertEnablement(action, getIgnoredResources(), false);
+		this.assertEnablement(action, getAddedResources(), true);
+		this.assertEnablement(action, getNewResources(), true);
+		assertDisabledForCommonReasons(action, getAllResources());
 	}
 
 	@Test
 	public void testAddToSVNAction() throws Exception {
 		IActionDelegate action = new AddToSVNAction();
-		this.assertEnablement(action, this.getModifiedResources(), false);
-		this.assertEnablement(action, this.getVersionedResources(), true);
-		this.assertEnablement(action, this.getNonversionedResources(), true);
-		this.assertEnablement(action, this.getIgnoredResources(), true);
-		this.assertEnablement(action, this.getAddedResources(), true);
-		this.assertEnablement(action, this.getNewResources(), true);
-		this.assertDisabledForCommonReasons(action, this.getAllResources());
+		this.assertEnablement(action, getModifiedResources(), false);
+		this.assertEnablement(action, getVersionedResources(), true);
+		this.assertEnablement(action, getNonversionedResources(), true);
+		this.assertEnablement(action, getIgnoredResources(), true);
+		this.assertEnablement(action, getAddedResources(), true);
+		this.assertEnablement(action, getNewResources(), true);
+		assertDisabledForCommonReasons(action, getAllResources());
 	}
 
 	@Test
 	public void testBranchAction() throws Exception {
 		IActionDelegate action = new BranchAction();
-		this.assertEnablement(action, this.getOnRepositoryResources(), true);
-		this.assertEnablement(action, new IResource[] { this.getOnRepositoryResources()[0] }, true);
-		this.assertEnablement(action, this.getVersionedResources(), true);
-		this.assertEnablement(action, new IResource[] { this.getVersionedResources()[0] }, true);
-		this.assertEnablement(action, this.getIgnoredResources(), false);
-		this.assertEnablement(action, new IResource[] { this.getIgnoredResources()[0] }, false);
-		this.assertEnablement(action, this.getNewResources(), false);
-		this.assertEnablement(action, new IResource[] { this.getNewResources()[0] }, false);
-		this.assertDisabledForCommonReasons(action, this.getAllResources());
+		this.assertEnablement(action, getOnRepositoryResources(), true);
+		this.assertEnablement(action, new IResource[] { getOnRepositoryResources()[0] }, true);
+		this.assertEnablement(action, getVersionedResources(), true);
+		this.assertEnablement(action, new IResource[] { getVersionedResources()[0] }, true);
+		this.assertEnablement(action, getIgnoredResources(), false);
+		this.assertEnablement(action, new IResource[] { getIgnoredResources()[0] }, false);
+		this.assertEnablement(action, getNewResources(), false);
+		this.assertEnablement(action, new IResource[] { getNewResources()[0] }, false);
+		assertDisabledForCommonReasons(action, getAllResources());
 	}
 
 	@Test
 	public void testCommitAction() throws Exception {
 		IActionDelegate action = new CommitAction();
-		this.assertEnablement(action, this.getChangedResources(), true);
-		this.assertEnablement(action, new IResource[] { this.getChangedResources()[0] }, true);
-		this.assertEnablement(action, this.getVersionedResources(), true);
-		this.assertEnablement(action, this.getIgnoredResources(), false);
-		this.assertEnablement(action, this.getNewResources(), true);
-		this.assertDisabledForCommonReasons(action, this.getAllResources());
+		this.assertEnablement(action, getChangedResources(), true);
+		this.assertEnablement(action, new IResource[] { getChangedResources()[0] }, true);
+		this.assertEnablement(action, getVersionedResources(), true);
+		this.assertEnablement(action, getIgnoredResources(), false);
+		this.assertEnablement(action, getNewResources(), true);
+		assertDisabledForCommonReasons(action, getAllResources());
 	}
 
 	@Test
 	public void testCompareWithLatestRevisionAction() throws Exception {
 		IActionDelegate action = new CompareWithLatestRevisionAction();
-		this.assertEnablement(action, this.getOnRepositoryResources(), false);
-		this.assertEnablement(action, new IResource[] { this.getOnRepositoryResources()[0] }, true);
-		this.assertEnablement(action, this.getVersionedResources(), false);
-		this.assertEnablement(action, new IResource[] { this.getVersionedResources()[0] }, true);
-		this.assertEnablement(action, this.getIgnoredResources(), false);
-		this.assertEnablement(action, new IResource[] { this.getIgnoredResources()[0] }, false);
-		this.assertEnablement(action, this.getNewResources(), false);
-		this.assertEnablement(action, new IResource[] { this.getNewResources()[0] }, false);
-		this.assertDisabledForCommonReasons(action, this.getAllResources());
+		this.assertEnablement(action, getOnRepositoryResources(), false);
+		this.assertEnablement(action, new IResource[] { getOnRepositoryResources()[0] }, true);
+		this.assertEnablement(action, getVersionedResources(), false);
+		this.assertEnablement(action, new IResource[] { getVersionedResources()[0] }, true);
+		this.assertEnablement(action, getIgnoredResources(), false);
+		this.assertEnablement(action, new IResource[] { getIgnoredResources()[0] }, false);
+		this.assertEnablement(action, getNewResources(), false);
+		this.assertEnablement(action, new IResource[] { getNewResources()[0] }, false);
+		assertDisabledForCommonReasons(action, getAllResources());
 	}
 
 	@Test
 	public void testCompareWithRevisionAction() throws Exception {
 		IActionDelegate action = new CompareWithRevisionAction();
-		this.assertEnablement(action, this.getOnRepositoryResources(), false);
-		this.assertEnablement(action, new IResource[] { this.getOnRepositoryResources()[0] }, true);
-		this.assertEnablement(action, this.getVersionedResources(), false);
-		this.assertEnablement(action, new IResource[] { this.getVersionedResources()[0] }, true);
-		this.assertEnablement(action, this.getIgnoredResources(), false);
-		this.assertEnablement(action, new IResource[] { this.getIgnoredResources()[0] }, false);
-		this.assertEnablement(action, this.getNewResources(), false);
-		this.assertEnablement(action, new IResource[] { this.getNewResources()[0] }, false);
-		this.assertDisabledForCommonReasons(action, this.getAllResources());
+		this.assertEnablement(action, getOnRepositoryResources(), false);
+		this.assertEnablement(action, new IResource[] { getOnRepositoryResources()[0] }, true);
+		this.assertEnablement(action, getVersionedResources(), false);
+		this.assertEnablement(action, new IResource[] { getVersionedResources()[0] }, true);
+		this.assertEnablement(action, getIgnoredResources(), false);
+		this.assertEnablement(action, new IResource[] { getIgnoredResources()[0] }, false);
+		this.assertEnablement(action, getNewResources(), false);
+		this.assertEnablement(action, new IResource[] { getNewResources()[0] }, false);
+		assertDisabledForCommonReasons(action, getAllResources());
 	}
 
 	@Test
 	public void testReplaceWithRevisionAction() throws Exception {
 		IActionDelegate action = new ReplaceWithRevisionAction();
-		this.assertEnablement(action, this.getOnRepositoryResources(), false);
-		this.assertEnablement(action, new IResource[] { this.getOnRepositoryResources()[0] }, true);
-		this.assertEnablement(action, this.getVersionedResources(), false);
-		this.assertEnablement(action, new IResource[] { this.getVersionedResources()[0] }, true);
-		this.assertEnablement(action, this.getIgnoredResources(), false);
-		this.assertEnablement(action, new IResource[] { this.getIgnoredResources()[0] }, false);
-		this.assertEnablement(action, this.getNewResources(), false);
-		this.assertEnablement(action, new IResource[] { this.getNewResources()[0] }, false);
-		this.assertDisabledForCommonReasons(action, this.getAllResources());
+		this.assertEnablement(action, getOnRepositoryResources(), false);
+		this.assertEnablement(action, new IResource[] { getOnRepositoryResources()[0] }, true);
+		this.assertEnablement(action, getVersionedResources(), false);
+		this.assertEnablement(action, new IResource[] { getVersionedResources()[0] }, true);
+		this.assertEnablement(action, getIgnoredResources(), false);
+		this.assertEnablement(action, new IResource[] { getIgnoredResources()[0] }, false);
+		this.assertEnablement(action, getNewResources(), false);
+		this.assertEnablement(action, new IResource[] { getNewResources()[0] }, false);
+		assertDisabledForCommonReasons(action, getAllResources());
 	}
 
 	@Test
 	public void testCompareWithWorkingCopyAction() throws Exception {
 		IActionDelegate action = new CompareWithWorkingCopyAction();
-		this.assertEnablement(action, this.getOnRepositoryResources(), false);
-		this.assertEnablement(action, new IResource[] { this.getOnRepositoryResources()[0] }, true);
-		this.assertEnablement(action, this.getVersionedResources(), false);
-		this.assertEnablement(action, new IResource[] { this.getVersionedResources()[0] }, true);
-		this.assertEnablement(action, this.getIgnoredResources(), false);
-		this.assertEnablement(action, new IResource[] { this.getIgnoredResources()[0] }, false);
-		this.assertEnablement(action, this.getNewResources(), false);
-		this.assertEnablement(action, new IResource[] { this.getNewResources()[0] }, false);
-		this.assertDisabledForCommonReasons(action, this.getAllResources());
+		this.assertEnablement(action, getOnRepositoryResources(), false);
+		this.assertEnablement(action, new IResource[] { getOnRepositoryResources()[0] }, true);
+		this.assertEnablement(action, getVersionedResources(), false);
+		this.assertEnablement(action, new IResource[] { getVersionedResources()[0] }, true);
+		this.assertEnablement(action, getIgnoredResources(), false);
+		this.assertEnablement(action, new IResource[] { getIgnoredResources()[0] }, false);
+		this.assertEnablement(action, getNewResources(), false);
+		this.assertEnablement(action, new IResource[] { getNewResources()[0] }, false);
+		assertDisabledForCommonReasons(action, getAllResources());
 	}
 
 	@Test
 	public void testEditPropertiesAction() throws Exception {
 		IActionDelegate action = new EditPropertiesAction();
-		this.assertEnablement(action, this.getExcludePrereplacedResources(), false);
-		this.assertEnablement(action, new IResource[] { this.getExcludePrereplacedResources()[0] }, true);
-		this.assertEnablement(action, this.getVersionedResources(), false);
-		this.assertEnablement(action, new IResource[] { this.getVersionedResources()[0] }, true);
-		this.assertEnablement(action, this.getIgnoredResources(), false);
-		this.assertEnablement(action, new IResource[] { this.getIgnoredResources()[0] }, false);
-		this.assertEnablement(action, this.getNewResources(), false);
-		this.assertEnablement(action, new IResource[] { this.getNewResources()[0] }, false);
-		this.assertDisabledForCommonReasons(action, this.getAllResources());
+		this.assertEnablement(action, getExcludePrereplacedResources(), false);
+		this.assertEnablement(action, new IResource[] { getExcludePrereplacedResources()[0] }, true);
+		this.assertEnablement(action, getVersionedResources(), false);
+		this.assertEnablement(action, new IResource[] { getVersionedResources()[0] }, true);
+		this.assertEnablement(action, getIgnoredResources(), false);
+		this.assertEnablement(action, new IResource[] { getIgnoredResources()[0] }, false);
+		this.assertEnablement(action, getNewResources(), false);
+		this.assertEnablement(action, new IResource[] { getNewResources()[0] }, false);
+		assertDisabledForCommonReasons(action, getAllResources());
 	}
 
 	@Test
 	public void testReplaceWithLatestRevisionAction() throws Exception {
 		IActionDelegate action = new ReplaceWithLatestRevisionAction();
-		this.assertEnablement(action, this.getOnRepositoryResources(), true);
-		this.assertEnablement(action, new IResource[] { this.getOnRepositoryResources()[0] }, true);
-		this.assertEnablement(action, this.getVersionedResources(), true);
-		this.assertEnablement(action, this.getIgnoredResources(), false);
-		this.assertEnablement(action, this.getNewResources(), false);
-		this.assertDisabledForCommonReasons(action, this.getAllResources());
+		this.assertEnablement(action, getOnRepositoryResources(), true);
+		this.assertEnablement(action, new IResource[] { getOnRepositoryResources()[0] }, true);
+		this.assertEnablement(action, getVersionedResources(), true);
+		this.assertEnablement(action, getIgnoredResources(), false);
+		this.assertEnablement(action, getNewResources(), false);
+		assertDisabledForCommonReasons(action, getAllResources());
 	}
 
 	@Test
 	public void testRevertAction() throws Exception {
 		IActionDelegate action = new RevertAction();
-		this.assertEnablement(action, this.getRevertableResources(), true);
-		this.assertEnablement(action, new IResource[] { this.getRevertableResources()[0] }, true);
-		this.assertEnablement(action, this.getVersionedResources(), true);
-		this.assertEnablement(action, this.getIgnoredResources(), false);
-		this.assertEnablement(action, this.getNewResources(), false);
-		this.assertDisabledForCommonReasons(action, this.getAllResources());
+		this.assertEnablement(action, getRevertableResources(), true);
+		this.assertEnablement(action, new IResource[] { getRevertableResources()[0] }, true);
+		this.assertEnablement(action, getVersionedResources(), true);
+		this.assertEnablement(action, getIgnoredResources(), false);
+		this.assertEnablement(action, getNewResources(), false);
+		assertDisabledForCommonReasons(action, getAllResources());
 	}
 
 	@Test
 	public void testShowAnnotationAction() throws Exception {
 		IActionDelegate action = new ShowAnnotationAction();
-		this.assertEnablement(action, this.getOnRepositoryResources(), false);
-		this.assertEnablement(action, new IResource[] { this.getOnRepositoryResources()[0] }, true);
-		this.assertEnablement(action, this.getVersionedResources(), false);
-		this.assertEnablement(action, new IResource[] { this.getVersionedResources()[0] }, true);
-		this.assertEnablement(action, this.getIgnoredResources(), false);
-		this.assertEnablement(action, new IResource[] { this.getIgnoredResources()[0] }, false);
-		this.assertEnablement(action, this.getNewResources(), false);
-		this.assertEnablement(action, new IResource[] { this.getNewResources()[0] }, false);
-		this.assertDisabledForCommonReasons(action, this.getAllResources());
+		this.assertEnablement(action, getOnRepositoryResources(), false);
+		this.assertEnablement(action, new IResource[] { getOnRepositoryResources()[0] }, true);
+		this.assertEnablement(action, getVersionedResources(), false);
+		this.assertEnablement(action, new IResource[] { getVersionedResources()[0] }, true);
+		this.assertEnablement(action, getIgnoredResources(), false);
+		this.assertEnablement(action, new IResource[] { getIgnoredResources()[0] }, false);
+		this.assertEnablement(action, getNewResources(), false);
+		this.assertEnablement(action, new IResource[] { getNewResources()[0] }, false);
+		assertDisabledForCommonReasons(action, getAllResources());
 	}
 
 	@Test
 	public void testShowResourceHistoryAction() throws Exception {
 		IActionDelegate action = new ShowHistoryAction();
-		this.assertEnablement(action, this.getOnRepositoryResources(), false);
-		this.assertEnablement(action, new IResource[] { this.getOnRepositoryResources()[0] }, true);
-		this.assertEnablement(action, this.getVersionedResources(), false);
-		this.assertEnablement(action, new IResource[] { this.getVersionedResources()[0] }, true);
-		this.assertEnablement(action, this.getIgnoredResources(), false);
-		this.assertEnablement(action, new IResource[] { this.getIgnoredResources()[0] }, false);
-		this.assertEnablement(action, this.getNewResources(), false);
-		this.assertEnablement(action, new IResource[] { this.getNewResources()[0] }, false);
-		this.assertDisabledForCommonReasons(action, this.getAllResources());
+		this.assertEnablement(action, getOnRepositoryResources(), false);
+		this.assertEnablement(action, new IResource[] { getOnRepositoryResources()[0] }, true);
+		this.assertEnablement(action, getVersionedResources(), false);
+		this.assertEnablement(action, new IResource[] { getVersionedResources()[0] }, true);
+		this.assertEnablement(action, getIgnoredResources(), false);
+		this.assertEnablement(action, new IResource[] { getIgnoredResources()[0] }, false);
+		this.assertEnablement(action, getNewResources(), false);
+		this.assertEnablement(action, new IResource[] { getNewResources()[0] }, false);
+		assertDisabledForCommonReasons(action, getAllResources());
 	}
 
 	@Test
 	public void testSwitchAction() throws Exception {
 		IActionDelegate action = new SwitchAction();
-		this.assertEnablement(action, this.getOnRepositoryResources(), false);
-		this.assertEnablement(action, new IResource[] { this.getOnRepositoryResources()[0] }, true);
-		this.assertEnablement(action, this.getVersionedResources(), false);
-		this.assertEnablement(action, new IResource[] { this.getVersionedResources()[0] }, true);
-		this.assertEnablement(action, this.getIgnoredResources(), false);
-		this.assertEnablement(action, new IResource[] { this.getIgnoredResources()[0] }, false);
-		this.assertEnablement(action, this.getNewResources(), false);
-		this.assertEnablement(action, new IResource[] { this.getNewResources()[0] }, false);
-		this.assertDisabledForCommonReasons(action, this.getAllResources());
+		this.assertEnablement(action, getOnRepositoryResources(), false);
+		this.assertEnablement(action, new IResource[] { getOnRepositoryResources()[0] }, true);
+		this.assertEnablement(action, getVersionedResources(), false);
+		this.assertEnablement(action, new IResource[] { getVersionedResources()[0] }, true);
+		this.assertEnablement(action, getIgnoredResources(), false);
+		this.assertEnablement(action, new IResource[] { getIgnoredResources()[0] }, false);
+		this.assertEnablement(action, getNewResources(), false);
+		this.assertEnablement(action, new IResource[] { getNewResources()[0] }, false);
+		assertDisabledForCommonReasons(action, getAllResources());
 	}
 
 	@Test
 	public void testSynchronizeAction() throws Exception {
 		IActionDelegate action = new SynchronizeAction();
-		this.assertEnablement(action, this.getVersionedResources(), true);
-		this.assertEnablement(action, this.getIgnoredResources(), true);
-		this.assertEnablement(action, this.getNewResources(), true);
-		this.assertDisabledForCommonReasons(action, this.getAllResources());
+		this.assertEnablement(action, getVersionedResources(), true);
+		this.assertEnablement(action, getIgnoredResources(), true);
+		this.assertEnablement(action, getNewResources(), true);
+		assertDisabledForCommonReasons(action, getAllResources());
 	}
 
 	@Test
 	public void testTagAction() throws Exception {
 		IActionDelegate action = new TagAction();
-		this.assertEnablement(action, this.getOnRepositoryResources(), true);
-		this.assertEnablement(action, new IResource[] { this.getOnRepositoryResources()[0] }, true);
-		this.assertEnablement(action, this.getVersionedResources(), true);
-		this.assertEnablement(action, new IResource[] { this.getVersionedResources()[0] }, true);
-		this.assertEnablement(action, this.getIgnoredResources(), false);
-		this.assertEnablement(action, new IResource[] { this.getIgnoredResources()[0] }, false);
-		this.assertEnablement(action, this.getNewResources(), false);
-		this.assertEnablement(action, new IResource[] { this.getNewResources()[0] }, false);
-		this.assertDisabledForCommonReasons(action, this.getAllResources());
+		this.assertEnablement(action, getOnRepositoryResources(), true);
+		this.assertEnablement(action, new IResource[] { getOnRepositoryResources()[0] }, true);
+		this.assertEnablement(action, getVersionedResources(), true);
+		this.assertEnablement(action, new IResource[] { getVersionedResources()[0] }, true);
+		this.assertEnablement(action, getIgnoredResources(), false);
+		this.assertEnablement(action, new IResource[] { getIgnoredResources()[0] }, false);
+		this.assertEnablement(action, getNewResources(), false);
+		this.assertEnablement(action, new IResource[] { getNewResources()[0] }, false);
+		assertDisabledForCommonReasons(action, getAllResources());
 	}
 
 	@Test
 	public void testUpdateAction() throws Exception {
 		IActionDelegate action = new UpdateAction();
-		this.assertEnablement(action, this.getOnRepositoryResources(), true);
-		this.assertEnablement(action, new IResource[] { this.getOnRepositoryResources()[0] }, true);
-		this.assertEnablement(action, this.getVersionedResources(), true);
-		this.assertEnablement(action, this.getIgnoredResources(), false);
-		this.assertEnablement(action, this.getNewResources(), false);
-		this.assertDisabledForCommonReasons(action, this.getAllResources());
+		this.assertEnablement(action, getOnRepositoryResources(), true);
+		this.assertEnablement(action, new IResource[] { getOnRepositoryResources()[0] }, true);
+		this.assertEnablement(action, getVersionedResources(), true);
+		this.assertEnablement(action, getIgnoredResources(), false);
+		this.assertEnablement(action, getNewResources(), false);
+		assertDisabledForCommonReasons(action, getAllResources());
 	}
 
 	private ISelection asSelection(IResource[] resources) {
@@ -322,10 +322,10 @@ public class JavaViewMenuEnablementTest {
 		IAction action = new Action() {
 		};
 		action.setEnabled(false);
-		ISelection selection = this.asSelection(resources);
+		ISelection selection = asSelection(resources);
 		FilterManager.instance().clear();
 		actionDelegate.selectionChanged(action, selection);
-		assertEquals(this.getName(actionDelegate) + " enablement wrong!", expectedEnablement, action.isEnabled());
+		assertEquals(getName(actionDelegate) + " enablement wrong!", expectedEnablement, action.isEnabled());
 	}
 
 	protected void assertEnablement(IActionDelegate actionDelegate, ISelection selection, boolean expectedEnablement) {
@@ -333,7 +333,7 @@ public class JavaViewMenuEnablementTest {
 		};
 		FilterManager.instance().clear();
 		actionDelegate.selectionChanged(action, selection);
-		assertEquals(this.getName(actionDelegate) + " enablement wrong!", expectedEnablement, action.isEnabled());
+		assertEquals(getName(actionDelegate) + " enablement wrong!", expectedEnablement, action.isEnabled());
 	}
 
 	protected String getName(IActionDelegate actionDelegate) {
@@ -342,93 +342,97 @@ public class JavaViewMenuEnablementTest {
 
 	protected IResource[] getAllResources() {
 		IResource[] allResources = FileUtility.getResourcesRecursive(
-				new IResource[] { this.getFirstProject(), this.getSecondProject() }, IStateFilter.SF_ALL);
+				new IResource[] { getFirstProject(), getSecondProject() }, IStateFilter.SF_ALL);
 		return allResources;
 	}
 
 	protected IResource[] getIgnoredResources() {
 		IResource[] ignoredResources = FileUtility.getResourcesRecursive(
-				new IResource[] { this.getFirstProject(), this.getSecondProject() }, IStateFilter.SF_IGNORED);
+				new IResource[] { getFirstProject(), getSecondProject() }, IStateFilter.SF_IGNORED);
 		return ignoredResources;
 	}
 
 	protected IResource[] getNonversionedResources() {
 		IResource[] nonversionedResources = FileUtility.getResourcesRecursive(
-				new IResource[] { this.getFirstProject(), this.getSecondProject() }, IStateFilter.SF_UNVERSIONED);
+				new IResource[] { getFirstProject(), getSecondProject() }, IStateFilter.SF_UNVERSIONED);
 		return nonversionedResources;
 	}
 
 	protected IResource[] getVersionedResources() {
 		IResource[] versionedResources = FileUtility.getResourcesRecursive(
-				new IResource[] { this.getFirstProject(), this.getSecondProject() }, IStateFilter.SF_VERSIONED);
+				new IResource[] { getFirstProject(), getSecondProject() }, IStateFilter.SF_VERSIONED);
 		return versionedResources;
 	}
 
 	protected IResource[] getOnRepositoryResources() {
 		IResource[] onRepositoryResources = FileUtility.getResourcesRecursive(
-				new IResource[] { this.getFirstProject(), this.getSecondProject() }, IStateFilter.SF_ONREPOSITORY);
+				new IResource[] { getFirstProject(), getSecondProject() }, IStateFilter.SF_ONREPOSITORY);
 		return onRepositoryResources;
 	}
 
 	protected IResource[] getNewResources() {
 		IResource[] newResources = FileUtility.getResourcesRecursive(
-				new IResource[] { this.getFirstProject(), this.getSecondProject() }, IStateFilter.SF_NEW);
+				new IResource[] { getFirstProject(), getSecondProject() }, IStateFilter.SF_NEW);
 		return newResources;
 	}
 
 	protected IResource[] getAddedResources() {
 		IResource[] addedResources = FileUtility.getResourcesRecursive(
-				new IResource[] { this.getFirstProject(), this.getSecondProject() }, IStateFilter.SF_ADDED);
+				new IResource[] { getFirstProject(), getSecondProject() }, IStateFilter.SF_ADDED);
 		return addedResources;
 	}
 
 	protected IResource[] getModifiedResources() {
 		IResource[] modifiedResources = FileUtility.getResourcesRecursive(
-				new IResource[] { this.getFirstProject(), this.getSecondProject() }, IStateFilter.SF_MODIFIED);
+				new IResource[] { getFirstProject(), getSecondProject() }, IStateFilter.SF_MODIFIED);
 		return modifiedResources;
 	}
 
 	protected IResource[] getNotmodifiedResources() {
 		IResource[] notModifiedResources = FileUtility.getResourcesRecursive(
-				new IResource[] { this.getFirstProject(), this.getSecondProject() }, IStateFilter.SF_NOTMODIFIED);
+				new IResource[] { getFirstProject(), getSecondProject() }, IStateFilter.SF_NOTMODIFIED);
 		return notModifiedResources;
 	}
 
 	protected IResource[] getDeletedResources() {
 		IResource[] deletedResources = FileUtility.getResourcesRecursive(
-				new IResource[] { this.getFirstProject(), this.getSecondProject() }, IStateFilter.SF_DELETED);
+				new IResource[] { getFirstProject(), getSecondProject() }, IStateFilter.SF_DELETED);
 		return deletedResources;
 	}
 
 	protected IResource[] getChangedResources() {
 		IResource[] changedResources = FileUtility.getResourcesRecursive(
-				new IResource[] { this.getFirstProject(), this.getSecondProject() }, IStateFilter.SF_ANY_CHANGE);
+				new IResource[] { getFirstProject(), getSecondProject() }, IStateFilter.SF_ANY_CHANGE);
 		return changedResources;
 	}
 
 	protected IResource[] getReplacedResources() {
 		IResource[] replacedResources = FileUtility.getResourcesRecursive(
-				new IResource[] { this.getFirstProject(), this.getSecondProject() }, IStateFilter.SF_REPLACED);
+				new IResource[] { getFirstProject(), getSecondProject() }, IStateFilter.SF_REPLACED);
 		return replacedResources;
 	}
 
 	protected IResource[] getExcludePrereplacedResources() {
-		return FileUtility.getResourcesRecursive(new IResource[] { this.getFirstProject(), this.getSecondProject() },
+		return FileUtility.getResourcesRecursive(new IResource[] { getFirstProject(), getSecondProject() },
 				new IStateFilter() {
+					@Override
 					public boolean accept(IResource resource, String state, int mask) {
 						return IStateFilter.SF_VERSIONED.accept(resource, state, mask)
 								&& !IStateFilter.SF_PREREPLACED.accept(resource, state, mask);
 					}
 
+					@Override
 					public boolean allowsRecursion(IResource resource, String state, int mask) {
 						return true;
 					}
 
+					@Override
 					public boolean accept(ILocalResource resource) {
 						return IStateFilter.SF_VERSIONED.accept(resource)
 								&& !IStateFilter.SF_PREREPLACED.accept(resource);
 					}
 
+					@Override
 					public boolean allowsRecursion(ILocalResource resource) {
 						return true;
 					}
@@ -437,7 +441,7 @@ public class JavaViewMenuEnablementTest {
 
 	protected IResource[] getRevertableResources() {
 		IResource[] revertableResources = FileUtility.getResourcesRecursive(
-				new IResource[] { this.getFirstProject(), this.getSecondProject() }, IStateFilter.SF_REVERTABLE);
+				new IResource[] { getFirstProject(), getSecondProject() }, IStateFilter.SF_REVERTABLE);
 		return revertableResources;
 	}
 

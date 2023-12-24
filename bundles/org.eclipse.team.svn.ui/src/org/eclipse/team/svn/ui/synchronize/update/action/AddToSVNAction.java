@@ -31,15 +31,17 @@ public class AddToSVNAction extends AbstractSynchronizeModelAction {
 
 	public AddToSVNAction(String text, ISynchronizePageConfiguration configuration) {
 		super(text, configuration);
-		this.actionHelper = new AddToSVNModelActionHelper(this, configuration);
+		actionHelper = new AddToSVNModelActionHelper(this, configuration);
 	}
 
+	@Override
 	protected FastSyncInfoFilter getSyncInfoFilter() {
-		return this.actionHelper.getSyncInfoFilter();
+		return actionHelper.getSyncInfoFilter();
 	}
 
+	@Override
 	protected IActionOperation getOperation(ISynchronizePageConfiguration configuration, IDiffElement[] elements) {
-		return this.actionHelper.getOperation();
+		return actionHelper.getOperation();
 	}
 
 }

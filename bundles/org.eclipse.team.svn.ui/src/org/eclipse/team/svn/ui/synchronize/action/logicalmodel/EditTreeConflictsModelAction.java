@@ -33,12 +33,13 @@ public class EditTreeConflictsModelAction extends AbstractSynchronizeLogicalMode
 
 	public EditTreeConflictsModelAction(String text, ISynchronizePageConfiguration configuration) {
 		super(text, configuration);
-		this.actionHelper = new EditTreeConflictsActionHelper(this, configuration);
+		actionHelper = new EditTreeConflictsActionHelper(this, configuration);
 	}
 
+	@Override
 	protected boolean updateSelection(IStructuredSelection selection) {
 		if (super.updateSelection(selection) && selection.size() == 1) {
-			AbstractSVNSyncInfo syncInfo = this.getSelectedSVNSyncInfo();
+			AbstractSVNSyncInfo syncInfo = getSelectedSVNSyncInfo();
 			if (syncInfo != null && IStateFilter.SF_TREE_CONFLICTING.accept(syncInfo.getLocalResource())) {
 				return true;
 			}
@@ -46,8 +47,9 @@ public class EditTreeConflictsModelAction extends AbstractSynchronizeLogicalMode
 		return false;
 	}
 
+	@Override
 	protected IActionOperation getOperation() {
-		return this.actionHelper.getOperation();
+		return actionHelper.getOperation();
 	}
 
 }

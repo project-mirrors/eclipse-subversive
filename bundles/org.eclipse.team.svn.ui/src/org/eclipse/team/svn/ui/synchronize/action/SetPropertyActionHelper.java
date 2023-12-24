@@ -16,7 +16,7 @@ package org.eclipse.team.svn.ui.synchronize.action;
 
 import org.eclipse.core.resources.IResource;
 import org.eclipse.jface.action.IAction;
-import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.window.Window;
 import org.eclipse.team.svn.core.IStateFilter;
 import org.eclipse.team.svn.core.operation.IActionOperation;
 import org.eclipse.team.svn.core.utility.FileUtility;
@@ -35,16 +35,17 @@ public class SetPropertyActionHelper extends AbstractActionHelper {
 		super(action, configuration);
 	}
 
+	@Override
 	public IActionOperation getOperation() {
 		/*
-		 * Set property for all versioned selected resources 
+		 * Set property for all versioned selected resources
 		 */
-		IResource[] selectedResources = this.getAllSelectedResources();
+		IResource[] selectedResources = getAllSelectedResources();
 		IResource[] filteredResources = FileUtility.filterResources(selectedResources, IStateFilter.SF_VERSIONED,
 				IResource.DEPTH_ZERO);
 		ResourcePropertyEditPanel panel = new ResourcePropertyEditPanel(null, filteredResources, true);
-		DefaultDialog dialog = new DefaultDialog(this.configuration.getSite().getShell(), panel);
-		if (dialog.open() == Dialog.OK) {
+		DefaultDialog dialog = new DefaultDialog(configuration.getSite().getShell(), panel);
+		if (dialog.open() == Window.OK) {
 			org.eclipse.team.svn.ui.action.local.SetPropertyAction.doSetProperty(filteredResources, panel, null);
 		}
 		return null;

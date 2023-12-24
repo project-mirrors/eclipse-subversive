@@ -27,7 +27,7 @@ import org.eclipse.team.svn.core.SVNMessages;
  */
 public class ConnectorDescriptor {
 
-	protected java.util.List<ConnectorDescriptorKind> kind = new java.util.ArrayList<ConnectorDescriptorKind>();
+	protected java.util.List<ConnectorDescriptorKind> kind = new java.util.ArrayList<>();
 
 	protected String name;
 
@@ -39,7 +39,7 @@ public class ConnectorDescriptor {
 
 	protected String siteUrl;
 
-	protected List<String> installableUnits = new ArrayList<String>();
+	protected List<String> installableUnits = new ArrayList<>();
 
 	protected String categoryId;
 
@@ -47,7 +47,7 @@ public class ConnectorDescriptor {
 
 	protected String groupId;
 
-	protected java.util.List<FeatureFilter> featureFilter = new java.util.ArrayList<FeatureFilter>();
+	protected java.util.List<FeatureFilter> featureFilter = new java.util.ArrayList<>();
 
 	protected Icon icon;
 
@@ -134,7 +134,7 @@ public class ConnectorDescriptor {
 	}
 
 	public void setInstallableUnits(List<String> id) {
-		this.installableUnits = id;
+		installableUnits = id;
 	}
 
 	/**

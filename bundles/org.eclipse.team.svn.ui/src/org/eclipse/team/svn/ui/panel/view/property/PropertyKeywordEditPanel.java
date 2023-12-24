@@ -19,10 +19,8 @@ import java.util.List;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.jface.viewers.CheckStateChangedEvent;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.ColumnWeightData;
-import org.eclipse.jface.viewers.ICheckStateListener;
 import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.TableLayout;
@@ -38,7 +36,6 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.TableColumn;
@@ -109,32 +106,32 @@ public class PropertyKeywordEditPanel extends AbstractDialogPanel {
 
 	public PropertyKeywordEditPanel(IResource[] selection, IResourceProvider alreadyWithProperties,
 			IPropertyProvider properties) {
-		super();
-		this.selectedResources = selection;
+		selectedResources = selection;
 		this.properties = properties;
 		this.alreadyWithProperties = alreadyWithProperties == null
 				? new IResource[0]
 				: alreadyWithProperties.getResources();
-		this.recursionEnabled = FileUtility.checkForResourcesPresence(selection,
-				new IStateFilter.AbstractStateFilter() {
-					protected boolean allowsRecursionImpl(ILocalResource local, IResource resource, String state,
-							int mask) {
-						return false;
-					}
+		recursionEnabled = FileUtility.checkForResourcesPresence(selection, new IStateFilter.AbstractStateFilter() {
+			@Override
+			protected boolean allowsRecursionImpl(ILocalResource local, IResource resource, String state, int mask) {
+				return false;
+			}
 
-					protected boolean acceptImpl(ILocalResource local, IResource resource, String state, int mask) {
-						return resource instanceof IContainer;
-					}
-				}, IResource.DEPTH_ZERO);
-		this.dialogTitle = SVNUIMessages.PropertyKeywordEditPanel_Title;
-		this.dialogDescription = SVNUIMessages.PropertyKeywordEditPanel_Description;
-		this.defaultMessage = this.alreadyWithProperties.length > 1
+			@Override
+			protected boolean acceptImpl(ILocalResource local, IResource resource, String state, int mask) {
+				return resource instanceof IContainer;
+			}
+		}, IResource.DEPTH_ZERO);
+		dialogTitle = SVNUIMessages.PropertyKeywordEditPanel_Title;
+		dialogDescription = SVNUIMessages.PropertyKeywordEditPanel_Description;
+		defaultMessage = this.alreadyWithProperties.length > 1
 				? SVNUIMessages.PropertyKeywordEditPanel_Message_Single
 				: SVNUIMessages.PropertyKeywordEditPanel_Message_Multi;
 
-		this.initializeKeywordElements();
+		initializeKeywordElements();
 	}
 
+	@Override
 	public void createControlsImpl(Composite parent) {
 		Composite composite = new Composite(parent, SWT.NULL);
 		GridLayout layout = new GridLayout();
@@ -142,51 +139,51 @@ public class PropertyKeywordEditPanel extends AbstractDialogPanel {
 		composite.setLayout(layout);
 		composite.setLayoutData(new GridData(GridData.FILL_BOTH));
 
-		this.checkboxViewer = CheckboxTableViewer.newCheckList(composite, SWT.BORDER | SWT.FULL_SELECTION);
+		checkboxViewer = CheckboxTableViewer.newCheckList(composite, SWT.BORDER | SWT.FULL_SELECTION);
 		GridData data = new GridData(GridData.FILL_BOTH);
-		this.checkboxViewer.getTable().setLayoutData(data);
+		checkboxViewer.getTable().setLayoutData(data);
 
 		TableLayout tlayout = new TableLayout();
-		this.checkboxViewer.getTable().setLayout(tlayout);
+		checkboxViewer.getTable().setLayout(tlayout);
 
-		TableColumn column = new TableColumn(this.checkboxViewer.getTable(), SWT.LEFT);
+		TableColumn column = new TableColumn(checkboxViewer.getTable(), SWT.LEFT);
 		column.setText(SVNUIMessages.PropertyKeywordEditPanel_Keyword);
 		tlayout.addColumnData(new ColumnWeightData(20, true));
 
-		column = new TableColumn(this.checkboxViewer.getTable(), SWT.LEFT);
+		column = new TableColumn(checkboxViewer.getTable(), SWT.LEFT);
 		column.setText(SVNUIMessages.PropertyKeywordEditPanel_Description1);
 		tlayout.addColumnData(new ColumnWeightData(50, true));
 
-		column = new TableColumn(this.checkboxViewer.getTable(), SWT.LEFT);
+		column = new TableColumn(checkboxViewer.getTable(), SWT.LEFT);
 		column.setText(SVNUIMessages.PropertyKeywordEditPanel_Sample);
 		tlayout.addColumnData(new ColumnWeightData(30, true));
 
-		KeywordTableElement[] elements = new KeywordTableElement[] { this.dateElement, this.revisionElement,
-				this.lastChangedByElement, this.headUrlElement, this.idElement, this.headerElement };
+		KeywordTableElement[] elements = { dateElement, revisionElement, lastChangedByElement, headUrlElement,
+				idElement, headerElement };
 
-		this.checkboxViewer.setContentProvider(new ArrayStructuredContentProvider());
+		checkboxViewer.setContentProvider(new ArrayStructuredContentProvider());
 
-		this.checkboxViewer.addCheckStateListener(new ICheckStateListener() {
-			public void checkStateChanged(CheckStateChangedEvent event) {
-				KeywordTableElement element = (KeywordTableElement) event.getElement();
+		checkboxViewer.addCheckStateListener(event -> {
+			KeywordTableElement element = (KeywordTableElement) event.getElement();
 
-				if (element.getCurrentState() == KeywordTableElement.DESELECTED) {
-					element.setCurrentState(KeywordTableElement.SELECTED);
-				} else if ((element.getCurrentState() == KeywordTableElement.SELECTED)
-						&& (element.getInitialState() == KeywordTableElement.MIXED)) {
-					element.setCurrentState(KeywordTableElement.MIXED);
-				} else {
-					element.setCurrentState(KeywordTableElement.DESELECTED);
-				}
-				PropertyKeywordEditPanel.this.refreshCheckboxState(element);
+			if (element.getCurrentState() == KeywordTableElement.DESELECTED) {
+				element.setCurrentState(KeywordTableElement.SELECTED);
+			} else if (element.getCurrentState() == KeywordTableElement.SELECTED
+					&& element.getInitialState() == KeywordTableElement.MIXED) {
+				element.setCurrentState(KeywordTableElement.MIXED);
+			} else {
+				element.setCurrentState(KeywordTableElement.DESELECTED);
 			}
+			PropertyKeywordEditPanel.this.refreshCheckboxState(element);
 		});
 
-		this.checkboxViewer.setLabelProvider(new ITableLabelProvider() {
+		checkboxViewer.setLabelProvider(new ITableLabelProvider() {
+			@Override
 			public Image getColumnImage(Object element, int columnIndex) {
 				return null;
 			}
 
+			@Override
 			public String getColumnText(Object element, int columnIndex) {
 				KeywordTableElement keyElement = (KeywordTableElement) element;
 				switch (columnIndex) {
@@ -205,26 +202,30 @@ public class PropertyKeywordEditPanel extends AbstractDialogPanel {
 				}
 			}
 
+			@Override
 			public void addListener(ILabelProviderListener listener) {
 			}
 
+			@Override
 			public void dispose() {
 			}
 
+			@Override
 			public boolean isLabelProperty(Object element, String property) {
 				return false;
 			}
 
+			@Override
 			public void removeListener(ILabelProviderListener listener) {
 			}
 		});
 
-		this.checkboxViewer.setInput(elements);
-		this.checkboxViewer.getTable().setHeaderVisible(true);
+		checkboxViewer.setInput(elements);
+		checkboxViewer.getTable().setHeaderVisible(true);
 
-		this.addSelectionButtons(composite);
+		addSelectionButtons(composite);
 
-		if (this.recursionEnabled || this.selectedResources.length > 1) {
+		if (recursionEnabled || selectedResources.length > 1) {
 			Label separator = new Label(composite, SWT.HORIZONTAL | SWT.SEPARATOR);
 			separator.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
@@ -245,73 +246,76 @@ public class PropertyKeywordEditPanel extends AbstractDialogPanel {
 			layout.numColumns = 2;
 			maskComposite.setLayout(layout);
 			maskComposite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-			this.useMaskCheckbox = new Button(maskComposite, SWT.CHECK);
-			this.useMaskCheckbox.setText(SVNUIMessages.PropertyKeywordEditPanel_UseMask);
-			this.maskHistory = new UserInputHistory("keywordsEditPanel"); //$NON-NLS-1$
-			this.maskText = new Combo(maskComposite, SWT.BORDER);
-			this.maskText.setItems(this.maskHistory.getHistory());
-			if (this.maskText.getItemCount() == 0) {
-				this.maskText.setText("*"); //$NON-NLS-1$
+			useMaskCheckbox = new Button(maskComposite, SWT.CHECK);
+			useMaskCheckbox.setText(SVNUIMessages.PropertyKeywordEditPanel_UseMask);
+			maskHistory = new UserInputHistory("keywordsEditPanel"); //$NON-NLS-1$
+			maskText = new Combo(maskComposite, SWT.BORDER);
+			maskText.setItems(maskHistory.getHistory());
+			if (maskText.getItemCount() == 0) {
+				maskText.setText("*"); //$NON-NLS-1$
 			} else {
-				this.maskText.select(0);
+				maskText.select(0);
 			}
-			Listener maskTextListener = new Listener() {
-				public void handleEvent(Event event) {
-					PropertyKeywordEditPanel.this.checkboxViewer.setAllGrayed(false);
-					PropertyKeywordEditPanel.this.changeMixedElementsToChecked();
-				}
+			Listener maskTextListener = event -> {
+				checkboxViewer.setAllGrayed(false);
+				PropertyKeywordEditPanel.this.changeMixedElementsToChecked();
 			};
-			this.maskText.addListener(SWT.Selection, maskTextListener);
-			this.maskText.addListener(SWT.Modify, maskTextListener);
+			maskText.addListener(SWT.Selection, maskTextListener);
+			maskText.addListener(SWT.Modify, maskTextListener);
 
-			this.attachTo(this.maskText, new AbstractVerifierProxy(
+			attachTo(maskText, new AbstractVerifierProxy(
 					new NonEmptyFieldVerifier(SVNUIMessages.PropertyKeywordEditPanel_Mask_Verifier)) {
+				@Override
 				protected boolean isVerificationEnabled(Control input) {
-					return PropertyKeywordEditPanel.this.useMaskCheckbox.getSelection();
+					return useMaskCheckbox.getSelection();
 				}
 			});
 			data = new GridData();
 			data.widthHint = 170;
-			this.maskText.setLayoutData(data);
+			maskText.setLayoutData(data);
 
-			this.maskText.setEnabled(false);
+			maskText.setEnabled(false);
 
-			this.useMaskCheckbox.addSelectionListener(new SelectionListener() {
+			useMaskCheckbox.addSelectionListener(new SelectionListener() {
+				@Override
 				public void widgetSelected(SelectionEvent e) {
-					PropertyKeywordEditPanel.this.maskText
-							.setEnabled(PropertyKeywordEditPanel.this.useMaskCheckbox.getSelection());
-					PropertyKeywordEditPanel.this.checkboxViewer.setAllGrayed(false);
+					maskText.setEnabled(useMaskCheckbox.getSelection());
+					checkboxViewer.setAllGrayed(false);
 					PropertyKeywordEditPanel.this.changeMixedElementsToChecked();
 					PropertyKeywordEditPanel.this.validateContent();
 				}
 
+				@Override
 				public void widgetDefaultSelected(SelectionEvent e) {
 				}
 			});
 
-			if (this.recursionEnabled) {
-				this.setRecursivelyCheckbox = new Button(subComposite, SWT.CHECK);
-				this.setRecursivelyCheckbox.setText(SVNUIMessages.PropertyKeywordEditPanel_Recursively);
-				this.setRecursivelyCheckbox
+			if (recursionEnabled) {
+				setRecursivelyCheckbox = new Button(subComposite, SWT.CHECK);
+				setRecursivelyCheckbox.setText(SVNUIMessages.PropertyKeywordEditPanel_Recursively);
+				setRecursivelyCheckbox
 						.setLayoutData(new GridData(GridData.FILL_HORIZONTAL | GridData.HORIZONTAL_ALIGN_END));
-				this.setRecursivelyCheckbox.setSelection(true);
-				this.setRecursivelyCheckbox.addSelectionListener(new SelectionListener() {
+				setRecursivelyCheckbox.setSelection(true);
+				setRecursivelyCheckbox.addSelectionListener(new SelectionListener() {
+					@Override
 					public void widgetSelected(SelectionEvent e) {
-						PropertyKeywordEditPanel.this.checkboxViewer.setAllGrayed(false);
+						checkboxViewer.setAllGrayed(false);
 						PropertyKeywordEditPanel.this.changeMixedElementsToChecked();
 					}
 
+					@Override
 					public void widgetDefaultSelected(SelectionEvent e) {
 					}
 				});
 			}
 		}
 
-		for (int i = 0; i < elements.length; i++) {
-			this.refreshCheckboxState(elements[i]);
+		for (KeywordTableElement element : elements) {
+			refreshCheckboxState(element);
 		}
 	}
 
+	@Override
 	public String getHelpId() {
 		return "org.eclipse.team.svn.help.setKeysDialogContext"; //$NON-NLS-1$
 	}
@@ -319,144 +323,135 @@ public class PropertyKeywordEditPanel extends AbstractDialogPanel {
 	public void performKeywordChanges() {
 		//if filtration by mask is enabled - remove all non-matching resources from the operable map
 		IStateFilter filter = IStateFilter.SF_EXCLUDE_PREREPLACED_AND_DELETED_FILES;
-		if (this.useMask) {
+		if (useMask) {
 			filter = new IStateFilter.AbstractStateFilter() {
-				private StringMatcher fileNameMatcher = new StringMatcher(PropertyKeywordEditPanel.this.mask);
+				private StringMatcher fileNameMatcher = new StringMatcher(mask);
 
+				@Override
 				protected boolean allowsRecursionImpl(ILocalResource local, IResource resource, String state,
 						int mask) {
 					return IStateFilter.SF_EXCLUDE_PREREPLACED_AND_DELETED.allowsRecursion(resource, state, mask);
 				}
 
+				@Override
 				protected boolean acceptImpl(ILocalResource local, IResource resource, String state, int mask) {
 					if (!IStateFilter.SF_EXCLUDE_PREREPLACED_AND_DELETED_FILES.accept(resource, state, mask)) {
 						return false;
 					}
-					return this.fileNameMatcher.match(resource.getName());
+					return fileNameMatcher.match(resource.getName());
 				}
 			};
 		}
 
-		IResourceProvider resourceProvider = new IResourceProvider() {
-			public IResource[] getResources() {
-				return PropertyKeywordEditPanel.this.selectedResources;
-			}
-		};
+		IResourceProvider resourceProvider = () -> selectedResources;
 
-		IPropertyProvider propertyProvider = new IPropertyProvider() {
-			public SVNProperty[] getProperties(IResource resource) {
-				SVNProperty[] retVal = PropertyKeywordEditPanel.this.properties == null
-						? null
-						: PropertyKeywordEditPanel.this.properties.getProperties(resource);
-				if (retVal == null) {
-					retVal = new SVNProperty[1];
-				}
-				SVNKeywordProperty keyProperty = new SVNKeywordProperty(retVal[0] == null ? null : retVal[0].value);
-				PropertyKeywordEditPanel.this.configureProperty(keyProperty);
-				retVal[0] = new SVNProperty(BuiltIn.KEYWORDS, keyProperty.toString());
-				return retVal;
+		IPropertyProvider propertyProvider = resource -> {
+			SVNProperty[] retVal = properties == null ? null : properties.getProperties(resource);
+			if (retVal == null) {
+				retVal = new SVNProperty[1];
 			}
+			SVNKeywordProperty keyProperty = new SVNKeywordProperty(retVal[0] == null ? null : retVal[0].value);
+			PropertyKeywordEditPanel.this.configureProperty(keyProperty);
+			retVal[0] = new SVNProperty(BuiltIn.KEYWORDS, keyProperty.toString());
+			return retVal;
 		};
 
 		CompositeOperation composite = new CompositeOperation("Operation_SetKeywords", SVNUIMessages.class); //$NON-NLS-1$
 		composite.add(new SetMultiPropertiesOperation(resourceProvider, propertyProvider, filter,
-				this.recursionEnabled && this.setRecursively ? IResource.DEPTH_INFINITE : IResource.DEPTH_ONE));
+				recursionEnabled && setRecursively ? IResource.DEPTH_INFINITE : IResource.DEPTH_ONE));
 		composite.add(new RefreshResourcesOperation(resourceProvider));
 		UIMonitorUtility.doTaskScheduledActive(composite);
 	}
 
 	protected void configureProperty(SVNKeywordProperty keyProperty) {
-		keyProperty.setDateEnabled(this.dateElement.getCurrentState() == KeywordTableElement.SELECTED
+		keyProperty.setDateEnabled(dateElement.getCurrentState() == KeywordTableElement.SELECTED
 				? true
-				: (this.dateElement.getCurrentState() == KeywordTableElement.DESELECTED
+				: dateElement.getCurrentState() == KeywordTableElement.DESELECTED
 						? false
-						: keyProperty.isDateEnabled()));
+						: keyProperty.isDateEnabled());
 
-		keyProperty.setRevisionEnabled(this.revisionElement.getCurrentState() == KeywordTableElement.SELECTED
+		keyProperty.setRevisionEnabled(revisionElement.getCurrentState() == KeywordTableElement.SELECTED
 				? true
-				: (this.revisionElement.getCurrentState() == KeywordTableElement.DESELECTED
+				: revisionElement.getCurrentState() == KeywordTableElement.DESELECTED
 						? false
-						: keyProperty.isLastChangedByEnabled()));
+						: keyProperty.isLastChangedByEnabled());
 
-		keyProperty.setLastChangedByEnabled(this.lastChangedByElement.getCurrentState() == KeywordTableElement.SELECTED
+		keyProperty.setLastChangedByEnabled(lastChangedByElement.getCurrentState() == KeywordTableElement.SELECTED
 				? true
-				: (this.lastChangedByElement.getCurrentState() == KeywordTableElement.DESELECTED
+				: lastChangedByElement.getCurrentState() == KeywordTableElement.DESELECTED
 						? false
-						: keyProperty.isLastChangedByEnabled()));
+						: keyProperty.isLastChangedByEnabled());
 
-		keyProperty.setHeadUrlEnabled(this.headUrlElement.getCurrentState() == KeywordTableElement.SELECTED
+		keyProperty.setHeadUrlEnabled(headUrlElement.getCurrentState() == KeywordTableElement.SELECTED
 				? true
-				: (this.headUrlElement.getCurrentState() == KeywordTableElement.DESELECTED
+				: headUrlElement.getCurrentState() == KeywordTableElement.DESELECTED
 						? false
-						: keyProperty.isHeadUrlEnabled()));
+						: keyProperty.isHeadUrlEnabled());
 
-		keyProperty.setIdEnabled(this.idElement.getCurrentState() == KeywordTableElement.SELECTED
+		keyProperty.setIdEnabled(idElement.getCurrentState() == KeywordTableElement.SELECTED
 				? true
-				: (this.idElement.getCurrentState() == KeywordTableElement.DESELECTED
-						? false
-						: keyProperty.isIdEnabled()));
+				: idElement.getCurrentState() == KeywordTableElement.DESELECTED ? false : keyProperty.isIdEnabled());
 
-		keyProperty.setHeaderEnabled(this.headerElement.getCurrentState() == KeywordTableElement.SELECTED
+		keyProperty.setHeaderEnabled(headerElement.getCurrentState() == KeywordTableElement.SELECTED
 				? true
-				: (this.headerElement.getCurrentState() == KeywordTableElement.DESELECTED
+				: headerElement.getCurrentState() == KeywordTableElement.DESELECTED
 						? false
-						: keyProperty.isHeaderEnabled()));
+						: keyProperty.isHeaderEnabled());
 	}
 
 	protected void applyCurrentKeywordValuesOnTableElement(KeywordTableElement tableElement, boolean propertyPresent) {
 		tableElement.setInitialState(tableElement.getInitialState() == KeywordTableElement.INITIAL
-				? (propertyPresent ? KeywordTableElement.SELECTED : KeywordTableElement.DESELECTED)
-				: (((propertyPresent && tableElement.getInitialState() == KeywordTableElement.DESELECTED)
-						|| (!propertyPresent && tableElement.getInitialState() == KeywordTableElement.SELECTED))
+				? propertyPresent ? KeywordTableElement.SELECTED : KeywordTableElement.DESELECTED
+				: propertyPresent && tableElement.getInitialState() == KeywordTableElement.DESELECTED
+						|| !propertyPresent && tableElement.getInitialState() == KeywordTableElement.SELECTED
 								? KeywordTableElement.MIXED
-								: tableElement.getInitialState()));
+								: tableElement.getInitialState());
 
 		tableElement.setCurrentState(tableElement.getInitialState());
 	}
 
 	protected void initializeKeywordElements() {
-		this.dateElement = new KeywordTableElement(SVNKeywordProperty.DATE_NAMES[0], SVNKeywordProperty.DATE_DESCR(),
+		dateElement = new KeywordTableElement(SVNKeywordProperty.DATE_NAMES[0], SVNKeywordProperty.DATE_DESCR(),
 				SVNKeywordProperty.DATE_SAMPLE, KeywordTableElement.INITIAL);
-		this.revisionElement = new KeywordTableElement(SVNKeywordProperty.REVISION_NAMES[0],
+		revisionElement = new KeywordTableElement(SVNKeywordProperty.REVISION_NAMES[0],
 				SVNKeywordProperty.REVISION_DESCR(), SVNKeywordProperty.REVISION_SAMPLE, KeywordTableElement.INITIAL);
-		this.lastChangedByElement = new KeywordTableElement(SVNKeywordProperty.AUTHOR_NAMES[0],
+		lastChangedByElement = new KeywordTableElement(SVNKeywordProperty.AUTHOR_NAMES[0],
 				SVNKeywordProperty.AUTHOR_DESCR(), SVNKeywordProperty.AUTHOR_SAMPLE, KeywordTableElement.INITIAL);
-		this.headUrlElement = new KeywordTableElement(SVNKeywordProperty.HEAD_URL_NAMES[0],
+		headUrlElement = new KeywordTableElement(SVNKeywordProperty.HEAD_URL_NAMES[0],
 				SVNKeywordProperty.HEAD_URL_DESCR(), SVNKeywordProperty.HEAD_URL_SAMPLE, KeywordTableElement.INITIAL);
-		this.idElement = new KeywordTableElement(SVNKeywordProperty.ID_NAMES[0], SVNKeywordProperty.ID_DESCR(),
+		idElement = new KeywordTableElement(SVNKeywordProperty.ID_NAMES[0], SVNKeywordProperty.ID_DESCR(),
 				SVNKeywordProperty.ID_SAMPLE, KeywordTableElement.INITIAL);
-		this.headerElement = new KeywordTableElement(SVNKeywordProperty.HEADER_NAMES[0],
-				SVNKeywordProperty.HEADER_DESCR(), SVNKeywordProperty.HEADER_SAMPLE, KeywordTableElement.INITIAL);
+		headerElement = new KeywordTableElement(SVNKeywordProperty.HEADER_NAMES[0], SVNKeywordProperty.HEADER_DESCR(),
+				SVNKeywordProperty.HEADER_SAMPLE, KeywordTableElement.INITIAL);
 
-		List<IResource> alreadyWithPropertiesList = Arrays.asList(this.alreadyWithProperties);
-		for (int i = 0; i < this.selectedResources.length; i++) {
+		List<IResource> alreadyWithPropertiesList = Arrays.asList(alreadyWithProperties);
+		for (IResource element : selectedResources) {
 			SVNProperty[] data;
 			SVNKeywordProperty keywordPropertyValue = new SVNKeywordProperty(null);
-			if (alreadyWithPropertiesList.contains(this.selectedResources[i]) && this.properties != null
-					&& (data = this.properties.getProperties(this.selectedResources[i])) != null) {
+			if (alreadyWithPropertiesList.contains(element) && properties != null
+					&& (data = properties.getProperties(element)) != null) {
 				keywordPropertyValue = new SVNKeywordProperty(data[0].value);
 			}
-			this.applyCurrentKeywordValuesOnTableElement(this.dateElement, keywordPropertyValue.isDateEnabled());
-			this.applyCurrentKeywordValuesOnTableElement(this.revisionElement,
-					keywordPropertyValue.isRevisionEnabled());
-			this.applyCurrentKeywordValuesOnTableElement(this.lastChangedByElement,
+			applyCurrentKeywordValuesOnTableElement(dateElement, keywordPropertyValue.isDateEnabled());
+			applyCurrentKeywordValuesOnTableElement(revisionElement, keywordPropertyValue.isRevisionEnabled());
+			applyCurrentKeywordValuesOnTableElement(lastChangedByElement,
 					keywordPropertyValue.isLastChangedByEnabled());
-			this.applyCurrentKeywordValuesOnTableElement(this.headUrlElement, keywordPropertyValue.isHeadUrlEnabled());
-			this.applyCurrentKeywordValuesOnTableElement(this.idElement, keywordPropertyValue.isIdEnabled());
-			this.applyCurrentKeywordValuesOnTableElement(this.headerElement, keywordPropertyValue.isHeaderEnabled());
+			applyCurrentKeywordValuesOnTableElement(headUrlElement, keywordPropertyValue.isHeadUrlEnabled());
+			applyCurrentKeywordValuesOnTableElement(idElement, keywordPropertyValue.isIdEnabled());
+			applyCurrentKeywordValuesOnTableElement(headerElement, keywordPropertyValue.isHeaderEnabled());
 		}
 	}
 
 	protected void refreshCheckboxState(KeywordTableElement element) {
-		this.checkboxViewer.setChecked(element, element.getCurrentState() == KeywordTableElement.MIXED
+		checkboxViewer.setChecked(element, element.getCurrentState() == KeywordTableElement.MIXED
 				|| element.getCurrentState() == KeywordTableElement.SELECTED);
-		this.checkboxViewer.setGrayed(element, element.getCurrentState() == KeywordTableElement.MIXED);
+		checkboxViewer.setGrayed(element, element.getCurrentState() == KeywordTableElement.MIXED);
 	}
 
 	protected void changeMixedElementsToChecked() {
-		Object[] elements = this.checkboxViewer.getCheckedElements();
-		for (int i = 0; i < elements.length; i++) {
-			((KeywordTableElement) elements[i]).setCurrentState(KeywordTableElement.SELECTED);
+		Object[] elements = checkboxViewer.getCheckedElements();
+		for (Object element : elements) {
+			((KeywordTableElement) element).setCurrentState(KeywordTableElement.SELECTED);
 		}
 	}
 
@@ -477,6 +472,7 @@ public class PropertyKeywordEditPanel extends AbstractDialogPanel {
 		data.widthHint = DefaultDialog.computeButtonWidth(selectButton);
 		selectButton.setLayoutData(data);
 		SelectionListener listener = new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				PropertyKeywordEditPanel.this.refreshKeywordElements(true);
 			}
@@ -489,6 +485,7 @@ public class PropertyKeywordEditPanel extends AbstractDialogPanel {
 		data.widthHint = DefaultDialog.computeButtonWidth(deselectButton);
 		deselectButton.setLayoutData(data);
 		listener = new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				PropertyKeywordEditPanel.this.refreshKeywordElements(false);
 			}
@@ -498,28 +495,31 @@ public class PropertyKeywordEditPanel extends AbstractDialogPanel {
 
 	protected void refreshKeywordElements(boolean selected) {
 		int state = selected ? KeywordTableElement.SELECTED : KeywordTableElement.DESELECTED;
-		this.dateElement.setCurrentState(state);
-		this.revisionElement.setCurrentState(state);
-		this.lastChangedByElement.setCurrentState(state);
-		this.headUrlElement.setCurrentState(state);
-		this.idElement.setCurrentState(state);
-		this.headerElement.setCurrentState(state);
-		this.checkboxViewer.setAllChecked(selected);
-		this.checkboxViewer.setAllGrayed(false);
+		dateElement.setCurrentState(state);
+		revisionElement.setCurrentState(state);
+		lastChangedByElement.setCurrentState(state);
+		headUrlElement.setCurrentState(state);
+		idElement.setCurrentState(state);
+		headerElement.setCurrentState(state);
+		checkboxViewer.setAllChecked(selected);
+		checkboxViewer.setAllGrayed(false);
 	}
 
+	@Override
 	protected void cancelChangesImpl() {
 	}
 
+	@Override
 	protected void saveChangesImpl() {
-		this.useMask = this.useMaskCheckbox == null ? false : this.useMaskCheckbox.getSelection();
-		this.mask = this.maskText == null ? "*" : this.maskText.getText().trim(); //$NON-NLS-1$
-		this.setRecursively = this.setRecursivelyCheckbox == null ? false : this.setRecursivelyCheckbox.getSelection();
-		if (this.useMask) {
-			this.maskHistory.addLine(this.maskText.getText());
+		useMask = useMaskCheckbox == null ? false : useMaskCheckbox.getSelection();
+		mask = maskText == null ? "*" : maskText.getText().trim(); //$NON-NLS-1$
+		setRecursively = setRecursivelyCheckbox == null ? false : setRecursivelyCheckbox.getSelection();
+		if (useMask) {
+			maskHistory.addLine(maskText.getText());
 		}
 	}
 
+	@Override
 	public Point getPrefferedSizeImpl() {
 		return new Point(670, SWT.DEFAULT);
 	}

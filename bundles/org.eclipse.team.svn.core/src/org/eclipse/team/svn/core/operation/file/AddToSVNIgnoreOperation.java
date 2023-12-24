@@ -19,7 +19,6 @@ import java.io.File;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.team.svn.core.SVNMessages;
 import org.eclipse.team.svn.core.connector.ISVNConnector;
-import org.eclipse.team.svn.core.operation.IUnprotectedOperation;
 import org.eclipse.team.svn.core.resource.IRepositoryLocation;
 import org.eclipse.team.svn.core.resource.IRepositoryResource;
 
@@ -47,17 +46,14 @@ public class AddToSVNIgnoreOperation extends AbstractFileOperation {
 		this.pattern = pattern;
 	}
 
+	@Override
 	protected void runImpl(IProgressMonitor monitor) throws Exception {
-		File[] files = this.operableData();
+		File[] files = operableData();
 
 		for (int i = 0; i < files.length && !monitor.isCanceled(); i++) {
 			final File current = files[i];
 
-			this.protectStep(new IUnprotectedOperation() {
-				public void run(IProgressMonitor monitor) throws Exception {
-					AddToSVNIgnoreOperation.this.handleResource(current);
-				}
-			}, monitor, files.length);
+			this.protectStep(monitor1 -> AddToSVNIgnoreOperation.this.handleResource(current), monitor, files.length);
 		}
 	}
 
@@ -70,8 +66,8 @@ public class AddToSVNIgnoreOperation extends AbstractFileOperation {
 		IRepositoryLocation location = remote.getRepositoryLocation();
 		ISVNConnector proxy = location.acquireSVNProxy();
 		try {
-			org.eclipse.team.svn.core.operation.local.AddToSVNIgnoreOperation.changeIgnoreProperty(proxy,
-					this.ignoreType, this.pattern, parent.getAbsolutePath(), current.getName());
+			org.eclipse.team.svn.core.operation.local.AddToSVNIgnoreOperation.changeIgnoreProperty(proxy, ignoreType,
+					pattern, parent.getAbsolutePath(), current.getName());
 		} finally {
 			location.releaseSVNProxy(proxy);
 		}

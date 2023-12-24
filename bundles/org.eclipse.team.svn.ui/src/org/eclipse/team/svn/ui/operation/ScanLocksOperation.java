@@ -28,7 +28,6 @@ import org.eclipse.team.svn.core.connector.ISVNConnector;
 import org.eclipse.team.svn.core.connector.SVNChangeStatus;
 import org.eclipse.team.svn.core.connector.SVNDepth;
 import org.eclipse.team.svn.core.operation.AbstractActionOperation;
-import org.eclipse.team.svn.core.operation.IUnprotectedOperation;
 import org.eclipse.team.svn.core.operation.SVNProgressMonitor;
 import org.eclipse.team.svn.core.resource.IRepositoryLocation;
 import org.eclipse.team.svn.core.svnstorage.SVNRemoteStorage;
@@ -49,7 +48,7 @@ public class ScanLocksOperation extends AbstractActionOperation {
 
 	protected SVNDepth depth;
 
-	protected Map<IResource, List<LockResource>> lockResources = new HashMap<IResource, List<LockResource>>();
+	protected Map<IResource, List<LockResource>> lockResources = new HashMap<>();
 
 	public ScanLocksOperation(IResource[] resources) {
 		this(resources, SVNDepth.INFINITY);
@@ -61,40 +60,38 @@ public class ScanLocksOperation extends AbstractActionOperation {
 		this.depth = depth;
 	}
 
+	@Override
 	protected void runImpl(IProgressMonitor monitor) throws Exception {
-		IResource[] shrinkedResources = FileUtility.shrinkChildNodes(this.resources);
+		IResource[] shrinkedResources = FileUtility.shrinkChildNodes(resources);
 		for (int i = 0; i < shrinkedResources.length && !monitor.isCanceled(); i++) {
 			final IResource resource = shrinkedResources[i];
-			this.protectStep(new IUnprotectedOperation() {
-				public void run(IProgressMonitor monitor) throws Exception {
-					List<SVNChangeStatus> lockStatuses = new ArrayList<SVNChangeStatus>();
+			this.protectStep(monitor1 -> {
+				List<SVNChangeStatus> lockStatuses = new ArrayList<>();
 
-					IRepositoryLocation location = SVNRemoteStorage.instance().getRepositoryLocation(resource);
-					ISVNConnector proxy = location.acquireSVNProxy();
-					try {
-						SVNChangeStatus[] changeStatuses = SVNUtility.status(proxy,
-								FileUtility.getWorkingCopyPath(resource), ScanLocksOperation.this.depth,
-								ISVNConnector.Options.SERVER_SIDE,
-								new SVNProgressMonitor(ScanLocksOperation.this, monitor, null));
-						//filter out resources which don't have locks
-						for (SVNChangeStatus status : changeStatuses) {
-							if (status.wcLock != null || status.reposLock != null) {
-								lockStatuses.add(status);
-							}
+				IRepositoryLocation location = SVNRemoteStorage.instance().getRepositoryLocation(resource);
+				ISVNConnector proxy = location.acquireSVNProxy();
+				try {
+					SVNChangeStatus[] changeStatuses = SVNUtility.status(proxy,
+							FileUtility.getWorkingCopyPath(resource), depth, ISVNConnector.Options.SERVER_SIDE,
+							new SVNProgressMonitor(ScanLocksOperation.this, monitor1, null));
+					//filter out resources which don't have locks
+					for (SVNChangeStatus status : changeStatuses) {
+						if (status.wcLock != null || status.reposLock != null) {
+							lockStatuses.add(status);
 						}
-					} finally {
-						location.releaseSVNProxy(proxy);
 					}
+				} finally {
+					location.releaseSVNProxy(proxy);
+				}
 
-					if (!lockStatuses.isEmpty()) {
-						List<LockResource> lockResourcesList = new ArrayList<LockResource>();
-						ScanLocksOperation.this.lockResources.put(resource, lockResourcesList);
-						for (SVNChangeStatus status : lockStatuses) {
-							Path path = new Path(status.path);
-							String name = path.lastSegment();
-							LockResource lockResource = ScanLocksOperation.this.createLockFile(status, name);
-							lockResourcesList.add(lockResource);
-						}
+				if (!lockStatuses.isEmpty()) {
+					List<LockResource> lockResourcesList = new ArrayList<>();
+					lockResources.put(resource, lockResourcesList);
+					for (SVNChangeStatus status : lockStatuses) {
+						Path path = new Path(status.path);
+						String name = path.lastSegment();
+						LockResource lockResource = ScanLocksOperation.this.createLockFile(status, name);
+						lockResourcesList.add(lockResource);
 					}
 				}
 			}, monitor, shrinkedResources.length);
@@ -102,12 +99,12 @@ public class ScanLocksOperation extends AbstractActionOperation {
 	}
 
 	public Map<IResource, List<LockResource>> getLockResourcesMap() {
-		return this.lockResources;
+		return lockResources;
 	}
 
 	public LockResource[] getLockResources() {
-		List<LockResource> res = new ArrayList<LockResource>();
-		for (List<LockResource> list : this.lockResources.values()) {
+		List<LockResource> res = new ArrayList<>();
+		for (List<LockResource> list : lockResources.values()) {
 			res.addAll(list);
 		}
 		return res.toArray(new LockResource[0]);
@@ -163,17 +160,18 @@ public class ScanLocksOperation extends AbstractActionOperation {
 			this.scanOp = scanOp;
 		}
 
+		@Override
 		protected void runImpl(IProgressMonitor monitor) throws Exception {
 			//get first resource
-			Map<IResource, List<LockResource>> lockResources = this.scanOp.getLockResourcesMap();
+			Map<IResource, List<LockResource>> lockResources = scanOp.getLockResourcesMap();
 			if (!lockResources.isEmpty()) {
 				Set<IResource> keys = lockResources.keySet();
 				IResource resource = keys.iterator().next();
 				List<LockResource> lockResourcesList = lockResources.get(resource);
 
-				this.lockResourceRoot = this.mapChangeStatusesToLockResource(resource,
+				lockResourceRoot = mapChangeStatusesToLockResource(resource,
 						lockResourcesList.toArray(new LockResource[0]));
-				this.compressLockResources(this.lockResourceRoot);
+				compressLockResources(lockResourceRoot);
 			}
 		}
 
@@ -229,7 +227,7 @@ public class ScanLocksOperation extends AbstractActionOperation {
 			LockResource[] children = resource.getChildren();
 			for (LockResource child : children) {
 				if (!child.isFile()) {
-					this.compressLockResources(child);
+					compressLockResources(child);
 				}
 			}
 
@@ -244,7 +242,7 @@ public class ScanLocksOperation extends AbstractActionOperation {
 		}
 
 		public LockResource getLockResourceRoot() {
-			return this.lockResourceRoot;
+			return lockResourceRoot;
 		}
 	}
 }

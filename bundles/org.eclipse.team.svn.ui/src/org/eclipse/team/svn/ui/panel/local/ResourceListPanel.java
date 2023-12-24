@@ -67,52 +67,56 @@ public class ResourceListPanel extends AbstractDialogPanel {
 		this.dialogDescription = dialogDescription;
 		this.defaultMessage = defaultMessage;
 		this.resources = resources;
-		this.images = new HashMap<ImageDescriptor, Image>();
+		images = new HashMap<>();
 	}
 
 	public boolean isShowLocalNames() {
-		return this.showLocalNames;
+		return showLocalNames;
 	}
 
 	public void setShowLocalNames(boolean showLocalNames) {
 		this.showLocalNames = showLocalNames;
 	}
 
+	@Override
 	public String getHelpId() {
-		return this.helpId;
+		return helpId;
 	}
 
+	@Override
 	public void dispose() {
-		for (Image img : this.images.values()) {
+		for (Image img : images.values()) {
 			img.dispose();
 		}
 		super.dispose();
 	}
 
+	@Override
 	public void createControlsImpl(Composite parent) {
 		Table table = new Table(parent, SWT.V_SCROLL | SWT.FULL_SELECTION | SWT.SINGLE | SWT.BORDER);
 		TableLayout layout = new TableLayout();
 		table.setLayout(layout);
 
-		this.tableViewer = new TableViewer(table);
+		tableViewer = new TableViewer(table);
 		GridData data = new GridData(GridData.FILL_BOTH);
 		data.heightHint = 120;
-		this.tableViewer.getTable().setLayoutData(data);
+		tableViewer.getTable().setLayoutData(data);
 
 		final TableColumn col = new TableColumn(table, SWT.NONE);
 		col.setResizable(true);
 		layout.addColumnData(new ColumnWeightData(100, true));
 
-		this.tableViewer.getTable().addControlListener(new ControlAdapter() {
+		tableViewer.getTable().addControlListener(new ControlAdapter() {
+			@Override
 			public void controlResized(ControlEvent e) {
-				col.setWidth(ResourceListPanel.this.tableViewer.getTable().getClientArea().width);
+				col.setWidth(tableViewer.getTable().getClientArea().width);
 			}
 		});
 
-		this.tableViewer.setLabelProvider(new ITableLabelProvider() {
+		tableViewer.setLabelProvider(new ITableLabelProvider() {
+			@Override
 			public Image getColumnImage(Object element, int columnIndex) {
-				IWorkbenchAdapter adapter = (IWorkbenchAdapter) ((IAdaptable) element)
-						.getAdapter(IWorkbenchAdapter.class);
+				IWorkbenchAdapter adapter = ((IAdaptable) element).getAdapter(IWorkbenchAdapter.class);
 				if (adapter == null) {
 					return null;
 				}
@@ -120,45 +124,52 @@ public class ResourceListPanel extends AbstractDialogPanel {
 				if (descriptor == null) {
 					return null;
 				}
-				Image image = ResourceListPanel.this.images.get(descriptor);
+				Image image = images.get(descriptor);
 				if (image == null) {
 					image = descriptor.createImage();
-					ResourceListPanel.this.images.put(descriptor, image);
+					images.put(descriptor, image);
 				}
 				return image;
 			}
 
+			@Override
 			public String getColumnText(Object element, int columnIndex) {
 				IResource resource = (IResource) element;
-				if (ResourceListPanel.this.showLocalNames) {
+				if (showLocalNames) {
 					return resource.getFullPath().toString().substring(1);
 				}
 				IRepositoryResource node = SVNRemoteStorage.instance().asRepositoryResource(resource);
 				return node.getUrl();
 			}
 
+			@Override
 			public void addListener(ILabelProviderListener listener) {
 			}
 
+			@Override
 			public void dispose() {
 			}
 
+			@Override
 			public boolean isLabelProperty(Object element, String property) {
 				return false;
 			}
 
+			@Override
 			public void removeListener(ILabelProviderListener listener) {
 			}
 		});
 
-		this.tableViewer.setContentProvider(new ArrayStructuredContentProvider());
+		tableViewer.setContentProvider(new ArrayStructuredContentProvider());
 
-		this.tableViewer.setInput(this.resources);
+		tableViewer.setInput(resources);
 	}
 
+	@Override
 	protected void saveChangesImpl() {
 	}
 
+	@Override
 	protected void cancelChangesImpl() {
 	}
 

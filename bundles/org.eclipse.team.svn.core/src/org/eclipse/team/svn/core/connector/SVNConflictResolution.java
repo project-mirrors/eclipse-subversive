@@ -56,7 +56,7 @@ public class SVNConflictResolution {
 
 		public final int id;
 
-		private Choice(int id) {
+		Choice(int id) {
 			this.id = id;
 		}
 	}

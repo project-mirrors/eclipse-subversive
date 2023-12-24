@@ -21,6 +21,7 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.team.svn.core.BaseMessages;
 import org.eclipse.team.svn.core.SVNTeamPlugin;
 import org.eclipse.team.svn.core.operation.CompositeOperation;
 import org.eclipse.team.svn.core.operation.local.LockOperation;
@@ -46,16 +47,16 @@ public class LockProposeUtility {
 			UIMonitorUtility.doTaskBusyWorkspaceModify(op);
 			return op.getStatus();
 		}
-		String msg = SVNUIMessages.format(SVNUIMessages.ErrorCancelPanel_Description_Cancelled,
+		String msg = BaseMessages.format(SVNUIMessages.ErrorCancelPanel_Description_Cancelled,
 				SVNUIMessages.LocksComposite_LockTitle);
-		return new Status(Status.CANCEL, SVNTeamPlugin.NATURE_ID, IStatus.CANCEL, msg, null);
+		return new Status(IStatus.CANCEL, SVNTeamPlugin.NATURE_ID, IStatus.CANCEL, msg, null);
 	}
 
 	public static IResource[] asResources(LockResource[] lockResources) {
-		List<IResource> res = new ArrayList<IResource>();
+		List<IResource> res = new ArrayList<>();
 		if (lockResources != null) {
-			for (int i = 0; i < lockResources.length; i++) {
-				Object ob = lockResources[i].getAdapter(IResource.class);
+			for (LockResource element : lockResources) {
+				Object ob = element.getAdapter(IResource.class);
 				if (ob != null) {
 					res.add((IResource) ob);
 				}
@@ -65,10 +66,10 @@ public class LockProposeUtility {
 	}
 
 	public static IRepositoryResource[] asRepositoryResources(LockResource[] lockResources) {
-		List<IRepositoryResource> res = new ArrayList<IRepositoryResource>();
+		List<IRepositoryResource> res = new ArrayList<>();
 		if (lockResources != null) {
-			for (int i = 0; i < lockResources.length; i++) {
-				Object ob = lockResources[i].getAdapter(IRepositoryResource.class);
+			for (LockResource element : lockResources) {
+				Object ob = element.getAdapter(IRepositoryResource.class);
 				if (ob != null) {
 					res.add((IRepositoryResource) ob);
 				}

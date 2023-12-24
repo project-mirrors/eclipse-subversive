@@ -45,45 +45,49 @@ public class RepositoryFolder extends RepositoryResource implements IParentTreeN
 		super(parent, resource);
 	}
 
+	@Override
 	public void refresh() {
-		this.childrenOp = null;
-		this.wrappedChildren = null;
+		childrenOp = null;
+		wrappedChildren = null;
 		super.refresh();
 	}
 
+	@Override
 	public boolean hasChildren() {
 		return true;
 	}
 
+	@Override
 	public Object[] getChildren(Object o) {
-		final IRepositoryContainer container = (IRepositoryContainer) this.resource;
+		final IRepositoryContainer container = (IRepositoryContainer) resource;
 
-		if (this.wrappedChildren != null) {
-			return this.wrappedChildren;
+		if (wrappedChildren != null) {
+			return wrappedChildren;
 		}
 
-		if (this.childrenOp != null) {
-			Object[] retVal = RepositoryFolder.wrapChildren(this, this.childrenOp.getChildren(), this.childrenOp);
+		if (childrenOp != null) {
+			Object[] retVal = RepositoryFolder.wrapChildren(this, childrenOp.getChildren(), childrenOp);
 			if (retVal != null) {
-				this.wrappedChildren = retVal;
-			} else if (this.childrenOp.getExecutionState() != IActionOperation.ERROR) {
+				wrappedChildren = retVal;
+			} else if (childrenOp.getExecutionState() != IActionOperation.ERROR) {
 				retVal = new Object[] { new RepositoryPending(this) };
 			} else {
-				retVal = this.wrappedChildren = new Object[] { new RepositoryError(this.childrenOp.getStatus()) };
+				retVal = wrappedChildren = new Object[] { new RepositoryError(childrenOp.getStatus()) };
 			}
 			return retVal;
 		}
 		IPreferenceStore store = SVNTeamUIPlugin.instance().getPreferenceStore();
-		this.childrenOp = new GetRemoteFolderChildrenOperation(container,
+		childrenOp = new GetRemoteFolderChildrenOperation(container,
 				SVNTeamPreferences.getRepositoryBoolean(store, SVNTeamPreferences.REPOSITORY_SHOW_EXTERNALS_NAME),
 				SVNTeamPreferences.getBehaviourBoolean(store,
 						SVNTeamPreferences.BEHAVIOUR_CASE_INSENSITIVE_TABLE_SORTING_NAME));
 
-		CompositeOperation op = new CompositeOperation(this.childrenOp.getId(), this.childrenOp.getMessagesClass());
-		op.add(this.childrenOp);
-		op.add(this.getRefreshOperation(this.getViewer()));
+		CompositeOperation op = new CompositeOperation(childrenOp.getId(), childrenOp.getMessagesClass());
+		op.add(childrenOp);
+		op.add(getRefreshOperation(getViewer()));
 
 		UIMonitorUtility.doTaskScheduled(op, new DefaultOperationWrapperFactory() {
+			@Override
 			public IActionOperation getLogged(IActionOperation operation) {
 				return new LoggedOperation(operation);
 			}
@@ -93,14 +97,14 @@ public class RepositoryFolder extends RepositoryResource implements IParentTreeN
 	}
 
 	public Object[] peekChildren(Object o) {
-		if (this.childrenOp == null) {
-			return this.getChildren(o);
+		if (childrenOp == null) {
+			return getChildren(o);
 		}
-		Object[] retVal = RepositoryFolder.wrapChildren(this, this.childrenOp.getChildren(), this.childrenOp);
+		Object[] retVal = RepositoryFolder.wrapChildren(this, childrenOp.getChildren(), childrenOp);
 		return retVal == null
-				? new Object[] { this.childrenOp.getExecutionState() != IActionOperation.ERROR
+				? new Object[] { childrenOp.getExecutionState() != IActionOperation.ERROR
 						? (Object) new RepositoryPending(this)
-						: new RepositoryError(this.childrenOp.getStatus()) }
+						: new RepositoryError(childrenOp.getStatus()) }
 				: retVal;
 	}
 
@@ -152,6 +156,7 @@ public class RepositoryFolder extends RepositoryResource implements IParentTreeN
 		return retVal;
 	}
 
+	@Override
 	protected ImageDescriptor getImageDescriptorImpl() {
 		return PlatformUI.getWorkbench().getSharedImages().getImageDescriptor(ISharedImages.IMG_OBJ_FOLDER);
 	}

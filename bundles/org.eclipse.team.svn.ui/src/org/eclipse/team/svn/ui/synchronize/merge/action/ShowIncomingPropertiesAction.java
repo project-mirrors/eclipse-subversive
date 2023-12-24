@@ -49,10 +49,12 @@ public class ShowIncomingPropertiesAction extends AbstractSynchronizeModelAction
 		super(text, configuration, selectionProvider);
 	}
 
+	@Override
 	protected boolean needsToSaveDirtyEditors() {
 		return false;
 	}
 
+	@Override
 	protected boolean updateSelection(IStructuredSelection selection) {
 		super.updateSelection(selection);
 		if (selection.size() == 1 && selection.getFirstElement() instanceof SyncInfoModelElement) {
@@ -71,8 +73,9 @@ public class ShowIncomingPropertiesAction extends AbstractSynchronizeModelAction
 		return false;
 	}
 
+	@Override
 	protected IActionOperation getOperation(ISynchronizePageConfiguration configuration, IDiffElement[] elements) {
-		AbstractSVNSyncInfo syncInfo = this.getSelectedSVNSyncInfo();
+		AbstractSVNSyncInfo syncInfo = getSelectedSVNSyncInfo();
 		if (syncInfo instanceof IMergeSyncInfo) {
 			IResourceChange change = ((IMergeSyncInfo) syncInfo).getRemoteResource();
 			IRepositoryResource remote = change.getOriginator();

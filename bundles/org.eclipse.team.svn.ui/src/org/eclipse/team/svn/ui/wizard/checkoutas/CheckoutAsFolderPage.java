@@ -21,7 +21,6 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.team.svn.core.resource.IRepositoryResource;
 import org.eclipse.team.svn.ui.SVNTeamUIPlugin;
@@ -45,14 +44,15 @@ public class CheckoutAsFolderPage extends AbstractVerifiedWizardPage {
 	public CheckoutAsFolderPage(IRepositoryResource[] repositoryResources) {
 		super(CheckoutAsFolderPage.class.getName(), SVNUIMessages.CheckoutAsFolderPage_Title,
 				SVNTeamUIPlugin.instance().getImageDescriptor("icons/wizards/newconnect.gif")); //$NON-NLS-1$
-		this.setDescription(SVNUIMessages.CheckoutAsFolderPage_Description);
+		setDescription(SVNUIMessages.CheckoutAsFolderPage_Description);
 		this.repositoryResources = repositoryResources;
 	}
 
 	public IContainer getTargetFolder() {
-		return this.targetFolder;
+		return targetFolder;
 	}
 
+	@Override
 	protected Composite createControlImpl(Composite parent) {
 		Composite composite = new Composite(parent, SWT.NONE);
 		GridLayout layout = new GridLayout();
@@ -60,19 +60,15 @@ public class CheckoutAsFolderPage extends AbstractVerifiedWizardPage {
 		GridData data = new GridData(GridData.FILL_BOTH);
 		composite.setLayoutData(data);
 
-		this.setControl(composite);
+		setControl(composite);
 
-		Listener listener = new Listener() {
-			public void handleEvent(Event event) {
-				IPath path = CheckoutAsFolderPage.this.group.getContainerFullPath();
-				CheckoutAsFolderPage.this.targetFolder = (IContainer) ResourcesPlugin.getWorkspace()
-						.getRoot()
-						.findMember(path);
-				CheckoutAsFolderPage.this.validateContent();
-			}
+		Listener listener = event -> {
+			IPath path = group.getContainerFullPath();
+			targetFolder = (IContainer) ResourcesPlugin.getWorkspace().getRoot().findMember(path);
+			CheckoutAsFolderPage.this.validateContent();
 		};
-		this.group = new SVNContainerSelectionGroup(composite, listener);
-		this.attachTo(this.group, new SVNContainerSelectionGroup.SVNContainerCheckOutSelectionVerifier());
+		group = new SVNContainerSelectionGroup(composite, listener);
+		attachTo(group, new SVNContainerSelectionGroup.SVNContainerCheckOutSelectionVerifier());
 
 //		Setting context help
 		PlatformUI.getWorkbench()

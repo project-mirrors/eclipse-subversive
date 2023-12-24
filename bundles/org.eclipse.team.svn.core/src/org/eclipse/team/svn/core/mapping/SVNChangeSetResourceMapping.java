@@ -33,26 +33,30 @@ public class SVNChangeSetResourceMapping extends ResourceMapping {
 		this.changeSet = changeSet;
 	}
 
+	@Override
 	public Object getModelObject() {
-		return this.changeSet;
+		return changeSet;
 	}
 
+	@Override
 	public String getModelProviderId() {
 		return SVNChangeSetModelProvider.ID;
 	}
 
+	@Override
 	public IProject[] getProjects() {
-		HashSet<IProject> projects = new HashSet<IProject>();
-		IResource[] resources = this.changeSet.getResources();
-		for (int i = 0; i < resources.length; i++) {
-			projects.add(resources[i].getProject());
+		HashSet<IProject> projects = new HashSet<>();
+		IResource[] resources = changeSet.getResources();
+		for (IResource element : resources) {
+			projects.add(element.getProject());
 		}
 		return projects.toArray(new IProject[projects.size()]);
 	}
 
+	@Override
 	public ResourceTraversal[] getTraversals(ResourceMappingContext context, IProgressMonitor monitor)
 			throws CoreException {
-		IResource[] resources = this.changeSet.getResources();
+		IResource[] resources = changeSet.getResources();
 		if (resources.length == 0) {
 			return new ResourceTraversal[0];
 		}

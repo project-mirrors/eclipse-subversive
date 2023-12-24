@@ -23,56 +23,56 @@ import org.eclipse.jface.resource.ImageDescriptor;
  * @author Alexander Gurov
  */
 public interface ILogNode extends IAdaptable {
-	public static final int TYPE_NONE = 0;
+	int TYPE_NONE = 0;
 
-	public static final int TYPE_CATEGORY = 1;
+	int TYPE_CATEGORY = 1;
 
-	public static final int TYPE_SVN = 2;
+	int TYPE_SVN = 2;
 
-	public static final int TYPE_LOCAL = 3;
+	int TYPE_LOCAL = 3;
 
-	public static final int LABEL_TRIM = 0;
+	int LABEL_TRIM = 0;
 
-	public static final int LABEL_FLAT = 1;
+	int LABEL_FLAT = 1;
 
-	public static final int LABEL_FULL = 2;
+	int LABEL_FULL = 2;
 
-	public static final int COLUMN_REVISION = 0;
+	int COLUMN_REVISION = 0;
 
-	public static final int COLUMN_DATE = 1;
+	int COLUMN_DATE = 1;
 
-	public static final int COLUMN_CHANGES = 2;
+	int COLUMN_CHANGES = 2;
 
-	public static final int COLUMN_AUTHOR = 3;
+	int COLUMN_AUTHOR = 3;
 
-	public static final int COLUMN_COMMENT = 4;
+	int COLUMN_COMMENT = 4;
 
-	public static final int NUM_OF_COLUMNS = 5;
+	int NUM_OF_COLUMNS = 5;
 
-	public int getType();
+	int getType();
 
-	public ILogNode[] getChildren();
+	ILogNode[] getChildren();
 
-	public boolean hasChildren();
+	boolean hasChildren();
 
-	public boolean requiresBoldFont(long currentRevision);
+	boolean requiresBoldFont(long currentRevision);
 
-	public ImageDescriptor getImageDescriptor();
+	ImageDescriptor getImageDescriptor();
 
-	public String getLabel(int columnIndex, int labelType, long currentRevision);
+	String getLabel(int columnIndex, int labelType, long currentRevision);
 
-	public Object getEntity();
+	Object getEntity();
 
-	public long getRevision();
+	long getRevision();
 
-	public long getTimeStamp();
+	long getTimeStamp();
 
-	public String getComment();
+	String getComment();
 
-	public String getAuthor();
+	String getAuthor();
 
-	public int getChangesCount();
+	int getChangesCount();
 
-	public ILogNode getParent();
+	ILogNode getParent();
 
 }

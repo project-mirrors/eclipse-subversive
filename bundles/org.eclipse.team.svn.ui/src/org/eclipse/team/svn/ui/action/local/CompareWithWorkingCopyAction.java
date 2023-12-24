@@ -33,9 +33,9 @@ import org.eclipse.team.svn.ui.operation.CompareResourcesOperation;
 public class CompareWithWorkingCopyAction extends AbstractWorkingCopyAction {
 
 	public CompareWithWorkingCopyAction() {
-		super();
 	}
 
+	@Override
 	public void runImpl(IAction action) {
 		IResource resource = this.getSelectedResources()[0];
 		ILocalResource local = SVNRemoteStorage.instance().asLocalResourceAccessible(resource);
@@ -43,24 +43,28 @@ public class CompareWithWorkingCopyAction extends AbstractWorkingCopyAction {
 				? SVNUtility.getCopiedFrom(resource)
 				: SVNRemoteStorage.instance().asRepositoryResource(resource);
 		remote.setSelectedRevision(SVNRevision.BASE);
-		this.runScheduled(new CompareResourcesOperation(local, remote));
+		runScheduled(new CompareResourcesOperation(local, remote));
 	}
 
+	@Override
 	public boolean isEnabled() {
 		return this.getSelectedResources().length == 1
-				&& this.checkForResourcesPresence(CompareWithWorkingCopyAction.COMPARE_FILTER);
+				&& checkForResourcesPresence(CompareWithWorkingCopyAction.COMPARE_FILTER);
 	}
 
+	@Override
 	protected boolean needsToSaveDirtyEditors() {
 		return true;
 	}
 
 	public static final IStateFilter COMPARE_FILTER = new IStateFilter.AbstractStateFilter() {
+		@Override
 		protected boolean acceptImpl(ILocalResource local, IResource resource, String state, int mask) {
 			return IStateFilter.SF_EXCLUDE_DELETED.accept(resource, state, mask)
 					| (mask & ILocalResource.IS_COPIED) != 0;
 		}
 
+		@Override
 		protected boolean allowsRecursionImpl(ILocalResource local, IResource resource, String state, int mask) {
 			return IStateFilter.SF_EXCLUDE_DELETED.accept(resource, state, mask);
 		}

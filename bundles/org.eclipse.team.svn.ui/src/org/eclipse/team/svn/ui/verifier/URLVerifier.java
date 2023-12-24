@@ -17,6 +17,7 @@ package org.eclipse.team.svn.ui.verifier;
 import java.net.URL;
 
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.team.svn.core.BaseMessages;
 import org.eclipse.team.svn.core.utility.SVNUtility;
 import org.eclipse.team.svn.ui.SVNUIMessages;
 
@@ -34,29 +35,31 @@ public class URLVerifier extends AbstractFormattedVerifier {
 
 	public URLVerifier(String fieldName) {
 		super(fieldName);
-		URLVerifier.ERROR_MESSAGE_SHORT = SVNUIMessages.format(SVNUIMessages.Verifier_URL_Short,
+		URLVerifier.ERROR_MESSAGE_SHORT = BaseMessages.format(SVNUIMessages.Verifier_URL_Short,
 				new String[] { AbstractFormattedVerifier.FIELD_NAME });
-		URLVerifier.ERROR_MESSAGE_FULL = SVNUIMessages.format(SVNUIMessages.Verifier_URL_Full,
+		URLVerifier.ERROR_MESSAGE_FULL = BaseMessages.format(SVNUIMessages.Verifier_URL_Full,
 				new String[] { AbstractFormattedVerifier.FIELD_NAME, URLVerifier.ERROR_REASON });
 	}
 
+	@Override
 	protected String getErrorMessageImpl(Control input) {
-		String url = this.getText(input);
+		String url = getText(input);
 		try {
 			URL svnUrl = SVNUtility.getSVNUrl(url);
 			String host = svnUrl.getHost();
-			if (!this.isIPAddress(host) && !host.matches("[a-zA-Z0-9_\\-]+(?:\\.[a-zA-Z0-9_\\-]+)*") //$NON-NLS-1$
+			if (!isIPAddress(host) && !host.matches("[a-zA-Z0-9_\\-]+(?:\\.[a-zA-Z0-9_\\-]+)*") //$NON-NLS-1$
 					&& host.length() > 0 || host.length() == 0 && !"file".equals(svnUrl.getProtocol())) { //$NON-NLS-1$
-				this.setPlaceHolder(URLVerifier.ERROR_REASON, SVNUIMessages.Verifier_URL_NoHost);
+				setPlaceHolder(URLVerifier.ERROR_REASON, SVNUIMessages.Verifier_URL_NoHost);
 				return URLVerifier.ERROR_MESSAGE_FULL;
 			}
 			return null;
 		} catch (Exception ex) {
-			this.setPlaceHolder(URLVerifier.ERROR_REASON, ex.getMessage());
+			setPlaceHolder(URLVerifier.ERROR_REASON, ex.getMessage());
 			return ex.getMessage() == null ? URLVerifier.ERROR_MESSAGE_SHORT : URLVerifier.ERROR_MESSAGE_FULL;
 		}
 	}
 
+	@Override
 	protected String getWarningMessageImpl(Control input) {
 		return null;
 	}
@@ -115,7 +118,7 @@ public class URLVerifier extends AbstractFormattedVerifier {
 		char[] addressChars = address.toCharArray();
 		int addressLength = addressChars.length;
 
-		int scopePos = address.indexOf("%"); //check for scope presence (network interface specifier) 
+		int scopePos = address.indexOf("%"); //check for scope presence (network interface specifier)
 		if (scopePos == addressLength - 1) { // check if scope format is proper or not
 			return false;
 		}
@@ -167,7 +170,7 @@ public class URLVerifier extends AbstractFormattedVerifier {
 				val = 0;
 				continue;
 			}
-			if (ch == '.' && ((j + IPV4_SIZE) <= IPV6_SIZE)) {
+			if (ch == '.' && j + IPV4_SIZE <= IPV6_SIZE) {
 				String ia4 = address.substring(currentTokenPointer, addressLength);
 				int dotCount = 0, index = 0;
 				while ((index = ia4.indexOf('.', index)) != -1) {
@@ -179,7 +182,7 @@ public class URLVerifier extends AbstractFormattedVerifier {
 				}
 				j += IPV4_SIZE;
 				hadNumTokenBefore = false;
-				break; // IPv4 segment could be the last address part only 
+				break; // IPv4 segment could be the last address part only
 			}
 			return false;
 		}

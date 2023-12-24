@@ -25,5 +25,5 @@ import org.eclipse.team.svn.core.resource.ISVNStorage;
  * @author Alexander Gurov
  */
 public interface IFileStorage extends ISVNStorage {
-	public IRepositoryResource asRepositoryResource(File file, boolean allowsNull);
+	IRepositoryResource asRepositoryResource(File file, boolean allowsNull);
 }

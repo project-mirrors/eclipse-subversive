@@ -76,7 +76,7 @@ public class ToolTipVariableSetProvider implements IVariableSetProvider {
 	public static final IVariable VAR_LOCK_COMMENT = new PredefinedVariable(ToolTipVariableSetProvider.DOMAIN_NAME,
 			ToolTipVariableSetProvider.NAME_OF_LOCK_COMMENT);
 
-	private static final Map<String, IVariable> name2Variable = new HashMap<String, IVariable>();
+	private static final Map<String, IVariable> name2Variable = new HashMap<>();
 
 	static {
 		ToolTipVariableSetProvider.name2Variable.put(ToolTipVariableSetProvider.NAME_OF_NAME,
@@ -101,14 +101,17 @@ public class ToolTipVariableSetProvider implements IVariableSetProvider {
 
 	public static ToolTipVariableSetProvider instance = new ToolTipVariableSetProvider();
 
+	@Override
 	public IVariable getCenterVariable() {
 		return null;
 	}
 
+	@Override
 	public String getDomainName() {
 		return ToolTipVariableSetProvider.DOMAIN_NAME;
 	}
 
+	@Override
 	public IVariable getVariable(String name) {
 		return ToolTipVariableSetProvider.name2Variable.get(name);
 	}

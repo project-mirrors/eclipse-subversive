@@ -28,7 +28,6 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.jface.action.IContributionManager;
-import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
@@ -55,9 +54,9 @@ import org.eclipse.team.internal.ui.mapping.ResourceModelActionProvider;
 import org.eclipse.team.internal.ui.synchronize.ChangeSetCapability;
 import org.eclipse.team.internal.ui.synchronize.IChangeSetProvider;
 import org.eclipse.team.internal.ui.synchronize.SynchronizePageConfiguration;
+import org.eclipse.team.svn.core.BaseMessages;
 import org.eclipse.team.svn.core.SVNTeamPlugin;
 import org.eclipse.team.svn.core.mapping.SVNChangeSetModelProvider;
-import org.eclipse.team.svn.ui.SVNUIMessages;
 import org.eclipse.team.svn.ui.utility.UIMonitorUtility;
 import org.eclipse.team.ui.synchronize.ISynchronizePageConfiguration;
 import org.eclipse.team.ui.synchronize.ISynchronizeParticipant;
@@ -94,23 +93,20 @@ public class SVNChangeSetActionProvider extends ResourceModelActionProvider {
 			super(TeamUIMessages.ChangeLogModelProvider_0, configuration);
 		}
 
+		@Override
 		public void run() {
 			final IDiff[] diffs = SVNChangeSetActionProvider.this.getLocalChanges(getStructuredSelection());
-			UIMonitorUtility.getDisplay().syncExec(new Runnable() {
-				public void run() {
-					CreateChangeSetAction.this.createChangeSet(diffs);
-				}
-			});
+			UIMonitorUtility.getDisplay().syncExec(() -> CreateChangeSetAction.this.createChangeSet(diffs));
 		}
 
 		protected void createChangeSet(IDiff[] diffs) {
-			ActiveChangeSet set = SVNChangeSetActionProvider.this.getChangeSetCapability()
-					.createChangeSet(getConfiguration(), diffs);
+			ActiveChangeSet set = getChangeSetCapability().createChangeSet(getConfiguration(), diffs);
 			if (set != null) {
-				SVNChangeSetActionProvider.this.getActiveChangeSetManager().add(set);
+				getActiveChangeSetManager().add(set);
 			}
 		}
 
+		@Override
 		protected boolean isEnabledForSelection(IStructuredSelection selection) {
 			return isContentProviderEnabled() && containsLocalChanges(selection);
 		}
@@ -127,24 +123,24 @@ public class SVNChangeSetActionProvider extends ResourceModelActionProvider {
 			selectionChanged(selection);
 		}
 
+		@Override
 		public void run() {
 			IDiff[] diffArray = getLocalChanges(getStructuredSelection());
-			if (this.set != null) {
-				this.set.add(diffArray);
+			if (set != null) {
+				set.add(diffArray);
 			} else {
-				ChangeSet[] sets = SVNChangeSetActionProvider.this.getActiveChangeSetManager().getSets();
-				IResource[] resources = this.getResources(diffArray);
-				for (int i = 0; i < sets.length; i++) {
-					ActiveChangeSet activeSet = (ActiveChangeSet) sets[i];
+				ChangeSet[] sets = getActiveChangeSetManager().getSets();
+				IResource[] resources = getResources(diffArray);
+				for (ChangeSet set2 : sets) {
+					ActiveChangeSet activeSet = (ActiveChangeSet) set2;
 					activeSet.remove(resources);
 				}
 			}
 		}
 
 		private IResource[] getResources(IDiff[] diffArray) {
-			ArrayList<IResource> result = new ArrayList<IResource>();
-			for (int i = 0; i < diffArray.length; i++) {
-				IDiff diff = diffArray[i];
+			ArrayList<IResource> result = new ArrayList<>();
+			for (IDiff diff : diffArray) {
 				IResource resource = ResourceDiffTree.getResourceFor(diff);
 				if (resource != null) {
 					result.add(resource);
@@ -153,6 +149,7 @@ public class SVNChangeSetActionProvider extends ResourceModelActionProvider {
 			return result.toArray(new IResource[result.size()]);
 		}
 
+		@Override
 		protected boolean isEnabledForSelection(IStructuredSelection selection) {
 			return isContentProviderEnabled() && containsLocalChanges(selection);
 		}
@@ -164,8 +161,9 @@ public class SVNChangeSetActionProvider extends ResourceModelActionProvider {
 			super(title);
 		}
 
+		@Override
 		protected boolean updateSelection(IStructuredSelection selection) {
-			return this.getSelectedSet() != null;
+			return getSelectedSet() != null;
 		}
 
 		protected ActiveChangeSet getSelectedSet() {
@@ -174,8 +172,9 @@ public class SVNChangeSetActionProvider extends ResourceModelActionProvider {
 				Object first = selection.getFirstElement();
 				if (first instanceof ActiveChangeSet) {
 					ActiveChangeSet activeChangeSet = (ActiveChangeSet) first;
-					if (activeChangeSet.isUserCreated())
+					if (activeChangeSet.isUserCreated()) {
 						return activeChangeSet;
+					}
 				}
 			}
 			return null;
@@ -188,12 +187,13 @@ public class SVNChangeSetActionProvider extends ResourceModelActionProvider {
 			super(TeamUIMessages.ChangeLogModelProvider_6, configuration);
 		}
 
+		@Override
 		public void run() {
 			ActiveChangeSet set = getSelectedSet();
-			if (set == null)
+			if (set == null) {
 				return;
-			getChangeSetCapability().editChangeSet(SVNChangeSetActionProvider.this.getSynchronizePageConfiguration(),
-					set);
+			}
+			getChangeSetCapability().editChangeSet(getSynchronizePageConfiguration(), set);
 		}
 	}
 
@@ -203,15 +203,16 @@ public class SVNChangeSetActionProvider extends ResourceModelActionProvider {
 			super("Remove Change Set", configuration); //$NON-NLS-1$
 		}
 
+		@Override
 		public void run() {
 			ActiveChangeSet set = getSelectedSet();
-			if (set == null)
+			if (set == null) {
 				return;
+			}
 			if (MessageDialog.openConfirm(
-					SVNChangeSetActionProvider.this.getSynchronizePageConfiguration().getSite().getShell(),
-					TeamUIMessages.ChangeSetActionGroup_0,
-					SVNUIMessages.format(TeamUIMessages.ChangeSetActionGroup_1, new String[] { set.getTitle() }))) {
-				SVNChangeSetActionProvider.this.getActiveChangeSetManager().remove(set);
+					getSynchronizePageConfiguration().getSite().getShell(), TeamUIMessages.ChangeSetActionGroup_0,
+					BaseMessages.format(TeamUIMessages.ChangeSetActionGroup_1, new String[] { set.getTitle() }))) {
+				getActiveChangeSetManager().remove(set);
 			}
 		}
 	}
@@ -222,6 +223,7 @@ public class SVNChangeSetActionProvider extends ResourceModelActionProvider {
 			super(TeamUIMessages.ChangeLogModelProvider_9, configuration);
 		}
 
+		@Override
 		public void run() {
 			ActiveChangeSet set = getSelectedSet();
 			if (set == null) {
@@ -241,96 +243,91 @@ public class SVNChangeSetActionProvider extends ResourceModelActionProvider {
 			update();
 		}
 
+		@Override
 		public void run() {
-			int sortCriteria = SVNChangeSetActionProvider
-					.getSortCriteria(SVNChangeSetActionProvider.this.getSynchronizePageConfiguration());
-			if (isChecked() && sortCriteria != this.criteria) {
+			int sortCriteria = SVNChangeSetActionProvider.getSortCriteria(getSynchronizePageConfiguration());
+			if (isChecked() && sortCriteria != criteria) {
 				SVNChangeSetActionProvider.setSortCriteria(
-						SVNChangeSetActionProvider.this.getSynchronizePageConfiguration(), this.criteria);
-				this.update();
-				((SynchronizePageConfiguration) SVNChangeSetActionProvider.this.getSynchronizePageConfiguration())
-						.getPage()
-						.getViewer()
-						.refresh();
+						getSynchronizePageConfiguration(), criteria);
+				update();
+				((SynchronizePageConfiguration) getSynchronizePageConfiguration()).getPage().getViewer().refresh();
 			}
 		}
 
 		public void update() {
-			setChecked(this.criteria == SVNChangeSetActionProvider
-					.getSortCriteria(SVNChangeSetActionProvider.this.getSynchronizePageConfiguration()));
+			setChecked(criteria == SVNChangeSetActionProvider.getSortCriteria(getSynchronizePageConfiguration()));
 		}
 	}
 
 	public SVNChangeSetActionProvider() {
-		super();
 	}
 
+	@Override
 	protected void initialize() {
 		super.initialize();
 		if (getChangeSetCapability().supportsCheckedInChangeSets()) {
-			this.sortChangeSetsMenu = new MenuManager(TeamUIMessages.ChangeLogModelProvider_0a);
-			this.sortChangeSetsMenu.add(
+			sortChangeSetsMenu = new MenuManager(TeamUIMessages.ChangeLogModelProvider_0a);
+			sortChangeSetsMenu.add(
 					new RefreshSortOrderAction(TeamUIMessages.ChangeLogModelProvider_1a, SVNChangeSetSorter.COMMENT));
-			this.sortChangeSetsMenu
+			sortChangeSetsMenu
 					.add(new RefreshSortOrderAction(TeamUIMessages.ChangeLogModelProvider_2a, SVNChangeSetSorter.DATE));
-			this.sortChangeSetsMenu
+			sortChangeSetsMenu
 					.add(new RefreshSortOrderAction(TeamUIMessages.ChangeLogModelProvider_3a, SVNChangeSetSorter.USER));
 		}
 		if (getChangeSetCapability().supportsActiveChangeSets()) {
-			this.addToChangeSetMenu = new MenuManager(TeamUIMessages.ChangeLogModelProvider_12);
-			this.addToChangeSetMenu.setRemoveAllWhenShown(true);
-			this.addToChangeSetMenu.addMenuListener(new IMenuListener() {
-				public void menuAboutToShow(IMenuManager manager) {
-					ChangeSet[] sets = getActiveChangeSetManager().getSets();
-					Arrays.sort(sets, new SVNChangeSetComparator());
-					ISelection selection = getContext().getSelection();
-					SVNChangeSetActionProvider.this.createChangeSetAction.selectionChanged(selection);
-					SVNChangeSetActionProvider.this.addToChangeSetMenu
-							.add(SVNChangeSetActionProvider.this.createChangeSetAction);
-					SVNChangeSetActionProvider.this.addToChangeSetMenu.add(new Separator());
-					for (int i = 0; i < sets.length; i++) {
-						ActiveChangeSet set = (ActiveChangeSet) sets[i];
-						AddToChangeSetAction action = new AddToChangeSetAction(
-								SVNChangeSetActionProvider.this.getSynchronizePageConfiguration(), set, selection);
-						manager.add(action);
-					}
-					SVNChangeSetActionProvider.this.addToChangeSetMenu.add(new Separator());
-					SVNChangeSetActionProvider.this.addToChangeSetMenu.add(new AddToChangeSetAction(
-							SVNChangeSetActionProvider.this.getSynchronizePageConfiguration(), null, selection));
+			addToChangeSetMenu = new MenuManager(TeamUIMessages.ChangeLogModelProvider_12);
+			addToChangeSetMenu.setRemoveAllWhenShown(true);
+			addToChangeSetMenu.addMenuListener(manager -> {
+				ChangeSet[] sets = getActiveChangeSetManager().getSets();
+				Arrays.sort(sets, new SVNChangeSetComparator());
+				ISelection selection = getContext().getSelection();
+				createChangeSetAction.selectionChanged(selection);
+				addToChangeSetMenu.add(createChangeSetAction);
+				addToChangeSetMenu.add(new Separator());
+				for (ChangeSet set2 : sets) {
+					ActiveChangeSet set = (ActiveChangeSet) set2;
+					AddToChangeSetAction action = new AddToChangeSetAction(
+							SVNChangeSetActionProvider.this.getSynchronizePageConfiguration(), set, selection);
+					manager.add(action);
 				}
+				addToChangeSetMenu.add(new Separator());
+				addToChangeSetMenu.add(new AddToChangeSetAction(
+						SVNChangeSetActionProvider.this.getSynchronizePageConfiguration(), null, selection));
 			});
-			this.createChangeSetAction = new CreateChangeSetAction(this.getSynchronizePageConfiguration());
-			this.addToChangeSetMenu.add(this.createChangeSetAction);
-			this.addToChangeSetMenu.add(new Separator());
-			this.editChangeSetAction = new EditChangeSetAction(this.getSynchronizePageConfiguration());
-			this.makeDefaultAction = new MakeDefaultChangeSetAction(this.getSynchronizePageConfiguration());
-			this.removeChangeSetAction = new RemoveChangeSetAction(this.getSynchronizePageConfiguration());
+			createChangeSetAction = new CreateChangeSetAction(getSynchronizePageConfiguration());
+			addToChangeSetMenu.add(createChangeSetAction);
+			addToChangeSetMenu.add(new Separator());
+			editChangeSetAction = new EditChangeSetAction(getSynchronizePageConfiguration());
+			makeDefaultAction = new MakeDefaultChangeSetAction(getSynchronizePageConfiguration());
+			removeChangeSetAction = new RemoveChangeSetAction(getSynchronizePageConfiguration());
 		}
 	}
 
+	@Override
 	public void fillContextMenu(IMenuManager menu) {
 		if (isContentProviderEnabled()) {
 			super.fillContextMenu(menu);
-			if (this.getChangeSetCapability().enableCheckedInChangeSetsFor(this.getSynchronizePageConfiguration())) {
-				appendToGroup(menu, ISynchronizePageConfiguration.SORT_GROUP, this.sortChangeSetsMenu);
+			if (getChangeSetCapability().enableCheckedInChangeSetsFor(getSynchronizePageConfiguration())) {
+				appendToGroup(menu, ISynchronizePageConfiguration.SORT_GROUP, sortChangeSetsMenu);
 			}
-			if (getChangeSetCapability().enableActiveChangeSetsFor(this.getSynchronizePageConfiguration())) {
-				appendToGroup(menu, CHANGE_SET_GROUP, this.addToChangeSetMenu);
-				appendToGroup(menu, CHANGE_SET_GROUP, this.editChangeSetAction);
-				appendToGroup(menu, CHANGE_SET_GROUP, this.removeChangeSetAction);
-				appendToGroup(menu, CHANGE_SET_GROUP, this.makeDefaultAction);
+			if (getChangeSetCapability().enableActiveChangeSetsFor(getSynchronizePageConfiguration())) {
+				appendToGroup(menu, CHANGE_SET_GROUP, addToChangeSetMenu);
+				appendToGroup(menu, CHANGE_SET_GROUP, editChangeSetAction);
+				appendToGroup(menu, CHANGE_SET_GROUP, removeChangeSetAction);
+				appendToGroup(menu, CHANGE_SET_GROUP, makeDefaultAction);
 			}
 		}
 	}
 
+	@Override
 	public void dispose() {
-		if (this.addToChangeSetMenu != null) {
-			this.addToChangeSetMenu.dispose();
-			this.addToChangeSetMenu.removeAll();
+		if (addToChangeSetMenu != null) {
+			addToChangeSetMenu.dispose();
+			addToChangeSetMenu.removeAll();
 		}
-		if (this.sortChangeSetsMenu != null) {
-			this.sortChangeSetsMenu.dispose();
-			this.sortChangeSetsMenu.removeAll();
+		if (sortChangeSetsMenu != null) {
+			sortChangeSetsMenu.dispose();
+			sortChangeSetsMenu.removeAll();
 		}
 		super.dispose();
 	}
@@ -381,7 +378,7 @@ public class SVNChangeSetActionProvider extends ResourceModelActionProvider {
 		if (configuration != null) {
 			Object o = configuration.getProperty(SVNChangeSetActionProvider.CHANGESET_SORTING_TYPE);
 			if (o instanceof Integer) {
-				sortCriteria = ((Integer) o).intValue();
+				sortCriteria = ((Integer) o);
 			} else {
 				try {
 					IDialogSettings pageSettings = configuration.getSite().getPageSettings();
@@ -406,7 +403,7 @@ public class SVNChangeSetActionProvider extends ResourceModelActionProvider {
 	}
 
 	public static void setSortCriteria(ISynchronizePageConfiguration configuration, int criteria) {
-		configuration.setProperty(SVNChangeSetActionProvider.CHANGESET_SORTING_TYPE, new Integer(criteria));
+		configuration.setProperty(SVNChangeSetActionProvider.CHANGESET_SORTING_TYPE, Integer.valueOf(criteria));
 		IDialogSettings pageSettings = configuration.getSite().getPageSettings();
 		if (pageSettings != null) {
 			pageSettings.put(SVNChangeSetActionProvider.CHANGESET_SORTING_TYPE, criteria);
@@ -414,7 +411,7 @@ public class SVNChangeSetActionProvider extends ResourceModelActionProvider {
 	}
 
 	private SVNChangeSetContentProvider getContentProvider() {
-		INavigatorContentExtension extension = this.getExtension();
+		INavigatorContentExtension extension = getExtension();
 		if (extension != null) {
 			ITreeContentProvider provider = extension.getContentProvider();
 			if (provider instanceof SVNChangeSetContentProvider) {
@@ -441,12 +438,10 @@ public class SVNChangeSetActionProvider extends ResourceModelActionProvider {
 	public IDiff[] getLocalChanges(IStructuredSelection selection) {
 		if (selection instanceof ITreeSelection) {
 			TreePath[] paths = ((ITreeSelection) selection).getPaths();
-			ArrayList<IDiff> result = new ArrayList<IDiff>();
-			for (int i = 0; i < paths.length; i++) {
-				TreePath path = paths[i];
+			ArrayList<IDiff> result = new ArrayList<>();
+			for (TreePath path : paths) {
 				IDiff[] diffs = getLocalChanges(path);
-				for (int j = 0; j < diffs.length; j++) {
-					IDiff diff = diffs[j];
+				for (IDiff diff : diffs) {
 					result.add(diff);
 				}
 			}
@@ -456,16 +451,16 @@ public class SVNChangeSetActionProvider extends ResourceModelActionProvider {
 	}
 
 	private IDiff[] getLocalChanges(TreePath path) {
-		IResourceDiffTree tree = this.getDiffTree(path);
+		IResourceDiffTree tree = getDiffTree(path);
 		if (path.getSegmentCount() == 1 && path.getLastSegment() instanceof IDiffTree) {
 			return ((ResourceDiffTree) tree).getDiffs();
 		}
-		ResourceTraversal[] traversals = this.getTraversals(path.getLastSegment());
+		ResourceTraversal[] traversals = getTraversals(path.getLastSegment());
 		return tree.getDiffs(traversals);
 	}
 
 	private IResourceDiffTree getDiffTree(TreePath path) {
-		return this.getContentProvider().getDiffTree(path);
+		return getContentProvider().getDiffTree(path);
 	}
 
 	private ResourceTraversal[] getTraversals(Object element) {
@@ -500,15 +495,19 @@ public class SVNChangeSetActionProvider extends ResourceModelActionProvider {
 		return new ResourceTraversal[0];
 	}
 
+	@Override
 	public void setContext(ActionContext context) {
 		super.setContext(context);
 		if (context != null) {
-			if (this.editChangeSetAction != null)
-				this.editChangeSetAction.selectionChanged((IStructuredSelection) getContext().getSelection());
-			if (this.removeChangeSetAction != null)
-				this.removeChangeSetAction.selectionChanged((IStructuredSelection) getContext().getSelection());
-			if (this.makeDefaultAction != null)
-				this.makeDefaultAction.selectionChanged((IStructuredSelection) getContext().getSelection());
+			if (editChangeSetAction != null) {
+				editChangeSetAction.selectionChanged((IStructuredSelection) getContext().getSelection());
+			}
+			if (removeChangeSetAction != null) {
+				removeChangeSetAction.selectionChanged((IStructuredSelection) getContext().getSelection());
+			}
+			if (makeDefaultAction != null) {
+				makeDefaultAction.selectionChanged((IStructuredSelection) getContext().getSelection());
+			}
 		}
 	}
 
@@ -516,8 +515,7 @@ public class SVNChangeSetActionProvider extends ResourceModelActionProvider {
 		if (selection instanceof ITreeSelection) {
 			ITreeSelection ts = (ITreeSelection) selection;
 			TreePath[] paths = ts.getPaths();
-			for (int i = 0; i < paths.length; i++) {
-				TreePath path = paths[i];
+			for (TreePath path : paths) {
 				if (containsLocalChanges(path)) {
 					return true;
 				}
@@ -534,6 +532,7 @@ public class SVNChangeSetActionProvider extends ResourceModelActionProvider {
 
 	private FastDiffFilter getVisibleLocalChangesFilter() {
 		return new FastDiffFilter() {
+			@Override
 			public boolean select(IDiff diff) {
 				if (diff instanceof IThreeWayDiff && isVisible(diff)) {
 					IThreeWayDiff twd = (IThreeWayDiff) diff;

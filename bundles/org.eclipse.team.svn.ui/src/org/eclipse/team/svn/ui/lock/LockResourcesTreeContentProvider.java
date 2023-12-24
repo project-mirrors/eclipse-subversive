@@ -33,8 +33,9 @@ public class LockResourcesTreeContentProvider implements ITreeContentProvider {
 		this.root = root;
 	}
 
+	@Override
 	public Object[] getChildren(Object parentElement) {
-		List<LockResource> res = new ArrayList<LockResource>();
+		List<LockResource> res = new ArrayList<>();
 		LockResource node = (LockResource) parentElement;
 		LockResource[] children = node.getChildren();
 		for (LockResource child : children) {
@@ -45,6 +46,7 @@ public class LockResourcesTreeContentProvider implements ITreeContentProvider {
 		return res.toArray(new LockResource[0]);
 	}
 
+	@Override
 	public boolean hasChildren(Object element) {
 		LockResource node = (LockResource) element;
 		LockResource[] children = node.getChildren();
@@ -56,18 +58,22 @@ public class LockResourcesTreeContentProvider implements ITreeContentProvider {
 		return false;
 	}
 
+	@Override
 	public Object getParent(Object element) {
 		return ((LockResource) element).getParent();
 	}
 
+	@Override
 	public Object[] getElements(Object inputElement) {
-		return new Object[] { this.root };
+		return new Object[] { root };
 	}
 
+	@Override
 	public void dispose() {
 
 	}
 
+	@Override
 	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 
 	}

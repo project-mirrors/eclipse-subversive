@@ -21,7 +21,6 @@ import org.eclipse.team.svn.core.SVNMessages;
 import org.eclipse.team.svn.core.connector.ISVNConnector;
 import org.eclipse.team.svn.core.connector.SVNDepth;
 import org.eclipse.team.svn.core.operation.IConsoleStream;
-import org.eclipse.team.svn.core.operation.IUnprotectedOperation;
 import org.eclipse.team.svn.core.operation.SVNProgressMonitor;
 import org.eclipse.team.svn.core.operation.file.AbstractFileOperation;
 import org.eclipse.team.svn.core.operation.file.IFileProvider;
@@ -49,25 +48,23 @@ public class RelocateOperation extends AbstractFileOperation {
 		this.toUrl = toUrl;
 	}
 
+	@Override
 	protected void runImpl(IProgressMonitor monitor) throws Exception {
-		File[] files = FileUtility.shrinkChildNodes(this.operableData(), true);
+		File[] files = FileUtility.shrinkChildNodes(operableData(), true);
 
 		for (int i = 0; i < files.length && !monitor.isCanceled(); i++) {
 			final File current = files[i];
 			final IRepositoryResource remote = SVNFileStorage.instance().asRepositoryResource(current, false);
 			final IRepositoryLocation location = remote.getRepositoryLocation();
 			final ISVNConnector proxy = location.acquireSVNProxy();
-			this.protectStep(new IUnprotectedOperation() {
-				public void run(IProgressMonitor monitor) throws Exception {
-					String path = current.getAbsolutePath();
-					RelocateOperation.this.writeToConsole(IConsoleStream.LEVEL_CMD,
-							"svn switch --relocate \"" + remote.getUrl() + "\" \"" + RelocateOperation.this.toUrl //$NON-NLS-1$//$NON-NLS-2$
-									+ "\" \"" + FileUtility.normalizePath(path) + "\"" //$NON-NLS-1$//$NON-NLS-2$
-									+ FileUtility.getUsernameParam(location.getUsername()) + "\n"); //$NON-NLS-1$
-					proxy.relocate(SVNUtility.encodeURL(remote.getUrl()),
-							SVNUtility.encodeURL(RelocateOperation.this.toUrl), path, SVNDepth.INFINITY,
-							new SVNProgressMonitor(RelocateOperation.this, monitor, null));
-				}
+			this.protectStep(monitor1 -> {
+				String path = current.getAbsolutePath();
+				RelocateOperation.this.writeToConsole(IConsoleStream.LEVEL_CMD,
+						"svn switch --relocate \"" + remote.getUrl() + "\" \"" + toUrl //$NON-NLS-1$//$NON-NLS-2$
+								+ "\" \"" + FileUtility.normalizePath(path) + "\"" //$NON-NLS-1$//$NON-NLS-2$
+								+ FileUtility.getUsernameParam(location.getUsername()) + "\n"); //$NON-NLS-1$
+				proxy.relocate(SVNUtility.encodeURL(remote.getUrl()), SVNUtility.encodeURL(toUrl), path,
+						SVNDepth.INFINITY, new SVNProgressMonitor(RelocateOperation.this, monitor1, null));
 			}, monitor, files.length);
 			location.releaseSVNProxy(proxy);
 		}

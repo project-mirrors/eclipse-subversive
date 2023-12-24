@@ -20,7 +20,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -30,8 +29,6 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
@@ -42,7 +39,6 @@ import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.DirectoryDialog;
-import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
@@ -222,286 +218,283 @@ public class SVNTeamPreferencesPage extends AbstractSVNTeamPreferencesPage {
 	protected Button checkForConnectorsButton;
 
 	public SVNTeamPreferencesPage() {
-		super();
 	}
 
+	@Override
 	protected void saveValues(IPreferenceStore store) {
-		SVNTeamPreferences.setRepositoryString(store, SVNTeamPreferences.REPOSITORY_HEAD_NAME, this.head);
-		SVNTeamPreferences.setRepositoryString(store, SVNTeamPreferences.REPOSITORY_BRANCHES_NAME, this.branches);
-		SVNTeamPreferences.setRepositoryString(store, SVNTeamPreferences.REPOSITORY_TAGS_NAME, this.tags);
+		SVNTeamPreferences.setRepositoryString(store, SVNTeamPreferences.REPOSITORY_HEAD_NAME, head);
+		SVNTeamPreferences.setRepositoryString(store, SVNTeamPreferences.REPOSITORY_BRANCHES_NAME, branches);
+		SVNTeamPreferences.setRepositoryString(store, SVNTeamPreferences.REPOSITORY_TAGS_NAME, tags);
 		SVNTeamPreferences.setRepositoryBoolean(store, SVNTeamPreferences.BRANCH_TAG_CONSIDER_STRUCTURE_NAME,
-				this.branchTagConsiderStructure);
+				branchTagConsiderStructure);
 		SVNTeamPreferences.setRepositoryBoolean(store, SVNTeamPreferences.REPOSITORY_FORCE_EXTERNALS_FREEZE_NAME,
-				this.forceExternalsFreeze);
+				forceExternalsFreeze);
 		SVNTeamPreferences.setRepositoryBoolean(store, SVNTeamPreferences.REPOSITORY_SHOW_EXTERNALS_NAME,
-				this.showExternals);
-		SVNTeamPreferences.setRepositoryBoolean(store, SVNTeamPreferences.REPOSITORY_SIMPLE_SHARE_NAME,
-				this.simpleShare);
+				showExternals);
+		SVNTeamPreferences.setRepositoryBoolean(store, SVNTeamPreferences.REPOSITORY_SIMPLE_SHARE_NAME, simpleShare);
 
-		AbstractSVNSubscriber.setSynchInfoContigous(this.fastReport);
-		SVNTeamPreferences.setSynchronizeBoolean(store, SVNTeamPreferences.ENABLE_MODEL_SYNC_NAME,
-				this.enableModelSync);
+		AbstractSVNSubscriber.setSynchInfoContigous(fastReport);
+		SVNTeamPreferences.setSynchronizeBoolean(store, SVNTeamPreferences.ENABLE_MODEL_SYNC_NAME, enableModelSync);
 
-		SVNTeamPreferences.setHistoryInt(store, SVNTeamPreferences.HISTORY_PAGE_SIZE_NAME, this.pageSize);
-		SVNTeamPreferences.setHistoryBoolean(store, SVNTeamPreferences.HISTORY_PAGING_ENABLE_NAME, this.pagingEnable);
+		SVNTeamPreferences.setHistoryInt(store, SVNTeamPreferences.HISTORY_PAGE_SIZE_NAME, pageSize);
+		SVNTeamPreferences.setHistoryBoolean(store, SVNTeamPreferences.HISTORY_PAGING_ENABLE_NAME, pagingEnable);
 		SVNTeamPreferences.setHistoryBoolean(store, SVNTeamPreferences.HISTORY_CONNECT_TO_COMPARE_WITH_NAME,
-				this.connectToCompareWith);
+				connectToCompareWith);
 
-		SVNTeamPreferences.setDateFormatInt(store, SVNTeamPreferences.DATE_FORMAT_NAME, this.dateFormat);
-		SVNTeamPreferences.setDateFormatString(store, SVNTeamPreferences.DATE_FORMAT_CUSTOM_NAME,
-				this.dateFormatCustom);
+		SVNTeamPreferences.setDateFormatInt(store, SVNTeamPreferences.DATE_FORMAT_NAME, dateFormat);
+		SVNTeamPreferences.setDateFormatString(store, SVNTeamPreferences.DATE_FORMAT_CUSTOM_NAME, dateFormatCustom);
 
 		SVNTeamPreferences.setConsultChangeSetsInCommit(store, SVNTeamPreferences.CONSULT_CHANGE_SETS_IN_COMMIT,
-				this.consultChangeSets);
+				consultChangeSets);
 
 		SVNTeamPreferences.setMailReporterBoolean(store, SVNTeamPreferences.MAILREPORTER_ENABLED_NAME,
-				this.mailReporterEnabled);
+				mailReporterEnabled);
 		SVNTeamPreferences.setMailReporterBoolean(store, SVNTeamPreferences.MAILREPORTER_ERRORS_ENABLED_NAME,
-				this.mailReporterErrorsEnabled);
+				mailReporterErrorsEnabled);
 
 		SVNTeamPreferences.setBehaviourBoolean(store, SVNTeamPreferences.BEHAVIOUR_COMMIT_SELECT_NEW_RESOURCES_NAME,
-				this.commitSelectNewResources);
-		if (this.commitSelectDerivedResources != SVNTeamPreferences.getBehaviourBoolean(store,
+				commitSelectNewResources);
+		if (commitSelectDerivedResources != SVNTeamPreferences.getBehaviourBoolean(store,
 				SVNTeamPreferences.BEHAVIOUR_COMMIT_SELECT_DERIVED_RESOURCES_NAME)) {
 			SVNRemoteStorage.instance()
 					.fireResourceStatesChangedEvent(new ResourceStatesChangedEvent(UpdateSubscriber.instance().roots(),
 							IResource.DEPTH_INFINITE, ResourceStatesChangedEvent.CHANGED_NODES));
 		}
 		SVNTeamPreferences.setBehaviourBoolean(store, SVNTeamPreferences.BEHAVIOUR_COMMIT_SELECT_DERIVED_RESOURCES_NAME,
-				this.commitSelectDerivedResources);
+				commitSelectDerivedResources);
 		SVNTeamPreferences.setBehaviourBoolean(store, SVNTeamPreferences.BEHAVIOUR_DO_NOT_SELECT_MISSING_RESOURCES_NAME,
-				this.notSelectMissingResources);
+				notSelectMissingResources);
 		SVNTeamPreferences.setBehaviourBoolean(store, SVNTeamPreferences.BEHAVIOUR_DO_NOT_SELECT_EXTERNALS_NAME,
-				this.useSubversionExternalsBehaviour);
+				useSubversionExternalsBehaviour);
 		SVNTeamPreferences.setBehaviourBoolean(store,
 				SVNTeamPreferences.BEHAVIOUR_SHOW_SELECTED_RESOURCES_IN_SYNC_PANE_NAME,
-				this.showSelectedResourcesInSyncPane);
+				showSelectedResourcesInSyncPane);
 		SVNTeamPreferences.setBehaviourBoolean(store, SVNTeamPreferences.BEHAVIOUR_TREAT_REPLACEMENT_AS_EDIT_NAME,
-				this.treatReplacementAsEdit);
+				treatReplacementAsEdit);
 		SVNTeamPreferences.setBehaviourBoolean(store, SVNTeamPreferences.BEHAVIOUR_ENABLE_AUTO_SHARE_NAME,
-				this.enableAutoShare);
+				enableAutoShare);
 		SVNTeamPreferences.setBehaviourBoolean(store, SVNTeamPreferences.BEHAVIOUR_COMPUTE_KEYWORDS_NAME,
-				this.computeKeywordsValues);
+				computeKeywordsValues);
 		SVNTeamPreferences.setBehaviourBoolean(store, SVNTeamPreferences.BEHAVIOUR_CASE_INSENSITIVE_TABLE_SORTING_NAME,
-				this.caseInsensitiveSorting);
+				caseInsensitiveSorting);
 		SVNTeamPreferences.setBehaviourBoolean(store, SVNTeamPreferences.BEHAVIOUR_IGNORE_EXTERNALS_NAME,
-				this.ignoreExternals);
+				ignoreExternals);
 
 		String oldId = CoreExtensionsManager.instance().getSVNConnectorFactory().getId();
-		if (!oldId.equals(this.svnConnector)) {
-			SVNTeamPreferences.setCoreString(store, SVNTeamPlugin.CORE_SVNCLIENT_NAME, this.svnConnector);
+		if (!oldId.equals(svnConnector)) {
+			SVNTeamPreferences.setCoreString(store, SVNTeamPlugin.CORE_SVNCLIENT_NAME, svnConnector);
 			// destroy all cached proxies
 			SVNRemoteStorage.instance().dispose();
 		}
 
-		SVNTeamPreferences.setMergeBoolean(store, SVNTeamPreferences.MERGE_USE_JAVAHL_NAME, this.useJavaHLMerge);
-		SVNTeamPreferences.setMergeBoolean(store, SVNTeamPreferences.MERGE_INCLUDE_MERGED_NAME,
-				this.includeMergedRevisions);
+		SVNTeamPreferences.setMergeBoolean(store, SVNTeamPreferences.MERGE_USE_JAVAHL_NAME, useJavaHLMerge);
+		SVNTeamPreferences.setMergeBoolean(store, SVNTeamPreferences.MERGE_INCLUDE_MERGED_NAME, includeMergedRevisions);
 
 		SVNTeamPreferences.setCheckoutBoolean(store, SVNTeamPreferences.CHECKOUT_USE_DOT_PROJECT_NAME,
-				this.checkoutUsingDotProjectName);
+				checkoutUsingDotProjectName);
 		SVNTeamPreferences.setCheckoutBoolean(store, SVNTeamPreferences.CHECKOUT_RESPECT_PROJECT_STRUCTURE_NAME,
-				this.checkoutRespectProjectStructure);
+				checkoutRespectProjectStructure);
 		SVNTeamPreferences.setCheckoutBoolean(store, SVNTeamPreferences.CHECKOUT_USE_DEFAULT_LOCATION_NAME,
-				this.checkoutUseDefaultLocation);
+				checkoutUseDefaultLocation);
 		SVNTeamPreferences.setCheckoutString(store, SVNTeamPreferences.CHECKOUT_SPECIFIED_LOCATION_NAME,
-				this.checkoutSpecifiedLocation);
+				checkoutSpecifiedLocation);
 	}
 
+	@Override
 	protected void loadDefaultValues(IPreferenceStore store) {
-		this.head = SVNTeamPreferences.REPOSITORY_HEAD_DEFAULT;
-		this.branches = SVNTeamPreferences.REPOSITORY_BRANCHES_DEFAULT;
-		this.tags = SVNTeamPreferences.REPOSITORY_TAGS_DEFAULT;
-		this.showExternals = SVNTeamPreferences.REPOSITORY_SHOW_EXTERNALS_DEFAULT;
+		head = SVNTeamPreferences.REPOSITORY_HEAD_DEFAULT;
+		branches = SVNTeamPreferences.REPOSITORY_BRANCHES_DEFAULT;
+		tags = SVNTeamPreferences.REPOSITORY_TAGS_DEFAULT;
+		showExternals = SVNTeamPreferences.REPOSITORY_SHOW_EXTERNALS_DEFAULT;
 
-		this.fastReport = Boolean.parseBoolean(AbstractSVNSubscriber.CONTIGOUS_REPORT_DEFAULT);
-		this.enableModelSync = SVNTeamPreferences.ENABLE_MODEL_SYNC_DEFAULT;
+		fastReport = Boolean.parseBoolean(AbstractSVNSubscriber.CONTIGOUS_REPORT_DEFAULT);
+		enableModelSync = SVNTeamPreferences.ENABLE_MODEL_SYNC_DEFAULT;
 
-		this.pagingEnable = SVNTeamPreferences.HISTORY_PAGING_ENABLE_DEFAULT;
-		this.pageSize = SVNTeamPreferences.HISTORY_PAGE_SIZE_DEFAULT;
-		this.connectToCompareWith = SVNTeamPreferences.HISTORY_CONNECT_TO_COMPARE_WITH_DEFAULT;
+		pagingEnable = SVNTeamPreferences.HISTORY_PAGING_ENABLE_DEFAULT;
+		pageSize = SVNTeamPreferences.HISTORY_PAGE_SIZE_DEFAULT;
+		connectToCompareWith = SVNTeamPreferences.HISTORY_CONNECT_TO_COMPARE_WITH_DEFAULT;
 
-		this.dateFormat = SVNTeamPreferences.DATE_FORMAT_DEFAULT;
-		this.dateFormatCustom = SVNTeamPreferences.DATE_FORMAT_CUSTOM_DEFAULT;
+		dateFormat = SVNTeamPreferences.DATE_FORMAT_DEFAULT;
+		dateFormatCustom = SVNTeamPreferences.DATE_FORMAT_CUSTOM_DEFAULT;
 
-		this.consultChangeSets = SVNTeamPreferences.CONSULT_CHANGE_SETS_IN_COMMIT_DEFAULT;
+		consultChangeSets = SVNTeamPreferences.CONSULT_CHANGE_SETS_IN_COMMIT_DEFAULT;
 
-		this.mailReporterEnabled = SVNTeamPreferences.MAILREPORTER_ENABLED_DEFAULT;
-		this.mailReporterErrorsEnabled = SVNTeamPreferences.MAILREPORTER_ERRORS_ENABLED_DEFAULT;
+		mailReporterEnabled = SVNTeamPreferences.MAILREPORTER_ENABLED_DEFAULT;
+		mailReporterErrorsEnabled = SVNTeamPreferences.MAILREPORTER_ERRORS_ENABLED_DEFAULT;
 
-		this.commitSelectNewResources = SVNTeamPreferences.BEHAVIOUR_COMMIT_SELECT_NEW_RESOURCES_DEFAULT;
-		this.commitSelectDerivedResources = SVNTeamPreferences.BEHAVIOUR_COMMIT_SELECT_DERIVED_RESOURCES_DEFAULT;
-		this.notSelectMissingResources = SVNTeamPreferences.BEHAVIOUR_DO_NOT_SELECT_MISSING_RESOURCES_NAME_DEFAULT;
-		this.useSubversionExternalsBehaviour = SVNTeamPreferences.BEHAVIOUR_DO_NOT_SELECT_EXTERNAL_DEFAULT;
-		this.showSelectedResourcesInSyncPane = SVNTeamPreferences.BEHAVIOUR_SHOW_SELECTED_RESOURCES_IN_SYNC_PANE_DEFAULT;
-		this.treatReplacementAsEdit = SVNTeamPreferences.BEHAVIOUR_TREAT_REPLACEMENT_AS_EDIT_DEFAULT;
+		commitSelectNewResources = SVNTeamPreferences.BEHAVIOUR_COMMIT_SELECT_NEW_RESOURCES_DEFAULT;
+		commitSelectDerivedResources = SVNTeamPreferences.BEHAVIOUR_COMMIT_SELECT_DERIVED_RESOURCES_DEFAULT;
+		notSelectMissingResources = SVNTeamPreferences.BEHAVIOUR_DO_NOT_SELECT_MISSING_RESOURCES_NAME_DEFAULT;
+		useSubversionExternalsBehaviour = SVNTeamPreferences.BEHAVIOUR_DO_NOT_SELECT_EXTERNAL_DEFAULT;
+		showSelectedResourcesInSyncPane = SVNTeamPreferences.BEHAVIOUR_SHOW_SELECTED_RESOURCES_IN_SYNC_PANE_DEFAULT;
+		treatReplacementAsEdit = SVNTeamPreferences.BEHAVIOUR_TREAT_REPLACEMENT_AS_EDIT_DEFAULT;
 
-		this.useJavaHLMerge = SVNTeamPreferences.MERGE_USE_JAVAHL_DEFAULT;
-		this.includeMergedRevisions = SVNTeamPreferences.MERGE_INCLUDE_MERGED_DEFAULT;
+		useJavaHLMerge = SVNTeamPreferences.MERGE_USE_JAVAHL_DEFAULT;
+		includeMergedRevisions = SVNTeamPreferences.MERGE_INCLUDE_MERGED_DEFAULT;
 
-		this.checkoutUsingDotProjectName = SVNTeamPreferences.CHECKOUT_USE_DOT_PROJECT_DEFAULT;
-		this.checkoutRespectProjectStructure = SVNTeamPreferences.CHECKOUT_RESPECT_PROJECT_STRUCTURE_DEFAULT;
-		this.checkoutUseDefaultLocation = SVNTeamPreferences.CHECKOUT_USE_DEFAULT_LOCATION_DEFAULT;
-		this.checkoutSpecifiedLocation = ResourcesPlugin.getWorkspace().getRoot().getLocation().toString();
+		checkoutUsingDotProjectName = SVNTeamPreferences.CHECKOUT_USE_DOT_PROJECT_DEFAULT;
+		checkoutRespectProjectStructure = SVNTeamPreferences.CHECKOUT_RESPECT_PROJECT_STRUCTURE_DEFAULT;
+		checkoutUseDefaultLocation = SVNTeamPreferences.CHECKOUT_USE_DEFAULT_LOCATION_DEFAULT;
+		checkoutSpecifiedLocation = ResourcesPlugin.getWorkspace().getRoot().getLocation().toString();
 
-		this.branchTagConsiderStructure = SVNTeamPreferences.BRANCH_TAG_CONSIDER_STRUCTURE_DEFAULT;
-		this.forceExternalsFreeze = SVNTeamPreferences.REPOSITORY_FORCE_EXTERNALS_FREEZE_DEFAULT;
+		branchTagConsiderStructure = SVNTeamPreferences.BRANCH_TAG_CONSIDER_STRUCTURE_DEFAULT;
+		forceExternalsFreeze = SVNTeamPreferences.REPOSITORY_FORCE_EXTERNALS_FREEZE_DEFAULT;
 
-		this.computeKeywordsValues = SVNTeamPreferences.BEHAVIOUR_COMPUTE_KEYWORDS_DEFAULT;
+		computeKeywordsValues = SVNTeamPreferences.BEHAVIOUR_COMPUTE_KEYWORDS_DEFAULT;
 
-		this.enableAutoShare = SVNTeamPreferences.BEHAVIOUR_ENABLE_AUTO_SHARE_DEFAULT;
+		enableAutoShare = SVNTeamPreferences.BEHAVIOUR_ENABLE_AUTO_SHARE_DEFAULT;
 
-		this.caseInsensitiveSorting = SVNTeamPreferences.BEHAVIOUR_CASE_INSENSITIVE_TABLE_SORTING_DEFAULT;
+		caseInsensitiveSorting = SVNTeamPreferences.BEHAVIOUR_CASE_INSENSITIVE_TABLE_SORTING_DEFAULT;
 
-		this.ignoreExternals = SVNTeamPreferences.BEHAVIOUR_IGNORE_EXTERNALS_DEFAULT;
+		ignoreExternals = SVNTeamPreferences.BEHAVIOUR_IGNORE_EXTERNALS_DEFAULT;
 
-		this.svnConnector = SVNTeamPreferences.CORE_SVNCONNECTOR_DEFAULT;
+		svnConnector = SVNTeamPreferences.CORE_SVNCONNECTOR_DEFAULT;
 	}
 
+	@Override
 	protected void loadValues(IPreferenceStore store) {
-		this.head = SVNTeamPreferences.getRepositoryString(store, SVNTeamPreferences.REPOSITORY_HEAD_NAME);
-		this.branches = SVNTeamPreferences.getRepositoryString(store, SVNTeamPreferences.REPOSITORY_BRANCHES_NAME);
-		this.tags = SVNTeamPreferences.getRepositoryString(store, SVNTeamPreferences.REPOSITORY_TAGS_NAME);
-		this.showExternals = SVNTeamPreferences.getRepositoryBoolean(store,
+		head = SVNTeamPreferences.getRepositoryString(store, SVNTeamPreferences.REPOSITORY_HEAD_NAME);
+		branches = SVNTeamPreferences.getRepositoryString(store, SVNTeamPreferences.REPOSITORY_BRANCHES_NAME);
+		tags = SVNTeamPreferences.getRepositoryString(store, SVNTeamPreferences.REPOSITORY_TAGS_NAME);
+		showExternals = SVNTeamPreferences.getRepositoryBoolean(store,
 				SVNTeamPreferences.REPOSITORY_SHOW_EXTERNALS_NAME);
-		this.simpleShare = SVNTeamPreferences.getRepositoryBoolean(store,
-				SVNTeamPreferences.REPOSITORY_SIMPLE_SHARE_NAME);
+		simpleShare = SVNTeamPreferences.getRepositoryBoolean(store, SVNTeamPreferences.REPOSITORY_SIMPLE_SHARE_NAME);
 
-		this.fastReport = AbstractSVNSubscriber.getSynchInfoContigous();
-		this.enableModelSync = SVNTeamPreferences.getSynchronizeBoolean(store,
-				SVNTeamPreferences.ENABLE_MODEL_SYNC_NAME);
+		fastReport = AbstractSVNSubscriber.getSynchInfoContigous();
+		enableModelSync = SVNTeamPreferences.getSynchronizeBoolean(store, SVNTeamPreferences.ENABLE_MODEL_SYNC_NAME);
 
-		this.connectToCompareWith = SVNTeamPreferences.getHistoryBoolean(store,
+		connectToCompareWith = SVNTeamPreferences.getHistoryBoolean(store,
 				SVNTeamPreferences.HISTORY_CONNECT_TO_COMPARE_WITH_NAME);
-		this.pagingEnable = SVNTeamPreferences.getHistoryBoolean(store, SVNTeamPreferences.HISTORY_PAGING_ENABLE_NAME);
-		this.pageSize = SVNTeamPreferences.getHistoryInt(store, SVNTeamPreferences.HISTORY_PAGE_SIZE_NAME);
+		pagingEnable = SVNTeamPreferences.getHistoryBoolean(store, SVNTeamPreferences.HISTORY_PAGING_ENABLE_NAME);
+		pageSize = SVNTeamPreferences.getHistoryInt(store, SVNTeamPreferences.HISTORY_PAGE_SIZE_NAME);
 
-		this.dateFormat = SVNTeamPreferences.getDateFormatInt(store, SVNTeamPreferences.DATE_FORMAT_NAME);
-		this.dateFormatCustom = SVNTeamPreferences.getDateFormatString(store,
-				SVNTeamPreferences.DATE_FORMAT_CUSTOM_NAME);
+		dateFormat = SVNTeamPreferences.getDateFormatInt(store, SVNTeamPreferences.DATE_FORMAT_NAME);
+		dateFormatCustom = SVNTeamPreferences.getDateFormatString(store, SVNTeamPreferences.DATE_FORMAT_CUSTOM_NAME);
 
-		this.consultChangeSets = SVNTeamPreferences.getConsultChangeSetsInCommit(store,
+		consultChangeSets = SVNTeamPreferences.getConsultChangeSetsInCommit(store,
 				SVNTeamPreferences.CONSULT_CHANGE_SETS_IN_COMMIT);
 
-		this.mailReporterEnabled = SVNTeamPreferences.getMailReporterBoolean(store,
+		mailReporterEnabled = SVNTeamPreferences.getMailReporterBoolean(store,
 				SVNTeamPreferences.MAILREPORTER_ENABLED_NAME);
-		this.mailReporterErrorsEnabled = SVNTeamPreferences.getMailReporterBoolean(store,
+		mailReporterErrorsEnabled = SVNTeamPreferences.getMailReporterBoolean(store,
 				SVNTeamPreferences.MAILREPORTER_ERRORS_ENABLED_NAME);
 
-		this.commitSelectNewResources = SVNTeamPreferences.getBehaviourBoolean(store,
+		commitSelectNewResources = SVNTeamPreferences.getBehaviourBoolean(store,
 				SVNTeamPreferences.BEHAVIOUR_COMMIT_SELECT_NEW_RESOURCES_NAME);
-		this.commitSelectDerivedResources = SVNTeamPreferences.getBehaviourBoolean(store,
+		commitSelectDerivedResources = SVNTeamPreferences.getBehaviourBoolean(store,
 				SVNTeamPreferences.BEHAVIOUR_COMMIT_SELECT_DERIVED_RESOURCES_NAME);
-		this.notSelectMissingResources = SVNTeamPreferences.getBehaviourBoolean(store,
+		notSelectMissingResources = SVNTeamPreferences.getBehaviourBoolean(store,
 				SVNTeamPreferences.BEHAVIOUR_DO_NOT_SELECT_MISSING_RESOURCES_NAME);
-		this.useSubversionExternalsBehaviour = SVNTeamPreferences.getBehaviourBoolean(store,
+		useSubversionExternalsBehaviour = SVNTeamPreferences.getBehaviourBoolean(store,
 				SVNTeamPreferences.BEHAVIOUR_DO_NOT_SELECT_EXTERNALS_NAME);
-		this.showSelectedResourcesInSyncPane = SVNTeamPreferences.getBehaviourBoolean(store,
+		showSelectedResourcesInSyncPane = SVNTeamPreferences.getBehaviourBoolean(store,
 				SVNTeamPreferences.BEHAVIOUR_SHOW_SELECTED_RESOURCES_IN_SYNC_PANE_NAME);
-		this.treatReplacementAsEdit = SVNTeamPreferences.getBehaviourBoolean(store,
+		treatReplacementAsEdit = SVNTeamPreferences.getBehaviourBoolean(store,
 				SVNTeamPreferences.BEHAVIOUR_TREAT_REPLACEMENT_AS_EDIT_NAME);
-		this.enableAutoShare = SVNTeamPreferences.getBehaviourBoolean(store,
+		enableAutoShare = SVNTeamPreferences.getBehaviourBoolean(store,
 				SVNTeamPreferences.BEHAVIOUR_ENABLE_AUTO_SHARE_NAME);
-		this.computeKeywordsValues = SVNTeamPreferences.getBehaviourBoolean(store,
+		computeKeywordsValues = SVNTeamPreferences.getBehaviourBoolean(store,
 				SVNTeamPreferences.BEHAVIOUR_COMPUTE_KEYWORDS_NAME);
-		this.caseInsensitiveSorting = SVNTeamPreferences.getBehaviourBoolean(store,
+		caseInsensitiveSorting = SVNTeamPreferences.getBehaviourBoolean(store,
 				SVNTeamPreferences.BEHAVIOUR_CASE_INSENSITIVE_TABLE_SORTING_NAME);
-		this.ignoreExternals = SVNTeamPreferences.getBehaviourBoolean(store,
+		ignoreExternals = SVNTeamPreferences.getBehaviourBoolean(store,
 				SVNTeamPreferences.BEHAVIOUR_IGNORE_EXTERNALS_NAME);
 
-		this.useJavaHLMerge = SVNTeamPreferences.getMergeBoolean(store, SVNTeamPreferences.MERGE_USE_JAVAHL_NAME);
-		this.includeMergedRevisions = SVNTeamPreferences.getMergeBoolean(store,
+		useJavaHLMerge = SVNTeamPreferences.getMergeBoolean(store, SVNTeamPreferences.MERGE_USE_JAVAHL_NAME);
+		includeMergedRevisions = SVNTeamPreferences.getMergeBoolean(store,
 				SVNTeamPreferences.MERGE_INCLUDE_MERGED_NAME);
 
-		this.checkoutUsingDotProjectName = SVNTeamPreferences.getCheckoutBoolean(store,
+		checkoutUsingDotProjectName = SVNTeamPreferences.getCheckoutBoolean(store,
 				SVNTeamPreferences.CHECKOUT_USE_DOT_PROJECT_NAME);
-		this.checkoutRespectProjectStructure = SVNTeamPreferences.getCheckoutBoolean(store,
+		checkoutRespectProjectStructure = SVNTeamPreferences.getCheckoutBoolean(store,
 				SVNTeamPreferences.CHECKOUT_RESPECT_PROJECT_STRUCTURE_NAME);
-		this.checkoutUseDefaultLocation = SVNTeamPreferences.getCheckoutBoolean(store,
+		checkoutUseDefaultLocation = SVNTeamPreferences.getCheckoutBoolean(store,
 				SVNTeamPreferences.CHECKOUT_USE_DEFAULT_LOCATION_NAME);
-		this.checkoutSpecifiedLocation = SVNTeamPreferences.getCheckoutString(store,
+		checkoutSpecifiedLocation = SVNTeamPreferences.getCheckoutString(store,
 				SVNTeamPreferences.CHECKOUT_SPECIFIED_LOCATION_NAME);
 
-		this.branchTagConsiderStructure = SVNTeamPreferences.getRepositoryBoolean(store,
+		branchTagConsiderStructure = SVNTeamPreferences.getRepositoryBoolean(store,
 				SVNTeamPreferences.BRANCH_TAG_CONSIDER_STRUCTURE_NAME);
-		this.forceExternalsFreeze = SVNTeamPreferences.getRepositoryBoolean(store,
+		forceExternalsFreeze = SVNTeamPreferences.getRepositoryBoolean(store,
 				SVNTeamPreferences.REPOSITORY_FORCE_EXTERNALS_FREEZE_NAME);
 
 		//Client specified in preferences currently may be uninstalled. So, request real used connector instead of saved.
-		this.svnConnector = CoreExtensionsManager.instance().getSVNConnectorFactory().getId();
+		svnConnector = CoreExtensionsManager.instance().getSVNConnectorFactory().getId();
 	}
 
+	@Override
 	protected void initializeControls() {
-		this.headField.setText(this.head);
-		this.branchesField.setText(this.branches);
-		this.tagsField.setText(this.tags);
-		this.showExternalsButton.setSelection(this.showExternals);
+		headField.setText(head);
+		branchesField.setText(branches);
+		tagsField.setText(tags);
+		showExternalsButton.setSelection(showExternals);
 
-		this.fastReportButton.setSelection(this.fastReport);
-		this.enableModelSyncButton.setSelection(this.enableModelSync);
+		fastReportButton.setSelection(fastReport);
+		enableModelSyncButton.setSelection(enableModelSync);
 
-		this.pageSizeField.setText(String.valueOf(this.pageSize));
-		this.enablePagingButton.setSelection(this.pagingEnable);
-		this.pageSizeField.setEnabled(this.pagingEnable);
-		this.connectToCompareWithButton.setSelection(this.connectToCompareWith);
+		pageSizeField.setText(String.valueOf(pageSize));
+		enablePagingButton.setSelection(pagingEnable);
+		pageSizeField.setEnabled(pagingEnable);
+		connectToCompareWithButton.setSelection(connectToCompareWith);
 
-		this.dateFormatField.select(this.dateFormat);
-		this.dateFormatCustomField.setEnabled(this.dateFormat == SVNTeamPreferences.DATE_FORMAT_MODE_CUSTOM);
-		this.setDateFormatValue();
+		dateFormatField.select(dateFormat);
+		dateFormatCustomField.setEnabled(dateFormat == SVNTeamPreferences.DATE_FORMAT_MODE_CUSTOM);
+		setDateFormatValue();
 
-		this.consultCSAlwaysButton
-				.setSelection(SVNTeamPreferences.CONSULT_CHANGE_SETS_IN_COMMIT_ALWAYS.equals(this.consultChangeSets));
-		this.consultCSNeverButton
-				.setSelection(SVNTeamPreferences.CONSULT_CHANGE_SETS_IN_COMMIT_NEVER.equals(this.consultChangeSets));
-		this.consultCSPromptButton
-				.setSelection(SVNTeamPreferences.CONSULT_CHANGE_SETS_IN_COMMIT_PROMPT.equals(this.consultChangeSets));
+		consultCSAlwaysButton
+				.setSelection(SVNTeamPreferences.CONSULT_CHANGE_SETS_IN_COMMIT_ALWAYS.equals(consultChangeSets));
+		consultCSNeverButton
+				.setSelection(SVNTeamPreferences.CONSULT_CHANGE_SETS_IN_COMMIT_NEVER.equals(consultChangeSets));
+		consultCSPromptButton
+				.setSelection(SVNTeamPreferences.CONSULT_CHANGE_SETS_IN_COMMIT_PROMPT.equals(consultChangeSets));
 
-		this.mailReporterEnabledButton.setSelection(this.mailReporterEnabled);
-		this.mailReporterErrorsEnabledButton.setSelection(this.mailReporterErrorsEnabled);
+		mailReporterEnabledButton.setSelection(mailReporterEnabled);
+		mailReporterErrorsEnabledButton.setSelection(mailReporterErrorsEnabled);
 
-		this.btnResourceSelectionNew.setSelection(this.commitSelectNewResources);
-		this.btnResourceSelectionDerived.setSelection(this.commitSelectDerivedResources);
-		this.btnResourceNotSelectionMissing.setSelection(this.notSelectMissingResources);
-		this.btnResourceSelectionExternal.setSelection(this.useSubversionExternalsBehaviour);
-		this.btnResourceSelectionPresentation.setSelection(this.showSelectedResourcesInSyncPane);
-		this.btnResourceSelectionTreatAsEdit.setSelection(this.treatReplacementAsEdit);
+		btnResourceSelectionNew.setSelection(commitSelectNewResources);
+		btnResourceSelectionDerived.setSelection(commitSelectDerivedResources);
+		btnResourceNotSelectionMissing.setSelection(notSelectMissingResources);
+		btnResourceSelectionExternal.setSelection(useSubversionExternalsBehaviour);
+		btnResourceSelectionPresentation.setSelection(showSelectedResourcesInSyncPane);
+		btnResourceSelectionTreatAsEdit.setSelection(treatReplacementAsEdit);
 
-		List<ISVNConnectorFactory> factoriesList = Arrays.asList(this.factories);
-		this.svnConnectorField.select(
-				factoriesList.indexOf(CoreExtensionsManager.instance().getSVNConnectorFactory(this.svnConnector)));
+		List<ISVNConnectorFactory> factoriesList = Arrays.asList(factories);
+		svnConnectorField.select(
+				factoriesList.indexOf(CoreExtensionsManager.instance().getSVNConnectorFactory(svnConnector)));
 
-		this.initializeClientSettings();
+		initializeClientSettings();
 
-		this.checkoutUsingDotProjectNameButton.setSelection(this.checkoutUsingDotProjectName);
-		this.checkoutRespectProjectStructureButton.setSelection(this.checkoutRespectProjectStructure);
-		this.useDefaultLocationButton.setSelection(this.checkoutUseDefaultLocation);
-		this.locationField.setText(this.checkoutSpecifiedLocation);
-		this.locationField.setEnabled(!this.checkoutUseDefaultLocation);
-		this.browse.setEnabled(!this.checkoutUseDefaultLocation);
+		checkoutUsingDotProjectNameButton.setSelection(checkoutUsingDotProjectName);
+		checkoutRespectProjectStructureButton.setSelection(checkoutRespectProjectStructure);
+		useDefaultLocationButton.setSelection(checkoutUseDefaultLocation);
+		locationField.setText(checkoutSpecifiedLocation);
+		locationField.setEnabled(!checkoutUseDefaultLocation);
+		browse.setEnabled(!checkoutUseDefaultLocation);
 
-		this.branchTagConsiderStructureButton.setSelection(this.branchTagConsiderStructure);
-		this.forceExternalsFreezeButton.setSelection(this.forceExternalsFreeze);
+		branchTagConsiderStructureButton.setSelection(branchTagConsiderStructure);
+		forceExternalsFreezeButton.setSelection(forceExternalsFreeze);
 
-		this.branchTagManualUrlEditButton.setSelection(!this.branchTagConsiderStructure);
+		branchTagManualUrlEditButton.setSelection(!branchTagConsiderStructure);
 
-		this.computeKeywordsValuesButton.setSelection(this.computeKeywordsValues);
+		computeKeywordsValuesButton.setSelection(computeKeywordsValues);
 
-		this.enableAutoShareButton.setSelection(this.enableAutoShare);
+		enableAutoShareButton.setSelection(enableAutoShare);
 
-		this.caseInsensitiveSortingButton.setSelection(this.caseInsensitiveSorting);
+		caseInsensitiveSortingButton.setSelection(caseInsensitiveSorting);
 
-		this.ignoreExternalsButton.setSelection(this.ignoreExternals);
+		ignoreExternalsButton.setSelection(ignoreExternals);
 	}
 
 	protected void initializeClientSettings() {
 		boolean isSVN15CompatibleConnector = CoreExtensionsManager.instance()
-				.getSVNConnectorFactory(this.svnConnector)
+				.getSVNConnectorFactory(svnConnector)
 				.getSVNAPIVersion() >= ISVNConnectorFactory.APICompatibility.SVNAPI_1_5_x;
-		this.useInteractiveMergeButton.setSelection(!this.useJavaHLMerge);
-		this.includeMergedRevisionsButton.setSelection(this.includeMergedRevisions);
-		this.includeMergedRevisionsButton.setEnabled(isSVN15CompatibleConnector);
+		useInteractiveMergeButton.setSelection(!useJavaHLMerge);
+		includeMergedRevisionsButton.setSelection(includeMergedRevisions);
+		includeMergedRevisionsButton.setEnabled(isSVN15CompatibleConnector);
 	}
 
+	@Override
 	protected Control createContentsImpl(Composite parent) {
 		TabFolder tabFolder = new TabFolder(parent, SWT.NONE);
 		tabFolder.setLayout(new TabFolderLayout());
@@ -509,23 +502,23 @@ public class SVNTeamPreferencesPage extends AbstractSVNTeamPreferencesPage {
 
 		TabItem tabItem = new TabItem(tabFolder, SWT.NONE);
 		tabItem.setText(SVNUIMessages.MainPreferencePage_generalTabName);
-		tabItem.setControl(this.createGeneralPage(tabFolder));
+		tabItem.setControl(createGeneralPage(tabFolder));
 
 		tabItem = new TabItem(tabFolder, SWT.NONE);
 		tabItem.setText(SVNUIMessages.MainPreferencePage_svnConnectorTabName);
-		tabItem.setControl(this.createSVNConnectorsPage(tabFolder));
+		tabItem.setControl(createSVNConnectorsPage(tabFolder));
 
 		tabItem = new TabItem(tabFolder, SWT.NONE);
 		tabItem.setText(SVNUIMessages.MainPreferencePage_repositoryTabName);
-		tabItem.setControl(this.createRepositorySettingsPage(tabFolder));
+		tabItem.setControl(createRepositorySettingsPage(tabFolder));
 
 		tabItem = new TabItem(tabFolder, SWT.NONE);
 		tabItem.setText(SVNUIMessages.MainPreferencePage_viewSettingsTabName);
-		tabItem.setControl(this.createViewSettingsPage(tabFolder));
+		tabItem.setControl(createViewSettingsPage(tabFolder));
 
 		tabItem = new TabItem(tabFolder, SWT.NONE);
 		tabItem.setText(SVNUIMessages.MainPreferencePage_mailReporterGroupName);
-		tabItem.setControl(this.createErrorReportingSettingsPage(tabFolder));
+		tabItem.setControl(createErrorReportingSettingsPage(tabFolder));
 
 //		Setting context help
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(parent, "org.eclipse.team.svn.help.SVNPreferencesContext"); //$NON-NLS-1$
@@ -556,46 +549,38 @@ public class SVNTeamPreferencesPage extends AbstractSVNTeamPreferencesPage {
 		label.setLayoutData(data);
 		label.setText(SVNUIMessages.MainPreferencePage_svnConnector);
 
-		this.svnConnectorField = new Combo(composite, SWT.READ_ONLY);
+		svnConnectorField = new Combo(composite, SWT.READ_ONLY);
 		data = new GridData(GridData.FILL_HORIZONTAL);
 		data.widthHint = 100;
-		this.svnConnectorField.setLayoutData(data);
+		svnConnectorField.setLayoutData(data);
 		Collection<?> fullSet = CoreExtensionsManager.instance().getAccessibleClients();
-		this.factories = fullSet.toArray(new ISVNConnectorFactory[fullSet.size()]);
-		Arrays.sort(this.factories, new Comparator<Object>() {
-			public int compare(Object o1, Object o2) {
-				return ((ISVNConnectorFactory) o1).getName().compareTo(((ISVNConnectorFactory) o2).getName());
-			}
-		});
+		factories = fullSet.toArray(new ISVNConnectorFactory[fullSet.size()]);
+		Arrays.sort(factories, (o1, o2) -> ((ISVNConnectorFactory) o1).getName().compareTo(((ISVNConnectorFactory) o2).getName()));
 		String[] items = new String[fullSet.size()];
 		for (int i = 0; i < items.length; i++) {
-			items[i] = SVNConnectorHelper.getConnectorName(this.factories[i]);
+			items[i] = SVNConnectorHelper.getConnectorName(factories[i]);
 		}
-		this.svnConnectorField.setItems(items);
-		this.svnConnectorField.setVisibleItemCount(items.length);
-		this.svnConnectorField.addSelectionListener(new SelectionAdapter() {
+		svnConnectorField.setItems(items);
+		svnConnectorField.setVisibleItemCount(items.length);
+		svnConnectorField.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
-				SVNTeamPreferencesPage.this.svnConnector = SVNTeamPreferencesPage.this.factories[SVNTeamPreferencesPage.this.svnConnectorField
-						.getSelectionIndex()].getId();
+				svnConnector = factories[svnConnectorField.getSelectionIndex()].getId();
 				SVNTeamPreferencesPage.this.initializeClientSettings();
 			}
 		});
 
 		if (CoreExtensionsManager.instance().getAccessibleClients().isEmpty()) {
-			this.checkForConnectorsButton = new Button(composite, SWT.PUSH);
-			this.checkForConnectorsButton.setText(SVNUIMessages.Button_CheckForConnectors);
+			checkForConnectorsButton = new Button(composite, SWT.PUSH);
+			checkForConnectorsButton.setText(SVNUIMessages.Button_CheckForConnectors);
 			data = new GridData(GridData.FILL_HORIZONTAL);
-			data.widthHint = DefaultDialog.computeButtonWidth(this.checkForConnectorsButton);
+			data.widthHint = DefaultDialog.computeButtonWidth(checkForConnectorsButton);
 			data.grabExcessHorizontalSpace = true;
 			data.horizontalSpan = 2;
 			data.horizontalAlignment = SWT.RIGHT;
-			this.checkForConnectorsButton.setLayoutData(data);
-			this.checkForConnectorsButton.setEnabled(true);
-			this.checkForConnectorsButton.addListener(SWT.Selection, new Listener() {
-				public void handleEvent(Event event) {
-					SVNTeamUIPlugin.instance().discoveryConnectors();
-				}
-			});
+			checkForConnectorsButton.setLayoutData(data);
+			checkForConnectorsButton.setEnabled(true);
+			checkForConnectorsButton.addListener(SWT.Selection, event -> SVNTeamUIPlugin.instance().discoveryConnectors());
 		}
 
 		// Merge settings group
@@ -612,14 +597,14 @@ public class SVNTeamPreferencesPage extends AbstractSVNTeamPreferencesPage {
 		label.setLayoutData(data);
 		label.setText(SVNUIMessages.MainPreferencePage_mergePrompt);
 
-		this.useInteractiveMergeButton = new Button(group, SWT.CHECK);
+		useInteractiveMergeButton = new Button(group, SWT.CHECK);
 		data = new GridData();
-		this.useInteractiveMergeButton.setLayoutData(data);
-		this.useInteractiveMergeButton.setText(SVNUIMessages.MainPreferencePage_mergeUseInteractiveMerge);
-		this.useInteractiveMergeButton.addSelectionListener(new SelectionAdapter() {
+		useInteractiveMergeButton.setLayoutData(data);
+		useInteractiveMergeButton.setText(SVNUIMessages.MainPreferencePage_mergeUseInteractiveMerge);
+		useInteractiveMergeButton.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
-				SVNTeamPreferencesPage.this.useJavaHLMerge = !SVNTeamPreferencesPage.this.useInteractiveMergeButton
-						.getSelection();
+				useJavaHLMerge = !useInteractiveMergeButton.getSelection();
 			}
 		});
 
@@ -632,14 +617,14 @@ public class SVNTeamPreferencesPage extends AbstractSVNTeamPreferencesPage {
 		label.setLayoutData(data);
 		label.setText(SVNUIMessages.MainPreferencePage_includeMergedRevisionsLabel);
 
-		this.includeMergedRevisionsButton = new Button(group, SWT.CHECK);
+		includeMergedRevisionsButton = new Button(group, SWT.CHECK);
 		data = new GridData();
-		this.includeMergedRevisionsButton.setLayoutData(data);
-		this.includeMergedRevisionsButton.setText(SVNUIMessages.MainPreferencePage_includeMergedRevisions);
-		this.includeMergedRevisionsButton.addSelectionListener(new SelectionAdapter() {
+		includeMergedRevisionsButton.setLayoutData(data);
+		includeMergedRevisionsButton.setText(SVNUIMessages.MainPreferencePage_includeMergedRevisions);
+		includeMergedRevisionsButton.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
-				SVNTeamPreferencesPage.this.includeMergedRevisions = SVNTeamPreferencesPage.this.includeMergedRevisionsButton
-						.getSelection();
+				includeMergedRevisions = includeMergedRevisionsButton.getSelection();
 			}
 		});
 
@@ -668,69 +653,69 @@ public class SVNTeamPreferencesPage extends AbstractSVNTeamPreferencesPage {
 		label.setLayoutData(data);
 		label.setText(SVNUIMessages.MainPreferencePage_resourceSelectionPrompt);
 
-		this.btnResourceSelectionNew = new Button(group, SWT.CHECK);
+		btnResourceSelectionNew = new Button(group, SWT.CHECK);
 		data = new GridData();
-		this.btnResourceSelectionNew.setLayoutData(data);
-		this.btnResourceSelectionNew.setText(SVNUIMessages.MainPreferencePage_resourceSelectionNew);
-		this.btnResourceSelectionNew.addSelectionListener(new SelectionAdapter() {
+		btnResourceSelectionNew.setLayoutData(data);
+		btnResourceSelectionNew.setText(SVNUIMessages.MainPreferencePage_resourceSelectionNew);
+		btnResourceSelectionNew.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
-				SVNTeamPreferencesPage.this.commitSelectNewResources = SVNTeamPreferencesPage.this.btnResourceSelectionNew
-						.getSelection();
+				commitSelectNewResources = btnResourceSelectionNew.getSelection();
 			}
 		});
 
-		this.btnResourceSelectionDerived = new Button(group, SWT.CHECK);
+		btnResourceSelectionDerived = new Button(group, SWT.CHECK);
 		data = new GridData();
-		this.btnResourceSelectionDerived.setLayoutData(data);
-		this.btnResourceSelectionDerived.setText(SVNUIMessages.MainPreferencePage_resourceSelectionDerived);
-		this.btnResourceSelectionDerived.addSelectionListener(new SelectionAdapter() {
+		btnResourceSelectionDerived.setLayoutData(data);
+		btnResourceSelectionDerived.setText(SVNUIMessages.MainPreferencePage_resourceSelectionDerived);
+		btnResourceSelectionDerived.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
-				SVNTeamPreferencesPage.this.commitSelectDerivedResources = SVNTeamPreferencesPage.this.btnResourceSelectionDerived
-						.getSelection();
+				commitSelectDerivedResources = btnResourceSelectionDerived.getSelection();
 			}
 		});
 
-		this.btnResourceNotSelectionMissing = new Button(group, SWT.CHECK);
+		btnResourceNotSelectionMissing = new Button(group, SWT.CHECK);
 		data = new GridData();
-		this.btnResourceNotSelectionMissing.setLayoutData(data);
-		this.btnResourceNotSelectionMissing.setText(SVNUIMessages.MainPreferencePage_resourceSelectionMissing);
-		this.btnResourceNotSelectionMissing.addSelectionListener(new SelectionAdapter() {
+		btnResourceNotSelectionMissing.setLayoutData(data);
+		btnResourceNotSelectionMissing.setText(SVNUIMessages.MainPreferencePage_resourceSelectionMissing);
+		btnResourceNotSelectionMissing.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
-				SVNTeamPreferencesPage.this.notSelectMissingResources = SVNTeamPreferencesPage.this.btnResourceNotSelectionMissing
-						.getSelection();
+				notSelectMissingResources = btnResourceNotSelectionMissing.getSelection();
 			}
 		});
 
-		this.btnResourceSelectionExternal = new Button(group, SWT.CHECK);
+		btnResourceSelectionExternal = new Button(group, SWT.CHECK);
 		data = new GridData();
-		this.btnResourceSelectionExternal.setLayoutData(data);
-		this.btnResourceSelectionExternal.setText(SVNUIMessages.MainPreferencePage_resourceSelectionExternal);
-		this.btnResourceSelectionExternal.addSelectionListener(new SelectionAdapter() {
+		btnResourceSelectionExternal.setLayoutData(data);
+		btnResourceSelectionExternal.setText(SVNUIMessages.MainPreferencePage_resourceSelectionExternal);
+		btnResourceSelectionExternal.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
-				SVNTeamPreferencesPage.this.useSubversionExternalsBehaviour = SVNTeamPreferencesPage.this.btnResourceSelectionExternal
-						.getSelection();
+				useSubversionExternalsBehaviour = btnResourceSelectionExternal.getSelection();
 			}
 		});
 
-		this.btnResourceSelectionPresentation = new Button(group, SWT.CHECK);
+		btnResourceSelectionPresentation = new Button(group, SWT.CHECK);
 		data = new GridData();
-		this.btnResourceSelectionPresentation.setLayoutData(data);
-		this.btnResourceSelectionPresentation.setText(SVNUIMessages.MainPreferencePage_resourceSelectionPresentation);
-		this.btnResourceSelectionPresentation.addSelectionListener(new SelectionAdapter() {
+		btnResourceSelectionPresentation.setLayoutData(data);
+		btnResourceSelectionPresentation.setText(SVNUIMessages.MainPreferencePage_resourceSelectionPresentation);
+		btnResourceSelectionPresentation.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
-				SVNTeamPreferencesPage.this.showSelectedResourcesInSyncPane = SVNTeamPreferencesPage.this.btnResourceSelectionPresentation
-						.getSelection();
+				showSelectedResourcesInSyncPane = btnResourceSelectionPresentation.getSelection();
 			}
 		});
 
-		this.btnResourceSelectionTreatAsEdit = new Button(group, SWT.CHECK);
+		btnResourceSelectionTreatAsEdit = new Button(group, SWT.CHECK);
 		data = new GridData();
-		this.btnResourceSelectionTreatAsEdit.setLayoutData(data);
-		this.btnResourceSelectionTreatAsEdit.setText(SVNUIMessages.MainPreferencePage_resourceSelectionTreatAsEdit);
-		this.btnResourceSelectionTreatAsEdit.addSelectionListener(new SelectionAdapter() {
+		btnResourceSelectionTreatAsEdit.setLayoutData(data);
+		btnResourceSelectionTreatAsEdit.setText(SVNUIMessages.MainPreferencePage_resourceSelectionTreatAsEdit);
+		btnResourceSelectionTreatAsEdit.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
-				SVNTeamPreferencesPage.this.treatReplacementAsEdit = SVNTeamPreferencesPage.this.btnResourceSelectionTreatAsEdit
-						.getSelection();
+				treatReplacementAsEdit = btnResourceSelectionTreatAsEdit.getSelection();
 			}
 		});
 
@@ -746,14 +731,14 @@ public class SVNTeamPreferencesPage extends AbstractSVNTeamPreferencesPage {
 		label.setLayoutData(data);
 		label.setText(SVNUIMessages.MainPreferencePage_sharePrompt);
 
-		this.enableAutoShareButton = new Button(group, SWT.CHECK);
+		enableAutoShareButton = new Button(group, SWT.CHECK);
 		data = new GridData();
-		this.enableAutoShareButton.setLayoutData(data);
-		this.enableAutoShareButton.setText(SVNUIMessages.MainPreferencePage_shareEnableAuto);
-		this.enableAutoShareButton.addSelectionListener(new SelectionAdapter() {
+		enableAutoShareButton.setLayoutData(data);
+		enableAutoShareButton.setText(SVNUIMessages.MainPreferencePage_shareEnableAuto);
+		enableAutoShareButton.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
-				SVNTeamPreferencesPage.this.enableAutoShare = SVNTeamPreferencesPage.this.enableAutoShareButton
-						.getSelection();
+				enableAutoShare = enableAutoShareButton.getSelection();
 			}
 		});
 
@@ -769,14 +754,14 @@ public class SVNTeamPreferencesPage extends AbstractSVNTeamPreferencesPage {
 		label.setLayoutData(data);
 		label.setText(SVNUIMessages.MainPreferencePage_keywordsPrompt);
 
-		this.computeKeywordsValuesButton = new Button(group, SWT.CHECK);
+		computeKeywordsValuesButton = new Button(group, SWT.CHECK);
 		data = new GridData();
-		this.computeKeywordsValuesButton.setLayoutData(data);
-		this.computeKeywordsValuesButton.setText(SVNUIMessages.MainPreferencePage_keywordsComputeRecursively);
-		this.computeKeywordsValuesButton.addSelectionListener(new SelectionAdapter() {
+		computeKeywordsValuesButton.setLayoutData(data);
+		computeKeywordsValuesButton.setText(SVNUIMessages.MainPreferencePage_keywordsComputeRecursively);
+		computeKeywordsValuesButton.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
-				SVNTeamPreferencesPage.this.computeKeywordsValues = SVNTeamPreferencesPage.this.computeKeywordsValuesButton
-						.getSelection();
+				computeKeywordsValues = computeKeywordsValuesButton.getSelection();
 			}
 		});
 
@@ -792,14 +777,14 @@ public class SVNTeamPreferencesPage extends AbstractSVNTeamPreferencesPage {
 		label.setLayoutData(data);
 		label.setText(SVNUIMessages.MainPreferencePage_tableSortingPrompt);
 
-		this.caseInsensitiveSortingButton = new Button(group, SWT.CHECK);
+		caseInsensitiveSortingButton = new Button(group, SWT.CHECK);
 		data = new GridData();
-		this.caseInsensitiveSortingButton.setLayoutData(data);
-		this.caseInsensitiveSortingButton.setText(SVNUIMessages.MainPreferencePage_tableSortingCaseInsensitive);
-		this.caseInsensitiveSortingButton.addSelectionListener(new SelectionAdapter() {
+		caseInsensitiveSortingButton.setLayoutData(data);
+		caseInsensitiveSortingButton.setText(SVNUIMessages.MainPreferencePage_tableSortingCaseInsensitive);
+		caseInsensitiveSortingButton.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
-				SVNTeamPreferencesPage.this.caseInsensitiveSorting = SVNTeamPreferencesPage.this.caseInsensitiveSortingButton
-						.getSelection();
+				caseInsensitiveSorting = caseInsensitiveSortingButton.getSelection();
 			}
 		});
 
@@ -815,14 +800,14 @@ public class SVNTeamPreferencesPage extends AbstractSVNTeamPreferencesPage {
 		label.setLayoutData(data);
 		label.setText(SVNUIMessages.MainPreferencePage_externalsGroupPrompt);
 
-		this.ignoreExternalsButton = new Button(group, SWT.CHECK);
+		ignoreExternalsButton = new Button(group, SWT.CHECK);
 		data = new GridData();
-		this.ignoreExternalsButton.setLayoutData(data);
-		this.ignoreExternalsButton.setText(SVNUIMessages.MainPreferencePage_ignoreExternals);
-		this.ignoreExternalsButton.addSelectionListener(new SelectionAdapter() {
+		ignoreExternalsButton.setLayoutData(data);
+		ignoreExternalsButton.setText(SVNUIMessages.MainPreferencePage_ignoreExternals);
+		ignoreExternalsButton.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
-				SVNTeamPreferencesPage.this.ignoreExternals = SVNTeamPreferencesPage.this.ignoreExternalsButton
-						.getSelection();
+				ignoreExternals = ignoreExternalsButton.getSelection();
 			}
 		});
 
@@ -872,30 +857,31 @@ public class SVNTeamPreferencesPage extends AbstractSVNTeamPreferencesPage {
 		label.setLayoutData(new GridData());
 		label.setText(SVNUIMessages.MainPreferencePage_synchronizePrompt);
 
-		this.fastReportButton = new Button(synchViewGroup, SWT.CHECK);
+		fastReportButton = new Button(synchViewGroup, SWT.CHECK);
 		data = new GridData();
-		this.fastReportButton.setLayoutData(data);
-		this.fastReportButton.setText(SVNUIMessages.MainPreferencePage_synchronizeFastReportName);
-		this.fastReportButton.addSelectionListener(new SelectionAdapter() {
+		fastReportButton.setLayoutData(data);
+		fastReportButton.setText(SVNUIMessages.MainPreferencePage_synchronizeFastReportName);
+		fastReportButton.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
-				SVNTeamPreferencesPage.this.fastReport = SVNTeamPreferencesPage.this.fastReportButton.getSelection();
+				fastReport = fastReportButton.getSelection();
 			}
 		});
 
 		//show models
-		this.enableModelSyncButton = new Button(synchViewGroup, SWT.CHECK);
+		enableModelSyncButton = new Button(synchViewGroup, SWT.CHECK);
 		data = new GridData();
-		this.enableModelSyncButton.setLayoutData(data);
-		this.enableModelSyncButton.setText(SVNUIMessages.MainPreferencePage_allowModelsName);
-		this.enableModelSyncButton.addSelectionListener(new SelectionAdapter() {
+		enableModelSyncButton.setLayoutData(data);
+		enableModelSyncButton.setText(SVNUIMessages.MainPreferencePage_allowModelsName);
+		enableModelSyncButton.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
-				SVNTeamPreferencesPage.this.enableModelSync = SVNTeamPreferencesPage.this.enableModelSyncButton
-						.getSelection();
+				enableModelSync = enableModelSyncButton.getSelection();
 			}
 		});
 
 		//Consult change sets group
-		this.createConsultChangeSets(consultChangeSetsGroup);
+		createConsultChangeSets(consultChangeSetsGroup);
 
 		//History View group
 		historyViewGroup.setText(SVNUIMessages.MainPreferencePage_historyGroupName);
@@ -906,57 +892,53 @@ public class SVNTeamPreferencesPage extends AbstractSVNTeamPreferencesPage {
 		label.setLayoutData(data);
 		label.setText(SVNUIMessages.MainPreferencePage_historyPrompt);
 
-		this.enablePagingButton = new Button(historyViewGroup, SWT.CHECK);
+		enablePagingButton = new Button(historyViewGroup, SWT.CHECK);
 		data = new GridData();
-		this.enablePagingButton.setLayoutData(data);
+		enablePagingButton.setLayoutData(data);
 		String labelText = SVNUIMessages.MainPreferencePage_historyEnablePaging;
-		this.enablePagingButton.setText(labelText);
-		this.enablePagingButton.addSelectionListener(new SelectionAdapter() {
+		enablePagingButton.setText(labelText);
+		enablePagingButton.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
-				if (SVNTeamPreferencesPage.this.enablePagingButton.getSelection()) {
-					SVNTeamPreferencesPage.this.pageSizeField.setEnabled(true);
-					int tmpPageSize = Integer.parseInt(SVNTeamPreferencesPage.this.pageSizeField.getText());
-					SVNTeamPreferencesPage.this.pageSize = tmpPageSize == 0
-							? SVNTeamPreferences.HISTORY_PAGE_SIZE_DEFAULT
-							: tmpPageSize;
-					SVNTeamPreferencesPage.this.pageSizeField
-							.setText(String.valueOf(SVNTeamPreferencesPage.this.pageSize));
-					SVNTeamPreferencesPage.this.pagingEnable = true;
+				if (enablePagingButton.getSelection()) {
+					pageSizeField.setEnabled(true);
+					int tmpPageSize = Integer.parseInt(pageSizeField.getText());
+					pageSize = tmpPageSize == 0 ? SVNTeamPreferences.HISTORY_PAGE_SIZE_DEFAULT : tmpPageSize;
+					pageSizeField.setText(String.valueOf(pageSize));
+					pagingEnable = true;
 				} else {
-					SVNTeamPreferencesPage.this.pagingEnable = false;
-					SVNTeamPreferencesPage.this.pageSizeField.setEnabled(false);
+					pagingEnable = false;
+					pageSizeField.setEnabled(false);
 				}
 			}
 		});
 
-		this.pageSizeField = new Text(historyViewGroup, SWT.SINGLE | SWT.BORDER);
+		pageSizeField = new Text(historyViewGroup, SWT.SINGLE | SWT.BORDER);
 		data = new GridData(GridData.FILL_HORIZONTAL);
 		data.grabExcessHorizontalSpace = true;
-		this.pageSizeField.setLayoutData(data);
+		pageSizeField.setLayoutData(data);
 		CompositeVerifier verifier = new CompositeVerifier();
 		verifier.add(new NonEmptyFieldVerifier(labelText));
 		verifier.add(new IntegerFieldVerifier(labelText, true));
-		this.attachTo(this.pageSizeField, verifier);
-		this.pageSizeField.addModifyListener(new ModifyListener() {
-			public void modifyText(ModifyEvent e) {
-				try {
-					SVNTeamPreferencesPage.this.pageSize = Integer
-							.parseInt(SVNTeamPreferencesPage.this.pageSizeField.getText());
-				} catch (Exception ex) {
+		attachTo(pageSizeField, verifier);
+		pageSizeField.addModifyListener(e -> {
+			try {
+				pageSize = Integer.parseInt(pageSizeField.getText());
+			} catch (Exception ex) {
 
-				}
 			}
 		});
 
-		this.connectToCompareWithButton = new Button(historyViewGroup, SWT.CHECK);
+		connectToCompareWithButton = new Button(historyViewGroup, SWT.CHECK);
 		data = new GridData();
 		data.horizontalSpan = 2;
-		this.connectToCompareWithButton.setLayoutData(data);
+		connectToCompareWithButton.setLayoutData(data);
 		labelText = SVNUIMessages.MainPreferencePage_historyConnectToCompareWith;
-		this.connectToCompareWithButton.setText(labelText);
-		this.connectToCompareWithButton.addSelectionListener(new SelectionAdapter() {
+		connectToCompareWithButton.setText(labelText);
+		connectToCompareWithButton.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
-				SVNTeamPreferencesPage.this.connectToCompareWith = ((Button) e.widget).getSelection();
+				connectToCompareWith = ((Button) e.widget).getSelection();
 			}
 		});
 
@@ -970,51 +952,44 @@ public class SVNTeamPreferencesPage extends AbstractSVNTeamPreferencesPage {
 		labelText = SVNUIMessages.MainPreferencePage_dateFormatPrompt;
 		label.setText(labelText);
 
-		this.dateFormatField = new Combo(dateFormatGroup, SWT.DROP_DOWN | SWT.READ_ONLY);
+		dateFormatField = new Combo(dateFormatGroup, SWT.DROP_DOWN | SWT.READ_ONLY);
 		String[] itemsDateFormat = new String[4];
 		itemsDateFormat[SVNTeamPreferences.DATE_FORMAT_MODE_SHORT] = SVNUIMessages.MainPreferencePage_dateFormatShort;
 		itemsDateFormat[SVNTeamPreferences.DATE_FORMAT_MODE_MEDIUM] = SVNUIMessages.MainPreferencePage_dateFormatMedium;
 		itemsDateFormat[SVNTeamPreferences.DATE_FORMAT_MODE_LONG] = SVNUIMessages.MainPreferencePage_dateFormatLong;
 		itemsDateFormat[SVNTeamPreferences.DATE_FORMAT_MODE_CUSTOM] = SVNUIMessages.MainPreferencePage_dateFormatCustom;
-		this.dateFormatField.setItems(itemsDateFormat);
+		dateFormatField.setItems(itemsDateFormat);
 
 		data = new GridData();
 		data.widthHint = 100;
-		this.dateFormatField.setLayoutData(data);
-		this.dateFormatField.addListener(SWT.Selection, new Listener() {
-			public void handleEvent(Event event) {
-				SVNTeamPreferencesPage.this.dateFormat = SVNTeamPreferencesPage.this.dateFormatField
-						.getSelectionIndex();
-				if (SVNTeamPreferencesPage.this.dateFormat == SVNTeamPreferences.DATE_FORMAT_MODE_CUSTOM) {
-					SVNTeamPreferencesPage.this.dateFormatCustomField.setEnabled(true);
-					SVNTeamPreferencesPage.this.dateFormatCustomField.setFocus();
-				} else {
-					SVNTeamPreferencesPage.this.dateFormatCustomField.setEnabled(false);
-				}
-				SVNTeamPreferencesPage.this.setDateFormatValue();
-				SVNTeamPreferencesPage.this.validateContent();
+		dateFormatField.setLayoutData(data);
+		dateFormatField.addListener(SWT.Selection, event -> {
+			dateFormat = dateFormatField.getSelectionIndex();
+			if (dateFormat == SVNTeamPreferences.DATE_FORMAT_MODE_CUSTOM) {
+				dateFormatCustomField.setEnabled(true);
+				dateFormatCustomField.setFocus();
+			} else {
+				dateFormatCustomField.setEnabled(false);
 			}
+			SVNTeamPreferencesPage.this.setDateFormatValue();
+			SVNTeamPreferencesPage.this.validateContent();
 		});
 
-		this.dateFormatCustomField = new Text(dateFormatGroup, SWT.SINGLE | SWT.BORDER);
+		dateFormatCustomField = new Text(dateFormatGroup, SWT.SINGLE | SWT.BORDER);
 		data = new GridData(GridData.FILL_HORIZONTAL);
-		this.dateFormatCustomField.setLayoutData(data);
+		dateFormatCustomField.setLayoutData(data);
 		verifier = new CompositeVerifier();
 		verifier.add(new NonEmptyFieldVerifier(labelText));
 		verifier.add(new DateFormatVerifier(labelText));
-		this.attachTo(this.dateFormatCustomField, new AbstractVerifierProxy(verifier) {
+		attachTo(dateFormatCustomField, new AbstractVerifierProxy(verifier) {
 			@Override
 			protected boolean isVerificationEnabled(Control input) {
-				return SVNTeamPreferencesPage.this.dateFormatField
-						.getSelectionIndex() == SVNTeamPreferences.DATE_FORMAT_MODE_CUSTOM;
+				return dateFormatField.getSelectionIndex() == SVNTeamPreferences.DATE_FORMAT_MODE_CUSTOM;
 			}
 		});
-		this.dateFormatCustomField.addModifyListener(new ModifyListener() {
-			public void modifyText(ModifyEvent e) {
-				if (SVNTeamPreferencesPage.this.dateFormat == SVNTeamPreferences.DATE_FORMAT_MODE_CUSTOM) {
-					SVNTeamPreferencesPage.this.dateFormatCustom = SVNTeamPreferencesPage.this.dateFormatCustomField
-							.getText();
-				}
+		dateFormatCustomField.addModifyListener(e -> {
+			if (dateFormat == SVNTeamPreferences.DATE_FORMAT_MODE_CUSTOM) {
+				dateFormatCustom = dateFormatCustomField.getText();
 			}
 		});
 
@@ -1022,18 +997,18 @@ public class SVNTeamPreferencesPage extends AbstractSVNTeamPreferencesPage {
 	}
 
 	protected void setDateFormatValue() {
-		if (this.dateFormat == SVNTeamPreferences.DATE_FORMAT_MODE_CUSTOM) {
-			this.dateFormatCustomField.setText(this.dateFormatCustom);
+		if (dateFormat == SVNTeamPreferences.DATE_FORMAT_MODE_CUSTOM) {
+			dateFormatCustomField.setText(dateFormatCustom);
 			return;
 		}
 
 		//set example date
 		DateFormat dateTimeFormat;
-		if (this.dateFormat == SVNTeamPreferences.DATE_FORMAT_MODE_SHORT) {
+		if (dateFormat == SVNTeamPreferences.DATE_FORMAT_MODE_SHORT) {
 			dateTimeFormat = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT, Locale.getDefault());
-		} else if (this.dateFormat == SVNTeamPreferences.DATE_FORMAT_MODE_MEDIUM) {
+		} else if (dateFormat == SVNTeamPreferences.DATE_FORMAT_MODE_MEDIUM) {
 			dateTimeFormat = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM, Locale.getDefault());
-		} else if (this.dateFormat == SVNTeamPreferences.DATE_FORMAT_MODE_LONG) {
+		} else if (dateFormat == SVNTeamPreferences.DATE_FORMAT_MODE_LONG) {
 			dateTimeFormat = DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.LONG, Locale.getDefault());
 		} else {
 			dateTimeFormat = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT, Locale.getDefault());
@@ -1046,19 +1021,17 @@ public class SVNTeamPreferencesPage extends AbstractSVNTeamPreferencesPage {
 			exampleDate = new Date();
 		}
 		String strDate = dateTimeFormat.format(exampleDate);
-		this.dateFormatCustomField.setText(strDate);
+		dateFormatCustomField.setText(strDate);
 	}
 
 	protected void createConsultChangeSets(Group consultChangeSetsGroup) {
-		Listener changeSetsSelectionListener = new Listener() {
-			public void handleEvent(Event event) {
-				if (SVNTeamPreferencesPage.this.consultCSAlwaysButton.getSelection()) {
-					SVNTeamPreferencesPage.this.consultChangeSets = SVNTeamPreferences.CONSULT_CHANGE_SETS_IN_COMMIT_ALWAYS;
-				} else if (SVNTeamPreferencesPage.this.consultCSNeverButton.getSelection()) {
-					SVNTeamPreferencesPage.this.consultChangeSets = SVNTeamPreferences.CONSULT_CHANGE_SETS_IN_COMMIT_NEVER;
-				} else if (SVNTeamPreferencesPage.this.consultCSPromptButton.getSelection()) {
-					SVNTeamPreferencesPage.this.consultChangeSets = SVNTeamPreferences.CONSULT_CHANGE_SETS_IN_COMMIT_PROMPT;
-				}
+		Listener changeSetsSelectionListener = event -> {
+			if (consultCSAlwaysButton.getSelection()) {
+				consultChangeSets = SVNTeamPreferences.CONSULT_CHANGE_SETS_IN_COMMIT_ALWAYS;
+			} else if (consultCSNeverButton.getSelection()) {
+				consultChangeSets = SVNTeamPreferences.CONSULT_CHANGE_SETS_IN_COMMIT_NEVER;
+			} else if (consultCSPromptButton.getSelection()) {
+				consultChangeSets = SVNTeamPreferences.CONSULT_CHANGE_SETS_IN_COMMIT_PROMPT;
 			}
 		};
 
@@ -1070,23 +1043,23 @@ public class SVNTeamPreferencesPage extends AbstractSVNTeamPreferencesPage {
 		data.horizontalSpan = 2;
 		data.grabExcessVerticalSpace = false;
 
-		this.consultCSAlwaysButton = new Button(consultChangeSetsGroup, SWT.RADIO);
+		consultCSAlwaysButton = new Button(consultChangeSetsGroup, SWT.RADIO);
 		data = new GridData();
-		this.consultCSAlwaysButton.setLayoutData(data);
-		this.consultCSAlwaysButton.setText(SVNUIMessages.MainPreferencePage_consultChangeSetsAlways);
-		this.consultCSAlwaysButton.addListener(SWT.Selection, changeSetsSelectionListener);
+		consultCSAlwaysButton.setLayoutData(data);
+		consultCSAlwaysButton.setText(SVNUIMessages.MainPreferencePage_consultChangeSetsAlways);
+		consultCSAlwaysButton.addListener(SWT.Selection, changeSetsSelectionListener);
 
-		this.consultCSNeverButton = new Button(consultChangeSetsGroup, SWT.RADIO);
+		consultCSNeverButton = new Button(consultChangeSetsGroup, SWT.RADIO);
 		data = new GridData();
-		this.consultCSNeverButton.setLayoutData(data);
-		this.consultCSNeverButton.setText(SVNUIMessages.MainPreferencePage_consultChangeSetsNever);
-		this.consultCSNeverButton.addListener(SWT.Selection, changeSetsSelectionListener);
+		consultCSNeverButton.setLayoutData(data);
+		consultCSNeverButton.setText(SVNUIMessages.MainPreferencePage_consultChangeSetsNever);
+		consultCSNeverButton.addListener(SWT.Selection, changeSetsSelectionListener);
 
-		this.consultCSPromptButton = new Button(consultChangeSetsGroup, SWT.RADIO);
+		consultCSPromptButton = new Button(consultChangeSetsGroup, SWT.RADIO);
 		data = new GridData();
-		this.consultCSPromptButton.setLayoutData(data);
-		this.consultCSPromptButton.setText(SVNUIMessages.MainPreferencePage_consultChangeSetsPrompt);
-		this.consultCSPromptButton.addListener(SWT.Selection, changeSetsSelectionListener);
+		consultCSPromptButton.setLayoutData(data);
+		consultCSPromptButton.setText(SVNUIMessages.MainPreferencePage_consultChangeSetsPrompt);
+		consultCSPromptButton.addListener(SWT.Selection, changeSetsSelectionListener);
 	}
 
 	protected Control createRepositorySettingsPage(Composite parent) {
@@ -1118,66 +1091,55 @@ public class SVNTeamPreferencesPage extends AbstractSVNTeamPreferencesPage {
 		String labelText = SVNUIMessages.MainPreferencePage_repositoryHeadName;
 		label.setText(labelText);
 
-		this.headField = new Text(group, SWT.SINGLE | SWT.BORDER);
+		headField = new Text(group, SWT.SINGLE | SWT.BORDER);
 		data = new GridData(GridData.FILL_HORIZONTAL);
 		data.grabExcessHorizontalSpace = true;
-		this.headField.setLayoutData(data);
+		headField.setLayoutData(data);
 		CompositeVerifier verifier = new CompositeVerifier();
 		verifier.add(new NonEmptyFieldVerifier(labelText));
 		verifier.add(new ResourceNameVerifier(labelText, false));
-		this.attachTo(this.headField, verifier);
-		this.headField.addModifyListener(new ModifyListener() {
-			public void modifyText(ModifyEvent e) {
-				SVNTeamPreferencesPage.this.head = SVNTeamPreferencesPage.this.headField.getText();
-			}
-		});
+		attachTo(headField, verifier);
+		headField.addModifyListener(e -> head = headField.getText());
 
 		label = new Label(group, SWT.NULL);
 		label.setLayoutData(new GridData());
 		labelText = SVNUIMessages.MainPreferencePage_repositoryBranchesName;
 		label.setText(labelText);
 
-		this.branchesField = new Text(group, SWT.SINGLE | SWT.BORDER);
+		branchesField = new Text(group, SWT.SINGLE | SWT.BORDER);
 		data = new GridData(GridData.FILL_HORIZONTAL);
 		data.grabExcessHorizontalSpace = true;
-		this.branchesField.setLayoutData(data);
+		branchesField.setLayoutData(data);
 		verifier = new CompositeVerifier();
 		verifier.add(new NonEmptyFieldVerifier(labelText));
 		verifier.add(new ResourceNameVerifier(labelText, false));
-		this.attachTo(this.branchesField, verifier);
-		this.branchesField.addModifyListener(new ModifyListener() {
-			public void modifyText(ModifyEvent e) {
-				SVNTeamPreferencesPage.this.branches = SVNTeamPreferencesPage.this.branchesField.getText();
-			}
-		});
+		attachTo(branchesField, verifier);
+		branchesField.addModifyListener(e -> branches = branchesField.getText());
 
 		label = new Label(group, SWT.NULL);
 		label.setLayoutData(new GridData());
 		labelText = SVNUIMessages.MainPreferencePage_repositoryTagsName;
 		label.setText(labelText);
 
-		this.tagsField = new Text(group, SWT.SINGLE | SWT.BORDER);
+		tagsField = new Text(group, SWT.SINGLE | SWT.BORDER);
 		data = new GridData(GridData.FILL_HORIZONTAL);
 		data.grabExcessHorizontalSpace = true;
-		this.tagsField.setLayoutData(data);
+		tagsField.setLayoutData(data);
 		verifier = new CompositeVerifier();
 		verifier.add(new NonEmptyFieldVerifier(labelText));
 		verifier.add(new ResourceNameVerifier(labelText, false));
-		this.attachTo(this.tagsField, verifier);
-		this.tagsField.addModifyListener(new ModifyListener() {
-			public void modifyText(ModifyEvent e) {
-				SVNTeamPreferencesPage.this.tags = SVNTeamPreferencesPage.this.tagsField.getText();
-			}
-		});
+		attachTo(tagsField, verifier);
+		tagsField.addModifyListener(e -> tags = tagsField.getText());
 
-		this.showExternalsButton = new Button(group, SWT.CHECK);
+		showExternalsButton = new Button(group, SWT.CHECK);
 		data = new GridData(GridData.FILL_HORIZONTAL);
 		data.horizontalSpan = 6;
-		this.showExternalsButton.setLayoutData(data);
-		this.showExternalsButton.setText(SVNUIMessages.MainPreferencePage_showExternals);
-		this.showExternalsButton.addSelectionListener(new SelectionAdapter() {
+		showExternalsButton.setLayoutData(data);
+		showExternalsButton.setText(SVNUIMessages.MainPreferencePage_showExternals);
+		showExternalsButton.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
-				SVNTeamPreferencesPage.this.showExternals = ((Button) e.widget).getSelection();
+				showExternals = ((Button) e.widget).getSelection();
 			}
 		});
 
@@ -1196,82 +1158,71 @@ public class SVNTeamPreferencesPage extends AbstractSVNTeamPreferencesPage {
 		label.setLayoutData(data);
 		label.setText(SVNUIMessages.MainPreferencePage_checkoutPrompt);
 
-		this.checkoutUsingDotProjectNameButton = new Button(group, SWT.CHECK);
+		checkoutUsingDotProjectNameButton = new Button(group, SWT.CHECK);
 		data = new GridData();
 		data.horizontalSpan = 2;
-		this.checkoutUsingDotProjectNameButton.setLayoutData(data);
-		this.checkoutUsingDotProjectNameButton.setText(SVNUIMessages.MainPreferencePage_checkoutUsingDotProjectName);
-		this.checkoutUsingDotProjectNameButton.addSelectionListener(new SelectionAdapter() {
+		checkoutUsingDotProjectNameButton.setLayoutData(data);
+		checkoutUsingDotProjectNameButton.setText(SVNUIMessages.MainPreferencePage_checkoutUsingDotProjectName);
+		checkoutUsingDotProjectNameButton.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
-				SVNTeamPreferencesPage.this.checkoutUsingDotProjectName = SVNTeamPreferencesPage.this.checkoutUsingDotProjectNameButton
-						.getSelection();
+				checkoutUsingDotProjectName = checkoutUsingDotProjectNameButton.getSelection();
 			}
 		});
 
-		this.checkoutRespectProjectStructureButton = new Button(group, SWT.CHECK);
+		checkoutRespectProjectStructureButton = new Button(group, SWT.CHECK);
 		data = new GridData();
 		data.horizontalSpan = 2;
-		this.checkoutRespectProjectStructureButton.setLayoutData(data);
-		this.checkoutRespectProjectStructureButton
-				.setText(SVNUIMessages.MainPreferencePage_checkoutRespectProjectStructure);
-		this.checkoutRespectProjectStructureButton.addSelectionListener(new SelectionAdapter() {
+		checkoutRespectProjectStructureButton.setLayoutData(data);
+		checkoutRespectProjectStructureButton.setText(SVNUIMessages.MainPreferencePage_checkoutRespectProjectStructure);
+		checkoutRespectProjectStructureButton.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
-				SVNTeamPreferencesPage.this.checkoutRespectProjectStructure = SVNTeamPreferencesPage.this.checkoutRespectProjectStructureButton
-						.getSelection();
+				checkoutRespectProjectStructure = checkoutRespectProjectStructureButton.getSelection();
 			}
 		});
 
-		this.useDefaultLocationButton = new Button(group, SWT.CHECK);
+		useDefaultLocationButton = new Button(group, SWT.CHECK);
 		data = new GridData();
 		data.horizontalSpan = 2;
-		this.useDefaultLocationButton.setLayoutData(data);
-		this.useDefaultLocationButton.setSelection(true);
-		this.useDefaultLocationButton.setText(SVNUIMessages.ProjectLocationSelectionPage_UseDefaultLocation);
-		this.useDefaultLocationButton.addListener(SWT.Selection, new Listener() {
-			public void handleEvent(Event event) {
-				SVNTeamPreferencesPage.this.checkoutUseDefaultLocation = SVNTeamPreferencesPage.this.useDefaultLocationButton
-						.getSelection();
-				SVNTeamPreferencesPage.this.locationField
-						.setEnabled(!SVNTeamPreferencesPage.this.checkoutUseDefaultLocation);
-				SVNTeamPreferencesPage.this.browse.setEnabled(!SVNTeamPreferencesPage.this.checkoutUseDefaultLocation);
-				SVNTeamPreferencesPage.this.validateContent();
-			}
+		useDefaultLocationButton.setLayoutData(data);
+		useDefaultLocationButton.setSelection(true);
+		useDefaultLocationButton.setText(SVNUIMessages.ProjectLocationSelectionPage_UseDefaultLocation);
+		useDefaultLocationButton.addListener(SWT.Selection, event -> {
+			checkoutUseDefaultLocation = useDefaultLocationButton.getSelection();
+			locationField.setEnabled(!checkoutUseDefaultLocation);
+			browse.setEnabled(!checkoutUseDefaultLocation);
+			SVNTeamPreferencesPage.this.validateContent();
 		});
 
-		this.locationField = new Text(group, SWT.SINGLE | SWT.BORDER);
+		locationField = new Text(group, SWT.SINGLE | SWT.BORDER);
 		data = new GridData(GridData.FILL_HORIZONTAL);
 		data.widthHint = 300;
-		this.locationField.setLayoutData(data);
-		this.locationField.setEnabled(false);
+		locationField.setLayoutData(data);
+		locationField.setEnabled(false);
 		verifier = new CompositeVerifier();
 		verifier.add(new NonEmptyFieldVerifier(SVNUIMessages.ProjectLocationSelectionPage_Location_Verifier));
 		verifier.add(new ExistingResourceVerifier(SVNUIMessages.ProjectLocationSelectionPage_Location_Verifier, false));
-		this.attachTo(this.locationField, new AbstractVerifierProxy(verifier) {
+		attachTo(locationField, new AbstractVerifierProxy(verifier) {
+			@Override
 			protected boolean isVerificationEnabled(Control input) {
-				return !SVNTeamPreferencesPage.this.useDefaultLocationButton.getSelection();
+				return !useDefaultLocationButton.getSelection();
 			}
 		});
-		this.locationField.addModifyListener(new ModifyListener() {
-			public void modifyText(ModifyEvent e) {
-				SVNTeamPreferencesPage.this.checkoutSpecifiedLocation = SVNTeamPreferencesPage.this.locationField
-						.getText();
-			}
-		});
+		locationField.addModifyListener(e -> checkoutSpecifiedLocation = locationField.getText());
 
-		this.browse = new Button(group, SWT.PUSH);
-		this.browse.setText(SVNUIMessages.Button_Browse);
+		browse = new Button(group, SWT.PUSH);
+		browse.setText(SVNUIMessages.Button_Browse);
 		data = new GridData();
-		data.widthHint = DefaultDialog.computeButtonWidth(this.browse);
-		this.browse.setLayoutData(data);
-		this.browse.setEnabled(false);
-		this.browse.addListener(SWT.Selection, new Listener() {
-			public void handleEvent(Event event) {
-				DirectoryDialog fileDialog = new DirectoryDialog(getShell());
-				fileDialog.setFilterPath(SVNTeamPreferencesPage.this.locationField.getText());
-				String res = fileDialog.open();
-				if (res != null) {
-					SVNTeamPreferencesPage.this.locationField.setText(res);
-				}
+		data.widthHint = DefaultDialog.computeButtonWidth(browse);
+		browse.setLayoutData(data);
+		browse.setEnabled(false);
+		browse.addListener(SWT.Selection, event -> {
+			DirectoryDialog fileDialog = new DirectoryDialog(getShell());
+			fileDialog.setFilterPath(locationField.getText());
+			String res = fileDialog.open();
+			if (res != null) {
+				locationField.setText(res);
 			}
 		});
 
@@ -1288,32 +1239,33 @@ public class SVNTeamPreferencesPage extends AbstractSVNTeamPreferencesPage {
 		label.setText(SVNUIMessages.MainPreferencePage_branchTagPrompt);
 
 		SelectionListener listener = new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
-				SVNTeamPreferencesPage.this.branchTagConsiderStructure = SVNTeamPreferencesPage.this.branchTagConsiderStructureButton
-						.getSelection();
+				branchTagConsiderStructure = branchTagConsiderStructureButton.getSelection();
 			}
 		};
-		this.branchTagConsiderStructureButton = new Button(group, SWT.RADIO);
-		this.branchTagConsiderStructureButton.setLayoutData(new GridData());
-		this.branchTagConsiderStructureButton.setText(SVNUIMessages.MainPreferencePage_branchTagConsiderStructureLabel);
-		this.branchTagConsiderStructureButton.addSelectionListener(listener);
+		branchTagConsiderStructureButton = new Button(group, SWT.RADIO);
+		branchTagConsiderStructureButton.setLayoutData(new GridData());
+		branchTagConsiderStructureButton.setText(SVNUIMessages.MainPreferencePage_branchTagConsiderStructureLabel);
+		branchTagConsiderStructureButton.addSelectionListener(listener);
 
-		this.branchTagManualUrlEditButton = new Button(group, SWT.RADIO);
-		this.branchTagManualUrlEditButton.setLayoutData(new GridData());
-		this.branchTagManualUrlEditButton.setText(SVNUIMessages.MainPreferencePage_branchTagManualLabel);
-		this.branchTagManualUrlEditButton.addSelectionListener(listener);
+		branchTagManualUrlEditButton = new Button(group, SWT.RADIO);
+		branchTagManualUrlEditButton.setLayoutData(new GridData());
+		branchTagManualUrlEditButton.setText(SVNUIMessages.MainPreferencePage_branchTagManualLabel);
+		branchTagManualUrlEditButton.addSelectionListener(listener);
 
 		label = new Label(group, SWT.HORIZONTAL | SWT.SEPARATOR);
 		data = new GridData(GridData.FILL_HORIZONTAL);
 		label.setLayoutData(data);
 
-		this.forceExternalsFreezeButton = new Button(group, SWT.CHECK);
+		forceExternalsFreezeButton = new Button(group, SWT.CHECK);
 		data = new GridData(GridData.FILL_HORIZONTAL);
-		this.forceExternalsFreezeButton.setLayoutData(data);
-		this.forceExternalsFreezeButton.setText(SVNUIMessages.MainPreferencePage_forceFreezeExternals);
-		this.forceExternalsFreezeButton.addSelectionListener(new SelectionAdapter() {
+		forceExternalsFreezeButton.setLayoutData(data);
+		forceExternalsFreezeButton.setText(SVNUIMessages.MainPreferencePage_forceFreezeExternals);
+		forceExternalsFreezeButton.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
-				SVNTeamPreferencesPage.this.forceExternalsFreeze = ((Button) e.widget).getSelection();
+				forceExternalsFreeze = ((Button) e.widget).getSelection();
 			}
 		});
 
@@ -1336,25 +1288,25 @@ public class SVNTeamPreferencesPage extends AbstractSVNTeamPreferencesPage {
 		label.setLayoutData(data);
 		label.setText(SVNUIMessages.MainPreferencePage_mailReporterPrompt);
 
-		this.mailReporterEnabledButton = new Button(composite, SWT.CHECK);
+		mailReporterEnabledButton = new Button(composite, SWT.CHECK);
 		data = new GridData();
-		this.mailReporterEnabledButton.setLayoutData(data);
-		this.mailReporterEnabledButton.setText(SVNUIMessages.MainPreferencePage_mailReporterEnabledName);
-		this.mailReporterEnabledButton.addSelectionListener(new SelectionAdapter() {
+		mailReporterEnabledButton.setLayoutData(data);
+		mailReporterEnabledButton.setText(SVNUIMessages.MainPreferencePage_mailReporterEnabledName);
+		mailReporterEnabledButton.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
-				SVNTeamPreferencesPage.this.mailReporterEnabled = SVNTeamPreferencesPage.this.mailReporterEnabledButton
-						.getSelection();
+				mailReporterEnabled = mailReporterEnabledButton.getSelection();
 			}
 		});
 
-		this.mailReporterErrorsEnabledButton = new Button(composite, SWT.CHECK);
+		mailReporterErrorsEnabledButton = new Button(composite, SWT.CHECK);
 		data = new GridData();
-		this.mailReporterErrorsEnabledButton.setLayoutData(data);
-		this.mailReporterErrorsEnabledButton.setText(SVNUIMessages.MainPreferencePage_mailReporterErrorsEnabledName);
-		this.mailReporterErrorsEnabledButton.addSelectionListener(new SelectionAdapter() {
+		mailReporterErrorsEnabledButton.setLayoutData(data);
+		mailReporterErrorsEnabledButton.setText(SVNUIMessages.MainPreferencePage_mailReporterErrorsEnabledName);
+		mailReporterErrorsEnabledButton.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
-				SVNTeamPreferencesPage.this.mailReporterErrorsEnabled = SVNTeamPreferencesPage.this.mailReporterErrorsEnabledButton
-						.getSelection();
+				mailReporterErrorsEnabled = mailReporterErrorsEnabledButton.getSelection();
 			}
 		});
 

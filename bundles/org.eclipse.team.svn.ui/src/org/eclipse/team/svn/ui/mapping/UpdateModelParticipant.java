@@ -51,7 +51,6 @@ public class UpdateModelParticipant extends AbstractSVNModelParticipant implemen
 	protected boolean isConsultChangeSets;
 
 	public UpdateModelParticipant() {
-		super();
 	}
 
 	public UpdateModelParticipant(SynchronizationContext context) {
@@ -64,59 +63,70 @@ public class UpdateModelParticipant extends AbstractSVNModelParticipant implemen
 			UILoggedOperation.reportError(this.getClass().getName(), e);
 		}
 		setSecondaryId(Long.toString(System.currentTimeMillis()));
-		this.isConsultChangeSets = isConsultChangeSets(context.getScopeManager());
+		isConsultChangeSets = isConsultChangeSets(context.getScopeManager());
 	}
 
+	@Override
 	protected void initializeConfiguration(ISynchronizePageConfiguration configuration) {
 		configuration.setProperty(ISynchronizePageConfiguration.P_VIEWER_ID,
 				"org.eclipse.team.svn.ui.workspaceSynchronization"); //$NON-NLS-1$
 		super.initializeConfiguration(configuration);
 	}
 
+	@Override
 	protected Collection<AbstractSynchronizeActionGroup> getActionGroups() {
-		//TODO see ExtensionsManager.getInstance().getCurrentSynchronizeActionContributor().getUpdateContributions();		
-		List<AbstractSynchronizeActionGroup> actionGroups = new ArrayList<AbstractSynchronizeActionGroup>();
+		//TODO see ExtensionsManager.getInstance().getCurrentSynchronizeActionContributor().getUpdateContributions();
+		List<AbstractSynchronizeActionGroup> actionGroups = new ArrayList<>();
 		actionGroups.add(new OptionsActionGroup());
 		return actionGroups;
 	}
 
+	@Override
 	protected ModelSynchronizeParticipantActionGroup createMergeActionGroup() {
 		return new UpdateModelActionGroup();
 	}
 
+	@Override
 	protected int getSupportedModes() {
 		return ISynchronizePageConfiguration.ALL_MODES;
 	}
 
+	@Override
 	protected int getDefaultMode() {
 		return ISynchronizePageConfiguration.BOTH_MODE;
 	}
 
+	@Override
 	public ChangeSetCapability getChangeSetCapability() {
-		if (this.capability == null) {
-			this.capability = new SVNModelParticipantChangeSetCapability();
+		if (capability == null) {
+			capability = new SVNModelParticipantChangeSetCapability();
 		}
-		return this.capability;
+		return capability;
 	}
 
+	@Override
 	protected MergeContext restoreContext(ISynchronizationScopeManager manager) {
 		return UpdateSubscriberContext.createContext(manager, ISynchronizationContext.THREE_WAY);
 	}
 
+	@Override
 	protected ISynchronizationScopeManager createScopeManager(ResourceMapping[] mappings) {
-		return UpdateSubscriberContext.createWorkspaceScopeManager(mappings, true, this.isConsultChangeSets);
+		return UpdateSubscriberContext.createWorkspaceScopeManager(mappings, true, isConsultChangeSets);
 	}
 
+	@Override
 	public void saveState(IMemento memento) {
 		super.saveState(memento);
-		memento.putString(CTX_CONSULT_CHANGE_SETS, Boolean.toString(this.isConsultChangeSets));
+		memento.putString(CTX_CONSULT_CHANGE_SETS, Boolean.toString(isConsultChangeSets));
 	}
 
+	@Override
 	public void init(String secondaryId, IMemento memento) throws PartInitException {
 		try {
 			String consult = memento.getString(CTX_CONSULT_CHANGE_SETS);
-			if (consult != null)
-				this.isConsultChangeSets = Boolean.valueOf(consult).booleanValue();
+			if (consult != null) {
+				isConsultChangeSets = Boolean.parseBoolean(consult);
+			}
 		} finally {
 			super.init(secondaryId, memento);
 		}

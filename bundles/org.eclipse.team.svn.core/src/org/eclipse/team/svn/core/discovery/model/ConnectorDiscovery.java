@@ -42,6 +42,7 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.SafeRunner;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.osgi.service.resolver.VersionRange;
+import org.eclipse.team.svn.core.BaseMessages;
 import org.eclipse.team.svn.core.SVNMessages;
 import org.eclipse.team.svn.core.discovery.util.WebUtil;
 import org.eclipse.team.svn.core.operation.LoggedOperation;
@@ -65,9 +66,9 @@ public class ConnectorDiscovery {
 
 	private List<DiscoveryConnector> filteredConnectors = Collections.emptyList();
 
-	private final List<AbstractDiscoveryStrategy> discoveryStrategies = new ArrayList<AbstractDiscoveryStrategy>();
+	private final List<AbstractDiscoveryStrategy> discoveryStrategies = new ArrayList<>();
 
-	private Dictionary<String, Object> environment = new Hashtable<String, Object>();
+	private Dictionary<String, Object> environment = new Hashtable<>();
 
 	private boolean verifyUpdateSiteAvailability = false;
 
@@ -96,12 +97,12 @@ public class ConnectorDiscovery {
 		if (discoveryStrategies.isEmpty()) {
 			throw new IllegalStateException();
 		}
-		connectors = new ArrayList<DiscoveryConnector>();
-		filteredConnectors = new ArrayList<DiscoveryConnector>();
-		categories = new ArrayList<DiscoveryCategory>();
+		connectors = new ArrayList<>();
+		filteredConnectors = new ArrayList<>();
+		categories = new ArrayList<>();
 
 		final int totalTicks = 100000;
-		final int discoveryTicks = totalTicks - (totalTicks / 10);
+		final int discoveryTicks = totalTicks - totalTicks / 10;
 		final int filterTicks = totalTicks - discoveryTicks;
 		monitor.beginTask(SVNMessages.ConnectorDiscovery_task_discovering_connectors, totalTicks);
 		try {
@@ -205,11 +206,11 @@ public class ConnectorDiscovery {
 	}
 
 	private void connectCategoriesToDescriptors() {
-		Map<String, DiscoveryCategory> idToCategory = new HashMap<String, DiscoveryCategory>();
+		Map<String, DiscoveryCategory> idToCategory = new HashMap<>();
 		for (DiscoveryCategory category : categories) {
 			DiscoveryCategory previous = idToCategory.put(category.getId(), category);
 			if (previous != null) {
-				String errMessage = SVNMessages.format(
+				String errMessage = BaseMessages.format(
 						SVNMessages.ConnectorDiscovery_duplicate_category_id,
 						new Object[] { category.getId(), category.getSource().getId(), previous.getSource().getId() });
 				LoggedOperation.reportError(this.getClass().getName(), new Exception(errMessage));
@@ -222,7 +223,7 @@ public class ConnectorDiscovery {
 				category.getConnectors().add(connector);
 				connector.setCategory(category);
 			} else {
-				String errMessage = SVNMessages.format(
+				String errMessage = BaseMessages.format(
 						SVNMessages.ConnectorDiscovery_bundle_references_unknown_category,
 						new Object[] { connector.getCategoryId(), connector.getInstallableUnits(),
 								connector.getSource().getId() });
@@ -235,14 +236,14 @@ public class ConnectorDiscovery {
 	 * eliminate any connectors whose {@link ConnectorDescriptor#getPlatformFilter() platform filters} don't match
 	 */
 	private void filterDescriptors() {
-		for (DiscoveryConnector connector : new ArrayList<DiscoveryConnector>(connectors)) {
+		for (DiscoveryConnector connector : new ArrayList<>(connectors)) {
 			if (connector.getPlatformFilter() != null && connector.getPlatformFilter().trim().length() > 0) {
 				boolean match = false;
 				try {
 					Filter filter = FrameworkUtil.createFilter(connector.getPlatformFilter());
 					match = filter.match(environment);
 				} catch (InvalidSyntaxException e) {
-					String errMessage = SVNMessages.format(
+					String errMessage = BaseMessages.format(
 							SVNMessages.ConnectorDiscovery_illegal_filter_syntax,
 							new Object[] { connector.getPlatformFilter(), connector.getInstallableUnits(),
 									connector.getSource().getId() });
@@ -275,7 +276,7 @@ public class ConnectorDiscovery {
 	}
 
 	private Map<String, Version> computeFeatureToVersion() {
-		Map<String, Version> featureToVersion = new HashMap<String, Version>();
+		Map<String, Version> featureToVersion = new HashMap<>();
 		for (IBundleGroupProvider provider : Platform.getBundleGroupProviders()) {
 			for (IBundleGroup bundleGroup : provider.getBundleGroups()) {
 				for (Bundle bundle : bundleGroup.getBundles()) {
@@ -293,7 +294,7 @@ public class ConnectorDiscovery {
 	public void verifySiteAvailability(IProgressMonitor monitor) {
 		// NOTE: we don't put java.net.URLs in the map since it involves DNS activity when
 		//       computing the hash code.
-		Map<String, Collection<DiscoveryConnector>> urlToDescriptors = new HashMap<String, Collection<DiscoveryConnector>>();
+		Map<String, Collection<DiscoveryConnector>> urlToDescriptors = new HashMap<>();
 
 		for (DiscoveryConnector descriptor : connectors) {
 			String url = descriptor.getSiteUrl();
@@ -302,7 +303,7 @@ public class ConnectorDiscovery {
 			}
 			Collection<DiscoveryConnector> collection = urlToDescriptors.get(url);
 			if (collection == null) {
-				collection = new ArrayList<DiscoveryConnector>();
+				collection = new ArrayList<>();
 				urlToDescriptors.put(url, collection);
 			}
 			collection.add(descriptor);
@@ -313,7 +314,7 @@ public class ConnectorDiscovery {
 			if (!urlToDescriptors.isEmpty()) {
 				ExecutorService executorService = Executors.newFixedThreadPool(Math.min(urlToDescriptors.size(), 4));
 				try {
-					List<Future<VerifyUpdateSiteJob>> futures = new ArrayList<Future<VerifyUpdateSiteJob>>(
+					List<Future<VerifyUpdateSiteJob>> futures = new ArrayList<>(
 							urlToDescriptors.size());
 					for (String url : urlToDescriptors.keySet()) {
 						futures.add(executorService.submit(new VerifyUpdateSiteJob(url)));
@@ -366,9 +367,10 @@ public class ConnectorDiscovery {
 			this.url = url;
 		}
 
+		@Override
 		public VerifyUpdateSiteJob call() throws Exception {
-			URL baseUrl = new URL(this.url);
-			URL[] locations = new URL[] { new URL(baseUrl, "content.jar"), new URL(baseUrl, "content.xml"), //$NON-NLS-1$//$NON-NLS-2$
+			URL baseUrl = new URL(url);
+			URL[] locations = { new URL(baseUrl, "content.jar"), new URL(baseUrl, "content.xml"), //$NON-NLS-1$//$NON-NLS-2$
 					new URL(baseUrl, "site.xml") }; //$NON-NLS-1$
 			ok = WebUtil.verifyAvailability(locations, true, new NullProgressMonitor());
 			return this;
@@ -379,10 +381,12 @@ public class ConnectorDiscovery {
 		for (final AbstractDiscoveryStrategy strategy : discoveryStrategies) {
 			SafeRunner.run(new ISafeRunnable() {
 
+				@Override
 				public void run() throws Exception {
 					strategy.dispose();
 				}
 
+				@Override
 				public void handleException(Throwable exception) {
 					String errMessage = SVNMessages.ConnectorDiscovery_exception_disposing
 							+ strategy.getClass().getName();

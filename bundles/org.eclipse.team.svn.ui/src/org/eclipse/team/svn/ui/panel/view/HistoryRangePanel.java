@@ -50,33 +50,36 @@ public class HistoryRangePanel extends AbstractDialogPanel {
 
 	public HistoryRangePanel(IRepositoryResource resource, SVNRevision initStartRevision,
 			SVNRevision initStopRevision) {
-		this.dialogTitle = SVNUIMessages.HistoryRangePanel_Title;
-		this.dialogDescription = SVNUIMessages.HistoryRangePanel_Description;
-		this.defaultMessage = SVNUIMessages.HistoryRangePanel_Message;
+		dialogTitle = SVNUIMessages.HistoryRangePanel_Title;
+		dialogDescription = SVNUIMessages.HistoryRangePanel_Description;
+		defaultMessage = SVNUIMessages.HistoryRangePanel_Message;
 
 		this.resource = resource;
-		this.initStartResource = SVNUtility.copyOf(resource);
-		this.initStartResource.setSelectedRevision(initStartRevision);
-		this.initStopResource = SVNUtility.copyOf(resource);
-		this.initStopResource.setSelectedRevision(initStopRevision);
+		initStartResource = SVNUtility.copyOf(resource);
+		initStartResource.setSelectedRevision(initStartRevision);
+		initStopResource = SVNUtility.copyOf(resource);
+		initStopResource.setSelectedRevision(initStopRevision);
 	}
 
+	@Override
 	protected Point getPrefferedSizeImpl() {
 		return new Point(715, SWT.DEFAULT);
 	}
 
+	@Override
 	public String getHelpId() {
 		return "org.eclipse.team.svn.help.historyRangeDialogContext"; //$NON-NLS-1$
 	}
 
 	public SVNRevision getStartRevision() {
-		return (this.reversed ? this.stopComposite : this.startComposite).getSelectedRevision();
+		return (reversed ? stopComposite : startComposite).getSelectedRevision();
 	}
 
 	public SVNRevision getStopRevision() {
-		return (this.reversed ? this.startComposite : this.stopComposite).getSelectedRevision();
+		return (reversed ? startComposite : stopComposite).getSelectedRevision();
 	}
 
+	@Override
 	protected void createControlsImpl(Composite parent) {
 		GridLayout layout = null;
 		GridData data = null;
@@ -90,44 +93,45 @@ public class HistoryRangePanel extends AbstractDialogPanel {
 		cmp.setLayoutData(data);
 
 		String defaultRevision = SVNUIMessages.HistoryRangePanel_Default;
-		this.startComposite = new RevisionComposite(cmp, this, true,
+		startComposite = new RevisionComposite(cmp, this, true,
 				new String[] { SVNUIMessages.HistoryRangePanel_StartRevision, defaultRevision }, null, false);
-		this.startComposite.setBaseResource(this.resource);
-		this.startComposite.setSelectedResource(this.initStartResource);
+		startComposite.setBaseResource(resource);
+		startComposite.setSelectedResource(initStartResource);
 		data = new GridData(GridData.FILL_HORIZONTAL);
-		this.startComposite.setLayoutData(data);
+		startComposite.setLayoutData(data);
 
-		this.stopComposite = new RevisionComposite(cmp, this, true,
+		stopComposite = new RevisionComposite(cmp, this, true,
 				new String[] { SVNUIMessages.HistoryRangePanel_StopRevision, defaultRevision }, null, false);
-		this.stopComposite.setBaseResource(this.resource);
-		this.stopComposite.setSelectedResource(this.initStopResource);
+		stopComposite.setBaseResource(resource);
+		stopComposite.setSelectedResource(initStopResource);
 		data = new GridData(GridData.FILL_HORIZONTAL);
-		this.stopComposite.setLayoutData(data);
+		stopComposite.setLayoutData(data);
 	}
 
+	@Override
 	protected void cancelChangesImpl() {
 
 	}
 
+	@Override
 	protected void saveChangesImpl() {
-		if (this.getStartRevision() == null || this.getStopRevision() == null) {
+		if (getStartRevision() == null || getStopRevision() == null) {
 			return;
 		}
-		this.initStartResource.setSelectedRevision(this.getStartRevision());
-		this.initStopResource.setSelectedRevision(this.getStopRevision());
+		initStartResource.setSelectedRevision(getStartRevision());
+		initStopResource.setSelectedRevision(getStopRevision());
 
 		UIMonitorUtility.doTaskNowDefault(new AbstractActionOperation("Operation_CheckRevisions", SVNUIMessages.class) { //$NON-NLS-1$
+			@Override
 			protected void runImpl(IProgressMonitor monitor) throws Exception {
-				ISVNConnector proxy = HistoryRangePanel.this.initStartResource.getRepositoryLocation()
-						.acquireSVNProxy();
+				ISVNConnector proxy = initStartResource.getRepositoryLocation().acquireSVNProxy();
 				try {
-					HistoryRangePanel.this.reversed = SVNUtility.compareRevisions(
-							HistoryRangePanel.this.initStartResource.getSelectedRevision(),
-							HistoryRangePanel.this.initStopResource.getSelectedRevision(),
-							SVNUtility.getEntryRevisionReference(HistoryRangePanel.this.initStartResource),
-							SVNUtility.getEntryRevisionReference(HistoryRangePanel.this.initStopResource), proxy) == -1;
+					reversed = SVNUtility.compareRevisions(
+							initStartResource.getSelectedRevision(), initStopResource.getSelectedRevision(),
+							SVNUtility.getEntryRevisionReference(initStartResource),
+							SVNUtility.getEntryRevisionReference(initStopResource), proxy) == -1;
 				} finally {
-					HistoryRangePanel.this.initStartResource.getRepositoryLocation().releaseSVNProxy(proxy);
+					initStartResource.getRepositoryLocation().releaseSVNProxy(proxy);
 				}
 			}
 		}, false);

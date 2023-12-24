@@ -32,35 +32,38 @@ public abstract class SVNRepositoryBase extends PlatformObject implements IRepos
 
 	// serialization conventional constructor
 	protected SVNRepositoryBase() {
-		super();
 	}
 
 	public SVNRepositoryBase(String url) {
-		super();
 		this.url = url;
 	}
 
+	@Override
 	public String getName() {
-		return SVNUtility.createPathForSVNUrl(this.getUrl()).lastSegment();
+		return SVNUtility.createPathForSVNUrl(getUrl()).lastSegment();
 	}
 
+	@Override
 	public String getUrl() {
-		return this.url;
+		return url;
 	}
 
+	@Override
 	public String toString() {
-		return this.getUrl();
+		return getUrl();
 	}
 
+	@Override
 	public boolean equals(Object obj) {
 		if (obj != null && obj instanceof IRepositoryBase) {
-			return this.getUrl().equals(((IRepositoryBase) obj).getUrl());
+			return getUrl().equals(((IRepositoryBase) obj).getUrl());
 		}
 		return false;
 	}
 
+	@Override
 	public int hashCode() {
-		return this.getUrl().hashCode();
+		return getUrl().hashCode();
 	}
 
 }

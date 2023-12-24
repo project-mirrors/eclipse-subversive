@@ -43,12 +43,13 @@ public class OpenInComparePaneAction extends Action {
 		Utils.initAction(this, "action.openInCompareEditor."); //$NON-NLS-1$
 	}
 
+	@Override
 	public void run() {
-		ISelection selection = this.configuration.getSite().getSelectionProvider().getSelection();
+		ISelection selection = configuration.getSite().getSelectionProvider().getSelection();
 		if (selection instanceof IStructuredSelection) {
 			IStructuredSelection strSelection = (IStructuredSelection) selection;
-			if (this.isOkToRun(strSelection)) {
-				IResource resource = this.getResources(strSelection)[0];
+			if (isOkToRun(strSelection)) {
+				IResource resource = getResources(strSelection)[0];
 				ILocalResource local = SVNRemoteStorage.instance().asLocalResource(resource);
 				if (!IStateFilter.SF_INTERNAL_INVALID.accept(local)) {
 					IRepositoryResource remote = local.isCopied()
@@ -63,7 +64,7 @@ public class OpenInComparePaneAction extends Action {
 
 	protected boolean isOkToRun(IStructuredSelection selection) {
 		if (selection.size() == 1) {
-			IResource[] resources = this.getResources(selection);
+			IResource[] resources = getResources(selection);
 			if (resources.length == 1) {
 				IResource resource = resources[0];
 				return resource.getType() == IResource.FILE

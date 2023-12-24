@@ -27,6 +27,7 @@ import java.net.UnknownHostException;
 
 import org.eclipse.core.net.proxy.IProxyData;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.team.svn.core.BaseMessages;
 import org.eclipse.team.svn.core.SVNMessages;
 import org.eclipse.team.svn.core.utility.SVNUtility;
 
@@ -54,7 +55,7 @@ public class WebUtil {
 	 *             if a network or IO problem occurs
 	 */
 	public static void downloadResource(File target, URL sourceUrl, IProgressMonitor monitor) throws IOException {
-		monitor.beginTask(SVNMessages.format(SVNMessages.WebUtil_task_retrievingUrl, sourceUrl.toString()),
+		monitor.beginTask(BaseMessages.format(SVNMessages.WebUtil_task_retrievingUrl, sourceUrl.toString()),
 				IProgressMonitor.UNKNOWN);
 		WebUtil.initProxyData(sourceUrl.getHost());
 		try {
@@ -65,7 +66,7 @@ public class WebUtil {
 				try {
 					in = new BufferedInputStream(in);
 					OutputStream out = new BufferedOutputStream(new FileOutputStream(target));
-					try {
+					try (out) {
 						int i;
 						while ((i = in.read()) != -1) {
 							out.write(i);
@@ -75,8 +76,6 @@ public class WebUtil {
 						out.close();
 						target.delete();
 						throw e;
-					} finally {
-						out.close();
 					}
 				} finally {
 					if (in != null) {
@@ -88,7 +87,7 @@ public class WebUtil {
 					}
 				}
 			} else {
-				throw new IOException(SVNMessages.format(SVNMessages.WebUtil_cannotDownload,
+				throw new IOException(BaseMessages.format(SVNMessages.WebUtil_cannotDownload,
 						new Object[] { sourceUrl.toString(), result }));
 			}
 		} finally {
@@ -111,7 +110,7 @@ public class WebUtil {
 		if (locations.length == 0) {
 			throw new IllegalArgumentException();
 		}
-		monitor.beginTask(SVNMessages.format(SVNMessages.WebUtil_task_verifyingUrl, locations[0].toString()),
+		monitor.beginTask(BaseMessages.format(SVNMessages.WebUtil_task_verifyingUrl, locations[0].toString()),
 				IProgressMonitor.UNKNOWN);
 		try {
 			int countFound = 0;
@@ -136,10 +135,8 @@ public class WebUtil {
 					if (one) {
 						return true;
 					}
-				} else {
-					if (!one) {
-						return false;
-					}
+				} else if (!one) {
+					return false;
 				}
 			}
 			return countFound == locations.length;

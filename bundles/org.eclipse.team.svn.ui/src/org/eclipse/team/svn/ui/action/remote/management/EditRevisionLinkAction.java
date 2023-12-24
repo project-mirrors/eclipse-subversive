@@ -16,7 +16,7 @@ package org.eclipse.team.svn.ui.action.remote.management;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.action.IAction;
-import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.window.Window;
 import org.eclipse.team.svn.core.connector.SVNRevision;
 import org.eclipse.team.svn.core.operation.AbstractActionOperation;
 import org.eclipse.team.svn.core.operation.CompositeOperation;
@@ -44,26 +44,27 @@ import org.eclipse.team.svn.ui.repository.model.RepositoryRevision;
 public class EditRevisionLinkAction extends AbstractRepositoryTeamAction {
 
 	public EditRevisionLinkAction() {
-		super();
 	}
 
+	@Override
 	public void runImpl(IAction action) {
-		RepositoryRevision revision = ((RepositoryRevision[]) this.getAdaptedSelection(RepositoryRevision.class))[0];
+		RepositoryRevision revision = this.getAdaptedSelection(RepositoryRevision.class)[0];
 		final IRevisionLink oldLink = revision.getRevisionLink();
 		IRepositoryResource resource = oldLink.getRepositoryResource();
 		SVNRevision oldRevision = revision.getRevision();
 
 		InputRevisionPanel panel = new InputRevisionPanel(oldLink.getRepositoryResource(), true, oldLink.getComment());
-		DefaultDialog dialog = new DefaultDialog(this.getShell(), panel);
-		if (dialog.open() == Dialog.OK) {
+		DefaultDialog dialog = new DefaultDialog(getShell(), panel);
+		if (dialog.open() == Window.OK) {
 			SVNRevision selectedRevision = panel.getSelectedRevision();
 			final String comment = panel.getRevisionComment();
 
 			CompositeOperation op = new CompositeOperation("Operation_EditRevisionLink", SVNUIMessages.class); //$NON-NLS-1$
 			if (!oldRevision.equals(selectedRevision)) {
-				//delete old link and re-create new link															
+				//delete old link and re-create new link
 				IActionOperation mainOp = new AbstractActionOperation("Operation_EditRevisionLink", //$NON-NLS-1$
 						SVNUIMessages.class) {
+					@Override
 					protected void runImpl(IProgressMonitor monitor) throws Exception {
 						oldLink.getRepositoryResource().getRepositoryLocation().removeRevisionLink(oldLink);
 					}
@@ -75,25 +76,24 @@ public class EditRevisionLinkAction extends AbstractRepositoryTeamAction {
 				final LocateResourceURLInHistoryOperation locateOp = new LocateResourceURLInHistoryOperation(
 						new IRepositoryResource[] { resource });
 
-				AddRevisionLinkOperation addOp = new AddRevisionLinkOperation(new IRevisionLinkProvider() {
-					public IRevisionLink[] getRevisionLinks() {
-						IRepositoryResource[] resources = locateOp.getRepositoryResources();
-						IRevisionLink[] links = new IRevisionLink[resources.length];
-						for (int i = 0; i < resources.length; i++) {
-							links[i] = SVNUtility.createRevisionLink(resources[i]);
-							links[i].setComment(comment);
-						}
-						return links;
+				AddRevisionLinkOperation addOp = new AddRevisionLinkOperation((IRevisionLinkProvider) () -> {
+					IRepositoryResource[] resources = locateOp.getRepositoryResources();
+					IRevisionLink[] links = new IRevisionLink[resources.length];
+					for (int i = 0; i < resources.length; i++) {
+						links[i] = SVNUtility.createRevisionLink(resources[i]);
+						links[i].setComment(comment);
 					}
+					return links;
 				}, selectedRevision);
 
 				op.add(mainOp);
 				op.add(locateOp, new IActionOperation[] { mainOp });
 				op.add(addOp, new IActionOperation[] { mainOp, locateOp });
 			} else {
-				//change link comment								
+				//change link comment
 				IActionOperation mainOp = new AbstractActionOperation("Operation_EditRevisionLink", //$NON-NLS-1$
 						SVNUIMessages.class) {
+					@Override
 					protected void runImpl(IProgressMonitor monitor) throws Exception {
 						oldLink.setComment(comment);
 					}
@@ -104,10 +104,11 @@ public class EditRevisionLinkAction extends AbstractRepositoryTeamAction {
 			op.add(new SaveRepositoryLocationsOperation());
 			op.add(new RefreshRepositoryLocationsOperation(
 					new IRepositoryLocation[] { resource.getRepositoryLocation() }, true));
-			this.runScheduled(op);
+			runScheduled(op);
 		}
 	}
 
+	@Override
 	public boolean isEnabled() {
 		return this.getAdaptedSelection(RepositoryRevision.class).length == 1;
 	}

@@ -41,8 +41,8 @@ import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.team.svn.core.IStateFilter;
 import org.eclipse.team.svn.core.SVNMessages;
 import org.eclipse.team.svn.core.connector.SVNDepth;
-import org.eclipse.team.svn.core.connector.SVNRevision;
 import org.eclipse.team.svn.core.connector.SVNProperty.BuiltIn;
+import org.eclipse.team.svn.core.connector.SVNRevision;
 import org.eclipse.team.svn.core.operation.AbstractActionOperation;
 import org.eclipse.team.svn.core.operation.CompositeOperation;
 import org.eclipse.team.svn.core.operation.IActionOperation;
@@ -61,7 +61,6 @@ import org.eclipse.team.svn.core.resource.ILocalResource;
 import org.eclipse.team.svn.core.resource.IRepositoryContainer;
 import org.eclipse.team.svn.core.resource.IRepositoryResource;
 import org.eclipse.team.svn.core.resource.IRepositoryResourceProvider;
-import org.eclipse.team.svn.core.resource.IResourceProvider;
 import org.eclipse.team.svn.core.svnstorage.SVNRemoteStorage;
 import org.eclipse.team.svn.core.utility.FileUtility;
 import org.eclipse.team.svn.core.utility.SVNUtility;
@@ -114,68 +113,67 @@ public class CheckoutAsWizard extends AbstractSVNWizard {
 	}
 
 	public CheckoutAsWizard(IRepositoryResource[] resources, IActionOperation priorOp) {
-		super();
-		this.setWindowTitle(SVNUIMessages.CheckoutAsWizard_Title);
-		this.setForcePreviousAndNextButtons(true);
+		setWindowTitle(SVNUIMessages.CheckoutAsWizard_Title);
+		setForcePreviousAndNextButtons(true);
 		this.resources = resources;
-		this.singleMode = this.resources.length == 1;
+		singleMode = this.resources.length == 1;
 		this.priorOp = priorOp;
 	}
 
 	public boolean isUseNewProjectWizard() {
-		return this.methodSelectionPage == null ? false : this.methodSelectionPage.isUseNewProjectWizard();
+		return methodSelectionPage == null ? false : methodSelectionPage.isUseNewProjectWizard();
 	}
 
 	public boolean isFindProjectsSelected() {
-		return this.singleMode
-				? (this.methodSelectionPage == null ? false : this.methodSelectionPage.isFindProjectsSelected())
-				: this.multipleMethodPage == null ? false : this.multipleMethodPage.isFindProjectsSelected();
+		return singleMode
+				? methodSelectionPage == null ? false : methodSelectionPage.isFindProjectsSelected()
+				: multipleMethodPage == null ? false : multipleMethodPage.isFindProjectsSelected();
 	}
 
 	public boolean isCheckoutAsFolderSelected() {
-		return this.singleMode
-				? (this.methodSelectionPage == null ? false : this.methodSelectionPage.isCheckoutAsFolderSelected())
-				: this.multipleMethodPage == null ? false : this.multipleMethodPage.isCheckoutAsFolderSelected();
+		return singleMode
+				? methodSelectionPage == null ? false : methodSelectionPage.isCheckoutAsFolderSelected()
+				: multipleMethodPage == null ? false : multipleMethodPage.isCheckoutAsFolderSelected();
 	}
 
 	public IContainer getTargetFolder() {
-		return this.selectFolderPage.getTargetFolder();
+		return selectFolderPage.getTargetFolder();
 	}
 
 	public SVNDepth getCheckoutDepth() {
-		return this.singleMode
-				? (this.methodSelectionPage == null ? SVNDepth.INFINITY : this.methodSelectionPage.getdepth())
-				: this.multipleMethodPage == null ? SVNDepth.INFINITY : this.multipleMethodPage.getdepth();
+		return singleMode
+				? methodSelectionPage == null ? SVNDepth.INFINITY : methodSelectionPage.getdepth()
+				: multipleMethodPage == null ? SVNDepth.INFINITY : multipleMethodPage.getdepth();
 	}
 
 	public String getProjectName() {
-		return this.methodSelectionPage == null
-				? this.resources[0].getName()
-				: this.methodSelectionPage.getProjectName();
+		return methodSelectionPage == null ? resources[0].getName() : methodSelectionPage.getProjectName();
 	}
 
 	public SVNRevision getRevisionToCheckoutFrom() {
-		return this.methodSelectionPage != null
-				? this.methodSelectionPage.getSelectedRevision()
-				: this.multipleMethodPage.getSelectedRevision();
+		return methodSelectionPage != null
+				? methodSelectionPage.getSelectedRevision()
+				: multipleMethodPage.getSelectedRevision();
 	}
 
 	public String getLocation() {
-		return this.isCheckoutAsFolderSelected()
-				? FileUtility.getWorkingCopyPath(this.getTargetFolder())
-				: this.locationSelectionPage.getLocation();
+		return isCheckoutAsFolderSelected()
+				? FileUtility.getWorkingCopyPath(getTargetFolder())
+				: locationSelectionPage.getLocation();
 	}
 
 	public String getWorkingSetName() {
-		return this.locationSelectionPage.getWorkingSetName();
+		return locationSelectionPage.getWorkingSetName();
 	}
 
+	@Override
 	public void addPages() {
-		if (this.resources.length == 1) {
-			this.projectName = this.fetchProjectName();
+		if (resources.length == 1) {
+			projectName = fetchProjectName();
 			GetRemoteFolderChildrenOperation op = new GetRemoteFolderChildrenOperation(
-					(IRepositoryContainer) this.resources[0], false);
+					(IRepositoryContainer) resources[0], false);
 			UIMonitorUtility.doTaskBusy(op, new DefaultOperationWrapperFactory() {
+				@Override
 				public IActionOperation getLogged(IActionOperation operation) {
 					return new LoggedOperation(operation);
 				}
@@ -183,77 +181,78 @@ public class CheckoutAsWizard extends AbstractSVNWizard {
 			boolean isEclipseProject = false;
 			if (op.getExecutionState() == IActionOperation.OK) {
 				IRepositoryResource[] children = op.getChildren();
-				for (int i = 0; i < children.length; i++) {
-					if (children[i].getName().equals(".project")) { //$NON-NLS-1$
+				for (IRepositoryResource child : children) {
+					if (child.getName().equals(".project")) { //$NON-NLS-1$
 						isEclipseProject = true;
 						break;
 					}
 				}
 			}
-			this.addPage(this.methodSelectionPage = new CheckoutMethodSelectionPage(this.projectName, !isEclipseProject,
-					this.resources[0]));
+			addPage(methodSelectionPage = new CheckoutMethodSelectionPage(projectName, !isEclipseProject,
+					resources[0]));
 		} else {
-			this.addPage(this.multipleMethodPage = new MultipleCheckoutMethodSelectionPage(this.resources));
+			addPage(multipleMethodPage = new MultipleCheckoutMethodSelectionPage(resources));
 		}
-		this.addPage(this.selectFolderPage = new CheckoutAsFolderPage(this.resources));
-		this.addPage(this.locationSelectionPage = new ProjectLocationSelectionPage(this.resources.length > 1, null));
+		addPage(selectFolderPage = new CheckoutAsFolderPage(resources));
+		addPage(locationSelectionPage = new ProjectLocationSelectionPage(resources.length > 1, null));
 	}
 
+	@Override
 	public IWizardPage getNextPage(IWizardPage page) {
-		if (page == this.selectFolderPage) {
+		if (page == selectFolderPage) {
 			return null;
 		}
 
 		if (page instanceof CheckoutMethodSelectionPage) {
-			if (this.methodSelectionPage.isUseNewProjectWizard() || this.methodSelectionPage.isFindProjectsSelected()) {
+			if (methodSelectionPage.isUseNewProjectWizard() || methodSelectionPage.isFindProjectsSelected()) {
 				return null;
 			}
 		} else if (page instanceof MultipleCheckoutMethodSelectionPage) {
-			if (this.multipleMethodPage.isFindProjectsSelected()) {
+			if (multipleMethodPage.isFindProjectsSelected()) {
 				return null;
 			}
 		}
 
-		if ((page == this.methodSelectionPage || page == this.multipleMethodPage)
-				&& !this.isCheckoutAsFolderSelected()) {
+		if ((page == methodSelectionPage || page == multipleMethodPage) && !isCheckoutAsFolderSelected()) {
 			return super.getNextPage(super.getNextPage(page));
 		}
 
 		return super.getNextPage(page);
 	}
 
+	@Override
 	public boolean performFinish() {
-		if (this.isFindProjectsSelected()) {
-			final CompositeOperation op = this.getLocateProjectsOperation(this.resources, this.getCheckoutDepth(),
-					this.getRevisionToCheckoutFrom());
+		if (isFindProjectsSelected()) {
+			final CompositeOperation op = getLocateProjectsOperation(resources, getCheckoutDepth(),
+					getRevisionToCheckoutFrom());
 			UIMonitorUtility.doTaskScheduledActive(op);
-		} else if (this.obtainNames()) {
-			this.doCheckout(this.getLocation(), this.getProjectName(), this.isUseNewProjectWizard(),
-					this.getCheckoutDepth(), this.getWorkingSetName(), this.getRevisionToCheckoutFrom());
+		} else if (obtainNames()) {
+			doCheckout(getLocation(), getProjectName(), isUseNewProjectWizard(), getCheckoutDepth(),
+					getWorkingSetName(), getRevisionToCheckoutFrom());
 		}
 		return true;
 	}
 
 	protected String fetchProjectName() {
-		ObtainProjectNameOperation obtainOperation = new ObtainProjectNameOperation(this.resources);
+		ObtainProjectNameOperation obtainOperation = new ObtainProjectNameOperation(resources);
 		UIMonitorUtility.doTaskNowDefault(obtainOperation, true);
 		if (obtainOperation.getExecutionState() != IStatus.OK) {
-			return this.resources[0].getName();
+			return resources[0].getName();
 		}
-		this.names2resources = ExtensionsManager.getInstance()
+		names2resources = ExtensionsManager.getInstance()
 				.getCurrentCheckoutFactory()
 				.prepareName2resources(obtainOperation.getNames2Resources());
-		return (String) this.names2resources.keySet().iterator().next();
+		return (String) names2resources.keySet().iterator().next();
 	}
 
 	protected boolean obtainNames() {
-		if (this.names2resources == null) {
-			ObtainProjectNameOperation obtainOperation = new ObtainProjectNameOperation(this.resources);
+		if (names2resources == null) {
+			ObtainProjectNameOperation obtainOperation = new ObtainProjectNameOperation(resources);
 			UIMonitorUtility.doTaskNowDefault(obtainOperation, true);
 			if (obtainOperation.getExecutionState() != IStatus.OK) {
 				return false;
 			}
-			this.names2resources = ExtensionsManager.getInstance()
+			names2resources = ExtensionsManager.getInstance()
 					.getCurrentCheckoutFactory()
 					.prepareName2resources(obtainOperation.getNames2Resources());
 		}
@@ -262,73 +261,73 @@ public class CheckoutAsWizard extends AbstractSVNWizard {
 
 	protected void doCheckout(String location, String projectName, boolean useNewProjectWizard, SVNDepth depth,
 			String workingSetName, SVNRevision revisionToCheckoutFrom) {
-		if (!useNewProjectWizard && this.names2resources.keySet().size() == 1) {
-			Object resource = this.names2resources.get(this.names2resources.keySet().iterator().next());
-			this.names2resources.clear();
-			this.names2resources.put(projectName, resource);
+		if (!useNewProjectWizard && names2resources.size() == 1) {
+			Object resource = names2resources.get(names2resources.keySet().iterator().next());
+			names2resources.clear();
+			names2resources.put(projectName, resource);
 		}
 		ArrayList operateResources = new ArrayList();
 		if (useNewProjectWizard) {
-			operateResources.add(this.names2resources.get(this.names2resources.keySet().iterator().next()));
+			operateResources.add(names2resources.get(names2resources.keySet().iterator().next()));
 		} else {
-			operateResources = CheckoutAction.getOperateResources(this.names2resources,
-					CheckoutAction.getResources2Names(this.names2resources), this.getShell(), location,
-					!this.isCheckoutAsFolderSelected());
+			operateResources = CheckoutAction.getOperateResources(names2resources,
+					CheckoutAction.getResources2Names(names2resources), getShell(), location,
+					!isCheckoutAsFolderSelected());
 		}
 
 		if (operateResources.size() > 0) {
 			IActionOperation op = null;
 			if (useNewProjectWizard) {
-				// this is the wrong way in the multithreaded environment, 
+				// this is the wrong way in the multithreaded environment,
 				// but it should work in the interactive environment of the Eclipse IDE
-				// and, at the same time, right way is much complex and requires to override 
+				// and, at the same time, right way is much complex and requires to override
 				// too many of built-in Eclipse Team-Services functionality
 				ProjectAdditionListener listener = new ProjectAdditionListener();
 				ResourcesPlugin.getWorkspace().addResourceChangeListener(listener, IResourceChangeEvent.POST_CHANGE);
-				(new NewProjectAction(PlatformUI.getWorkbench().getActiveWorkbenchWindow())).run();
+				new NewProjectAction(PlatformUI.getWorkbench().getActiveWorkbenchWindow()).run();
 				ResourcesPlugin.getWorkspace().removeResourceChangeListener(listener);
 
 				IProject selectedProject = listener.getProject();
 				if (selectedProject != null) {
-					op = this.prepareForOne((IRepositoryResource) operateResources.get(0), selectedProject.getName(),
+					op = prepareForOne((IRepositoryResource) operateResources.get(0), selectedProject.getName(),
 							FileUtility.getResourcePath(selectedProject).removeLastSegments(1).toString(), true, depth,
 							workingSetName, revisionToCheckoutFrom);
 				}
-			} else if (this.isCheckoutAsFolderSelected()) {
+			} else if (isCheckoutAsFolderSelected()) {
 				Map resources2Names = new HashMap();
-				if (this.names2resources != null) {
-					for (Iterator it = this.names2resources.entrySet().iterator(); it.hasNext();) {
+				if (names2resources != null) {
+					for (Iterator it = names2resources.entrySet().iterator(); it.hasNext();) {
 						Map.Entry entry = (Map.Entry) it.next();
 						resources2Names.put(entry.getValue(), entry.getKey());
 					}
 				}
-				Map mappings = this.getExternalsFolderNames(this.resources, resources2Names);
+				Map mappings = getExternalsFolderNames(resources, resources2Names);
 				IResource destinationRoot = ResourcesPlugin.getWorkspace()
 						.getRoot()
-						.findMember(this.selectFolderPage.getTargetFolder().getFullPath());
+						.findMember(selectFolderPage.getTargetFolder().getFullPath());
 				ILocalResource localDest = SVNRemoteStorage.instance().asLocalResource(destinationRoot);
 				if (IStateFilter.SF_INTERNAL_INVALID.accept(localDest)) {
-					op = this.getCheckoutAsFolderOperationUnshared(this.getTargetFolder(), this.resources, mappings);
+					op = getCheckoutAsFolderOperationUnshared(getTargetFolder(), resources, mappings);
 				} else {
-					op = this.getCheckoutAsFolderOperation(this.getTargetFolder(), this.resources, mappings);
+					op = getCheckoutAsFolderOperation(getTargetFolder(), resources, mappings);
 				}
-			} else if (this.singleMode) {
-				op = this.prepareForOne((IRepositoryResource) operateResources.get(0), projectName, location, false,
-						depth, workingSetName, revisionToCheckoutFrom);
+			} else if (singleMode) {
+				op = prepareForOne((IRepositoryResource) operateResources.get(0), projectName, location, false, depth,
+						workingSetName, revisionToCheckoutFrom);
 			} else {
 				HashMap operateMap = new HashMap();
 				for (Iterator iter = operateResources.iterator(); iter.hasNext();) {
 					IRepositoryResource resource = (IRepositoryResource) iter.next();
-					HashMap resources2names = CheckoutAction.getResources2Names(this.names2resources);
+					HashMap resources2names = CheckoutAction.getResources2Names(names2resources);
 					operateMap.put(resources2names.get(resource), resource);
 				}
-				op = this.prepareForMultiple(operateMap, location, depth, workingSetName, revisionToCheckoutFrom);
+				op = prepareForMultiple(operateMap, location, depth, workingSetName, revisionToCheckoutFrom);
 			}
 			if (op != null) {
-				if (this.priorOp != null) {
+				if (priorOp != null) {
 					CompositeOperation tmp = new CompositeOperation(op.getId(), op.getMessagesClass());
-					tmp.add(this.priorOp);
-					tmp.add(op, new IActionOperation[] { this.priorOp });
+					tmp.add(priorOp);
+					tmp.add(op, new IActionOperation[] { priorOp });
 					op = tmp;
 				}
 				UIMonitorUtility.doTaskScheduledActive(op);
@@ -339,18 +338,18 @@ public class CheckoutAsWizard extends AbstractSVNWizard {
 	protected IActionOperation getCheckoutAsFolderOperationUnshared(IContainer targetFolder,
 			IRepositoryResource[] resources, Map mappings) {
 		CompositeOperation op = new CompositeOperation(SVNUIMessages.Operation_CheckoutAsFolder, SVNUIMessages.class);
-		for (int i = 0; i < resources.length; i++) {
+		for (IRepositoryResource element : resources) {
 			IPath location = FileUtility.getResourcePath(targetFolder);
-			File target = location.append((String) mappings.get(resources[i])).toFile();
-			IRepositoryResource modifiedResource = SVNUtility.copyOf(resources[i]);
-			modifiedResource.setSelectedRevision(this.getRevisionToCheckoutFrom());
+			File target = location.append((String) mappings.get(element)).toFile();
+			IRepositoryResource modifiedResource = SVNUtility.copyOf(element);
+			modifiedResource.setSelectedRevision(getRevisionToCheckoutFrom());
 			op.add(new org.eclipse.team.svn.core.operation.file.CheckoutAsOperation(target, modifiedResource,
-					this.getCheckoutDepth(),
+					getCheckoutDepth(),
 					SVNTeamPreferences.getBehaviourBoolean(SVNTeamUIPlugin.instance().getPreferenceStore(),
 							SVNTeamPreferences.BEHAVIOUR_IGNORE_EXTERNALS_NAME),
 					false));
 		}
-		IResource[] localResources = new IResource[] { targetFolder };
+		IResource[] localResources = { targetFolder };
 		op.add(new RefreshResourcesOperation(localResources), null);
 		return op;
 	}
@@ -358,16 +357,16 @@ public class CheckoutAsWizard extends AbstractSVNWizard {
 	protected IActionOperation getCheckoutAsFolderOperation(IContainer targetFolder, IRepositoryResource[] resources,
 			Map mappings) {
 		String externalsData = ""; //$NON-NLS-1$
-		for (int i = 0; i < resources.length; i++) {
-			String line = (String) mappings.get(resources[i]) + "\t" + SVNUtility.encodeURL(resources[i].getUrl()) //$NON-NLS-1$
+		for (IRepositoryResource element : resources) {
+			String line = (String) mappings.get(element) + "\t" + SVNUtility.encodeURL(element.getUrl()) //$NON-NLS-1$
 					+ "\n"; //$NON-NLS-1$
-			;
+
 			externalsData += line;
 		}
 
 		CompositeOperation op = new CompositeOperation(SVNUIMessages.Operation_CheckoutAsFolder, SVNMessages.class);
 		IActionOperation[] dependency = null;
-		IResource[] localResources = new IResource[] { targetFolder };
+		IResource[] localResources = { targetFolder };
 		ILocalResource localResource = SVNRemoteStorage.instance().asLocalResourceAccessible(targetFolder);
 		IResource[] newResources = null;
 		if (IStateFilter.SF_UNVERSIONED.accept(localResource)) {
@@ -388,14 +387,14 @@ public class CheckoutAsWizard extends AbstractSVNWizard {
 		op.add(setProps, dependency);
 		dependency = new IActionOperation[] { setProps };
 
-		for (int i = 0; i < resources.length; i++) {
+		for (IRepositoryResource element : resources) {
 			IPath location = targetFolder.getLocation();
 			if (location != null) {
-				File target = location.append((String) mappings.get(resources[i])).toFile();
-				IRepositoryResource modifiedResource = SVNUtility.copyOf(resources[i]);
-				modifiedResource.setSelectedRevision(this.getRevisionToCheckoutFrom());
+				File target = location.append((String) mappings.get(element)).toFile();
+				IRepositoryResource modifiedResource = SVNUtility.copyOf(element);
+				modifiedResource.setSelectedRevision(getRevisionToCheckoutFrom());
 				op.add(new org.eclipse.team.svn.core.operation.file.CheckoutAsOperation(target, modifiedResource,
-						this.getCheckoutDepth(),
+						getCheckoutDepth(),
 						SVNTeamPreferences.getBehaviourBoolean(SVNTeamUIPlugin.instance().getPreferenceStore(),
 								SVNTeamPreferences.BEHAVIOUR_IGNORE_EXTERNALS_NAME),
 						false), dependency);
@@ -408,13 +407,13 @@ public class CheckoutAsWizard extends AbstractSVNWizard {
 	protected Map getExternalsFolderNames(IRepositoryResource[] resources, Map resource2Name) {
 		Map retVal = new HashMap();
 		Set allNames = new HashSet();
-		for (int i = 0; i < resources.length; i++) {
-			String name = (String) resource2Name.get(resources[i]);
+		for (IRepositoryResource element : resources) {
+			String name = (String) resource2Name.get(element);
 			if (name == null) {
-				name = resources[i].getName();
+				name = element.getName();
 			}
-			name = this.getName(this.getTargetFolder(), name, allNames);
-			retVal.put(resources[i], name);
+			name = getName(getTargetFolder(), name, allNames);
+			retVal.put(element, name);
 			allNames.add(name);
 		}
 		return retVal;
@@ -463,7 +462,7 @@ public class CheckoutAsWizard extends AbstractSVNWizard {
 	protected CompositeOperation prepareForMultiple(HashMap name2resources, String location, SVNDepth depth,
 			String workingSetName, SVNRevision revisionToCheckoutFrom) {
 		CompositeOperation op = new CompositeOperation("", SVNUIMessages.class); //$NON-NLS-1$
-		IResource[] locals = new IResource[name2resources.keySet().size()];
+		IResource[] locals = new IResource[name2resources.size()];
 		String name;
 		int i = 0;
 		for (Iterator iter = name2resources.keySet().iterator(); iter.hasNext(); i++) {
@@ -494,7 +493,7 @@ public class CheckoutAsWizard extends AbstractSVNWizard {
 			resources[i] = tmpResource;
 		}
 		LocateProjectsOperation mainOp = new LocateProjectsOperation(resources,
-				ExtensionsManager.getInstance().getCurrentCheckoutFactory().getLocateFilter(), 5); //TODO level limitation now is hardcoded		
+				ExtensionsManager.getInstance().getCurrentCheckoutFactory().getLocateFilter(), 5); //TODO level limitation now is hardcoded
 
 		final CompositeOperation op = new CompositeOperation(mainOp.getId(), mainOp.getMessagesClass());
 		op.add(mainOp);
@@ -503,7 +502,7 @@ public class CheckoutAsWizard extends AbstractSVNWizard {
 				.additionalProcessing(op, mainOp);
 		ObtainProjectNameOperation obtainOperation = new ObtainProjectNameOperation(provider);
 		op.add(obtainOperation, new IActionOperation[] { mainOp });
-		op.add(this.getCheckoutProjectOperation(resources, obtainOperation, depth, revisionToCheckoutFrom),
+		op.add(getCheckoutProjectOperation(resources, obtainOperation, depth, revisionToCheckoutFrom),
 				new IActionOperation[] { obtainOperation });
 
 		return op;
@@ -513,96 +512,92 @@ public class CheckoutAsWizard extends AbstractSVNWizard {
 			final ObtainProjectNameOperation obtainOperation, final SVNDepth depth,
 			final SVNRevision revisionToCheckoutFrom) {
 		return new AbstractActionOperation("Operation_CheckoutProjects", SVNUIMessages.class) { //$NON-NLS-1$
+			@Override
 			protected void runImpl(IProgressMonitor monitor) throws Exception {
-				UIMonitorUtility.getDisplay().syncExec(new Runnable() {
-					public void run() {
-						HashMap name2resources = obtainOperation.getNames2Resources();
-						if (name2resources.isEmpty()) {
-							new MessageDialog(UIMonitorUtility.getShell(), getOperationResource("Title"), null, //$NON-NLS-1$
-									getOperationResource("Message"), MessageDialog.INFORMATION, //$NON-NLS-1$
-									new String[] { IDialogConstants.OK_LABEL }, 0).open();
-							return;
+				UIMonitorUtility.getDisplay().syncExec(() -> {
+					HashMap name2resources = obtainOperation.getNames2Resources();
+					if (name2resources.isEmpty()) {
+						new MessageDialog(UIMonitorUtility.getShell(), getOperationResource("Title"), null, //$NON-NLS-1$
+								getOperationResource("Message"), MessageDialog.INFORMATION, //$NON-NLS-1$
+								new String[] { IDialogConstants.OK_LABEL }, 0).open();
+						return;
+					}
+					CheckoutProjectsWizard wizard = new CheckoutProjectsWizard(resources, name2resources);
+					WizardDialog dialog = new WizardDialog(UIMonitorUtility.getShell(), wizard);
+					dialog.create();
+					wizard.postInit();
+					dialog.getShell()
+							.setSize(Math.max(SIZING_WIZARD_WIDTH, dialog.getShell().getSize().x),
+									SIZING_WIZARD_HEIGHT);
+					if (dialog.open() == 0) {//finish button pressed
+						List selection = wizard.getResultSelections();
+						IActionOperation op;
+						final Set projectNames;
+						if (wizard.isCheckoutAsFoldersSelected()) {
+							projectNames = null;
+							Map resources2Names = new HashMap();
+							if (names2resources != null) {
+								for (Iterator it = names2resources.entrySet().iterator(); it.hasNext();) {
+									Map.Entry entry = (Map.Entry) it.next();
+									resources2Names.put(entry.getValue(), entry.getKey());
+								}
+							}
+							Map mappings = CheckoutAsWizard.this.getExternalsFolderNames(resources,
+									resources2Names);
+							op = CheckoutAsWizard.this.getCheckoutAsFolderOperation(wizard.getTargetFolder(),
+									(IRepositoryResource[]) selection
+											.toArray(new IRepositoryResource[selection.size()]),
+									mappings);
+						} else {
+							HashMap selectedMap = new HashMap();
+							List projects = new ArrayList();
+							projectNames = name2resources.keySet();
+							for (Iterator iter = projectNames.iterator(); iter.hasNext();) {
+								String projName = (String) iter.next();
+								if (wizard.getResultSelections().contains(name2resources.get(projName))) {
+									selectedMap.put(projName, name2resources.get(projName));
+									projects.add(name2resources.get(projName));
+								}
+							}
+							boolean ignoreExternals = SVNTeamPreferences.getBehaviourBoolean(
+									SVNTeamUIPlugin.instance().getPreferenceStore(),
+									SVNTeamPreferences.BEHAVIOUR_IGNORE_EXTERNALS_NAME);
+							op = ExtensionsManager.getInstance()
+									.getCurrentCheckoutFactory()
+									.getCheckoutOperation(CheckoutAsWizard.this.getShell(),
+											(IRepositoryResource[]) projects
+													.toArray(new IRepositoryResource[projects.size()]),
+											selectedMap, wizard.isRespectHierarchy(), wizard.getLocation(), depth,
+											ignoreExternals);
 						}
-						CheckoutProjectsWizard wizard = new CheckoutProjectsWizard(resources, name2resources);
-						WizardDialog dialog = new WizardDialog(UIMonitorUtility.getShell(), wizard);
-						dialog.create();
-						wizard.postInit();
-						dialog.getShell()
-								.setSize(Math.max(SIZING_WIZARD_WIDTH, dialog.getShell().getSize().x),
-										SIZING_WIZARD_HEIGHT);
-						if (dialog.open() == 0) {//finish button pressed
-							List selection = wizard.getResultSelections();
-							IActionOperation op;
-							final Set projectNames;
-							if (wizard.isCheckoutAsFoldersSelected()) {
-								projectNames = null;
-								Map resources2Names = new HashMap();
-								if (CheckoutAsWizard.this.names2resources != null) {
-									for (Iterator it = CheckoutAsWizard.this.names2resources.entrySet().iterator(); it
-											.hasNext();) {
-										Map.Entry entry = (Map.Entry) it.next();
-										resources2Names.put(entry.getValue(), entry.getKey());
-									}
+						if (op != null) {
+							String wsName = wizard.getWorkingSetName();
+							if (priorOp != null || wsName != null) {
+								CompositeOperation tmp = new CompositeOperation(op.getId(), op.getMessagesClass());
+								if (priorOp != null) {
+									tmp.add(priorOp);
+									tmp.add(op, new IActionOperation[] { priorOp });
+								} else {
+									tmp.add(op);
 								}
-								Map mappings = CheckoutAsWizard.this.getExternalsFolderNames(resources,
-										resources2Names);
-								op = CheckoutAsWizard.this.getCheckoutAsFolderOperation(wizard.getTargetFolder(),
-										(IRepositoryResource[]) selection
-												.toArray(new IRepositoryResource[selection.size()]),
-										mappings);
-							} else {
-								HashMap selectedMap = new HashMap();
-								List projects = new ArrayList();
-								projectNames = name2resources.keySet();
-								for (Iterator iter = projectNames.iterator(); iter.hasNext();) {
-									String projName = (String) iter.next();
-									if (wizard.getResultSelections().contains(name2resources.get(projName))) {
-										selectedMap.put(projName, name2resources.get(projName));
-										projects.add(name2resources.get(projName));
-									}
-								}
-								boolean ignoreExternals = SVNTeamPreferences.getBehaviourBoolean(
-										SVNTeamUIPlugin.instance().getPreferenceStore(),
-										SVNTeamPreferences.BEHAVIOUR_IGNORE_EXTERNALS_NAME);
-								op = ExtensionsManager.getInstance()
-										.getCurrentCheckoutFactory()
-										.getCheckoutOperation(CheckoutAsWizard.this.getShell(),
-												(IRepositoryResource[]) projects
-														.toArray(new IRepositoryResource[projects.size()]),
-												selectedMap, wizard.isRespectHierarchy(), wizard.getLocation(), depth,
-												ignoreExternals);
-							}
-							if (op != null) {
-								String wsName = wizard.getWorkingSetName();
-								if (CheckoutAsWizard.this.priorOp != null || wsName != null) {
-									CompositeOperation tmp = new CompositeOperation(op.getId(), op.getMessagesClass());
-									if (CheckoutAsWizard.this.priorOp != null) {
-										tmp.add(CheckoutAsWizard.this.priorOp);
-										tmp.add(op, new IActionOperation[] { CheckoutAsWizard.this.priorOp });
-									} else {
-										tmp.add(op);
-									}
-									if (wsName != null) {
-										tmp.add(new MoveProjectsToWorkingSetOperation(new IResourceProvider() {
-											public IResource[] getResources() {
-												List projects = new ArrayList();
-												for (Iterator it = projectNames.iterator(); it.hasNext();) {
-													String name = (String) it.next();
-													IProject prj = ResourcesPlugin.getWorkspace()
-															.getRoot()
-															.getProject(name);
-													if (prj != null) {
-														projects.add(prj);
-													}
-												}
-												return (IProject[]) projects.toArray(new IProject[projects.size()]);
+								if (wsName != null) {
+									tmp.add(new MoveProjectsToWorkingSetOperation(() -> {
+										List projects = new ArrayList();
+										for (Iterator it = projectNames.iterator(); it.hasNext();) {
+											String name = (String) it.next();
+											IProject prj = ResourcesPlugin.getWorkspace()
+													.getRoot()
+													.getProject(name);
+											if (prj != null) {
+												projects.add(prj);
 											}
-										}, wsName));
-									}
-									op = tmp;
+										}
+										return (IProject[]) projects.toArray(new IProject[projects.size()]);
+									}, wsName));
 								}
-								UIMonitorUtility.doTaskScheduledActive(op);
+								op = tmp;
 							}
+							UIMonitorUtility.doTaskScheduledActive(op);
 						}
 					}
 				});
@@ -610,10 +605,11 @@ public class CheckoutAsWizard extends AbstractSVNWizard {
 		};
 	}
 
+	@Override
 	public boolean canFinish() {
-		IWizardPage currentPage = this.getContainer().getCurrentPage();
-		if (((currentPage instanceof CheckoutMethodSelectionPage)
-				|| (currentPage instanceof MultipleCheckoutMethodSelectionPage)) && this.isCheckoutAsFolderSelected()) {
+		IWizardPage currentPage = getContainer().getCurrentPage();
+		if ((currentPage instanceof CheckoutMethodSelectionPage
+				|| currentPage instanceof MultipleCheckoutMethodSelectionPage) && isCheckoutAsFolderSelected()) {
 			return false;
 		}
 		return super.canFinish();
@@ -622,23 +618,24 @@ public class CheckoutAsWizard extends AbstractSVNWizard {
 	protected class ProjectAdditionListener implements IResourceChangeListener {
 		protected IProject project = null;
 
+		@Override
 		public void resourceChanged(IResourceChangeEvent event) {
 			IResourceDelta[] deltas = event.getDelta().getAffectedChildren();
-			for (int i = 0; i < deltas.length; i++) {
-				IResource resource = deltas[i].getResource();
+			for (IResourceDelta element : deltas) {
+				IResource resource = element.getResource();
 				if (resource instanceof IProject) {
-					if (deltas[i].getKind() == IResourceDelta.ADDED) {
-						this.project = (IProject) resource;
-					} else if (deltas[i].getKind() == IResourceDelta.REMOVED && this.project == resource) {
+					if (element.getKind() == IResourceDelta.ADDED) {
+						project = (IProject) resource;
+					} else if (element.getKind() == IResourceDelta.REMOVED && project == resource) {
 						// wizard will be cancelled ?
-						this.project = null;
+						project = null;
 					}
 				}
 			}
 		}
 
 		public IProject getProject() {
-			return this.project;
+			return project;
 		}
 
 	}

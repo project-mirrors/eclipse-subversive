@@ -62,29 +62,32 @@ public class OverrideAndCommitModelActionHelper extends AbstractActionHelper {
 		super(action, configuration);
 	}
 
+	@Override
 	public FastSyncInfoFilter getSyncInfoFilter() {
 		return new FastSyncInfoFilter.SyncInfoDirectionFilter(
 				new int[] { SyncInfo.CONFLICTING, SyncInfo.OUTGOING, SyncInfo.INCOMING }) {
+			@Override
 			public boolean select(SyncInfo info) {
 				UpdateSyncInfo sync = (UpdateSyncInfo) info;
-				return super.select(info) && !(IStateFilter.SF_OBSTRUCTED.accept(sync.getLocalResource()));
+				return super.select(info) && !IStateFilter.SF_OBSTRUCTED.accept(sync.getLocalResource());
 			}
 		};
 	}
 
+	@Override
 	public IActionOperation getOperation() {
 		String msg = null;
 		boolean keepLocks = false;
 		final IResource[][] resources = new IResource[1][];
 		IResource[] treatAsEdits = null;
 
-		IResource[] changedResources = this.getSyncInfoSelector()
+		IResource[] changedResources = getSyncInfoSelector()
 				.getSelectedResourcesRecursive(ISyncStateFilter.SF_OVERRIDE);
 		IResource[] overrideResources = UnacceptableOperationNotificator
 				.shrinkResourcesWithNotOnRespositoryParents(configuration.getSite().getShell(), changedResources);
 		if (overrideResources != null && overrideResources.length > 0) {
 			overrideResources = FileUtility.addOperableParents(overrideResources, IStateFilter.SF_NOTONREPOSITORY);
-			HashSet<IResource> allResourcesSet = new HashSet<IResource>(Arrays.asList(overrideResources));
+			HashSet<IResource> allResourcesSet = new HashSet<>(Arrays.asList(overrideResources));
 			String proposedComment = SVNChangeSetCapability.getProposedComment(overrideResources);
 			CommitPanel commitPanel = new CommitPanel(overrideResources, overrideResources,
 					CommitPanel.MSG_OVER_AND_COMMIT, proposedComment);
@@ -119,41 +122,39 @@ public class OverrideAndCommitModelActionHelper extends AbstractActionHelper {
 			IResourceProvider additionProvider = new IResourceProvider() {
 				protected IResource[] result;
 
+				@Override
 				public IResource[] getResources() {
-					if (this.result == null) {
-						HashSet<IResource> tAdd = new HashSet<IResource>(Arrays.asList(addition));
+					if (result == null) {
+						HashSet<IResource> tAdd = new HashSet<>(Arrays.asList(addition));
 						IResource[] restricted = mergeOp.getHavingDifferentNodeKind();
-						for (int i = 0; i < restricted.length; i++) {
-							if (restricted[i] instanceof IContainer) {//delete from add to SVN list, resources, with nodekind changed, and all their children 
+						for (IResource element : restricted) {
+							if (element instanceof IContainer) {//delete from add to SVN list, resources, with nodekind changed, and all their children
 								IResource[] restrictedChildren = FileUtility.getResourcesRecursive(resources[0],
 										IStateFilter.SF_ALL);
 								tAdd.removeAll(Arrays.asList(restrictedChildren));
 							} else {
-								tAdd.remove(restricted[i]);
+								tAdd.remove(element);
 							}
 
 						}
 
-						this.result = tAdd.toArray(new IResource[tAdd.size()]);
+						result = tAdd.toArray(new IResource[tAdd.size()]);
 					}
-					return this.result;
+					return result;
 				}
 			};
 			op.add(new AddToSVNWithPropertiesOperation(additionProvider, false), new IActionOperation[] { mergeOp });
 			op.add(new ClearLocalStatusesOperation(additionProvider));
 		}
 		CommitOperation mainOp = new CommitOperation(mergeOp, msg, true, keepLocks);
-		IActionOperation[] dependsOn = new IActionOperation[] { mergeOp };
+		IActionOperation[] dependsOn = { mergeOp };
 		op.add(mainOp, dependsOn);
 		op.add(new AbstractActionOperation("Operation_UNodeKindChanged", SVNUIMessages.class) { //$NON-NLS-1$
+			@Override
 			protected void runImpl(IProgressMonitor monitor) throws Exception {
 				final IResource[] diffNodeKind = mergeOp.getHavingDifferentNodeKind();
 				if (diffNodeKind.length > 0) {
-					UIMonitorUtility.getDisplay().syncExec(new Runnable() {
-						public void run() {
-							new NotifyNodeKindChangedDialog(UIMonitorUtility.getShell(), diffNodeKind).open();
-						}
-					});
+					UIMonitorUtility.getDisplay().syncExec(() -> new NotifyNodeKindChangedDialog(UIMonitorUtility.getShell(), diffNodeKind).open());
 				}
 			}
 		});
@@ -167,10 +168,12 @@ public class OverrideAndCommitModelActionHelper extends AbstractActionHelper {
 	}
 
 	public static final IStateFilter SF_NEW = new IStateFilter.AbstractStateFilter() {
+		@Override
 		protected boolean acceptImpl(ILocalResource local, IResource resource, String state, int mask) {
 			return state == IStateFilter.ST_NEW;
 		}
 
+		@Override
 		protected boolean allowsRecursionImpl(ILocalResource local, IResource resource, String state, int mask) {
 			return true;
 		}

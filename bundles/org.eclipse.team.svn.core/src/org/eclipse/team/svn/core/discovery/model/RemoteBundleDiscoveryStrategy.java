@@ -29,6 +29,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.team.svn.core.BaseMessages;
 import org.eclipse.team.svn.core.SVNMessages;
 import org.eclipse.team.svn.core.SVNTeamPlugin;
 import org.eclipse.team.svn.core.discovery.util.WebUtil;
@@ -53,10 +54,7 @@ public class RemoteBundleDiscoveryStrategy extends BundleDiscoveryStrategy {
 
 	@Override
 	public void performDiscovery(IProgressMonitor monitor) throws CoreException {
-		if (connectors == null || categories == null || discoveryUrl == null) {
-			throw new IllegalStateException();
-		}
-		if (registryStrategy != null) {
+		if (connectors == null || categories == null || discoveryUrl == null || (registryStrategy != null)) {
 			throw new IllegalStateException();
 		}
 
@@ -86,7 +84,7 @@ public class RemoteBundleDiscoveryStrategy extends BundleDiscoveryStrategy {
 			}
 
 			//TODO correctly call DownloadBundleJob, through our framework operations
-			DownloadBundleJob downloadBundleJob = new DownloadBundleJob(this.discoveryUrl, monitor);
+			DownloadBundleJob downloadBundleJob = new DownloadBundleJob(discoveryUrl, monitor);
 			downloadBundleJob.exec();
 			File bundleFile = downloadBundleJob.getFile();
 			if (bundleFile != null) // is there any network issues or the job was cancelled?
@@ -94,7 +92,7 @@ public class RemoteBundleDiscoveryStrategy extends BundleDiscoveryStrategy {
 				try {
 					registryStrategy = new DiscoveryRegistryStrategy(new File[] { registryCacheFolder },
 							new boolean[] { false }, this);
-					registryStrategy.setDiscoveryInfo(bundleFile, this.discoveryUrl);
+					registryStrategy.setDiscoveryInfo(bundleFile, discoveryUrl);
 					IExtensionRegistry extensionRegistry = new ExtensionRegistry(registryStrategy, this, this);
 					try {
 						IExtensionPoint extensionPoint = extensionRegistry
@@ -130,11 +128,11 @@ public class RemoteBundleDiscoveryStrategy extends BundleDiscoveryStrategy {
 		}
 
 		public void exec() {
-			String bundleUrl = this.location;
+			String bundleUrl = location;
 			for (int attemptCount = 0; attemptCount < maxDiscoveryJarDownloadAttempts; ++attemptCount) {
 				try {
 					if (!bundleUrl.startsWith("http://") && !bundleUrl.startsWith("https://")) { //$NON-NLS-1$//$NON-NLS-2$
-						String errMessage = SVNMessages.format(
+						String errMessage = BaseMessages.format(
 								SVNMessages.RemoteBundleDiscoveryStrategy_unrecognized_discovery_url, bundleUrl);
 						LoggedOperation.reportError(this.getClass().getName(), new Exception(errMessage));
 
@@ -158,7 +156,7 @@ public class RemoteBundleDiscoveryStrategy extends BundleDiscoveryStrategy {
 					}/*don't use sub progress monitor here*/);
 					file = target;
 				} catch (IOException e) {
-					String errMessage = SVNMessages.format(
+					String errMessage = BaseMessages.format(
 							SVNMessages.RemoteBundleDiscoveryStrategy_cannot_download_bundle, bundleUrl);
 					LoggedOperation.reportError(this.getClass().getName(), new Exception(errMessage, e));
 
@@ -170,7 +168,7 @@ public class RemoteBundleDiscoveryStrategy extends BundleDiscoveryStrategy {
 		}
 
 		public File getFile() {
-			return this.file;
+			return file;
 		}
 	}
 

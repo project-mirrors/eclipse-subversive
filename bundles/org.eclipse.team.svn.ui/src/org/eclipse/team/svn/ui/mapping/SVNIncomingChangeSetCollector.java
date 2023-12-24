@@ -56,6 +56,7 @@ public class SVNIncomingChangeSetCollector extends ChangeSetManager {
 		this.subscriber = subscriber;
 	}
 
+	@Override
 	protected void initializeSets() {
 		//do nothing
 	}
@@ -72,15 +73,15 @@ public class SVNIncomingChangeSetCollector extends ChangeSetManager {
 		String svnNoDate = SVNMessages.SVNInfo_NoDate;
 		//
 
-		HashMap<Long, SVNIncomingChangeSet> sets = new HashMap<Long, SVNIncomingChangeSet>();
-		final Set<SVNIncomingChangeSet> added = new HashSet<SVNIncomingChangeSet>();
-		for (ChangeSet set : this.getSets()) {
+		HashMap<Long, SVNIncomingChangeSet> sets = new HashMap<>();
+		final Set<SVNIncomingChangeSet> added = new HashSet<>();
+		for (ChangeSet set : getSets()) {
 			SVNIncomingChangeSet svnSet = (SVNIncomingChangeSet) set;
 			sets.put(svnSet.getRevision(), svnSet);
 		}
 		try {
 			for (IDiff diff : diffs) {
-				SyncInfo info = this.subscriber.getSyncInfo(ResourceDiffTree.getResourceFor(diff));
+				SyncInfo info = subscriber.getSyncInfo(ResourceDiffTree.getResourceFor(diff));
 				if (info == null || (info.getKind() & SyncInfo.INCOMING) == 0) {
 					continue;
 				}
@@ -138,11 +139,10 @@ public class SVNIncomingChangeSetCollector extends ChangeSetManager {
 	}
 
 	public void handleChange(IDiffChangeEvent event) {
-		ArrayList<IPath> removals = new ArrayList<IPath>(Arrays.asList(event.getRemovals()));
-		ArrayList<IDiff> additions = new ArrayList<IDiff>(Arrays.asList(event.getAdditions()));
+		ArrayList<IPath> removals = new ArrayList<>(Arrays.asList(event.getRemovals()));
+		ArrayList<IDiff> additions = new ArrayList<>(Arrays.asList(event.getAdditions()));
 		IDiff[] changed = event.getChanges();
-		for (int i = 0; i < changed.length; i++) {
-			IDiff diff = changed[i];
+		for (IDiff diff : changed) {
 			additions.add(diff);
 			removals.add(diff.getPath());
 		}
@@ -155,19 +155,19 @@ public class SVNIncomingChangeSetCollector extends ChangeSetManager {
 	}
 
 	protected void remove(IPath[] paths) {
-		ChangeSet[] sets = this.getSets();
-		for (int i = 0; i < sets.length; i++) {
-			DiffChangeSet set = (DiffChangeSet) sets[i];
+		ChangeSet[] sets = getSets();
+		for (ChangeSet set2 : sets) {
+			DiffChangeSet set = (DiffChangeSet) set2;
 			set.remove(paths);
 		}
 	}
 
 	public Subscriber getSubscriber() {
-		return this.subscriber;
+		return subscriber;
 	}
 
 	public ChangeSetCapability getChangeSetCapability() {
-		ISynchronizeParticipant participant = this.configuration.getParticipant();
+		ISynchronizeParticipant participant = configuration.getParticipant();
 		if (participant instanceof IChangeSetProvider) {
 			IChangeSetProvider provider = (IChangeSetProvider) participant;
 			return provider.getChangeSetCapability();
