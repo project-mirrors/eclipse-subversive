@@ -1,3 +1,15 @@
+<!--
+	Copyright (c) 2023 Contributors to the Eclipse Foundation
+
+	This program and the accompanying materials are made available under the
+	terms of the Eclipse Public License 2.0 which is available at
+	https://www.eclipse.org/legal/epl-2.0/.
+
+	SPDX-License-Identifier: EPL-2.0
+
+	Contributors:
+		See git history
+-->
 <xsl:stylesheet version = '1.0' xmlns:xsl='http://www.w3.org/1999/XSL/Transform' xmlns:msxsl="urn:schemas-microsoft-com:xslt">
 <xsl:output method="html" encoding="ISO-8859-1"/>
 <xsl:key name="cat" match="category" use="@name"/>
