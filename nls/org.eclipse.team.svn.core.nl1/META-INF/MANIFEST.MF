@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
-Bundle-RequiredExecutionEnvironment: J2SE-1.5, JavaSE-1.6
 Bundle-ManifestVersion: 2
+Bundle-RequiredExecutionEnvironment: JavaSE-11
 Bundle-Name: Localization
 Bundle-SymbolicName: org.eclipse.team.svn.core.nl1
 Bundle-Version: 5.0.0.qualifier
