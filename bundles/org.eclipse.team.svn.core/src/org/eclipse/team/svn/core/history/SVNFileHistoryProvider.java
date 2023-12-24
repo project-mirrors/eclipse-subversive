@@ -36,6 +36,7 @@ import org.eclipse.team.svn.core.utility.ProgressMonitorUtility;
  */
 public class SVNFileHistoryProvider extends FileHistoryProvider {
 
+	@Override
 	public IFileHistory getFileHistoryFor(IResource resource, int flags, IProgressMonitor monitor) {
 		IRepositoryResource remote = SVNRemoteStorage.instance().asRepositoryResource(resource);
 		GetLogMessagesOperation logOp = new GetLogMessagesOperation(remote);
@@ -45,8 +46,7 @@ public class SVNFileHistoryProvider extends FileHistoryProvider {
 				remote.setSelectedRevision(SVNRevision.fromNumber(local.getRevision()));
 			}
 			logOp.setLimit(1);
-		}
-		else if ((flags & IFileHistoryProvider.SINGLE_LINE_OF_DESCENT) != 0) {
+		} else if ((flags & IFileHistoryProvider.SINGLE_LINE_OF_DESCENT) != 0) {
 			if (local.getRevision() != SVNRevision.INVALID_REVISION_NUMBER) {
 				remote.setSelectedRevision(SVNRevision.fromNumber(local.getRevision()));
 			}
@@ -58,13 +58,15 @@ public class SVNFileHistoryProvider extends FileHistoryProvider {
 		}
 		return null;
 	}
-	
+
+	@Override
 	public IFileRevision getWorkspaceFileRevision(IResource resource) {
 		return new SVNLocalResourceRevision(SVNRemoteStorage.instance().asLocalResource(resource), SVNRevision.WORKING);
 	}
-	
+
+	@Override
 	public IFileHistory getFileHistoryFor(IFileStore store, int flags, IProgressMonitor monitor) {
 		return null;
 	}
-	
+
 }

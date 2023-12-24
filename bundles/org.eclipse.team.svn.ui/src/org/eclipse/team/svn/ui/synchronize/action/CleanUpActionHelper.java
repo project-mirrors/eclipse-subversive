@@ -32,15 +32,17 @@ import org.eclipse.team.ui.synchronize.ISynchronizePageConfiguration;
 public class CleanUpActionHelper extends AbstractActionHelper {
 
 	public CleanUpActionHelper(IAction action, ISynchronizePageConfiguration configuration) {
-		super(action, configuration);	
+		super(action, configuration);
 	}
 
+	@Override
 	public IActionOperation getOperation() {
 		/*
-		 * Cleanup versioned selected folder 
+		 * Cleanup versioned selected folder
 		 */
-		IResource[] selectedResources = this.getAllSelectedResources();
-		IResource[] filteredResources = FileUtility.filterResources(selectedResources, IStateFilter.SF_VERSIONED_FOLDERS, IResource.DEPTH_ZERO);
+		IResource[] selectedResources = getAllSelectedResources();
+		IResource[] filteredResources = FileUtility.filterResources(selectedResources,
+				IStateFilter.SF_VERSIONED_FOLDERS, IResource.DEPTH_ZERO);
 		CleanupOperation mainOp = new CleanupOperation(filteredResources);
 		CompositeOperation op = new CompositeOperation(mainOp.getId(), mainOp.getMessagesClass());
 		op.add(mainOp);

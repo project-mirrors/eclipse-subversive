@@ -15,21 +15,25 @@
 package org.eclipse.team.svn.core.extension.crashrecovery;
 
 /**
- * Error handling facility allows external code to provide its own decision about the problem resolution 
- * and prevents core module from crash or non-user-friendly actions.
- * This will be very helpful in case of internal problems like "Unable connect to project" etc.
+ * Error handling facility allows external code to provide its own decision about the problem resolution and prevents core module from crash
+ * or non-user-friendly actions. This will be very helpful in case of internal problems like "Unable connect to project" etc.
  * 
  * @author Alexander Gurov
  */
 public interface IErrorHandlingFacility extends IResolutionHelper {
 	/**
 	 * The method adds external resolution helper
-	 * @param helper resolution helper instance
+	 * 
+	 * @param helper
+	 *            resolution helper instance
 	 */
-	public void addResolutionHelper(IResolutionHelper helper);
+	void addResolutionHelper(IResolutionHelper helper);
+
 	/**
 	 * The method removes external resolution helper
-	 * @param helper resolution helper instance
+	 * 
+	 * @param helper
+	 *            resolution helper instance
 	 */
-	public void removeResolutionHelper(IResolutionHelper helper);
+	void removeResolutionHelper(IResolutionHelper helper);
 }

@@ -24,39 +24,45 @@ import org.eclipse.team.svn.core.resource.IRevisionLink;
  */
 public class SVNRevisionLink implements IRevisionLink {
 
-	protected IRepositoryResource repositoryResource;	
+	protected IRepositoryResource repositoryResource;
+
 	protected String comment;
-	
+
 	public SVNRevisionLink(IRepositoryResource repositoryResource) {
 		this.repositoryResource = repositoryResource;
 	}
 
+	@Override
 	public String getComment() {
-		return this.comment == null ? "" : this.comment; //$NON-NLS-1$
+		return comment == null ? "" : comment; //$NON-NLS-1$
 	}
 
+	@Override
 	public void setComment(String comment) {
 		this.comment = comment;
 	}
 
-	public IRepositoryResource getRepositoryResource() {		
-		return this.repositoryResource;
+	@Override
+	public IRepositoryResource getRepositoryResource() {
+		return repositoryResource;
 	}
-	
+
+	@Override
 	public boolean equals(Object obj) {
 		if (obj == null || !(obj instanceof IRevisionLink)) {
 			return false;
 		}
-		IRevisionLink link = (IRevisionLink) obj;		
-		return this.repositoryResource.equals(link.getRepositoryResource()) && 
-			   this.getComment().equals(link.getComment());
+		IRevisionLink link = (IRevisionLink) obj;
+		return repositoryResource.equals(link.getRepositoryResource()) && getComment().equals(link.getComment());
 	}
-	
+
+	@Override
 	public int hashCode() {
-		return this.repositoryResource.hashCode();
+		return repositoryResource.hashCode();
 	}
-	
+
+	@Override
 	public String toString() {
-		return this.repositoryResource.toString();
-	}		
+		return repositoryResource.toString();
+	}
 }

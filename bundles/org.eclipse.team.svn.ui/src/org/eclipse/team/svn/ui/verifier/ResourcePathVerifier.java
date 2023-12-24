@@ -16,6 +16,7 @@ package org.eclipse.team.svn.ui.verifier;
 
 import org.eclipse.core.runtime.Path;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.team.svn.core.BaseMessages;
 import org.eclipse.team.svn.ui.SVNUIMessages;
 
 /**
@@ -24,24 +25,27 @@ import org.eclipse.team.svn.ui.SVNUIMessages;
  * @author Sergiy Logvin
  */
 public class ResourcePathVerifier extends AbstractFormattedVerifier {
-    protected static String ERROR_MESSAGE;
-        
-    public ResourcePathVerifier(String fieldName) {
-        super(fieldName);
-        ResourcePathVerifier.ERROR_MESSAGE = SVNUIMessages.format(SVNUIMessages.Verifier_ResourcePath, new String[] {AbstractFormattedVerifier.FIELD_NAME});
-    }
-    
-    protected String getErrorMessageImpl(Control input) {
-        String text = this.getText(input);
-        Path path = new Path(text);
-        if (!path.isValidPath(text)) {
-            return ResourcePathVerifier.ERROR_MESSAGE;
-        }
-        return null;
-    }
+	protected static String ERROR_MESSAGE;
 
-    protected String getWarningMessageImpl(Control input) {
-        return null;
-    }
+	public ResourcePathVerifier(String fieldName) {
+		super(fieldName);
+		ResourcePathVerifier.ERROR_MESSAGE = BaseMessages.format(SVNUIMessages.Verifier_ResourcePath,
+				new String[] { AbstractFormattedVerifier.FIELD_NAME });
+	}
+
+	@Override
+	protected String getErrorMessageImpl(Control input) {
+		String text = getText(input);
+		Path path = new Path(text);
+		if (!path.isValidPath(text)) {
+			return ResourcePathVerifier.ERROR_MESSAGE;
+		}
+		return null;
+	}
+
+	@Override
+	protected String getWarningMessageImpl(Control input) {
+		return null;
+	}
 
 }

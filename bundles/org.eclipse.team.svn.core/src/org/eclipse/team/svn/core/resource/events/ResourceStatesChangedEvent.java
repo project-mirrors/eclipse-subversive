@@ -17,65 +17,67 @@ package org.eclipse.team.svn.core.resource.events;
 
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Objects;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IResourceVisitor;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.team.svn.core.utility.FileUtility;
 import org.eclipse.team.svn.core.utility.IQueuedElement;
 import org.eclipse.team.svn.core.utility.SVNUtility;
 
 /**
- * Basic "resources changed event" implementation 
+ * Basic "resources changed event" implementation
  * 
  * @author Alexander Gurov
  */
 public class ResourceStatesChangedEvent implements IQueuedElement<ResourceStatesChangedEvent> {
 	public static final int CHANGED_NODES = 0;
-	public static final int PATH_NODES = 1;
-	public final IResource []resources;
-	public final int depth;
-	public final int type;
-	
-	private IResource []fullSet;
 
-	public ResourceStatesChangedEvent(IResource []resources, int depth, int type) {
-    	// notify in parent to child order
+	public static final int PATH_NODES = 1;
+
+	public final IResource[] resources;
+
+	public final int depth;
+
+	public final int type;
+
+	private IResource[] fullSet;
+
+	public ResourceStatesChangedEvent(IResource[] resources, int depth, int type) {
+		// notify in parent to child order
 		FileUtility.reorder(this.resources = resources, true);
 		this.depth = depth;
 		this.type = type;
 		if (this.depth == IResource.DEPTH_ZERO) {
-			this.fullSet = this.resources;
+			fullSet = this.resources;
 		}
 	}
-	
-	public IResource []getResourcesRecursivelly() {
-		if (this.fullSet == null) {
+
+	public IResource[] getResourcesRecursivelly() {
+		if (fullSet == null) {
 			try {
-				this.fullSet = ResourceStatesChangedEvent.collectResources(this.resources, this.depth);
-				FileUtility.reorder(this.fullSet, true);
-			} 
-			catch (Exception e) {
-				this.fullSet = this.resources;
+				fullSet = ResourceStatesChangedEvent.collectResources(resources, depth);
+				FileUtility.reorder(fullSet, true);
+			} catch (Exception e) {
+				fullSet = resources;
 			}
 		}
-		return this.fullSet;
+		return fullSet;
 	}
-	
+
 	public boolean contains(IResource resource) {
-		if (this.containsImpl(resource)) {
+		if (containsImpl(resource)) {
 			return true;
 		}
-		if (this.depth != IResource.DEPTH_ZERO) {
-			if (this.containsImpl(resource.getParent())) {
+		if (depth != IResource.DEPTH_ZERO) {
+			if (containsImpl(resource.getParent())) {
 				return true;
 			}
-			if (this.depth != IResource.DEPTH_ONE) {
+			if (depth != IResource.DEPTH_ONE) {
 				IPath path = resource.getFullPath();
-				for (int i = 0; i < this.resources.length; i++) {
-					if (this.resources[i].getFullPath().isPrefixOf(path)) {
+				for (IResource element : resources) {
+					if (element.getFullPath().isPrefixOf(path)) {
 						return true;
 					}
 				}
@@ -84,52 +86,42 @@ public class ResourceStatesChangedEvent implements IQueuedElement<ResourceStates
 		return false;
 	}
 
-	public static IResource []collectResources(IResource []resources, int depth) throws Exception {
-    	if (depth == IResource.DEPTH_ZERO) {
-    		return resources;
-    	}
-    	
-		final HashSet<IResource> fullList = new HashSet<IResource>();
-		for (int i = 0; i < resources.length; i++) {
-    		FileUtility.visitNodes(resources[i], new IResourceVisitor() {
-				public boolean visit(IResource resource) throws CoreException {
-					if (FileUtility.isNotSupervised(resource)) {
-						return false;
-					}
-					// Don't descent into ignored folders, but do not check for 
-					// every *file* because isIgnored() is not for free
-					if (resource instanceof IContainer && SVNUtility.isIgnored(resource)) {
-						return false;
-					}
-					fullList.add(resource);
-					return true;
+	public static IResource[] collectResources(IResource[] resources, int depth) throws Exception {
+		if (depth == IResource.DEPTH_ZERO) {
+			return resources;
+		}
+
+		final HashSet<IResource> fullList = new HashSet<>();
+		for (IResource element : resources) {
+			FileUtility.visitNodes(element, resource -> {
+				// Don't descent into ignored folders, but do not check for
+				// every *file* because isIgnored() is not for free
+				if (FileUtility.isNotSupervised(resource) || (resource instanceof IContainer && SVNUtility.isIgnored(resource))) {
+					return false;
 				}
+				fullList.add(resource);
+				return true;
 			}, depth);
 		}
 		return fullList.toArray(new IResource[fullList.size()]);
 	}
-	
+
 	protected boolean containsImpl(IResource resource) {
-		for (int i = 0; i < this.resources.length; i++) {
-			if (this.resources[i].equals(resource)) {
+		for (IResource element : resources) {
+			if (element.equals(resource)) {
 				return true;
 			}
 		}
 		return false;
 	}
-	
-	public int getSize(){
-		return this.resources.length;
+
+	public int getSize() {
+		return resources.length;
 	}
-	
+
 	@Override
 	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + this.depth;
-		result = prime * result + Arrays.hashCode(this.resources);
-		result = prime * result + this.type;
-		return result;
+		return Objects.hash(depth, Arrays.hashCode(resources), type);
 	}
 
 	@Override
@@ -141,46 +133,43 @@ public class ResourceStatesChangedEvent implements IQueuedElement<ResourceStates
 			return false;
 		}
 		ResourceStatesChangedEvent other = (ResourceStatesChangedEvent) obj;
-		if (this.depth != other.depth) {
-			return false;
-		}
-		if (this.type != other.type) {
-			return false;
-		}
-		if (!Arrays.equals(this.resources, other.resources)) {
+		if ((depth != other.depth) || (type != other.type) || !Arrays.equals(resources, other.resources)) {
 			return false;
 		}
 		return true;
 	}
-	
+
+	@Override
 	public boolean canSkip() {
 		return true;
 	}
-	
-	public boolean canMerge(ResourceStatesChangedEvent e){
-		return this.depth == e.depth && this.type == e.type;
+
+	@Override
+	public boolean canMerge(ResourceStatesChangedEvent e) {
+		return depth == e.depth && type == e.type;
 	}
-	
-	public ResourceStatesChangedEvent merge(ResourceStatesChangedEvent event){
-		IResource [] arr = new IResource[this.resources.length + event.resources.length];
-		System.arraycopy(this.resources, 0, arr, 0, this.resources.length);
-		System.arraycopy(event.resources, 0, arr, this.resources.length, event.resources.length);
-		return new ResourceStatesChangedEvent(arr, this.depth, this.type);
+
+	@Override
+	public ResourceStatesChangedEvent merge(ResourceStatesChangedEvent event) {
+		IResource[] arr = new IResource[resources.length + event.resources.length];
+		System.arraycopy(resources, 0, arr, 0, resources.length);
+		System.arraycopy(event.resources, 0, arr, resources.length, event.resources.length);
+		return new ResourceStatesChangedEvent(arr, depth, type);
 	}
 
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
 		builder.append("ResourceStatesChangedEvent [depth=");
-		builder.append(this.depth);
+		builder.append(depth);
 		builder.append(", size=");
-		builder.append(this.resources.length);
+		builder.append(resources.length);
 		builder.append(", ");
 		builder.append(", type=");
-		builder.append(this.type);
+		builder.append(type);
 		builder.append(", ");
 		builder.append("resources=");
-		builder.append(Arrays.toString(this.resources));
+		builder.append(Arrays.toString(resources));
 		builder.append("]");
 		return builder.toString();
 	}

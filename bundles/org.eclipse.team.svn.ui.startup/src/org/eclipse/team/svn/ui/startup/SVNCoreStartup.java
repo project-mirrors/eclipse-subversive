@@ -24,6 +24,7 @@ import org.eclipse.ui.IStartup;
  */
 public class SVNCoreStartup implements IStartup {
 
+	@Override
 	public void earlyStartup() {
 		// touch the core plug-in to trigger its load
 		SVNTeamPlugin.instance();

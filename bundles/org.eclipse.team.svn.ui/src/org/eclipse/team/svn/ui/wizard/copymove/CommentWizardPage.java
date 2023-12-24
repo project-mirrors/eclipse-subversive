@@ -30,16 +30,15 @@ import org.eclipse.team.svn.ui.wizard.AbstractVerifiedWizardPage;
  */
 public class CommentWizardPage extends AbstractVerifiedWizardPage {
 	protected CommentComposite commentComposite;
-	
+
 	public CommentWizardPage(boolean isMove) {
 		super(CommentWizardPage.class.getName(),
-				isMove ?
-				SVNUIMessages.MoveToAction_Comment_Title :
-				SVNUIMessages.CopyToAction_Comment_Title,
+				isMove ? SVNUIMessages.MoveToAction_Comment_Title : SVNUIMessages.CopyToAction_Comment_Title,
 				SVNTeamUIPlugin.instance().getImageDescriptor("icons/wizards/newconnect.gif")); //$NON-NLS-1$
-		this.setDescription(SVNUIMessages.CopyMove_Comment_Message);
+		setDescription(SVNUIMessages.CopyMove_Comment_Message);
 	}
 
+	@Override
 	protected Composite createControlImpl(Composite parent) {
 		Composite composite = new Composite(parent, SWT.NONE);
 		GridLayout layout = new GridLayout(1, true);
@@ -47,15 +46,15 @@ public class CommentWizardPage extends AbstractVerifiedWizardPage {
 		layout.marginHeight = 5;
 		composite.setLayout(layout);
 		GridData data = new GridData(GridData.FILL_BOTH);
-		composite.setLayoutData(data);		
-		this.commentComposite = new CommentComposite(composite, this);
-		this.commentComposite.setLayoutData(new GridData(GridData.FILL_BOTH));
+		composite.setLayoutData(data);
+		commentComposite = new CommentComposite(composite, this);
+		commentComposite.setLayoutData(new GridData(GridData.FILL_BOTH));
 		return composite;
 	}
-	
+
 	public String getComment() {
-		this.commentComposite.saveChanges();
-		return this.commentComposite.getMessage();
+		commentComposite.saveChanges();
+		return commentComposite.getMessage();
 	}
 
 }

@@ -16,7 +16,6 @@ package org.eclipse.team.svn.ui.panel.reporting;
 
 import org.eclipse.team.svn.ui.SVNUIMessages;
 
-
 /**
  * Preview any product quality report panel
  * 
@@ -26,8 +25,9 @@ public class PreviewReportPanel extends PreviewPanel {
 	public PreviewReportPanel(String description, String report) {
 		super(SVNUIMessages.PreviewReportPanel_Title, description, SVNUIMessages.PreviewReportPanel_Message, report);
 	}
-	
+
+	@Override
 	public String getHelpId() {
-    	return "org.eclipse.team.svn.help.previewReportDialogContext"; //$NON-NLS-1$
-	}	
+		return "org.eclipse.team.svn.help.previewReportDialogContext"; //$NON-NLS-1$
+	}
 }

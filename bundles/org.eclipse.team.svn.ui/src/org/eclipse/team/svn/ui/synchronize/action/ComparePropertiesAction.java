@@ -34,22 +34,25 @@ import org.eclipse.team.ui.synchronize.ISynchronizePageConfiguration;
 public class ComparePropertiesAction extends AbstractSynchronizeModelAction {
 
 	protected ComparePropertiesActionHelper actionHelper;
-	
+
 	public ComparePropertiesAction(String text, ISynchronizePageConfiguration configuration) {
 		super(text, configuration);
-		this.actionHelper = new ComparePropertiesActionHelper(this, configuration);
+		actionHelper = new ComparePropertiesActionHelper(this, configuration);
 	}
-	
+
+	@Override
 	protected boolean needsToSaveDirtyEditors() {
 		return false;
 	}
-	
+
+	@Override
 	protected boolean updateSelection(IStructuredSelection selection) {
-		super.updateSelection(selection);		
+		super.updateSelection(selection);
 		if (selection.size() == 1 && selection.getFirstElement() instanceof SyncInfoModelElement) {
-			ISynchronizeModelElement element = (ISynchronizeModelElement)selection.getFirstElement();
+			ISynchronizeModelElement element = (ISynchronizeModelElement) selection.getFirstElement();
 			if (element instanceof SyncInfoModelElement) {
-				AbstractSVNSyncInfo syncInfo = (AbstractSVNSyncInfo)((SyncInfoModelElement)selection.getFirstElement()).getSyncInfo();
+				AbstractSVNSyncInfo syncInfo = (AbstractSVNSyncInfo) ((SyncInfoModelElement) selection
+						.getFirstElement()).getSyncInfo();
 				ILocalResource incoming = syncInfo.getRemoteChangeResource();
 				boolean retVal = IStateFilter.SF_EXCLUDE_DELETED.accept(incoming);
 				if (incoming instanceof IResourceChange) {
@@ -62,9 +65,10 @@ public class ComparePropertiesAction extends AbstractSynchronizeModelAction {
 		}
 		return false;
 	}
-	
+
+	@Override
 	protected IActionOperation getOperation(ISynchronizePageConfiguration configuration, IDiffElement[] elements) {
-		return this.actionHelper.getOperation();
+		return actionHelper.getOperation();
 	}
 
 }

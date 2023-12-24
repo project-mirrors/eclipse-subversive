@@ -22,6 +22,9 @@ import org.eclipse.core.runtime.IProgressMonitor;
  * @author Alexander Gurov
  */
 public interface IResourceChangeVisitor {
-	public void preVisit(ResourceChange change, IActionOperationProcessor processor, IProgressMonitor monitor) throws Exception;
-	public void postVisit(ResourceChange change, IActionOperationProcessor processor, IProgressMonitor monitor) throws Exception;
+	void preVisit(ResourceChange change, IActionOperationProcessor processor, IProgressMonitor monitor)
+			throws Exception;
+
+	void postVisit(ResourceChange change, IActionOperationProcessor processor, IProgressMonitor monitor)
+			throws Exception;
 }

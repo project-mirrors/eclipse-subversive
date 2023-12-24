@@ -23,6 +23,7 @@ import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.team.svn.core.SVNMessages;
 import org.eclipse.team.svn.core.connector.SVNConnectorCancelException;
 import org.eclipse.team.svn.core.operation.AbstractActionOperation;
+import org.eclipse.team.svn.core.operation.IActionOperation;
 import org.eclipse.team.svn.core.operation.IConsoleStream;
 import org.junit.Test;
 
@@ -65,7 +66,7 @@ public class AbstractOperationTest {
 			}
 		};
 		op.run(new NullProgressMonitor());
-		assertEquals(AbstractActionOperation.ERROR, op.getExecutionState());
+		assertEquals(IActionOperation.ERROR, op.getExecutionState());
 	}
 
 	@Test
@@ -76,38 +77,47 @@ public class AbstractOperationTest {
 			protected void runImpl(IProgressMonitor monitor) throws Exception {
 				monitor.setCanceled(true);
 				reportStatus(new IStatus() {
+					@Override
 					public IStatus[] getChildren() {
 						return null;
 					}
 
+					@Override
 					public int getCode() {
 						return 0;
 					}
 
+					@Override
 					public Throwable getException() {
 						return new SVNConnectorCancelException("Cancelled");
 					}
 
+					@Override
 					public String getMessage() {
 						return null;
 					}
 
+					@Override
 					public String getPlugin() {
 						return null;
 					}
 
+					@Override
 					public int getSeverity() {
 						return IStatus.CANCEL;
 					}
 
+					@Override
 					public boolean isMultiStatus() {
 						return false;
 					}
 
+					@Override
 					public boolean isOK() {
 						return false;
 					}
 
+					@Override
 					public boolean matches(int severityMask) {
 						return false;
 					}
@@ -121,18 +131,23 @@ public class AbstractOperationTest {
 		};
 
 		op.setConsoleStream(new IConsoleStream() {
+			@Override
 			public void doComplexWrite(Runnable runnable) {
 			}
 
+			@Override
 			public void markCancelled() {
 			}
 
+			@Override
 			public void markEnd() {
 			}
 
+			@Override
 			public void markStart(String data) {
 			}
 
+			@Override
 			public void write(int severity, String data) {
 			}
 		});
@@ -161,7 +176,6 @@ public class AbstractOperationTest {
 				return super.getShortErrorMessage(t);
 			}
 		}
-		;
 		MockAbstractActionOperation op = new MockAbstractActionOperation();
 		assertEquals(expected, op.getShortErrorMessage(new Throwable("Throwable")));
 	}

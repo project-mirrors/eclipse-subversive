@@ -30,8 +30,9 @@ public class SVNRepositoryTrunk extends SVNRepositoryRootBase {
 		super(location, url, selectedRevision);
 	}
 
+	@Override
 	public int getKind() {
 		return IRepositoryRoot.KIND_TRUNK;
 	}
-	
+
 }

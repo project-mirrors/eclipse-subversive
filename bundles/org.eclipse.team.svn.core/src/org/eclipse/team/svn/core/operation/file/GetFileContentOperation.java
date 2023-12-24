@@ -34,40 +34,45 @@ import org.eclipse.team.svn.core.utility.SVNUtility;
  */
 public class GetFileContentOperation extends AbstractFileOperation {
 	public static final int DEFAULT_BUFFER_SIZE = 2048;
-	
+
 	protected SVNRevision revision;
+
 	protected SVNRevision pegRevision;
+
 	protected int bufferSize;
+
 	protected OutputStream target;
 
 	public GetFileContentOperation(File file, SVNRevision revision, SVNRevision pegRevision, OutputStream target) {
 		this(file, revision, pegRevision, GetFileContentOperation.DEFAULT_BUFFER_SIZE, target);
 	}
-	
-	public GetFileContentOperation(File file, SVNRevision revision, SVNRevision pegRevision, int bufferSize, OutputStream target) {
-		super("Operation_GetFileContent", SVNMessages.class, new File[] {file}); //$NON-NLS-1$
+
+	public GetFileContentOperation(File file, SVNRevision revision, SVNRevision pegRevision, int bufferSize,
+			OutputStream target) {
+		super("Operation_GetFileContent", SVNMessages.class, new File[] { file }); //$NON-NLS-1$
 		this.revision = revision;
 		this.pegRevision = pegRevision;
 		this.bufferSize = bufferSize;
 		this.target = target;
 	}
 
+	@Override
 	protected void runImpl(IProgressMonitor monitor) throws Exception {
-		File file = this.operableData()[0];
-		
-	    IRepositoryResource remote = SVNFileStorage.instance().asRepositoryResource(file, false);
+		File file = operableData()[0];
+
+		IRepositoryResource remote = SVNFileStorage.instance().asRepositoryResource(file, false);
 		ISVNConnector proxy = remote.getRepositoryLocation().acquireSVNProxy();
 		try {
-			SVNRevision.Kind kind = this.revision.getKind();
+			SVNRevision.Kind kind = revision.getKind();
 			if (kind == Kind.BASE || kind == Kind.WORKING) {
-				proxy.streamFileContent(new SVNEntryRevisionReference(file.getAbsolutePath(), null, this.revision), this.bufferSize, this.target, new SVNProgressMonitor(this, monitor, null));
+				proxy.streamFileContent(new SVNEntryRevisionReference(file.getAbsolutePath(), null, revision),
+						bufferSize, target, new SVNProgressMonitor(this, monitor, null));
+			} else {
+				proxy.streamFileContent(SVNUtility.getEntryRevisionReference(remote), bufferSize, target,
+						new SVNProgressMonitor(this, monitor, null));
 			}
-			else {
-				proxy.streamFileContent(SVNUtility.getEntryRevisionReference(remote), this.bufferSize, this.target, new SVNProgressMonitor(this, monitor, null));
-			}
-		}
-		finally {
-		    remote.getRepositoryLocation().releaseSVNProxy(proxy);
+		} finally {
+			remote.getRepositoryLocation().releaseSVNProxy(proxy);
 		}
 	}
 

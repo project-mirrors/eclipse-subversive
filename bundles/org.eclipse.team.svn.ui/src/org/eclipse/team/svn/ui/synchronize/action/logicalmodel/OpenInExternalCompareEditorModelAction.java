@@ -47,35 +47,43 @@ public class OpenInExternalCompareEditorModelAction extends AbstractSynchronizeL
 		super(text, configuration);
 	}
 
+	@Override
 	protected IActionOperation getOperation() {
 		IActionOperation op = null;
-		
-		IResource resource = this.getSelectedResource();				
+
+		IResource resource = getSelectedResource();
 		DiffViewerSettings diffSettings = SVNTeamDiffViewerPage.loadDiffViewerSettings();
-		DetectExternalCompareOperationHelper detectCompareHelper = new DetectExternalCompareOperationHelper(resource, diffSettings, true);
+		DetectExternalCompareOperationHelper detectCompareHelper = new DetectExternalCompareOperationHelper(resource,
+				diffSettings, true);
 		detectCompareHelper.execute(new NullProgressMonitor());
 		ExternalProgramParameters externalProgramParams = detectCompareHelper.getExternalProgramParameters();
-		
+
 		ILocalResource local = SVNRemoteStorage.instance().asLocalResource(resource);
-		IRepositoryResource remote = local.isCopied() ? SVNUtility.getCopiedFrom(resource) : SVNRemoteStorage.instance().asRepositoryResource(resource);							
+		IRepositoryResource remote = local.isCopied()
+				? SVNUtility.getCopiedFrom(resource)
+				: SVNRemoteStorage.instance().asRepositoryResource(resource);
 		if (externalProgramParams != null) {
-			op = new ExternalCompareOperation(local, remote, new DefaultExternalProgramParametersProvider(externalProgramParams));				
-		}
-		else {
+			op = new ExternalCompareOperation(local, remote,
+					new DefaultExternalProgramParametersProvider(externalProgramParams));
+		} else {
 			op = new CompareResourcesOperation(local, remote, false, true);
 		}
 		return op;
 	}
-	
+
+	@Override
 	protected boolean isEnabledForSelection(IStructuredSelection selection) {
 		return selection.size() == 1 && super.isEnabledForSelection(selection);
 	}
 
+	@Override
 	public FastSyncInfoFilter getSyncInfoFilter() {
 		return new FastSyncInfoFilter() {
+			@Override
 			public boolean select(SyncInfo info) {
-				ILocalResource local = ((AbstractSVNSyncInfo)info).getLocalResource();
-				return local.getResource().getType() == IResource.FILE && CompareWithWorkingCopyAction.COMPARE_FILTER.accept(local);
+				ILocalResource local = ((AbstractSVNSyncInfo) info).getLocalResource();
+				return local.getResource().getType() == IResource.FILE
+						&& CompareWithWorkingCopyAction.COMPARE_FILTER.accept(local);
 			}
 		};
 	}

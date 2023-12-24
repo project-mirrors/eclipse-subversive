@@ -30,19 +30,22 @@ public class CopyToAction extends AbstractCopyMoveAction {
 		super("CopyToAction");
 	}
 
-	protected AbstractCopyMoveResourcesOperation makeCopyOperation(IRepositoryResource destination, IRepositoryResource[] selected, String message, String name) {
+	@Override
+	protected AbstractCopyMoveResourcesOperation makeCopyOperation(IRepositoryResource destination,
+			IRepositoryResource[] selected, String message, String name) {
 		return new CopyResourcesOperation(destination, selected, message, name);
 	}
 
+	@Override
 	public boolean isEnabled() {
-		IRepositoryResource []resources = this.getSelectedRepositoryResources();
+		IRepositoryResource[] resources = getSelectedRepositoryResources();
 		if (resources.length == 0) {
 			return false;
 		}
 		//disable transfer between different repositories
 		IRepositoryLocation first = resources[0].getRepositoryLocation();
-		for (int i = 0; i < resources.length; i++) {
-			IRepositoryLocation location = resources[i].getRepositoryLocation();
+		for (IRepositoryResource element : resources) {
+			IRepositoryLocation location = element.getRepositoryLocation();
 			if (first != location) {
 				return false;
 			}
@@ -50,8 +53,10 @@ public class CopyToAction extends AbstractCopyMoveAction {
 		return true;
 	}
 
-	protected RefreshRemoteResourcesOperation makeRefreshOperation(IRepositoryResource destination, IRepositoryResource[] selected) {
-		return new RefreshRemoteResourcesOperation(new IRepositoryResource[] {destination});
+	@Override
+	protected RefreshRemoteResourcesOperation makeRefreshOperation(IRepositoryResource destination,
+			IRepositoryResource[] selected) {
+		return new RefreshRemoteResourcesOperation(new IRepositoryResource[] { destination });
 	}
 
 }

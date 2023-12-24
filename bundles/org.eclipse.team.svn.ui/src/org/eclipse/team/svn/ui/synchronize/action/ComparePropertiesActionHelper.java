@@ -37,32 +37,31 @@ import org.eclipse.team.ui.synchronize.ISynchronizePageConfiguration;
  * @author Igor Burilo
  */
 public class ComparePropertiesActionHelper extends AbstractActionHelper {
-	
+
 	public ComparePropertiesActionHelper(IAction action, ISynchronizePageConfiguration configuration) {
 		super(action, configuration);
 	}
 
+	@Override
 	public IActionOperation getOperation() {
-		IResource resource = this.getSelectedResource();
+		IResource resource = getSelectedResource();
 		ILocalResource baseResource = SVNRemoteStorage.instance().asLocalResource(resource);
-		IRepositoryResource remote =  SVNRemoteStorage.instance().asRepositoryResource(resource);
-	    SVNEntryRevisionReference baseReference = new SVNEntryRevisionReference(FileUtility.getWorkingCopyPath(resource), null, SVNRevision.BASE);
-	    SVNEntryRevisionReference remoteReference = baseReference;
-	    AbstractSVNSyncInfo info = this.getSelectedSVNSyncInfo();
-	    if (info != null) {
-		    ILocalResource change = this.getSelectedSVNSyncInfo().getRemoteChangeResource();
-		    if (change instanceof IResourceChange) {
-		    	remote = ((IResourceChange)change).getOriginator();
-		    	remoteReference = new SVNEntryRevisionReference(remote.getUrl(), remote.getPegRevision(), SVNRevision.fromNumber(((IResourceChange)change).getRevision()));
-		    }
-			PropertyCompareInput input = new ThreeWayPropertyCompareInput(new CompareConfiguration(),
-					resource,
-					remoteReference,
-					baseReference,
-					remote.getRepositoryLocation(),
-					baseResource.getRevision());
+		IRepositoryResource remote = SVNRemoteStorage.instance().asRepositoryResource(resource);
+		SVNEntryRevisionReference baseReference = new SVNEntryRevisionReference(
+				FileUtility.getWorkingCopyPath(resource), null, SVNRevision.BASE);
+		SVNEntryRevisionReference remoteReference = baseReference;
+		AbstractSVNSyncInfo info = getSelectedSVNSyncInfo();
+		if (info != null) {
+			ILocalResource change = getSelectedSVNSyncInfo().getRemoteChangeResource();
+			if (change instanceof IResourceChange) {
+				remote = ((IResourceChange) change).getOriginator();
+				remoteReference = new SVNEntryRevisionReference(remote.getUrl(), remote.getPegRevision(),
+						SVNRevision.fromNumber(((IResourceChange) change).getRevision()));
+			}
+			PropertyCompareInput input = new ThreeWayPropertyCompareInput(new CompareConfiguration(), resource,
+					remoteReference, baseReference, remote.getRepositoryLocation(), baseResource.getRevision());
 			CompareUI.openCompareEditor(input);
-	    }
+		}
 		return null;
 	}
 

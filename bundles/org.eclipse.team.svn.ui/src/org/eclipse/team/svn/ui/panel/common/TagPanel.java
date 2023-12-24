@@ -30,29 +30,35 @@ import org.eclipse.team.svn.ui.preferences.SVNTeamPreferences;
  */
 public class TagPanel extends AbstractBranchTagPanel {
 
-    public TagPanel(IRepositoryRoot tagTo, boolean showStartsWith, Set existingNames, IRepositoryResource[] selectedRemoteResources) {
-    	this(tagTo, showStartsWith, existingNames, new IResource[0], selectedRemoteResources);
-    }
-    
-    public TagPanel(IRepositoryRoot tagTo, boolean showStartsWith, Set existingNames, IResource[] resources, IRepositoryResource[] selectedRemoteResources) {
-    	super(tagTo, showStartsWith, existingNames, "TagPanel", "tag", resources, selectedRemoteResources);
-    }
-
-    public void createControlsImpl(Composite parent) {
-    	super.createControlsImpl(parent);
-    	if (this.startsWith && SVNTeamPreferences.getRepositoryBoolean(SVNTeamUIPlugin.instance().getPreferenceStore(), SVNTeamPreferences.REPOSITORY_FORCE_EXTERNALS_FREEZE_NAME)) {
-    		this.freezeExternalsCheck.setSelection(true);
-    		this.freezeExternalsCheck.setEnabled(false);
-    	} 	
-    }
-    
-	protected void creationModeChanged(int creationMode) {
-		this.freezeExternalsCheck.setSelection(creationMode != SVNTeamPreferences.CREATION_MODE_REPOSITORY);
-		this.revisionComposite.setEnabled(creationMode == SVNTeamPreferences.CREATION_MODE_REPOSITORY);
+	public TagPanel(IRepositoryRoot tagTo, boolean showStartsWith, Set existingNames,
+			IRepositoryResource[] selectedRemoteResources) {
+		this(tagTo, showStartsWith, existingNames, new IResource[0], selectedRemoteResources);
 	}
 
-    public String getHelpId() {
-    	return "org.eclipse.team.svn.help.tagDialogContext"; //$NON-NLS-1$
-    }
-    
+	public TagPanel(IRepositoryRoot tagTo, boolean showStartsWith, Set existingNames, IResource[] resources,
+			IRepositoryResource[] selectedRemoteResources) {
+		super(tagTo, showStartsWith, existingNames, "TagPanel", "tag", resources, selectedRemoteResources);
+	}
+
+	@Override
+	public void createControlsImpl(Composite parent) {
+		super.createControlsImpl(parent);
+		if (startsWith && SVNTeamPreferences.getRepositoryBoolean(SVNTeamUIPlugin.instance().getPreferenceStore(),
+				SVNTeamPreferences.REPOSITORY_FORCE_EXTERNALS_FREEZE_NAME)) {
+			freezeExternalsCheck.setSelection(true);
+			freezeExternalsCheck.setEnabled(false);
+		}
+	}
+
+	@Override
+	protected void creationModeChanged(int creationMode) {
+		freezeExternalsCheck.setSelection(creationMode != SVNTeamPreferences.CREATION_MODE_REPOSITORY);
+		revisionComposite.setEnabled(creationMode == SVNTeamPreferences.CREATION_MODE_REPOSITORY);
+	}
+
+	@Override
+	public String getHelpId() {
+		return "org.eclipse.team.svn.help.tagDialogContext"; //$NON-NLS-1$
+	}
+
 }

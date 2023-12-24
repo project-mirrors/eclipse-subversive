@@ -17,9 +17,9 @@ package org.eclipse.team.svn.core.connector;
 /**
  * The conflict resolution method description
  * 
- * The JavaHL API's is the only way to interact between SVN and Java-based tools. At the same time JavaHL connector library
- * is not EPL compatible and we won't to pin plug-in with concrete connector implementation. So, the only way to do this is
- * providing our own connector interface which will be covered by concrete connector implementation.
+ * The JavaHL API's is the only way to interact between SVN and Java-based tools. At the same time JavaHL connector library is not EPL
+ * compatible and we won't to pin plug-in with concrete connector implementation. So, the only way to do this is providing our own connector
+ * interface which will be covered by concrete connector implementation.
  * 
  * @author Alexander Gurov
  */
@@ -53,10 +53,10 @@ public class SVNConflictResolution {
 		 * Resolve the conflict by choosing the merged object (potentially manually edited).
 		 */
 		CHOOSE_MERGED(6);
-		
+
 		public final int id;
-		
-		private Choice(int id) {
+
+		Choice(int id) {
 			this.id = id;
 		}
 	}

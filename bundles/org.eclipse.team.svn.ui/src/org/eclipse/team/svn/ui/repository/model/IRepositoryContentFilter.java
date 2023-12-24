@@ -14,13 +14,12 @@
 
 package org.eclipse.team.svn.ui.repository.model;
 
-
 /**
  * Filter for the repository locations
  *
  * @author Sergiy Logvin
  */
 public interface IRepositoryContentFilter {
-	public boolean accept(Object obj);
-	
+	boolean accept(Object obj);
+
 }

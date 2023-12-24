@@ -26,41 +26,51 @@ import org.eclipse.osgi.util.NLS;
  * 
  * @author Alexander Gurov
  */
-public abstract class AbstractFileConflictDetectionOperation extends AbstractFileOperation implements IUnresolvedConflictDetector {
-    protected Set processed;
-    protected Set unprocessed;
+public abstract class AbstractFileConflictDetectionOperation extends AbstractFileOperation
+		implements IUnresolvedConflictDetector {
+	protected Set processed;
+
+	protected Set unprocessed;
+
 	protected boolean hasUnresolvedConflict;
+
 	protected String conflictMessage;
 
-	public AbstractFileConflictDetectionOperation(String operationName, Class<? extends NLS> messagesClass, File[] files) {
+	public AbstractFileConflictDetectionOperation(String operationName, Class<? extends NLS> messagesClass,
+			File[] files) {
 		super(operationName, messagesClass, files);
 	}
 
-	public AbstractFileConflictDetectionOperation(String operationName, Class<? extends NLS> messagesClass, IFileProvider provider) {
+	public AbstractFileConflictDetectionOperation(String operationName, Class<? extends NLS> messagesClass,
+			IFileProvider provider) {
 		super(operationName, messagesClass, provider);
 	}
 
-    public boolean hasUnresolvedConflicts() {
-        return this.hasUnresolvedConflict;
-    }
-    
-    public String getMessage() {
-    	return this.conflictMessage;
-    }
-    
-	public File []getProcessed() {
-		return this.processed == null ? null : (File [])this.processed.toArray(new File[this.processed.size()]);
+	@Override
+	public boolean hasUnresolvedConflicts() {
+		return hasUnresolvedConflict;
 	}
 
-	public File []getUnprocessed() {
-		return this.unprocessed == null ? null : (File [])this.unprocessed.toArray(new File[this.unprocessed.size()]);
+	@Override
+	public String getMessage() {
+		return conflictMessage;
 	}
 
-	protected void defineInitialResourceSet(File []resources) {
-        this.hasUnresolvedConflict = false;
-        this.unprocessed = new HashSet();
-        this.processed = new HashSet();
-		this.processed.addAll(Arrays.asList(resources));
+	@Override
+	public File[] getProcessed() {
+		return processed == null ? null : (File[]) processed.toArray(new File[processed.size()]);
 	}
-	
+
+	@Override
+	public File[] getUnprocessed() {
+		return unprocessed == null ? null : (File[]) unprocessed.toArray(new File[unprocessed.size()]);
+	}
+
+	protected void defineInitialResourceSet(File[] resources) {
+		hasUnresolvedConflict = false;
+		unprocessed = new HashSet();
+		processed = new HashSet();
+		processed.addAll(Arrays.asList(resources));
+	}
+
 }

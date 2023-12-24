@@ -23,10 +23,13 @@ import org.eclipse.mylyn.team.ui.AbstractTaskReference;
  */
 public class SVNLinkedTaskInfo extends AbstractTaskReference {
 	protected String repositoryUrl;
+
 	protected String taskId;
+
 	protected String taskFullUrl;
+
 	protected String comment;
-	
+
 	public SVNLinkedTaskInfo(String repositoryUrl, String taskId, String taskFullUrl, String comment) {
 		this.repositoryUrl = repositoryUrl;
 		this.taskId = taskId;
@@ -34,20 +37,24 @@ public class SVNLinkedTaskInfo extends AbstractTaskReference {
 		this.comment = comment;
 	}
 
+	@Override
 	public String getText() {
-		return this.comment;
+		return comment;
 	}
 
+	@Override
 	public String getRepositoryUrl() {
-		return this.repositoryUrl;
+		return repositoryUrl;
 	}
 
+	@Override
 	public String getTaskUrl() {
-		return this.taskFullUrl;
+		return taskFullUrl;
 	}
 
+	@Override
 	public String getTaskId() {
-		return this.taskId;
+		return taskId;
 	}
 
 }

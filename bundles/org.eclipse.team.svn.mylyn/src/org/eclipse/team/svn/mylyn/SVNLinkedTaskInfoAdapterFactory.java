@@ -41,52 +41,56 @@ import org.eclipse.ui.IWorkbenchPage;
  * @author Alexander Gurov
  */
 public class SVNLinkedTaskInfoAdapterFactory implements IAdapterFactory {
-	private static final Class []ADAPTED_TYPES = new Class[] {AbstractTaskReference.class};
-	
+	private static final Class[] ADAPTED_TYPES = { AbstractTaskReference.class };
+
+	@Override
 	public Class[] getAdapterList() {
 		return SVNLinkedTaskInfoAdapterFactory.ADAPTED_TYPES;
 	}
 
+	@Override
 	public Object getAdapter(Object adaptableObject, Class adapterType) {
 		if (!AbstractTaskReference.class.equals(adapterType)) {
 			return null;
 		}
-		
+
 		if (adaptableObject instanceof ChangeSet) {
-			return this.createFromChangeSet((ChangeSet)adaptableObject);
+			return createFromChangeSet((ChangeSet) adaptableObject);
 		}
-		
-		Object adapted =  Platform.getAdapterManager().getAdapter(adaptableObject, SVNLogEntry.class);
+
+		Object adapted = Platform.getAdapterManager().getAdapter(adaptableObject, SVNLogEntry.class);
 		if (adapted != null) {
-			SVNLogEntry historyEntry = (SVNLogEntry)adapted;
+			SVNLogEntry historyEntry = (SVNLogEntry) adapted;
 			String comment = historyEntry.message == null ? "" : historyEntry.message; //$NON-NLS-1$
-			
+
 			IWorkbenchPage page = UIMonitorUtility.getActivePage();
 			if (page != null) {
 				IViewPart view = page.findView(IHistoryView.VIEW_ID);
 				if (view instanceof IHistoryView) {
-					IHistoryPage historyPage = ((IHistoryView)view).getHistoryPage();
+					IHistoryPage historyPage = ((IHistoryView) view).getHistoryPage();
 					if (historyPage instanceof SVNHistoryPage) {
-						IResource resource = ((SVNHistoryPage)historyPage).getResource();
-						return new SVNLinkedTaskInfo(this.getTaskRepositoryUrl(resource), null, this.getTaskFullUrl(resource, comment), comment);
+						IResource resource = ((SVNHistoryPage) historyPage).getResource();
+						return new SVNLinkedTaskInfo(getTaskRepositoryUrl(resource), null,
+								getTaskFullUrl(resource, comment), comment);
 					}
 				}
 			}
 			return new SVNLinkedTaskInfo(null, null, null, comment);
 		}
-		
+
 		return null;
 	}
 
 	protected AbstractTaskReference createFromChangeSet(ChangeSet set) {
-		IResource []resources = set.getResources();
+		IResource[] resources = set.getResources();
 		if (resources != null && resources.length > 0) {
-			return new SVNLinkedTaskInfo(this.getTaskRepositoryUrl(resources[0]), null, this.getTaskFullUrl(resources[0], set.getComment()), set.getComment());
+			return new SVNLinkedTaskInfo(getTaskRepositoryUrl(resources[0]), null,
+					getTaskFullUrl(resources[0], set.getComment()), set.getComment());
 		}
-		
+
 		return new SVNLinkedTaskInfo(null, null, null, set.getComment());
 	}
-	
+
 	protected String getTaskRepositoryUrl(IResource resource) {
 		if (resource != null) {
 			TaskRepository repository = TasksUiPlugin.getDefault().getRepositoryForResource(resource);
@@ -96,22 +100,23 @@ public class SVNLinkedTaskInfoAdapterFactory implements IAdapterFactory {
 		}
 		return null;
 	}
-	
+
 	protected String getTaskFullUrl(IResource resource, String comment) {
 		BugtraqModel model = SVNLinkedTaskInfoAdapterFactory.getBugtraqModel(resource);
 		IssueList linkList = new IssueList();
 		linkList.parseMessage(comment, model);
 		List issues = linkList.getLinks();
 		if (issues.size() > 0) {
-			return model.getResultingURL((IssueList.LinkPlacement)issues.get(0));
+			return model.getResultingURL((IssueList.LinkPlacement) issues.get(0));
 		}
 		return null;
 	}
-	
+
 	public static BugtraqModel getBugtraqModel(IResource resource) {
-		CommitPanel.CollectPropertiesOperation bugtraqOp = new CommitPanel.CollectPropertiesOperation(new IResource[] {resource});
+		CommitPanel.CollectPropertiesOperation bugtraqOp = new CommitPanel.CollectPropertiesOperation(
+				new IResource[] { resource });
 		bugtraqOp.run(new NullProgressMonitor());
 		return bugtraqOp.getBugtraqModel();
 	}
-	
+
 }

@@ -31,35 +31,40 @@ import org.eclipse.team.ui.synchronize.ISynchronizePageConfiguration;
  * @author Igor Burilo
  */
 public class ShowIncomingPropertiesModelAction extends AbstractSynchronizeLogicalModelAction {
-	
+
 	protected ShowIncomingPropertiesActionHelper actionHelper;
-	
+
 	public ShowIncomingPropertiesModelAction(String text, ISynchronizePageConfiguration configuration) {
 		super(text, configuration);
-		this.actionHelper = new ShowIncomingPropertiesActionHelper(this, configuration);
+		actionHelper = new ShowIncomingPropertiesActionHelper(this, configuration);
 	}
 
+	@Override
 	protected boolean needsToSaveDirtyEditors() {
 		return false;
 	}
-	
+
+	@Override
 	protected boolean updateSelection(IStructuredSelection selection) {
 		if (super.updateSelection(selection)) {
 			if (selection.size() == 1) {
-				AbstractSVNSyncInfo syncInfo = this.getSelectedSVNSyncInfo();
+				AbstractSVNSyncInfo syncInfo = getSelectedSVNSyncInfo();
 				if (syncInfo != null && syncInfo.getKind() != SyncInfo.IN_SYNC) {
 					ILocalResource incoming = syncInfo.getRemoteChangeResource();
 					if (incoming instanceof IResourceChange) {
-						return IStateFilter.SF_TREE_CONFLICTING.accept(incoming) ? IStateFilter.SF_TREE_CONFLICTING_REPOSITORY_EXIST.accept(incoming) : IStateFilter.ST_DELETED != incoming.getStatus();
+						return IStateFilter.SF_TREE_CONFLICTING.accept(incoming)
+								? IStateFilter.SF_TREE_CONFLICTING_REPOSITORY_EXIST.accept(incoming)
+								: IStateFilter.ST_DELETED != incoming.getStatus();
 					}
-				}					
-			}	
+				}
+			}
 		}
 		return false;
 	}
-	
+
+	@Override
 	protected IActionOperation getOperation() {
-		return this.actionHelper.getOperation();
+		return actionHelper.getOperation();
 	}
 
 }

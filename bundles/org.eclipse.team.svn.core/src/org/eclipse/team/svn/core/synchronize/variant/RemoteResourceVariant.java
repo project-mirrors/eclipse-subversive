@@ -32,19 +32,21 @@ public abstract class RemoteResourceVariant extends ResourceVariant {
 		RemoteResourceVariant.svnAuthor = SVNMessages.SVNInfo_Author;
 	}
 
+	@Override
 	protected String getCacheId() {
 		return "Remote: " + super.getCacheId();
 	}
-	
-    public String getContentIdentifier() {
-        if (IStateFilter.SF_PREREPLACED.accept(this.local)) {
-        	return "";
-        }
-    	String retVal = super.getContentIdentifier();
-	    if ((!this.isNotOnRepository() || this.local.isCopied()) && this.local.getAuthor() != null) {
-	        retVal += " " + BaseMessages.format(RemoteResourceVariant.svnAuthor, new Object[] {this.local.getAuthor()});
-	    }
-        return retVal;
-    }
-    
+
+	@Override
+	public String getContentIdentifier() {
+		if (IStateFilter.SF_PREREPLACED.accept(local)) {
+			return "";
+		}
+		String retVal = super.getContentIdentifier();
+		if ((!isNotOnRepository() || local.isCopied()) && local.getAuthor() != null) {
+			retVal += " " + BaseMessages.format(RemoteResourceVariant.svnAuthor, new Object[] { local.getAuthor() });
+		}
+		return retVal;
+	}
+
 }

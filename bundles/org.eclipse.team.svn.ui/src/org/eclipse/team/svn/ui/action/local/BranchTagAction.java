@@ -61,55 +61,68 @@ import org.eclipse.team.svn.ui.utility.UIMonitorUtility;
  *
  * @author Sergiy Logvin
  */
-public class BranchTagAction extends AbstractNonRecursiveTeamAction {	
+public class BranchTagAction extends AbstractNonRecursiveTeamAction {
 	public static final int BRANCH_ACTION = 0;
+
 	public static final int TAG_ACTION = 1;
-	
+
 	protected int actionType;
-	
+
 	public BranchTagAction(int actionType) {
 		this.actionType = actionType;
 	}
 
+	@Override
 	public void runImpl(IAction action) {
-		IResource []resources = this.getSelectedResources(IStateFilter.SF_EXCLUDE_DELETED);
-		
-		IActionOperation op = BranchTagAction.getBranchTagOperation(this.getShell(), this.actionType, resources);
+		IResource[] resources = this.getSelectedResources(IStateFilter.SF_EXCLUDE_DELETED);
+
+		IActionOperation op = BranchTagAction.getBranchTagOperation(getShell(), actionType, resources);
 		if (op != null) {
-			this.runScheduled(op);
+			runScheduled(op);
 		}
 	}
-	
-	public static IActionOperation getBranchTagOperation(Shell shell, int actionType, final IResource []resources) {
-		final IRepositoryResource []remoteResources = new IRepositoryResource[resources.length];
-		
+
+	public static IActionOperation getBranchTagOperation(Shell shell, int actionType, final IResource[] resources) {
+		final IRepositoryResource[] remoteResources = new IRepositoryResource[resources.length];
+
 		for (int i = 0; i < resources.length; i++) {
 			remoteResources[i] = SVNRemoteStorage.instance().asRepositoryResource(resources[i]);
 		}
-		
-		if (!OperationErrorDialog.isAcceptableAtOnce(remoteResources, actionType == BRANCH_ACTION ? SVNUIMessages.BranchTagAction_Error_Branch : SVNUIMessages.BranchTagAction_Error_Tag, shell)) {
+
+		if (!OperationErrorDialog.isAcceptableAtOnce(remoteResources,
+				actionType == BRANCH_ACTION
+						? SVNUIMessages.BranchTagAction_Error_Branch
+						: SVNUIMessages.BranchTagAction_Error_Tag,
+				shell)) {
 			return null;
 		}
-		
-		Set<String> nodeNames = new HashSet<String>();
-		boolean isStructureEnabled = remoteResources[0].getRepositoryLocation().isStructureEnabled()&& SVNTeamPreferences.getRepositoryBoolean(SVNTeamUIPlugin.instance().getPreferenceStore(), SVNTeamPreferences.BRANCH_TAG_CONSIDER_STRUCTURE_NAME);
+
+		Set<String> nodeNames = new HashSet<>();
+		boolean isStructureEnabled = remoteResources[0].getRepositoryLocation().isStructureEnabled()
+				&& SVNTeamPreferences.getRepositoryBoolean(SVNTeamUIPlugin.instance().getPreferenceStore(),
+						SVNTeamPreferences.BRANCH_TAG_CONSIDER_STRUCTURE_NAME);
 		if (isStructureEnabled) {
-			nodeNames = org.eclipse.team.svn.ui.action.remote.BranchTagAction.getExistingNodeNames(actionType == BranchTagAction.BRANCH_ACTION ? SVNUtility.getBranchesLocation(remoteResources[0]) : SVNUtility.getTagsLocation(remoteResources[0]));
+			nodeNames = org.eclipse.team.svn.ui.action.remote.BranchTagAction
+					.getExistingNodeNames(actionType == BranchTagAction.BRANCH_ACTION
+							? SVNUtility.getBranchesLocation(remoteResources[0])
+							: SVNUtility.getTagsLocation(remoteResources[0]));
 			if (nodeNames == null) {
 				return null;
 			}
 		}
-		
-		AbstractBranchTagPanel panel = 
-			actionType == BranchTagAction.BRANCH_ACTION ? 
-			new BranchPanel(SVNUtility.getBranchesLocation(remoteResources[0]), true, nodeNames, resources, new IRepositoryResource[0]) :
-			new TagPanel(SVNUtility.getTagsLocation(remoteResources[0]), true, nodeNames, resources, new IRepositoryResource[0]);
+
+		AbstractBranchTagPanel panel = actionType == BranchTagAction.BRANCH_ACTION
+				? new BranchPanel(SVNUtility.getBranchesLocation(remoteResources[0]), true, nodeNames, resources,
+						new IRepositoryResource[0])
+				: new TagPanel(SVNUtility.getTagsLocation(remoteResources[0]), true, nodeNames, resources,
+						new IRepositoryResource[0]);
 		DefaultDialog dialog = new DefaultDialog(shell, panel);
-		
+
 		if (dialog.open() == 0) {
 			IRepositoryResource destination = panel.getDestination();
-			
-			boolean forceCreate = isStructureEnabled && resources.length == 1 && resources[0].getType() == IResource.PROJECT;
+
+			boolean forceCreate = isStructureEnabled && resources.length == 1
+					&& resources[0].getType() == IResource.PROJECT;
 			if (forceCreate) {
 				/*
 				 * In order to determine that project has a single project layout,
@@ -119,123 +132,139 @@ public class BranchTagAction extends AbstractNonRecursiveTeamAction {
 				 * but in workspace we have a checked out trunk folder which is a project root.
 				 * For more details, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=246268
 				 */
-				boolean isSingleProjectLayout = 				 
-					remoteResources[0] instanceof IRepositoryRoot && ((IRepositoryRoot) (remoteResources[0])).getKind() == IRepositoryRoot.KIND_TRUNK ||
-					org.eclipse.team.svn.ui.action.remote.BranchTagAction.isSingleProjectLayout(remoteResources[0]);
+				boolean isSingleProjectLayout = remoteResources[0] instanceof IRepositoryRoot
+						&& ((IRepositoryRoot) remoteResources[0]).getKind() == IRepositoryRoot.KIND_TRUNK
+						|| org.eclipse.team.svn.ui.action.remote.BranchTagAction
+								.isSingleProjectLayout(remoteResources[0]);
 				forceCreate &= !isSingleProjectLayout;
-			} 
-								
+			}
+
 			int creationMode = panel.getCreationMode();
 			PreparedBranchTagOperation mainOp;
 			if (creationMode == SVNTeamPreferences.CREATION_MODE_REPOSITORY) {
 				IRepositoryResource[] resourcesWithSpecifiedRevision = new IRepositoryResource[remoteResources.length];
 				for (int i = 0; i < resources.length; i++) {
-					resourcesWithSpecifiedRevision[i] = SVNUtility.copyOf(remoteResources[i]);				
+					resourcesWithSpecifiedRevision[i] = SVNUtility.copyOf(remoteResources[i]);
 					resourcesWithSpecifiedRevision[i].setSelectedRevision(panel.getRevisionForRemoteResources());
 					resourcesWithSpecifiedRevision[i].setPegRevision(remoteResources[i].getPegRevision());
 				}
-				mainOp = new PreparedBranchTagOperation((actionType == BRANCH_ACTION ? "Branch" : "Tag"), resourcesWithSpecifiedRevision, destination, panel.getMessage(), forceCreate);
-			}
-			else {
-				mainOp = new PreparedBranchTagOperation((actionType == BRANCH_ACTION ? "Branch" : "Tag"), resources, remoteResources, destination, panel.getMessage(), forceCreate);
+				mainOp = new PreparedBranchTagOperation(actionType == BRANCH_ACTION ? "Branch" : "Tag",
+						resourcesWithSpecifiedRevision, destination, panel.getMessage(), forceCreate);
+			} else {
+				mainOp = new PreparedBranchTagOperation(actionType == BRANCH_ACTION ? "Branch" : "Tag", resources,
+						remoteResources, destination, panel.getMessage(), forceCreate);
 			}
 			switch (creationMode) {
 				case SVNTeamPreferences.CREATION_MODE_CHECKREVISION: {
-					final boolean notInSync[] = new boolean[] {false};
-					boolean cancelled = UIMonitorUtility.doTaskNowDefault(new AbstractActionOperation("Operation_CheckIfWCInSync", SVNUIMessages.class) { //$NON-NLS-1$
-						protected void runImpl(IProgressMonitor monitor) throws Exception {
-							if (!FilterManager.instance().checkForResourcesPresenceRecursive(resources, IStateFilter.SF_ANY_CHANGE)) {
-								for (int i = 0; i < resources.length && !monitor.isCanceled(); i++) {
-									ILocalResource local = SVNRemoteStorage.instance().asLocalResource(resources[i]);
-									if (local.getRevision() != remoteResources[i].getRevision()) {
+					final boolean notInSync[] = { false };
+					boolean cancelled = UIMonitorUtility.doTaskNowDefault(
+							new AbstractActionOperation("Operation_CheckIfWCInSync", SVNUIMessages.class) { //$NON-NLS-1$
+								@Override
+								protected void runImpl(IProgressMonitor monitor) throws Exception {
+									if (!FilterManager.instance()
+											.checkForResourcesPresenceRecursive(resources,
+													IStateFilter.SF_ANY_CHANGE)) {
+										for (int i = 0; i < resources.length && !monitor.isCanceled(); i++) {
+											ILocalResource local = SVNRemoteStorage.instance()
+													.asLocalResource(resources[i]);
+											if (local.getRevision() != remoteResources[i].getRevision()) {
+												notInSync[0] = true;
+												return;
+											}
+										}
+									} else {
 										notInSync[0] = true;
-										return;
 									}
 								}
-							}
-							else {
-								notInSync[0] = true;
-							}
-						}
-					}, true).isCancelled();
+							}, true).isCancelled();
 					if (cancelled) {
 						return null;
 					}
 					if (notInSync[0]) {
-						new OperationErrorDialog(shell, actionType == BRANCH_ACTION ? SVNUIMessages.BranchTagAction_Error_Branch : SVNUIMessages.BranchTagAction_Error_Tag, SVNUIMessages.BranchTagAction_Error_NotInSync).open();
+						new OperationErrorDialog(shell,
+								actionType == BRANCH_ACTION
+										? SVNUIMessages.BranchTagAction_Error_Branch
+										: SVNUIMessages.BranchTagAction_Error_Tag,
+								SVNUIMessages.BranchTagAction_Error_NotInSync).open();
 						return null;
 					}
 					break;
 				}
 				case SVNTeamPreferences.CREATION_MODE_DOUPDATE: {
 					CompositeOperation op = new CompositeOperation("Operation_Update", SVNMessages.class); //$NON-NLS-1$
-					
+
 					SaveProjectMetaOperation saveOp = new SaveProjectMetaOperation(resources);
 					op.add(saveOp);
-					
-					boolean ignoreExternals = SVNTeamPreferences.getBehaviourBoolean(SVNTeamUIPlugin.instance().getPreferenceStore(), SVNTeamPreferences.BEHAVIOUR_IGNORE_EXTERNALS_NAME);
+
+					boolean ignoreExternals = SVNTeamPreferences.getBehaviourBoolean(
+							SVNTeamUIPlugin.instance().getPreferenceStore(),
+							SVNTeamPreferences.BEHAVIOUR_IGNORE_EXTERNALS_NAME);
 					UpdateOperation updateOp = new UpdateOperation(resources, ignoreExternals);
 					op.add(updateOp);
-					op.add(new ClearUpdateStatusesOperation(updateOp), new IActionOperation[] {updateOp});
+					op.add(new ClearUpdateStatusesOperation(updateOp), new IActionOperation[] { updateOp });
 					op.add(new NotifyUnresolvedConflictOperation(updateOp));
-					
+
 					op.add(new RestoreProjectMetaOperation(saveOp));
 					op.add(new RefreshResourcesOperation(resources));
-					
-					if (UIMonitorUtility.doTaskNowDefault(op, true).isCancelled() || updateOp.hasUnresolvedConflicts()) {
+
+					if (UIMonitorUtility.doTaskNowDefault(op, true).isCancelled()
+							|| updateOp.hasUnresolvedConflicts()) {
 						return null;
 					}
 					break;
 				}
 			}
 			CompositeOperation op = new CompositeOperation(mainOp.getId(), mainOp.getMessagesClass());
-			
+
 			if (creationMode == SVNTeamPreferences.CREATION_MODE_REPOSITORY) {
 				op.add(mainOp);
-			}
-			else {
-				IResource []newResources = panel.getSelectedResources();
+			} else {
+				IResource[] newResources = panel.getSelectedResources();
 				if (newResources != null && newResources.length > 0) {
 					op.add(new AddToSVNOperation(newResources, false));
 				}
-				
+
 				if (panel.isFreezeExternals()) {
 					FreezeExternalsOperation freezeOp = new FreezeExternalsOperation(resources);
 					op.add(freezeOp);
-					op.add(mainOp, new IActionOperation[] {freezeOp});
+					op.add(mainOp, new IActionOperation[] { freezeOp });
 					op.add(new RestoreExternalsOperation(freezeOp));
-				}
-				else {
+				} else {
 					op.add(mainOp);
 				}
-				
+
 				if (newResources != null && newResources.length > 0) {
 					op.add(new RevertOperation(newResources, false));
 				}
 			}
-			
+
 			if (panel.isStartWithSelected()) {
-				boolean ignoreExternals = SVNTeamPreferences.getBehaviourBoolean(SVNTeamUIPlugin.instance().getPreferenceStore(), SVNTeamPreferences.BEHAVIOUR_IGNORE_EXTERNALS_NAME);
+				boolean ignoreExternals = SVNTeamPreferences.getBehaviourBoolean(
+						SVNTeamUIPlugin.instance().getPreferenceStore(),
+						SVNTeamPreferences.BEHAVIOUR_IGNORE_EXTERNALS_NAME);
 				SaveProjectMetaOperation saveOp = new SaveProjectMetaOperation(resources);
 				op.add(saveOp);
-				SwitchOperation switchOp = new SwitchOperation(resources, mainOp, SVNDepth.INFINITY, false, ignoreExternals);
-			    op.add(switchOp, new IActionOperation[] {mainOp});
+				SwitchOperation switchOp = new SwitchOperation(resources, mainOp, SVNDepth.INFINITY, false,
+						ignoreExternals);
+				op.add(switchOp, new IActionOperation[] { mainOp });
 				op.add(new RestoreProjectMetaOperation(saveOp));
 				op.add(new RefreshResourcesOperation(resources));
 				op.add(new NotifyUnresolvedConflictOperation(switchOp));
 			}
-			
+
 			return op;
 		}
 		return null;
 	}
-	
+
+	@Override
 	public boolean isEnabled() {
-		return this.checkForResourcesPresence(IStateFilter.SF_EXCLUDE_DELETED);
+		return checkForResourcesPresence(IStateFilter.SF_EXCLUDE_DELETED);
 	}
 
+	@Override
 	protected boolean needsToSaveDirtyEditors() {
 		return true;
 	}
-	
+
 }

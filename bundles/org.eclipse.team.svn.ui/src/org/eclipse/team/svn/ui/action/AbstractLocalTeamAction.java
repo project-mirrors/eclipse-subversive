@@ -22,7 +22,6 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.team.svn.core.IStateFilter;
 
-
 /**
  * Local SVN team actions ancestor
  * 
@@ -30,36 +29,37 @@ import org.eclipse.team.svn.core.IStateFilter;
  */
 public abstract class AbstractLocalTeamAction extends AbstractSVNTeamAction {
 	private static IStructuredSelection selection;
-	
+
 	public AbstractLocalTeamAction() {
-		super();
 	}
-	
+
+	@Override
 	protected IStructuredSelection getSelection() {
 		if (AbstractLocalTeamAction.selection == null) {
 			AbstractLocalTeamAction.selection = StructuredSelection.EMPTY;
 		}
 		return AbstractLocalTeamAction.selection;
 	}
-	
+
+	@Override
 	protected void checkSelection(IStructuredSelection selection) {
-		HashSet<IResource> oldSel = new HashSet<IResource>(Arrays.asList(this.getSelectedResources()));
-		IStructuredSelection oldSelection = this.getSelection();
+		HashSet<IResource> oldSel = new HashSet<>(Arrays.asList(getSelectedResources()));
+		IStructuredSelection oldSelection = getSelection();
 		AbstractLocalTeamAction.selection = selection;
-		HashSet<IResource> newSel = new HashSet<IResource>(Arrays.asList(this.getSelectedResources()));
+		HashSet<IResource> newSel = new HashSet<>(Arrays.asList(getSelectedResources()));
 		AbstractLocalTeamAction.selection = oldSelection;
 		if (!newSel.equals(oldSel)) {
 			AbstractLocalTeamAction.selection = selection;
 			FilterManager.instance().clear();
 		}
 	}
-	
+
 	protected boolean checkForResourcesPresence(IStateFilter filter) {
-		return FilterManager.instance().checkForResourcesPresence(this.getSelectedResources(), filter, false);
+		return FilterManager.instance().checkForResourcesPresence(getSelectedResources(), filter, false);
 	}
-	
+
 	protected boolean checkForResourcesPresenceRecursive(IStateFilter filter) {
-		return FilterManager.instance().checkForResourcesPresenceRecursive(this.getSelectedResources(), filter);
+		return FilterManager.instance().checkForResourcesPresenceRecursive(getSelectedResources(), filter);
 	}
 
 }

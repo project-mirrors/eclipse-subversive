@@ -26,16 +26,27 @@ import org.eclipse.team.svn.core.connector.SVNRevision;
  * @author Alexander Gurov
  */
 public interface IChangeStateProvider {
-	public String getLocalPath();
-	public SVNEntry.Kind getNodeKind();
-	public SVNEntryStatus.Kind getPropertiesChangeType();
-	public SVNEntryStatus.Kind getTextChangeType();
-	public SVNRevision.Number getChangeRevision();
-	public String getChangeAuthor();
-	public String getComment();
-	public long getChangeDate();
-	public boolean isCopied();
-	public boolean isSwitched();
-	public IResource getExact(IResource []set);
+	String getLocalPath();
+
+	SVNEntry.Kind getNodeKind();
+
+	SVNEntryStatus.Kind getPropertiesChangeType();
+
+	SVNEntryStatus.Kind getTextChangeType();
+
+	SVNRevision.Number getChangeRevision();
+
+	String getChangeAuthor();
+
+	String getComment();
+
+	long getChangeDate();
+
+	boolean isCopied();
+
+	boolean isSwitched();
+
+	IResource getExact(IResource[] set);
+
 	SVNConflictDescriptor getTreeConflictDescriptor();
 }

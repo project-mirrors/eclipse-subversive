@@ -20,7 +20,7 @@ package org.eclipse.team.svn.core.svnstorage.events;
  * @author Alexei Goncharov
  */
 public interface IRepositoriesStateChangedListener {
-	
-	public void repositoriesStateChanged(RepositoriesStateChangedEvent event);
-	
+
+	void repositoriesStateChanged(RepositoriesStateChangedEvent event);
+
 }

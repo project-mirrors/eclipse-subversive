@@ -14,9 +14,7 @@
 
 package org.eclipse.team.svn.ui.wizard.copymove;
 
-import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -48,19 +46,21 @@ import org.eclipse.team.svn.ui.wizard.AbstractVerifiedWizardPage;
  * @author Alexei Goncharov
  */
 public class SelectDestinationPage extends AbstractVerifiedWizardPage {
-	protected IRepositoryResource [] resources;
-	
+	protected IRepositoryResource[] resources;
+
 	protected RepositoryTreeComposite repositoryTree;
+
 	protected Text newResourceName;
-	
+
 	public SelectDestinationPage(IRepositoryResource[] resources) {
-		super(SelectDestinationPage.class.getName(), 
-				SVNUIMessages.RepositoryTreePanel_Description,
+		super(SelectDestinationPage.class.getName(), SVNUIMessages.RepositoryTreePanel_Description,
 				SVNTeamUIPlugin.instance().getImageDescriptor("icons/wizards/newconnect.gif")); //$NON-NLS-1$
-		this.setDescription(AbstractDialogPanel.makeToBeOperatedMessage(resources) + "\r\n" + SVNUIMessages.AbstractCopyToMoveTo_Message); //$NON-NLS-1$
+		setDescription(AbstractDialogPanel.makeToBeOperatedMessage(resources) + "\r\n" //$NON-NLS-1$
+				+ SVNUIMessages.AbstractCopyToMoveTo_Message);
 		this.resources = resources;
 	}
 
+	@Override
 	protected Composite createControlImpl(Composite parent) {
 		Composite composite = new Composite(parent, SWT.NONE);
 		GridLayout layout = new GridLayout(2, false);
@@ -71,68 +71,70 @@ public class SelectDestinationPage extends AbstractVerifiedWizardPage {
 		composite.setLayoutData(data);
 		data = new GridData(GridData.FILL_BOTH);
 		data.horizontalSpan = 2;
-		this.repositoryTree = new RepositoryTreeComposite(composite, SWT.BORDER, false, new RepositoryTreePanel.ProjectRoot(this.resources[0], false));
-		ProjectRoot root = (ProjectRoot)this.repositoryTree.getRepositoryTreeViewer().getInput();
-		this.repositoryTree.getRepositoryTreeViewer().setExpandedElements(new Object[] {root.getChildren(null)[0]});
-		String url = this.resources[0].getRepositoryLocation().getRepositoryRootUrl();
-		this.repositoryTree.setFilter(new RepositoryLocationFilter(url) {
+		repositoryTree = new RepositoryTreeComposite(composite, SWT.BORDER, false,
+				new RepositoryTreePanel.ProjectRoot(resources[0], false));
+		ProjectRoot root = (ProjectRoot) repositoryTree.getRepositoryTreeViewer().getInput();
+		repositoryTree.getRepositoryTreeViewer().setExpandedElements(root.getChildren(null)[0]);
+		String url = resources[0].getRepositoryLocation().getRepositoryRootUrl();
+		repositoryTree.setFilter(new RepositoryLocationFilter(url) {
+			@Override
 			public boolean accept(Object obj) {
-				if (obj instanceof RepositoryFile || 
-					obj instanceof RepositoryRevisions || 
-					obj instanceof RepositoryFolder && this.acceptYourself(((RepositoryFolder)obj).getRepositoryResource())) {
+				if (obj instanceof RepositoryFile || obj instanceof RepositoryRevisions
+						|| obj instanceof RepositoryFolder
+								&& acceptYourself(((RepositoryFolder) obj).getRepositoryResource())) {
 					return false;
 				}
 				return super.accept(obj);
 			}
-			
-			private boolean acceptYourself(IRepositoryResource resource) { 
-				for (int i = 0; i < SelectDestinationPage.this.resources.length; i++) {
-					if (resource.equals(SelectDestinationPage.this.resources[i])) {
+
+			private boolean acceptYourself(IRepositoryResource resource) {
+				for (IRepositoryResource element : resources) {
+					if (resource.equals(element)) {
 						return true;
 					}
 				}
 				return false;
 			}
 		});
-		this.repositoryTree.setLayoutData(data);
-		this.repositoryTree.getRepositoryTreeViewer().addSelectionChangedListener(new ISelectionChangedListener() {
-				public void selectionChanged(SelectionChangedEvent event) {
-					SelectDestinationPage.this.validateContent();	
-				}
-			}
+		repositoryTree.setLayoutData(data);
+		repositoryTree.getRepositoryTreeViewer().addSelectionChangedListener(event -> SelectDestinationPage.this.validateContent()
 		);
-		
+
 		data = new GridData();
 		Label name = new Label(composite, SWT.NONE);
-		name.setText(this.resources.length == 1 ? SVNUIMessages.CopyMove_SubFolder_One : SVNUIMessages.CopyMove_SubFolder_Multi);
+		name.setText(
+				resources.length == 1 ? SVNUIMessages.CopyMove_SubFolder_One : SVNUIMessages.CopyMove_SubFolder_Multi);
 		name.setLayoutData(data);
 		data = new GridData();
 		data.horizontalAlignment = SWT.FILL;
-		this.newResourceName = new Text(composite, SWT.BORDER);
-		this.newResourceName.setLayoutData(data);
+		newResourceName = new Text(composite, SWT.BORDER);
+		newResourceName.setLayoutData(data);
 		CompositeVerifier verifier = new CompositeVerifier();
-		if (this.resources.length == 1) {
+		if (resources.length == 1) {
 			verifier.add(new NonEmptyFieldVerifier(name.getText()));
-			this.newResourceName.setText(this.resources[0].getName());
+			newResourceName.setText(resources[0].getName());
 		}
 		verifier.add(new ResourceNameVerifier(name.getText(),
-				CoreExtensionsManager.instance().getSVNConnectorFactory().getSVNAPIVersion() >= ISVNConnectorFactory.APICompatibility.SVNAPI_1_5_x));
-		this.attachTo(this.newResourceName, verifier);
-		
+				CoreExtensionsManager.instance()
+						.getSVNConnectorFactory()
+						.getSVNAPIVersion() >= ISVNConnectorFactory.APICompatibility.SVNAPI_1_5_x));
+		attachTo(newResourceName, verifier);
+
 		return composite;
 	}
-	
+
+	@Override
 	public boolean isPageComplete() {
-		return super.isPageComplete() && !this.repositoryTree.getRepositoryTreeViewer().getSelection().isEmpty();
+		return super.isPageComplete() && !repositoryTree.getRepositoryTreeViewer().getSelection().isEmpty();
 	}
-	
+
 	public IRepositoryResource getDestination() {
-		IStructuredSelection sel = (IStructuredSelection)this.repositoryTree.getRepositoryTreeViewer().getSelection();
-		return ((RepositoryResource)sel.getFirstElement()).getRepositoryResource();
+		IStructuredSelection sel = (IStructuredSelection) repositoryTree.getRepositoryTreeViewer().getSelection();
+		return ((RepositoryResource) sel.getFirstElement()).getRepositoryResource();
 	}
-	
+
 	public String getNewResourceName() {
-		return this.newResourceName.getText();
+		return newResourceName.getText();
 	}
 
 }

@@ -29,17 +29,20 @@ import org.eclipse.ui.IWorkbenchPage;
  * @author Alexander Gurov
  * @deprecated use BuiltInAnnotate.open() instead
  */
+@Deprecated
 public class LocalShowAnnotationOperation extends AbstractWorkingCopyOperation {
-	
+
 	public LocalShowAnnotationOperation(IResource resource) {
-		super("Operation_ShowAnnotation", SVNUIMessages.class, new IResource[] {resource}); //$NON-NLS-1$
+		super("Operation_ShowAnnotation", SVNUIMessages.class, new IResource[] { resource }); //$NON-NLS-1$
 	}
 
+	@Override
 	protected void runImpl(IProgressMonitor monitor) throws Exception {
 		IWorkbenchPage page = UIMonitorUtility.getActivePage();
 		if (page != null) {
-			new BuiltInAnnotate().open(UIMonitorUtility.getActivePage(), (IFile)this.operableData()[0], UIMonitorUtility.getShell());
+			new BuiltInAnnotate().open(UIMonitorUtility.getActivePage(), (IFile) operableData()[0],
+					UIMonitorUtility.getShell());
 		}
-	}  					
-	
+	}
+
 }

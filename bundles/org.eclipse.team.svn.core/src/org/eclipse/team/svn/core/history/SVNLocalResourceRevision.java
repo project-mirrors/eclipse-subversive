@@ -42,6 +42,7 @@ import org.eclipse.team.svn.core.utility.ProgressMonitorUtility;
  */
 public class SVNLocalResourceRevision extends FileRevision {
 	protected ILocalResource local;
+
 	protected SVNRevision rev;
 
 	public SVNLocalResourceRevision(ILocalResource local, SVNRevision rev) {
@@ -49,61 +50,71 @@ public class SVNLocalResourceRevision extends FileRevision {
 		this.rev = rev;
 	}
 
+	@Override
 	public URI getURI() {
-		return this.local.getResource().getLocationURI();
+		return local.getResource().getLocationURI();
 	}
 
+	@Override
 	public long getTimestamp() {
-		return !IStateFilter.SF_ONREPOSITORY.accept(this.local) ? -1 : this.local.getLastCommitDate();
+		return !IStateFilter.SF_ONREPOSITORY.accept(local) ? -1 : local.getLastCommitDate();
 	}
 
+	@Override
 	public boolean exists() {
 		return true;
 	}
 
+	@Override
 	public String getContentIdentifier() {
-		if (IStateFilter.SF_UNVERSIONED.accept(this.local)) {
+		if (IStateFilter.SF_UNVERSIONED.accept(local)) {
 			return SVNMessages.ResourceVariant_unversioned;
 		}
-		long revision = this.local.getRevision();
-		if (IStateFilter.SF_DELETED.accept(this.local) && revision == SVNRevision.INVALID_REVISION_NUMBER) {
+		long revision = local.getRevision();
+		if (IStateFilter.SF_DELETED.accept(local) && revision == SVNRevision.INVALID_REVISION_NUMBER) {
 			return SVNMessages.ResourceVariant_deleted;
 		}
 		return String.valueOf(revision);
 	}
 
+	@Override
 	public String getAuthor() {
-		return this.local.getAuthor();
+		return local.getAuthor();
 	}
 
+	@Override
 	public String getComment() {
 		return null;
 	}
-	
+
+	@Override
 	public String getName() {
-		return this.local.getName();
+		return local.getName();
 	}
 
+	@Override
 	public IStorage getStorage(IProgressMonitor monitor) throws CoreException {
-		if (this.local instanceof ILocalFolder) {
+		if (local instanceof ILocalFolder) {
 			return null;
 		}
-		if (IStateFilter.SF_UNVERSIONED.accept(this.local) && !IStateFilter.SF_PREREPLACED.accept(this.local)) {
-			return (IStorage)this.local.getResource();
+		if (IStateFilter.SF_UNVERSIONED.accept(local) && !IStateFilter.SF_PREREPLACED.accept(local)) {
+			return (IStorage) local.getResource();
 		}
 		return new LocalStorage();
 	}
 
+	@Override
 	public boolean isPropertyMissing() {
-		return IStateFilter.SF_ONREPOSITORY.accept(this.local);
+		return IStateFilter.SF_ONREPOSITORY.accept(local);
 	}
 
+	@Override
 	public IFileRevision withAllProperties(IProgressMonitor monitor) throws CoreException {
-		if (!IStateFilter.SF_ONREPOSITORY.accept(this.local)) {
+		if (!IStateFilter.SF_ONREPOSITORY.accept(local)) {
 			return this;
 		}
-		IRepositoryResource remote = SVNRemoteStorage.instance().asRepositoryResource(this.local.getResource());
-		remote.setSelectedRevision(SVNRevision.fromNumber(this.local.getRevision()));
+		IRepositoryResource remote = SVNRemoteStorage.instance().asRepositoryResource(local.getResource());
+		remote.setSelectedRevision(SVNRevision.fromNumber(local.getRevision()));
 		GetLogMessagesOperation log = new GetLogMessagesOperation(remote);
 		log.setLimit(1);
 		ProgressMonitorUtility.doTaskExternal(log, monitor);
@@ -115,16 +126,18 @@ public class SVNLocalResourceRevision extends FileRevision {
 
 	protected class LocalStorage extends ResourceContentStorage {
 		public LocalStorage() {
-			super(SVNRemoteStorage.instance().asRepositoryResource(SVNLocalResourceRevision.this.local.getResource()));
-		}
-		
-		public IPath getFullPath() {
-			return SVNLocalResourceRevision.this.local.getResource().getLocation();
+			super(SVNRemoteStorage.instance().asRepositoryResource(local.getResource()));
 		}
 
-		protected AbstractGetFileContentOperation getLoadContentOperation() {
-		    return new GetLocalFileContentOperation(SVNLocalResourceRevision.this.local.getResource(), SVNLocalResourceRevision.this.rev.getKind());
+		@Override
+		public IPath getFullPath() {
+			return local.getResource().getLocation();
 		}
-		
+
+		@Override
+		protected AbstractGetFileContentOperation getLoadContentOperation() {
+			return new GetLocalFileContentOperation(local.getResource(), rev.getKind());
+		}
+
 	}
 }

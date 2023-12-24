@@ -17,6 +17,7 @@ package org.eclipse.team.svn.ui.compare;
 import org.eclipse.compare.CompareConfiguration;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.viewers.TreeSelection;
+import org.eclipse.team.svn.core.BaseMessages;
 import org.eclipse.team.svn.core.connector.SVNEntryRevisionReference;
 import org.eclipse.team.svn.core.resource.IRepositoryLocation;
 import org.eclipse.team.svn.ui.SVNUIMessages;
@@ -28,37 +29,37 @@ import org.eclipse.team.svn.ui.SVNUIMessages;
  */
 public class TwoWayPropertyCompareInput extends PropertyCompareInput {
 
-	public TwoWayPropertyCompareInput(CompareConfiguration configuration,
-									  SVNEntryRevisionReference left,
-									  SVNEntryRevisionReference right,
-									  IRepositoryLocation location) {
+	public TwoWayPropertyCompareInput(CompareConfiguration configuration, SVNEntryRevisionReference left,
+			SVNEntryRevisionReference right, IRepositoryLocation location) {
 		super(configuration, left, right, null, location);
 	}
 
+	@Override
 	protected void fillMenu(IMenuManager manager, TreeSelection selection) {
 		// is menu needed???
 	}
-	
+
+	@Override
 	public String getTitle() {
-		String nameLeft = this.left.path.substring(this.left.path.lastIndexOf("/") + 1); //$NON-NLS-1$
-		String nameRight = this.right.path.substring(this.right.path.lastIndexOf("/") + 1); //$NON-NLS-1$
+		String nameLeft = left.path.substring(left.path.lastIndexOf("/") + 1); //$NON-NLS-1$
+		String nameRight = right.path.substring(right.path.lastIndexOf("/") + 1); //$NON-NLS-1$
 		if (nameLeft.equals(nameRight)) {
-			return SVNUIMessages.format(SVNUIMessages.PropertyCompareInput_Title2,
-					  new String []	{
-					  nameLeft + " [" + this.getRevisionPart(this.left), //$NON-NLS-1$
-					  this.getRevisionPart(this.right)+ "] " //$NON-NLS-1$
-					  });
+			return BaseMessages.format(SVNUIMessages.PropertyCompareInput_Title2,
+					new String[] { nameLeft + " [" + getRevisionPart(left), //$NON-NLS-1$
+							getRevisionPart(right) + "] " //$NON-NLS-1$
+					});
 		}
-		return SVNUIMessages.format(SVNUIMessages.PropertyCompareInput_Title2,
-				  new String []	{
-				  nameLeft  + " [" + this.getRevisionPart(this.left) + "]", //$NON-NLS-1$ //$NON-NLS-2$
-				  nameRight + " [" + this.getRevisionPart(this.right)+ "] " //$NON-NLS-1$ //$NON-NLS-2$
-				  });
-		
+		return BaseMessages.format(SVNUIMessages.PropertyCompareInput_Title2,
+				new String[] { nameLeft + " [" + getRevisionPart(left) + "]", //$NON-NLS-1$ //$NON-NLS-2$
+						nameRight + " [" + getRevisionPart(right) + "] " //$NON-NLS-1$ //$NON-NLS-2$
+				});
+
 	}
-	
+
+	@Override
 	protected String getRevisionPart(SVNEntryRevisionReference reference) {
-		return SVNUIMessages.format(SVNUIMessages.ResourceCompareInput_RevisionSign, new String [] {String.valueOf(reference.revision)});
+		return BaseMessages.format(SVNUIMessages.ResourceCompareInput_RevisionSign,
+				new String[] { String.valueOf(reference.revision) });
 	}
 
 }

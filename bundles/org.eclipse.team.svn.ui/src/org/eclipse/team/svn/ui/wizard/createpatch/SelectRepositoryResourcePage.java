@@ -33,50 +33,54 @@ import org.eclipse.ui.PlatformUI;
  */
 public class SelectRepositoryResourcePage extends AbstractVerifiedWizardPage {
 	protected RepositoryResourceSelectionComposite selectComposite;
+
 	protected IRepositoryResource baseResource;
+
 	protected IRepositoryResource selectedResource;
 
 	public SelectRepositoryResourcePage(IRepositoryResource baseResource) {
 		super(
-			SelectRepositoryResourcePage.class.getName(), 
-			SVNUIMessages.SelectRepositoryResourcePage_Title, 
-			SVNTeamUIPlugin.instance().getImageDescriptor("icons/wizards/newconnect.gif")); //$NON-NLS-1$
-		this.setDescription(SVNUIMessages.SelectRepositoryResourcePage_Description);
-		this.selectedResource = this.baseResource = baseResource;
+				SelectRepositoryResourcePage.class.getName(), SVNUIMessages.SelectRepositoryResourcePage_Title,
+				SVNTeamUIPlugin.instance().getImageDescriptor("icons/wizards/newconnect.gif")); //$NON-NLS-1$
+		setDescription(SVNUIMessages.SelectRepositoryResourcePage_Description);
+		selectedResource = this.baseResource = baseResource;
 	}
 
 	public IRepositoryResource getSelectedResource() {
-		return this.selectedResource;
+		return selectedResource;
 	}
-	
+
+	@Override
 	protected Composite createControlImpl(Composite parent) {
 		GridData data = null;
 		GridLayout layout = null;
-		
+
 		Composite composite = new Composite(parent, SWT.NONE);
 		layout = new GridLayout();
 		layout.marginWidth = 4;
 		composite.setLayout(layout);
 		data = new GridData(GridData.FILL_BOTH);
 		composite.setLayoutData(data);
-		
-		this.selectComposite = new RepositoryResourceSelectionComposite(
-				composite, SWT.NONE, this, "patchUrl", this.baseResource, true,  //$NON-NLS-1$
+
+		selectComposite = new RepositoryResourceSelectionComposite(
+				composite, SWT.NONE, this, "patchUrl", baseResource, true, //$NON-NLS-1$
 				SVNUIMessages.SelectRepositoryResourcePage_Select_Title,
-				SVNUIMessages.SelectRepositoryResourcePage_Select_Description, RepositoryResourceSelectionComposite.MODE_DEFAULT, RepositoryResourceSelectionComposite.TEXT_BASE);
+				SVNUIMessages.SelectRepositoryResourcePage_Select_Description,
+				RepositoryResourceSelectionComposite.MODE_DEFAULT, RepositoryResourceSelectionComposite.TEXT_BASE);
 		data = new GridData(GridData.FILL_HORIZONTAL);
 		data.widthHint = 550;
-		this.selectComposite.setLayoutData(data);
-		
+		selectComposite.setLayoutData(data);
+
 //		Setting context help
-        PlatformUI.getWorkbench().getHelpSystem().setHelp(composite, "org.eclipse.team.svn.help.patchRemoteContext"); //$NON-NLS-1$
-		
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(composite, "org.eclipse.team.svn.help.patchRemoteContext"); //$NON-NLS-1$
+
 		return composite;
 	}
 
+	@Override
 	public IWizardPage getNextPage() {
-		this.selectedResource = this.selectComposite.getSelectedResource();
-		this.selectComposite.saveHistory();
+		selectedResource = selectComposite.getSelectedResource();
+		selectComposite.saveHistory();
 		return super.getNextPage();
 	}
 

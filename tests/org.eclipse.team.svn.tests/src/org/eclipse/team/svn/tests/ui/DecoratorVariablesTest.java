@@ -27,11 +27,11 @@ import org.junit.Test;
  */
 public class DecoratorVariablesTest {
 
-	protected static IVariable[] format = new IVariable[] { TextVariableSetProvider.VAR_ADDED_FLAG,
-			TextVariableSetProvider.VAR_AUTHOR, TextVariableSetProvider.VAR_DATE,
-			TextVariableSetProvider.VAR_LOCATION_LABEL, TextVariableSetProvider.VAR_LOCATION_URL,
-			TextVariableSetProvider.VAR_NAME, TextVariableSetProvider.VAR_OUTGOING_FLAG,
-			TextVariableSetProvider.VAR_RESOURCE_URL, TextVariableSetProvider.VAR_REVISION,
+	protected static IVariable[] format = { TextVariableSetProvider.VAR_ADDED_FLAG, TextVariableSetProvider.VAR_AUTHOR,
+			TextVariableSetProvider.VAR_DATE, TextVariableSetProvider.VAR_LOCATION_LABEL,
+			TextVariableSetProvider.VAR_LOCATION_URL, TextVariableSetProvider.VAR_NAME,
+			TextVariableSetProvider.VAR_OUTGOING_FLAG, TextVariableSetProvider.VAR_RESOURCE_URL,
+			TextVariableSetProvider.VAR_REVISION,
 			new UserVariable(TextVariableSetProvider.DOMAIN_NAME, "[test_data]") };
 
 	protected static String formatLine = "{" + TextVariableSetProvider.NAME_OF_ADDED_FLAG + "}" + "{"

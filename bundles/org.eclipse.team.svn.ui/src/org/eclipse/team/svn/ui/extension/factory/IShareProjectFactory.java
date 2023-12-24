@@ -26,47 +26,61 @@ import org.eclipse.team.svn.ui.wizard.shareproject.SelectProjectNamePage;
  */
 public interface IShareProjectFactory {
 	/**
-	 * The method provides ShareProjectWizard page with some extended options in compare to default Subversive implementation 
-	 * @param project the project which will be shared
+	 * The method provides ShareProjectWizard page with some extended options in compare to default Subversive implementation
+	 * 
+	 * @param project
+	 *            the project which will be shared
 	 * @return wizard page
 	 */
-	public SelectProjectNamePage getProjectLayoutPage();
+	SelectProjectNamePage getProjectLayoutPage();
+
 	/**
 	 * Allows to override default Subversive behavior while sharing the project
-	 * @param projects the projects which will be shared 
-	 * @param location the repository location which will be used in order to share the project
-	 * @param page advanced share project configuration page
+	 * 
+	 * @param projects
+	 *            the projects which will be shared
+	 * @param location
+	 *            the repository location which will be used in order to share the project
+	 * @param page
+	 *            advanced share project configuration page
 	 * @return share project operation implementation which overrides default Subversive behavior
 	 */
-	public ShareProjectOperation getShareProjectOperation(IProject []projects, IRepositoryLocation location, SelectProjectNamePage page, String commitMessage);
-	
+	ShareProjectOperation getShareProjectOperation(IProject[] projects, IRepositoryLocation location,
+			SelectProjectNamePage page, String commitMessage);
+
 	/**
-	 * Force disablement of the finish button on the "Commit Comment" page
-	 * depending on project
-	 * @param project the project which will be shared
+	 * Force disablement of the finish button on the "Commit Comment" page depending on project
+	 * 
+	 * @param project
+	 *            the project which will be shared
 	 * @return true if should be disallowed
 	 */
-	public boolean disallowFinishOnCommitComment(IProject []projects);
-	
+	boolean disallowFinishOnCommitComment(IProject[] projects);
+
 	/**
-	 * Force disablement of the finish button on the "Already Connected" page
-	 * depending on project
-	 * @param project the project which will be shared
+	 * Force disablement of the finish button on the "Already Connected" page depending on project
+	 * 
+	 * @param project
+	 *            the project which will be shared
 	 * @return true if should be disallowed
 	 */
-	public boolean disallowFinishOnAlreadyConnected(IProject []projects);
+	boolean disallowFinishOnAlreadyConnected(IProject[] projects);
+
 	/**
-	 * Force disablement of the finish button on the "Add Repository Location" page
-	 * depending on project
-	 * @param project the project which will be shared
+	 * Force disablement of the finish button on the "Add Repository Location" page depending on project
+	 * 
+	 * @param project
+	 *            the project which will be shared
 	 * @return true if should be disallowed
 	 */
-	public boolean disallowFinishOnAddRepositoryLocation(IProject []projects);
+	boolean disallowFinishOnAddRepositoryLocation(IProject[] projects);
+
 	/**
-	 * Force disablement of the finish button on the "Select Repository Location" page
-	 * depending on project
-	 * @param project the project which will be shared
+	 * Force disablement of the finish button on the "Select Repository Location" page depending on project
+	 * 
+	 * @param project
+	 *            the project which will be shared
 	 * @return true if should be disallowed
 	 */
-	public boolean disallowFinishOnSelectRepositoryLocation(IProject []projects);
+	boolean disallowFinishOnSelectRepositoryLocation(IProject[] projects);
 }

@@ -25,7 +25,7 @@ public enum ConnectorDescriptorKind {
 
 	private final String value;
 
-	private ConnectorDescriptorKind(String value) {
+	ConnectorDescriptorKind(String value) {
 		this.value = value;
 	}
 

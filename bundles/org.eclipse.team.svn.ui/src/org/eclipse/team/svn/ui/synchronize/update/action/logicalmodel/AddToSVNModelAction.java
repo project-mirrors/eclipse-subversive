@@ -28,21 +28,23 @@ import org.eclipse.team.ui.synchronize.ISynchronizePageConfiguration;
 public class AddToSVNModelAction extends AbstractSynchronizeLogicalModelAction {
 
 	protected AddToSVNModelActionHelper actionHelper;
-	
+
 	public AddToSVNModelAction(String text, ISynchronizePageConfiguration configuration) {
 		super(text, configuration);
-		this.actionHelper = new AddToSVNModelActionHelper(this, configuration);
+		actionHelper = new AddToSVNModelActionHelper(this, configuration);
 	}
 
+	@Override
 	protected FastSyncInfoFilter getSyncInfoFilter() {
-		return this.actionHelper.getSyncInfoFilter();
+		return actionHelper.getSyncInfoFilter();
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.team.svn.ui.synchronize.action.AbstractSynchronizeLogicalModelAction#getOperation()
 	 */
+	@Override
 	protected IActionOperation getOperation() {
-		return this.actionHelper.getOperation();
+		return actionHelper.getOperation();
 	}
 
 }

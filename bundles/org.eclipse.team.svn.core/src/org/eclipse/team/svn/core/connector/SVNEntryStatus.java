@@ -14,13 +14,12 @@
 
 package org.eclipse.team.svn.core.connector;
 
-
 /**
  * The basic status information container
  * 
- * The JavaHL API's is the only way to interact between SVN and Java-based tools. At the same time JavaHL connector library
- * is not EPL compatible and we won't to pin plug-in with concrete connector implementation. So, the only way to do this is
- * providing our own connector interface which will be covered by concrete connector implementation.
+ * The JavaHL API's is the only way to interact between SVN and Java-based tools. At the same time JavaHL connector library is not EPL
+ * compatible and we won't to pin plug-in with concrete connector implementation. So, the only way to do this is providing our own connector
+ * interface which will be covered by concrete connector implementation.
  * 
  * @author Alexander Gurov
  */
@@ -85,9 +84,9 @@ public abstract class SVNEntryStatus {
 		 * An unversioned path populated by an svn:externals property
 		 */
 		EXTERNAL(13);
-		
+
 		public final int id;
-		
+
 		public static Kind fromId(int id) {
 			for (Kind kind : values()) {
 				if (kind.id == id) {
@@ -96,8 +95,8 @@ public abstract class SVNEntryStatus {
 			}
 			throw new IllegalArgumentException("Invalid entry status kind: " + id); //$NON-NLS-1$
 		}
-		
-		private Kind(int id) {
+
+		Kind(int id) {
 			this.id = id;
 		}
 	}
@@ -108,8 +107,9 @@ public abstract class SVNEntryStatus {
 	public final SVNEntry.Kind nodeKind;
 
 	/**
-	 * The status of the node, based on restructuring changes; if the node
-     * has no restructuring changes, it will be set to Kind.NONE (see {@link SVNEntryStatus.Kind})
+	 * The status of the node, based on restructuring changes; if the node has no restructuring changes, it will be set to Kind.NONE (see
+	 * {@link SVNEntryStatus.Kind})
+	 * 
 	 * @since 1.9
 	 */
 	//public final Kind nodeStatus;

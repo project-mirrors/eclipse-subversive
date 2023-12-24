@@ -27,13 +27,8 @@ import org.eclipse.team.svn.ui.SVNUIMessages;
 public class ReplaceWarningDialog extends MessageDialog {
 
 	public ReplaceWarningDialog(Shell parentShell) {
-		super(parentShell,
-			SVNUIMessages.ReplaceWarningDialog_Title, 
-			null, 
-			SVNUIMessages.ReplaceWarningDialog_Message,
-			MessageDialog.QUESTION, 
-			new String[] {IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL}, 
-			0);
+		super(parentShell, SVNUIMessages.ReplaceWarningDialog_Title, null, SVNUIMessages.ReplaceWarningDialog_Message,
+				MessageDialog.QUESTION, new String[] { IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL }, 0);
 	}
 
 }

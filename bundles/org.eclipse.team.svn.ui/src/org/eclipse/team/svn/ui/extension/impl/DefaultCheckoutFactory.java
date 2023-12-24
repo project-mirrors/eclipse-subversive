@@ -44,52 +44,69 @@ public class DefaultCheckoutFactory implements ICheckoutFactory {
 	}
 
 	// for common reasons should be implemented as post-processing for checkout action, but while tracker is Eclipse project we should make it the best as we can...
+	@Override
 	public LocateProjectsOperation.ILocateFilter getLocateFilter() {
 		return new EclipseProjectsFilter();
 	}
-	
-	public IActionOperation getCheckoutOperation(Shell shell, IRepositoryResource []remote, HashMap checkoutMap, boolean respectHierarchy, String location,  SVNDepth recurseDepth, boolean ignoreExternals) {
-		return CheckoutAction.getCheckoutOperation(shell, remote, checkoutMap, respectHierarchy, location, recurseDepth, ignoreExternals);
+
+	@Override
+	public IActionOperation getCheckoutOperation(Shell shell, IRepositoryResource[] remote, HashMap checkoutMap,
+			boolean respectHierarchy, String location, SVNDepth recurseDepth, boolean ignoreExternals) {
+		return CheckoutAction.getCheckoutOperation(shell, remote, checkoutMap, respectHierarchy, location, recurseDepth,
+				ignoreExternals);
 	}
 
 	protected class EclipseProjectsFilter implements LocateProjectsOperation.ILocateFilter {
+		@Override
 		public boolean isProject(IRepositoryResource remote, IRepositoryResource[] children) {
-			for (int i = 0; i < children.length; i++) {
-				if (children[i] instanceof IRepositoryFile && children[i].getName().equals(".project")) { //$NON-NLS-1$
+			for (IRepositoryResource child : children) {
+				if (child instanceof IRepositoryFile && child.getName().equals(".project")) { //$NON-NLS-1$
 					return true;
 				}
 			}
 			return false;
 		}
-		
+
 	}
 
+	@Override
 	public ITableLabelProvider getLabelProvider(HashMap resources2names) {
 		return new LabelProvider(resources2names);
 	}
 
 	protected class LabelProvider implements ITableLabelProvider {
 		protected HashMap resources2names;
+
 		public LabelProvider(HashMap resources2names) {
 			this.resources2names = resources2names;
 		}
+
+		@Override
 		public void removeListener(ILabelProviderListener listener) {
 		}
+
+		@Override
 		public void addListener(ILabelProviderListener listener) {
 		}
+
+		@Override
 		public boolean isLabelProperty(Object element, String property) {
 			return false;
 		}
+
+		@Override
 		public void dispose() {
 		}
+
+		@Override
 		public String getColumnText(Object element, int columnIndex) {
-			IRepositoryResource resource = (IRepositoryResource)element;
+			IRepositoryResource resource = (IRepositoryResource) element;
 			switch (columnIndex) {
 				case 1: {
 					return resource.getUrl();
 				}
 				case 2: {
-					return FileUtility.formatResourceName((String)this.resources2names.get(resource));
+					return FileUtility.formatResourceName((String) resources2names.get(resource));
 				}
 				case 3: {
 					return SVNUIMessages.DefaultCheckoutFactory_EclipseProject;
@@ -97,21 +114,27 @@ public class DefaultCheckoutFactory implements ICheckoutFactory {
 			}
 			return ""; //$NON-NLS-1$
 		}
+
+		@Override
 		public Image getColumnImage(Object element, int columnIndex) {
 			return null;
 		}
 	}
 
-	public IRepositoryResourceProvider additionalProcessing(CompositeOperation op, IRepositoryResourceProvider provider) {
+	@Override
+	public IRepositoryResourceProvider additionalProcessing(CompositeOperation op,
+			IRepositoryResourceProvider provider) {
 		return provider;
 	}
 
+	@Override
 	public HashMap prepareName2resources(HashMap name2resources) {
 		return name2resources;
 	}
-	
+
+	@Override
 	public boolean findProjectsOptionEnabled() {
 		return false;
 	}
-	
+
 }

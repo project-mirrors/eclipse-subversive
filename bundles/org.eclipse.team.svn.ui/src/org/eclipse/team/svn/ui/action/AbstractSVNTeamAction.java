@@ -40,7 +40,6 @@ import org.eclipse.team.svn.ui.utility.IOperationWrapperFactory;
 import org.eclipse.team.svn.ui.utility.UIMonitorUtility;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.ISelectionListener;
-import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.ide.IDE;
 
@@ -52,52 +51,55 @@ import org.eclipse.ui.ide.IDE;
 public abstract class AbstractSVNTeamAction extends TeamAction {
 	// copy paste in order to fix problems with Eclipse 3.0.x->3.1.x->3.2 API changes
 	private IWorkbenchWindow window;
+
 	private Shell shell;
-	private ISelectionListener selectionListener = new ISelectionListener() {
-		public void selectionChanged(IWorkbenchPart part, ISelection selection) {
-			if (selection instanceof IStructuredSelection) {
-				AbstractSVNTeamAction.this.checkSelection((IStructuredSelection)selection);
-			}
+
+	private ISelectionListener selectionListener = (part, selection) -> {
+		if (selection instanceof IStructuredSelection) {
+			this.checkSelection((IStructuredSelection) selection);
 		}
 	};
 
 	public AbstractSVNTeamAction() {
-		super();
 	}
 
 	/**
-	 * Save all dirty editors in the workbench that are open on files that may
-	 * be affected by this operation. Opens a dialog to prompt the user if
-	 * <code>confirm</code> is true. Return true if successful. Return false
-	 * if the user has canceled the command. Must be called from the UI thread.
+	 * Save all dirty editors in the workbench that are open on files that may be affected by this operation. Opens a dialog to prompt the
+	 * user if <code>confirm</code> is true. Return true if successful. Return false if the user has canceled the command. Must be called
+	 * from the UI thread.
 	 * 
-	 * @param confirm prompt the user if true
+	 * @param confirm
+	 *            prompt the user if true
 	 * @return boolean false if the operation was canceled.
 	 */
 	public final boolean saveAllEditors(boolean confirm) {
-		return IDE.saveAllEditors(this.getOriginalSelectedResources(), confirm);
+		return IDE.saveAllEditors(getOriginalSelectedResources(), confirm);
 	}
-	
+
+	@Override
 	public abstract boolean isEnabled();
+
 	public abstract void runImpl(IAction action);
-	
+
+	@Override
 	protected final void execute(final IAction action) throws InvocationTargetException, InterruptedException {
-		ProgressMonitorUtility.doTaskExternal(new AbstractActionOperation("Operation_CallMenuAction", SVNUIMessages.class) { //$NON-NLS-1$
-			protected void runImpl(IProgressMonitor monitor) throws Exception {
-				if (AbstractSVNTeamAction.this.isEnabled()) {
-					if (AbstractSVNTeamAction.this.needsToSaveDirtyEditors() && 
-						!AbstractSVNTeamAction.this.saveAllEditors(AbstractSVNTeamAction.this.confirmSaveOfDirtyEditor())) {
-						return;
+		ProgressMonitorUtility
+				.doTaskExternal(new AbstractActionOperation("Operation_CallMenuAction", SVNUIMessages.class) { //$NON-NLS-1$
+					@Override
+					protected void runImpl(IProgressMonitor monitor) throws Exception {
+						if (AbstractSVNTeamAction.this.isEnabled()) {
+							if (AbstractSVNTeamAction.this.needsToSaveDirtyEditors() && !AbstractSVNTeamAction.this
+									.saveAllEditors(AbstractSVNTeamAction.this.confirmSaveOfDirtyEditor())) {
+								return;
+							}
+							AbstractSVNTeamAction.this.runImpl(action);
+						}
 					}
-					AbstractSVNTeamAction.this.runImpl(action);
-				}
-			}
-		}, new NullProgressMonitor());
+				}, new NullProgressMonitor());
 	}
-	
+
 	/**
-	 * Return whether dirty editor should be saved before this action is run.
-	 * Default is <code>false</code>.
+	 * Return whether dirty editor should be saved before this action is run. Default is <code>false</code>.
 	 * 
 	 * @return whether dirty editor should be saved before this action is run
 	 */
@@ -106,23 +108,22 @@ public abstract class AbstractSVNTeamAction extends TeamAction {
 	}
 
 	/**
-	 * Returns whether the user should be prompted to save dirty editors. The
-	 * default is <code>true</code>.
+	 * Returns whether the user should be prompted to save dirty editors. The default is <code>true</code>.
 	 * 
 	 * @return whether the user should be prompted to save dirty editors
 	 */
 	protected boolean confirmSaveOfDirtyEditor() {
 		return true;
 	}
-	
+
 	protected ICancellableOperationWrapper runBusy(IActionOperation operation) {
-		return UIMonitorUtility.doTaskBusy(operation, this.getOperationWrapperFactory());
+		return UIMonitorUtility.doTaskBusy(operation, getOperationWrapperFactory());
 	}
-	
+
 	protected ICancellableOperationWrapper runScheduled(IActionOperation operation) {
-		return UIMonitorUtility.doTaskScheduled(this.getTargetPart(), operation, this.getOperationWrapperFactory());
+		return UIMonitorUtility.doTaskScheduled(getTargetPart(), operation, getOperationWrapperFactory());
 	}
-	
+
 	protected IOperationWrapperFactory getOperationWrapperFactory() {
 		return new DefaultOperationWrapperFactory();
 	}
@@ -130,76 +131,83 @@ public abstract class AbstractSVNTeamAction extends TeamAction {
 	protected void handleException(Exception ex) {
 		this.handle(ex, SVNUIMessages.getErrorString("Error_ActionFailed"), SVNUIMessages.Error_ActionFailed_Message); //$NON-NLS-1$
 	}
-	
+
+	@Override
 	public void selectionChanged(IAction action, ISelection selection) {
 		try {
 			IStructuredSelection structuredSelection = null;
 			if (selection instanceof ITextSelection) {
-				IEditorPart part = this.getTargetPage().getActiveEditor();
+				IEditorPart part = getTargetPage().getActiveEditor();
 				if (part != null) {
-					IResource resource = (IResource) part.getEditorInput().getAdapter(IResource.class);
+					IResource resource = part.getEditorInput().getAdapter(IResource.class);
 					if (resource != null && resource.getType() == IResource.FILE) {
 						structuredSelection = new StructuredSelection(resource);
 					}
 				}
 			} else if (selection instanceof IStructuredSelection) {
 				structuredSelection = (IStructuredSelection) selection;
-			} 
+			}
 			if (structuredSelection == null || structuredSelection.isEmpty()) {
 				if (action != null) {
 					action.setEnabled(false);
 				}
 			} else {
-				this.checkSelection(structuredSelection);
+				checkSelection(structuredSelection);
 				super.selectionChanged(action, structuredSelection);
-			}		
-		}
-		catch (Throwable ex) {
+			}
+		} catch (Throwable ex) {
 			LoggedOperation.reportError(SVNUIMessages.getErrorString("Error_MenuEnablement"), ex); //$NON-NLS-1$
 		}
 	}
 
+	@Override
 	protected Shell getShell() {
-		return this.shell != null ? this.shell : super.getShell();
+		return shell != null ? shell : super.getShell();
 	}
-	
+
+	@Override
 	public IWorkbenchWindow getWindow() {
-		return this.window;
+		return window;
 	}
-	
+
+	@Override
 	public void init(IWorkbenchWindow window) {
 		this.window = window;
-		this.shell = this.window.getShell();	
-		this.window.getSelectionService().addPostSelectionListener(this.selectionListener);
+		shell = this.window.getShell();
+		this.window.getSelectionService().addPostSelectionListener(selectionListener);
 	}
-	
+
+	@Override
 	public void dispose() {
-		if (this.window != null) {
-			this.window.getSelectionService().removePostSelectionListener(this.selectionListener);
+		if (window != null) {
+			window.getSelectionService().removePostSelectionListener(selectionListener);
 		}
 		super.dispose();
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.team.internal.ui.actions.TeamAction#getSelectedResources()
-	 */		
-	protected IResource[] getSelectedResources() {	
-		//filters out not valid resources   		
-		List<IResource> res = new ArrayList<IResource>();
+	 */
+	@Override
+	protected IResource[] getSelectedResources() {
+		//filters out not valid resources
+		List<IResource> res = new ArrayList<>();
 		IResource[] resources = super.getSelectedResources();
 		for (IResource resource : resources) {
 			if (!FileUtility.isNotSupervised(resource)) {
 				res.add(resource);
 			}
-		} 				
+		}
 		return res.toArray(new IResource[0]);
-	}	
-	
-	protected IResource[] getOriginalSelectedResources() {		
-		return super.getSelectedResources();		
-	} 
-	
+	}
+
+	protected IResource[] getOriginalSelectedResources() {
+		return super.getSelectedResources();
+	}
+
 	protected abstract void checkSelection(IStructuredSelection selection);
+
+	@Override
 	protected abstract IStructuredSelection getSelection();
-	
+
 }

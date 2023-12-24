@@ -33,8 +33,9 @@ import org.eclipse.team.svn.core.utility.SVNUtility;
  */
 public class GetFileContentOperation extends AbstractGetFileContentOperation {
 	protected IRepositoryResource resource;
+
 	protected IRepositoryResourceProvider provider;
-	
+
 	public GetFileContentOperation(IRepositoryResource resource) {
 		super("Revision"); //$NON-NLS-1$
 		this.resource = resource;
@@ -44,44 +45,47 @@ public class GetFileContentOperation extends AbstractGetFileContentOperation {
 		super("Revision"); //$NON-NLS-1$
 		this.provider = provider;
 	}
-	
+
+	@Override
 	protected void runImpl(IProgressMonitor monitor) throws Exception {
-		if (this.provider != null) {
-			this.resource = this.provider.getRepositoryResources()[0];
+		if (provider != null) {
+			resource = provider.getRepositoryResources()[0];
 		}
-		
-		String url = this.resource.getUrl();
-		IRepositoryLocation location = this.resource.getRepositoryLocation();
+
+		String url = resource.getUrl();
+		IRepositoryLocation location = resource.getRepositoryLocation();
 		ISVNConnector proxy = location.acquireSVNProxy();
 		FileOutputStream stream = null;
 		try {
 			url = SVNUtility.encodeURL(url);
 //			this.writeToConsole(IConsoleStream.LEVEL_CMD, "svn cat " + url + "@" + this.resource.getPegRevision() + " -r " + selected + " --username \"" + location.getUsername() + "\"\n");
-			this.tmpFile = this.createTempFile();
-			stream = new FileOutputStream(this.tmpFile);
-			
+			tmpFile = createTempFile();
+			stream = new FileOutputStream(tmpFile);
+
 			proxy.streamFileContent(
-					SVNUtility.getEntryRevisionReference(this.resource), 
-					2048, 
-					stream,
+					SVNUtility.getEntryRevisionReference(resource), 2048, stream,
 					new SVNProgressMonitor(GetFileContentOperation.this, monitor, null));
-		}
-		finally {
+		} finally {
 			location.releaseSVNProxy(proxy);
 			if (stream != null) {
-				try {stream.close();} catch (Exception ex) {}
+				try {
+					stream.close();
+				} catch (Exception ex) {
+				}
 			}
 		}
 	}
-	
+
+	@Override
 	protected String getExtension() {
-		String name = this.resource.getName();
+		String name = resource.getName();
 		int idx = name.lastIndexOf('.');
 		return idx == -1 ? "" : name.substring(idx + 1); //$NON-NLS-1$
 	}
-	
+
+	@Override
 	protected String getShortErrorMessage(Throwable t) {
-		return BaseMessages.format(super.getShortErrorMessage(t), new Object[] {this.resource.getUrl()});
+		return BaseMessages.format(super.getShortErrorMessage(t), new Object[] { resource.getUrl() });
 	}
 
 }

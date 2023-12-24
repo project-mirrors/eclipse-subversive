@@ -29,7 +29,6 @@ import org.eclipse.team.svn.core.SVNMessages;
 import org.eclipse.team.svn.core.SVNTeamPlugin;
 import org.eclipse.team.svn.core.SVNTeamProvider;
 import org.eclipse.team.svn.core.operation.AbstractActionOperation;
-import org.eclipse.team.svn.core.operation.IUnprotectedOperation;
 import org.eclipse.team.svn.core.resource.IRepositoryLocation;
 import org.eclipse.team.svn.core.resource.IResourceProvider;
 
@@ -40,38 +39,40 @@ import org.eclipse.team.svn.core.resource.IResourceProvider;
  */
 public class FindRelatedProjectsOperation extends AbstractActionOperation implements IResourceProvider {
 	protected IRepositoryLocation location;
+
 	protected List<IProject> resources;
+
 	protected Set<IProject> exceptProjects;
-	
+
 	public FindRelatedProjectsOperation(IRepositoryLocation location) {
 		this(location, null);
 	}
-	
-	public FindRelatedProjectsOperation(IRepositoryLocation location, IProject []exceptProjects) {
+
+	public FindRelatedProjectsOperation(IRepositoryLocation location, IProject[] exceptProjects) {
 		super("Operation_FindRelatedProjects", SVNMessages.class); //$NON-NLS-1$
 		this.location = location;
 		if (exceptProjects != null) {
-			this.exceptProjects = new HashSet<IProject>(Arrays.asList(exceptProjects));
+			this.exceptProjects = new HashSet<>(Arrays.asList(exceptProjects));
 		}
 	}
 
-	public IResource []getResources() {
-		return this.resources == null ? new IProject[0] : this.resources.toArray(new IProject[this.resources.size()]);
+	@Override
+	public IResource[] getResources() {
+		return resources == null ? new IProject[0] : resources.toArray(new IProject[resources.size()]);
 	}
 
+	@Override
 	protected void runImpl(IProgressMonitor monitor) throws Exception {
-		this.resources = new ArrayList<IProject>();
-		IProject []projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
+		resources = new ArrayList<>();
+		IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
 		for (int i = 0; i < projects.length && !monitor.isCanceled(); i++) {
 			final IProject current = projects[i];
-			this.protectStep(new IUnprotectedOperation() {
-				public void run(IProgressMonitor monitor) throws Exception {
-					SVNTeamProvider provider = (SVNTeamProvider)RepositoryProvider.getProvider(current, SVNTeamPlugin.NATURE_ID);
-					if (provider != null && 
-						(FindRelatedProjectsOperation.this.exceptProjects == null || !FindRelatedProjectsOperation.this.exceptProjects.contains(current)) &&
-						provider.peekAtLocation() == FindRelatedProjectsOperation.this.location) {
-						FindRelatedProjectsOperation.this.resources.add(current);
-					}
+			this.protectStep(monitor1 -> {
+				SVNTeamProvider provider = (SVNTeamProvider) RepositoryProvider.getProvider(current,
+						SVNTeamPlugin.NATURE_ID);
+				if (provider != null && (exceptProjects == null || !exceptProjects.contains(current))
+						&& provider.peekAtLocation() == location) {
+					resources.add(current);
 				}
 			}, monitor, projects.length);
 		}

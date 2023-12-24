@@ -32,42 +32,41 @@ import org.eclipse.team.svn.ui.action.AbstractRepositoryTeamAction;
  * @author Sergiy Logvin
  */
 public class CopyUrlAction extends AbstractRepositoryTeamAction {
-	
+
 	protected String url;
 
 	public CopyUrlAction() {
-		super();
 	}
 
+	@Override
 	public void runImpl(IAction action) {
 		IActionOperation op = new AbstractActionOperation("Operation_CopyURL", SVNUIMessages.class) { //$NON-NLS-1$
+			@Override
 			protected void runImpl(IProgressMonitor monitor) throws Exception {
 				Clipboard clipboard = new Clipboard(CopyUrlAction.this.getShell().getDisplay());
 				try {
 					clipboard.setContents(
-						new Object[] {CopyUrlAction.this.url}, 
-						new Transfer[] {TextTransfer.getInstance()});
-				}
-				finally {
+							new Object[] { url }, new Transfer[] { TextTransfer.getInstance() });
+				} finally {
 					clipboard.dispose();
 				}
 			}
 		};
-		this.runBusy(op);
+		runBusy(op);
 	}
-	
+
+	@Override
 	public boolean isEnabled() {
-		IRepositoryResource []resources = this.getSelectedRepositoryResources();
-		IRepositoryLocation []locations = this.getSelectedRepositoryLocations();
+		IRepositoryResource[] resources = getSelectedRepositoryResources();
+		IRepositoryLocation[] locations = getSelectedRepositoryLocations();
 		if (resources.length == 0 && locations.length == 1) {
-			this.url = locations[0].getUrl();
+			url = locations[0].getUrl();
+			return true;
+		} else if (resources.length == 1) {
+			url = resources[0].getUrl();
 			return true;
 		}
-		else if (resources.length == 1) {
-			this.url = resources[0].getUrl();
-			return true;
-		}
-		
+
 		return false;
 	}
 

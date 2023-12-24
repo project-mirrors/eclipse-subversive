@@ -16,7 +16,6 @@
 package org.eclipse.team.svn.core.operation.local;
 
 import java.io.File;
-import java.io.FileFilter;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -25,7 +24,6 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.team.svn.core.SVNMessages;
 import org.eclipse.team.svn.core.SVNTeamPlugin;
-import org.eclipse.team.svn.core.operation.IUnprotectedOperation;
 import org.eclipse.team.svn.core.resource.IResourceProvider;
 import org.eclipse.team.svn.core.utility.FileUtility;
 import org.eclipse.team.svn.core.utility.PatternProvider;
@@ -38,79 +36,81 @@ import org.eclipse.team.svn.core.utility.SVNUtility;
  */
 public class SaveProjectMetaOperation extends AbstractWorkingCopyOperation implements IResourceProvider {
 	// exclude .settings folder due large information amount contained in it
-	protected static final String []META_FILES = new String[] {".project", ".classpath"}; //$NON-NLS-1$ //$NON-NLS-2$
+	protected static final String[] META_FILES = { ".project", ".classpath" }; //$NON-NLS-1$ //$NON-NLS-2$
+
 	protected HashMap<String, File> savedMetas;
+
 	protected String startsWith;
 
-	public SaveProjectMetaOperation(IResource []resources) {
+	public SaveProjectMetaOperation(IResource[] resources) {
 		this(resources, null);
 	}
-	
-	public SaveProjectMetaOperation(IResource []resources, String startsWith) {
+
+	public SaveProjectMetaOperation(IResource[] resources, String startsWith) {
 		super("Operation_SaveMeta", SVNMessages.class, resources); //$NON-NLS-1$
-		this.savedMetas = new HashMap<String, File>();
+		savedMetas = new HashMap<>();
 		this.startsWith = startsWith;
 	}
 
 	public SaveProjectMetaOperation(IResourceProvider provider) {
 		this(provider, null);
 	}
-	
+
 	public SaveProjectMetaOperation(IResourceProvider provider, String startsWith) {
 		super("Operation_SaveMeta", SVNMessages.class, provider); //$NON-NLS-1$
-		this.savedMetas = new HashMap<String, File>();
+		savedMetas = new HashMap<>();
 		this.startsWith = startsWith;
 	}
-	
-	public IResource []getResources() {
-		return this.operableData();
+
+	@Override
+	public IResource[] getResources() {
+		return operableData();
 	}
-	
+
 	public Map<String, File> getSavedMetas() {
-		return this.savedMetas;
+		return savedMetas;
 	}
-	
+
+	@Override
 	public int getOperationWeight() {
 		return 0;
 	}
 
+	@Override
 	protected void runImpl(IProgressMonitor monitor) throws Exception {
-		IResource []changeSet = this.operableData();
-		
+		IResource[] changeSet = operableData();
+
 		for (int i = 0; i < changeSet.length && !monitor.isCanceled(); i++) {
 			final IResource change = changeSet[i];
-			this.protectStep(new IUnprotectedOperation() {
-				public void run(IProgressMonitor monitor) throws Exception {
-					IProject project = change.getProject();
-					if (!project.isAccessible()) {
-						return;
-					}
-					IResource []members = project.members();
-					for (int i = 0; i < members.length && !monitor.isCanceled(); i++) {
-						if (SaveProjectMetaOperation.this.shouldBeSaved(members[i])) {
-							try {
-								SaveProjectMetaOperation.this.saveMeta(members[i], monitor);
-							}
-							catch (Exception ex) {
-								// disallow error reporting
-							}
+			this.protectStep(monitor1 -> {
+				IProject project = change.getProject();
+				if (!project.isAccessible()) {
+					return;
+				}
+				IResource[] members = project.members();
+				for (int i1 = 0; i1 < members.length && !monitor1.isCanceled(); i1++) {
+					if (SaveProjectMetaOperation.this.shouldBeSaved(members[i1])) {
+						try {
+							SaveProjectMetaOperation.this.saveMeta(members[i1], monitor1);
+						} catch (Exception ex) {
+							// disallow error reporting
 						}
 					}
 				}
 			}, monitor, changeSet.length);
 		}
 	}
-	
+
 	protected boolean shouldBeSaved(IResource resource) {
 		String name = resource.getName();
 		if (name.equals(SVNUtility.getSVNFolderName())) {
 			return false;
 		}
-		if (this.startsWith != null) {
-			return name.startsWith(this.startsWith);
+		if (startsWith != null) {
+			return name.startsWith(startsWith);
 		}
-		for (int i = 0; i < SaveProjectMetaOperation.META_FILES.length; i++) {
-			if (name.equalsIgnoreCase(SaveProjectMetaOperation.META_FILES[i])) {
+		for (String element : SaveProjectMetaOperation.META_FILES) {
+			if (name.equalsIgnoreCase(element)) {
 				return true;
 			}
 		}
@@ -126,18 +126,13 @@ public class SaveProjectMetaOperation extends AbstractWorkingCopyOperation imple
 				target.deleteOnExit();
 				if (source.isDirectory()) {
 					target.delete();
-					FileUtility.copyAll(target, source, FileUtility.COPY_NO_OPTIONS, new FileFilter() {
-						public boolean accept(File pathname) {
-							return !pathname.getName().equals(SVNUtility.getSVNFolderName());
-						}
-					}, monitor);
-				}
-				else {
+					FileUtility.copyAll(target, source, FileUtility.COPY_NO_OPTIONS, pathname -> !pathname.getName().equals(SVNUtility.getSVNFolderName()), monitor);
+				} else {
 					FileUtility.copyFile(target, source, monitor);
 				}
-				this.savedMetas.put(sourceLocation, target);
+				savedMetas.put(sourceLocation, target);
 			}
 		}
 	}
-	
+
 }

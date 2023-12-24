@@ -23,5 +23,5 @@ import org.eclipse.team.svn.core.utility.ILoggedOperationFactory;
  * @author Alexander Gurov
  */
 public interface IOperationWrapperFactory extends ILoggedOperationFactory {
-	public ICancellableOperationWrapper getCancellable(IActionOperation operation);
+	ICancellableOperationWrapper getCancellable(IActionOperation operation);
 }

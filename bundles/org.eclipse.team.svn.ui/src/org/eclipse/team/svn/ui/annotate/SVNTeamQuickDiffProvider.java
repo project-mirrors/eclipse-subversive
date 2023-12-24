@@ -47,180 +47,212 @@ import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.ui.texteditor.quickdiff.IQuickDiffReferenceProvider;
 
 /**
- * Quick diff provider. Uses BASE working copy revision to compare. 
+ * Quick diff provider. Uses BASE working copy revision to compare.
  * 
  * @author Alexander Gurov
  */
-public class SVNTeamQuickDiffProvider implements IQuickDiffReferenceProvider, IResourceStatesListener, IElementStateListener {
+public class SVNTeamQuickDiffProvider
+		implements IQuickDiffReferenceProvider, IResourceStatesListener, IElementStateListener {
 	protected String id;
+
 	protected ITextEditor editor;
+
 	protected IDocumentProvider documentProvider;
+
 	protected boolean referenceInitialized;
+
 	protected IDocument reference;
+
 	protected ILocalResource savedState;
+
 	protected Job updateJob;
 
+	@Override
 	public void setActiveEditor(ITextEditor editor) {
 		IEditorInput editorInput = editor.getEditorInput();
 		if (ResourceUtil.getFile(editorInput) != null) {
 			this.editor = editor;
-			this.documentProvider = editor.getDocumentProvider();
+			documentProvider = editor.getDocumentProvider();
 			SVNRemoteStorage.instance().addResourceStatesListener(ResourceStatesChangedEvent.class, this);
-			if (this.documentProvider != null) {
-				this.documentProvider.addElementStateListener(this);
+			if (documentProvider != null) {
+				documentProvider.addElementStateListener(this);
 			}
-			this.referenceInitialized = true;
+			referenceInitialized = true;
 		}
 	}
 
+	@Override
 	public void dispose() {
-		if (this.updateJob != null && this.updateJob.getState() != Job.NONE) {
-			this.updateJob.cancel();
+		if (updateJob != null && updateJob.getState() != Job.NONE) {
+			updateJob.cancel();
 		}
-		this.referenceInitialized = false;
-		
-		if (this.documentProvider != null) {
-			this.documentProvider.removeElementStateListener(this);
+		referenceInitialized = false;
+
+		if (documentProvider != null) {
+			documentProvider.removeElementStateListener(this);
 		}
 		SVNRemoteStorage.instance().removeResourceStatesListener(ResourceStatesChangedEvent.class, this);
 	}
 
+	@Override
 	public String getId() {
-		return this.id;
+		return id;
 	}
 
+	@Override
 	public void setId(String id) {
 		this.id = id;
 	}
 
+	@Override
 	public IDocument getReference(IProgressMonitor monitor) throws CoreException {
-		if (this.referenceInitialized) {
-			if (this.reference == null) {
-				this.readDocument(monitor);
+		if (referenceInitialized) {
+			if (reference == null) {
+				readDocument(monitor);
 			}
-			return this.reference;
+			return reference;
 		}
 		return null;
 	}
 
+	@Override
 	public boolean isEnabled() {
-		return this.referenceInitialized && this.isShared();
+		return referenceInitialized && isShared();
 	}
 
+	@Override
 	public void resourcesStateChanged(ResourceStatesChangedEvent event) {
-		IFile file = this.getFile();
-		if (file != null && this.isEnabled() && event.contains(this.getFile())) {
-			this.backgroundFetch();
+		IFile file = getFile();
+		if (file != null && isEnabled() && event.contains(getFile())) {
+			backgroundFetch();
 		}
 	}
 
+	@Override
 	public void elementContentReplaced(Object element) {
-		IFile file = this.getFile();
-		if (file != null && this.isEnabled() && this.editor.getEditorInput() == element) {
-			this.backgroundFetch();
+		IFile file = getFile();
+		if (file != null && isEnabled() && editor.getEditorInput() == element) {
+			backgroundFetch();
 		}
 	}
 
+	@Override
 	public void elementContentAboutToBeReplaced(Object element) {
 	}
 
+	@Override
 	public void elementDeleted(Object element) {
 	}
 
+	@Override
 	public void elementDirtyStateChanged(Object element, boolean isDirty) {
 	}
 
+	@Override
 	public void elementMoved(Object originalElement, Object movedElement) {
 	}
-	
+
 	protected boolean isShared() {
-		ILocalResource local = this.getLocalResource();
+		ILocalResource local = getLocalResource();
 		return IStateFilter.SF_VERSIONED.accept(local);
 	}
-	
+
 	protected ILocalResource getLocalResource() {
-		return SVNRemoteStorage.instance().asLocalResource(this.getFile());
+		return SVNRemoteStorage.instance().asLocalResource(getFile());
 	}
-	
+
 	protected IFile getFile() {
-		return this.editor == null ? null : ResourceUtil.getFile(this.editor.getEditorInput());
+		return editor == null ? null : ResourceUtil.getFile(editor.getEditorInput());
 	}
-	
+
 	protected void backgroundFetch() {
-		if (this.updateJob != null && this.updateJob.getState() != Job.NONE) {
-			this.updateJob.cancel();
+		if (updateJob != null && updateJob.getState() != Job.NONE) {
+			updateJob.cancel();
 		}
-		this.updateJob = ProgressMonitorUtility.doTaskScheduledDefault(new AbstractActionOperation("Operation_QuickDiff", SVNUIMessages.class) { //$NON-NLS-1$
-			protected void runImpl(IProgressMonitor monitor) throws Exception {
-				SVNTeamQuickDiffProvider.this.readDocument(monitor);
-			}
-		});
+		updateJob = ProgressMonitorUtility
+				.doTaskScheduledDefault(new AbstractActionOperation("Operation_QuickDiff", SVNUIMessages.class) { //$NON-NLS-1$
+					@Override
+					protected void runImpl(IProgressMonitor monitor) throws Exception {
+						SVNTeamQuickDiffProvider.this.readDocument(monitor);
+					}
+				});
 	}
-	
+
 	protected void readDocument(IProgressMonitor monitor) {
-		if (this.reference == null) {
-			this.reference = new Document();
+		if (reference == null) {
+			reference = new Document();
 		}
-		if (this.documentProvider instanceof IStorageDocumentProvider) {
-			IStorageDocumentProvider provider = (IStorageDocumentProvider)this.documentProvider;
-			String encodingTmp = provider.getEncoding(this.editor.getEditorInput());
+		if (documentProvider instanceof IStorageDocumentProvider) {
+			IStorageDocumentProvider provider = (IStorageDocumentProvider) documentProvider;
+			String encodingTmp = provider.getEncoding(editor.getEditorInput());
 			String encoding = encodingTmp == null ? provider.getDefaultEncoding() : encodingTmp;
-			
-			ILocalResource tmp = this.getLocalResource();
-			if (this.savedState == null || !IStateFilter.SF_INTERNAL_INVALID.accept(tmp) && this.savedState.getRevision() != tmp.getRevision()) {
-				this.savedState = tmp;
-				final GetLocalFileContentOperation contentOp = new GetLocalFileContentOperation(tmp.getResource(), Kind.BASE);
+
+			ILocalResource tmp = getLocalResource();
+			if (savedState == null
+					|| !IStateFilter.SF_INTERNAL_INVALID.accept(tmp) && savedState.getRevision() != tmp.getRevision()) {
+				savedState = tmp;
+				final GetLocalFileContentOperation contentOp = new GetLocalFileContentOperation(tmp.getResource(),
+						Kind.BASE);
 				CompositeOperation op = new CompositeOperation("Operation_PrepareQuickDiff", SVNUIMessages.class); //$NON-NLS-1$
 				op.add(contentOp);
 				op.add(new InitializeDocumentOperation(encoding) {
+					@Override
 					public InputStream getInputStream() {
 						return contentOp.getContent();
 					}
-				}, new IActionOperation[] {contentOp});
+				}, new IActionOperation[] { contentOp });
 				ProgressMonitorUtility.doTaskExternalDefault(op, monitor);
 			}
-		}
-		else if (!monitor.isCanceled()) {
-			this.reference.set(""); //$NON-NLS-1$
+		} else if (!monitor.isCanceled()) {
+			reference.set(""); //$NON-NLS-1$
 		}
 	}
-	
+
 	protected abstract class InitializeDocumentOperation extends AbstractActionOperation {
 		public String encoding;
-		
+
 		public InitializeDocumentOperation(String encoding) {
 			super("Operation_InitializeDocument", SVNUIMessages.class); //$NON-NLS-1$
 			this.encoding = encoding;
 		}
-		
+
 		public abstract InputStream getInputStream() throws Exception;
-		
+
+		@Override
 		protected void runImpl(IProgressMonitor monitor) throws Exception {
-			InputStream content = this.getInputStream();
+			InputStream content = getInputStream();
 			Reader in = null;
 			CharArrayWriter store = null;
 			try {
-				in = new BufferedReader(new InputStreamReader(content, this.encoding));
+				in = new BufferedReader(new InputStreamReader(content, encoding));
 				store = new CharArrayWriter();
-				char []buf = new char[2048];
+				char[] buf = new char[2048];
 				int len;
 				while ((len = in.read(buf)) > 0 && !monitor.isCanceled()) {
 					store.write(buf, 0, len);
 				}
 				if (!monitor.isCanceled()) {
-					SVNTeamQuickDiffProvider.this.reference.set(store.toString());
+					reference.set(store.toString());
 				}
-			}
-			finally {
+			} finally {
 				if (store != null) {
-					try {store.close();} catch (Exception ex) {}
+					try {
+						store.close();
+					} catch (Exception ex) {
+					}
 				}
 				if (in != null) {
-					try {in.close();} catch (Exception ex) {}
+					try {
+						in.close();
+					} catch (Exception ex) {
+					}
 				}
-				try {content.close();} catch (Exception ex) {}
+				try {
+					content.close();
+				} catch (Exception ex) {
+				}
 			}
 		}
 	}
-	
+
 }

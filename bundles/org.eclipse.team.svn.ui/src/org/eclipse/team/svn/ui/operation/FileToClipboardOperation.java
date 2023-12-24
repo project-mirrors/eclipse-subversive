@@ -34,55 +34,59 @@ import org.eclipse.team.svn.ui.utility.UIMonitorUtility;
  */
 public class FileToClipboardOperation extends AbstractActionOperation {
 	protected String fileName;
+
 	protected boolean deleteFile;
+
 	protected String charset;
-	
+
 	public FileToClipboardOperation(String fileName) {
 		this(fileName, "UTF-8");
 	}
-	
+
 	public FileToClipboardOperation(String fileName, String charset) {
 		this(fileName, charset, true);
 	}
-	
+
 	public FileToClipboardOperation(String fileName, String charset, boolean deleteFile) {
 		super("Operation_FileToClipboard", SVNUIMessages.class); //$NON-NLS-1$
 		this.fileName = fileName;
 		this.deleteFile = deleteFile;
 		this.charset = charset;
 	}
-	
+
+	@Override
 	public int getOperationWeight() {
 		return 0;
 	}
 
+	@Override
 	protected void runImpl(final IProgressMonitor monitor) throws Exception {
 		ByteArrayOutputStream data = new ByteArrayOutputStream();
-		File tempFile = new File(this.fileName);
+		File tempFile = new File(fileName);
 		FileInputStream stream = new FileInputStream(tempFile);
 		try {
-			byte []buf = new byte[2048];
+			byte[] buf = new byte[2048];
 			int len = 0;
 			while ((len = stream.read(buf)) > 0) {
 				data.write(buf, 0, len);
 			}
+		} finally {
+			try {
+				stream.close();
+			} catch (Exception ex) {
+			}
 		}
-		finally {
-			try {stream.close();} catch (Exception ex) {}
-		}
-		if (this.deleteFile) {
+		if (deleteFile) {
 			tempFile.delete();
 		}
-		final String text = data.toString(this.charset);
+		final String text = data.toString(charset);
 		if (data.size() > 0) {
 			final Display display = UIMonitorUtility.getDisplay();
-			display.syncExec(new Runnable() {
-				public void run() {
-					TextTransfer plainTextTransfer = TextTransfer.getInstance();
-					Clipboard clipboard = new Clipboard(display);
-					clipboard.setContents(new String[] {text}, new Transfer[] {plainTextTransfer});
-					clipboard.dispose();
-				}
+			display.syncExec(() -> {
+				TextTransfer plainTextTransfer = TextTransfer.getInstance();
+				Clipboard clipboard = new Clipboard(display);
+				clipboard.setContents(new String[] { text }, new Transfer[] { plainTextTransfer });
+				clipboard.dispose();
 			});
 		}
 	}

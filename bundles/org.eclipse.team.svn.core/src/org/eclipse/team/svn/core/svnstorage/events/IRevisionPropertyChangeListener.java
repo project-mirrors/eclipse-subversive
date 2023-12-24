@@ -20,5 +20,5 @@ package org.eclipse.team.svn.core.svnstorage.events;
  * @author Alexei Goncharov
  */
 public interface IRevisionPropertyChangeListener {
-	public void revisionPropertyChanged(RevisonPropertyChangeEvent event);
+	void revisionPropertyChanged(RevisonPropertyChangeEvent event);
 }

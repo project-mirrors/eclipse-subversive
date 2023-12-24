@@ -19,7 +19,7 @@ import org.eclipse.team.svn.core.resource.IRepositoryResource;
 import org.eclipse.ui.PlatformUI;
 
 /**
- * Repository file node representation 
+ * Repository file node representation
  * 
  * @author Alexander Gurov
  */
@@ -28,12 +28,14 @@ public class RepositoryFile extends RepositoryResource {
 		super(parent, resource);
 	}
 
-	public Object []getChildren(Object o) {
+	@Override
+	public Object[] getChildren(Object o) {
 		return null;
 	}
 
+	@Override
 	protected ImageDescriptor getImageDescriptorImpl() {
-		return PlatformUI.getWorkbench().getEditorRegistry().getImageDescriptor(this.resource.getName());
+		return PlatformUI.getWorkbench().getEditorRegistry().getImageDescriptor(resource.getName());
 	}
 
 }

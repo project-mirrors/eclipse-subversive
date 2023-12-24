@@ -34,28 +34,32 @@ import org.eclipse.team.svn.ui.preferences.SVNTeamPreferences;
 public class ExportAction extends AbstractWorkingCopyAction {
 
 	public ExportAction() {
-		super();
 	}
-	
+
+	@Override
 	public void runImpl(IAction action) {
-		IResource []resources = this.getSelectedResources(IStateFilter.SF_EXCLUDE_DELETED);
-		
-		DirectoryDialog fileDialog = new DirectoryDialog(this.getShell());
+		IResource[] resources = this.getSelectedResources(IStateFilter.SF_EXCLUDE_DELETED);
+
+		DirectoryDialog fileDialog = new DirectoryDialog(getShell());
 		fileDialog.setText(SVNUIMessages.ExportAction_Select_Title);
 		fileDialog.setMessage(SVNUIMessages.ExportAction_Select_Description);
 		String path = fileDialog.open();
 		if (path != null) {
-			boolean ignoreExternals = SVNTeamPreferences.getBehaviourBoolean(SVNTeamUIPlugin.instance().getPreferenceStore(), SVNTeamPreferences.BEHAVIOUR_IGNORE_EXTERNALS_NAME);
-			this.runScheduled(new ExportOperation(resources, path, SVNRevision.WORKING, ignoreExternals));
+			boolean ignoreExternals = SVNTeamPreferences.getBehaviourBoolean(
+					SVNTeamUIPlugin.instance().getPreferenceStore(),
+					SVNTeamPreferences.BEHAVIOUR_IGNORE_EXTERNALS_NAME);
+			runScheduled(new ExportOperation(resources, path, SVNRevision.WORKING, ignoreExternals));
 		}
 	}
-	
+
+	@Override
 	public boolean isEnabled() {
-		return this.checkForResourcesPresence(IStateFilter.SF_EXCLUDE_DELETED);
+		return checkForResourcesPresence(IStateFilter.SF_EXCLUDE_DELETED);
 	}
-	
+
+	@Override
 	protected boolean needsToSaveDirtyEditors() {
 		return true;
 	}
-	
+
 }

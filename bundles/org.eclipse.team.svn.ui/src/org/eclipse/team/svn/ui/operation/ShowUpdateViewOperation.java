@@ -41,20 +41,21 @@ import org.eclipse.ui.IWorkbenchPart;
  * @author Alexander Gurov
  */
 public class ShowUpdateViewOperation extends AbstractWorkingCopyOperation {
-	
+
 	//note that it can be null
 	protected IWorkbenchPart part;
-	
+
 	protected ISynchronizeScope scope;
+
 	protected ResourceMapping[] resourcesMapping;
-	
+
 	public ShowUpdateViewOperation(ISynchronizeScope scope, IWorkbenchPart part) {
-		super("Operation_ShowUpdateView", SVNUIMessages.class, (IResource [])null); //$NON-NLS-1$
+		super("Operation_ShowUpdateView", SVNUIMessages.class, (IResource[]) null); //$NON-NLS-1$
 		this.part = part;
 		this.scope = scope;
 	}
 
-	public ShowUpdateViewOperation(IResource []resources, IWorkbenchPart part) {
+	public ShowUpdateViewOperation(IResource[] resources, IWorkbenchPart part) {
 		super("Operation_ShowUpdateView", SVNUIMessages.class, resources); //$NON-NLS-1$
 		this.part = part;
 	}
@@ -63,54 +64,60 @@ public class ShowUpdateViewOperation extends AbstractWorkingCopyOperation {
 		super("Operation_ShowUpdateView", SVNUIMessages.class, provider); //$NON-NLS-1$
 		this.part = part;
 	}
-	
+
 	public ShowUpdateViewOperation(ResourceMapping[] resourcesMapping, IWorkbenchPart part) {
-		super("Operation_ShowUpdateView", SVNUIMessages.class, (IResource [])null); //$NON-NLS-1$
+		super("Operation_ShowUpdateView", SVNUIMessages.class, (IResource[]) null); //$NON-NLS-1$
 		this.part = part;
 		this.resourcesMapping = resourcesMapping;
 	}
 
+	@Override
 	public ISchedulingRule getSchedulingRule() {
 		return null;
 	}
-	
+
+	@Override
 	public int getOperationWeight() {
 		return 0;
 	}
-	
+
+	@Override
 	protected void runImpl(IProgressMonitor monitor) throws Exception {
 		if (ModelHelper.isShowModelSync()) {
-						
-			if (this.resourcesMapping.length == 0) {
-				return;					
+
+			if (resourcesMapping.length == 0) {
+				return;
 			}
-						
-			String messsage = SVNUIMessages.ConsultChangeSets_message1;			
+
+			String messsage = SVNUIMessages.ConsultChangeSets_message1;
 			boolean consultChangeSets = CommitActionHelper.isIncludeChangeSets(messsage);
-			SubscriberScopeManager manager = UpdateSubscriberContext.createWorkspaceScopeManager(this.resourcesMapping, true, consultChangeSets);										
-			UpdateSubscriberContext context = UpdateSubscriberContext.createContext(manager, ISynchronizationContext.THREE_WAY);
+			SubscriberScopeManager manager = UpdateSubscriberContext.createWorkspaceScopeManager(resourcesMapping, true,
+					consultChangeSets);
+			UpdateSubscriberContext context = UpdateSubscriberContext.createContext(manager,
+					ISynchronizationContext.THREE_WAY);
 			UpdateModelParticipant participant = new UpdateModelParticipant(context);
-			TeamUI.getSynchronizeManager().addSynchronizeParticipants(new ISynchronizeParticipant[] {participant});
-			participant.run(this.part);
+			TeamUI.getSynchronizeManager().addSynchronizeParticipants(new ISynchronizeParticipant[] { participant });
+			participant.run(part);
 		} else {
-			IResource []resources;
-			if (this.scope == null) {
-				resources = this.operableData();
-				this.scope = new ResourceScope(resources);
+			IResource[] resources;
+			if (scope == null) {
+				resources = operableData();
+				scope = new ResourceScope(resources);
+			} else {
+				resources = scope.getRoots();
 			}
-			else {
-				resources = this.scope.getRoots();
-			}
-			
+
 			UpdateParticipant participant = null;
 			if (resources != null) {
-				participant = (UpdateParticipant)SubscriberParticipant.getMatchingParticipant(UpdateParticipant.PARTICIPANT_ID, resources);
+				participant = (UpdateParticipant) SubscriberParticipant
+						.getMatchingParticipant(UpdateParticipant.PARTICIPANT_ID, resources);
 			}
 			if (participant == null) {
-				participant = new UpdateParticipant(this.scope);
-				TeamUI.getSynchronizeManager().addSynchronizeParticipants(new ISynchronizeParticipant[] {participant});
+				participant = new UpdateParticipant(scope);
+				TeamUI.getSynchronizeManager()
+						.addSynchronizeParticipants(new ISynchronizeParticipant[] { participant });
 			}
-			participant.run(this.part);
+			participant.run(part);
 		}
 	}
 

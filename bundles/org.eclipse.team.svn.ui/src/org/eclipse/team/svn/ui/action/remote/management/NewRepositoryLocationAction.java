@@ -29,19 +29,21 @@ import org.eclipse.team.svn.ui.wizard.NewRepositoryLocationWizard;
 public class NewRepositoryLocationAction extends TeamAction {
 
 	public NewRepositoryLocationAction() {
-		super();
 	}
-	
+
+	@Override
 	public void run(IAction action) {
 		NewRepositoryLocationWizard wizard = new NewRepositoryLocationWizard();
-		WizardDialog dialog = new WizardDialog(this.getShell(), wizard);
+		WizardDialog dialog = new WizardDialog(getShell(), wizard);
 		dialog.open();
 	}
 
+	@Override
 	public boolean isEnabled() {
 		return true;
 	}
 
+	@Override
 	protected void execute(IAction action) throws InvocationTargetException, InterruptedException {
 		// compatibility with 3.3
 	}

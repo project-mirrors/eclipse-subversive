@@ -23,5 +23,5 @@ import org.eclipse.team.svn.core.connector.SVNRevision;
  * @author Alexander Gurov
  */
 public interface ICommentProvider {
-	public String getComment(IResource resource, SVNRevision rev, SVNRevision peg);
+	String getComment(IResource resource, SVNRevision rev, SVNRevision peg);
 }

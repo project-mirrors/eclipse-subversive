@@ -24,24 +24,35 @@ import org.eclipse.core.runtime.IPath;
  * @author Alexander Gurov
  */
 public interface ISVNStorage extends IRepositoryLocationFactory {
-	public static final int IGNORE_NAME = 0;
-	public static final int IGNORE_EXTENSION = 1;
-	public static final int IGNORE_PATTERN = 2;
-	
-	public static final String PREF_STATE_INFO_LOCATION = "stateInfoLocation";
-	public static final String PREF_NO_STORED_AUTHENTICATION = "noStoredAuthentication";
-	
-	public void initialize(IPath stateInfoLocation) throws Exception;
-	public void initialize(Map<String, Object> preferences) throws Exception;
-	public void dispose();
-	
-	public IRepositoryLocation []getRepositoryLocations();
-	public IRepositoryLocation getRepositoryLocation(String id);
-	public void addRepositoryLocation(IRepositoryLocation location);
-	public void removeRepositoryLocation(IRepositoryLocation location);
-	public void reconfigureLocations();
-	public void saveConfiguration() throws Exception;
+	int IGNORE_NAME = 0;
 
-	public byte []repositoryResourceAsBytes(IRepositoryResource resource);
-	public IRepositoryResource repositoryResourceFromBytes(byte []bytes);
+	int IGNORE_EXTENSION = 1;
+
+	int IGNORE_PATTERN = 2;
+
+	String PREF_STATE_INFO_LOCATION = "stateInfoLocation";
+
+	String PREF_NO_STORED_AUTHENTICATION = "noStoredAuthentication";
+
+	void initialize(IPath stateInfoLocation) throws Exception;
+
+	void initialize(Map<String, Object> preferences) throws Exception;
+
+	void dispose();
+
+	IRepositoryLocation[] getRepositoryLocations();
+
+	IRepositoryLocation getRepositoryLocation(String id);
+
+	void addRepositoryLocation(IRepositoryLocation location);
+
+	void removeRepositoryLocation(IRepositoryLocation location);
+
+	void reconfigureLocations();
+
+	void saveConfiguration() throws Exception;
+
+	byte[] repositoryResourceAsBytes(IRepositoryResource resource);
+
+	IRepositoryResource repositoryResourceFromBytes(byte[] bytes);
 }

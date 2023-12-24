@@ -46,33 +46,38 @@ public class MarkAsMergedAction extends AbstractSynchronizeModelAction {
 		super(text, configuration);
 	}
 
+	@Override
 	protected FastSyncInfoFilter getSyncInfoFilter() {
-		return new FastSyncInfoFilter.SyncInfoDirectionFilter(new int[] {SyncInfo.CONFLICTING, SyncInfo.INCOMING}) {
-            public boolean select(SyncInfo info) {
-                if (super.select(info)) {
-                    UpdateSyncInfo sync = (UpdateSyncInfo)info;
-                    boolean localIsFile = sync.getLocalResource().getResource() instanceof IFile;
-                    boolean remoteIsFile = sync.getRemoteChangeResource() instanceof ILocalFile;
-                    return !IStateFilter.SF_OBSTRUCTED.accept(sync.getLocalResource()) && localIsFile == remoteIsFile;
-                }
-                return false;
-            }
-        };
+		return new FastSyncInfoFilter.SyncInfoDirectionFilter(new int[] { SyncInfo.CONFLICTING, SyncInfo.INCOMING }) {
+			@Override
+			public boolean select(SyncInfo info) {
+				if (super.select(info)) {
+					UpdateSyncInfo sync = (UpdateSyncInfo) info;
+					boolean localIsFile = sync.getLocalResource().getResource() instanceof IFile;
+					boolean remoteIsFile = sync.getRemoteChangeResource() instanceof ILocalFile;
+					return !IStateFilter.SF_OBSTRUCTED.accept(sync.getLocalResource()) && localIsFile == remoteIsFile;
+				}
+				return false;
+			}
+		};
 	}
 
+	@Override
 	protected IActionOperation getOperation(ISynchronizePageConfiguration configuration, IDiffElement[] elements) {
-		IResource []resources = UnacceptableOperationNotificator.shrinkResourcesWithNotOnRespositoryParents(configuration.getSite().getShell(), this.syncInfoSelector.getSelectedResources());
+		IResource[] resources = UnacceptableOperationNotificator.shrinkResourcesWithNotOnRespositoryParents(
+				configuration.getSite().getShell(), syncInfoSelector.getSelectedResources());
 		if (resources == null || resources.length == 0) {
 			return null;
 		}
-		boolean ignoreExternals = SVNTeamPreferences.getBehaviourBoolean(SVNTeamUIPlugin.instance().getPreferenceStore(), SVNTeamPreferences.BEHAVIOUR_IGNORE_EXTERNALS_NAME);
+		boolean ignoreExternals = SVNTeamPreferences.getBehaviourBoolean(
+				SVNTeamUIPlugin.instance().getPreferenceStore(), SVNTeamPreferences.BEHAVIOUR_IGNORE_EXTERNALS_NAME);
 		MarkAsMergedOperation mainOp = new MarkAsMergedOperation(resources, false, null, ignoreExternals);
 
 		CompositeOperation op = new CompositeOperation(mainOp.getId(), mainOp.getMessagesClass());
 
 		op.add(mainOp);
 		op.add(new ShowPostCommitErrorsOperation(mainOp));
-		op.add(new ClearUpdateStatusesOperation(resources), new IActionOperation[]{mainOp});
+		op.add(new ClearUpdateStatusesOperation(resources), new IActionOperation[] { mainOp });
 		op.add(new RefreshResourcesOperation(FileUtility.getParents(resources, false)));
 
 		return op;

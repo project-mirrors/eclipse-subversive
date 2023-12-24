@@ -23,7 +23,6 @@ public class HiddenException extends UnreportableException {
 	private static final long serialVersionUID = -7093439079259787375L;
 
 	public HiddenException() {
-		super();
 	}
 
 	public HiddenException(String message) {

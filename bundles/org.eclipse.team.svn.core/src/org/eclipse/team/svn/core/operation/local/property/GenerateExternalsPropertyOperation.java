@@ -33,83 +33,94 @@ import org.eclipse.team.svn.core.utility.SVNUtility;
 public class GenerateExternalsPropertyOperation extends AbstractActionOperation implements IResourcePropertyProvider {
 
 	protected IResource resource;
+
 	protected String url;
+
 	protected SVNRevision revision;
+
 	protected String localPath;
+
 	protected boolean isPriorToSVN15Format;
-	
+
 	protected SVNProperty property;
-	
-	public GenerateExternalsPropertyOperation(IResource resource, String url, SVNRevision revision, String localPath, boolean isPriorToSVN15Format) {		
+
+	public GenerateExternalsPropertyOperation(IResource resource, String url, SVNRevision revision, String localPath,
+			boolean isPriorToSVN15Format) {
 		super("Operation_GenerateExternalsProperty", SVNMessages.class); //$NON-NLS-1$
 		this.resource = resource;
 		this.url = url;
 		this.revision = revision;
-		this.localPath= localPath;
+		this.localPath = localPath;
 		this.isPriorToSVN15Format = isPriorToSVN15Format;
 	}
-	
+
+	@Override
 	protected void runImpl(IProgressMonitor monitor) throws Exception {
-		this.preprocessInputParameters();
-		
-		StringBuffer value = new StringBuffer();
-		if (this.isPriorToSVN15Format) {
-			//local -r 10 url								
-			value.append(this.localPath);
-			if (this.getStrRevision() != null) {
-				value.append(" -r ").append(this.getStrRevision()); //$NON-NLS-1$
+		preprocessInputParameters();
+
+		StringBuilder value = new StringBuilder();
+		if (isPriorToSVN15Format) {
+			//local -r 10 url
+			value.append(localPath);
+			if (getStrRevision() != null) {
+				value.append(" -r ").append(getStrRevision()); //$NON-NLS-1$
 			}
-			value.append(" ").append(this.url); //$NON-NLS-1$
+			value.append(" ").append(url); //$NON-NLS-1$
 		} else {
 			//-r 10 url local
-			if (this.getStrRevision() != null) {
-				value.append("-r ").append(this.getStrRevision()).append(" "); //$NON-NLS-1$ //$NON-NLS-2$
+			if (getStrRevision() != null) {
+				value.append("-r ").append(getStrRevision()).append(" "); //$NON-NLS-1$ //$NON-NLS-2$
 			}
-			value.append(this.url);
-			value.append(" ").append(this.localPath); //$NON-NLS-1$
-		}			
-		this.property = new SVNProperty(SVNProperty.BuiltIn.EXTERNALS, value.toString());
+			value.append(url);
+			value.append(" ").append(localPath); //$NON-NLS-1$
+		}
+		property = new SVNProperty(SVNProperty.BuiltIn.EXTERNALS, value.toString());
 	}
-	
-	protected void preprocessInputParameters() {		
-		this.url = SVNUtility.encodeURL(this.url);
-		
-		if (this.localPath.contains(" ")) { //$NON-NLS-1$
-			this.localPath = "\"" + this.localPath + "\""; //$NON-NLS-1$ //$NON-NLS-2$
-		}		
+
+	protected void preprocessInputParameters() {
+		url = SVNUtility.encodeURL(url);
+
+		if (localPath.contains(" ")) { //$NON-NLS-1$
+			localPath = "\"" + localPath + "\""; //$NON-NLS-1$ //$NON-NLS-2$
+		}
 	}
-	
+
 	protected String getStrRevision() {
 //		if (this.revision.getKind() == SVNRevision.Kind.DATE) {
-//			//Example: 2006-02-17 15:30 +0230				
+//			//Example: 2006-02-17 15:30 +0230
 //			SimpleDateFormat formatter = new SimpleDateFormat("{yyyy-dd-MM}");
-//			return formatter.format(((SVNRevision.Date) this.revision).getDate());				
-//		} else 
-		if (this.revision.getKind() == SVNRevision.Kind.NUMBER) {
-			long number = ((SVNRevision.Number) this.revision).getNumber();
+//			return formatter.format(((SVNRevision.Date) this.revision).getDate());
+//		} else
+		if (revision.getKind() == SVNRevision.Kind.NUMBER) {
+			long number = ((SVNRevision.Number) revision).getNumber();
 			if (number != -1) {
 				return String.valueOf(number);
-			}				
+			}
 		}
 		return null;
 	}
 
+	@Override
 	public SVNProperty[] getProperties() {
-		return new SVNProperty[]{this.property};
-	}		
-	
+		return new SVNProperty[] { property };
+	}
+
+	@Override
 	public IResource getLocal() {
-		return this.resource;
+		return resource;
 	}
 
+	@Override
 	public IRepositoryResource getRemote() {
-		return SVNRemoteStorage.instance().asRepositoryResource(this.resource);
+		return SVNRemoteStorage.instance().asRepositoryResource(resource);
 	}
 
+	@Override
 	public boolean isEditAllowed() {
 		return false;
 	}
 
-	public void refresh() {						
-	}		
+	@Override
+	public void refresh() {
+	}
 }

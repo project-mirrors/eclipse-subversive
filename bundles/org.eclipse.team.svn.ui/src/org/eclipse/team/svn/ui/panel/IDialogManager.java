@@ -22,16 +22,20 @@ import org.eclipse.swt.widgets.Shell;
  * @author Alexander Gurov
  */
 public interface IDialogManager {
-    public static final int LEVEL_OK = 0;
-    public static final int LEVEL_WARNING = 1;
-    public static final int LEVEL_ERROR = 2;
-    
-    public Shell getShell();
-    
-    public void setButtonEnabled(int idx, boolean enabled);
-    public boolean isButtonEnabled(int idx);
-    public void setMessage(int level, String message);
-    
-    public void forceClose(int buttonId);
-    
+	int LEVEL_OK = 0;
+
+	int LEVEL_WARNING = 1;
+
+	int LEVEL_ERROR = 2;
+
+	Shell getShell();
+
+	void setButtonEnabled(int idx, boolean enabled);
+
+	boolean isButtonEnabled(int idx);
+
+	void setMessage(int level, String message);
+
+	void forceClose(int buttonId);
+
 }

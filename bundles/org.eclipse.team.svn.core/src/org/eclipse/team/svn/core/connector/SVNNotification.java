@@ -14,13 +14,12 @@
 
 package org.eclipse.team.svn.core.connector;
 
-
 /**
  * Notification information container
  * 
- * The JavaHL API's is the only way to interact between SVN and Java-based tools. At the same time JavaHL connector library
- * is not EPL compatible and we won't to pin plug-in with concrete connector implementation. So, the only way to do this is
- * providing our own connector interface which will be covered by concrete connector implementation.
+ * The JavaHL API's is the only way to interact between SVN and Java-based tools. At the same time JavaHL connector library is not EPL
+ * compatible and we won't to pin plug-in with concrete connector implementation. So, the only way to do this is providing our own connector
+ * interface which will be covered by concrete connector implementation.
  * 
  * @author Alexander Gurov
  */
@@ -49,13 +48,13 @@ public class SVNNotification {
 		 * The working copy entry was unlocked
 		 */
 		UNLOCKED(4);
-		
+
 		public final int id;
 
 		public static boolean isStatusKnown(int status) {
 			return status >= NodeLock.INAPPLICABLE.id /*0*/ && status <= NodeLock.UNLOCKED.id /*4*/;
 		}
-		
+
 		public static NodeLock fromId(int id) {
 			for (NodeLock kind : values()) {
 				if (kind.id == id) {
@@ -64,8 +63,8 @@ public class SVNNotification {
 			}
 			throw new IllegalArgumentException("Invalid lock kind: " + id); //$NON-NLS-1$
 		}
-		
-		private NodeLock(int id) {
+
+		NodeLock(int id) {
 			this.id = id;
 		}
 	}
@@ -106,23 +105,24 @@ public class SVNNotification {
 		 * Modified state got conflicting mods.
 		 */
 		CONFLICTED(7);
-		
+
 		public final int id;
 
 		public static boolean isStatusKnown(int status) {
 			return status >= NodeStatus.INAPPLICABLE.id /*0*/ && status <= NodeStatus.CONFLICTED.id /*7*/;
 		}
-		
+
 		/**
 		 * The textual representation for the status types
 		 */
-		public static final String[] statusNames = { "inapplicable", "unknown", "unchanged", "missing", "obstructed", "changed", "merged", "conflicted", };
+		public static final String[] statusNames = { "inapplicable", "unknown", "unchanged", "missing", "obstructed",
+				"changed", "merged", "conflicted", };
 
 		/**
 		 * The short textual representation for the status types
 		 */
 		public static final String[] shortStatusNames = { " ", " ", " ", "?", "O", "U", "G", "C", };
-		
+
 		public static NodeStatus fromId(int id) {
 			for (NodeStatus kind : values()) {
 				if (kind.id == id) {
@@ -131,8 +131,8 @@ public class SVNNotification {
 			}
 			throw new IllegalArgumentException("Invalid node status kind: " + id); //$NON-NLS-1$
 		}
-		
-		private NodeStatus(int id) {
+
+		NodeStatus(int id) {
 			this.id = id;
 		}
 	}
@@ -271,45 +271,37 @@ public class SVNNotification {
 		 */
 		UPDATE_REPLACED(30),
 		/**
-	     * @since 1.6
-	     * Property added.
-	     */
-	    PROPERTY_ADDED(31),
-	    /**
-	     * @since 1.6
-	     * Property modified.
-	     */
-	    PROPERTY_MODIFIED(32),
-	    /**
-	     * @since 1.6
-	     * Property deleted.
-	     */
-	    PROPERTY_DELETED(33),
-	    /**
-	     * @since 1.6
-	     * Property delete nonexistent.
-	     */
-	    PROPERTY_DELETED_NONEXISTENT(34),
-	    /**
-	     * @since 1.6
-	     * Revision property set.
-	     */
-	    REVPROP_SET(35),
-	    /**
-	     * @since 1.6
-	     * Revision property deleted.
-	     */
-	    REVPROP_DELETE(36),
-	    /**
-	     * @since 1.6
-	     * The last notification in a merge
-	     */
-	    MERGE_COMPLETED(37),
-	    /**
-	     * @since 1.6
-	     * The path is a tree-conflict victim of the intended action
-	     */
-	    TREE_CONFLICT(38),
+		 * @since 1.6 Property added.
+		 */
+		PROPERTY_ADDED(31),
+		/**
+		 * @since 1.6 Property modified.
+		 */
+		PROPERTY_MODIFIED(32),
+		/**
+		 * @since 1.6 Property deleted.
+		 */
+		PROPERTY_DELETED(33),
+		/**
+		 * @since 1.6 Property delete nonexistent.
+		 */
+		PROPERTY_DELETED_NONEXISTENT(34),
+		/**
+		 * @since 1.6 Revision property set.
+		 */
+		REVPROP_SET(35),
+		/**
+		 * @since 1.6 Revision property deleted.
+		 */
+		REVPROP_DELETE(36),
+		/**
+		 * @since 1.6 The last notification in a merge
+		 */
+		MERGE_COMPLETED(37),
+		/**
+		 * @since 1.6 The path is a tree-conflict victim of the intended action
+		 */
+		TREE_CONFLICT(38),
 		/**
 		 * @since 1.7 A path has moved to another changelist.
 		 */
@@ -458,25 +450,35 @@ public class SVNNotification {
 		 * @since 1.8 A move in the working copy has been broken.
 		 */
 		MOVE_BROKEN(75);
-		
 
-        /** Running cleanup on an external module.
-         * @since New in 1.9. */
+		/**
+		 * Running cleanup on an external module.
+		 * 
+		 * @since New in 1.9.
+		 */
 //        cleanup_external ("cleanup external"),
 
-        /** The operation failed because the operation (E.g. commit)
-         * is only valid if the operation includes this path.
-         * @since New in 1.9. */
+		/**
+		 * The operation failed because the operation (E.g. commit) is only valid if the operation includes this path.
+		 * 
+		 * @since New in 1.9.
+		 */
 //        failed_requires_target ("failed requires target"),
 
-        /** Running info on an external module.
-         * @since New in 1.9. */
+		/**
+		 * Running info on an external module.
+		 * 
+		 * @since New in 1.9.
+		 */
 //        info_external ("info external"),
 
-        /** Finalizing commit.
-         * @since New in 1.9. */
+		/**
+		 * Finalizing commit.
+		 * 
+		 * @since New in 1.9.
+		 */
 //        commit_finalizing ("commit finalizing");
-		
+
 		public final int id;
 
 		/*
@@ -485,21 +487,27 @@ public class SVNNotification {
 		public static boolean isActionKnown(int action) {
 			return action >= PerformedAction.ADD.id /*0*/ && action <= PerformedAction.MOVE_BROKEN.id /*75*/;
 		}
-		
+
 		/**
 		 * Textual representation of the action types
 		 */
-		public static final String[] actionNames = { "add", "copy", "delete", "restore", "revert", "failed revert", "resolved", "skip", "update delete", "update add",
-				"update modified", "update completed", "update external", "status completed", "status external", "sending modified", "sending added", "sending deleted",
-				"sending replaced", "transfer", "blame revision processed", "locked", "unlocked", "locking failed", "unlocking failed", "path exists", "changelist set",
-				"changelist cleared", "merge begin", "foreign merge begin", "replaced",
-				"property added", "property modified", "property deleted", "nonexistent property deleted", "revprop set", "revprop deleted", "merge completed", "tree conflict",
-				"changelist moved", "failed external", "update started", "update skip obstruction", "update skip working only", "update skip access denied", "update external removed",
-				"update shadowed add", "update shadowed update", "update shadowed delete", "merge record info", "upgraded path", "merge record info begin", "Merge elide info", 
-				"patch", "patch applied hunk", "patch rejected hunk", "patch hunk already applied", "commit copied", "commit copied replaced", "url redirect", "path nonexistent",
-				"exclude", "failed conflict", "failed missing", "failed out of date", "failed no parent", "failed by lock", "failed forbidden by server",
-				"broken lock removed", "failed by obstruction", "conflict resolver starting", "conflict resolver done", "conflict resolver done", "foreign copy begin", "move broken"};
-		
+		public static final String[] actionNames = { "add", "copy", "delete", "restore", "revert", "failed revert",
+				"resolved", "skip", "update delete", "update add", "update modified", "update completed",
+				"update external", "status completed", "status external", "sending modified", "sending added",
+				"sending deleted", "sending replaced", "transfer", "blame revision processed", "locked", "unlocked",
+				"locking failed", "unlocking failed", "path exists", "changelist set", "changelist cleared",
+				"merge begin", "foreign merge begin", "replaced", "property added", "property modified",
+				"property deleted", "nonexistent property deleted", "revprop set", "revprop deleted", "merge completed",
+				"tree conflict", "changelist moved", "failed external", "update started", "update skip obstruction",
+				"update skip working only", "update skip access denied", "update external removed",
+				"update shadowed add", "update shadowed update", "update shadowed delete", "merge record info",
+				"upgraded path", "merge record info begin", "Merge elide info", "patch", "patch applied hunk",
+				"patch rejected hunk", "patch hunk already applied", "commit copied", "commit copied replaced",
+				"url redirect", "path nonexistent", "exclude", "failed conflict", "failed missing",
+				"failed out of date", "failed no parent", "failed by lock", "failed forbidden by server",
+				"broken lock removed", "failed by obstruction", "conflict resolver starting", "conflict resolver done",
+				"conflict resolver done", "foreign copy begin", "move broken" };
+
 		public static PerformedAction fromId(int id) {
 			for (PerformedAction kind : values()) {
 				if (kind.id == id) {
@@ -508,8 +516,8 @@ public class SVNNotification {
 			}
 			throw new IllegalArgumentException("Invalid action kind: " + id); //$NON-NLS-1$
 		}
-		
-		private PerformedAction(int id) {
+
+		PerformedAction(int id) {
 			this.id = id;
 		}
 	}
@@ -544,11 +552,12 @@ public class SVNNotification {
 	 */
 	public final String errMsg;
 
-    /**
-     * A detailed stack of error messages for the item
-     * @see ClientException
-     * @since 1.9
-     */
+	/**
+	 * A detailed stack of error messages for the item
+	 * 
+	 * @see ClientException
+	 * @since 1.9
+	 */
 //	public final SVNConnectorException.ErrorMessage []errorMessageStack;
 
 	/**
@@ -570,28 +579,27 @@ public class SVNNotification {
 	 * the state of the lock of the item (see {@link NodeLock}).
 	 */
 	public final NodeLock lockState;
-	
-	
-    /**
-     * The name of the changelist.
-     */
+
+	/**
+	 * The name of the changelist.
+	 */
 //    private String changelistName;
 
-    /**
-     * The range of the merge just beginning to occur.
-     */
+	/**
+	 * The range of the merge just beginning to occur.
+	 */
 //    private RevisionRange mergeRange;
 
-    /**
-     * Similar to {@link #path}, but when not <code>null</code>, the
-     * notification is about a UR>.
-     * @since 1.9
-     */
+	/**
+	 * Similar to {@link #path}, but when not <code>null</code>, the notification is about a UR>.
+	 * 
+	 * @since 1.9
+	 */
 //    private String url;
 
-    /**
-     * A common absolute path prefix that can be subtracted from .path.
-     */
+	/**
+	 * A common absolute path prefix that can be subtracted from .path.
+	 */
 //    private String pathPrefix;
 //
 //    private String propName;
@@ -613,7 +621,8 @@ public class SVNNotification {
 //    int hunkFuzz;
 //
 
-	public SVNNotification(String path, PerformedAction action, SVNEntry.Kind kind, String mimeType, SVNLock lock, String errMsg, NodeStatus contentState, NodeStatus propState, NodeLock lockState, long revision) {
+	public SVNNotification(String path, PerformedAction action, SVNEntry.Kind kind, String mimeType, SVNLock lock,
+			String errMsg, NodeStatus contentState, NodeStatus propState, NodeLock lockState, long revision) {
 		this.path = path;
 		this.action = action;
 		this.kind = kind;

@@ -26,30 +26,30 @@ import org.eclipse.team.svn.core.connector.SVNCommitStatus;
  * @author Alexander Gurov
  */
 public class SVNNullProgressMonitor implements ISVNProgressMonitor {
-	protected ArrayList<SVNCommitStatus> commitStatuses = new ArrayList<SVNCommitStatus>();
-	
+	protected ArrayList<SVNCommitStatus> commitStatuses = new ArrayList<>();
+
 	public Collection<SVNCommitStatus> getCommitStatuses() {
-		return this.commitStatuses;
+		return commitStatuses;
 	}
 
 	public Collection<SVNCommitStatus> getPostCommitErrors() {
-		ArrayList<SVNCommitStatus> retVal = new ArrayList<SVNCommitStatus>();
-		for (SVNCommitStatus status : this.commitStatuses) {
-			retVal.add(status);
-		}
+		ArrayList<SVNCommitStatus> retVal = new ArrayList<>(commitStatuses);
 		return retVal;
 	}
 
+	@Override
 	public void progress(int current, int total, ItemState state) {
 
 	}
 
+	@Override
 	public boolean isActivityCancelled() {
 		return false;
 	}
 
+	@Override
 	public void commitStatus(SVNCommitStatus status) {
-		this.commitStatuses.add(status);
+		commitStatuses.add(status);
 	}
-	
+
 }

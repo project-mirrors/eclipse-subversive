@@ -25,40 +25,46 @@ import org.eclipse.team.svn.core.resource.IResourceChange;
 /**
  * Merge sync info: ignores outgoing changes
  * 
- * It's used to present sync info for skipped by merge resources, e.g.
- * skipped resources can be considered as tree conflicts (which appeared in SVN 1.6)
- * but in previous SVN versions. As tree conflicts were not correctly treated in previous
- * to SVN 1.6 version, we should somehow show them to user.
+ * It's used to present sync info for skipped by merge resources, e.g. skipped resources can be considered as tree conflicts (which appeared
+ * in SVN 1.6) but in previous SVN versions. As tree conflicts were not correctly treated in previous to SVN 1.6 version, we should somehow
+ * show them to user.
  * 
  * @author Alexander Gurov
  */
 public class MergeSyncInfo extends AbstractSVNSyncInfo implements IMergeSyncInfo {
-	
+
 	protected IResourceChange baseStatus;
-	
-	public MergeSyncInfo(ILocalResource local, IResourceChange base, IResourceChange remote, IResourceVariantComparator comparator) {
-		super(local, base == null ? AbstractSVNSyncInfo.makeBaseVariant(local) : AbstractSVNSyncInfo.makeRemoteVariant(local, base), AbstractSVNSyncInfo.makeRemoteVariant(local, remote), comparator, remote);
-		this.baseStatus = base;
+
+	public MergeSyncInfo(ILocalResource local, IResourceChange base, IResourceChange remote,
+			IResourceVariantComparator comparator) {
+		super(local,
+				base == null
+						? AbstractSVNSyncInfo.makeBaseVariant(local)
+						: AbstractSVNSyncInfo.makeRemoteVariant(local, base),
+				AbstractSVNSyncInfo.makeRemoteVariant(local, remote), comparator, remote);
+		baseStatus = base;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.team.core.synchronize.SyncInfo#calculateKind()
 	 */
 	@Override
 	protected int calculateKind() throws TeamException {
-		String localKind = this.local == null ? IStateFilter.ST_NOTEXISTS : this.local.getStatus();
-		int localMask = this.local == null ? 0 : this.local.getChangeMask();
-		String remoteKind = this.remoteStatus == null ? (this.isNonVersioned(localKind, localMask) ? IStateFilter.ST_NOTEXISTS : IStateFilter.ST_NORMAL) : this.remoteStatus.getStatus();
-		int remoteMask = this.remoteStatus == null ? 0 : this.remoteStatus.getChangeMask();
+		String localKind = local == null ? IStateFilter.ST_NOTEXISTS : local.getStatus();
+		int localMask = local == null ? 0 : local.getChangeMask();
+		String remoteKind = remoteStatus == null
+				? this.isNonVersioned(localKind, localMask) ? IStateFilter.ST_NOTEXISTS : IStateFilter.ST_NORMAL
+				: remoteStatus.getStatus();
+		int remoteMask = remoteStatus == null ? 0 : remoteStatus.getChangeMask();
 
-		if (this.isLinked(localKind, localMask)) {
-        	// Corresponding resource at remote site can produce a change
+		if (isLinked(localKind, localMask)) {
+			// Corresponding resource at remote site can produce a change
 			if (this.isAdded(remoteKind, remoteMask)) {
 				this.localKind = SyncInfo.OUTGOING | SyncInfo.ADDITION;
 				this.remoteKind = SyncInfo.INCOMING | SyncInfo.ADDITION;
 				return SyncInfo.CONFLICTING | SyncInfo.ADDITION;
 			}
-			if (this.isModified(remoteKind, remoteMask) || this.isReplaced(remoteKind, remoteMask)) {
+			if (isModified(remoteKind, remoteMask) || this.isReplaced(remoteKind, remoteMask)) {
 				this.localKind = SyncInfo.OUTGOING | SyncInfo.ADDITION;
 				this.remoteKind = SyncInfo.INCOMING | SyncInfo.CHANGE;
 				return SyncInfo.CONFLICTING | SyncInfo.CHANGE;
@@ -71,17 +77,12 @@ public class MergeSyncInfo extends AbstractSVNSyncInfo implements IMergeSyncInfo
 			return SyncInfo.IN_SYNC;
 		}
 
-	    if (this.isTreeConflicted(localKind, localMask)) {
+		if (isTreeConflicted(localKind, localMask) || isTreeConflicted(remoteKind, remoteMask)) {
 			this.localKind = SyncInfo.OUTGOING | SyncInfo.CHANGE;
 			this.remoteKind = SyncInfo.INCOMING | SyncInfo.CHANGE;
-	    	return SyncInfo.CONFLICTING | SyncInfo.CHANGE;
-	    }
-	    if (this.isTreeConflicted(remoteKind, remoteMask)) {
-			this.localKind = SyncInfo.OUTGOING | SyncInfo.CHANGE;
-			this.remoteKind = SyncInfo.INCOMING | SyncInfo.CHANGE;
-	    	return SyncInfo.CONFLICTING | SyncInfo.CHANGE;
-	    }
-		
+			return SyncInfo.CONFLICTING | SyncInfo.CHANGE;
+		}
+
 		if (this.isAdded(remoteKind, remoteMask)) {
 			this.remoteKind = SyncInfo.INCOMING | SyncInfo.ADDITION;
 			if (this.isNotExists(localKind, localMask) || this.isDeleted(localKind, localMask)) {
@@ -90,12 +91,12 @@ public class MergeSyncInfo extends AbstractSVNSyncInfo implements IMergeSyncInfo
 			this.localKind = SyncInfo.OUTGOING | SyncInfo.ADDITION;
 			return SyncInfo.CONFLICTING | SyncInfo.ADDITION;
 		}
-		if (this.isConflicted(remoteKind, remoteMask)) {
+		if (isConflicted(remoteKind, remoteMask)) {
 			this.localKind = SyncInfo.OUTGOING | SyncInfo.CHANGE;
 			this.remoteKind = SyncInfo.INCOMING | SyncInfo.CHANGE;
 			return SyncInfo.CONFLICTING | SyncInfo.CHANGE;
 		}
-		if (this.isModified(remoteKind, remoteMask)) {
+		if (isModified(remoteKind, remoteMask)) {
 			this.remoteKind = SyncInfo.INCOMING | SyncInfo.CHANGE;
 			if (this.isNotExists(localKind, localMask)) {
 				this.remoteKind = SyncInfo.INCOMING | SyncInfo.ADDITION;
@@ -113,7 +114,7 @@ public class MergeSyncInfo extends AbstractSVNSyncInfo implements IMergeSyncInfo
 				this.remoteKind = SyncInfo.IN_SYNC;
 				return SyncInfo.IN_SYNC;
 			}
-			if (this.isNotModified(localKind, localMask)) {
+			if (isNotModified(localKind, localMask)) {
 				return SyncInfo.INCOMING | SyncInfo.DELETION;
 			}
 			this.localKind = SyncInfo.OUTGOING | SyncInfo.CHANGE;
@@ -129,21 +130,23 @@ public class MergeSyncInfo extends AbstractSVNSyncInfo implements IMergeSyncInfo
 	 */
 	@Override
 	public ILocalResource getBaseChangeResource() {
-		return this.baseStatus == null ? this.local : this.baseStatus;
+		return baseStatus == null ? local : baseStatus;
 	}
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.team.svn.core.synchronize.IMergeSyncInfo#getBaseResource()
 	 */
+	@Override
 	public IResourceChange getBaseResource() {
-		return this.baseStatus;
+		return baseStatus;
 	}
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.team.svn.core.synchronize.IMergeSyncInfo#getRemoteResource()
 	 */
+	@Override
 	public IResourceChange getRemoteResource() {
-		return this.remoteStatus;
+		return remoteStatus;
 	}
-	
+
 }

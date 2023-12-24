@@ -31,28 +31,31 @@ import org.eclipse.team.ui.synchronize.ISynchronizePageConfiguration;
 public class ShowOutgoingPropertiesModelAction extends AbstractSynchronizeLogicalModelAction {
 
 	protected ShowOutgoingPropertiesActionHelper actionHelper;
-	
+
 	public ShowOutgoingPropertiesModelAction(String text, ISynchronizePageConfiguration configuration) {
 		super(text, configuration);
-		this.actionHelper = new ShowOutgoingPropertiesActionHelper(this, configuration);
+		actionHelper = new ShowOutgoingPropertiesActionHelper(this, configuration);
 	}
 
+	@Override
 	protected boolean needsToSaveDirtyEditors() {
 		return false;
 	}
-	
+
+	@Override
 	protected boolean updateSelection(IStructuredSelection selection) {
 		if (super.updateSelection(selection)) {
-			if (selection.size() == 1) {	
-				IResource resource = this.getSelectedResource();
+			if (selection.size() == 1) {
+				IResource resource = getSelectedResource();
 				return IStateFilter.SF_VERSIONED.accept(SVNRemoteStorage.instance().asLocalResource(resource));
-			}	
+			}
 		}
-	    return false;
+		return false;
 	}
-	
+
+	@Override
 	protected IActionOperation getOperation() {
-		return this.actionHelper.getOperation();
+		return actionHelper.getOperation();
 	}
 
 }

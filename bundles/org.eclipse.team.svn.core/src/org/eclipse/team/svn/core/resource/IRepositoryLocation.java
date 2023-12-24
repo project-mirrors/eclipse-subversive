@@ -25,97 +25,123 @@ import org.eclipse.team.svn.core.resource.events.IRepositoryLocationStateListene
  * @author Alexander Gurov
  */
 public interface IRepositoryLocation extends IRepositoryBase, IRepositoryResourceFactory {
-	
+
 	/**
 	 * Detect what information should be present while serializing location:
 	 * 
-	 * ALL - save all data.
-	 * 	For example, it's used for storing repository locations between Eclipse sessions. 
+	 * ALL - save all data. For example, it's used for storing repository locations between Eclipse sessions.
 	 * 
-	 * WITHOUT_REVISION_COMMENTS - it's used for storing all info except revision link comments.
-	 * 	For example, it's used for storing locations in project set files, as
-	 * 	comment size can be very big.
+	 * WITHOUT_REVISION_COMMENTS - it's used for storing all info except revision link comments. For example, it's used for storing
+	 * locations in project set files, as comment size can be very big.
 	 * 
-	 * ONLY_REQUIRED_DATA	- it's stored only necessary data required for restoring
-	 * 	location. For example, it's used by setting location property for project;
-	 *  we make location size as small as possible because project's property
-	 *  size is limited by Eclipse.
+	 * ONLY_REQUIRED_DATA - it's stored only necessary data required for restoring location. For example, it's used by setting location
+	 * property for project; we make location size as small as possible because project's property size is limited by Eclipse.
 	 */
-	public static enum  LocationReferenceTypeEnum {
-		ALL,	
-		WITHOUT_REVISION_COMMENTS,
-		ONLY_REQUIRED_DATA		
+	public enum LocationReferenceTypeEnum {
+		ALL, WITHOUT_REVISION_COMMENTS, ONLY_REQUIRED_DATA
 	}
-	
-    public void addStateListener(IRepositoryLocationStateListener listener);
-    public void removeStateListener(IRepositoryLocationStateListener listener);
-	
-	public String getId();
-	
-	public void setLabel(String label);
-	public String getLabel();
-		
+
+	void addStateListener(IRepositoryLocationStateListener listener);
+
+	void removeStateListener(IRepositoryLocationStateListener listener);
+
+	String getId();
+
+	void setLabel(String label);
+
+	String getLabel();
+
 	/*
 	 * As in some cases there can be limitations on reference string size or some
 	 * information is not needed, then we provide a parameter which says what
 	 * information should be saved.
 	 * For more details, see LocationReferenceTypeEnum
 	 */
-	public String asReference(LocationReferenceTypeEnum locationReferenceType);
-	public void fillLocationFromReference(String [] referenceParts);
-	
-	public String getUrlAsIs();
-	public void setUrl(String url);
-	public String getRepositoryRootUrl();
-	public String getRepositoryUUID();
-	public IRepositoryRoot getRepositoryRoot();
-	public IRepositoryRoot getRoot();
+	String asReference(LocationReferenceTypeEnum locationReferenceType);
 
-	public void setStructureEnabled(boolean enabled);
-	public boolean isStructureEnabled();
+	void fillLocationFromReference(String[] referenceParts);
 
-	public void setTrunkLocation(String location);
-	public String getTrunkLocation();
-	public String getUserInputTrunk();
-	
-	public String getBranchesLocation();
-	public void setBranchesLocation(String location);
-	public String getUserInputBranches();
-	
-	public String getTagsLocation();
-	public void setTagsLocation(String location);
-	public String getUserInputTags();
-	
-	public IRevisionLink []getRevisionLinks();
-	public void addRevisionLink(IRevisionLink link);
-	public void removeRevisionLink(IRevisionLink link);
+	String getUrlAsIs();
 
-	public String getUsername();
-	public void setUsername(String username);
-	public String getPassword();
-	public void setPassword(String password);
-	
-	public boolean isPasswordSavedForRealm(String realm);
-	public boolean isPasswordSaved();
-	public void setPasswordSaved(boolean saved);
-	
-	public ISVNConnector acquireSVNProxy();
-	public void releaseSVNProxy(ISVNConnector proxy);
-	public void reconfigure();
-	public void dispose();
-	
-	public SSLSettings getSSLSettings();
-	public SSHSettings getSSHSettings();
-	
-	public Collection<String> getRealms();
-	public void addRealm(String realm, IRepositoryLocation location);
-	public void removeRealm(String realm);
-	public Collection<IRepositoryLocation> getRealmLocations();
-	public IRepositoryLocation getLocationForRealm(String realm);
-	
-	public boolean isAuthorNameEnabled();
-	public String getAuthorName();
-	
-	public void setAuthorNameEnabled(boolean isEnabled);
-	public void setAuthorName(String name);
+	void setUrl(String url);
+
+	String getRepositoryRootUrl();
+
+	String getRepositoryUUID();
+
+	IRepositoryRoot getRepositoryRoot();
+
+	IRepositoryRoot getRoot();
+
+	void setStructureEnabled(boolean enabled);
+
+	boolean isStructureEnabled();
+
+	void setTrunkLocation(String location);
+
+	String getTrunkLocation();
+
+	String getUserInputTrunk();
+
+	String getBranchesLocation();
+
+	void setBranchesLocation(String location);
+
+	String getUserInputBranches();
+
+	String getTagsLocation();
+
+	void setTagsLocation(String location);
+
+	String getUserInputTags();
+
+	IRevisionLink[] getRevisionLinks();
+
+	void addRevisionLink(IRevisionLink link);
+
+	void removeRevisionLink(IRevisionLink link);
+
+	String getUsername();
+
+	void setUsername(String username);
+
+	String getPassword();
+
+	void setPassword(String password);
+
+	boolean isPasswordSavedForRealm(String realm);
+
+	boolean isPasswordSaved();
+
+	void setPasswordSaved(boolean saved);
+
+	ISVNConnector acquireSVNProxy();
+
+	void releaseSVNProxy(ISVNConnector proxy);
+
+	void reconfigure();
+
+	void dispose();
+
+	SSLSettings getSSLSettings();
+
+	SSHSettings getSSHSettings();
+
+	Collection<String> getRealms();
+
+	void addRealm(String realm, IRepositoryLocation location);
+
+	void removeRealm(String realm);
+
+	Collection<IRepositoryLocation> getRealmLocations();
+
+	IRepositoryLocation getLocationForRealm(String realm);
+
+	boolean isAuthorNameEnabled();
+
+	String getAuthorName();
+
+	void setAuthorNameEnabled(boolean isEnabled);
+
+	void setAuthorName(String name);
 }

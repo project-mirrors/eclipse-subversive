@@ -27,15 +27,16 @@ import org.eclipse.team.svn.core.synchronize.UpdateSubscriber;
 public class SVNTeamProviderType extends RepositoryProviderType {
 
 	public SVNTeamProviderType() {
-		super();
 	}
 
+	@Override
 	public ProjectSetCapability getProjectSetCapability() {
 		return new SVNTeamProjectSetCapability();
 	}
-		
-	public Subscriber getSubscriber() {		
+
+	@Override
+	public Subscriber getSubscriber() {
 		return UpdateSubscriber.instance();
 	}
-	
+
 }

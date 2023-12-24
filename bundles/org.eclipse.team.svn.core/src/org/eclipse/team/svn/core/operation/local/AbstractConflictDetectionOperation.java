@@ -23,54 +23,65 @@ import org.eclipse.team.svn.core.resource.IResourceProvider;
  * 
  * @author Alexander Gurov
  */
-public abstract class AbstractConflictDetectionOperation extends AbstractWorkingCopyOperation implements IUnresolvedConflictDetector {
+public abstract class AbstractConflictDetectionOperation extends AbstractWorkingCopyOperation
+		implements IUnresolvedConflictDetector {
 
 	protected UnresolvedConflictDetectorHelper conflictDetectorHelper;
 
-    public AbstractConflictDetectionOperation(String operationName, Class<? extends NLS> messagesClass, IResource []resources) {
-        super(operationName, messagesClass, resources);
-        this.conflictDetectorHelper = new UnresolvedConflictDetectorHelper();
-    }
-
-    public AbstractConflictDetectionOperation(String operationName, Class<? extends NLS> messagesClass, IResourceProvider provider) {
-        super(operationName, messagesClass, provider);
-        this.conflictDetectorHelper = new UnresolvedConflictDetectorHelper();
-    }
-    
-    public void setUnresolvedConflict(boolean hasUnresolvedConflict) {
-		this.conflictDetectorHelper.setUnresolvedConflict(hasUnresolvedConflict);
-	}	
-    
-    public boolean hasUnresolvedConflicts() {
-        return this.conflictDetectorHelper.hasUnresolvedConflicts();
-    }
-    
-    public String getMessage() {
-    	return this.conflictDetectorHelper.getMessage();
-    }
-    
-    public IResource []getUnprocessed() {
-		return this.conflictDetectorHelper.getUnprocessed();
-    }
-
-	public IResource []getProcessed() {
-		return this.conflictDetectorHelper.getProcessed();
+	public AbstractConflictDetectionOperation(String operationName, Class<? extends NLS> messagesClass,
+			IResource[] resources) {
+		super(operationName, messagesClass, resources);
+		conflictDetectorHelper = new UnresolvedConflictDetectorHelper();
 	}
-	
-	public void defineInitialResourceSet(IResource []resources) {
-		this.conflictDetectorHelper.defineInitialResourceSet(resources);
+
+	public AbstractConflictDetectionOperation(String operationName, Class<? extends NLS> messagesClass,
+			IResourceProvider provider) {
+		super(operationName, messagesClass, provider);
+		conflictDetectorHelper = new UnresolvedConflictDetectorHelper();
 	}
-	
+
+	@Override
+	public void setUnresolvedConflict(boolean hasUnresolvedConflict) {
+		conflictDetectorHelper.setUnresolvedConflict(hasUnresolvedConflict);
+	}
+
+	@Override
+	public boolean hasUnresolvedConflicts() {
+		return conflictDetectorHelper.hasUnresolvedConflicts();
+	}
+
+	@Override
+	public String getMessage() {
+		return conflictDetectorHelper.getMessage();
+	}
+
+	@Override
+	public IResource[] getUnprocessed() {
+		return conflictDetectorHelper.getUnprocessed();
+	}
+
+	@Override
+	public IResource[] getProcessed() {
+		return conflictDetectorHelper.getProcessed();
+	}
+
+	public void defineInitialResourceSet(IResource[] resources) {
+		conflictDetectorHelper.defineInitialResourceSet(resources);
+	}
+
+	@Override
 	public void addUnprocessed(IResource unprocessed) {
-		this.conflictDetectorHelper.addUnprocessed(unprocessed);
+		conflictDetectorHelper.addUnprocessed(unprocessed);
 	}
 
+	@Override
 	public void setConflictMessage(String message) {
-		this.conflictDetectorHelper.setConflictMessage(message);		
+		conflictDetectorHelper.setConflictMessage(message);
 	}
-	
-	 public void removeProcessed(IResource resource) {
-		 this.conflictDetectorHelper.removeProcessed(resource);
-	 }
-	
+
+	@Override
+	public void removeProcessed(IResource resource) {
+		conflictDetectorHelper.removeProcessed(resource);
+	}
+
 }

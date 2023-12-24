@@ -44,7 +44,6 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.content.IContentDescription;
 import org.eclipse.jface.action.Action;
-import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
@@ -60,6 +59,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.TreeItem;
+import org.eclipse.team.svn.core.BaseMessages;
 import org.eclipse.team.svn.core.SVNMessages;
 import org.eclipse.team.svn.core.connector.SVNDiffStatus;
 import org.eclipse.team.svn.core.connector.SVNEntry;
@@ -96,24 +96,28 @@ import org.eclipse.ui.IWorkbenchPage;
  */
 public abstract class ResourceCompareInput extends SaveableCompareEditorInput {
 	protected ResourceCompareViewer viewer;
+
 	protected BaseCompareNode root;
-	
+
 	protected IRepositoryResource rootLeft;
+
 	protected IRepositoryResource rootAncestor;
+
 	protected IRepositoryResource rootRight;
-	
+
 	protected String forceId;
 
 	public static void openCompareEditor(ResourceCompareInput compare, boolean forceReuse) {
 		IWorkbenchPage page = UIMonitorUtility.getActivePage();
-		IEditorReference []editorRefs = page.getEditorReferences();	
-		for (int i = 0; i < editorRefs.length; i++) {
-			IEditorPart part = editorRefs[i].getEditor(false);
-			if (part instanceof IReusableEditor && !part.isDirty() && compare.getClass().equals(part.getEditorInput().getClass())) {
-				ResourceCompareInput existing = (ResourceCompareInput)part.getEditorInput();
-				if (forceReuse || compare.equals(existing) || 
-					existing.getForceId() != null && existing.getForceId().equals(compare.getForceId())) {
-					CompareUI.reuseCompareEditor(compare, (IReusableEditor)part);
+		IEditorReference[] editorRefs = page.getEditorReferences();
+		for (IEditorReference editorRef : editorRefs) {
+			IEditorPart part = editorRef.getEditor(false);
+			if (part instanceof IReusableEditor && !part.isDirty()
+					&& compare.getClass().equals(part.getEditorInput().getClass())) {
+				ResourceCompareInput existing = (ResourceCompareInput) part.getEditorInput();
+				if (forceReuse || compare.equals(existing)
+						|| existing.getForceId() != null && existing.getForceId().equals(compare.getForceId())) {
+					CompareUI.reuseCompareEditor(compare, (IReusableEditor) part);
 					page.activate(part);
 					return;
 				}
@@ -121,122 +125,131 @@ public abstract class ResourceCompareInput extends SaveableCompareEditorInput {
 		}
 		CompareUI.openCompareEditor(compare);
 	}
-	
+
+	@Override
 	protected void fireInputChange() {
 // SavableCompareEditorInput:166 for whatever reason closes the editor on change notification
 //	509192: Saving changes in compare editor closes the editor (structural compare)
-//	https://bugs.eclipse.org/bugs/show_bug.cgi?id=509192	
+//	https://bugs.eclipse.org/bugs/show_bug.cgi?id=509192
 //		if (this.root != null) {
 //			this.root.fireChange();
 //		}
 	}
-	
+
 	public ResourceCompareInput(CompareConfiguration configuration) {
 		super(configuration, UIMonitorUtility.getActivePage());
 	}
-	
+
 	public void setForceId(String forceId) {
 		this.forceId = forceId;
 	}
 
 	public String getForceId() {
-		return this.forceId;
+		return forceId;
 	}
 
 	public void initialize(IProgressMonitor monitor) throws Exception {
-		this.refreshTitles();
+		refreshTitles();
 	}
-	
+
+	@Override
 	public final Viewer createDiffViewer(Composite parent) {
-		this.viewer = this.createDiffViewerImpl(parent, this.getCompareConfiguration());
-		
+		viewer = createDiffViewerImpl(parent, getCompareConfiguration());
+
 		MenuManager menuMgr = new MenuManager();
-		Menu menu = menuMgr.createContextMenu(this.viewer.getControl());	
-		menuMgr.addMenuListener(new IMenuListener() {
-			public void menuAboutToShow(IMenuManager manager) {
-				manager.removeAll();
-				TreeSelection selection = (TreeSelection)ResourceCompareInput.this.viewer.getSelection();
-				if (selection.size() != 0) {
-					ResourceCompareInput.this.fillMenu(manager, selection);
-					manager.add(new Separator());
-				}
-				manager.add(new Action(SVNUIMessages.SynchronizeActionGroup_ExpandAll) {
-					public void run() {
-						ResourceCompareInput.this.viewer.expandAll();
-					}
-				});
+		Menu menu = menuMgr.createContextMenu(viewer.getControl());
+		menuMgr.addMenuListener(manager -> {
+			manager.removeAll();
+			TreeSelection selection = (TreeSelection) viewer.getSelection();
+			if (selection.size() != 0) {
+				ResourceCompareInput.this.fillMenu(manager, selection);
+				manager.add(new Separator());
 			}
+			manager.add(new Action(SVNUIMessages.SynchronizeActionGroup_ExpandAll) {
+				@Override
+				public void run() {
+					viewer.expandAll();
+				}
+			});
 		});
-		this.viewer.getControl().setMenu(menu);
-		
-		return this.viewer;
+		viewer.getControl().setMenu(menu);
+
+		return viewer;
 	}
-	
+
 	protected abstract void fillMenu(IMenuManager manager, TreeSelection selection);
-	
+
+	@Override
 	public boolean equals(Object obj) {
 		if (obj != null && obj.getClass().equals(this.getClass())) {
-			ResourceCompareInput other = (ResourceCompareInput)obj;
-			return this.rootLeft.equals(other.rootLeft) && this.rootRight.equals(other.rootRight) && (this.rootAncestor == other.rootAncestor || this.rootAncestor != null && this.rootAncestor.equals(other.rootAncestor));
+			ResourceCompareInput other = (ResourceCompareInput) obj;
+			return rootLeft.equals(other.rootLeft) && rootRight.equals(other.rootRight)
+					&& (rootAncestor == other.rootAncestor
+							|| rootAncestor != null && rootAncestor.equals(other.rootAncestor));
 		}
 		return false;
 	}
-	
+
 	protected ResourceCompareViewer createDiffViewerImpl(Composite parent, CompareConfiguration config) {
 		return new ResourceCompareViewer(parent, config);
 	}
-	
-	protected ICompareInput prepareCompareInput(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-		if (this.root != null) {
-			ResourceElement left = (ResourceElement)this.root.getLeft();
-			ResourceElement ancestor = (ResourceElement)this.root.getAncestor();
-			ResourceElement right = (ResourceElement)this.root.getRight();
-			
+
+	@Override
+	protected ICompareInput prepareCompareInput(IProgressMonitor monitor)
+			throws InvocationTargetException, InterruptedException {
+		if (root != null) {
+			ResourceElement left = (ResourceElement) root.getLeft();
+			ResourceElement ancestor = (ResourceElement) root.getAncestor();
+			ResourceElement right = (ResourceElement) root.getRight();
+
 			//TODO additionally decorate resources in order to show property changes
-			if ((left.getType() == ITypedElement.FOLDER_TYPE || ancestor != null && ancestor.getType() == ITypedElement.FOLDER_TYPE || right.getType() == ITypedElement.FOLDER_TYPE) && 
-				(this.root.getKind() & Differencer.CHANGE_TYPE_MASK) != 0) {
-				this.root = (BaseCompareNode)this.root.getParent();
+			if ((left.getType() == ITypedElement.FOLDER_TYPE
+					|| ancestor != null && ancestor.getType() == ITypedElement.FOLDER_TYPE
+					|| right.getType() == ITypedElement.FOLDER_TYPE)
+					&& (root.getKind() & Differencer.CHANGE_TYPE_MASK) != 0) {
+				root = (BaseCompareNode) root.getParent();
 			}
-			CompositeOperation op = this.root.getFetcher();
+			CompositeOperation op = root.getFetcher();
 			if (op != null) {
 				ProgressMonitorUtility.doTaskExternal(op, monitor);
 			}
 		}
 		monitor.done();
-		return this.root;
+		return root;
 	}
 
-	protected void findRootNode(Map<IPath, IDiffElement> path2node, IRepositoryResource resource, IProgressMonitor monitor) {
-		this.root = (BaseCompareNode)path2node.get(SVNUtility.createPathForSVNUrl(resource.getUrl()));
+	protected void findRootNode(Map<IPath, IDiffElement> path2node, IRepositoryResource resource,
+			IProgressMonitor monitor) {
+		root = (BaseCompareNode) path2node.get(SVNUtility.createPathForSVNUrl(resource.getUrl()));
 	}
-	
+
 	protected void refreshTitles() throws Exception {
-		if (this.root == null) {
+		if (root == null) {
 			return;
 		}
-		CompareConfiguration cc = this.getCompareConfiguration();
-		
-		cc.setLeftLabel(this.getLeftLabel());
-		cc.setLeftImage(this.getLeftImage());
-		
-		cc.setRightLabel(this.getRightLabel());
-		cc.setRightImage(this.getRightImage());
-		
-		ResourceElement left = this.getLeftResourceElement();
-		String leftRevisionPart = this.getRevisionPart(left);
+		CompareConfiguration cc = getCompareConfiguration();
+
+		cc.setLeftLabel(getLeftLabel());
+		cc.setLeftImage(getLeftImage());
+
+		cc.setRightLabel(getRightLabel());
+		cc.setRightImage(getRightImage());
+
+		ResourceElement left = getLeftResourceElement();
+		String leftRevisionPart = getRevisionPart(left);
 		String leftResourceName = left.getName();
-		ResourceElement right = this.getRightResourceElement();
-		String rightRevisionPart = this.getRevisionPart(right);
+		ResourceElement right = getRightResourceElement();
+		String rightRevisionPart = getRevisionPart(right);
 		String rightResourceName = right.getName();
-		
-		if (this.isThreeWay()) {
-			cc.setAncestorLabel(this.getAncestorLabel());
-			cc.setAncestorImage(this.getAncestorImage());
-			
-			ResourceElement ancestor = this.getAncestorResourceElement();
-			String ancestorRevisionPart = this.getRevisionPart(ancestor);
+
+		if (isThreeWay()) {
+			cc.setAncestorLabel(getAncestorLabel());
+			cc.setAncestorImage(getAncestorImage());
+
+			ResourceElement ancestor = getAncestorResourceElement();
+			String ancestorRevisionPart = getRevisionPart(ancestor);
 			String ancestorResourceName = ancestor.getName();
-			
+
 			String leftPart = leftResourceName + " [" + leftRevisionPart; //$NON-NLS-1$
 			String ancestorPart = " "; //$NON-NLS-1$
 			String rightPart = " "; //$NON-NLS-1$
@@ -247,154 +260,150 @@ public abstract class ResourceCompareInput extends SaveableCompareEditorInput {
 				if (rightEquals) {
 					ancestorPart += ancestorRevisionPart + " "; //$NON-NLS-1$
 					rightPart += rightRevisionPart + "]"; //$NON-NLS-1$
-				}
-				else {
+				} else {
 					ancestorPart += ancestorRevisionPart + "] "; //$NON-NLS-1$
 					rightPart += rightResourceName + " [" + rightRevisionPart + "]"; //$NON-NLS-1$ //$NON-NLS-2$
 				}
-			}
-			else if (rightEquals) {
+			} else if (rightEquals) {
 				leftPart += "] "; //$NON-NLS-1$
 				ancestorPart += ancestorResourceName + " [" + ancestorRevisionPart + " "; //$NON-NLS-1$ //$NON-NLS-2$
 				rightPart += rightRevisionPart + "]"; //$NON-NLS-1$
-			}
-			else {
+			} else {
 				leftPart += "] "; //$NON-NLS-1$
 				ancestorPart += ancestorResourceName + " [" + ancestorRevisionPart + "] "; //$NON-NLS-1$ //$NON-NLS-2$
 				rightPart += rightResourceName + " [" + rightRevisionPart + "]"; //$NON-NLS-1$ //$NON-NLS-2$
 			}
 
-			this.setTitle(SVNUIMessages.format(SVNUIMessages.ResourceCompareInput_Title3, new Object[] {leftPart, ancestorPart, rightPart}));
-		} 
-		else {
+			setTitle(BaseMessages.format(SVNUIMessages.ResourceCompareInput_Title3,
+					new Object[] { leftPart, ancestorPart, rightPart }));
+		} else {
 			String leftPart = leftResourceName + " [" + leftRevisionPart; //$NON-NLS-1$
 			String rightPart = " "; //$NON-NLS-1$
-			if (leftResourceName.equals(rightResourceName)){
+			if (leftResourceName.equals(rightResourceName)) {
 				leftPart += " "; //$NON-NLS-1$
 				rightPart += rightRevisionPart + "]"; //$NON-NLS-1$
-			}
-			else {
+			} else {
 				leftPart += "] "; //$NON-NLS-1$
 				rightPart += rightResourceName + " [" + rightRevisionPart + "]"; //$NON-NLS-1$ //$NON-NLS-2$
 			}
-			
-			this.setTitle(SVNUIMessages.format(SVNUIMessages.ResourceCompareInput_Title2, new Object[] {leftPart, rightPart}));
+
+			setTitle(BaseMessages.format(SVNUIMessages.ResourceCompareInput_Title2,
+					new Object[] { leftPart, rightPart }));
 		}
 	}
-	
+
 	protected String getAncestorLabel() throws Exception {
-		return this.getLabel(this.getAncestorResourceElement());
+		return getLabel(getAncestorResourceElement());
 	}
 
 	protected Image getAncestorImage() throws Exception {
-		return CompareUI.getImage(RepositoryFolder.wrapChild(null, this.getAncestorResourceElement().getRepositoryResource(), null));
+		return CompareUI.getImage(
+				RepositoryFolder.wrapChild(null, getAncestorResourceElement().getRepositoryResource(), null));
 	}
 
 	protected String getLeftLabel() throws Exception {
-		return this.getLabel(this.getLeftResourceElement());
+		return getLabel(getLeftResourceElement());
 	}
-	
+
 	protected Image getLeftImage() throws Exception {
-		return CompareUI.getImage(RepositoryFolder.wrapChild(null, this.getLeftResourceElement().getRepositoryResource(), null));
+		return CompareUI.getImage(
+				RepositoryFolder.wrapChild(null, getLeftResourceElement().getRepositoryResource(), null));
 	}
-	
+
 	protected String getRightLabel() throws Exception {
-		return this.getLabel(this.getRightResourceElement());
+		return getLabel(getRightResourceElement());
 	}
-	
+
 	protected Image getRightImage() throws Exception {
-		return CompareUI.getImage(RepositoryFolder.wrapChild(null, this.getRightResourceElement().getRepositoryResource(), null));
+		return CompareUI.getImage(
+				RepositoryFolder.wrapChild(null, getRightResourceElement().getRepositoryResource(), null));
 	}
-	
+
 	protected String getLabel(ResourceElement element) throws Exception {
-		return element.getRepositoryResource().getUrl() + " [" + this.getRevisionPart(element) + "]"; //$NON-NLS-1$ //$NON-NLS-2$
+		return element.getRepositoryResource().getUrl() + " [" + getRevisionPart(element) + "]"; //$NON-NLS-1$ //$NON-NLS-2$
 	}
-	
+
 	protected String getRevisionPart(ResourceElement element) throws Exception {
 		IRepositoryResource resource = element.getRepositoryResource();
 		SVNRevision selected = resource.getSelectedRevision();
 		if (selected == SVNRevision.INVALID_REVISION) {
 			return SVNUIMessages.ResourceCompareInput_ResourceIsNotAvailable;
 		}
-		return SVNUIMessages.format(SVNUIMessages.ResourceCompareInput_RevisionSign, new String[] {String.valueOf(resource.getRevision())});
+		return BaseMessages.format(SVNUIMessages.ResourceCompareInput_RevisionSign,
+				new String[] { String.valueOf(resource.getRevision()) });
 	}
-	
+
 	protected ResourceElement getLeftResourceElement() {
-		DiffNode node = this.getSelectedNode();
+		DiffNode node = getSelectedNode();
 		if (node != null) {
-			return (ResourceElement)node.getLeft();
+			return (ResourceElement) node.getLeft();
 		}
-		return (ResourceElement)this.root.getLeft();
+		return (ResourceElement) root.getLeft();
 	}
-	
+
 	protected ResourceElement getRightResourceElement() {
-		DiffNode node = this.getSelectedNode();
+		DiffNode node = getSelectedNode();
 		if (node != null) {
-			return (ResourceElement)node.getRight();
+			return (ResourceElement) node.getRight();
 		}
-		return (ResourceElement)this.root.getRight();
+		return (ResourceElement) root.getRight();
 	}
-	
+
 	protected ResourceElement getAncestorResourceElement() {
-		DiffNode node = this.getSelectedNode();
+		DiffNode node = getSelectedNode();
 		if (node != null) {
-			return (ResourceElement)node.getAncestor();
+			return (ResourceElement) node.getAncestor();
 		}
-		return (ResourceElement)this.root.getAncestor();
+		return (ResourceElement) root.getAncestor();
 	}
-	
+
 	protected DiffNode getSelectedNode() {
-		if (this.viewer != null) {
-			IStructuredSelection selection = (IStructuredSelection)this.viewer.getSelection();
+		if (viewer != null) {
+			IStructuredSelection selection = (IStructuredSelection) viewer.getSelection();
 			if (selection != null && !selection.isEmpty() && selection.getFirstElement() instanceof DiffNode) {
-				return (DiffNode)selection.getFirstElement();
+				return (DiffNode) selection.getFirstElement();
 			}
 		}
 		return null;
 	}
-	
-	protected IDiffContainer getParentCompareNode(IRepositoryResource current, Map<IPath, IDiffContainer> path2node) throws Exception {
+
+	protected IDiffContainer getParentCompareNode(IRepositoryResource current, Map<IPath, IDiffContainer> path2node)
+			throws Exception {
 		IRepositoryResource parent = current.getParent();
 		if (parent == null) {
 			return null;
 		}
-		
+
 		IPath parentUrl = SVNUtility.createPathForSVNUrl(parent.getUrl());
 		IDiffContainer node = path2node.get(parentUrl);
 		if (node == null) {
-			path2node.put(parentUrl, node = this.makeStubNode(this.getParentCompareNode(parent, path2node), parent));
+			path2node.put(parentUrl, node = makeStubNode(getParentCompareNode(parent, path2node), parent));
 		}
 		return node;
 	}
-	
+
 	protected static int getDiffKind(SVNEntryStatus.Kind textStatus, SVNEntryStatus.Kind propStatus) {
-		if (textStatus == SVNEntryStatus.Kind.ADDED ||
-			textStatus == SVNEntryStatus.Kind.UNVERSIONED) {
+		if (textStatus == SVNEntryStatus.Kind.ADDED || textStatus == SVNEntryStatus.Kind.UNVERSIONED) {
 			return Differencer.ADDITION;
 		}
 		if (textStatus == SVNEntryStatus.Kind.DELETED) {
 			return Differencer.DELETION;
 		}
-		if (textStatus == SVNEntryStatus.Kind.REPLACED) {
-			return Differencer.CHANGE;
-		}
-		if (textStatus == SVNEntryStatus.Kind.MODIFIED ||
-			propStatus == SVNEntryStatus.Kind.MODIFIED) {
+		if ((textStatus == SVNEntryStatus.Kind.REPLACED) || textStatus == SVNEntryStatus.Kind.MODIFIED || propStatus == SVNEntryStatus.Kind.MODIFIED) {
 			return Differencer.CHANGE;
 		}
 		return Differencer.NO_CHANGE;
 	}
-	
+
 	protected Kind getNodeKind(SVNDiffStatus st, boolean ignoreNone) {
 		return SVNUtility.getNodeKind(st.pathPrev, st.nodeKind, ignoreNone);
 	}
-	
+
 	protected IRepositoryResource createResourceFor(IRepositoryLocation location, Kind kind, String url) {
 		IRepositoryResource retVal = null;
 		if (kind == SVNEntry.Kind.FILE) {
 			retVal = location.asRepositoryFile(url, false);
-		}
-		else if (kind == SVNEntry.Kind.DIR) {
+		} else if (kind == SVNEntry.Kind.DIR) {
 			retVal = location.asRepositoryContainer(url, false);
 		}
 		if (retVal == null) {
@@ -402,36 +411,44 @@ public abstract class ResourceCompareInput extends SaveableCompareEditorInput {
 		}
 		return retVal;
 	}
-	
+
 	protected abstract boolean isThreeWay();
+
 	protected abstract IDiffContainer makeStubNode(IDiffContainer parent, IRepositoryResource node);
-	
-	public class ResourceElement implements ITypedElement, IEncodedStreamContentAccessor, IContentChangeNotifier, IEditableContent {
+
+	public class ResourceElement
+			implements ITypedElement, IEncodedStreamContentAccessor, IContentChangeNotifier, IEditableContent {
 		protected Vector<IContentChangeListener> listenerList;
+
 		protected boolean dirty;
+
 		protected String charset;
-		
+
 		protected IRepositoryResource resource;
+
 		protected AbstractGetFileContentOperation op;
+
 		protected ILocalResource localAlias;
+
 		protected boolean editable;
-		
+
 		public ResourceElement(IRepositoryResource resource, ILocalResource alias, boolean showContent) {
 			this.resource = resource;
-			this.localAlias = alias;
-			this.editable = false;
-			this.listenerList = new Vector<IContentChangeListener>();
+			localAlias = alias;
+			editable = false;
+			listenerList = new Vector<>();
 			if (!showContent) {
 				this.resource.setSelectedRevision(SVNRevision.INVALID_REVISION);
 			}
 		}
-		
+
+		@Override
 		public String getCharset() {
-			if (this.charset == null) {
+			if (charset == null) {
 				//if char set isn't yet set and there's a local resource then
 				//try to get char set from it
-				if (this.localAlias != null && this.localAlias.getResource() instanceof IEncodedStorage) {
-					IEncodedStorage es = (IEncodedStorage) this.localAlias.getResource();
+				if (localAlias != null && localAlias.getResource() instanceof IEncodedStorage) {
+					IEncodedStorage es = (IEncodedStorage) localAlias.getResource();
 					try {
 						return es.getCharset();
 					} catch (CoreException e) {
@@ -440,111 +457,120 @@ public abstract class ResourceCompareInput extends SaveableCompareEditorInput {
 				}
 				return null;
 			} else {
-				return this.charset;
+				return charset;
 			}
 		}
-		
-		public void setCharset(String charset){
+
+		public void setCharset(String charset) {
 			this.charset = charset;
 		}
-		
+
+		@Override
 		public void addContentChangeListener(IContentChangeListener listener) {
-			this.listenerList.add(listener);
+			listenerList.add(listener);
 		}
-		
+
+		@Override
 		public void removeContentChangeListener(IContentChangeListener listener) {
-			this.listenerList.remove(listener);
+			listenerList.remove(listener);
 		}
-		
+
 		public boolean isDirty() {
-			return this.dirty;
+			return dirty;
 		}
-		
+
 		public void setDirty(boolean dirty) {
 			this.dirty = dirty;
 		}
-		
+
+		@Override
 		public boolean isEditable() {
-			return this.editable && this.localAlias instanceof ILocalFile;
+			return editable && localAlias instanceof ILocalFile;
 		}
 
 		public void setEditable(boolean editable) {
 			this.editable = editable;
 		}
 
+		@Override
 		public ITypedElement replace(ITypedElement dest, ITypedElement src) {
 			return dest;
 		}
-		
+
 		public void commit(IProgressMonitor pm) throws CoreException {
-			if (this.isDirty()) {
-				IFile file = (IFile)this.localAlias.getResource();
+			if (isDirty()) {
+				IFile file = (IFile) localAlias.getResource();
 				file.refreshLocal(IResource.DEPTH_ZERO, pm);
-				this.dirty = false;
+				dirty = false;
 			}
 		}
 
+		@Override
 		public void setContent(byte[] newContent) {
-			if (this.isEditable()) {
-				if (this.op != null) {
-					this.op.setContent(newContent);
-					this.fireContentChanged();
+			if (isEditable()) {
+				if (op != null) {
+					op.setContent(newContent);
+					fireContentChanged();
 				}
 			}
 		}
-		
+
 		public IRepositoryResource getRepositoryResource() {
-			return this.resource;
+			return resource;
 		}
-		
+
 		public ILocalResource getLocalResource() {
-			return this.localAlias;
+			return localAlias;
 		}
-		
+
+		@Override
 		public String getName() {
-			return this.resource.getName();
+			return resource.getName();
 		}
-	
+
+		@Override
 		public Image getImage() {
-			return CompareUI.getImage(RepositoryFolder.wrapChild(null, this.resource, null));
+			return CompareUI.getImage(RepositoryFolder.wrapChild(null, resource, null));
 		}
-	
+
+		@Override
 		public String getType() {
-			if (this.resource instanceof IRepositoryContainer) {
+			if (resource instanceof IRepositoryContainer) {
 				return ITypedElement.FOLDER_TYPE;
 			}
-			String fileName = this.resource.getName();
+			String fileName = resource.getName();
 			int dotIdx = fileName.lastIndexOf('.');
 			return dotIdx == -1 ? ITypedElement.UNKNOWN_TYPE : fileName.substring(dotIdx + 1);
 		}
 
 		public AbstractGetFileContentOperation getFetcher() {
-			if (this.op != null && this.op.getExecutionState() == IActionOperation.OK) {
+			if (op != null && op.getExecutionState() == IActionOperation.OK) {
 				return null;
 			}
-			if (this.resource instanceof IRepositoryFile) {
-				if (this.resource.getSelectedRevision() != SVNRevision.INVALID_REVISION) {
-					SVNRevision.Kind revisionKind = this.resource.getSelectedRevision().getKind();
-					return this.op = revisionKind == SVNRevision.Kind.WORKING || revisionKind == SVNRevision.Kind.BASE ? 
-						(AbstractGetFileContentOperation)new GetLocalFileContentOperation(this.localAlias.getResource(), revisionKind) : 
-						new GetFileContentOperation(this.resource);
-				}
-				else if (this.isEditable()) {
-					return this.op = new GetLocalFileContentOperation(this.localAlias.getResource(), SVNRevision.Kind.WORKING);
+			if (resource instanceof IRepositoryFile) {
+				if (resource.getSelectedRevision() != SVNRevision.INVALID_REVISION) {
+					SVNRevision.Kind revisionKind = resource.getSelectedRevision().getKind();
+					return op = revisionKind == SVNRevision.Kind.WORKING || revisionKind == SVNRevision.Kind.BASE
+							? (AbstractGetFileContentOperation) new GetLocalFileContentOperation(
+									localAlias.getResource(), revisionKind)
+							: new GetFileContentOperation(resource);
+				} else if (isEditable()) {
+					return op = new GetLocalFileContentOperation(localAlias.getResource(), SVNRevision.Kind.WORKING);
 				}
 			}
-			return this.op = null;
+			return op = null;
 		}
-	
+
+		@Override
 		public InputStream getContents() {
-			return this.op == null || this.op.getExecutionState() != IActionOperation.OK ? null : this.op.getContent();
+			return op == null || op.getExecutionState() != IActionOperation.OK ? null : op.getContent();
 		}
-	
+
 		protected void fireContentChanged() {
-			this.dirty = true;
-			IContentChangeListener []listeners = this.listenerList.toArray(new IContentChangeListener[0]);
-			for (int i= 0; i < listeners.length; i++) {
-				listeners[i].contentChanged(this);
+			dirty = true;
+			IContentChangeListener[] listeners = listenerList.toArray(new IContentChangeListener[0]);
+			for (IContentChangeListener listener : listeners) {
+				listener.contentChanged(this);
 			}
 		}
 
@@ -554,131 +580,138 @@ public abstract class ResourceCompareInput extends SaveableCompareEditorInput {
 		public ResourceCompareViewer(Composite parent, CompareConfiguration configuration) {
 			super(parent, configuration);
 		}
-		
+
+		@Override
 		public void setComparator(ViewerComparator comparator) {
 			super.setComparator(new ViewerComparator() {
+				@Override
 				public int category(Object element) {
-					return ((IDiffElement)element).getType() == ITypedElement.FOLDER_TYPE ? 0 : 1;
+					return ((IDiffElement) element).getType() == ITypedElement.FOLDER_TYPE ? 0 : 1;
 				}
 			});
 		}
-		
+
 		@Override
 		protected void handleDoubleSelect(final SelectionEvent event) {
-			final BaseCompareNode node = (BaseCompareNode)((TreeItem)event.item).getData();
+			final BaseCompareNode node = (BaseCompareNode) ((TreeItem) event.item).getData();
 			CompositeOperation fetchContent = node.getFetcher();
 			if (fetchContent != null) {
 				if (!fetchContent.isEmpty()) {
 					fetchContent.add(new AbstractActionOperation("Operation_FetchContent", SVNUIMessages.class) { //$NON-NLS-1$
+						@Override
 						protected void runImpl(IProgressMonitor monitor) throws Exception {
-							final Throwable []t = new Throwable[1];
-							UIMonitorUtility.getDisplay().syncExec(new Runnable() {
-								public void run() {
-									try {
-										ResourceCompareInput.this.refreshTitles();
-										ResourceCompareViewer.super.handleOpen(event);
-									} 
-									catch (Exception e) {
-										t[0] = e;
-									}
+							final Throwable[] t = new Throwable[1];
+							UIMonitorUtility.getDisplay().syncExec(() -> {
+								try {
+									refreshTitles();
+									ResourceCompareViewer.super.handleOpen(event);
+								} catch (Exception e) {
+									t[0] = e;
 								}
 							});
-							if (t[0] != null ){
+							if (t[0] != null) {
 								this.reportStatus(IStatus.ERROR, null, t[0]);
 							}
 						}
 					});
 					UIMonitorUtility.doTaskNowDefault(fetchContent, true);
-				}
-				else {
+				} else {
 					try {
-						ResourceCompareInput.this.refreshTitles();
-					} 
-					catch (Exception e) {
-						// title is ready, no exception expected 
+						refreshTitles();
+					} catch (Exception e) {
+						// title is ready, no exception expected
 					}
 				}
-			}
-			else { // handle a folder expansion/collapse
+			} else { // handle a folder expansion/collapse
 				ISelection selection = this.getSelection();
 				if (selection instanceof IStructuredSelection) {
-					for (Iterator elements = ((IStructuredSelection)selection).iterator(); elements.hasNext(); ) {
-						Object next = elements.next();
-						if (!this.getExpandedState(next)) {
+					for (Object next : ((IStructuredSelection) selection)) {
+						if (!getExpandedState(next)) {
 							this.expandToLevel(next, 1);
-						}
-						else {
-							this.collapseToLevel(next, 1);
+						} else {
+							collapseToLevel(next, 1);
 						}
 					}
 				}
 			}
 			super.handleDoubleSelect(event);
 		}
-		
+
 		protected class LabelProviderWrapper implements ILabelProvider {
 			protected Map<Object, Image> images;
+
 			protected ILabelProvider baseProvider;
-			
+
 			public LabelProviderWrapper(ILabelProvider baseProvider) {
-				this.images = new HashMap<Object, Image>();
+				images = new HashMap<>();
 				this.baseProvider = baseProvider;
 			}
-			
+
+			@Override
 			public void addListener(ILabelProviderListener listener) {
-				this.baseProvider.addListener(listener);
+				baseProvider.addListener(listener);
 			}
-			
+
+			@Override
 			public void removeListener(ILabelProviderListener listener) {
-				this.baseProvider.removeListener(listener);
+				baseProvider.removeListener(listener);
 			}
-			
+
+			@Override
 			public boolean isLabelProperty(Object element, String property) {
-				return this.baseProvider.isLabelProperty(element, property);
+				return baseProvider.isLabelProperty(element, property);
 			}
-			
+
+			@Override
 			public String getText(Object element) {
-				return this.baseProvider.getText(element);
+				return baseProvider.getText(element);
 			}
-			
+
+			@Override
 			public Image getImage(Object element) {
-				return this.baseProvider.getImage(element);
+				return baseProvider.getImage(element);
 			}
-			
+
+			@Override
 			public void dispose() {
-				for (Iterator<Image> it = this.images.values().iterator(); it.hasNext(); ) {
+				for (Iterator<Image> it = images.values().iterator(); it.hasNext();) {
 					it.next().dispose();
 				}
-				this.baseProvider.dispose();
+				baseProvider.dispose();
 			}
-			
+
 		}
 	}
-	
+
 	protected class BaseCompareNode extends DiffNode {
 		public BaseCompareNode(IDiffContainer parent, int kind) {
 			super(parent, kind);
 		}
-		
+
+		@Override
 		public void fireChange() {
 			super.fireChange();
 		}
-		
+
 		protected String detectCharset(InputStream stream) throws Exception {
 			try {
-				IContentDescription description = Platform.getContentTypeManager().getDescriptionFor(stream, this.getName(), IContentDescription.ALL);
+				IContentDescription description = Platform.getContentTypeManager()
+						.getDescriptionFor(stream, getName(), IContentDescription.ALL);
 				return description == null ? null : description.getCharset();
-			} 
-			finally {
-				try {stream.close();} catch (Exception ex) {}
+			} finally {
+				try {
+					stream.close();
+				} catch (Exception ex) {
+				}
 			}
 		}
-		
+
 		public CompositeOperation getFetcher() {
-			final ResourceElement left = (ResourceElement)this.getLeft();
-			final ResourceElement ancestor = (ResourceElement)this.getAncestor();
-			final ResourceElement right = (ResourceElement)this.getRight();
-			CompositeOperation op = new CompositeOperation(SVNUIMessages.ResourceCompareInput_Fetch, SVNUIMessages.class);
+			final ResourceElement left = (ResourceElement) getLeft();
+			final ResourceElement ancestor = (ResourceElement) getAncestor();
+			final ResourceElement right = (ResourceElement) getRight();
+			CompositeOperation op = new CompositeOperation(SVNUIMessages.ResourceCompareInput_Fetch,
+					SVNUIMessages.class);
 
 			boolean hasFile = false;
 			if (left != null && left.getType() != ITypedElement.FOLDER_TYPE) {
@@ -686,10 +719,11 @@ public abstract class ResourceCompareInput extends SaveableCompareEditorInput {
 				if (fetchOp != null) {
 					op.add(fetchOp);
 					op.add(new AbstractActionOperation("Operation_DetectCharset", SVNMessages.class) { //$NON-NLS-1$
-		                protected void runImpl(IProgressMonitor monitor) throws Exception {
-		                	left.setCharset(BaseCompareNode.this.detectCharset(fetchOp.getContent()));
-		                }
-			        }, new IActionOperation[] {fetchOp});
+						@Override
+						protected void runImpl(IProgressMonitor monitor) throws Exception {
+							left.setCharset(BaseCompareNode.this.detectCharset(fetchOp.getContent()));
+						}
+					}, new IActionOperation[] { fetchOp });
 				}
 				hasFile = true;
 			}
@@ -698,10 +732,11 @@ public abstract class ResourceCompareInput extends SaveableCompareEditorInput {
 				if (fetchOp != null) {
 					op.add(fetchOp);
 					op.add(new AbstractActionOperation("Operation_DetectCharset", SVNMessages.class) { //$NON-NLS-1$
-		                protected void runImpl(IProgressMonitor monitor) throws Exception {
-		                	ancestor.setCharset(BaseCompareNode.this.detectCharset(fetchOp.getContent()));
-		                }
-			        }, new IActionOperation[] {fetchOp});
+						@Override
+						protected void runImpl(IProgressMonitor monitor) throws Exception {
+							ancestor.setCharset(BaseCompareNode.this.detectCharset(fetchOp.getContent()));
+						}
+					}, new IActionOperation[] { fetchOp });
 				}
 				hasFile = true;
 			}
@@ -710,15 +745,16 @@ public abstract class ResourceCompareInput extends SaveableCompareEditorInput {
 				if (fetchOp != null) {
 					op.add(fetchOp);
 					op.add(new AbstractActionOperation("Operation_DetectCharset", SVNMessages.class) { //$NON-NLS-1$
-		                protected void runImpl(IProgressMonitor monitor) throws Exception {
-		                	right.setCharset(BaseCompareNode.this.detectCharset(fetchOp.getContent()));
-		                }
-			        }, new IActionOperation[] {fetchOp});
+						@Override
+						protected void runImpl(IProgressMonitor monitor) throws Exception {
+							right.setCharset(BaseCompareNode.this.detectCharset(fetchOp.getContent()));
+						}
+					}, new IActionOperation[] { fetchOp });
 				}
 				hasFile = true;
 			}
 			return hasFile ? op : null;
 		}
 	}
-	
+
 }

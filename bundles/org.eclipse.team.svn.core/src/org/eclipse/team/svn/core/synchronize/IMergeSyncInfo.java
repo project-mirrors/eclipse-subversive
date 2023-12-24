@@ -19,18 +19,16 @@ import org.eclipse.team.svn.core.resource.IResourceChange;
 /**
  * Provide base and remote resource changes for Merge view statuses
  * 
- * As we can construct two types of statuses: MergeSyncInfo and UpdateSyncInfoForMerge
- * (see MergeSubscriber#getSVNSyncInfo),
- * this interface allows to return in the same manner base and remote resources
- * despite of what merge sync info object we use.
+ * As we can construct two types of statuses: MergeSyncInfo and UpdateSyncInfoForMerge (see MergeSubscriber#getSVNSyncInfo), this interface
+ * allows to return in the same manner base and remote resources despite of what merge sync info object we use.
  * 
- *  For more details why we don't use Team API for getting these resources
- *  see UpdateSyncInfoForMerge
+ * For more details why we don't use Team API for getting these resources see UpdateSyncInfoForMerge
  * 
  * @author Igor Burilo
  */
 public interface IMergeSyncInfo {
-	
+
 	IResourceChange getBaseResource();
-	IResourceChange getRemoteResource();	
+
+	IResourceChange getRemoteResource();
 }

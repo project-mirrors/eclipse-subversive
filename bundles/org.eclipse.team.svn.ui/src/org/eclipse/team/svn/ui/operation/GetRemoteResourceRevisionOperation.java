@@ -27,20 +27,22 @@ import org.eclipse.team.svn.ui.SVNUIMessages;
  */
 public class GetRemoteResourceRevisionOperation extends AbstractActionOperation {
 	protected IRepositoryResource resource;
+
 	protected long revision;
 
 	public GetRemoteResourceRevisionOperation(IRepositoryResource resource) {
 		super("Operation_GetRemoteRevision", SVNUIMessages.class); //$NON-NLS-1$
 		this.resource = resource;
-		this.revision = SVNRevision.INVALID_REVISION_NUMBER;
+		revision = SVNRevision.INVALID_REVISION_NUMBER;
 	}
 
 	public long getRevision() {
-		return this.revision;
+		return revision;
 	}
 
+	@Override
 	protected void runImpl(IProgressMonitor monitor) throws Exception {
-		this.revision = this.resource.getRevision();
+		revision = resource.getRevision();
 	}
 
 }

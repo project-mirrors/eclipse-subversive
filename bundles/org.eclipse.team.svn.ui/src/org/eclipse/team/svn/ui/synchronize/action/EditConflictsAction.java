@@ -25,20 +25,22 @@ import org.eclipse.team.ui.synchronize.ISynchronizePageConfiguration;
  * @author Alexei Goncharov
  */
 public class EditConflictsAction extends AbstractSynchronizeModelAction {
-	
+
 	protected EditConflictsActionHelper actionHelper;
-	
+
 	public EditConflictsAction(String text, ISynchronizePageConfiguration configuration) {
 		super(text, configuration);
-		this.actionHelper = new EditConflictsActionHelper(this, configuration);
+		actionHelper = new EditConflictsActionHelper(this, configuration);
 	}
 
+	@Override
 	protected FastSyncInfoFilter getSyncInfoFilter() {
-		return this.actionHelper.getSyncInfoFilter();
+		return actionHelper.getSyncInfoFilter();
 	}
 
+	@Override
 	protected IActionOperation getOperation(ISynchronizePageConfiguration configuration, IDiffElement[] elements) {
-		return this.actionHelper.getOperation();
+		return actionHelper.getOperation();
 	}
-	
+
 }

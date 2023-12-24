@@ -38,13 +38,17 @@ import org.eclipse.team.svn.ui.SVNUIMessages;
  */
 public class ConflictingFileEditorInput extends CompareEditorInput {
 	protected IFile target;
+
 	protected IFile left;
+
 	protected IFile right;
+
 	protected IFile ancestor;
-	
+
 	protected MergeElement targetElement;
-	
-	public ConflictingFileEditorInput(CompareConfiguration configuration, IFile target, IFile left, IFile right, IFile ancestor) {
+
+	public ConflictingFileEditorInput(CompareConfiguration configuration, IFile target, IFile left, IFile right,
+			IFile ancestor) {
 		super(configuration);
 		this.target = target;
 		this.left = left;
@@ -52,76 +56,79 @@ public class ConflictingFileEditorInput extends CompareEditorInput {
 		this.ancestor = ancestor;
 	}
 
+	@Override
 	protected Object prepareInput(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-		CompareConfiguration cc = this.getCompareConfiguration();
-		Image img = CompareUI.getImage(this.target);
+		CompareConfiguration cc = getCompareConfiguration();
+		Image img = CompareUI.getImage(target);
 		cc.setLeftImage(img);
 		cc.setRightImage(img);
 		cc.setAncestorImage(img);
-		cc.setLeftLabel(this.target.getName() + " " + SVNUIMessages.ConflictingFileEditorInput_Working); //$NON-NLS-1$
-		cc.setRightLabel(this.target.getName() + " " + SVNUIMessages.ConflictingFileEditorInput_Repository); //$NON-NLS-1$
-		cc.setAncestorLabel(this.target.getName() + " " + SVNUIMessages.ConflictingFileEditorInput_Base); //$NON-NLS-1$
-		
-		this.setTitle(this.target.getName() + " " + SVNUIMessages.ConflictingFileEditorInput_EditConflicts); //$NON-NLS-1$
-		
+		cc.setLeftLabel(target.getName() + " " + SVNUIMessages.ConflictingFileEditorInput_Working); //$NON-NLS-1$
+		cc.setRightLabel(target.getName() + " " + SVNUIMessages.ConflictingFileEditorInput_Repository); //$NON-NLS-1$
+		cc.setAncestorLabel(target.getName() + " " + SVNUIMessages.ConflictingFileEditorInput_Base); //$NON-NLS-1$
+
+		setTitle(target.getName() + " " + SVNUIMessages.ConflictingFileEditorInput_EditConflicts); //$NON-NLS-1$
+
 		InputStream stream = null;
 		try {
-			stream = this.left.getContents();
-			byte []buf = new byte[2048];
+			stream = left.getContents();
+			byte[] buf = new byte[2048];
 			int len = 0;
 			ByteArrayOutputStream output = new ByteArrayOutputStream();
 			while ((len = stream.read(buf)) > 0) {
 				output.write(buf, 0, len);
 			}
-			this.targetElement = new MergeElement(this.target, output.toByteArray(), true);
-		} 
-		catch (RuntimeException e) {
+			targetElement = new MergeElement(target, output.toByteArray(), true);
+		} catch (RuntimeException e) {
 			throw e;
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			throw new InvocationTargetException(e);
-		}
-		finally {
+		} finally {
 			if (stream != null) {
-				try {stream.close();} catch (Exception ex) {}
+				try {
+					stream.close();
+				} catch (Exception ex) {
+				}
 			}
 		}
-		
+
 		try {
-			MergeElement rightRef = new MergeElement(this.right);
-			rightRef.setCharsetReference(this.targetElement);
-			MergeElement ancestorRef = new MergeElement(this.ancestor);
-			ancestorRef.setCharsetReference(this.targetElement);
-			return new Differencer().findDifferences(true, monitor, null, ancestorRef, this.targetElement, rightRef);
-		}
-		finally {
+			MergeElement rightRef = new MergeElement(right);
+			rightRef.setCharsetReference(targetElement);
+			MergeElement ancestorRef = new MergeElement(ancestor);
+			ancestorRef.setCharsetReference(targetElement);
+			return new Differencer().findDifferences(true, monitor, null, ancestorRef, targetElement, rightRef);
+		} finally {
 			monitor.done();
 		}
 	}
-	
+
+	@Override
 	public Object getAdapter(Class adapter) {
 		if (IFile.class.equals(adapter)) {
 			// disallow auto-flush of editor content
-			return this.target;
+			return target;
 		}
 		return super.getAdapter(adapter);
 	}
-	
+
+	@Override
 	public void saveChanges(IProgressMonitor pm) throws CoreException {
 		// flush editor content...
 		super.saveChanges(pm);
 		// ...and save it
-		this.targetElement.commit(pm);
-		
-		this.setDirty(false);
+		targetElement.commit(pm);
+
+		setDirty(false);
 	}
-	
+
 	protected class MergeElement extends BufferedResourceNode {
 		protected boolean editable;
+
 		protected BufferedResourceNode charsetReference;
-		
+
 		public BufferedResourceNode getCharsetReference() {
-			return this.charsetReference;
+			return charsetReference;
 		}
 
 		public void setCharsetReference(BufferedResourceNode charsetReference) {
@@ -131,27 +138,30 @@ public class ConflictingFileEditorInput extends CompareEditorInput {
 		public MergeElement(IResource resource) {
 			this(resource, null, false);
 		}
-		
-		public MergeElement(IResource resource, byte []initialContent, boolean editable) {
+
+		public MergeElement(IResource resource, byte[] initialContent, boolean editable) {
 			super(resource);
 			this.editable = editable;
 			if (initialContent != null) {
-				this.setContent(initialContent);
+				setContent(initialContent);
 			}
 		}
 
+		@Override
 		public String getCharset() {
-			return this.charsetReference != null ? this.charsetReference.getCharset() : super.getCharset();
+			return charsetReference != null ? charsetReference.getCharset() : super.getCharset();
 		}
-		
+
+		@Override
 		public String getType() {
-			String extension = ConflictingFileEditorInput.this.target.getFileExtension();
+			String extension = target.getFileExtension();
 			return extension == null ? ITypedElement.UNKNOWN_TYPE : extension;
 		}
 
+		@Override
 		public boolean isEditable() {
-			return this.editable;
+			return editable;
 		}
 	}
-	
+
 }

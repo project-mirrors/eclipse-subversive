@@ -38,16 +38,19 @@ import org.eclipse.team.ui.synchronize.ISynchronizePageConfiguration;
  * @author Igor Burilo
  */
 public class CompareWithRevisionPaneAction extends AbstractSynchronizeModelAction {
-	
+
 	public CompareWithRevisionPaneAction(String text, ISynchronizePageConfiguration configuration) {
 		super(text, configuration);
 	}
-	
+
+	@Override
 	protected IActionOperation getOperation(ISynchronizePageConfiguration configuration, IDiffElement[] elements) {
-		IResource resource = this.getAllSelectedResources()[0];
+		IResource resource = getAllSelectedResources()[0];
 		ILocalResource local = SVNRemoteStorage.instance().asLocalResource(resource);
 		if (!IStateFilter.SF_INTERNAL_INVALID.accept(local)) {
-			IRepositoryResource remote = local.isCopied() ? SVNUtility.getCopiedFrom(resource) : SVNRemoteStorage.instance().asRepositoryResource(resource);
+			IRepositoryResource remote = local.isCopied()
+					? SVNUtility.getCopiedFrom(resource)
+					: SVNRemoteStorage.instance().asRepositoryResource(resource);
 			ComparePanel panel = new ComparePanel(remote, local.getRevision());
 			DefaultDialog dlg = new DefaultDialog(UIMonitorUtility.getShell(), panel);
 			if (dlg.open() == 0) {
@@ -58,15 +61,20 @@ public class CompareWithRevisionPaneAction extends AbstractSynchronizeModelActio
 		}
 		return null;
 	}
-	
+
+	@Override
 	protected boolean updateSelection(IStructuredSelection selection) {
 		if (super.updateSelection(selection)) {
 			if (selection.size() == 1) {
-				IResource[] selectedResources = this.getAllSelectedResources();
-				return (CoreExtensionsManager.instance().getSVNConnectorFactory().getSVNAPIVersion() >= ISVNConnectorFactory.APICompatibility.SVNAPI_1_5_x || 
-						selectedResources[0].getType() == IResource.FILE) && FileUtility.checkForResourcesPresenceRecursive(selectedResources, CompareWithWorkingCopyAction.COMPARE_FILTER);
-			}					
+				IResource[] selectedResources = getAllSelectedResources();
+				return (CoreExtensionsManager.instance()
+						.getSVNConnectorFactory()
+						.getSVNAPIVersion() >= ISVNConnectorFactory.APICompatibility.SVNAPI_1_5_x
+						|| selectedResources[0].getType() == IResource.FILE)
+						&& FileUtility.checkForResourcesPresenceRecursive(selectedResources,
+								CompareWithWorkingCopyAction.COMPARE_FILTER);
+			}
 		}
 		return false;
-	}    		
+	}
 }

@@ -19,7 +19,7 @@ import org.eclipse.team.svn.core.connector.SVNLogPath;
 import org.eclipse.team.svn.core.utility.StringMatcher;
 
 /**
- * Changed path log entries filter 
+ * Changed path log entries filter
  * 
  * @author Alexei Goncharov
  */
@@ -30,19 +30,20 @@ public class ChangeNameLogEntryFilter implements ILogEntryFilter {
 	public ChangeNameLogEntryFilter() {
 		this(null);
 	}
-	
+
 	public ChangeNameLogEntryFilter(String changedPathToAccept) {
 		this.changedPathToAccept = changedPathToAccept;
 	}
-	
+
+	@Override
 	public boolean accept(SVNLogEntry logEntry) {
-		if (this.changedPathToAccept == null) {
+		if (changedPathToAccept == null) {
 			return true;
 		}
-		StringMatcher matcher = new StringMatcher(this.changedPathToAccept);
-		SVNLogPath [] paths = logEntry.changedPaths == null ? new SVNLogPath[0] : logEntry.changedPaths;
-		for (int i = 0; i < paths.length; i++) {
-			if (matcher.match(paths[i].path)) {
+		StringMatcher matcher = new StringMatcher(changedPathToAccept);
+		SVNLogPath[] paths = logEntry.changedPaths == null ? new SVNLogPath[0] : logEntry.changedPaths;
+		for (SVNLogPath path : paths) {
+			if (matcher.match(path.path)) {
 				return true;
 			}
 		}
@@ -52,9 +53,9 @@ public class ChangeNameLogEntryFilter implements ILogEntryFilter {
 	public void setGangedPathToAccept(String changedPathToAccept) {
 		this.changedPathToAccept = changedPathToAccept;
 	}
-	
+
 	public String getGangedPathToAccept() {
-		return this.changedPathToAccept;
+		return changedPathToAccept;
 	}
-	
+
 }

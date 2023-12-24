@@ -14,7 +14,6 @@
 
 package org.eclipse.team.svn.ui.extension.factory;
 
-
 /**
  * Add additional function to a commit message history view Such as click on a link.
  * 
@@ -22,8 +21,9 @@ package org.eclipse.team.svn.ui.extension.factory;
  */
 public interface IHistoryViewFactory {
 	/**
-	 * Returns project-specific multi-line comment view implementation 
+	 * Returns project-specific multi-line comment view implementation
+	 * 
 	 * @return project-specific multi-line comment view implementation
 	 */
-	public ICommentView getCommentView();
+	ICommentView getCommentView();
 }

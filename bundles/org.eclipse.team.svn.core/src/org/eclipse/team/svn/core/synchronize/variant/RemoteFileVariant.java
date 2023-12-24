@@ -44,40 +44,43 @@ public class RemoteFileVariant extends RemoteResourceVariant {
 		super(local);
 	}
 
+	@Override
 	protected void fetchContents(IProgressMonitor monitor) throws TeamException {
-		if ((!this.local.isCopied() && this.local.getRevision() == SVNRevision.INVALID_REVISION_NUMBER) || 
-				(IStateFilter.SF_DELETED.accept(this.local) || IStateFilter.SF_TREE_CONFLICTING.accept(this.local) && !IStateFilter.SF_TREE_CONFLICTING_REPOSITORY_EXIST.accept(this.local)) &&
-				!IStateFilter.SF_REPLACED.accept(this.local)) {
-			this.setContents(new ByteArrayInputStream(new byte[0]), monitor);
+		if (!local.isCopied() && local.getRevision() == SVNRevision.INVALID_REVISION_NUMBER
+				|| (IStateFilter.SF_DELETED.accept(local) || IStateFilter.SF_TREE_CONFLICTING.accept(local)
+						&& !IStateFilter.SF_TREE_CONFLICTING_REPOSITORY_EXIST.accept(local))
+						&& !IStateFilter.SF_REPLACED.accept(local)) {
+			setContents(new ByteArrayInputStream(new byte[0]), monitor);
 			return;
 		}
 		IRepositoryResource remote = null;
-		if (this.local.isCopied()) {
-			IRepositoryLocation location = SVNRemoteStorage.instance().getRepositoryLocation(this.local.getResource());
-			SVNEntryInfo []st = SVNUtility.info(new SVNEntryRevisionReference(FileUtility.getWorkingCopyPath(this.local.getResource())));
+		if (local.isCopied()) {
+			IRepositoryLocation location = SVNRemoteStorage.instance().getRepositoryLocation(local.getResource());
+			SVNEntryInfo[] st = SVNUtility
+					.info(new SVNEntryRevisionReference(FileUtility.getWorkingCopyPath(local.getResource())));
 			remote = location.asRepositoryFile(st[0].copyFromUrl, false);
 			remote.setSelectedRevision(SVNRevision.fromNumber(st[0].copyFromRevision));
 			remote.setPegRevision(SVNRevision.fromNumber(st[0].copyFromRevision));
-		}
-		else {
-			remote = SVNRemoteStorage.instance().asRepositoryResource(this.local.getResource());
-			remote.setSelectedRevision(SVNRevision.fromNumber(this.local.getRevision()));
-			remote.setPegRevision(((IResourceChange)this.local).getPegRevision());
-			if (this.local instanceof IResourceChange) {
-				IRepositoryResource originator = ((IResourceChange)this.local).getOriginator();
+		} else {
+			remote = SVNRemoteStorage.instance().asRepositoryResource(local.getResource());
+			remote.setSelectedRevision(SVNRevision.fromNumber(local.getRevision()));
+			remote.setPegRevision(((IResourceChange) local).getPegRevision());
+			if (local instanceof IResourceChange) {
+				IRepositoryResource originator = ((IResourceChange) local).getOriginator();
 				if (originator != null) {
 					remote = originator;
 				}
 			}
 		}
-		
+
 		GetFileContentOperation op = new GetFileContentOperation(remote);
 		ProgressMonitorUtility.doTaskExternal(op, monitor);
 		if (op.getExecutionState() == IActionOperation.OK) {
-			this.setContents(op.getContent(), monitor);
+			setContents(op.getContent(), monitor);
 		}
 	}
 
+	@Override
 	public boolean isContainer() {
 		return false;
 	}

@@ -27,7 +27,6 @@ import org.eclipse.team.svn.core.SVNMessages;
 import org.eclipse.team.svn.core.SVNTeamPlugin;
 import org.eclipse.team.svn.core.utility.ProgressMonitorUtility;
 
-
 /**
  * Abstract implementation of get file content operation
  * 
@@ -39,51 +38,59 @@ public abstract class AbstractGetFileContentOperation extends AbstractActionOper
 	public AbstractGetFileContentOperation(String getOperationType) {
 		super("Operation_GetFileContent_" + getOperationType, SVNMessages.class); //$NON-NLS-1$
 	}
-	
+
 	public String getTemporaryPath() {
-		return this.tmpFile == null ? null : this.tmpFile.getAbsolutePath();
+		return tmpFile == null ? null : tmpFile.getAbsolutePath();
 	}
 
 	public InputStream getContent() {
-		final InputStream []retVal = new InputStream[] {new ByteArrayInputStream(new byte[0])};
-		if (this.tmpFile != null && this.tmpFile.exists()) {
-			ProgressMonitorUtility.doTaskExternal(new AbstractActionOperation("Operation_GetFileContent_CreateStream", SVNMessages.class) { //$NON-NLS-1$
-				protected void runImpl(IProgressMonitor monitor) throws Exception {
-					retVal[0] = new FileInputStream(AbstractGetFileContentOperation.this.tmpFile);
-				}
-			}, new NullProgressMonitor());
+		final InputStream[] retVal = { new ByteArrayInputStream(new byte[0]) };
+		if (tmpFile != null && tmpFile.exists()) {
+			ProgressMonitorUtility.doTaskExternal(
+					new AbstractActionOperation("Operation_GetFileContent_CreateStream", SVNMessages.class) { //$NON-NLS-1$
+						@Override
+						protected void runImpl(IProgressMonitor monitor) throws Exception {
+							retVal[0] = new FileInputStream(tmpFile);
+						}
+					}, new NullProgressMonitor());
 		}
 		return retVal[0];
 	}
-	
-	public void setContent(final byte []data) {
-		ProgressMonitorUtility.doTaskExternal(new AbstractActionOperation("Operation_GetFileContent_SetContent", SVNMessages.class) { //$NON-NLS-1$
-			protected void runImpl(IProgressMonitor monitor) throws Exception {
-				if (AbstractGetFileContentOperation.this.tmpFile == null) {
-					AbstractGetFileContentOperation.this.tmpFile = AbstractGetFileContentOperation.this.createTempFile();
-				}
-				File parent = AbstractGetFileContentOperation.this.tmpFile.getParentFile();
-				if (parent != null && !parent.exists()) {
-					parent.mkdirs();
-				}
-				FileOutputStream stream = new FileOutputStream(AbstractGetFileContentOperation.this.tmpFile);
-				try {
-					stream.write(data);
-				}
-				finally {
-					try {stream.close();} catch (Exception ex) {}
-				}
-			}
-		}, new NullProgressMonitor());
+
+	public void setContent(final byte[] data) {
+		ProgressMonitorUtility
+				.doTaskExternal(new AbstractActionOperation("Operation_GetFileContent_SetContent", SVNMessages.class) { //$NON-NLS-1$
+					@Override
+					protected void runImpl(IProgressMonitor monitor) throws Exception {
+						if (tmpFile == null) {
+							tmpFile = AbstractGetFileContentOperation.this.createTempFile();
+						}
+						File parent = tmpFile.getParentFile();
+						if (parent != null && !parent.exists()) {
+							parent.mkdirs();
+						}
+						FileOutputStream stream = new FileOutputStream(tmpFile);
+						try {
+							stream.write(data);
+						} finally {
+							try {
+								stream.close();
+							} catch (Exception ex) {
+							}
+						}
+					}
+				}, new NullProgressMonitor());
 	}
-	
+
 	protected File createTempFile() throws IOException {
-		String extension = this.getExtension();
-		return SVNTeamPlugin.instance().getTemporaryFile(null, "getfilecontent" + (extension != null && extension.length() > 0 ? "." + extension : ".tmp"));  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		String extension = getExtension();
+		return SVNTeamPlugin.instance()
+				.getTemporaryFile(null,
+						"getfilecontent" + (extension != null && extension.length() > 0 ? "." + extension : ".tmp")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	}
-	
+
 	protected String getExtension() {
 		return ""; //$NON-NLS-1$
 	}
-	
+
 }

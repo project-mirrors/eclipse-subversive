@@ -25,19 +25,23 @@ import org.eclipse.ui.IMemento;
 
 public class ChangeSetCompareAdapter extends SynchronizationCompareAdapter implements ITraversalFactory {
 
+	@Override
 	public void save(ResourceMapping[] mappings, IMemento memento) {
 		// Don't save
 	}
 
+	@Override
 	public ResourceMapping[] restore(IMemento memento) {
 		// Don't restore
 		return new ResourceMapping[0];
 	}
 
+	@Override
 	public ResourceTraversal[] getTraversals(ISynchronizationScope scope) {
 		return scope.getTraversals(ModelProvider.RESOURCE_MODEL_PROVIDER_ID);
 	}
-	
+
+	@Override
 	public String getName(ResourceMapping mapping) {
 		Object modelObject = mapping.getModelObject();
 		if (modelObject instanceof ChangeSet) {

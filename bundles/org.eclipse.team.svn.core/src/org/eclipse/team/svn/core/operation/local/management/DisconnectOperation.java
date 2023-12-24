@@ -23,7 +23,6 @@ import org.eclipse.core.runtime.jobs.MultiRule;
 import org.eclipse.team.core.RepositoryProvider;
 import org.eclipse.team.svn.core.SVNMessages;
 import org.eclipse.team.svn.core.operation.AbstractActionOperation;
-import org.eclipse.team.svn.core.operation.IUnprotectedOperation;
 import org.eclipse.team.svn.core.operation.SVNResourceRuleFactory;
 import org.eclipse.team.svn.core.utility.FileUtility;
 
@@ -33,38 +32,37 @@ import org.eclipse.team.svn.core.utility.FileUtility;
  * @author Alexander Gurov
  */
 public class DisconnectOperation extends AbstractActionOperation {
-	protected IProject []projects;
+	protected IProject[] projects;
+
 	protected boolean dropSVNFolders;
 
-	public DisconnectOperation(IProject []projects, boolean dropSVNFolders) {
+	public DisconnectOperation(IProject[] projects, boolean dropSVNFolders) {
 		super("Operation_Disconnect", SVNMessages.class); //$NON-NLS-1$
 		this.projects = projects;
 		this.dropSVNFolders = dropSVNFolders;
 	}
 
+	@Override
 	public ISchedulingRule getSchedulingRule() {
-		HashSet<ISchedulingRule> rules = new HashSet<ISchedulingRule>();
-		for (int i = 0; i < this.projects.length; i++) {
-			rules.add(SVNResourceRuleFactory.INSTANCE.modifyRule(this.projects[i]));
+		HashSet<ISchedulingRule> rules = new HashSet<>();
+		for (IProject project : projects) {
+			rules.add(SVNResourceRuleFactory.INSTANCE.modifyRule(project));
 		}
 		return new MultiRule(rules.toArray(new ISchedulingRule[rules.size()]));
 	}
-	
+
+	@Override
 	protected void runImpl(IProgressMonitor monitor) throws Exception {
-		for (int i = 0; i < this.projects.length; i++) {
-			final IProject current = this.projects[i];
-			
-			this.protectStep(new IUnprotectedOperation() {
-				public void run(IProgressMonitor monitor) throws Exception {
-					if (RepositoryProvider.isShared(current)) { // it seems sometimes projects could be unmapped prior to running this code, for example by an outside activity (see bug #403385)
-						RepositoryProvider.unmap(current);
-					}
-					if (DisconnectOperation.this.dropSVNFolders) {
-						FileUtility.removeSVNMetaInformation(current, null);
-					}
+		for (final IProject current : projects) {
+			this.protectStep(monitor1 -> {
+				if (RepositoryProvider.isShared(current)) { // it seems sometimes projects could be unmapped prior to running this code, for example by an outside activity (see bug #403385)
+					RepositoryProvider.unmap(current);
 				}
-			}, monitor, this.projects.length);
+				if (dropSVNFolders) {
+					FileUtility.removeSVNMetaInformation(current, null);
+				}
+			}, monitor, projects.length);
 		}
 	}
-	
+
 }

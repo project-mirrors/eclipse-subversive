@@ -17,9 +17,9 @@ package org.eclipse.team.svn.core.connector;
 /**
  * Repository notification information container
  * 
- * The JavaHL API's is the only way to interact between SVN and Java-based tools. At the same time JavaHL connector library
- * is not EPL compatible and we won't to pin plug-in with concrete connector implementation. So, the only way to do this is
- * providing our own connector interface which will be covered by concrete connector implementation.
+ * The JavaHL API's is the only way to interact between SVN and Java-based tools. At the same time JavaHL connector library is not EPL
+ * compatible and we won't to pin plug-in with concrete connector implementation. So, the only way to do this is providing our own connector
+ * interface which will be covered by concrete connector implementation.
  * 
  * @author Alexander Gurov
  */
@@ -45,13 +45,13 @@ public class SVNRepositoryNotification {
 		 * The node was replaced
 		 */
 		REPLACE(3);
-		
+
 		public final int id;
 
 		public static boolean isActionKnown(int action) {
 			return action >= NodeAction.CHANGE.id /*0*/ && action <= NodeAction.REPLACE.id /*3*/;
 		}
-		
+
 		public static NodeAction fromId(int id) {
 			for (NodeAction kind : values()) {
 				if (kind.id == id) {
@@ -60,8 +60,8 @@ public class SVNRepositoryNotification {
 			}
 			throw new IllegalArgumentException("Invalid node action kind: " + id); //$NON-NLS-1$
 		}
-		
-		private NodeAction(int id) {
+
+		NodeAction(int id) {
 			this.id = id;
 		}
 	}
@@ -137,47 +137,51 @@ public class SVNRepositoryNotification {
 		UPGRADE_START(15),
 		/**
 		 * A revision was skipped during loading.
+		 * 
 		 * @since 1.8
 		 */
 		LOAD_SKIPPED_REV(16),
 		/**
 		 * The structure of a revision is being verified.
+		 * 
 		 * @since 1.8
 		 */
 		VERIFY_REV_STRUCTURE(17);
 
-		
-
-        /**
-         * A revprop shard got packed. @
-         * @since 1.9
-         */
+		/**
+		 * A revprop shard got packed. @
+		 * 
+		 * @since 1.9
+		 */
 //        pack_revprops,
 
-        /**
-         * A non-packed revprop shard got removed.
-         * @since 1.9
-         */
+		/**
+		 * A non-packed revprop shard got removed.
+		 * 
+		 * @since 1.9
+		 */
 //        cleanup_revprops,
 
-        /**
-         * The repository format got bumped.
-         * @since 1.9
-         */
+		/**
+		 * The repository format got bumped.
+		 * 
+		 * @since 1.9
+		 */
 //        format_bumped,
 
-        /**
-         * A revision range was copied.
-         * @since 1.9
-         */
+		/**
+		 * A revision range was copied.
+		 * 
+		 * @since 1.9
+		 */
 //        hotcopy_rev_range;
-		
+
 		public final int id;
-		
+
 		public static boolean isActionKnown(int action) {
 			return action >= Action.WARNING.id /*0*/ && action <= Action.VERIFY_REV_STRUCTURE.id /*17*/;
 		}
-		
+
 		public static Action fromId(int id) {
 			for (Action kind : values()) {
 				if (kind.id == id) {
@@ -186,8 +190,8 @@ public class SVNRepositoryNotification {
 			}
 			throw new IllegalArgumentException("Invalid action kind: " + id); //$NON-NLS-1$
 		}
-		
-		private Action(int id) {
+
+		Action(int id) {
 			this.id = id;
 		}
 	}
@@ -232,7 +236,8 @@ public class SVNRepositoryNotification {
 	 */
 	public final long oldRevision;
 
-	public SVNRepositoryNotification(String path, NodeAction nodeAction, Action action, long revision, String warning, long shard, long newRevision, long oldRevision) {
+	public SVNRepositoryNotification(String path, NodeAction nodeAction, Action action, long revision, String warning,
+			long shard, long newRevision, long oldRevision) {
 		this.path = path;
 		this.nodeAction = nodeAction;
 		this.action = action;

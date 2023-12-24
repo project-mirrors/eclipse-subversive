@@ -18,7 +18,6 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IContributionItem;
-import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.viewers.ISelection;
@@ -36,94 +35,93 @@ import org.eclipse.team.ui.synchronize.ModelSynchronizeParticipantActionGroup;
 public abstract class AbstractSynchronizeModelActionGroup extends ModelSynchronizeParticipantActionGroup {
 
 	public static final String GROUP_MANAGE_LOCALS = "modelManageLocalChanges"; //$NON-NLS-1$
+
 	public static final String GROUP_PROCESS_ALL = "modelProcessAllItems"; //$NON-NLS-1$
+
 	public static final String GROUP_TEAM = "modelTeam"; //$NON-NLS-1$
-	
+
 	protected ISynchronizePageConfiguration configuration;
-	
+
 	protected MenuManager outgoing;
+
 	protected MenuManager incoming;
-	
+
 	public AbstractSynchronizeModelActionGroup() {
-		super();
 	}
 
+	@Override
 	public final void initialize(ISynchronizePageConfiguration configuration) {
 		super.initialize(this.configuration = configuration);
-		this.configureActions(configuration);
+		configureActions(configuration);
 	}
-	
-    public ISynchronizePageConfiguration getConfiguration() {
-        return this.configuration;
-    }
 
+	@Override
+	public ISynchronizePageConfiguration getConfiguration() {
+		return configuration;
+	}
+
+	@Override
 	public void dispose() {
-		if (this.outgoing != null) {
-			this.outgoing.removeAll();
-			this.outgoing.dispose();
+		if (outgoing != null) {
+			outgoing.removeAll();
+			outgoing.dispose();
 		}
-		
-		if (this.incoming != null) {
-			this.incoming.removeAll();
-			this.incoming.dispose();
+
+		if (incoming != null) {
+			incoming.removeAll();
+			incoming.dispose();
 		}
-		
+
 		super.dispose();
 	}
-	   
+
 	protected abstract void configureActions(ISynchronizePageConfiguration configuration);
-	
-	protected void addSpecificActions(final AbstractSynchronizeLogicalModelAction selectionProvider, final ISynchronizePageConfiguration configuration) {
-		this.outgoing = new MenuManager(SVNUIMessages.SynchronizeActionGroup_Outgoing);
+
+	protected void addSpecificActions(final AbstractSynchronizeLogicalModelAction selectionProvider,
+			final ISynchronizePageConfiguration configuration) {
+		outgoing = new MenuManager(SVNUIMessages.SynchronizeActionGroup_Outgoing);
 		this.appendToGroup(
-				ISynchronizePageConfiguration.P_CONTEXT_MENU, 
-				AbstractSynchronizeModelActionGroup.GROUP_TEAM, 
-				this.outgoing);
-		
-		this.incoming = new MenuManager(SVNUIMessages.SynchronizeActionGroup_Incoming);
+				ISynchronizePageConfiguration.P_CONTEXT_MENU, AbstractSynchronizeModelActionGroup.GROUP_TEAM, outgoing);
+
+		incoming = new MenuManager(SVNUIMessages.SynchronizeActionGroup_Incoming);
 		this.appendToGroup(
-				ISynchronizePageConfiguration.P_CONTEXT_MENU, 
-				AbstractSynchronizeModelActionGroup.GROUP_TEAM, 
-				this.incoming);
-		
+				ISynchronizePageConfiguration.P_CONTEXT_MENU, AbstractSynchronizeModelActionGroup.GROUP_TEAM, incoming);
+
 		boolean isEuropa = false;
-		String version = (String) Platform.getBundle("org.eclipse.core.runtime").getHeaders().get("Bundle-Version"); //$NON-NLS-1$ //$NON-NLS-2$
+		String version = Platform.getBundle("org.eclipse.core.runtime").getHeaders().get("Bundle-Version"); //$NON-NLS-1$ //$NON-NLS-2$
 		if (version != null) {
-			isEuropa = "3.4.0".compareTo(version) > 0; //$NON-NLS-1$			
+			isEuropa = "3.4.0".compareTo(version) > 0; //$NON-NLS-1$
 		}
 		if (isEuropa) {
-			this.addLocalActions(this.outgoing, configuration);
-			this.addRemoteActions(this.incoming, configuration);
-		}
-		else {
-			this.outgoing.setRemoveAllWhenShown(true);
-			this.outgoing.addMenuListener(new IMenuListener() {
-				public void menuAboutToShow(IMenuManager manager) {
-					AbstractSynchronizeModelActionGroup.this.addLocalActions(manager, configuration);
-					AbstractSynchronizeModelActionGroup.this.updateSelection(manager, selectionProvider.getStructuredSelection());
-				}
+			addLocalActions(outgoing, configuration);
+			addRemoteActions(incoming, configuration);
+		} else {
+			outgoing.setRemoveAllWhenShown(true);
+			outgoing.addMenuListener(manager -> {
+				AbstractSynchronizeModelActionGroup.this.addLocalActions(manager, configuration);
+				AbstractSynchronizeModelActionGroup.this.updateSelection(manager,
+						selectionProvider.getStructuredSelection());
 			});
-			this.incoming.setRemoveAllWhenShown(true);
-			this.incoming.addMenuListener(new IMenuListener() {
-				public void menuAboutToShow(IMenuManager manager) {
-					AbstractSynchronizeModelActionGroup.this.addRemoteActions(manager, configuration);
-					AbstractSynchronizeModelActionGroup.this.updateSelection(manager, selectionProvider.getStructuredSelection());
-				}
+			incoming.setRemoveAllWhenShown(true);
+			incoming.addMenuListener(manager -> {
+				AbstractSynchronizeModelActionGroup.this.addRemoteActions(manager, configuration);
+				AbstractSynchronizeModelActionGroup.this.updateSelection(manager,
+						selectionProvider.getStructuredSelection());
 			});
 		}
 	}
 
 	protected void addLocalActions(IMenuManager manager, ISynchronizePageConfiguration configuration) {
-		
+
 	}
+
 	protected void addRemoteActions(IMenuManager manager, ISynchronizePageConfiguration configuration) {
-		
+
 	}
-	
+
 	protected void updateSelection(IMenuManager manager, ISelection selection) {
 		IContributionItem[] items = manager.getItems();
-		for (int i = 0; i < items.length; i++) {
-			IContributionItem item = items[i];
+		for (IContributionItem item : items) {
 			if (item instanceof ActionContributionItem) {
 				IAction actionItem = ((ActionContributionItem) item).getAction();
 				if (actionItem instanceof ModelParticipantAction) {

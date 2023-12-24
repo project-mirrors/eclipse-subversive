@@ -28,19 +28,21 @@ import org.eclipse.team.svn.ui.utility.WorkspaceModifyOperationWrapperFactory;
 public abstract class AbstractNonRecursiveTeamAction extends AbstractLocalTeamAction implements IPlainResourceSelector {
 
 	public AbstractNonRecursiveTeamAction() {
-		super();
 	}
-	
+
+	@Override
 	protected IOperationWrapperFactory getOperationWrapperFactory() {
 		return new WorkspaceModifyOperationWrapperFactory();
 	}
 
-	public IResource []getSelectedResources() {
+	@Override
+	public IResource[] getSelectedResources() {
 		return super.getSelectedResources();
 	}
-	
-	public IResource []getSelectedResources(IStateFilter filter) {
+
+	@Override
+	public IResource[] getSelectedResources(IStateFilter filter) {
 		return FileUtility.getResourcesRecursive(this.getSelectedResources(), filter, IResource.DEPTH_ZERO);
 	}
-	
+
 }

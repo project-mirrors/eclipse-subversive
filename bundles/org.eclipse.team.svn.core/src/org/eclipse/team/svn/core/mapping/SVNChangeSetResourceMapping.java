@@ -28,33 +28,38 @@ import org.eclipse.team.internal.core.subscribers.ChangeSet;
 public class SVNChangeSetResourceMapping extends ResourceMapping {
 
 	protected ChangeSet changeSet;
-	
-	public SVNChangeSetResourceMapping(ChangeSet changeSet ) {
+
+	public SVNChangeSetResourceMapping(ChangeSet changeSet) {
 		this.changeSet = changeSet;
 	}
 
+	@Override
 	public Object getModelObject() {
-		return this.changeSet;
+		return changeSet;
 	}
 
+	@Override
 	public String getModelProviderId() {
 		return SVNChangeSetModelProvider.ID;
 	}
 
+	@Override
 	public IProject[] getProjects() {
-		HashSet<IProject> projects = new HashSet<IProject>();
-		IResource[] resources = this.changeSet.getResources();
-		for (int i = 0; i < resources.length; i++) {
-			projects.add(resources[i].getProject());
+		HashSet<IProject> projects = new HashSet<>();
+		IResource[] resources = changeSet.getResources();
+		for (IResource element : resources) {
+			projects.add(element.getProject());
 		}
 		return projects.toArray(new IProject[projects.size()]);
 	}
 
-	public ResourceTraversal[] getTraversals(ResourceMappingContext context, IProgressMonitor monitor) throws CoreException {
-		IResource[] resources = this.changeSet.getResources();
+	@Override
+	public ResourceTraversal[] getTraversals(ResourceMappingContext context, IProgressMonitor monitor)
+			throws CoreException {
+		IResource[] resources = changeSet.getResources();
 		if (resources.length == 0) {
 			return new ResourceTraversal[0];
 		}
-		return new ResourceTraversal[] {new ResourceTraversal(resources, IResource.DEPTH_ZERO, IResource.NONE)};
+		return new ResourceTraversal[] { new ResourceTraversal(resources, IResource.DEPTH_ZERO, IResource.NONE) };
 	}
 }

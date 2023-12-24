@@ -21,8 +21,10 @@ package org.eclipse.team.svn.core.extension.crashrecovery;
  */
 public interface IResolutionHelper {
 	/**
-	 * The method provides resolution for errors about it is known 
-	 * @param description structure which describes the error happened
+	 * The method provides resolution for errors about it is known
+	 * 
+	 * @param description
+	 *            structure which describes the error happened
 	 */
-	public boolean acquireResolution(ErrorDescription description);
+	boolean acquireResolution(ErrorDescription description);
 }

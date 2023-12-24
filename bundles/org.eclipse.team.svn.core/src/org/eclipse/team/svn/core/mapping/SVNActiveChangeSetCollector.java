@@ -20,6 +20,7 @@ import org.eclipse.team.internal.core.subscribers.SubscriberChangeSetManager;
 
 /**
  * SVN active change set manager.
+ * 
  * @author Alexei Goncharov
  */
 public class SVNActiveChangeSetCollector extends SubscriberChangeSetManager {
@@ -28,8 +29,9 @@ public class SVNActiveChangeSetCollector extends SubscriberChangeSetManager {
 		super(subscriber);
 	}
 
+	@Override
 	protected ActiveChangeSet doCreateSet(String name) {
 		return new SVNActiveChangeSet(this, name);
 	}
-	
+
 }

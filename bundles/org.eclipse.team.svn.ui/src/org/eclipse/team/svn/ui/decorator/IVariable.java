@@ -15,11 +15,12 @@
 package org.eclipse.team.svn.ui.decorator;
 
 /**
- * Decoration variable interface 
+ * Decoration variable interface
  * 
  * @author Alexander Gurov
  */
 public interface IVariable {
-	public String getName();
-	public String getDescription();
+	String getName();
+
+	String getDescription();
 }

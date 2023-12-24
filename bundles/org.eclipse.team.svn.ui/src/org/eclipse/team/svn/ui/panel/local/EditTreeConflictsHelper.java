@@ -54,16 +54,17 @@ import org.eclipse.team.svn.ui.preferences.SVNTeamPreferences;
 public class EditTreeConflictsHelper {
 
 	protected ILocalResource local;
+
 	protected SVNConflictDescriptor treeConflict;
-	
+
 	public EditTreeConflictsHelper(ILocalResource local) {
 		this.local = local;
-		this.treeConflict = this.local.getTreeConflictDescriptor();
+		treeConflict = this.local.getTreeConflictDescriptor();
 	}
-	
+
 	public String getOperationAsString() {
 		String operation = SVNUIMessages.EditTreeConflictsPanel_None_Operation;
-		switch (this.treeConflict.operation) {
+		switch (treeConflict.operation) {
 			case UPDATE:
 				operation = SVNUIMessages.EditTreeConflictsPanel_Update_Operation;
 				break;
@@ -78,10 +79,10 @@ public class EditTreeConflictsHelper {
 		}
 		return operation;
 	}
-	
+
 	public String getReasonAsString() {
 		String reason = ""; //$NON-NLS-1$
-		switch (this.treeConflict.reason) {
+		switch (treeConflict.reason) {
 			case ADDED:
 				reason = SVNUIMessages.EditTreeConflictsPanel_Add_Reason;
 				break;
@@ -112,102 +113,103 @@ public class EditTreeConflictsHelper {
 		}
 		return reason;
 	}
-	
+
 	public String getActionAsString() {
 		String action = SVNUIMessages.EditTreeConflictsPanel_Replace_Action;
-		switch (this.treeConflict.action) {
-		case ADD:
-			action = SVNUIMessages.EditTreeConflictsPanel_Add_Action;
-			break;
-		case DELETE:
-			action = SVNUIMessages.EditTreeConflictsPanel_Delete_Action;
-			break;
-		case MODIFY:
-			action = SVNUIMessages.EditTreeConflictsPanel_Modify_Action;
-			break;
-		case REPLACE:
-			break;
+		switch (treeConflict.action) {
+			case ADD:
+				action = SVNUIMessages.EditTreeConflictsPanel_Add_Action;
+				break;
+			case DELETE:
+				action = SVNUIMessages.EditTreeConflictsPanel_Delete_Action;
+				break;
+			case MODIFY:
+				action = SVNUIMessages.EditTreeConflictsPanel_Modify_Action;
+				break;
+			case REPLACE:
+				break;
 		}
 		return action;
 	}
-		
+
 	public String getTip() {
 		String tip = null;
-		/*	
+		/*
 		 * Add it ?
-		 *  	
+		 * 
 		 * [Merge: local missing incoming edit]
 		 * 		In case alpha was renamed, rename alpha in the branch
-         * 		and run the merge again. 	
+		 * 		and run the merge again.
 		 */
-		if (this.treeConflict.action == Action.DELETE && this.treeConflict.reason == Reason.DELETED) {
+		if (treeConflict.action == Action.DELETE && treeConflict.reason == Reason.DELETED) {
 			tip = SVNUIMessages.EditTreeConflictsPanel_Tip1;
-		} else if (this.treeConflict.reason == Reason.MODIFIED &&  this.treeConflict.action == Action.DELETE) {
-			 tip = SVNUIMessages.EditTreeConflictsPanel_Tip2;
-		} else if (this.treeConflict.reason == Reason.DELETED || this.treeConflict.action == Action.DELETE) {
+		} else if (treeConflict.reason == Reason.MODIFIED && treeConflict.action == Action.DELETE) {
+			tip = SVNUIMessages.EditTreeConflictsPanel_Tip2;
+		} else if (treeConflict.reason == Reason.DELETED || treeConflict.action == Action.DELETE) {
 			tip = SVNUIMessages.EditTreeConflictsPanel_Tip3;
-		}					
+		}
 		return tip;
 	}
-	
+
 	public String getSrcUrl(boolean isLeft) {
-		SVNConflictVersion version = isLeft ? this.treeConflict.srcLeftVersion : this.treeConflict.srcRightVersion;
-		return  
-			version == null ? 
-			SVNRemoteStorage.instance().asRepositoryResource(this.local.getResource()).getUrl() : 
-			SVNUtility.normalizeURL(version.reposURL + "/" + version.pathInRepos); //$NON-NLS-1$
+		SVNConflictVersion version = isLeft ? treeConflict.srcLeftVersion : treeConflict.srcRightVersion;
+		return version == null
+				? SVNRemoteStorage.instance().asRepositoryResource(local.getResource()).getUrl()
+				: SVNUtility.normalizeURL(version.reposURL + "/" + version.pathInRepos); //$NON-NLS-1$
 	}
-	
+
 	/*
-	 * When we apply incoming changes we're trying not to make the conflict 
+	 * When we apply incoming changes we're trying not to make the conflict
 	 * as resolved (e.g. because of another conflicts may exist or user after this may need
 	 * to perform other additional steps), but it's not always possible, e.g.
-	 * some resolutions require 'revert' operation (which clears conflict markers) 
+	 * some resolutions require 'revert' operation (which clears conflict markers)
 	 */
 	public boolean isRemoteOperationResolveTheConflict() {
-		return (this.treeConflict.action == Action.MODIFY || this.treeConflict.action == Action.REPLACE) && (this.treeConflict.operation == Operation.UPDATE || this.treeConflict.operation == Operation.SWITCHED);
+		return (treeConflict.action == Action.MODIFY || treeConflict.action == Action.REPLACE)
+				&& (treeConflict.operation == Operation.UPDATE || treeConflict.operation == Operation.SWITCHED);
 	}
-	
+
 	public IActionOperation getOperation(boolean isRemoteResolution, boolean isLocalResolution, boolean markAsMerged) {
 		// FIXME just retest SVN::resolve() function behaviour when SVN 1.7 is available, then decide on removing useless parts if there is any
 		CompositeOperation op = new CompositeOperation("", SVNUIMessages.class); //$NON-NLS-1$
 		//used as parameter to operations, e.g. update, revert
 		boolean isRecursive = true;
 		if (isRemoteResolution) {
-			if (this.treeConflict.action == Action.ADD) {
-				this.addRemoteAddOperation(op, isRecursive);
-			} else if (this.treeConflict.action == Action.DELETE) {
-				this.addRemoteDeleteOperation(op);
-			} else if (this.treeConflict.action == Action.MODIFY || this.treeConflict.action == Action.REPLACE) {
-				this.addRemoteModifyOperation(op, isRecursive);								
+			if (treeConflict.action == Action.ADD) {
+				addRemoteAddOperation(op, isRecursive);
+			} else if (treeConflict.action == Action.DELETE) {
+				addRemoteDeleteOperation(op);
+			} else if (treeConflict.action == Action.MODIFY || treeConflict.action == Action.REPLACE) {
+				addRemoteModifyOperation(op, isRecursive);
 			}
 		}
-		
+
 		//add resolved operation
 		boolean isManual = !isRemoteResolution && !isLocalResolution;
-		if (isLocalResolution || markAsMerged && (isRemoteResolution && !this.isRemoteOperationResolveTheConflict() || isManual)) {
-			op.add(this.getResolvedOperation(isRemoteResolution, isLocalResolution, markAsMerged));
+		if (isLocalResolution
+				|| markAsMerged && (isRemoteResolution && !isRemoteOperationResolveTheConflict() || isManual)) {
+			op.add(getResolvedOperation(isRemoteResolution, isLocalResolution, markAsMerged));
 		}
-		
+
 		if (op.isEmpty()) {
 			return null;
 		}
-		
+
 		//TODO refresh parent ?
-		op.add(new RefreshResourcesOperation(new IResource[]{this.local.getResource()}));
+		op.add(new RefreshResourcesOperation(new IResource[] { local.getResource() }));
 		return op;
 	}
-	
+
 	protected void addRemoteDeleteOperation(CompositeOperation op) {
-		/* 
+		/*
 		 * If item doesn't exist locally, i.e. missing or deleted then: resolved
 		 * otherwise: delete + resolved
 		 */
-		if (this.local.getResource().exists()) {
-			op.add(new DeleteResourceOperation(this.local.getResource()));
-		}				
+		if (local.getResource().exists()) {
+			op.add(new DeleteResourceOperation(local.getResource()));
+		}
 	}
-	
+
 	protected void addRemoteModifyOperation(CompositeOperation op, boolean isRecursive) {
 		/*
 		 * For 'update' operation:
@@ -217,91 +219,101 @@ public class EditTreeConflictsHelper {
 		 * 		[delete] + copy + resolved
 		 * 		Result: R+
 		 */
-		
-		IResource resource = this.local.getResource();			
-		if (this.treeConflict.operation == Operation.UPDATE || this.treeConflict.operation == Operation.SWITCHED) {
-			IActionOperation resolveOp = new RevertOperation(new IResource[]{resource}, isRecursive);
-			op.add(resolveOp);						
-			
-			SVNRevision rev = this.treeConflict.operation == Operation.UPDATE ? SVNRevision.HEAD : SVNRevision.fromNumber(this.treeConflict.srcRightVersion.pegRevision);
-			boolean ignoreExternals = SVNTeamPreferences.getBehaviourBoolean(SVNTeamUIPlugin.instance().getPreferenceStore(), SVNTeamPreferences.BEHAVIOUR_IGNORE_EXTERNALS_NAME);
-			UpdateOperation updateOp = new UpdateOperation(new IResource[]{resource}, rev, ignoreExternals);
-			op.add(updateOp, new IActionOperation[]{resolveOp});	
-		} else if (this.treeConflict.operation == Operation.MERGE) {
-			DeleteResourceOperation deleteOp = null;				
+
+		IResource resource = local.getResource();
+		if (treeConflict.operation == Operation.UPDATE || treeConflict.operation == Operation.SWITCHED) {
+			IActionOperation resolveOp = new RevertOperation(new IResource[] { resource }, isRecursive);
+			op.add(resolveOp);
+
+			SVNRevision rev = treeConflict.operation == Operation.UPDATE
+					? SVNRevision.HEAD
+					: SVNRevision.fromNumber(treeConflict.srcRightVersion.pegRevision);
+			boolean ignoreExternals = SVNTeamPreferences.getBehaviourBoolean(
+					SVNTeamUIPlugin.instance().getPreferenceStore(),
+					SVNTeamPreferences.BEHAVIOUR_IGNORE_EXTERNALS_NAME);
+			UpdateOperation updateOp = new UpdateOperation(new IResource[] { resource }, rev, ignoreExternals);
+			op.add(updateOp, new IActionOperation[] { resolveOp });
+		} else if (treeConflict.operation == Operation.MERGE) {
+			DeleteResourceOperation deleteOp = null;
 			if (resource.exists()) {
 				deleteOp = new DeleteResourceOperation(resource);
 				op.add(deleteOp);
-			}						
-			
-			IActionOperation copyOp = this.getCopyResourceOperation();
-			op.add(copyOp, deleteOp == null ? null : new IActionOperation[]{deleteOp});
+			}
+
+			IActionOperation copyOp = getCopyResourceOperation();
+			op.add(copyOp, deleteOp == null ? null : new IActionOperation[] { deleteOp });
 		}
 	}
-	
-	protected void addRemoteAddOperation(CompositeOperation op, boolean isRecursive) {		
+
+	protected void addRemoteAddOperation(CompositeOperation op, boolean isRecursive) {
 		/*
 		 * 'Update' operation: resolved + [delete[ + update
-		 * 'Merge' operation:  resolved + [delete] + copy   
+		 * 'Merge' operation:  resolved + [delete] + copy
 		 * 
 		 * For 'merge' operation we perform a copy
-		 * For 'update' operation we perform update because file already exists in repository		 
-		 */						
+		 * For 'update' operation we perform update because file already exists in repository
+		 */
 		DeleteResourceOperation deleteOp = null;
 		//if resource exists on file system we delete it
-		if (this.local.getResource().exists()) {
-			deleteOp = new DeleteResourceOperation(this.local.getResource());
-			op.add(deleteOp);			
+		if (local.getResource().exists()) {
+			deleteOp = new DeleteResourceOperation(local.getResource());
+			op.add(deleteOp);
 		}
-		
+
 		IActionOperation updateOp;
-		if (this.treeConflict.operation == Operation.MERGE) {
-			updateOp = this.getCopyResourceOperation();		
+		if (treeConflict.operation == Operation.MERGE) {
+			updateOp = getCopyResourceOperation();
 		} else {
-			SVNRevision rev = this.treeConflict.operation == Operation.UPDATE ? SVNRevision.HEAD : SVNRevision.fromNumber(this.treeConflict.srcRightVersion.pegRevision);
-			boolean ignoreExternals = SVNTeamPreferences.getBehaviourBoolean(SVNTeamUIPlugin.instance().getPreferenceStore(), SVNTeamPreferences.BEHAVIOUR_IGNORE_EXTERNALS_NAME);
-			updateOp = new UpdateOperation(new IResource[]{this.local.getResource()}, rev, ignoreExternals);				
-		}																		
-		op.add(updateOp, deleteOp == null ? null : new IActionOperation[]{deleteOp});
+			SVNRevision rev = treeConflict.operation == Operation.UPDATE
+					? SVNRevision.HEAD
+					: SVNRevision.fromNumber(treeConflict.srcRightVersion.pegRevision);
+			boolean ignoreExternals = SVNTeamPreferences.getBehaviourBoolean(
+					SVNTeamUIPlugin.instance().getPreferenceStore(),
+					SVNTeamPreferences.BEHAVIOUR_IGNORE_EXTERNALS_NAME);
+			updateOp = new UpdateOperation(new IResource[] { local.getResource() }, rev, ignoreExternals);
+		}
+		op.add(updateOp, deleteOp == null ? null : new IActionOperation[] { deleteOp });
 	}
-	
+
 	protected IActionOperation getCopyResourceOperation() {
-		String url = this.getSrcUrl(false);
-		long pegRev = this.treeConflict.srcRightVersion.pegRevision;
-		
-		return new CopyRemoteResourcesToWcOperation(new SVNEntryReference(url, SVNRevision.fromNumber(pegRev)), this.local.getResource());
+		String url = getSrcUrl(false);
+		long pegRev = treeConflict.srcRightVersion.pegRevision;
+
+		return new CopyRemoteResourcesToWcOperation(new SVNEntryReference(url, SVNRevision.fromNumber(pegRev)),
+				local.getResource());
 	}
-	
-	protected IActionOperation getResolvedOperation(boolean isRemoteResolution, boolean isLocalResolution, boolean markAsMerged) {
+
+	protected IActionOperation getResolvedOperation(boolean isRemoteResolution, boolean isLocalResolution,
+			boolean markAsMerged) {
 //		int resolution = isRemoteResolution ? SVNConflictResolution.CHOOSE_REMOTE_FULL : isLocalResolution ? SVNConflictResolution.CHOOSE_LOCAL_FULL : SVNConflictResolution.CHOOSE_MERGED;
 		// FIXME there is really the Subversion issue why the "svn: Tree conflicts can only be resolved to 'working' state" error happens
 		//  for reference please check this article: http://tortoisesvn.tigris.org/ds/viewMessage.do?dsForumId=757&viewType=browseAll&dsMessageId=2411874#messagefocus
 		//  so, for now Subversive code will just resolve conflicts and the only call SVN API resolve() function to mark it as merged
 		//  which means the only acceptable option is SVNConflictResolution.CHOOSE_MERGED
 		SVNConflictResolution.Choice resolution = SVNConflictResolution.Choice.CHOOSE_MERGED;
-		return new MarkResolvedOperation(new IResource[] {this.local.getResource()}, resolution, SVNDepth.INFINITY);		
+		return new MarkResolvedOperation(new IResource[] { local.getResource() }, resolution, SVNDepth.INFINITY);
 	}
-	
+
 	public IRepositoryResource getRepositoryResourceForHistory(boolean isLeft) {
-		SVNConflictVersion version = isLeft ? this.treeConflict.srcLeftVersion : this.treeConflict.srcRightVersion;		
-		String url = this.getSrcUrl(isLeft);		
+		SVNConflictVersion version = isLeft ? treeConflict.srcLeftVersion : treeConflict.srcRightVersion;
+		String url = getSrcUrl(isLeft);
 		String repos = version.reposURL;
-		repos = SVNUtility.normalizeURL(repos);		
-		SVNRevision revision = SVNRevision.fromNumber(this.treeConflict.srcRightVersion.pegRevision);
-		
+		repos = SVNUtility.normalizeURL(repos);
+		SVNRevision revision = SVNRevision.fromNumber(treeConflict.srcRightVersion.pegRevision);
+
 		//find the first parent of resource which exists in repository in end revision (srcRightSource's pegRevision)
 		while (true) {
 			IPath path = SVNUtility.createPathForSVNUrl(url);
 			path = path.removeLastSegments(1);
 			url = path.toString();
-			
+
 			IRepositoryLocation location = null;
 			ISVNConnector proxy = null;
-			try {				
-				SVNEntryRevisionReference ref = new SVNEntryRevisionReference(url, revision, revision);								
+			try {
+				SVNEntryRevisionReference ref = new SVNEntryRevisionReference(url, revision, revision);
 				IRepositoryResource rr = SVNUtility.asRepositoryResource(url, true);
 				location = rr.getRepositoryLocation();
-				proxy = location.acquireSVNProxy();				
+				proxy = location.acquireSVNProxy();
 				SVNUtility.info(proxy, ref, SVNDepth.EMPTY, new SVNNullProgressMonitor());
 				break;
 			} catch (SVNConnectorException e) {
@@ -310,11 +322,11 @@ public class EditTreeConflictsHelper {
 				}
 			} finally {
 				if (location != null && proxy != null) {
-					location.releaseSVNProxy(proxy);	
-				}				
+					location.releaseSVNProxy(proxy);
+				}
 			}
-		}			
-				
+		}
+
 		IRepositoryResource repositoryResource = SVNUtility.asRepositoryResource(url, true);
 		repositoryResource.setPegRevision(revision);
 		repositoryResource.setSelectedRevision(revision);

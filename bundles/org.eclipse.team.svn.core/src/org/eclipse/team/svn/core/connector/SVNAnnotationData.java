@@ -17,9 +17,9 @@ package org.eclipse.team.svn.core.connector;
 /**
  * Annotation data block
  * 
- * The JavaHL API's is the only way to interact between SVN and Java-based tools. At the same time JavaHL connector
- * library is not EPL compatible and we won't to pin plug-in with concrete connector implementation. So, the only way to
- * do this is providing our own connector interface which will be covered by concrete connector implementation.
+ * The JavaHL API's is the only way to interact between SVN and Java-based tools. At the same time JavaHL connector library is not EPL
+ * compatible and we won't to pin plug-in with concrete connector implementation. So, the only way to do this is providing our own connector
+ * interface which will be covered by concrete connector implementation.
  * 
  * @author Alexander Gurov
  */
@@ -28,7 +28,7 @@ public class SVNAnnotationData {
 	 * The line number.
 	 */
 	public final long lineNum;
-	
+
 	/**
 	 * The annotated line revision
 	 */
@@ -89,7 +89,8 @@ public class SVNAnnotationData {
 	 * @param mergedPath
 	 *            the path of the last change merged into the line
 	 */
-	public SVNAnnotationData(long lineNum, boolean hasLocalChange, long revision, long date, String author, long mergedRevision, long mergedDate, String mergedAuthor, String mergedPath) {
+	public SVNAnnotationData(long lineNum, boolean hasLocalChange, long revision, long date, String author,
+			long mergedRevision, long mergedDate, String mergedAuthor, String mergedPath) {
 		this.lineNum = lineNum;
 		this.hasLocalChange = hasLocalChange;
 		this.revision = revision;

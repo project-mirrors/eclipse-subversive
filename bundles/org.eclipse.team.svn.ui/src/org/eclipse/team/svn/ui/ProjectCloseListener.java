@@ -26,9 +26,14 @@ import org.eclipse.team.svn.core.svnstorage.SVNRemoteStorage;
  * @author Alexander Gurov
  */
 public class ProjectCloseListener implements IResourceChangeListener {
+	@Override
 	public void resourceChanged(IResourceChangeEvent event) {
-		IProject []projects = new IProject[] {(IProject)event.getResource()};
-		SVNRemoteStorage.instance().fireResourceStatesChangedEvent(new ProjectStatesChangedEvent(projects, event.getType() == IResourceChangeEvent.PRE_CLOSE ? ProjectStatesChangedEvent.ST_PRE_CLOSED : ProjectStatesChangedEvent.ST_PRE_DELETED));
+		IProject[] projects = { (IProject) event.getResource() };
+		SVNRemoteStorage.instance()
+				.fireResourceStatesChangedEvent(new ProjectStatesChangedEvent(projects,
+						event.getType() == IResourceChangeEvent.PRE_CLOSE
+								? ProjectStatesChangedEvent.ST_PRE_CLOSED
+								: ProjectStatesChangedEvent.ST_PRE_DELETED));
 		/*
 		 * Don't clear remote status cache because PersistentRemoteStatusCache impl. depends on
 		 * resources existence, i.e. it can can't flush bytes for deleted or closed project.

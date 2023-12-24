@@ -19,52 +19,57 @@ import java.util.Date;
 import org.eclipse.team.internal.core.subscribers.DiffChangeSet;
 
 public class SVNIncomingChangeSet extends DiffChangeSet {
-	
+
 	protected String comment;
+
 	protected String author;
+
 	protected Long revision;
+
 	protected Date date;
-	
+
 	public SVNIncomingChangeSet() {
-		this.comment = ""; //$NON-NLS-1$
-		this.revision = Long.MIN_VALUE;
-		this.author = ""; //$NON-NLS-1$
-		this.date = null;
+		comment = ""; //$NON-NLS-1$
+		revision = Long.MIN_VALUE;
+		author = ""; //$NON-NLS-1$
+		date = null;
 	}
-	
+
+	@Override
 	public void setName(String name) {
 		super.setName(name);
 	}
-	
+
 	public void setRevision(Long revision) {
 		this.revision = revision;
 	}
-	
+
 	public Long getRevision() {
-		return this.revision;
+		return revision;
 	}
-	
+
 	public void setAuthor(String author) {
 		this.author = author;
 	}
-	
+
 	public String getAuthor() {
-        return this.author;
-    }
+		return author;
+	}
 
 	public void setDate(Date date) {
 		this.date = date;
 	}
-	
-    public Date getDate() {
-        return this.date;
-    }
 
-    public void setComment(String comment) {
-    	this.comment = comment;
-    }
-    
-    public String getComment() {
-        return this.comment;
-    }
+	public Date getDate() {
+		return date;
+	}
+
+	public void setComment(String comment) {
+		this.comment = comment;
+	}
+
+	@Override
+	public String getComment() {
+		return comment;
+	}
 }

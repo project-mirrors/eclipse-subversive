@@ -28,37 +28,42 @@ import org.eclipse.team.svn.ui.SVNTeamUIPlugin;
  */
 public class PromptOptionDialog extends MessageDialogWithToggle {
 	protected IOptionManager optionManager;
-	
+
 	public interface IOptionManager {
-		public String []getButtons();
-		public void buttonPressed(IPreferenceStore store, int idx, boolean toggle);
+		String[] getButtons();
+
+		void buttonPressed(IPreferenceStore store, int idx, boolean toggle);
 	}
-	
+
 	public static abstract class AbstractOptionManager implements IOptionManager {
+		@Override
 		public String[] getButtons() {
-			return new String[] {IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL};
+			return new String[] { IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL };
 		}
 	}
 
-	public PromptOptionDialog(Shell parentShell, String title, String message, String toggleMessage, IOptionManager optionManager) {
-		super(parentShell, title, null, message, MessageDialog.QUESTION, optionManager.getButtons(), 0, toggleMessage, false);
+	public PromptOptionDialog(Shell parentShell, String title, String message, String toggleMessage,
+			IOptionManager optionManager) {
+		super(parentShell, title, null, message, MessageDialog.QUESTION, optionManager.getButtons(), 0, toggleMessage,
+				false);
 		this.optionManager = optionManager;
-		this.setPrefStore(SVNTeamUIPlugin.instance().getPreferenceStore());
+		setPrefStore(SVNTeamUIPlugin.instance().getPreferenceStore());
 	}
-	
+
+	@Override
 	protected void buttonPressed(int buttonId) {
 		int idx = -1;
-		for (int i = 0; i < this.getButtonLabels().length; i++) {
-			int id = ((Integer)(this.getButton(i)).getData()).intValue();
+		for (int i = 0; i < getButtonLabels().length; i++) {
+			int id = ((Integer) getButton(i).getData());
 			if (id == buttonId) {
 				idx = i;
 				break;
 			}
 		}
-		
+
 		super.buttonPressed(buttonId);
-		
-		this.optionManager.buttonPressed(this.getPrefStore(), idx, this.getToggleState());
+
+		optionManager.buttonPressed(getPrefStore(), idx, getToggleState());
 	}
-	
+
 }

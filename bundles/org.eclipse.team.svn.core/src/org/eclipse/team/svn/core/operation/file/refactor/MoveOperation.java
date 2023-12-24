@@ -15,7 +15,6 @@
 package org.eclipse.team.svn.core.operation.file.refactor;
 
 import java.io.File;
-import java.io.FileFilter;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
@@ -23,7 +22,6 @@ import org.eclipse.core.runtime.jobs.MultiRule;
 import org.eclipse.team.svn.core.BaseMessages;
 import org.eclipse.team.svn.core.SVNMessages;
 import org.eclipse.team.svn.core.connector.ISVNConnector;
-import org.eclipse.team.svn.core.operation.IUnprotectedOperation;
 import org.eclipse.team.svn.core.operation.SVNProgressMonitor;
 import org.eclipse.team.svn.core.operation.UnreportableException;
 import org.eclipse.team.svn.core.operation.file.AbstractFileOperation;
@@ -42,9 +40,10 @@ import org.eclipse.team.svn.core.utility.SVNUtility;
  */
 public class MoveOperation extends AbstractFileOperation {
 	protected File localTo;
+
 	protected boolean forceNonSVN;
-	
-	public MoveOperation(File []files, File localTo, boolean forceNonSVN) {
+
+	public MoveOperation(File[] files, File localTo, boolean forceNonSVN) {
 		super("Operation_MoveFile", SVNMessages.class, files); //$NON-NLS-1$
 		this.localTo = localTo;
 		this.forceNonSVN = forceNonSVN;
@@ -56,67 +55,63 @@ public class MoveOperation extends AbstractFileOperation {
 		this.forceNonSVN = forceNonSVN;
 	}
 
+	@Override
 	public ISchedulingRule getSchedulingRule() {
 		ISchedulingRule parentRule = super.getSchedulingRule();
-		return MultiRule.combine(new LockingRule(this.localTo), parentRule);
+		return MultiRule.combine(new LockingRule(localTo), parentRule);
 	}
-	
+
+	@Override
 	protected void runImpl(IProgressMonitor monitor) throws Exception {
-		File []files = this.operableData();
+		File[] files = operableData();
 		// allows moving of child and parent resources at the same time
 		FileUtility.reorder(files, false);
-		
-		IRepositoryResource remoteTo = SVNFileStorage.instance().asRepositoryResource(this.localTo, true);
+
+		IRepositoryResource remoteTo = SVNFileStorage.instance().asRepositoryResource(localTo, true);
 		IRepositoryLocation location = remoteTo == null ? null : remoteTo.getRepositoryLocation();
 		final ISVNConnector proxy = location == null ? null : location.acquireSVNProxy();
-		
+
 		for (int i = 0; i < files.length && !monitor.isCanceled(); i++) {
 			final File current = files[i];
-			this.protectStep(new IUnprotectedOperation() {
-				public void run(IProgressMonitor monitor) throws Exception {
-					IRepositoryResource remote = SVNFileStorage.instance().asRepositoryResource(current, true);
-					File checked = MoveOperation.this.getRenameTo(current);
-					if (remote == null) {
-						MoveOperation.this.nonSVNMove(checked, current, monitor);
-					}
-					else if (proxy == null || MoveOperation.this.forceNonSVN) {
-						MoveOperation.this.nonSVNCopy(current, monitor);
-						ProgressMonitorUtility.doTaskExternal(new DeleteOperation(new File[] {current}), monitor);
-					}
-					else {
-						proxy.moveLocal(new String[] {current.getAbsolutePath()}, checked.getAbsolutePath(), ISVNConnector.Options.FORCE | ISVNConnector.Options.ALLOW_MIXED_REVISIONS, new SVNProgressMonitor(MoveOperation.this, monitor, null));
-					}
+			this.protectStep(monitor1 -> {
+				IRepositoryResource remote = SVNFileStorage.instance().asRepositoryResource(current, true);
+				File checked = MoveOperation.this.getRenameTo(current);
+				if (remote == null) {
+					MoveOperation.this.nonSVNMove(checked, current, monitor1);
+				} else if (proxy == null || forceNonSVN) {
+					MoveOperation.this.nonSVNCopy(current, monitor1);
+					ProgressMonitorUtility.doTaskExternal(new DeleteOperation(new File[] { current }), monitor1);
+				} else {
+					proxy.moveLocal(new String[] { current.getAbsolutePath() }, checked.getAbsolutePath(),
+							ISVNConnector.Options.FORCE | ISVNConnector.Options.ALLOW_MIXED_REVISIONS,
+							new SVNProgressMonitor(MoveOperation.this, monitor1, null));
 				}
 			}, monitor, files.length);
 		}
-		
+
 		if (location != null) {
 			location.releaseSVNProxy(proxy);
 		}
 	}
 
 	protected File getRenameTo(File what) {
-		File checked = new File(this.localTo.getAbsolutePath() + "/" + what.getName()); //$NON-NLS-1$
+		File checked = new File(localTo.getAbsolutePath() + "/" + what.getName()); //$NON-NLS-1$
 		if (checked.exists()) {
-			String message = this.getNationalizedString("Error_AlreadyExists"); //$NON-NLS-1$
-			throw new UnreportableException(BaseMessages.format(message, new Object[] {checked.getAbsolutePath()}));
+			String message = getNationalizedString("Error_AlreadyExists"); //$NON-NLS-1$
+			throw new UnreportableException(BaseMessages.format(message, new Object[] { checked.getAbsolutePath() }));
 		}
 		return checked;
 	}
-	
+
 	protected void nonSVNMove(File renameTo, File what, IProgressMonitor monitor) throws Exception {
 		if (!what.renameTo(renameTo)) {
-			this.nonSVNCopy(what, monitor);
+			nonSVNCopy(what, monitor);
 			FileUtility.deleteRecursive(what, monitor);
 		}
 	}
 
 	protected void nonSVNCopy(File what, IProgressMonitor monitor) throws Exception {
-		FileUtility.copyAll(this.localTo, what, FileUtility.COPY_NO_OPTIONS, new FileFilter() {
-			public boolean accept(File pathname) {
-				return !pathname.getName().equals(SVNUtility.getSVNFolderName());
-			}
-		}, monitor);
+		FileUtility.copyAll(localTo, what, FileUtility.COPY_NO_OPTIONS, pathname -> !pathname.getName().equals(SVNUtility.getSVNFolderName()), monitor);
 	}
-	
+
 }

@@ -27,6 +27,7 @@ import org.eclipse.team.svn.ui.SVNUIMessages;
 import org.eclipse.team.svn.ui.dialog.DefaultDialog;
 import org.eclipse.team.svn.ui.operation.UILoggedOperation;
 import org.eclipse.team.svn.ui.panel.common.RepositoryTreePanel;
+import org.eclipse.team.svn.ui.panel.common.SVNHistoryPanel;
 import org.eclipse.team.svn.ui.panel.common.SelectRevisionPanel;
 import org.eclipse.team.svn.ui.utility.UIMonitorUtility;
 
@@ -39,22 +40,30 @@ import org.eclipse.team.svn.ui.utility.UIMonitorUtility;
  */
 public class SVNScmHandlerUi extends ScmHandlerUi {
 
+	@Override
 	public boolean canSelectUrl() {
 		return true;
 	}
 
+	@Override
 	public boolean canSelectRevision() {
 		return true;
 	}
 
+	@Override
 	public ScmUrl selectUrl(Shell shell, ScmUrl scmUrl) {
-		IRepositoryResource repositoryResource = this.getRepositoryResource(scmUrl);
+		IRepositoryResource repositoryResource = getRepositoryResource(scmUrl);
 
 		// if no URL selected (repositoryResource == null) then existing repository locations must be shown...
-		RepositoryTreePanel panel = new RepositoryTreePanel(SVNUIMessages.RepositoryResourceSelectionComposite_Select_Title, M2ESVNPlugin.instance()
-				.getResource("CheckoutAsMavenProjectWizard.OptionsPage.Selection.Title"), M2ESVNPlugin.instance().getResource(
-				"CheckoutAsMavenProjectWizard.OptionsPage.Selection.Description"),
-				repositoryResource == null ? new IRepositoryResource[0] : new IRepositoryResource[] { repositoryResource }, 
+		RepositoryTreePanel panel = new RepositoryTreePanel(
+				SVNUIMessages.RepositoryResourceSelectionComposite_Select_Title,
+				M2ESVNPlugin.instance().getResource("CheckoutAsMavenProjectWizard.OptionsPage.Selection.Title"),
+				M2ESVNPlugin.instance()
+						.getResource(
+								"CheckoutAsMavenProjectWizard.OptionsPage.Selection.Description"),
+				repositoryResource == null
+						? new IRepositoryResource[0]
+						: new IRepositoryResource[] { repositoryResource },
 				true /* allowSourcesInTree */, false);
 		panel.setAllowFiles(false);
 
@@ -67,25 +76,26 @@ public class SVNScmHandlerUi extends ScmHandlerUi {
 		return null;
 	}
 
+	@Override
 	public String selectRevision(Shell shell, ScmUrl scmUrl, String scmRevision) {
 		IRepositoryResource repositoryResource = getRepositoryResource(scmUrl);
 		if (repositoryResource == null) {
 			return null;
 		}
 
-		GetLogMessagesOperation msgsOp = SelectRevisionPanel.getMsgsOp(repositoryResource, true /* stopOnCopy */);
-		if (!UIMonitorUtility.doTaskNowDefault(shell, msgsOp, true).isCancelled() && msgsOp.getExecutionState() == IActionOperation.OK) {
+		GetLogMessagesOperation msgsOp = SVNHistoryPanel.getMsgsOp(repositoryResource, true /* stopOnCopy */);
+		if (!UIMonitorUtility.doTaskNowDefault(shell, msgsOp, true).isCancelled()
+				&& msgsOp.getExecutionState() == IActionOperation.OK) {
 			long currentRevision = SVNRevision.INVALID_REVISION_NUMBER;
 			try {
 				//NOTE initially revision number is empty. Is it correct behaviour or not?
 				if (scmRevision != null && scmRevision.length() > 0) {
 					SVNRevision rev = SVNRevision.fromString(scmRevision);
 					if (rev.getKind() == SVNRevision.Kind.NUMBER) {
-						currentRevision = ((SVNRevision.Number)rev).getNumber();
+						currentRevision = ((SVNRevision.Number) rev).getNumber();
 					}
 				}
-			}
-			catch (IllegalArgumentException ex) {
+			} catch (IllegalArgumentException ex) {
 				UILoggedOperation.reportError("SVNScmHandlerUi.selectRevision", ex);
 			}
 
@@ -113,15 +123,18 @@ public class SVNScmHandlerUi extends ScmHandlerUi {
 		return SVNUtility.asRepositoryResource(url, true);
 	}
 
+	@Override
 	public boolean isValidUrl(String scmUrl) {
-		return scmUrl != null && scmUrl.startsWith(SVNScmHandler.SVN_SCM_ID) && SVNUtility.isValidSVNURL(scmUrl.substring(SVNScmHandler.SVN_SCM_ID.length()));
+		return scmUrl != null && scmUrl.startsWith(SVNScmHandler.SVN_SCM_ID)
+				&& SVNUtility.isValidSVNURL(scmUrl.substring(SVNScmHandler.SVN_SCM_ID.length()));
 	}
 
+	@Override
 	public boolean isValidRevision(ScmUrl scmUrl, String scmRevision) {
 		try {
 			SVNRevision revision = SVNRevision.fromString(scmRevision);
 			SVNRevision.Kind kind = revision.getKind();
-			return kind == SVNRevision.Kind.HEAD || kind == SVNRevision.Kind.NUMBER;	
+			return kind == SVNRevision.Kind.HEAD || kind == SVNRevision.Kind.NUMBER;
 		} catch (Exception e) {
 			return false;
 		}

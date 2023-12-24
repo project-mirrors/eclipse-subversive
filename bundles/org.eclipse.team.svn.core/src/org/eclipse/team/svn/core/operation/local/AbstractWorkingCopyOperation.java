@@ -31,33 +31,37 @@ import org.eclipse.team.svn.core.resource.IResourceProvider;
  * @author Alexander Gurov
  */
 public abstract class AbstractWorkingCopyOperation extends AbstractActionOperation {
-	private IResource []resources;
+	private IResource[] resources;
+
 	private IResourceProvider provider;
 
-	public AbstractWorkingCopyOperation(String operationName, Class<? extends NLS> messagesClass, IResource []resources) {
+	public AbstractWorkingCopyOperation(String operationName, Class<? extends NLS> messagesClass,
+			IResource[] resources) {
 		super(operationName, messagesClass);
 		this.resources = resources;
 	}
-	
-	public AbstractWorkingCopyOperation(String operationName, Class<? extends NLS> messagesClass, IResourceProvider provider) {
+
+	public AbstractWorkingCopyOperation(String operationName, Class<? extends NLS> messagesClass,
+			IResourceProvider provider) {
 		super(operationName, messagesClass);
 		this.provider = provider;
 	}
-	
-    public ISchedulingRule getSchedulingRule() {
-    	// if the resource provider interface is used then we don't know all the resources at the moment of the operation scheduling, so we lock the entire workspace instead
-    	if (this.resources == null || this.resources.length == 0) {
-    		return ResourcesPlugin.getWorkspace().getRoot();
-    	}
-    	HashSet<ISchedulingRule> ruleSet = new HashSet<ISchedulingRule>();
-    	for (int i = 0; i < this.resources.length; i++) {
-    		ruleSet.add(SVNResourceRuleFactory.INSTANCE.refreshRule(this.resources[i]));
-    	}
-    	return new MultiRule(ruleSet.toArray(new ISchedulingRule[ruleSet.size()]));
-    }
 
-	protected IResource []operableData() {
-		return this.resources == null ? this.provider.getResources() : this.resources;
+	@Override
+	public ISchedulingRule getSchedulingRule() {
+		// if the resource provider interface is used then we don't know all the resources at the moment of the operation scheduling, so we lock the entire workspace instead
+		if (resources == null || resources.length == 0) {
+			return ResourcesPlugin.getWorkspace().getRoot();
+		}
+		HashSet<ISchedulingRule> ruleSet = new HashSet<>();
+		for (IResource element : resources) {
+			ruleSet.add(SVNResourceRuleFactory.INSTANCE.refreshRule(element));
+		}
+		return new MultiRule(ruleSet.toArray(new ISchedulingRule[ruleSet.size()]));
 	}
-	
+
+	protected IResource[] operableData() {
+		return resources == null ? provider.getResources() : resources;
+	}
+
 }

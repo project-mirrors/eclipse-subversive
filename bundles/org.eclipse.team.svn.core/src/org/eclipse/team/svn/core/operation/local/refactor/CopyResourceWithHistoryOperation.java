@@ -34,48 +34,58 @@ import org.eclipse.team.svn.core.svnstorage.SVNRemoteStorage;
 import org.eclipse.team.svn.core.utility.FileUtility;
 
 /**
- * Copies versioned resource with the history preserved  
+ * Copies versioned resource with the history preserved
  * 
  * @author Sergiy Logvin
  */
 public class CopyResourceWithHistoryOperation extends AbstractActionOperation {
 	protected IResource source;
+
 	protected IResource destination;
-	
+
 	public CopyResourceWithHistoryOperation(IResource source, IResource destination) {
 		super("Operation_CopyLocalH", SVNMessages.class); //$NON-NLS-1$
 		this.source = source;
 		this.destination = destination;
 	}
-	
+
+	@Override
 	public ISchedulingRule getSchedulingRule() {
-		return this.destination instanceof IProject ? this.destination : this.destination.getParent();
+		return destination instanceof IProject ? destination : destination.getParent();
 	}
-	
+
 	public boolean isAllowed() {
 		IRemoteStorage storage = SVNRemoteStorage.instance();
-		IRepositoryLocation locationSource = storage.getRepositoryLocation(this.source);
-		IRepositoryLocation locationDestination = storage.getRepositoryLocation(this.destination);
-		ILocalResource localSource =  storage.asLocalResource(this.source);
-		
+		IRepositoryLocation locationSource = storage.getRepositoryLocation(source);
+		IRepositoryLocation locationDestination = storage.getRepositoryLocation(destination);
+		ILocalResource localSource = storage.asLocalResource(source);
+
 		return IStateFilter.SF_ONREPOSITORY.accept(localSource) && locationSource.equals(locationDestination);
 	}
 
+	@Override
 	protected void runImpl(IProgressMonitor monitor) throws Exception {
 		IRemoteStorage storage = SVNRemoteStorage.instance();
-		IRepositoryLocation location = storage.getRepositoryLocation(this.source);
-        ISVNConnector proxy = location.acquireSVNProxy();
-        try {
-			this.writeToConsole(IConsoleStream.LEVEL_CMD, "svn copy \"" + FileUtility.normalizePath(FileUtility.getWorkingCopyPath(this.source)) + "\" \"" + FileUtility.getWorkingCopyPath(this.destination) + "\"\n"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-			proxy.copyLocal(new SVNEntryRevisionReference[] {new SVNEntryRevisionReference(FileUtility.getWorkingCopyPath(this.source), null, SVNRevision.WORKING)}, FileUtility.getWorkingCopyPath(this.destination), ISVNConnector.Options.NONE, ISVNConnector.NO_EXTERNALS_TO_PIN, new SVNProgressMonitor(this, monitor, null));
-		}
-		finally {
-		    location.releaseSVNProxy(proxy);
+		IRepositoryLocation location = storage.getRepositoryLocation(source);
+		ISVNConnector proxy = location.acquireSVNProxy();
+		try {
+			writeToConsole(IConsoleStream.LEVEL_CMD,
+					"svn copy \"" + FileUtility.normalizePath(FileUtility.getWorkingCopyPath(source)) + "\" \"" //$NON-NLS-1$//$NON-NLS-2$
+							+ FileUtility.getWorkingCopyPath(destination) + "\"\n"); //$NON-NLS-1$
+			proxy.copyLocal(
+					new SVNEntryRevisionReference[] { new SVNEntryRevisionReference(
+							FileUtility.getWorkingCopyPath(source), null, SVNRevision.WORKING) },
+					FileUtility.getWorkingCopyPath(destination), ISVNConnector.Options.NONE,
+					ISVNConnector.NO_EXTERNALS_TO_PIN, new SVNProgressMonitor(this, monitor, null));
+		} finally {
+			location.releaseSVNProxy(proxy);
 		}
 	}
-	
+
+	@Override
 	protected String getShortErrorMessage(Throwable t) {
-		return BaseMessages.format(super.getShortErrorMessage(t), new Object[] {this.source.getName(), this.destination.toString()});
+		return BaseMessages.format(super.getShortErrorMessage(t),
+				new Object[] { source.getName(), destination.toString() });
 	}
 
 }

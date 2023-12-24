@@ -26,7 +26,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 
 import org.eclipse.compare.CompareConfiguration;
 import org.eclipse.compare.CompareEditorInput;
@@ -42,16 +41,14 @@ import org.eclipse.compare.structuremergeviewer.Differencer;
 import org.eclipse.compare.structuremergeviewer.IDiffContainer;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
-import org.eclipse.jface.viewers.IOpenListener;
-import org.eclipse.jface.viewers.OpenEvent;
 import org.eclipse.jface.viewers.TreeSelection;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Menu;
+import org.eclipse.team.svn.core.BaseMessages;
 import org.eclipse.team.svn.core.SVNMessages;
 import org.eclipse.team.svn.core.connector.ISVNConnector;
 import org.eclipse.team.svn.core.connector.SVNChangeStatus;
@@ -74,374 +71,390 @@ import org.eclipse.team.svn.ui.utility.UIMonitorUtility;
  * @author Alexei Goncharov
  */
 public abstract class PropertyCompareInput extends CompareEditorInput {
-	
+
 	protected DiffTreeViewer viewer;
-	
+
 	protected IRepositoryLocation location;
-	
+
 	protected SVNEntryRevisionReference left;
+
 	protected SVNEntryRevisionReference right;
+
 	protected SVNEntryRevisionReference ancestor;
 
 	protected HashMap<String, String> leftProps;
+
 	protected HashMap<String, String> ancestorProps;
+
 	protected HashMap<String, String> rightProps;
-	
+
 	protected HashSet<String> propSet;
-	
-	public PropertyCompareInput(CompareConfiguration configuration,
-								SVNEntryRevisionReference left,
-								SVNEntryRevisionReference right,
-								SVNEntryRevisionReference ancestor,
-								IRepositoryLocation location) {
+
+	public PropertyCompareInput(CompareConfiguration configuration, SVNEntryRevisionReference left,
+			SVNEntryRevisionReference right, SVNEntryRevisionReference ancestor, IRepositoryLocation location) {
 		super(configuration);
 		this.left = left;
 		this.right = right;
 		this.ancestor = ancestor;
 		this.location = location;
 	}
-	
+
+	@Override
 	public Viewer createDiffViewer(Composite parent) {
-		this.viewer = (DiffTreeViewer)super.createDiffViewer(parent);
-		this.viewer.addOpenListener(new IOpenListener () {
-			public void open(OpenEvent event) {
-				PropertyCompareNode selected = (PropertyCompareNode)((TreeSelection)event.getSelection()).getPaths()[0].getFirstSegment();
-				CompareConfiguration conf = PropertyCompareInput.this.getCompareConfiguration();
-				if (PropertyCompareInput.this.ancestor != null) {
-					conf.setAncestorLabel(selected.getName() + " [" + PropertyCompareInput.this.getRevisionPart(PropertyCompareInput.this.ancestor) + "]"); //$NON-NLS-1$ //$NON-NLS-2$
-				}
-				conf.setLeftLabel(selected.getName() + " [" + PropertyCompareInput.this.getRevisionPart(PropertyCompareInput.this.left) + "]"); //$NON-NLS-1$ //$NON-NLS-2$
-				conf.setRightLabel(selected.getName() + " [" + PropertyCompareInput.this.getRevisionPart(PropertyCompareInput.this.right) + "]");	 //$NON-NLS-1$ //$NON-NLS-2$
+		viewer = (DiffTreeViewer) super.createDiffViewer(parent);
+		viewer.addOpenListener(event -> {
+			PropertyCompareNode selected = (PropertyCompareNode) ((TreeSelection) event.getSelection())
+					.getPaths()[0].getFirstSegment();
+			CompareConfiguration conf = PropertyCompareInput.this.getCompareConfiguration();
+			if (ancestor != null) {
+				conf.setAncestorLabel(selected.getName() + " [" //$NON-NLS-1$
+						+ PropertyCompareInput.this.getRevisionPart(ancestor) + "]"); //$NON-NLS-1$
 			}
+			conf.setLeftLabel(selected.getName() + " [" //$NON-NLS-1$
+					+ PropertyCompareInput.this.getRevisionPart(left) + "]"); //$NON-NLS-1$
+			conf.setRightLabel(selected.getName() + " [" //$NON-NLS-1$
+					+ PropertyCompareInput.this.getRevisionPart(right) + "]"); //$NON-NLS-1$
 		});
-		
+
 		MenuManager menuMgr = new MenuManager();
-		Menu menu = menuMgr.createContextMenu(this.viewer.getControl());	
-		menuMgr.addMenuListener(new IMenuListener() {
-			public void menuAboutToShow(IMenuManager manager) {
-				manager.removeAll();
-				TreeSelection selection = (TreeSelection)PropertyCompareInput.this.viewer.getSelection();
-				if (selection.size() == 0) {
-					return;
-				}
-				PropertyCompareInput.this.fillMenu(manager, selection);
+		Menu menu = menuMgr.createContextMenu(viewer.getControl());
+		menuMgr.addMenuListener(manager -> {
+			manager.removeAll();
+			TreeSelection selection = (TreeSelection) viewer.getSelection();
+			if (selection.size() == 0) {
+				return;
 			}
+			PropertyCompareInput.this.fillMenu(manager, selection);
 		});
-		this.viewer.getControl().setMenu(menu);
-		
-		return this.viewer;
+		viewer.getControl().setMenu(menu);
+
+		return viewer;
 	}
-	
+
 	protected abstract void fillMenu(IMenuManager manager, TreeSelection selection);
-	
+
 	protected String getRevisionPart(SVNEntryRevisionReference reference) {
 		if (reference == null) {
 			return SVNUIMessages.ResourceCompareInput_PrejFile;
 		}
-		return SVNUIMessages.format(SVNUIMessages.ResourceCompareInput_RevisionSign, new String [] {String.valueOf(reference.revision)});
+		return BaseMessages.format(SVNUIMessages.ResourceCompareInput_RevisionSign,
+				new String[] { String.valueOf(reference.revision) });
 	}
-	
+
+	@Override
 	protected Object prepareInput(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-		this.leftProps = new HashMap<String, String>();
-		this.ancestorProps = new HashMap<String, String>();
-		this.rightProps = new HashMap<String, String>();
-		this.propSet = new HashSet<String>();
-		
+		leftProps = new HashMap<>();
+		ancestorProps = new HashMap<>();
+		rightProps = new HashMap<>();
+		propSet = new HashSet<>();
+
 		//read the properties
-		GetPropertiesOperation leftPropOperation = new GetPropertiesOperation(this.left, this.location, false);
-		GetPropertiesOperation rightPropOperation = new GetPropertiesOperation(this.right == null ? this.left : this.right, this.location, this.right == null);
+		GetPropertiesOperation leftPropOperation = new GetPropertiesOperation(left, location, false);
+		GetPropertiesOperation rightPropOperation = new GetPropertiesOperation(
+				right == null ? left : right, location, right == null);
 		GetPropertiesOperation ancestorPropOperation = null;
 		final CompositeOperation op = new CompositeOperation(leftPropOperation.getOperationName(), SVNMessages.class);
 		op.add(leftPropOperation);
 		op.add(rightPropOperation);
-		if (this.ancestor != null) {
-			ancestorPropOperation = new GetPropertiesOperation(this.ancestor, this.location, false);
+		if (ancestor != null) {
+			ancestorPropOperation = new GetPropertiesOperation(ancestor, location, false);
 			op.add(ancestorPropOperation);
 		}
-		UIMonitorUtility.getDisplay().syncExec(new Runnable() {
-			public void run() {
-				UIMonitorUtility.doTaskNowDefault(op, true);
-			}
-		});
-		
+		UIMonitorUtility.getDisplay().syncExec(() -> UIMonitorUtility.doTaskNowDefault(op, true));
+
 		//gather found properties
-		SVNProperty [] properties = leftPropOperation.getProperties();
+		SVNProperty[] properties = leftPropOperation.getProperties();
 		for (SVNProperty current : properties) {
-			this.propSet.add(current.name);
-			this.leftProps.put(current.name, current.value);
+			propSet.add(current.name);
+			leftProps.put(current.name, current.value);
 		}
 		properties = null;
 		properties = rightPropOperation.getProperties();
 		for (SVNProperty current : properties) {
-			this.propSet.add(current.name);
-			this.rightProps.put(current.name, current.value);
+			propSet.add(current.name);
+			rightProps.put(current.name, current.value);
 		}
-		if (this.ancestor != null) {
+		if (ancestor != null) {
 			properties = null;
 			properties = ancestorPropOperation.getProperties();
 			for (SVNProperty current : properties) {
-				this.propSet.add(current.name);
-				this.ancestorProps.put(current.name, current.value);
-			}			
+				propSet.add(current.name);
+				ancestorProps.put(current.name, current.value);
+			}
 		}
-		
+
 		//prepare input
 		RootCompareNode root = new RootCompareNode(Differencer.NO_CHANGE);
-		for (String current : this.propSet) {
-			String leftValue = this.leftProps.get(current);
-			String rightValue = this.rightProps.get(current);
-			String ancestorValue = this.ancestorProps.get(current);
-			int diffKind = this.calculateDifference(leftValue, rightValue, ancestorValue);
+		for (String current : propSet) {
+			String leftValue = leftProps.get(current);
+			String rightValue = rightProps.get(current);
+			String ancestorValue = ancestorProps.get(current);
+			int diffKind = calculateDifference(leftValue, rightValue, ancestorValue);
 			if (rightPropOperation.isConflicting(current)) {
-				int tDiffKind = this.calculateDifference(leftValue, ancestorValue, ancestorValue);
-				diffKind = (rightPropOperation.isAdded(current) ? Differencer.ADDITION : (rightPropOperation.isChanged(current) ? Differencer.CHANGE : Differencer.DELETION));
+				int tDiffKind = calculateDifference(leftValue, ancestorValue, ancestorValue);
+				diffKind = rightPropOperation.isAdded(current)
+						? Differencer.ADDITION
+						: rightPropOperation.isChanged(current) ? Differencer.CHANGE : Differencer.DELETION;
 				diffKind = Differencer.CONFLICTING | (diffKind == Differencer.CHANGE ? tDiffKind : diffKind);
 			}
 			if (diffKind != Differencer.NO_CHANGE) {
 				new PropertyCompareNode(
-						root,
-						diffKind,
-						new PropertyElement(current, ancestorValue, false),
-						new PropertyElement(current, leftValue, this.ancestor == null ? false : true),
+						root, diffKind, new PropertyElement(current, ancestorValue, false),
+						new PropertyElement(current, leftValue, ancestor == null ? false : true),
 						new PropertyElement(current, rightValue, false));
 			}
 		}
-			
+
 		if (root.getChildren().length > 0) {
 			return root;
 		}
 		return null;
 	}
-	
+
 	protected int calculateDifference(String leftValue, String rightValue, String ancestorValue) {
 		int diffKind = Differencer.NO_CHANGE;
-		if (this.ancestor == null) {
+		if (ancestor == null) {
 			if (leftValue != null && rightValue != null) {
 				diffKind = rightValue.equals(leftValue) ? Differencer.NO_CHANGE : Differencer.CHANGE;
-			}
-			else if (leftValue == null) {
+			} else if (leftValue == null) {
 				diffKind = Differencer.ADDITION;
-			}
-			else {
+			} else {
 				diffKind = Differencer.DELETION;
 			}
-		}
-		else {
-			if (ancestorValue == null) {
-				if (rightValue != null && leftValue != null) {
-					diffKind = Differencer.ADDITION | Differencer.CONFLICTING;
-				}
-				else if (rightValue != null) {
-					diffKind = Differencer.RIGHT | Differencer.ADDITION;
-				}
-				else if (leftValue != null) {
-					diffKind = Differencer.LEFT | Differencer.ADDITION;
-				}
+		} else if (ancestorValue == null) {
+			if (rightValue != null && leftValue != null) {
+				diffKind = Differencer.ADDITION | Differencer.CONFLICTING;
+			} else if (rightValue != null) {
+				diffKind = Differencer.RIGHT | Differencer.ADDITION;
+			} else if (leftValue != null) {
+				diffKind = Differencer.LEFT | Differencer.ADDITION;
 			}
-			else {
-				if (rightValue != null && leftValue != null)
-				{
-					if (!rightValue.equals(ancestorValue) && !leftValue.equals(ancestorValue)) {
-						diffKind = Differencer.CHANGE | Differencer.CONFLICTING;
-					}
-					else if (!rightValue.equals(ancestorValue)) {
-						diffKind = Differencer.RIGHT | Differencer.CHANGE;
-					}
-					else if (!leftValue.equals(ancestorValue)) {
-						diffKind = Differencer.LEFT | Differencer.CHANGE;
-					}
+		} else {
+			if (rightValue != null && leftValue != null) {
+				if (!rightValue.equals(ancestorValue) && !leftValue.equals(ancestorValue)) {
+					diffKind = Differencer.CHANGE | Differencer.CONFLICTING;
+				} else if (!rightValue.equals(ancestorValue)) {
+					diffKind = Differencer.RIGHT | Differencer.CHANGE;
+				} else if (!leftValue.equals(ancestorValue)) {
+					diffKind = Differencer.LEFT | Differencer.CHANGE;
 				}
-				else if (leftValue == null && rightValue == null) {
-					diffKind = Differencer.DELETION | Differencer.CONFLICTING;
+			} else if (leftValue == null && rightValue == null) {
+				diffKind = Differencer.DELETION | Differencer.CONFLICTING;
+			} else if (leftValue == null) {
+				diffKind = Differencer.LEFT | Differencer.DELETION;
+				if (!rightValue.equals(ancestorValue)) {
+					diffKind |= Differencer.CONFLICTING;
 				}
-				else if (leftValue == null) {
-					diffKind = Differencer.LEFT | Differencer.DELETION;
-					if (!rightValue.equals(ancestorValue)) {
-						diffKind |= Differencer.CONFLICTING;
-					}
-				}
-				else if (rightValue == null) {
-					diffKind = Differencer.RIGHT | Differencer.DELETION;
-					if (!leftValue.equals(ancestorValue)) {
-						diffKind |= Differencer.CONFLICTING;
-					}
+			} else if (rightValue == null) {
+				diffKind = Differencer.RIGHT | Differencer.DELETION;
+				if (!leftValue.equals(ancestorValue)) {
+					diffKind |= Differencer.CONFLICTING;
 				}
 			}
 		}
 		return diffKind;
 	}
-	
+
+	@Override
 	public void saveChanges(IProgressMonitor monitor) throws CoreException {
 		super.saveChanges(monitor);
-		PropertyCompareNode currentNode = (PropertyCompareNode)this.getSelectedEdition();
-		PropertyElement left = (PropertyElement)currentNode.getLeft();
-		PropertyElement right = (PropertyElement)currentNode.getRight();
-		PropertyElement ancestor = (PropertyElement)currentNode.getAncestor();
+		PropertyCompareNode currentNode = (PropertyCompareNode) getSelectedEdition();
+		PropertyElement left = (PropertyElement) currentNode.getLeft();
+		PropertyElement right = (PropertyElement) currentNode.getRight();
+		PropertyElement ancestor = (PropertyElement) currentNode.getAncestor();
 		left.commit(monitor);
-		currentNode.setKind(this.calculateDifference(left.getValue(), right.getValue(), ancestor.getValue()));
+		currentNode.setKind(calculateDifference(left.getValue(), right.getValue(), ancestor.getValue()));
 		currentNode.fireChange();
-		this.viewer.refresh();
+		viewer.refresh();
 	}
-	
+
 	protected class RootCompareNode extends DiffNode {
 		public RootCompareNode(int kind) {
 			super(kind);
 		}
 	}
-	
+
 	protected class PropertyCompareNode extends DiffNode {
 
-		public PropertyCompareNode(IDiffContainer parent, int kind,
-				ITypedElement ancestor, ITypedElement left, ITypedElement right) {
+		public PropertyCompareNode(IDiffContainer parent, int kind, ITypedElement ancestor, ITypedElement left,
+				ITypedElement right) {
 			super(parent, kind, ancestor, left, right);
 		}
-		
+
+		@Override
 		public void fireChange() {
 			super.fireChange();
 		}
-		
+
 	}
-	
-	protected class PropertyElement implements ITypedElement, IEditableContent, IStreamContentAccessor, IContentChangeNotifier {
+
+	protected class PropertyElement
+			implements ITypedElement, IEditableContent, IStreamContentAccessor, IContentChangeNotifier {
 
 		protected String basedOnName;
+
 		protected String basedOnValue;
+
 		protected String currentInput;
+
 		protected boolean isEditable;
+
 		protected ArrayList<IContentChangeListener> listenersList;
-		
+
 		public PropertyElement(String name, String value, boolean isEditable) {
-			this.basedOnName = name;
-			this.basedOnValue = value;
+			basedOnName = name;
+			basedOnValue = value;
 			this.isEditable = isEditable;
-			this.listenersList = new ArrayList<IContentChangeListener>();
+			listenersList = new ArrayList<>();
 		}
-		
+
+		@Override
 		public Image getImage() {
 			return CompareUI.getImage(""); //$NON-NLS-1$
 		}
 
+		@Override
 		public String getName() {
-			return this.basedOnName;
-		}
-		
-		public String getValue() {
-			return this.basedOnValue;
-		}
-		
-		public void setValue(String value) {
-			this.basedOnValue = value;
+			return basedOnName;
 		}
 
+		public String getValue() {
+			return basedOnValue;
+		}
+
+		public void setValue(String value) {
+			basedOnValue = value;
+		}
+
+		@Override
 		public String getType() {
 			return ITypedElement.TEXT_TYPE;
 		}
 
+		@Override
 		public boolean isEditable() {
-			return this.isEditable;
+			return isEditable;
 		}
 
+		@Override
 		public ITypedElement replace(ITypedElement dest, ITypedElement src) {
 			return dest;
 		}
 
+		@Override
 		public void setContent(byte[] newContent) {
-			this.currentInput = new String(newContent);
+			currentInput = new String(newContent);
 		}
-		
+
 		public void commit(IProgressMonitor pm) throws CoreException {
-			this.basedOnValue = this.currentInput;
-			new SavePropChangesOperation(PropertyCompareInput.this.left, new SVNProperty(this.basedOnName, this.basedOnValue), PropertyCompareInput.this.location).run(pm);
-			this.fireContentChanged();
+			basedOnValue = currentInput;
+			new SavePropChangesOperation(left, new SVNProperty(basedOnName, basedOnValue), location).run(pm);
+			fireContentChanged();
 		}
 
+		@Override
 		public InputStream getContents() throws CoreException {
-			return new ByteArrayInputStream(this.basedOnValue == null ? "".getBytes() : this.basedOnValue.getBytes());  //$NON-NLS-1$
+			return new ByteArrayInputStream(basedOnValue == null ? "".getBytes() : basedOnValue.getBytes()); //$NON-NLS-1$
 		}
 
+		@Override
 		public void addContentChangeListener(IContentChangeListener listener) {
-			this.listenersList.add(listener);
+			listenersList.add(listener);
 		}
 
+		@Override
 		public void removeContentChangeListener(IContentChangeListener listener) {
-			this.listenersList.remove(listener);
+			listenersList.remove(listener);
 		}
-		
+
 		protected void fireContentChanged() {
-			IContentChangeListener []listeners = this.listenersList.toArray(new IContentChangeListener[0]);
-			for (int i= 0; i < listeners.length; i++) {
-				listeners[i].contentChanged(this);
+			IContentChangeListener[] listeners = listenersList.toArray(new IContentChangeListener[0]);
+			for (IContentChangeListener listener : listeners) {
+				listener.contentChanged(this);
 			}
 		}
-		
+
 	}
-	
-	protected class SavePropChangesOperation extends  AbstractActionOperation {
+
+	protected class SavePropChangesOperation extends AbstractActionOperation {
 		protected SVNEntryRevisionReference reference;
+
 		protected SVNProperty propToSet;
+
 		protected IRepositoryLocation location;
-		
-		public SavePropChangesOperation(SVNEntryRevisionReference reference, SVNProperty propToSet, IRepositoryLocation location) {
+
+		public SavePropChangesOperation(SVNEntryRevisionReference reference, SVNProperty propToSet,
+				IRepositoryLocation location) {
 			super("Operation_SetProperties", SVNMessages.class); //$NON-NLS-1$
 			this.propToSet = propToSet;
 			this.reference = reference;
 			this.location = location;
 		}
-		
+
+		@Override
 		protected void runImpl(IProgressMonitor monitor) throws Exception {
-			ISVNConnector proxy = this.location.acquireSVNProxy();
+			ISVNConnector proxy = location.acquireSVNProxy();
 			try {
-				proxy.setPropertyLocal(new String[] {this.reference.path}, new SVNProperty(this.propToSet.name, this.propToSet.value), SVNDepth.EMPTY, ISVNConnector.Options.FORCE, null, new SVNProgressMonitor(this, monitor, null));
-			}
-			finally {
-				this.location.releaseSVNProxy(proxy);
+				proxy.setPropertyLocal(new String[] { reference.path },
+						new SVNProperty(propToSet.name, propToSet.value), SVNDepth.EMPTY, ISVNConnector.Options.FORCE,
+						null, new SVNProgressMonitor(this, monitor, null));
+			} finally {
+				location.releaseSVNProxy(proxy);
 			}
 		}
 	}
-	
+
 	protected class GetPropertiesOperation extends AbstractActionOperation {
 		protected SVNEntryRevisionReference reference;
+
 		protected IRepositoryLocation location;
-		protected SVNProperty [] properties;
-		protected ArrayList<SVNProperty> propsAdd = new ArrayList<SVNProperty>();
-		protected ArrayList<SVNProperty> propsChange = new ArrayList<SVNProperty>();
-		protected ArrayList<SVNProperty> propsDel = new ArrayList<SVNProperty>();
+
+		protected SVNProperty[] properties;
+
+		protected ArrayList<SVNProperty> propsAdd = new ArrayList<>();
+
+		protected ArrayList<SVNProperty> propsChange = new ArrayList<>();
+
+		protected ArrayList<SVNProperty> propsDel = new ArrayList<>();
+
 		protected boolean usePropsRej;
-		
-		public GetPropertiesOperation(SVNEntryRevisionReference reference, IRepositoryLocation location, boolean usePropsRej) {
+
+		public GetPropertiesOperation(SVNEntryRevisionReference reference, IRepositoryLocation location,
+				boolean usePropsRej) {
 			super("Operation_GetRevisionProperties", SVNMessages.class); //$NON-NLS-1$
 			this.reference = reference;
 			this.location = location;
 			this.usePropsRej = usePropsRej;
 		}
-		
+
 		public boolean isConflicting(String name) {
-			return this.usePropsRej && 
-				(this.findProperty(name, this.propsAdd) != null ||
-				this.findProperty(name, this.propsChange) != null ||
-				this.findProperty(name, this.propsDel) != null);
+			return usePropsRej && (findProperty(name, propsAdd) != null || findProperty(name, propsChange) != null
+					|| findProperty(name, propsDel) != null);
 		}
-		
+
 		public boolean isAdded(String name) {
-			return this.usePropsRej && this.findProperty(name, this.propsAdd) != null;
+			return usePropsRej && findProperty(name, propsAdd) != null;
 		}
-		
+
 		public boolean isChanged(String name) {
-			return this.usePropsRej && this.findProperty(name, this.propsChange) != null;
+			return usePropsRej && findProperty(name, propsChange) != null;
 		}
-		
+
 		public boolean isDeleted(String name) {
-			return this.usePropsRej && this.findProperty(name, this.propsDel) != null;
+			return usePropsRej && findProperty(name, propsDel) != null;
 		}
-		
+
+		@Override
 		protected void runImpl(IProgressMonitor monitor) throws Exception {
-			ISVNConnector proxy = this.location.acquireSVNProxy();
+			ISVNConnector proxy = location.acquireSVNProxy();
 			try {
-				this.properties = SVNUtility.properties(proxy, this.reference, ISVNConnector.Options.NONE, new SVNProgressMonitor(this, monitor, null));				
-				if (this.usePropsRej) {
-					SVNChangeStatus []status = SVNUtility.status(proxy, this.reference.path, SVNDepth.EMPTY, ISVNConnector.Options.NONE, new SVNNullProgressMonitor());
-					if (status.length > 0 && status[0].propStatus == SVNEntryStatus.Kind.CONFLICTED && 
-						status[0].treeConflicts != null && status[0].treeConflicts[0].remotePath != null) {
+				properties = SVNUtility.properties(proxy, reference, ISVNConnector.Options.NONE,
+						new SVNProgressMonitor(this, monitor, null));
+				if (usePropsRej) {
+					SVNChangeStatus[] status = SVNUtility.status(proxy, reference.path, SVNDepth.EMPTY,
+							ISVNConnector.Options.NONE, new SVNNullProgressMonitor());
+					if (status.length > 0 && status[0].propStatus == SVNEntryStatus.Kind.CONFLICTED
+							&& status[0].treeConflicts != null && status[0].treeConflicts[0].remotePath != null) {
 						File rejFile = new File(status[0].treeConflicts[0].remotePath);
 						if (rejFile.exists()) {
 							BufferedInputStream is = null;
@@ -454,26 +467,29 @@ public abstract class PropertyCompareInput extends CompareEditorInput {
 								while ((line = reader.readLine()) != null) {
 									if ((state == 0 || state == 2) && line.startsWith("Trying to add new property '")) {
 										if (state == 2 || state == 8) {
-											this.propsAdd.add(new SVNProperty(pName, pValue));
+											propsAdd.add(new SVNProperty(pName, pValue));
 										}
-										pName = line.substring("Trying to add new property '".length(), line.length() - 1);
+										pName = line.substring("Trying to add new property '".length(),
+												line.length() - 1);
 										pValue = null;
 										state = 1;
 									}
 									if ((state == 0 || state == 2) && line.startsWith("Trying to change property '")) {
 										if (state == 2 || state == 8) {
-											this.propsAdd.add(new SVNProperty(pName, pValue));
+											propsAdd.add(new SVNProperty(pName, pValue));
 										}
-										pName = line.substring("Trying to change property '".length(), line.length() - 1);
+										pName = line.substring("Trying to change property '".length(),
+												line.length() - 1);
 										pValue = null;
 										state = 3;
 									}
 									if ((state == 0 || state == 2) && line.startsWith("Trying to delete property '")) {
 										if (state == 2 || state == 8) {
-											this.propsAdd.add(new SVNProperty(pName, pValue));
+											propsAdd.add(new SVNProperty(pName, pValue));
 										}
-										pName = line.substring("Trying to change property '".length(), line.length() - 1);
-										this.propsDel.add(new SVNProperty(pName, ""));
+										pName = line.substring("Trying to change property '".length(),
+												line.length() - 1);
+										propsDel.add(new SVNProperty(pName, ""));
 										pName = null;
 										pValue = null;
 										state = 6;
@@ -499,12 +515,12 @@ public abstract class PropertyCompareInput extends CompareEditorInput {
 									}
 									if (state == 5) {
 										if (line.endsWith(">>>>>>> (incoming property value)")) {
-											line = line.substring(0, line.length() - ">>>>>>> (incoming property value)".length());
+											line = line.substring(0,
+													line.length() - ">>>>>>> (incoming property value)".length());
 											pValue = pValue != null ? pValue + "\n" + line : line;
-											this.propsChange.add(new SVNProperty(pName, pValue));
+											propsChange.add(new SVNProperty(pName, pValue));
 											state = 0;
-										}
-										else {
+										} else {
 											pValue = pValue != null ? pValue + "\n" + line : line;
 										}
 									}
@@ -517,61 +533,66 @@ public abstract class PropertyCompareInput extends CompareEditorInput {
 									}
 									if (state == 8) {
 										if (line.endsWith(">>>>>>> (incoming property value)")) {
-											line = line.substring(0, line.length() - ">>>>>>> (incoming property value)".length());
+											line = line.substring(0,
+													line.length() - ">>>>>>> (incoming property value)".length());
 											pValue = pValue != null ? pValue + "\n" + line : line;
-											this.propsAdd.add(new SVNProperty(pName, pValue));
+											propsAdd.add(new SVNProperty(pName, pValue));
 											state = 0;
-										}
-										else {
+										} else {
 											pValue = pValue != null ? pValue + "\n" + line : line;
 										}
 									}
 								}
 								if (state == 2 || state == 8) {
-									this.propsAdd.add(new SVNProperty(pName, pValue));
+									propsAdd.add(new SVNProperty(pName, pValue));
 								}
-								ArrayList<SVNProperty> props = new ArrayList<SVNProperty>();
-								props.addAll(this.propsAdd);
-								props.addAll(this.propsChange);
-								if (this.properties != null) {
-									for (int i = 0; i < this.properties.length; i++) {
-										if (this.findProperty(this.properties[i].name, this.propsDel) == null &&
-											this.findProperty(this.properties[i].name, this.propsChange) == null &&
-											this.findProperty(this.properties[i].name, this.propsAdd) == null) {
-											props.add(this.properties[i]);
+								ArrayList<SVNProperty> props = new ArrayList<>(propsAdd);
+								props.addAll(propsChange);
+								if (properties != null) {
+									for (SVNProperty property : properties) {
+										if (findProperty(property.name, propsDel) == null
+												&& findProperty(property.name, propsChange) == null
+												&& findProperty(property.name, propsAdd) == null) {
+											props.add(property);
 										}
 									}
 								}
-								this.properties = props.toArray(new SVNProperty[props.size()]);
-							}
-							catch (IOException ex) {
+								properties = props.toArray(new SVNProperty[props.size()]);
+							} catch (IOException ex) {
 								// uninterested
-							}
-							finally {
-								if (reader != null) try {reader.close();} catch (IOException ex) {};
-								if (is != null) try {is.close();} catch (IOException ex) {};
+							} finally {
+								if (reader != null) {
+									try {
+										reader.close();
+									} catch (IOException ex) {
+									}
+								}
+								if (is != null) {
+									try {
+										is.close();
+									} catch (IOException ex) {
+									}
+								}
 							}
 						}
 					}
 				}
-			}
-			finally {
-				this.location.releaseSVNProxy(proxy);
+			} finally {
+				location.releaseSVNProxy(proxy);
 			}
 		}
-		
+
 		private SVNProperty findProperty(String name, ArrayList<SVNProperty> props) {
-			for (Iterator<SVNProperty> it = props.iterator(); it.hasNext(); ) {
-				SVNProperty p = it.next();
+			for (SVNProperty p : props) {
 				if (name.equals(p.name)) {
 					return p;
 				}
 			}
 			return null;
 		}
-		
-		public SVNProperty [] getProperties() {
-			return this.properties == null ? new SVNProperty[0] : this.properties;
+
+		public SVNProperty[] getProperties() {
+			return properties == null ? new SVNProperty[0] : properties;
 		}
 	}
 }

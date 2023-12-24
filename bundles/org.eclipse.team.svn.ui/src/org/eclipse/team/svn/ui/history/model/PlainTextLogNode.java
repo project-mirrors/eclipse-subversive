@@ -31,77 +31,92 @@ public class PlainTextLogNode extends AbstractLogNode {
 		super(parent);
 		this.label = label;
 	}
-	
+
+	@Override
 	public Object getAdapter(Class adapter) {
 		if (adapter.equals(String.class)) {
-			return this.label;
+			return label;
 		}
 		return null;
 	}
-	
+
+	@Override
 	public int getType() {
 		return ILogNode.TYPE_NONE;
 	}
-	
+
+	@Override
 	public Object getEntity() {
-		return this.label;
+		return label;
 	}
-	
+
+	@Override
 	public boolean requiresBoldFont(long currentRevision) {
 		return true;
 	}
-	
+
+	@Override
 	public ImageDescriptor getImageDescriptor() {
-		if (this.label.equals(RootHistoryCategory.PENDING[0])) {
+		if (label.equals(RootHistoryCategory.PENDING[0])) {
 			return SVNTeamUIPlugin.instance().getImageDescriptor("icons/views/repositories/browser_pending.gif"); //$NON-NLS-1$
 		}
 		return null;
 	}
-	
+
+	@Override
 	public String getLabel(int columnIndex, int labelType, long currentRevision) {
 		if (columnIndex == ILogNode.COLUMN_REVISION) {
-			return this.label;
+			return label;
 		}
 		return ""; //$NON-NLS-1$
 	}
-	
-	public ILogNode []getChildren() {
+
+	@Override
+	public ILogNode[] getChildren() {
 		return null;
 	}
-	
+
+	@Override
 	public boolean hasChildren() {
 		return false;
 	}
 
+	@Override
 	public String getAuthor() {
 		return ""; //$NON-NLS-1$
 	}
 
+	@Override
 	public int getChangesCount() {
 		return 0;
 	}
 
+	@Override
 	public String getComment() {
 		return ""; //$NON-NLS-1$
 	}
 
+	@Override
 	public long getRevision() {
 		return SVNRevision.INVALID_REVISION_NUMBER;
 	}
 
+	@Override
 	public long getTimeStamp() {
 		return 0;
 	}
-	
+
+	@Override
 	public int hashCode() {
-		return this.label.hashCode();
+		return label.hashCode();
 	}
-	
+
+	@Override
 	public boolean equals(Object obj) {
 		if (obj instanceof PlainTextLogNode) {
-			return this.label.equals(((PlainTextLogNode)obj).label);
+			return label.equals(((PlainTextLogNode) obj).label);
 		}
 		return false;
 	}
-	
+
 }

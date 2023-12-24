@@ -34,66 +34,72 @@ import org.eclipse.team.svn.ui.verifier.AbstractVerifierProxy;
 public class CreateProjectStructurePanel extends AbstractGetResourceNamePanel {
 	public CreateProjectStructurePanel() {
 		super(SVNUIMessages.CreateProjectStructurePanel_Title, true);
-        this.dialogDescription = SVNUIMessages.CreateProjectStructurePanel_Description;
+		dialogDescription = SVNUIMessages.CreateProjectStructurePanel_Description;
 	}
 
-    public void createControlsImpl(Composite parent) {
-        GridData data = null;
-        GridLayout layout = null;
+	@Override
+	public void createControlsImpl(Composite parent) {
+		GridData data = null;
+		GridLayout layout = null;
 
-        Composite projectComposite = new Composite(parent, SWT.NONE);
-        layout = new GridLayout();
-        layout.marginWidth = 0;
-        layout.marginHeight = 0;
-        projectComposite.setLayout(layout);
-        data = new GridData(GridData.FILL_HORIZONTAL);        
-        projectComposite.setLayoutData(data);
-        
-        Button monolythicButton = new Button(projectComposite, SWT.RADIO);
-        data = new GridData(GridData.FILL_HORIZONTAL);        
-        monolythicButton.setLayoutData(data);
-        monolythicButton.setText(SVNUIMessages.CreateProjectStructurePanel_Monolythic);
-        monolythicButton.addSelectionListener(new SelectionAdapter() {
+		Composite projectComposite = new Composite(parent, SWT.NONE);
+		layout = new GridLayout();
+		layout.marginWidth = 0;
+		layout.marginHeight = 0;
+		projectComposite.setLayout(layout);
+		data = new GridData(GridData.FILL_HORIZONTAL);
+		projectComposite.setLayoutData(data);
+
+		Button monolythicButton = new Button(projectComposite, SWT.RADIO);
+		data = new GridData(GridData.FILL_HORIZONTAL);
+		monolythicButton.setLayoutData(data);
+		monolythicButton.setText(SVNUIMessages.CreateProjectStructurePanel_Monolythic);
+		monolythicButton.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
-				if (((Button)e.widget).getSelection()) {
+				if (((Button) e.widget).getSelection()) {
 					CreateProjectStructurePanel.this.resourceName = ""; //$NON-NLS-1$
 					CreateProjectStructurePanel.this.text.setEnabled(false);
 				}
 				CreateProjectStructurePanel.this.validateContent();
 			}
 		});
-        monolythicButton.setSelection(false);
-        
-        Button otherButton = new Button(projectComposite, SWT.RADIO);
-        data = new GridData(GridData.FILL_HORIZONTAL);        
-        otherButton.setLayoutData(data);
-        otherButton.setText(SVNUIMessages.CreateProjectStructurePanel_SingleOrMulti);
-        otherButton.addSelectionListener(new SelectionAdapter() {
+		monolythicButton.setSelection(false);
+
+		Button otherButton = new Button(projectComposite, SWT.RADIO);
+		data = new GridData(GridData.FILL_HORIZONTAL);
+		otherButton.setLayoutData(data);
+		otherButton.setText(SVNUIMessages.CreateProjectStructurePanel_SingleOrMulti);
+		otherButton.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
-				if (((Button)e.widget).getSelection()) {
+				if (((Button) e.widget).getSelection()) {
 					CreateProjectStructurePanel.this.resourceName = CreateProjectStructurePanel.this.text.getText();
 					CreateProjectStructurePanel.this.text.setEnabled(true);
 				}
 				CreateProjectStructurePanel.this.validateContent();
 			}
 		});
-        otherButton.setSelection(true);
-        
-    	super.createControlsImpl(projectComposite);
-    	
-    	this.text.setFocus();
-    }
-    
-	public String getHelpId() {
-    	return "org.eclipse.team.svn.help.remote_createProjectStructureDialogContext"; //$NON-NLS-1$
+		otherButton.setSelection(true);
+
+		super.createControlsImpl(projectComposite);
+
+		text.setFocus();
 	}
-    
-    protected AbstractVerifier createNonEmptyNameFieldVerifier() {
-    	return new AbstractVerifierProxy(super.createNonEmptyNameFieldVerifier()) {
-    		protected boolean isVerificationEnabled(Control input) {
-    			return CreateProjectStructurePanel.this.text.isEnabled();
-    		}
-    	};
-    }
-    
+
+	@Override
+	public String getHelpId() {
+		return "org.eclipse.team.svn.help.remote_createProjectStructureDialogContext"; //$NON-NLS-1$
+	}
+
+	@Override
+	protected AbstractVerifier createNonEmptyNameFieldVerifier() {
+		return new AbstractVerifierProxy(super.createNonEmptyNameFieldVerifier()) {
+			@Override
+			protected boolean isVerificationEnabled(Control input) {
+				return CreateProjectStructurePanel.this.text.isEnabled();
+			}
+		};
+	}
+
 }

@@ -35,65 +35,80 @@ import org.eclipse.team.svn.ui.utility.ArrayStructuredContentProvider;
  * @author Sergiy Logvin
  */
 public class ItemListPanel extends AbstractDialogPanel {
-	protected String []items; 
+	protected String[] items;
+
 	protected Image itemIcon;
+
 	protected Table table;
 
-	public ItemListPanel(String []items, ImageDescriptor imageDescriptor, String dialogTitle, String dialogDescription, String defaultMessage) {
-		this(items, imageDescriptor, dialogTitle, dialogDescription, defaultMessage, new String[] {IDialogConstants.OK_LABEL});
-	}	
-	
-	public ItemListPanel(String []items, ImageDescriptor imageDescriptor, String dialogTitle, String dialogDescription, String defaultMessage, String[] buttons) {
+	public ItemListPanel(String[] items, ImageDescriptor imageDescriptor, String dialogTitle, String dialogDescription,
+			String defaultMessage) {
+		this(items, imageDescriptor, dialogTitle, dialogDescription, defaultMessage,
+				new String[] { IDialogConstants.OK_LABEL });
+	}
+
+	public ItemListPanel(String[] items, ImageDescriptor imageDescriptor, String dialogTitle, String dialogDescription,
+			String defaultMessage, String[] buttons) {
 		super(buttons);
 		this.items = items;
 		this.dialogTitle = dialogTitle;
 		this.dialogDescription = dialogDescription;
 		this.defaultMessage = defaultMessage;
-		this.itemIcon = imageDescriptor.createImage();
-	}	
-	
+		itemIcon = imageDescriptor.createImage();
+	}
+
+	@Override
 	protected void saveChangesImpl() {
 	}
 
-    protected void cancelChangesImpl() {
-    }
-    
+	@Override
+	protected void cancelChangesImpl() {
+	}
+
+	@Override
 	public void createControlsImpl(Composite parent) {
-		this.table = new Table(parent, SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL | SWT.SINGLE | SWT.FULL_SELECTION);
-		this.table.setLayoutData(new GridData(GridData.FILL_BOTH));
+		table = new Table(parent, SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL | SWT.SINGLE | SWT.FULL_SELECTION);
+		table.setLayoutData(new GridData(GridData.FILL_BOTH));
 		TableLayout layout = new TableLayout();
-		this.table.setLayout(layout);
-	    TableViewer viewer = new TableViewer(this.table);
-	    
-	   	TableColumn col = new TableColumn(this.table, SWT.NONE);
+		table.setLayout(layout);
+		TableViewer viewer = new TableViewer(table);
+
+		TableColumn col = new TableColumn(table, SWT.NONE);
 		col.setResizable(true);
 		col.setAlignment(SWT.CENTER);
-        layout.addColumnData(new ColumnWeightData(0, 60, true));        
-               
-        viewer.setContentProvider(new ArrayStructuredContentProvider());
+		layout.addColumnData(new ColumnWeightData(0, 60, true));
+
+		viewer.setContentProvider(new ArrayStructuredContentProvider());
 		ITableLabelProvider labelProvider = new ITableLabelProvider() {
+			@Override
 			public Image getColumnImage(Object element, int columnIndex) {
-				return ItemListPanel.this.itemIcon;
+				return itemIcon;
 			}
+
+			@Override
 			public String getColumnText(Object element, int columnIndex) {
 				return element.toString();
 			}
 
+			@Override
 			public void addListener(ILabelProviderListener listener) {
 			}
 
+			@Override
 			public void dispose() {
 			}
 
+			@Override
 			public boolean isLabelProperty(Object element, String property) {
 				return true;
 			}
 
+			@Override
 			public void removeListener(ILabelProviderListener listener) {
-			}		
+			}
 		};
-		viewer.setLabelProvider(labelProvider);	
-		viewer.setInput(this.items);
+		viewer.setLabelProvider(labelProvider);
+		viewer.setInput(items);
 	}
 
 }

@@ -40,72 +40,76 @@ import org.eclipse.team.svn.ui.preferences.SVNTeamDiffViewerPage;
  * @author Igor Burilo
  */
 public class CompareResourcesOperation extends CompositeOperation {
-	
+
 	protected ILocalResource local;
+
 	protected IRepositoryResource remote;
-	
+
 	protected CompareResourcesInternalOperation internalCompareOp;
-	
+
 	public CompareResourcesOperation(ILocalResource local, IRepositoryResource remote) {
 		this(local, remote, false, false);
 	}
-	
+
 	public CompareResourcesOperation(ILocalResource local, IRepositoryResource remote, boolean forceReuse) {
 		this(local, remote, forceReuse, false);
 	}
-	
-	public CompareResourcesOperation(ILocalResource local, IRepositoryResource remote, boolean forceReuse, boolean showInDialog) {
+
+	public CompareResourcesOperation(ILocalResource local, IRepositoryResource remote, boolean forceReuse,
+			boolean showInDialog) {
 		this(local, remote, forceReuse, showInDialog, ISVNConnector.Options.NONE);
 	}
-	
-	public CompareResourcesOperation(ILocalResource local, IRepositoryResource remote, boolean forceReuse, boolean showInDialog, long options) {
+
+	public CompareResourcesOperation(ILocalResource local, IRepositoryResource remote, boolean forceReuse,
+			boolean showInDialog, long options) {
 		super("Operation_CompareLocal", SVNUIMessages.class); //$NON-NLS-1$
 		this.local = local;
 		this.remote = remote;
-		
-		final RunExternalCompareOperation externalCompareOp = new RunExternalCompareOperation(local, remote, SVNTeamDiffViewerPage.loadDiffViewerSettings());
+
+		final RunExternalCompareOperation externalCompareOp = new RunExternalCompareOperation(local, remote,
+				SVNTeamDiffViewerPage.loadDiffViewerSettings());
 		this.add(externalCompareOp);
-		
-		this.internalCompareOp = new CompareResourcesInternalOperation(local, remote, forceReuse, showInDialog, options) {
+
+		internalCompareOp = new CompareResourcesInternalOperation(local, remote, forceReuse, showInDialog, options) {
+			@Override
 			protected void runImpl(IProgressMonitor monitor) throws Exception {
 				if (!externalCompareOp.isExecuted()) {
 					super.runImpl(monitor);
-				}				
+				}
 			}
 		};
-		this.add(this.internalCompareOp, new IActionOperation[]{externalCompareOp});				
+		this.add(internalCompareOp, new IActionOperation[] { externalCompareOp });
 	}
-	
+
 	public void setDiffFile(String diffFile) {
 		if (diffFile != null) {
-			this.add(new UDiffGenerateOperation(this.local, this.remote, diffFile), new IActionOperation[]{this.internalCompareOp});
-		}		
+			this.add(new UDiffGenerateOperation(local, remote, diffFile), new IActionOperation[] { internalCompareOp });
+		}
 	}
-	
+
 	public void setForceId(String forceId) {
-		this.internalCompareOp.setForceId(forceId);
+		internalCompareOp.setForceId(forceId);
 	}
-	
+
 	/**
-	 * If there are no repository changes (incoming or conflicting), then we compare
-	 * with base revision (don't touch repository)
+	 * If there are no repository changes (incoming or conflicting), then we compare with base revision (don't touch repository)
 	 *
 	 * @param resource
 	 * @return
 	 */
 	public static SVNRevision getRemoteResourceRevisionForCompare(IResource resource) {
 		SVNRevision revision = SVNRevision.HEAD;
-		try {									
+		try {
 			AbstractSVNSyncInfo syncInfo = (AbstractSVNSyncInfo) UpdateSubscriber.instance().getSyncInfo(resource);
 			if (syncInfo != null) {
 				int kind = SyncInfo.getDirection(syncInfo.getKind());
 				if (kind != SyncInfo.INCOMING && kind != SyncInfo.CONFLICTING) {
 					revision = SVNRevision.BASE;
-				}									
+				}
 			}
 		} catch (TeamException te) {
 			LoggedOperation.reportError(CompareResourcesOperation.class.toString(), te);
-		}	
+		}
 		return revision;
 	}
 }

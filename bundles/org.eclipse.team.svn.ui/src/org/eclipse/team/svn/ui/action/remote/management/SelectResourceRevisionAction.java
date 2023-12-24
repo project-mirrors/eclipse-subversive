@@ -17,7 +17,7 @@ package org.eclipse.team.svn.ui.action.remote.management;
 import java.util.HashSet;
 
 import org.eclipse.jface.action.IAction;
-import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.team.svn.core.connector.SVNRevision;
 import org.eclipse.team.svn.core.operation.AbstractActionOperation;
@@ -43,63 +43,63 @@ import org.eclipse.team.svn.ui.panel.common.InputRevisionPanel;
  */
 public class SelectResourceRevisionAction extends AbstractRepositoryTeamAction {
 	public SelectResourceRevisionAction() {
-		super();
 	}
 
+	@Override
 	public void runImpl(IAction action) {
-		IRepositoryResource []resources = this.getSelectedRepositoryResources();
+		IRepositoryResource[] resources = getSelectedRepositoryResources();
 		this.runImpl(resources);
 	}
-	
-	protected void runImpl(IRepositoryResource []resources) {
-		IActionOperation op = SelectResourceRevisionAction.getAddRevisionLinkOperation(resources, this.getShell());
+
+	protected void runImpl(IRepositoryResource[] resources) {
+		IActionOperation op = SelectResourceRevisionAction.getAddRevisionLinkOperation(resources, getShell());
 		if (op != null) {
-			this.runScheduled(op);
+			runScheduled(op);
 		}
 	}
-	
-	public static IActionOperation getAddRevisionLinkOperation(IRepositoryResource []resources, Shell shell) {
+
+	public static IActionOperation getAddRevisionLinkOperation(IRepositoryResource[] resources, Shell shell) {
 		SVNRevision selectedRevision = null;
 		final String comment[] = new String[1];
-				 
+
 		InputRevisionPanel panel = new InputRevisionPanel(resources.length == 1 ? resources[0] : null, false, null);
 		DefaultDialog dialog = new DefaultDialog(shell, panel);
-		if (dialog.open() == Dialog.OK) {			
-			comment[0] = panel.getRevisionComment();			
+		if (dialog.open() == Window.OK) {
+			comment[0] = panel.getRevisionComment();
 			if (resources.length == 1) {
 				selectedRevision = panel.getSelectedRevision();
 				resources[0] = SVNUtility.copyOf(resources[0]);
-				resources[0].setSelectedRevision(selectedRevision);	
-			}			
-									
+				resources[0].setSelectedRevision(selectedRevision);
+			}
+
 			final LocateResourceURLInHistoryOperation locateOp = new LocateResourceURLInHistoryOperation(resources);
-			AbstractActionOperation mainOp = new AddRevisionLinkOperation(new IRevisionLinkProvider() {
-				public IRevisionLink[] getRevisionLinks() {
-					IRepositoryResource[] resources = locateOp.getRepositoryResources();
-					IRevisionLink[] links = new IRevisionLink[resources.length];
-					for (int i = 0; i < resources.length; i ++) {
-						links[i] = SVNUtility.createRevisionLink(resources[i]);
-						links[i].setComment(comment[0]);
-					} 							
-					return links;
+			AbstractActionOperation mainOp = new AddRevisionLinkOperation((IRevisionLinkProvider) () -> {
+				IRepositoryResource[] resources1 = locateOp.getRepositoryResources();
+				IRevisionLink[] links = new IRevisionLink[resources1.length];
+				for (int i = 0; i < resources1.length; i++) {
+					links[i] = SVNUtility.createRevisionLink(resources1[i]);
+					links[i].setComment(comment[0]);
 				}
+				return links;
 			}, selectedRevision);
 			CompositeOperation op = new CompositeOperation(mainOp.getId(), mainOp.getMessagesClass());
 			op.add(locateOp);
-			op.add(mainOp, new IActionOperation[] {locateOp});
+			op.add(mainOp, new IActionOperation[] { locateOp });
 			op.add(new SaveRepositoryLocationsOperation());
-			HashSet<IRepositoryLocation> locations = new HashSet<IRepositoryLocation>();
+			HashSet<IRepositoryLocation> locations = new HashSet<>();
 			for (IRepositoryResource resource : resources) {
 				locations.add(resource.getRepositoryLocation());
 			}
-			op.add(new RefreshRepositoryLocationsOperation(locations.toArray(new IRepositoryLocation[locations.size()]), true));
+			op.add(new RefreshRepositoryLocationsOperation(locations.toArray(new IRepositoryLocation[locations.size()]),
+					true));
 			return op;
 		}
 		return null;
 	}
-	
+
+	@Override
 	public boolean isEnabled() {
-		return this.getSelectedRepositoryResources().length > 0;
+		return getSelectedRepositoryResources().length > 0;
 	}
 
 }

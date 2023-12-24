@@ -26,16 +26,26 @@ import org.eclipse.team.svn.core.resource.ILocalResource;
  */
 public abstract class SVNLocalResource implements ILocalResource {
 	protected IResource resource;
+
 	protected long revision;
+
 	protected long baseRevision;
+
 	protected String textStatus;
+
 	protected String propStatus;
+
 	protected int changeMask;
+
 	protected String author;
+
 	protected long lastCommitDate;
+
 	protected SVNConflictDescriptor treeConflictDescriptor;
-	
-	protected SVNLocalResource(IResource resource, long revision, long baseRevision, String textStatus, String propStatus, int changeMask, String author, long lastCommitDate, SVNConflictDescriptor treeConflictDescriptor) {
+
+	protected SVNLocalResource(IResource resource, long revision, long baseRevision, String textStatus,
+			String propStatus, int changeMask, String author, long lastCommitDate,
+			SVNConflictDescriptor treeConflictDescriptor) {
 		this.resource = resource;
 		this.revision = revision;
 		this.baseRevision = baseRevision;
@@ -46,72 +56,88 @@ public abstract class SVNLocalResource implements ILocalResource {
 		this.lastCommitDate = lastCommitDate;
 		this.treeConflictDescriptor = treeConflictDescriptor;
 	}
-	
+
+	@Override
 	public boolean isLocked() {
-	    return (this.changeMask & ILocalResource.IS_LOCKED) != 0;
+		return (changeMask & ILocalResource.IS_LOCKED) != 0;
 	}
-	
+
+	@Override
 	public IResource getResource() {
-		return this.resource;
+		return resource;
 	}
 
+	@Override
 	public String getName() {
-		return this.resource.getName();
+		return resource.getName();
 	}
 
+	@Override
 	public long getRevision() {
-		return this.revision;
+		return revision;
 	}
 
+	@Override
 	public long getBaseRevision() {
-		return this.baseRevision;
+		return baseRevision;
 	}
-	
+
+	@Override
 	public String getTextStatus() {
-		return this.textStatus;
+		return textStatus;
 	}
-	
+
+	@Override
 	public String getPropStatus() {
-		return this.propStatus;
+		return propStatus;
 	}
-	
+
+	@Override
 	public String getStatus() {
-		return SVNRemoteStorage.getCompoundStatusString(this.textStatus, this.propStatus);
+		return SVNRemoteStorage.getCompoundStatusString(textStatus, propStatus);
 	}
-	
+
+	@Override
 	public int getChangeMask() {
-		return this.changeMask;
+		return changeMask;
 	}
-	
+
+	@Override
 	public boolean isCopied() {
-		return (this.changeMask & ILocalResource.IS_COPIED) != 0;
+		return (changeMask & ILocalResource.IS_COPIED) != 0;
 	}
 
+	@Override
 	public String getAuthor() {
-		return this.author;
-	}
-	
-	public long getLastCommitDate() {
-		return this.lastCommitDate;
+		return author;
 	}
 
+	@Override
+	public long getLastCommitDate() {
+		return lastCommitDate;
+	}
+
+	@Override
 	public boolean hasTreeConflict() {
-		return this.treeConflictDescriptor != null && this.treeConflictDescriptor.conflictKind == SVNConflictDescriptor.Kind.TREE;
+		return treeConflictDescriptor != null && treeConflictDescriptor.conflictKind == SVNConflictDescriptor.Kind.TREE;
 	}
-	
+
+	@Override
 	public SVNConflictDescriptor getTreeConflictDescriptor() {
-		return this.treeConflictDescriptor;
+		return treeConflictDescriptor;
 	}
-	
+
+	@Override
 	public String toString() {
-		return this.resource.toString();
+		return resource.toString();
 	}
-	
+
+	@Override
 	public boolean equals(Object obj) {
 		if (obj instanceof ILocalResource) {
-			return this.resource.equals(((ILocalResource)obj).getResource());
+			return resource.equals(((ILocalResource) obj).getResource());
 		}
 		return false;
 	}
-	
+
 }

@@ -21,7 +21,6 @@ import org.eclipse.team.svn.core.SVNMessages;
 import org.eclipse.team.svn.core.connector.ISVNConnector;
 import org.eclipse.team.svn.core.connector.SVNDepth;
 import org.eclipse.team.svn.core.operation.IConsoleStream;
-import org.eclipse.team.svn.core.operation.IUnprotectedOperation;
 import org.eclipse.team.svn.core.operation.SVNProgressMonitor;
 import org.eclipse.team.svn.core.resource.IRepositoryLocation;
 import org.eclipse.team.svn.core.resource.IRepositoryResource;
@@ -35,7 +34,7 @@ import org.eclipse.team.svn.core.utility.FileUtility;
 public class RevertOperation extends AbstractFileOperation {
 	protected boolean recursive;
 
-	public RevertOperation(File []files, boolean recursive) {
+	public RevertOperation(File[] files, boolean recursive) {
 		super("Operation_RevertFile", SVNMessages.class, files); //$NON-NLS-1$
 		this.recursive = recursive;
 	}
@@ -45,27 +44,26 @@ public class RevertOperation extends AbstractFileOperation {
 		this.recursive = recursive;
 	}
 
+	@Override
 	protected void runImpl(IProgressMonitor monitor) throws Exception {
-		File []files = this.operableData();
-		
-		if (this.recursive) {
+		File[] files = operableData();
+
+		if (recursive) {
 			files = FileUtility.shrinkChildNodes(files, false);
-		}
-		else {
+		} else {
 			FileUtility.reorder(files, false);
 		}
-		
+
 		for (int i = 0; i < files.length && !monitor.isCanceled(); i++) {
 			final File current = files[i];
 			IRepositoryResource remote = SVNFileStorage.instance().asRepositoryResource(current, false);
 			IRepositoryLocation location = remote.getRepositoryLocation();
 			final ISVNConnector proxy = location.acquireSVNProxy();
-			this.writeToConsole(IConsoleStream.LEVEL_CMD, "svn revert \"" + FileUtility.normalizePath(current.getAbsolutePath()) + "\"" + (this.recursive ? " -R" : "") + "\n"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
-			this.protectStep(new IUnprotectedOperation() {
-				public void run(IProgressMonitor monitor) throws Exception {
-					proxy.revert(new String[] {current.getAbsolutePath()}, SVNDepth.infinityOrEmpty(RevertOperation.this.recursive), null, ISVNConnector.Options.NONE, new SVNProgressMonitor(RevertOperation.this, monitor, null));
-				}
-			}, monitor, files.length);
+			writeToConsole(IConsoleStream.LEVEL_CMD,
+					"svn revert \"" + FileUtility.normalizePath(current.getAbsolutePath()) + "\"" //$NON-NLS-1$//$NON-NLS-2$
+							+ (recursive ? " -R" : "") + "\n"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			this.protectStep(monitor1 -> proxy.revert(new String[] { current.getAbsolutePath() }, SVNDepth.infinityOrEmpty(recursive), null,
+					ISVNConnector.Options.NONE, new SVNProgressMonitor(RevertOperation.this, monitor1, null)), monitor, files.length);
 			location.releaseSVNProxy(proxy);
 		}
 	}

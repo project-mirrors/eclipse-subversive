@@ -29,7 +29,7 @@ import org.eclipse.team.svn.ui.history.data.SVNLocalFileRevision;
  */
 public class CategoryLogNode extends AbstractLogNode {
 	protected HistoryCategory category;
-	
+
 	public CategoryLogNode(RootHistoryCategory category) {
 		this(category, null);
 	}
@@ -39,89 +39,101 @@ public class CategoryLogNode extends AbstractLogNode {
 		this.category = category;
 	}
 
+	@Override
 	public Object getAdapter(Class adapter) {
 		if (adapter.equals(HistoryCategory.class)) {
-			return this.category;
+			return category;
 		}
 		return null;
 	}
-	
+
+	@Override
 	public ILogNode[] getChildren() {
-		Object []entries = this.category.getEntries();
-		ILogNode []children = new ILogNode[entries.length];
+		Object[] entries = category.getEntries();
+		ILogNode[] children = new ILogNode[entries.length];
 		for (int i = 0; i < entries.length; i++) {
 			if (entries[i] instanceof SVNLogEntry) {
-				children[i] = new SVNLogNode((SVNLogEntry)entries[i], this);
-			}
-			else if (entries[i] instanceof SVNLocalFileRevision) {
-				children[i] = new LocalLogNode((SVNLocalFileRevision)entries[i], this);
-			}
-			else if (entries[i] instanceof HistoryCategory) {
-				children[i] = new CategoryLogNode((HistoryCategory)entries[i], this);
-			}
-			else if (entries[i] instanceof String) {
-				children[i] = new PlainTextLogNode((String)entries[i], this);
+				children[i] = new SVNLogNode((SVNLogEntry) entries[i], this);
+			} else if (entries[i] instanceof SVNLocalFileRevision) {
+				children[i] = new LocalLogNode((SVNLocalFileRevision) entries[i], this);
+			} else if (entries[i] instanceof HistoryCategory) {
+				children[i] = new CategoryLogNode((HistoryCategory) entries[i], this);
+			} else if (entries[i] instanceof String) {
+				children[i] = new PlainTextLogNode((String) entries[i], this);
 			}
 		}
 		return children;
 	}
 
+	@Override
 	public Object getEntity() {
-		return this.category;
+		return category;
 	}
 
+	@Override
 	public boolean requiresBoldFont(long currentRevision) {
 		return true;
 	}
-	
+
+	@Override
 	public ImageDescriptor getImageDescriptor() {
 		return SVNTeamUIPlugin.instance().getImageDescriptor("icons/views/history/group_by_date.gif"); //$NON-NLS-1$
 	}
 
+	@Override
 	public String getLabel(int columnIndex, int labelType, long currentRevision) {
 		if (columnIndex == ILogNode.COLUMN_REVISION) {
-			return this.category.getName();
+			return category.getName();
 		}
 		return ""; //$NON-NLS-1$
 	}
-	
+
+	@Override
 	public int getType() {
 		return ILogNode.TYPE_CATEGORY;
 	}
 
+	@Override
 	public boolean hasChildren() {
 		return true;
 	}
 
+	@Override
 	public String getAuthor() {
 		return ""; //$NON-NLS-1$
 	}
 
+	@Override
 	public int getChangesCount() {
 		return 0;
 	}
 
+	@Override
 	public String getComment() {
 		return ""; //$NON-NLS-1$
 	}
 
+	@Override
 	public long getRevision() {
 		return SVNRevision.INVALID_REVISION_NUMBER;
 	}
 
+	@Override
 	public long getTimeStamp() {
 		return 0;
 	}
-	
+
+	@Override
 	public int hashCode() {
-		return this.category.hashCode();
+		return category.hashCode();
 	}
-	
+
+	@Override
 	public boolean equals(Object obj) {
 		if (obj instanceof CategoryLogNode) {
-			return this.category.equals(((CategoryLogNode)obj).category);
+			return category.equals(((CategoryLogNode) obj).category);
 		}
 		return false;
 	}
-	
+
 }

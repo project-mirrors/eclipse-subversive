@@ -26,5 +26,5 @@ public class CompareWithTagAction extends CompareWithBranchTagAction {
 	public CompareWithTagAction() {
 		super(BranchTagSelectionComposite.TAG_OPERATED);
 	}
-	
+
 }

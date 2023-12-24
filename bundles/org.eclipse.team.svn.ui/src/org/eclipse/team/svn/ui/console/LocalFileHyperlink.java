@@ -39,32 +39,36 @@ import org.eclipse.ui.part.FileEditorInput;
  *
  */
 public class LocalFileHyperlink implements IHyperlink {
-	
+
 	protected String pathString;
-	
+
 	public LocalFileHyperlink(String pathString) {
 		this.pathString = pathString;
 	}
 
+	@Override
 	public void linkActivated() {
-		UIMonitorUtility.doTaskBusyDefault(new OpenLocalFileOperation(this.pathString));
+		UIMonitorUtility.doTaskBusyDefault(new OpenLocalFileOperation(pathString));
 	}
 
+	@Override
 	public void linkEntered() {
 	}
 
+	@Override
 	public void linkExited() {
 	}
-	
+
 	protected class OpenLocalFileOperation extends AbstractActionOperation {
-		
+
 		protected String filePath;
-		
+
 		public OpenLocalFileOperation(String filePath) {
 			super("Operation_OpenLocalFile", SVNUIMessages.class); //$NON-NLS-1$
 			this.filePath = filePath;
 		}
 
+		@Override
 		protected void runImpl(IProgressMonitor monitor) throws Exception {
 			IWorkbenchWindow window = SVNTeamUIPlugin.instance().getWorkbench().getActiveWorkbenchWindow();
 			if (window == null || window.getActivePage() == null) {
@@ -74,18 +78,19 @@ public class LocalFileHyperlink implements IHyperlink {
 			if (ResourcesPlugin.getWorkspace().getRoot() == null) {
 				return;
 			}
-			
-			IPath path = Path.fromOSString(this.filePath);
+
+			IPath path = Path.fromOSString(filePath);
 			if (!path.isAbsolute()) {
-				path = path.makeAbsolute().setDevice(ResourcesPlugin.getWorkspace().getRoot().getLocation().getDevice());
+				path = path.makeAbsolute()
+						.setDevice(ResourcesPlugin.getWorkspace().getRoot().getLocation().getDevice());
 			}
-			
+
 			IFile file = ResourcesPlugin.getWorkspace().getRoot().getFileForLocation(path);
 			if (file == null || !file.exists()) {
 				if (path != null && !path.isAbsolute() && path.segmentCount() > 1) {
 					path = path.removeFirstSegments(1);
 					file = ResourcesPlugin.getWorkspace().getRoot().getFile(path);
-				} 
+				}
 			}
 			if (file == null || !file.exists()) {
 				return;
@@ -96,20 +101,21 @@ public class LocalFileHyperlink implements IHyperlink {
 			}
 			IEditorDescriptor descriptor = null;
 			IContentDescription contentDescription = file.getContentDescription();
-			descriptor = registry.getDefaultEditor(path.lastSegment(), contentDescription != null ? contentDescription.getContentType(): null);
-			
+			descriptor = registry.getDefaultEditor(path.lastSegment(),
+					contentDescription != null ? contentDescription.getContentType() : null);
+
 			if (descriptor == null) {
 				descriptor = registry.findEditor(IEditorRegistry.SYSTEM_EXTERNAL_EDITOR_ID);
 			}
-			
+
 			if (descriptor == null) {
 				return;
 			}
-			
+
 			IEditorInput input = new FileEditorInput(file);
 			page.openEditor(input, descriptor.getId());
 		}
-		
+
 	}
 
 }

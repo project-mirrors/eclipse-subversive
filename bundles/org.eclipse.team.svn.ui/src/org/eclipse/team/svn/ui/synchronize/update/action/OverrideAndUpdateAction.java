@@ -38,7 +38,6 @@ import org.eclipse.team.svn.core.operation.local.SaveProjectMetaOperation;
 import org.eclipse.team.svn.core.operation.local.UpdateOperation;
 import org.eclipse.team.svn.core.operation.local.change.visitors.RemoveNonVersionedVisitor;
 import org.eclipse.team.svn.core.resource.ILocalResource;
-import org.eclipse.team.svn.core.resource.IResourceProvider;
 import org.eclipse.team.svn.core.utility.FileUtility;
 import org.eclipse.team.svn.ui.SVNTeamUIPlugin;
 import org.eclipse.team.svn.ui.SVNUIMessages;
@@ -62,25 +61,33 @@ public class OverrideAndUpdateAction extends AbstractSynchronizeModelAction {
 		super(text, configuration);
 	}
 
+	@Override
 	protected FastSyncInfoFilter getSyncInfoFilter() {
-		return new FastSyncInfoFilter.SyncInfoDirectionFilter(new int[] {SyncInfo.OUTGOING, SyncInfo.INCOMING, SyncInfo.CONFLICTING});
+		return new FastSyncInfoFilter.SyncInfoDirectionFilter(
+				new int[] { SyncInfo.OUTGOING, SyncInfo.INCOMING, SyncInfo.CONFLICTING });
 	}
 
+	@Override
 	protected IActionOperation getOperation(ISynchronizePageConfiguration configuration, IDiffElement[] elements) {
-		final IResource [][]resources = new IResource[1][];
-		IResource []obstructedResources = OverrideAndUpdateAction.this.syncInfoSelector.getSelectedResourcesRecursive(IStateFilter.SF_OBSTRUCTED);
+		final IResource[][] resources = new IResource[1][];
+		IResource[] obstructedResources = OverrideAndUpdateAction.this.syncInfoSelector
+				.getSelectedResourcesRecursive(IStateFilter.SF_OBSTRUCTED);
 		obstructedResources = FileUtility.addOperableParents(obstructedResources, IStateFilter.SF_OBSTRUCTED);
-		HashSet<IResource> allResources = new HashSet<IResource>(Arrays.asList(obstructedResources));
-		IResource []changedResources = OverrideAndUpdateAction.this.syncInfoSelector.getSelectedResourcesRecursive(ISyncStateFilter.SF_OVERRIDE);
-		changedResources = UnacceptableOperationNotificator.shrinkResourcesWithNotOnRespositoryParents(configuration.getSite().getShell(), changedResources);
-		ArrayList<IResource> affected = new ArrayList<IResource>();
- 		if (changedResources != null) {
-			IResource [] changedWithOperableParents = FileUtility.addOperableParents(changedResources, IStateFilter.SF_NOTONREPOSITORY);
-			ArrayList<IResource> changedList = new ArrayList<IResource>(Arrays.asList(changedResources));
+		HashSet<IResource> allResources = new HashSet<>(Arrays.asList(obstructedResources));
+		IResource[] changedResources = OverrideAndUpdateAction.this.syncInfoSelector
+				.getSelectedResourcesRecursive(ISyncStateFilter.SF_OVERRIDE);
+		changedResources = UnacceptableOperationNotificator
+				.shrinkResourcesWithNotOnRespositoryParents(configuration.getSite().getShell(), changedResources);
+		ArrayList<IResource> affected = new ArrayList<>();
+		if (changedResources != null) {
+			IResource[] changedWithOperableParents = FileUtility.addOperableParents(changedResources,
+					IStateFilter.SF_NOTONREPOSITORY);
+			ArrayList<IResource> changedList = new ArrayList<>(Arrays.asList(changedResources));
 			for (IResource current : changedWithOperableParents) {
 				if (!changedList.contains(current)) {
 					changedList.add(current);
-					IResource [] currentAffectedArray = FileUtility.getResourcesRecursive(new IResource [] {current}, IStateFilter.SF_ANY_CHANGE);
+					IResource[] currentAffectedArray = FileUtility.getResourcesRecursive(new IResource[] { current },
+							IStateFilter.SF_ANY_CHANGE);
 					for (IResource currentAffected : currentAffectedArray) {
 						if (!changedList.contains(currentAffected)) {
 							affected.add(currentAffected);
@@ -89,12 +96,13 @@ public class OverrideAndUpdateAction extends AbstractSynchronizeModelAction {
 				}
 			}
 			changedResources = changedWithOperableParents;
- 			allResources.addAll(Arrays.asList(changedResources));
- 		}
-		
+			allResources.addAll(Arrays.asList(changedResources));
+		}
+
 		if (allResources.size() > 0) {
-			IResource []fullSet = allResources.toArray(new IResource[allResources.size()]);
-			OverrideResourcesPanel panel = new OverrideResourcesPanel(fullSet, fullSet, OverrideResourcesPanel.MSG_UPDATE, affected.toArray(new IResource [affected.size()]));
+			IResource[] fullSet = allResources.toArray(new IResource[allResources.size()]);
+			OverrideResourcesPanel panel = new OverrideResourcesPanel(fullSet, fullSet,
+					OverrideResourcesPanel.MSG_UPDATE, affected.toArray(new IResource[affected.size()]));
 			DefaultDialog dialog = new DefaultDialog(configuration.getSite().getShell(), panel);
 			if (dialog.open() != 0) {
 				return null;
@@ -103,52 +111,60 @@ public class OverrideAndUpdateAction extends AbstractSynchronizeModelAction {
 		} else {
 			return null;
 		}
-		
+
 		CompositeOperation op = new CompositeOperation("Operation_UOverrideAndUpdate", SVNUIMessages.class); //$NON-NLS-1$
 
 		SaveProjectMetaOperation saveOp = new SaveProjectMetaOperation(resources[0]);
 		op.add(saveOp);
 		/*
-		 * We should call RemoveNonVersionedResourcesOperation before revert operation, because we don't want 
+		 * We should call RemoveNonVersionedResourcesOperation before revert operation, because we don't want
 		 * to delete ignored resources (revert operation makes 'ignored' resource as 'new' in case if ignore properties were not committed)
 		 * 
 		 * Probably there are case where we need to call RemoveNonVersionedResourcesOperation once again after revert operation,
 		 * but I didn't find them
 		 */
-		IActionOperation removeNonVersionedResourcesOp = new ResourcesTraversalOperation("Operation_RemoveNonSVN", SVNMessages.class, resources[0], new RemoveNonVersionedVisitor(true), IResource.DEPTH_INFINITE);
+		IActionOperation removeNonVersionedResourcesOp = new ResourcesTraversalOperation("Operation_RemoveNonSVN",
+				SVNMessages.class, resources[0], new RemoveNonVersionedVisitor(true), IResource.DEPTH_INFINITE);
 		op.add(removeNonVersionedResourcesOp);
-		RevertOperation revertOp = new RevertOperation(FileUtility.getResourcesRecursive(resources[0], IStateFilter.SF_REVERTABLE, IResource.DEPTH_ZERO), true);
+		RevertOperation revertOp = new RevertOperation(
+				FileUtility.getResourcesRecursive(resources[0], IStateFilter.SF_REVERTABLE, IResource.DEPTH_ZERO),
+				true);
 		op.add(revertOp);
 		op.add(new ClearLocalStatusesOperation(resources[0]));
 		// Obstructed resources are deleted now. So, try to revert all corresponding entries
-		RevertOperation revertOp1 = new RevertOperation(FileUtility.getResourcesRecursive(resources[0], IStateFilter.SF_OBSTRUCTED, IResource.DEPTH_ZERO), true);
+		RevertOperation revertOp1 = new RevertOperation(
+				FileUtility.getResourcesRecursive(resources[0], IStateFilter.SF_OBSTRUCTED, IResource.DEPTH_ZERO),
+				true);
 		op.add(revertOp1);
 		op.add(new ClearLocalStatusesOperation(resources[0]));
-		
+
 		Map<SVNRevision, Set<IResource>> splitted = UpdateAction.splitByPegRevision(this, resources[0]);
-		
+
 		for (Map.Entry<SVNRevision, Set<IResource>> entry : splitted.entrySet()) {
-			final IResource []toUpdate = entry.getValue().toArray(new IResource[0]);
-			boolean ignoreExternals = SVNTeamPreferences.getBehaviourBoolean(SVNTeamUIPlugin.instance().getPreferenceStore(), SVNTeamPreferences.BEHAVIOUR_IGNORE_EXTERNALS_NAME);
-			UpdateOperation mainOp = new UpdateOperation(new IResourceProvider() {
-				public IResource[] getResources() {
-					return 
-						FileUtility.getResourcesRecursive(toUpdate, new IStateFilter.AbstractStateFilter() {
-							protected boolean acceptImpl(ILocalResource local, IResource resource, String state, int mask) {
-								return IStateFilter.SF_ONREPOSITORY.accept(resource, state, mask) || IStateFilter.SF_NOTEXISTS.accept(resource, state, mask);
-							}
-							protected boolean allowsRecursionImpl(ILocalResource local, IResource resource, String state, int mask) {
-								return true;
-							}
-						}, IResource.DEPTH_ZERO);
+			final IResource[] toUpdate = entry.getValue().toArray(new IResource[0]);
+			boolean ignoreExternals = SVNTeamPreferences.getBehaviourBoolean(
+					SVNTeamUIPlugin.instance().getPreferenceStore(),
+					SVNTeamPreferences.BEHAVIOUR_IGNORE_EXTERNALS_NAME);
+			UpdateOperation mainOp = new UpdateOperation(() -> FileUtility.getResourcesRecursive(toUpdate, new IStateFilter.AbstractStateFilter() {
+				@Override
+				protected boolean acceptImpl(ILocalResource local, IResource resource, String state, int mask) {
+					return IStateFilter.SF_ONREPOSITORY.accept(resource, state, mask)
+							|| IStateFilter.SF_NOTEXISTS.accept(resource, state, mask);
 				}
-			}, entry.getKey(), ignoreExternals);
-			op.add(mainOp, new IActionOperation[] {revertOp, revertOp1, removeNonVersionedResourcesOp});
-			op.add(new ClearUpdateStatusesOperation(mainOp), new IActionOperation[]{mainOp});
+
+				@Override
+				protected boolean allowsRecursionImpl(ILocalResource local, IResource resource, String state,
+						int mask) {
+					return true;
+				}
+			}, IResource.DEPTH_ZERO), entry.getKey(), ignoreExternals);
+			op.add(mainOp, new IActionOperation[] { revertOp, revertOp1, removeNonVersionedResourcesOp });
+			op.add(new ClearUpdateStatusesOperation(mainOp), new IActionOperation[] { mainOp });
 		}
-		
+
 		op.add(new RestoreProjectMetaOperation(saveOp));
-		op.add(new RefreshResourcesOperation(resources[0]/*, IResource.DEPTH_INFINITE, RefreshResourcesOperation.REFRESH_ALL*/));
+		op.add(new RefreshResourcesOperation(
+				resources[0]/*, IResource.DEPTH_INFINITE, RefreshResourcesOperation.REFRESH_ALL*/));
 
 		return op;
 	}

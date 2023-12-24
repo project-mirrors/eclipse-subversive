@@ -9,8 +9,8 @@
  *
  * Contributors:
  *     Tasktop Technologies - initial API and implementation
- *     IBM Corporation - helper methods from 
- *       org.eclipse.wst.common.frameworks.internal.ui.WTPActivityHelper 
+ *     IBM Corporation - helper methods from
+ *       org.eclipse.wst.common.frameworks.internal.ui.WTPActivityHelper
  *     Alexander Fedorov (ArSysOp) - ongoing support
  *******************************************************************************/
 
@@ -24,6 +24,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
+import org.eclipse.team.svn.core.BaseMessages;
 import org.eclipse.team.svn.core.SVNTeamPlugin;
 import org.eclipse.team.svn.core.operation.LoggedOperation;
 import org.eclipse.team.svn.ui.SVNUIMessages;
@@ -40,7 +41,7 @@ import org.eclipse.ui.internal.browser.WorkbenchBrowserSupport;
  * @author Steffen Pingel
  * @author Igor Burilo
  */
-public class WorkbenchUtil {	
+public class WorkbenchUtil {
 
 	/**
 	 * Opens <code>location</code> in a web-browser according to the Eclipse workbench preferences.
@@ -59,8 +60,8 @@ public class WorkbenchUtil {
 	 * @param location
 	 *            the url to open
 	 * @param customFlags
-	 *            additional flags that are passed to {@link IWorkbenchBrowserSupport}, pass
-	 *            {@link IWorkbenchBrowserSupport#AS_EXTERNAL} to force opening external browser
+	 *            additional flags that are passed to {@link IWorkbenchBrowserSupport}, pass {@link IWorkbenchBrowserSupport#AS_EXTERNAL} to
+	 *            force opening external browser
 	 */
 	public static void openUrl(String location, int customFlags) {
 		try {
@@ -76,7 +77,8 @@ public class WorkbenchUtil {
 				} catch (PartInitException e) {
 					Status status = new Status(IStatus.ERROR, SVNTeamPlugin.NATURE_ID,
 							SVNUIMessages.WorkbenchUtil_Browser_Initialization_Failed);
-					MessageDialog.openError(UIMonitorUtility.getShell(), SVNUIMessages.WorkbenchUtil_Open_Location_Title, status.getMessage());
+					MessageDialog.openError(UIMonitorUtility.getShell(),
+							SVNUIMessages.WorkbenchUtil_Open_Location_Title, status.getMessage());
 				}
 			} else {
 				IWebBrowser browser = null;
@@ -94,20 +96,23 @@ public class WorkbenchUtil {
 				browser.openURL(url);
 			}
 		} catch (PartInitException e) {
-			LoggedOperation.reportError(WorkbenchUtil.class.toString(), e);			
-			
+			LoggedOperation.reportError(WorkbenchUtil.class.toString(), e);
+
 			Status status = new Status(IStatus.ERROR, SVNTeamPlugin.NATURE_ID,
 					SVNUIMessages.WorkbenchUtil_Browser_Initialization_Failed, e);
-			MessageDialog.openError(UIMonitorUtility.getShell(), SVNUIMessages.WorkbenchUtil_Open_Location_Title, status.getMessage());			
+			MessageDialog.openError(UIMonitorUtility.getShell(), SVNUIMessages.WorkbenchUtil_Open_Location_Title,
+					status.getMessage());
 		} catch (MalformedURLException e) {
 			if (location != null && location.trim().equals("")) { //$NON-NLS-1$
 				Status status = new Status(IStatus.WARNING, SVNTeamPlugin.NATURE_ID,
 						SVNUIMessages.WorkbenchUtil_No_URL_Error, e);
-				MessageDialog.openWarning(UIMonitorUtility.getShell(), SVNUIMessages.WorkbenchUtil_Open_Location_Title, status.getMessage());
+				MessageDialog.openWarning(UIMonitorUtility.getShell(), SVNUIMessages.WorkbenchUtil_Open_Location_Title,
+						status.getMessage());
 			} else {
-				Status status = new Status(IStatus.ERROR, SVNTeamPlugin.NATURE_ID, SVNUIMessages.format(
+				Status status = new Status(IStatus.ERROR, SVNTeamPlugin.NATURE_ID, BaseMessages.format(
 						SVNUIMessages.WorkbenchUtil_Invalid_URL_Error, location), e);
-				MessageDialog.openError(UIMonitorUtility.getShell(), SVNUIMessages.WorkbenchUtil_Open_Location_Title, status.getMessage());
+				MessageDialog.openError(UIMonitorUtility.getShell(), SVNUIMessages.WorkbenchUtil_Open_Location_Title,
+						status.getMessage());
 			}
 		}
 	}

@@ -28,42 +28,54 @@ import org.eclipse.ui.IWorkbenchPart;
  * @author Andrej Zachar
  */
 public interface ICommitActionFactory {
-	
+
 	/**
 	 * Called upon the CommentComposite initialization.
+	 * 
 	 * @param commentManager
 	 */
-	public void initCommentManager(ICommentManager commentManager);
+	void initCommentManager(ICommentManager commentManager);
 
 	/**
 	 * Called each time "Ok" button is pressed.
+	 * 
 	 * @param commentManager
 	 */
-	public void confirmMessage(ICommentManager commentManager);
+	void confirmMessage(ICommentManager commentManager);
 
 	/**
 	 * Called each time "Cancel" button is pressed.
+	 * 
 	 * @param commentManager
 	 */
-	public void cancelMessage(ICommentManager commentManager);
+	void cancelMessage(ICommentManager commentManager);
 
 	/**
 	 * The method provide abilities in extending of the standard Subversive Commit Dialog to more powerful
-	 * @param shell Shell instance which will be used to interact with user
-	 * @param allFilesToCommit full set of files which will be committed
-	 * @param panel the default Subversive Commit Panel implementation 
+	 * 
+	 * @param shell
+	 *            Shell instance which will be used to interact with user
+	 * @param allFilesToCommit
+	 *            full set of files which will be committed
+	 * @param panel
+	 *            the default Subversive Commit Panel implementation
 	 * @return enahanced Commit Dialog
 	 */
-	public ICommitDialog getCommitDialog(Shell shell, Collection allFilesToCommit, ICommentDialogPanel panel);
+	ICommitDialog getCommitDialog(Shell shell, Collection allFilesToCommit, ICommentDialogPanel panel);
 
 	/**
 	 * The method allows customizing of the Commit Operation
-	 * @param operation prepared Commit operation
-	 * @param revisionProvider committed revision provider
-	 * @param dependsOn dependencies which can prevent commit operation execution in case of failure
-	 * @param part workbench part which will be used to interact with user
+	 * 
+	 * @param operation
+	 *            prepared Commit operation
+	 * @param revisionProvider
+	 *            committed revision provider
+	 * @param dependsOn
+	 *            dependencies which can prevent commit operation execution in case of failure
+	 * @param part
+	 *            workbench part which will be used to interact with user
 	 */
-	public void performAfterCommitTasks(CompositeOperation operation, IRevisionProvider revisionProvider, 
-		IActionOperation[] dependsOn, IWorkbenchPart part);
-	
+	void performAfterCommitTasks(CompositeOperation operation, IRevisionProvider revisionProvider,
+			IActionOperation[] dependsOn, IWorkbenchPart part);
+
 }

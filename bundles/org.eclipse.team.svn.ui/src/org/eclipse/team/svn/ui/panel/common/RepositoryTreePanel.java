@@ -16,9 +16,7 @@
 package org.eclipse.team.svn.ui.panel.common;
 
 import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
@@ -45,77 +43,85 @@ import org.eclipse.team.svn.ui.repository.model.RepositoryRevisions;
  */
 public class RepositoryTreePanel extends AbstractDialogPanel {
 	protected RepositoryTreeComposite repositoryTree;
+
 	protected IRepositoryBase root;
+
 	protected IRepositoryResource selectedResource;
-	protected IRepositoryResource []selectedResources;
+
+	protected IRepositoryResource[] selectedResources;
+
 	protected boolean allowSourcesInTree;
+
 	protected boolean allowFiles;
+
 	protected boolean autoExpandFirstLevel;
+
 	protected boolean showRevisionLinks;
-	
-	public RepositoryTreePanel(String title, IRepositoryResource[] resources, boolean allowSourcesInTree, boolean showRevisionLinks) {
-		this(title,
-			SVNUIMessages.RepositoryTreePanel_Description, 
-			AbstractDialogPanel.makeToBeOperatedMessage(resources), 
-			resources, 
-			allowSourcesInTree,
-			showRevisionLinks);
+
+	public RepositoryTreePanel(String title, IRepositoryResource[] resources, boolean allowSourcesInTree,
+			boolean showRevisionLinks) {
+		this(title, SVNUIMessages.RepositoryTreePanel_Description,
+				AbstractDialogPanel.makeToBeOperatedMessage(resources), resources, allowSourcesInTree,
+				showRevisionLinks);
 	}
-	
-	public RepositoryTreePanel(String title, String description, String message, IRepositoryResource[] resources, boolean allowSourcesInTree, boolean showRevisionLinks) {
+
+	public RepositoryTreePanel(String title, String description, String message, IRepositoryResource[] resources,
+			boolean allowSourcesInTree, boolean showRevisionLinks) {
 		this(title, description, message, resources, allowSourcesInTree, null, showRevisionLinks);
 	}
-	
-	public RepositoryTreePanel(String title, String description, String message, IRepositoryResource[] resources, boolean allowSourcesInTree, IRepositoryBase root, boolean showRevisionLinks) {
-		super();
-		this.dialogTitle = title;
-		this.dialogDescription = description;
-		this.defaultMessage = message;
-		this.selectedResources = resources;
+
+	public RepositoryTreePanel(String title, String description, String message, IRepositoryResource[] resources,
+			boolean allowSourcesInTree, IRepositoryBase root, boolean showRevisionLinks) {
+		dialogTitle = title;
+		dialogDescription = description;
+		defaultMessage = message;
+		selectedResources = resources;
 		this.allowSourcesInTree = allowSourcesInTree;
-		this.allowFiles = false;
-		this.root = root;		
+		allowFiles = false;
+		this.root = root;
 		this.showRevisionLinks = showRevisionLinks;
 	}
-	
+
 	public void setAutoExpandFirstLevel(boolean autoExpandFirstLevel) {
 		this.autoExpandFirstLevel = autoExpandFirstLevel;
 	}
-	
+
 	public boolean isAllowFiles() {
-		return this.allowFiles;
+		return allowFiles;
 	}
 
 	public void setAllowFiles(boolean allowFiles) {
 		this.allowFiles = allowFiles;
 	}
-	
+
 	public IRepositoryResource getSelectedResource() {
-		return this.selectedResource;
+		return selectedResource;
 	}
-	
+
+	@Override
 	public void createControlsImpl(Composite parent) {
-		if (this.root != null) {
-			this.repositoryTree = new RepositoryTreeComposite(parent, SWT.BORDER, false, this.root);
+		if (root != null) {
+			repositoryTree = new RepositoryTreeComposite(parent, SWT.BORDER, false, root);
+		} else if (selectedResources.length > 0) {
+			repositoryTree = new RepositoryTreeComposite(parent, SWT.BORDER, false,
+					new ProjectRoot(selectedResources[0], showRevisionLinks));
+		} else {
+			repositoryTree = new RepositoryTreeComposite(parent, SWT.BORDER);
 		}
-		else if (this.selectedResources.length > 0) {
-			this.repositoryTree = new RepositoryTreeComposite(parent, SWT.BORDER, false, new ProjectRoot(this.selectedResources[0], this.showRevisionLinks));
+		repositoryTree.setAutoExpandFirstLevel(autoExpandFirstLevel);
+		if (repositoryTree.getRepositoryTreeViewer().getInput() instanceof ProjectRoot) {
+			ProjectRoot root = (ProjectRoot) repositoryTree.getRepositoryTreeViewer().getInput();
+			repositoryTree.getRepositoryTreeViewer().setExpandedElements(root.getChildren(null)[0]);
 		}
-		else {
-			this.repositoryTree = new RepositoryTreeComposite(parent, SWT.BORDER);
-		}
-		this.repositoryTree.setAutoExpandFirstLevel(this.autoExpandFirstLevel);
-        if (this.repositoryTree.getRepositoryTreeViewer().getInput() instanceof ProjectRoot) {
-        	ProjectRoot root = (ProjectRoot)this.repositoryTree.getRepositoryTreeViewer().getInput();
-			this.repositoryTree.getRepositoryTreeViewer().setExpandedElements(new Object[] {root.getChildren(null)[0]});
-        }
-		if (this.root == null && this.selectedResources.length > 0) {
-			String url = this.selectedResources[0].getRepositoryLocation().getRepositoryRootUrl();
-			this.repositoryTree.setFilter(new RepositoryLocationFilter(url) {
+		if (root == null && selectedResources.length > 0) {
+			String url = selectedResources[0].getRepositoryLocation().getRepositoryRootUrl();
+			repositoryTree.setFilter(new RepositoryLocationFilter(url) {
+				@Override
 				public boolean accept(Object obj) {
-					if (obj instanceof RepositoryFile && !RepositoryTreePanel.this.allowFiles || 
-						!RepositoryTreePanel.this.showRevisionLinks && obj instanceof RepositoryRevisions || 
-						obj instanceof RepositoryFolder && RepositoryTreePanel.this.isSource(((RepositoryFolder)obj).getRepositoryResource())) {
+					if (obj instanceof RepositoryFile && !allowFiles
+							|| !showRevisionLinks && obj instanceof RepositoryRevisions
+							|| obj instanceof RepositoryFolder && RepositoryTreePanel.this
+									.isSource(((RepositoryFolder) obj).getRepositoryResource())) {
 						return false;
 					}
 					return super.accept(obj);
@@ -124,74 +130,81 @@ public class RepositoryTreePanel extends AbstractDialogPanel {
 		}
 		GridData data = new GridData(GridData.FILL_BOTH);
 		data.heightHint = 185;
-		this.repositoryTree.setLayoutData(data);
-		this.repositoryTree.getRepositoryTreeViewer().addSelectionChangedListener(new ISelectionChangedListener() {
-			public void selectionChanged(SelectionChangedEvent event) {
-				if (RepositoryTreePanel.this.manager != null) {
-					IStructuredSelection selection = (IStructuredSelection)RepositoryTreePanel.this.repositoryTree.getRepositoryTreeViewer().getSelection();
-					RepositoryTreePanel.this.manager.setButtonEnabled(0, !selection.isEmpty() && selection.getFirstElement() instanceof IResourceTreeNode);
-				}
+		repositoryTree.setLayoutData(data);
+		repositoryTree.getRepositoryTreeViewer().addSelectionChangedListener(event -> {
+			if (RepositoryTreePanel.this.manager != null) {
+				IStructuredSelection selection = (IStructuredSelection) repositoryTree.getRepositoryTreeViewer()
+						.getSelection();
+				RepositoryTreePanel.this.manager.setButtonEnabled(0,
+						!selection.isEmpty() && selection.getFirstElement() instanceof IResourceTreeNode);
 			}
 		});
 	}
-	
+
+	@Override
 	public String getHelpId() {
-    	return "org.eclipse.team.svn.help.copyMoveToDialogContext"; //$NON-NLS-1$
+		return "org.eclipse.team.svn.help.copyMoveToDialogContext"; //$NON-NLS-1$
 	}
-	
+
+	@Override
 	protected void saveChangesImpl() {
-		IStructuredSelection selection = (IStructuredSelection)this.repositoryTree.getRepositoryTreeViewer().getSelection();
+		IStructuredSelection selection = (IStructuredSelection) repositoryTree.getRepositoryTreeViewer().getSelection();
 		if (!selection.isEmpty() && selection.getFirstElement() instanceof RepositoryResource) {
-			this.selectedResource = ((IResourceTreeNode)selection.getFirstElement()).getRepositoryResource();
+			selectedResource = ((IResourceTreeNode) selection.getFirstElement()).getRepositoryResource();
 		}
 	}
-	
+
+	@Override
 	protected void cancelChangesImpl() {
 	}
-	
+
 	protected boolean isSource(IRepositoryResource resource) {
-		if (!this.allowSourcesInTree) {
-			for (int i = 0; i < this.selectedResources.length; i++) {
-				if (resource.equals(this.selectedResources[i])) {
+		if (!allowSourcesInTree) {
+			for (IRepositoryResource element : selectedResources) {
+				if (resource.equals(element)) {
 					return true;
 				}
 			}
 		}
 		return false;
 	}
-	
+
 	public static class ProjectRoot extends RepositoryFictiveNode implements IParentTreeNode {
-		protected Object []children;
-		
+		protected Object[] children;
+
 		public ProjectRoot(IRepositoryResource resource, boolean showRevisionLinks) {
 			IRepositoryResource projectRoot = SVNUtility.getTrunkLocation(resource);
-			if (((IRepositoryRoot)projectRoot).getKind() == IRepositoryRoot.KIND_TRUNK) {
+			if (((IRepositoryRoot) projectRoot).getKind() == IRepositoryRoot.KIND_TRUNK) {
 				projectRoot = projectRoot.getParent();
-			}	
-			this.children = new Object[showRevisionLinks ? 3 : 2];
-			this.children[0] = RepositoryFolder.wrapChild(null, projectRoot, null);
-			this.children[1] = RepositoryFolder.wrapChild(null, resource.getRepositoryLocation().getRepositoryRoot(), null);
+			}
+			children = new Object[showRevisionLinks ? 3 : 2];
+			children[0] = RepositoryFolder.wrapChild(null, projectRoot, null);
+			children[1] = RepositoryFolder.wrapChild(null, resource.getRepositoryLocation().getRepositoryRoot(), null);
 			if (showRevisionLinks) {
-				this.children[2] = new RepositoryRevisions(resource.getRepositoryLocation());
+				children[2] = new RepositoryRevisions(resource.getRepositoryLocation());
 			}
 		}
 
+		@Override
 		public boolean hasChildren() {
 			return true;
 		}
 
+		@Override
 		public Object[] getChildren(Object o) {
-			return this.children;
+			return children;
 		}
 
+		@Override
 		public ImageDescriptor getImageDescriptor(Object object) {
 			return null;
 		}
 
+		@Override
 		public String getLabel(Object o) {
 			return null;
 		}
-		
+
 	}
-	
+
 }

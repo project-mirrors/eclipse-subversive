@@ -40,55 +40,63 @@ public class SVNChangeSetLabelProvider extends ResourceModelLabelProvider {
 
 	private Image changeSetImage;
 
+	@Override
 	public void init(ICommonContentExtensionSite site) {
 		super.init(site);
 	}
 
+	@Override
 	public String getText(Object element) {
-		if (element instanceof ActiveChangeSet && SVNTeamPlugin.instance().getModelChangeSetManager().isDefault((ActiveChangeSet)element)) {
+		if (element instanceof ActiveChangeSet
+				&& SVNTeamPlugin.instance().getModelChangeSetManager().isDefault((ActiveChangeSet) element)) {
 			return super.getText(element) + " " + SVNUIMessages.ChangeSet_DefaultDecoration; //$NON-NLS-1$
 		}
 		return super.getText(element);
 	}
-	
+
+	@Override
 	protected String getDelegateText(Object elementOrPath) {
-		Object element = this.internalGetElement(elementOrPath);
+		Object element = internalGetElement(elementOrPath);
 		if (element instanceof ChangeSet) {
 			ChangeSet set = (ChangeSet) element;
 			return set.getName();
 		}
 		return super.getDelegateText(elementOrPath);
 	}
-	
+
+	@Override
 	protected Image getDelegateImage(Object elementOrPath) {
-		Object element = this.internalGetElement(elementOrPath);
+		Object element = internalGetElement(elementOrPath);
 		if (element instanceof ChangeSet) {
-			return this.getChangeSetImage();
+			return getChangeSetImage();
 		}
 		return super.getDelegateImage(elementOrPath);
 	}
 
 	private Image getChangeSetImage() {
-		if (this.changeSetImage == null) {
-			this.changeSetImage = SVNTeamUIPlugin.instance().getImageDescriptor("icons/objects/changeset.gif").createImage(); //$NON-NLS-1$
+		if (changeSetImage == null) {
+			changeSetImage = SVNTeamUIPlugin.instance()
+					.getImageDescriptor("icons/objects/changeset.gif") //$NON-NLS-1$
+					.createImage();
 		}
-		return this.changeSetImage;
+		return changeSetImage;
 	}
-	
+
+	@Override
 	public void dispose() {
-		if (this.changeSetImage != null) {
-			this.changeSetImage.dispose();
+		if (changeSetImage != null) {
+			changeSetImage.dispose();
 		}
 		super.dispose();
 	}
-	
+
+	@Override
 	protected boolean isBusy(Object elementOrPath) {
-		Object element = this.internalGetElement(elementOrPath);
+		Object element = internalGetElement(elementOrPath);
 		if (element instanceof DiffChangeSet) {
 			DiffChangeSet dcs = (DiffChangeSet) element;
 			IResource[] resources = dcs.getResources();
-			for (int i = 0; i < resources.length; i++) {
-				IResource resource = resources[i];
+			for (IResource resource : resources) {
 				if (getContext().getDiffTree().getProperty(resource.getFullPath(), IDiffTree.P_BUSY_HINT)) {
 					return true;
 				}
@@ -97,29 +105,31 @@ public class SVNChangeSetLabelProvider extends ResourceModelLabelProvider {
 		}
 		return super.isBusy(elementOrPath);
 	}
-	
+
+	@Override
 	protected boolean hasDecendantConflicts(Object elementOrPath) {
-		Object element = this.internalGetElement(elementOrPath);
+		Object element = internalGetElement(elementOrPath);
 		if (element instanceof DiffChangeSet) {
 			DiffChangeSet dcs = (DiffChangeSet) element;
 			IResource[] resources = dcs.getResources();
-			for (int i = 0; i < resources.length; i++) {
-				IResource resource = resources[i];
-				if (this.getContext().getDiffTree().getProperty(resource.getFullPath(), IDiffTree.P_HAS_DESCENDANT_CONFLICTS))
+			for (IResource resource : resources) {
+				if (getContext().getDiffTree()
+						.getProperty(resource.getFullPath(), IDiffTree.P_HAS_DESCENDANT_CONFLICTS)) {
 					return true;
+				}
 			}
 			return false;
 		}
 		if (elementOrPath instanceof TreePath && element instanceof IResource) {
-			DiffChangeSet set = this.internalGetChangeSet(elementOrPath);
+			DiffChangeSet set = internalGetChangeSet(elementOrPath);
 			if (set != null) {
-				ResourceTraversal[] traversals = this.getTraversalCalculator().getTraversals(set, (TreePath)elementOrPath);
-				return (this.getContext().getDiffTree().hasMatchingDiffs(traversals, CONFLICT_FILTER));
+				ResourceTraversal[] traversals = getTraversalCalculator().getTraversals(set, (TreePath) elementOrPath);
+				return getContext().getDiffTree().hasMatchingDiffs(traversals, CONFLICT_FILTER);
 			}
 		}
 		return super.hasDecendantConflicts(elementOrPath);
 	}
-	
+
 	private DiffChangeSet internalGetChangeSet(Object elementOrPath) {
 		if (elementOrPath instanceof TreePath) {
 			TreePath tp = (TreePath) elementOrPath;
@@ -131,15 +141,15 @@ public class SVNChangeSetLabelProvider extends ResourceModelLabelProvider {
 		return null;
 	}
 
+	@Override
 	protected int getMarkerSeverity(Object elementOrPath) {
-		Object element = this.internalGetElement(elementOrPath);
+		Object element = internalGetElement(elementOrPath);
 		if (element instanceof DiffChangeSet) {
 			DiffChangeSet dcs = (DiffChangeSet) element;
-			HashSet<IProject> projects = new HashSet<IProject>();
+			HashSet<IProject> projects = new HashSet<>();
 			IResource[] resources = dcs.getResources();
 			int severity = -1;
-			for (int i = 0; i < resources.length; i++) {
-				IResource resource = resources[i];
+			for (IResource resource : resources) {
 				IProject project = resource.getProject();
 				if (!projects.contains(project)) {
 					projects.add(project);
@@ -156,21 +166,20 @@ public class SVNChangeSetLabelProvider extends ResourceModelLabelProvider {
 		}
 		return super.getMarkerSeverity(elementOrPath);
 	}
-	
+
+	@Override
 	protected void updateLabels(Object[] elements) {
-		super.updateLabels(this.addSetsContainingElements(elements));
+		super.updateLabels(addSetsContainingElements(elements));
 	}
 
 	private Object[] addSetsContainingElements(Object[] elements) {
-		HashSet<Object> result = new HashSet<Object>();
-		for (int i = 0; i < elements.length; i++) {
-			Object object = elements[i];
+		HashSet<Object> result = new HashSet<>();
+		for (Object object : elements) {
 			result.add(object);
 			if (object instanceof IProject) {
 				IProject project = (IProject) object;
-				ChangeSet[] sets = this.getSetsContaing(project);
-				for (int j = 0; j < sets.length; j++) {
-					ChangeSet set = sets[j];
+				ChangeSet[] sets = getSetsContaing(project);
+				for (ChangeSet set : sets) {
 					result.add(set);
 				}
 			}
@@ -179,13 +188,13 @@ public class SVNChangeSetLabelProvider extends ResourceModelLabelProvider {
 	}
 
 	private ChangeSet[] getSetsContaing(IProject project) {
-		return this.getContentProvider().getSetsShowingPropogatedStateFrom(project.getFullPath());
+		return getContentProvider().getSetsShowingPropogatedStateFrom(project.getFullPath());
 	}
 
 	private SVNChangeSetContentProvider getContentProvider() {
-		return (SVNChangeSetContentProvider)this.getExtensionSite().getExtension().getContentProvider();
+		return (SVNChangeSetContentProvider) getExtensionSite().getExtension().getContentProvider();
 	}
-	
+
 	private Object internalGetElement(Object elementOrPath) {
 		if (elementOrPath instanceof TreePath) {
 			TreePath tp = (TreePath) elementOrPath;
@@ -193,17 +202,18 @@ public class SVNChangeSetLabelProvider extends ResourceModelLabelProvider {
 		}
 		return elementOrPath;
 	}
-	
+
+	@Override
 	public Font getFont(Object element) {
-		element = this.internalGetElement(element);
-	    if (element instanceof ActiveChangeSet && this.isDefaultActiveSet((ActiveChangeSet)element)) {
+		element = internalGetElement(element);
+		if (element instanceof ActiveChangeSet && isDefaultActiveSet((ActiveChangeSet) element)) {
 			return JFaceResources.getFontRegistry().getBold(JFaceResources.DEFAULT_FONT);
-	    }
+		}
 		return super.getFont(element);
 	}
 
 	private boolean isDefaultActiveSet(ActiveChangeSet set) {
-		ChangeSetCapability changeSetCapability = this.getContentProvider().getChangeSetCapability();
+		ChangeSetCapability changeSetCapability = getContentProvider().getChangeSetCapability();
 		if (changeSetCapability != null) {
 			ActiveChangeSetManager activeChangeSetManager = changeSetCapability.getActiveChangeSetManager();
 			if (activeChangeSetManager != null) {

@@ -30,31 +30,35 @@ import org.eclipse.team.svn.ui.SVNUIMessages;
  * @author Alexander Gurov
  */
 public class PrepareRemoteResourcesTransferrableOperation extends AbstractActionOperation {
-	protected IRepositoryResource []resources;
+	protected IRepositoryResource[] resources;
+
 	protected Display display;
+
 	protected int operation;
 
-	public PrepareRemoteResourcesTransferrableOperation(IRepositoryResource []resources, int operation, Display display) {
+	public PrepareRemoteResourcesTransferrableOperation(IRepositoryResource[] resources, int operation,
+			Display display) {
 		super("Operation_FillCopyPaste", SVNUIMessages.class); //$NON-NLS-1$
 		this.resources = resources;
 		this.display = display;
 		this.operation = operation;
 	}
-	
+
+	@Override
 	public int getOperationWeight() {
 		return 0;
 	}
 
+	@Override
 	protected void runImpl(IProgressMonitor monitor) throws Exception {
-		Clipboard clipboard = new Clipboard(this.display);
+		Clipboard clipboard = new Clipboard(display);
 		try {
 			clipboard.setContents(
-				new Object[] {new RemoteResourceTransferrable(this.resources, this.operation)}, 
-				new Transfer[] {RemoteResourceTransfer.getInstance()});
-		}
-		finally {
+					new Object[] { new RemoteResourceTransferrable(resources, operation) },
+					new Transfer[] { RemoteResourceTransfer.getInstance() });
+		} finally {
 			clipboard.dispose();
 		}
 	}
-	
+
 }

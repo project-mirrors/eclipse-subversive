@@ -26,14 +26,15 @@ import org.eclipse.team.svn.core.resource.IRepositoryResource;
  * 
  * @author Alexander Gurov
  */
+@Deprecated
 public interface IConnectedProjectInformation {
-	
-	public IRepositoryLocation getRepositoryLocation() throws HiddenException;
-	
-	public IRepositoryResource getRepositoryResource() throws HiddenException;
-	
-	public void switchResource(IRepositoryResource resource) throws CoreException;
-	
-	public void relocateResource() throws CoreException;
-	
+
+	IRepositoryLocation getRepositoryLocation() throws HiddenException;
+
+	IRepositoryResource getRepositoryResource() throws HiddenException;
+
+	void switchResource(IRepositoryResource resource) throws CoreException;
+
+	void relocateResource() throws CoreException;
+
 }

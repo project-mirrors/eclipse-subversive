@@ -33,108 +33,116 @@ import org.eclipse.team.svn.ui.wizard.createpatch.SelectPatchFilePage;
  */
 public class CreatePatchWizard extends AbstractSVNWizard {
 	public static final int WRITE_TO_CLIPBOARD = 0;
+
 	public static final int WRITE_TO_EXTERNAL_FILE = 1;
+
 	public static final int WRITE_TO_WORKSPACE_FILE = 2;
-	
+
 	protected String targetName;
+
 	protected boolean showIgnoreAncestry;
-	
+
 	protected SelectPatchFilePage selectFile;
+
 	protected PatchOptionsPage options;
-	protected IResource []roots;
+
+	protected IResource[] roots;
 
 	public CreatePatchWizard(String targetName) {
 		this(targetName, null);
 	}
-	
-	public CreatePatchWizard(String targetName, IResource []roots) {
+
+	public CreatePatchWizard(String targetName, IResource[] roots) {
 		this(targetName, roots, false);
 	}
-	
-	public CreatePatchWizard(String targetName, IResource []roots, boolean showIgnoreAncestry) {
-		super();
-		this.setWindowTitle(SVNUIMessages.CreatePatchWizard_Title);
+
+	public CreatePatchWizard(String targetName, IResource[] roots, boolean showIgnoreAncestry) {
+		setWindowTitle(SVNUIMessages.CreatePatchWizard_Title);
 		this.targetName = targetName;
 		this.roots = roots;
 		this.showIgnoreAncestry = showIgnoreAncestry;
 	}
-	
+
 	public String getCharset() {
-		return this.selectFile.getCharset();
+		return selectFile.getCharset();
 	}
-	
+
 	public int getRootPoint() {
-		return this.options.getRootPoint();
+		return options.getRootPoint();
 	}
-	
+
 	public IResource getTargetFolder() {
-		if (this.selectFile.getFile() != null) {
-			return this.selectFile.getFile().getParent();
+		if (selectFile.getFile() != null) {
+			return selectFile.getFile().getParent();
 		}
-		return ResourcesPlugin.getWorkspace().getRoot().getContainerForLocation(new Path(this.getFileName()).removeLastSegments(1));
+		return ResourcesPlugin.getWorkspace()
+				.getRoot()
+				.getContainerForLocation(new Path(getFileName()).removeLastSegments(1));
 	}
-	
+
 	public String getFileName() {
-		return this.selectFile.getFileName();
+		return selectFile.getFileName();
 	}
-	
+
 	public int getWriteMode() {
-		return this.selectFile.getWriteMode();
+		return selectFile.getWriteMode();
 	}
 
 	public boolean isIgnoreDeleted() {
-		return this.options.isIgnoreDeleted();
+		return options.isIgnoreDeleted();
 	}
 
 	public boolean isProcessBinary() {
-		return this.options.isProcessBinary();
+		return options.isProcessBinary();
 	}
 
 	public boolean isProcessUnversioned() {
-		return this.options.isProcessUnversioned();
+		return options.isProcessUnversioned();
 	}
 
 	public boolean isRecursive() {
-		return this.options.isRecursive() & this.selectFile.isRecursive();
+		return options.isRecursive() & selectFile.isRecursive();
 	}
 
 	public long getDiffOptions() {
-		return 
-			(this.isIgnoreAncestry() ? ISVNConnector.Options.IGNORE_ANCESTRY : ISVNConnector.Options.NONE) | 
-			(this.isIgnoreDeleted() ? ISVNConnector.Options.SKIP_DELETED : ISVNConnector.Options.NONE) | 
-			(this.isProcessBinary() ? ISVNConnector.Options.FORCE : ISVNConnector.Options.NONE);
+		return (isIgnoreAncestry() ? ISVNConnector.Options.IGNORE_ANCESTRY : ISVNConnector.Options.NONE)
+				| (isIgnoreDeleted() ? ISVNConnector.Options.SKIP_DELETED : ISVNConnector.Options.NONE)
+				| (isProcessBinary() ? ISVNConnector.Options.FORCE : ISVNConnector.Options.NONE);
 	}
-	
+
 	public long getDiffOutputOptions() {
-		return this.options.getDiffOutputOptions();
+		return options.getDiffOutputOptions();
 	}
 
-	public IResource []getSelection() {
-		return this.selectFile.isRecursive() ? this.roots : this.selectFile.getSelection();
+	public IResource[] getSelection() {
+		return selectFile.isRecursive() ? roots : selectFile.getSelection();
 	}
-	
+
 	public boolean isIgnoreAncestry() {
-		return this.options.isIgnoreAncestry();
+		return options.isIgnoreAncestry();
 	}
 
+	@Override
 	public void addPages() {
-		this.addPage(this.selectFile = new SelectPatchFilePage(this.targetName, this.roots));
-		this.addPage(this.options = new PatchOptionsPage(this.roots != null, this.showIgnoreAncestry));
+		addPage(selectFile = new SelectPatchFilePage(targetName, roots));
+		addPage(options = new PatchOptionsPage(roots != null, showIgnoreAncestry));
 	}
-	
+
+	@Override
 	public IWizardPage getNextPage(IWizardPage page) {
-		if (this.roots != null) {
-			HashSet<IProject> projects = new HashSet<IProject>();
-			for (IResource resource : this.getSelection()) {
+		if (roots != null) {
+			HashSet<IProject> projects = new HashSet<>();
+			for (IResource resource : getSelection()) {
 				projects.add(resource.getProject());
 			}
-			this.options.setMultiSelect(projects.size() > 1);
+			options.setMultiSelect(projects.size() > 1);
 		}
 		return super.getNextPage(page);
 	}
-	
+
+	@Override
 	public boolean performFinish() {
 		return true;
 	}
-	
+
 }

@@ -39,55 +39,68 @@ import org.eclipse.team.svn.core.utility.SVNUtility;
  * @author Sergiy Logvin
  */
 public class GetPropertiesOperation extends AbstractActionOperation implements IResourcePropertyProvider {
-	protected SVNProperty []properties;
+	protected SVNProperty[] properties;
+
 	protected IResource resource;
+
 	protected SVNRevision revision;
-	
+
 	public GetPropertiesOperation(IResource resource) {
-		this(resource, IStateFilter.SF_DELETED.accept(SVNRemoteStorage.instance().asLocalResource(resource)) ? SVNRevision.BASE : SVNRevision.WORKING);
+		this(resource,
+				IStateFilter.SF_DELETED.accept(SVNRemoteStorage.instance().asLocalResource(resource))
+						? SVNRevision.BASE
+						: SVNRevision.WORKING);
 	}
-	
+
 	public GetPropertiesOperation(IResource resource, SVNRevision revision) {
 		super("Operation_GetProperties", SVNMessages.class); //$NON-NLS-1$
 		this.resource = resource;
 		this.revision = revision;
 	}
-	
-	public SVNProperty []getProperties() {
-		return this.properties;
+
+	@Override
+	public SVNProperty[] getProperties() {
+		return properties;
 	}
-	
+
+	@Override
 	public boolean isEditAllowed() {
 		return true;
 	}
-	
+
+	@Override
 	public void refresh() {
-		this.run(new NullProgressMonitor());
+		run(new NullProgressMonitor());
 	}
 
+	@Override
 	public IResource getLocal() {
-		return this.resource;
+		return resource;
 	}
 
+	@Override
 	public IRepositoryResource getRemote() {
-		return SVNRemoteStorage.instance().asRepositoryResource(this.resource);
+		return SVNRemoteStorage.instance().asRepositoryResource(resource);
 	}
 
+	@Override
 	protected void runImpl(IProgressMonitor monitor) throws Exception {
-		this.properties = null;
-		IRepositoryLocation location = SVNRemoteStorage.instance().getRepositoryLocation(this.resource);
+		properties = null;
+		IRepositoryLocation location = SVNRemoteStorage.instance().getRepositoryLocation(resource);
 		ISVNConnector proxy = location.acquireSVNProxy();
 		try {
 //			this.writeToConsole(IConsoleStream.LEVEL_CMD, "svn proplist \"" + local.getWorkingCopyPath() + "\"\n");
-			this.properties = SVNUtility.properties(proxy, new SVNEntryRevisionReference(FileUtility.getWorkingCopyPath(this.resource), null, this.revision), ISVNConnector.Options.NONE, new SVNProgressMonitor(this, monitor, null));
-		}
-		finally {
-		    location.releaseSVNProxy(proxy);
+			properties = SVNUtility.properties(proxy,
+					new SVNEntryRevisionReference(FileUtility.getWorkingCopyPath(resource), null, revision),
+					ISVNConnector.Options.NONE, new SVNProgressMonitor(this, monitor, null));
+		} finally {
+			location.releaseSVNProxy(proxy);
 		}
 	}
-	
+
+	@Override
 	protected String getShortErrorMessage(Throwable t) {
-		return BaseMessages.format(super.getShortErrorMessage(t), new Object[] {this.resource.getName()});
+		return BaseMessages.format(super.getShortErrorMessage(t), new Object[] { resource.getName() });
 	}
-	
+
 }

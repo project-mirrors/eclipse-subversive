@@ -22,11 +22,14 @@ import org.eclipse.team.svn.core.resource.IRepositoryLocation.LocationReferenceT
  * @author Alexander Gurov
  */
 public interface IRepositoryLocationFactory {
-	public IRepositoryLocation newRepositoryLocation();
-	public void copyRepositoryLocation(IRepositoryLocation to, IRepositoryLocation from);
-	public IRepositoryLocation newRepositoryLocation(String reference);
+	IRepositoryLocation newRepositoryLocation();
+
+	void copyRepositoryLocation(IRepositoryLocation to, IRepositoryLocation from);
+
+	IRepositoryLocation newRepositoryLocation(String reference);
+
 	/*
 	 * see IRepositoryLocation class comments why we need LocationReferenceTypeEnum parameter
 	 */
-	public String repositoryLocationAsReference(IRepositoryLocation location, LocationReferenceTypeEnum locationReferenceType);
+	String repositoryLocationAsReference(IRepositoryLocation location, LocationReferenceTypeEnum locationReferenceType);
 }

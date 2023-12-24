@@ -36,41 +36,44 @@ import org.eclipse.team.svn.core.utility.SVNUtility;
 public class SubclipseProjectSetHandler implements IProjectSetHandler {
 
 	protected static final String PLUGIN_INFORMATION = "0.9.3"; //$NON-NLS-1$
-	
+
+	@Override
 	public String getProjectNameForReference(String fullReference) {
-		String []parts = fullReference.split(","); //$NON-NLS-1$
+		String[] parts = fullReference.split(","); //$NON-NLS-1$
 		if (parts.length < 3 || !parts[0].equals(SubclipseProjectSetHandler.PLUGIN_INFORMATION)) {
 			return null;
 		}
 		return parts[2];
 	}
-	
-	public IProject configureCheckoutOperation(CompositeOperation op, IProject project, String fullReference) throws TeamException {		
-		String []parts = fullReference.split(","); //$NON-NLS-1$
-		
-		IRepositoryLocation location = this.getLocationForReference(parts);
+
+	@Override
+	public IProject configureCheckoutOperation(CompositeOperation op, IProject project, String fullReference)
+			throws TeamException {
+		String[] parts = fullReference.split(","); //$NON-NLS-1$
+
+		IRepositoryLocation location = getLocationForReference(parts);
 		IRepositoryResource resource = location.asRepositoryContainer(parts[1], true);
 
 		if (resource != null) {
-			String projectLocation = 
-				project.exists() ? 
-				FileUtility.getResourcePath(project).removeLastSegments(1).toString() : 
-				Platform.getLocation().toString();
-			CheckoutAsOperation mainOp = new CheckoutAsOperation(project.getName(), resource, projectLocation, SVNDepth.INFINITY, false);
+			String projectLocation = project.exists()
+					? FileUtility.getResourcePath(project).removeLastSegments(1).toString()
+					: Platform.getLocation().toString();
+			CheckoutAsOperation mainOp = new CheckoutAsOperation(project.getName(), resource, projectLocation,
+					SVNDepth.INFINITY, false);
 			op.add(mainOp);
 			return mainOp.getProject();
 		}
 		return null;
 	}
 
-	protected IRepositoryLocation getLocationForReference(String []parts) {
+	protected IRepositoryLocation getLocationForReference(String[] parts) {
 		IRepositoryLocation location = null;
-		String url = parts[1];		
-		IRepositoryLocation []locations = SVNRemoteStorage.instance().getRepositoryLocations();
+		String url = parts[1];
+		IRepositoryLocation[] locations = SVNRemoteStorage.instance().getRepositoryLocations();
 		IPath awaitingFor = SVNUtility.createPathForSVNUrl(url);
-		for (int i = 0; i < locations.length; i++) {
-			if (SVNUtility.createPathForSVNUrl(locations[i].getUrl()).isPrefixOf(awaitingFor)) {
-				return locations[i];
+		for (IRepositoryLocation location2 : locations) {
+			if (SVNUtility.createPathForSVNUrl(location2.getUrl()).isPrefixOf(awaitingFor)) {
+				return location2;
 			}
 		}
 		if (location == null) {
@@ -80,15 +83,18 @@ public class SubclipseProjectSetHandler implements IProjectSetHandler {
 		SVNRemoteStorage.instance().addRepositoryLocation(location);
 		return location;
 	}
-	
+
+	@Override
 	public String asReference(IProject project) throws TeamException {
 		throw new RuntimeException("Unsupported operation"); //$NON-NLS-1$
 	}
-	
+
+	@Override
 	public String asReference(String resourceUrl, String projectName) {
 		throw new RuntimeException("Unsupported operation"); //$NON-NLS-1$
 	}
 
+	@Override
 	public boolean accept(String referenceString) {
 		return referenceString.startsWith(PLUGIN_INFORMATION);
 	}

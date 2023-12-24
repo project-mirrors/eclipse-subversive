@@ -25,13 +25,14 @@ import org.eclipse.team.svn.core.resource.IRepositoryRoot;
  */
 public class SVNRepositoryLocationRoot extends SVNRepositoryRootBase {
 	private static final long serialVersionUID = 2511682499975444957L;
-	
+
 	public SVNRepositoryLocationRoot(IRepositoryLocation location) {
 		super(location, location.getUrl(), SVNRevision.HEAD);
 	}
 
+	@Override
 	public int getKind() {
 		return IRepositoryRoot.KIND_LOCATION_ROOT;
 	}
-	
+
 }

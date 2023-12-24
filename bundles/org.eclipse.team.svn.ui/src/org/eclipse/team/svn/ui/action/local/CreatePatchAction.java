@@ -36,35 +36,38 @@ import org.eclipse.team.svn.ui.wizard.CreatePatchWizard;
  */
 public class CreatePatchAction extends AbstractWorkingCopyAction {
 	public CreatePatchAction() {
-		super();
 	}
-	
+
+	@Override
 	public void runImpl(IAction action) {
-		IResource []targets = FileUtility.filterResources(this.getSelectedResources(), IStateFilter.SF_ANY_CHANGE);
-		IActionOperation op = CreatePatchAction.getCreatePatchOperation(targets, this.getShell());
+		IResource[] targets = FileUtility.filterResources(this.getSelectedResources(), IStateFilter.SF_ANY_CHANGE);
+		IActionOperation op = CreatePatchAction.getCreatePatchOperation(targets, getShell());
 		if (op != null) {
-			this.runScheduled(op);
+			runScheduled(op);
 		}
 	}
-	
-	public static IActionOperation getCreatePatchOperation(IResource []targets, Shell shell) {
+
+	public static IActionOperation getCreatePatchOperation(IResource[] targets, Shell shell) {
 		if (targets.length > 0) {
 			CreatePatchWizard wizard = new CreatePatchWizard(targets[0].getName(), targets);
 			WizardDialog dialog = new WizardDialog(shell, wizard);
 			if (dialog.open() == 0) {
-				CreatePatchOperation mainOp = 
-					new CreatePatchOperation(
-						wizard.getSelection(), wizard.getFileName(), wizard.isRecursive(), wizard.isProcessUnversioned(), 
-						ISVNConnector.Options.IGNORE_ANCESTRY | wizard.getDiffOptions(), wizard.getRootPoint(), wizard.getDiffOutputOptions());
+				CreatePatchOperation mainOp = new CreatePatchOperation(
+						wizard.getSelection(), wizard.getFileName(), wizard.isRecursive(),
+						wizard.isProcessUnversioned(), ISVNConnector.Options.IGNORE_ANCESTRY | wizard.getDiffOptions(),
+						wizard.getRootPoint(), wizard.getDiffOutputOptions());
 				CompositeOperation op = new CompositeOperation(mainOp.getId(), mainOp.getMessagesClass());
 				op.add(mainOp);
 				switch (wizard.getWriteMode()) {
 					case CreatePatchWizard.WRITE_TO_WORKSPACE_FILE: {
-						op.add(new RefreshResourcesOperation(new IResource[] {wizard.getTargetFolder()}, IResource.DEPTH_ONE, RefreshResourcesOperation.REFRESH_CHANGES), new IActionOperation[] {mainOp});
+						op.add(new RefreshResourcesOperation(new IResource[] { wizard.getTargetFolder() },
+								IResource.DEPTH_ONE, RefreshResourcesOperation.REFRESH_CHANGES),
+								new IActionOperation[] { mainOp });
 						break;
 					}
 					case CreatePatchWizard.WRITE_TO_CLIPBOARD: {
-						op.add(new FileToClipboardOperation(wizard.getFileName(), wizard.getCharset(), true), new IActionOperation[] {mainOp});
+						op.add(new FileToClipboardOperation(wizard.getFileName(), wizard.getCharset(), true),
+								new IActionOperation[] { mainOp });
 						break;
 					}
 				}
@@ -74,12 +77,14 @@ public class CreatePatchAction extends AbstractWorkingCopyAction {
 		return null;
 	}
 
+	@Override
 	public boolean isEnabled() {
-		return this.checkForResourcesPresenceRecursive(IStateFilter.SF_ANY_CHANGE);
+		return checkForResourcesPresenceRecursive(IStateFilter.SF_ANY_CHANGE);
 	}
 
+	@Override
 	protected boolean needsToSaveDirtyEditors() {
 		return true;
 	}
-	
+
 }

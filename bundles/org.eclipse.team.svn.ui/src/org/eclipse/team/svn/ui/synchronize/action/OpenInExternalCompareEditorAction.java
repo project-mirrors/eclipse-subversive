@@ -41,43 +41,52 @@ import org.eclipse.team.ui.synchronize.ISynchronizePageConfiguration;
  * @author Igor Burilo
  */
 public class OpenInExternalCompareEditorAction extends AbstractSynchronizeModelAction {
-	
+
 	protected ExternalProgramParameters externalProgramParams;
-	
+
 	public OpenInExternalCompareEditorAction(String text, ISynchronizePageConfiguration configuration) {
-		super(text, configuration);			
+		super(text, configuration);
 	}
 
-	protected IActionOperation getOperation(ISynchronizePageConfiguration configuration, IDiffElement[] elements) {					
+	@Override
+	protected IActionOperation getOperation(ISynchronizePageConfiguration configuration, IDiffElement[] elements) {
 		IActionOperation op = null;
-		if (this.externalProgramParams != null) {
-			IResource resource = this.getSelectedResource();				
+		if (externalProgramParams != null) {
+			IResource resource = getSelectedResource();
 			ILocalResource local = SVNRemoteStorage.instance().asLocalResource(resource);
-			IRepositoryResource remote = local.isCopied() ? SVNUtility.getCopiedFrom(resource) : SVNRemoteStorage.instance().asRepositoryResource(resource);							
-			op = new ExternalCompareOperation(local, remote, new DefaultExternalProgramParametersProvider(this.externalProgramParams));				
-		}					
+			IRepositoryResource remote = local.isCopied()
+					? SVNUtility.getCopiedFrom(resource)
+					: SVNRemoteStorage.instance().asRepositoryResource(resource);
+			op = new ExternalCompareOperation(local, remote,
+					new DefaultExternalProgramParametersProvider(externalProgramParams));
+		}
 		return op;
 	}
-	
-	protected boolean updateSelection(IStructuredSelection selection) {			
+
+	@Override
+	protected boolean updateSelection(IStructuredSelection selection) {
 		if (super.updateSelection(selection) && selection.size() == 1) {
-			IResource resource = this.getSelectedResource();				
+			IResource resource = getSelectedResource();
 			DiffViewerSettings diffSettings = SVNTeamDiffViewerPage.loadDiffViewerSettings();
-			DetectExternalCompareOperationHelper detectCompareHelper = new DetectExternalCompareOperationHelper(resource, diffSettings, true);
+			DetectExternalCompareOperationHelper detectCompareHelper = new DetectExternalCompareOperationHelper(
+					resource, diffSettings, true);
 			detectCompareHelper.execute(new NullProgressMonitor());
-			this.externalProgramParams = detectCompareHelper.getExternalProgramParameters();
-			if (this.externalProgramParams != null) {
+			externalProgramParams = detectCompareHelper.getExternalProgramParameters();
+			if (externalProgramParams != null) {
 				return true;
-			}				
-		}			
+			}
+		}
 		return false;
 	}
-			
+
+	@Override
 	public FastSyncInfoFilter getSyncInfoFilter() {
 		return new FastSyncInfoFilter() {
+			@Override
 			public boolean select(SyncInfo info) {
-				return CompareWithWorkingCopyAction.COMPARE_FILTER.accept(((AbstractSVNSyncInfo)info).getLocalResource());
+				return CompareWithWorkingCopyAction.COMPARE_FILTER
+						.accept(((AbstractSVNSyncInfo) info).getLocalResource());
 			}
 		};
-	}		
+	}
 }

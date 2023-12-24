@@ -25,22 +25,23 @@ import java.util.regex.Pattern;
  */
 public final class PatternProvider {
 	private static int MAX_CACHE_SIZE = 100;
-	
-	private static LinkedHashMap<String, Pattern> patterns = new LinkedHashMap<String, Pattern>() {
+
+	private static LinkedHashMap<String, Pattern> patterns = new LinkedHashMap<>() {
 		private static final long serialVersionUID = 2921759287651173337L;
 
+		@Override
 		protected boolean removeEldestEntry(Map.Entry eldest) {
-			return this.size() > PatternProvider.MAX_CACHE_SIZE;
+			return size() > PatternProvider.MAX_CACHE_SIZE;
 		}
 	};
-	
+
 	public static String replaceAll(String strSource, String strPattern, String strReplacement) {
 		return PatternProvider.getPattern(strPattern).matcher(strSource).replaceAll(strReplacement);
 	}
 
 	public static synchronized Pattern getPattern(String strPattern) {
 		Pattern patternReturn = PatternProvider.patterns.get(strPattern);
-		
+
 		//if two threads would need the same new pattern in the same time, only one will compile it
 		if (patternReturn == null) {
 			patternReturn = Pattern.compile(strPattern);
@@ -48,7 +49,7 @@ public final class PatternProvider {
 		}
 		return patternReturn;
 	}
-	
+
 	private PatternProvider() {
 	}
 }

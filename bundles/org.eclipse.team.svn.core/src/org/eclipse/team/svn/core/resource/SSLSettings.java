@@ -28,52 +28,56 @@ public class SSLSettings implements Serializable {
 	private static final long serialVersionUID = -5649960025841815445L;
 
 	protected boolean authenticationEnabled;
+
 	protected String certificatePath;
+
 	protected boolean passPhraseSaved;
+
 	// Base64 encoded
 	protected String passPhrase;
+
 	private transient String passPhraseTemporary;
+
 	private transient ISSLSettingsStateListener parentLocation;
-	
+
 	public SSLSettings() {
 		this(null);
 	}
 
 	public SSLSettings(ISSLSettingsStateListener parentLocation) {
-		this.certificatePath = ""; //$NON-NLS-1$
-		this.passPhrase = ""; //$NON-NLS-1$
-		this.passPhraseSaved = false;
+		certificatePath = ""; //$NON-NLS-1$
+		passPhrase = ""; //$NON-NLS-1$
+		passPhraseSaved = false;
 		this.parentLocation = parentLocation;
 	}
 
 	public String getCertificatePath() {
-		return this.certificatePath;
+		return certificatePath;
 	}
 
 	public void setCertificatePath(String certificatePath) {
 		String oldValue = this.certificatePath;
 		this.certificatePath = certificatePath;
-		this.fireSSLChanged(ISSLSettingsStateListener.SSL_CERTIFICATE_PATH, oldValue, certificatePath);
+		fireSSLChanged(ISSLSettingsStateListener.SSL_CERTIFICATE_PATH, oldValue, certificatePath);
 	}
 
 	public String getPassPhrase() {
-		return this.passPhraseSaved ? SVNUtility.base64Decode(this.passPhrase) : SVNUtility.base64Decode(this.passPhraseTemporary);
+		return passPhraseSaved ? SVNUtility.base64Decode(passPhrase) : SVNUtility.base64Decode(passPhraseTemporary);
 	}
 
 	public void setPassPhrase(String passPhrase) {
-		String oldValue = this.passPhraseSaved ? this.passPhrase : this.passPhraseTemporary;
+		String oldValue = passPhraseSaved ? this.passPhrase : passPhraseTemporary;
 		oldValue = oldValue != null ? SVNUtility.base64Decode(oldValue) : oldValue;
-		if (this.passPhraseSaved) {
+		if (passPhraseSaved) {
 			this.passPhrase = SVNUtility.base64Encode(passPhrase);
+		} else {
+			passPhraseTemporary = SVNUtility.base64Encode(passPhrase);
 		}
-		else {
-			this.passPhraseTemporary = SVNUtility.base64Encode(passPhrase);
-		}
-		this.fireSSLChanged(ISSLSettingsStateListener.SSL_PASS_PHRASE, oldValue, passPhrase);
+		fireSSLChanged(ISSLSettingsStateListener.SSL_PASS_PHRASE, oldValue, passPhrase);
 	}
 
 	public boolean isPassPhraseSaved() {
-		return this.passPhraseSaved;
+		return passPhraseSaved;
 	}
 
 	public void setPassPhraseSaved(boolean passPhraseSaved) {
@@ -83,29 +87,30 @@ public class SSLSettings implements Serializable {
 		boolean oldValue = this.passPhraseSaved;
 		this.passPhraseSaved = passPhraseSaved;
 		if (!passPhraseSaved) {
-			this.passPhraseTemporary = this.passPhrase;
-			this.passPhrase = null;
+			passPhraseTemporary = passPhrase;
+			passPhrase = null;
+		} else {
+			passPhrase = passPhraseTemporary;
 		}
-		else {
-			this.passPhrase = this.passPhraseTemporary;
-		}
-		this.fireSSLChanged(ISSLSettingsStateListener.SSL_PASS_PHRASE_SAVED, Boolean.valueOf(oldValue), Boolean.valueOf(passPhraseSaved));
+		fireSSLChanged(ISSLSettingsStateListener.SSL_PASS_PHRASE_SAVED, Boolean.valueOf(oldValue),
+				Boolean.valueOf(passPhraseSaved));
 	}
 
 	public boolean isAuthenticationEnabled() {
-		return this.authenticationEnabled;
+		return authenticationEnabled;
 	}
 
 	public void setAuthenticationEnabled(boolean authenticationEnabled) {
 		boolean oldValue = this.authenticationEnabled;
 		this.authenticationEnabled = authenticationEnabled;
-		this.fireSSLChanged(ISSLSettingsStateListener.SSL_AUTHENTICATION_ENABLED, Boolean.valueOf(oldValue), Boolean.valueOf(authenticationEnabled));
+		fireSSLChanged(ISSLSettingsStateListener.SSL_AUTHENTICATION_ENABLED, Boolean.valueOf(oldValue),
+				Boolean.valueOf(authenticationEnabled));
 	}
-	
+
 	protected void fireSSLChanged(String field, Object oldValue, Object newValue) {
-		if (this.parentLocation != null) {
-			this.parentLocation.sslChanged(null, field, oldValue, newValue);
+		if (parentLocation != null) {
+			parentLocation.sslChanged(null, field, oldValue, newValue);
 		}
 	}
-	
+
 }

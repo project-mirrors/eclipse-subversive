@@ -20,8 +20,7 @@ import org.eclipse.ui.console.IConsolePageParticipant;
 import org.eclipse.ui.part.IPageBookViewPage;
 
 /**
- * Console helper that allows contributing actions to the console view when
- * the SVN console is visible. Added to the console from 
+ * Console helper that allows contributing actions to the console view when the SVN console is visible. Added to the console from
  * org.eclipse.ui.console.consolePageParticipants extension point.
  * 
  * @author Igor Burilo
@@ -29,25 +28,30 @@ import org.eclipse.ui.part.IPageBookViewPage;
 public class SVNConsolePageParticipant implements IConsolePageParticipant {
 
 	private SVNConsoleRemoveAction consoleRemoveAction;
-	
-	public void init(IPageBookViewPage page, IConsole console) {		
-		this.consoleRemoveAction = new SVNConsoleRemoveAction();
+
+	@Override
+	public void init(IPageBookViewPage page, IConsole console) {
+		consoleRemoveAction = new SVNConsoleRemoveAction();
 		IActionBars bars = page.getSite().getActionBars();
-		bars.getToolBarManager().appendToGroup(IConsoleConstants.LAUNCH_GROUP, this.consoleRemoveAction);
+		bars.getToolBarManager().appendToGroup(IConsoleConstants.LAUNCH_GROUP, consoleRemoveAction);
 	}
-	
-	public void dispose() {		
-		this.consoleRemoveAction = null;
+
+	@Override
+	public void dispose() {
+		consoleRemoveAction = null;
 	}
-	
+
+	@Override
 	public void activated() {
-	
+
 	}
 
+	@Override
 	public void deactivated() {
-		
+
 	}
 
+	@Override
 	public Object getAdapter(Class adapter) {
 		return null;
 	}

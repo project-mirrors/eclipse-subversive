@@ -37,50 +37,54 @@ import org.eclipse.team.svn.core.utility.FileUtility;
  */
 public class GetLocalFileContentOperation extends AbstractGetFileContentOperation {
 	protected IResource resource;
+
 	protected SVNRevision revision;
 
 	public GetLocalFileContentOperation(IResource resource, SVNRevision.Kind revisionKind) {
 		super("Local"); //$NON-NLS-1$
 		this.resource = resource;
-		this.revision = revisionKind == Kind.BASE ? SVNRevision.BASE : SVNRevision.WORKING;
+		revision = revisionKind == Kind.BASE ? SVNRevision.BASE : SVNRevision.WORKING;
 	}
-	
+
+	@Override
 	public int getOperationWeight() {
 		return 0;
 	}
 
+	@Override
 	protected void runImpl(IProgressMonitor monitor) throws Exception {
-		if (this.revision.getKind() == Kind.BASE) {
-		    IRepositoryLocation location = SVNRemoteStorage.instance().getRepositoryLocation(this.resource);
+		if (revision.getKind() == Kind.BASE) {
+			IRepositoryLocation location = SVNRemoteStorage.instance().getRepositoryLocation(resource);
 			ISVNConnector proxy = location.acquireSVNProxy();
 			FileOutputStream stream = null;
 			try {
-				this.tmpFile = this.createTempFile();
-				stream = new FileOutputStream(this.tmpFile);
+				tmpFile = createTempFile();
+				stream = new FileOutputStream(tmpFile);
 				proxy.streamFileContent(
-						new SVNEntryRevisionReference(FileUtility.getWorkingCopyPath(this.resource), null, this.revision), 
-						2048, 
-						stream, 
-						new SVNProgressMonitor(GetLocalFileContentOperation.this, monitor, null));
+						new SVNEntryRevisionReference(FileUtility.getWorkingCopyPath(resource), null, revision), 2048,
+						stream, new SVNProgressMonitor(GetLocalFileContentOperation.this, monitor, null));
+			} finally {
+				location.releaseSVNProxy(proxy);
+				if (stream != null) {
+					try {
+						stream.close();
+					} catch (Exception ex) {
+					}
+				}
 			}
-			finally {
-			    location.releaseSVNProxy(proxy);
-			    if (stream != null) {
-			    	try {stream.close();} catch (Exception ex) {}
-			    }
-			}
-		}
-		else {
-			this.tmpFile = new File(FileUtility.getWorkingCopyPath(this.resource));
+		} else {
+			tmpFile = new File(FileUtility.getWorkingCopyPath(resource));
 		}
 	}
-	
+
+	@Override
 	protected String getExtension() {
-		return this.resource.getFileExtension();
+		return resource.getFileExtension();
 	}
-	
+
+	@Override
 	protected String getShortErrorMessage(Throwable t) {
-		return BaseMessages.format(super.getShortErrorMessage(t), new Object[] {this.resource.getName()});
+		return BaseMessages.format(super.getShortErrorMessage(t), new Object[] { resource.getName() });
 	}
-	
+
 }

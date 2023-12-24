@@ -34,19 +34,23 @@ public class CreateBranchModelAction extends AbstractSynchronizeLogicalModelActi
 		super(text, configuration);
 	}
 
+	@Override
 	protected boolean updateSelection(IStructuredSelection selection) {
-		super.updateSelection(selection);		
-		IResource[] resources = this.getAllSelectedResources();
+		super.updateSelection(selection);
+		IResource[] resources = getAllSelectedResources();
 		if (FileUtility.checkForResourcesPresence(resources, IStateFilter.SF_EXCLUDE_DELETED, IResource.DEPTH_ZERO)) {
 			return true;
-		}	
-	    return false;
+		}
+		return false;
 	}
-		
+
+	@Override
 	protected IActionOperation getOperation() {
-		IResource[] selectedResources = this.getAllSelectedResources();
-		IResource []resources = FileUtility.getResourcesRecursive(selectedResources, IStateFilter.SF_EXCLUDE_DELETED, IResource.DEPTH_ZERO);
-		return BranchTagAction.getBranchTagOperation(this.getConfiguration().getSite().getShell(), BranchTagAction.BRANCH_ACTION, resources);
+		IResource[] selectedResources = getAllSelectedResources();
+		IResource[] resources = FileUtility.getResourcesRecursive(selectedResources, IStateFilter.SF_EXCLUDE_DELETED,
+				IResource.DEPTH_ZERO);
+		return BranchTagAction.getBranchTagOperation(getConfiguration().getSite().getShell(),
+				BranchTagAction.BRANCH_ACTION, resources);
 	}
 
 }

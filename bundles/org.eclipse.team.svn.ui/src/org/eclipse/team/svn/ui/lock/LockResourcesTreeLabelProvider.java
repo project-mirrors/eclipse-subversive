@@ -27,31 +27,38 @@ import org.eclipse.team.svn.ui.SVNTeamUIPlugin;
 public class LockResourcesTreeLabelProvider extends LabelProvider {
 
 	protected static Image rootIcon;
+
 	protected static Image folderIcon;
-	
+
 	public LockResourcesTreeLabelProvider() {
 		synchronized (LockResourcesTreeLabelProvider.class) {
 			if (LockResourcesTreeLabelProvider.folderIcon == null) {
-				SVNTeamUIPlugin instance = SVNTeamUIPlugin.instance();				
-				LockResourcesTreeLabelProvider.folderIcon = instance.getImageDescriptor("icons/views/history/affected_folder.gif").createImage(); //$NON-NLS-1$
-				LockResourcesTreeLabelProvider.rootIcon = instance.getImageDescriptor("icons/objects/repository-root.gif").createImage(); //$NON-NLS-1$
+				SVNTeamUIPlugin instance = SVNTeamUIPlugin.instance();
+				LockResourcesTreeLabelProvider.folderIcon = instance
+						.getImageDescriptor("icons/views/history/affected_folder.gif") //$NON-NLS-1$
+						.createImage();
+				LockResourcesTreeLabelProvider.rootIcon = instance
+						.getImageDescriptor("icons/objects/repository-root.gif") //$NON-NLS-1$
+						.createImage();
 				CompareUI.disposeOnShutdown(LockResourcesTreeLabelProvider.folderIcon);
 				CompareUI.disposeOnShutdown(LockResourcesTreeLabelProvider.rootIcon);
 			}
 		}
 	}
-	
+
+	@Override
 	public Image getImage(Object element) {
 		LockResource node = (LockResource) element;
 		if (node.isRoot()) {
 			return LockResourcesTreeLabelProvider.rootIcon;
 		} else {
 			return LockResourcesTreeLabelProvider.folderIcon;
-		}		
+		}
 	}
 
+	@Override
 	public String getText(Object element) {
-		LockResource node = (LockResource) element; 
+		LockResource node = (LockResource) element;
 		return node.getName();
 	}
 }

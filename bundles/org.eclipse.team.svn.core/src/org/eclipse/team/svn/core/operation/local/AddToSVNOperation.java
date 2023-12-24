@@ -28,7 +28,6 @@ import org.eclipse.team.svn.core.connector.SVNErrorCodes;
 import org.eclipse.team.svn.core.connector.SVNProperty;
 import org.eclipse.team.svn.core.connector.SVNProperty.BuiltIn;
 import org.eclipse.team.svn.core.operation.IConsoleStream;
-import org.eclipse.team.svn.core.operation.IUnprotectedOperation;
 import org.eclipse.team.svn.core.operation.SVNNullProgressMonitor;
 import org.eclipse.team.svn.core.operation.SVNProgressMonitor;
 import org.eclipse.team.svn.core.resource.IRemoteStorage;
@@ -44,11 +43,11 @@ import org.eclipse.team.svn.core.utility.FileUtility;
  */
 public class AddToSVNOperation extends AbstractWorkingCopyOperation {
 	protected boolean isRecursive;
-	
+
 	public AddToSVNOperation(IResource[] resources) {
 		this(resources, false);
 	}
-	
+
 	public AddToSVNOperation(IResource[] resources, boolean isRecursive) {
 		super("Operation_AddToSVN", SVNMessages.class, resources); //$NON-NLS-1$
 		this.isRecursive = isRecursive;
@@ -63,73 +62,76 @@ public class AddToSVNOperation extends AbstractWorkingCopyOperation {
 		this.isRecursive = isRecursive;
 	}
 
+	@Override
 	protected void runImpl(IProgressMonitor monitor) throws Exception {
-		IResource []resources = this.operableData();
-		
-		if (this.isRecursive) {
-			this.isRecursive = !FileUtility.checkForResourcesPresenceRecursive(resources, IStateFilter.SF_IGNORED);
+		IResource[] resources = operableData();
+
+		if (isRecursive) {
+			isRecursive = !FileUtility.checkForResourcesPresenceRecursive(resources, IStateFilter.SF_IGNORED);
 		}
-		if (this.isRecursive) {
+		if (isRecursive) {
 			resources = FileUtility.shrinkChildNodesWithSwitched(resources);
-		}
-		else {
+		} else {
 			FileUtility.reorder(resources, true);
 		}
-		
+
 		final IRemoteStorage storage = SVNRemoteStorage.instance();
 		for (int i = 0; i < resources.length && !monitor.isCanceled(); i++) {
-		    final IResource current = resources[i];
+			final IResource current = resources[i];
 			IRepositoryLocation location = storage.getRepositoryLocation(current);
 			final ISVNConnector proxy = location.acquireSVNProxy();
-			
-			this.protectStep(new IUnprotectedOperation() {
-				public void run(IProgressMonitor monitor) throws Exception {
-					AddToSVNOperation.this.doAdd(current, proxy, monitor);
-				}
-			}, monitor, resources.length);
+
+			this.protectStep(monitor1 -> AddToSVNOperation.this.doAdd(current, proxy, monitor1), monitor, resources.length);
 			location.releaseSVNProxy(proxy);
 		}
 	}
-	
+
 	public static void removeFromParentIgnore(ISVNConnector proxy, String parentPath, String name) throws Exception {
 		try {
-			SVNProperty data = proxy.getProperty(new SVNEntryRevisionReference(parentPath), BuiltIn.IGNORE, null, new SVNNullProgressMonitor());
+			SVNProperty data = proxy.getProperty(new SVNEntryRevisionReference(parentPath), BuiltIn.IGNORE, null,
+					new SVNNullProgressMonitor());
 			String ignoreValue = data == null ? "" : data.value; //$NON-NLS-1$
-			
+
 			StringTokenizer tok = new StringTokenizer(ignoreValue, "\n", true); //$NON-NLS-1$
 			ignoreValue = ""; //$NON-NLS-1$
 			boolean skipToken = false;
 			while (tok.hasMoreTokens()) {
-			    String oneOf = tok.nextToken();
-			    
+				String oneOf = tok.nextToken();
+
 				if (!oneOf.equals(name) && !skipToken) {
-				    ignoreValue += oneOf;
-				}
-				else {
-				    skipToken = !skipToken;
+					ignoreValue += oneOf;
+				} else {
+					skipToken = !skipToken;
 				}
 			}
-			
-			proxy.setPropertyLocal(new String[] {parentPath}, new SVNProperty(BuiltIn.IGNORE, ignoreValue.length() > 0 ? ignoreValue : null), SVNDepth.EMPTY, ISVNConnector.Options.NONE, null, new SVNNullProgressMonitor());
-		}
-		catch (SVNConnectorException ex) {
+
+			proxy.setPropertyLocal(new String[] { parentPath },
+					new SVNProperty(BuiltIn.IGNORE, ignoreValue.length() > 0 ? ignoreValue : null), SVNDepth.EMPTY,
+					ISVNConnector.Options.NONE, null, new SVNNullProgressMonitor());
+		} catch (SVNConnectorException ex) {
 			if (ex.getErrorId() != SVNErrorCodes.unversionedResource) { // if the parent is unversioned, then just ignore it
 				throw ex;
 			}
 		}
 	}
-	
+
 	protected void doAdd(IResource current, ISVNConnector proxy, IProgressMonitor monitor) throws Exception {
 		String wcPath = FileUtility.getWorkingCopyPath(current);
-		
-		AddToSVNOperation.this.writeToConsole(IConsoleStream.LEVEL_CMD, "svn add \"" + FileUtility.normalizePath(wcPath) + "\"" + (AddToSVNOperation.this.isRecursive ? "" : " -N") + ISVNConnector.Options.asCommandLine(ISVNConnector.Options.FORCE | ISVNConnector.Options.INCLUDE_PARENTS) + "\n"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
-		
+
+		AddToSVNOperation.this.writeToConsole(IConsoleStream.LEVEL_CMD,
+				"svn add \"" + FileUtility.normalizePath(wcPath) + "\"" //$NON-NLS-1$//$NON-NLS-2$
+						+ (AddToSVNOperation.this.isRecursive ? "" : " -N") + ISVNConnector.Options.asCommandLine( //$NON-NLS-1$//$NON-NLS-2$
+								ISVNConnector.Options.FORCE | ISVNConnector.Options.INCLUDE_PARENTS)
+						+ "\n"); //$NON-NLS-1$
+
 		IResource parent = current.getParent();
 		if (parent != null) {
 			AddToSVNOperation.removeFromParentIgnore(proxy, FileUtility.getWorkingCopyPath(parent), current.getName());
 		}
-		
-		proxy.add(wcPath, SVNDepth.infinityOrEmpty(AddToSVNOperation.this.isRecursive), ISVNConnector.Options.FORCE | ISVNConnector.Options.INCLUDE_PARENTS, new SVNProgressMonitor(AddToSVNOperation.this, monitor, null));
+
+		proxy.add(wcPath, SVNDepth.infinityOrEmpty(AddToSVNOperation.this.isRecursive),
+				ISVNConnector.Options.FORCE | ISVNConnector.Options.INCLUDE_PARENTS,
+				new SVNProgressMonitor(AddToSVNOperation.this, monitor, null));
 	}
-	
+
 }

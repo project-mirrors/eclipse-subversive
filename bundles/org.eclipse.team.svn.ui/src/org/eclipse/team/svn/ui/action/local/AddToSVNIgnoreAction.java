@@ -42,67 +42,74 @@ import org.eclipse.team.svn.ui.panel.local.IgnoreMethodPanel;
 public class AddToSVNIgnoreAction extends AbstractNonRecursiveTeamAction {
 
 	public AddToSVNIgnoreAction() {
-		super();
 	}
 
+	@Override
 	public void runImpl(IAction action) {
-		IResource []resources = this.getSelectedResources(AddToSVNIgnoreAction.SF_NEW_AND_PARENT_VERSIONED);
+		IResource[] resources = this.getSelectedResources(AddToSVNIgnoreAction.SF_NEW_AND_PARENT_VERSIONED);
 
-		IResource []operableParents = FileUtility.getOperableParents(resources, IStateFilter.SF_UNVERSIONED);
+		IResource[] operableParents = FileUtility.getOperableParents(resources, IStateFilter.SF_UNVERSIONED);
 		if (operableParents.length > 0) {
-		    AddToSVNPanel panel = new AddToSVNPanel(operableParents);
-			DefaultDialog dialog1 = new DefaultDialog(this.getShell(), panel);
+			AddToSVNPanel panel = new AddToSVNPanel(operableParents);
+			DefaultDialog dialog1 = new DefaultDialog(getShell(), panel);
 			if (dialog1.open() != 0) {
-			    return;
+				return;
 			}
-		    operableParents = panel.getSelectedResources();
+			operableParents = panel.getSelectedResources();
 		}
-	    
+
 		if (resources.length == 0) { // check bug 433287: is there a need to rework enablement/processing interaction due to possible asynchrony?
 			return;
 		}
-		
+
 		IgnoreMethodPanel panel = new IgnoreMethodPanel(resources);
-		DefaultDialog dialog = new DefaultDialog(this.getShell(), panel);
+		DefaultDialog dialog = new DefaultDialog(getShell(), panel);
 		if (dialog.open() == 0) {
-			AddToSVNIgnoreOperation mainOp = new AddToSVNIgnoreOperation(resources, panel.getIgnoreType(), panel.getIgnorePattern());
-			
+			AddToSVNIgnoreOperation mainOp = new AddToSVNIgnoreOperation(resources, panel.getIgnoreType(),
+					panel.getIgnorePattern());
+
 			CompositeOperation op = new CompositeOperation(mainOp.getId(), mainOp.getMessagesClass());
-			
+
 			if (operableParents.length > 0) {
 				op.add(new AddToSVNOperation(operableParents));
 				op.add(new ClearLocalStatusesOperation(operableParents));
 			}
 
 			op.add(mainOp);
-			HashSet<IResource> tmp = new HashSet<IResource>(Arrays.asList(resources));
-			for (int i = 0; i < resources.length; i++) {
-				tmp.add(resources[i].getParent());
+			HashSet<IResource> tmp = new HashSet<>(Arrays.asList(resources));
+			for (IResource element : resources) {
+				tmp.add(element.getParent());
 			}
-			IResource []resourcesAndParents = tmp.toArray(new IResource[tmp.size()]);
-			op.add(new RefreshResourcesOperation(resourcesAndParents, IResource.DEPTH_INFINITE, RefreshResourcesOperation.REFRESH_ALL));
+			IResource[] resourcesAndParents = tmp.toArray(new IResource[tmp.size()]);
+			op.add(new RefreshResourcesOperation(resourcesAndParents, IResource.DEPTH_INFINITE,
+					RefreshResourcesOperation.REFRESH_ALL));
 
-			this.runScheduled(op);
+			runScheduled(op);
 		}
 	}
 
+	@Override
 	public boolean isEnabled() {
-		return this.checkForResourcesPresence(AddToSVNIgnoreAction.SF_NEW_AND_PARENT_VERSIONED);
+		return checkForResourcesPresence(AddToSVNIgnoreAction.SF_NEW_AND_PARENT_VERSIONED);
 	}
-	
+
 	public static IStateFilter SF_NEW_AND_PARENT_VERSIONED = new IStateFilter.AbstractStateFilter() {
-        protected boolean acceptImpl(ILocalResource local, IResource resource, String state, int mask) {
-            if (state == IStateFilter.ST_NEW) {
-            	IContainer parent = resource.getParent();
-            	if (parent != null) {
-        			return IStateFilter.SF_VERSIONED.accept(SVNRemoteStorage.instance().asLocalResource(parent));	
-                }
-            }
-            return false;
-        }
-		protected boolean allowsRecursionImpl(ILocalResource local, IResource resource, String state, int mask) {
-			return state != IStateFilter.ST_IGNORED && state != IStateFilter.ST_OBSTRUCTED && state != IStateFilter.ST_LINKED;
+		@Override
+		protected boolean acceptImpl(ILocalResource local, IResource resource, String state, int mask) {
+			if (state == IStateFilter.ST_NEW) {
+				IContainer parent = resource.getParent();
+				if (parent != null) {
+					return IStateFilter.SF_VERSIONED.accept(SVNRemoteStorage.instance().asLocalResource(parent));
+				}
+			}
+			return false;
 		}
-    };
+
+		@Override
+		protected boolean allowsRecursionImpl(ILocalResource local, IResource resource, String state, int mask) {
+			return state != IStateFilter.ST_IGNORED && state != IStateFilter.ST_OBSTRUCTED
+					&& state != IStateFilter.ST_LINKED;
+		}
+	};
 
 }

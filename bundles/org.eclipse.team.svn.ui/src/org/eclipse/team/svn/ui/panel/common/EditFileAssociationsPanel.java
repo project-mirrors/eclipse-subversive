@@ -41,25 +41,31 @@ import org.eclipse.team.svn.ui.verifier.NonEmptyFieldVerifier;
 public class EditFileAssociationsPanel extends AbstractDialogPanel {
 
 	protected DiffViewerSettings diffSettings;
+
 	protected ResourceSpecificParameters param;
-		
+
 	protected Text extensionText;
+
 	protected DiffViewerExternalProgramComposite diffExternalComposite;
+
 	protected DiffViewerExternalProgramComposite mergeExternalComposite;
-	
+
 	public EditFileAssociationsPanel(ResourceSpecificParameters param, DiffViewerSettings diffSettings) {
 		this.param = param;
 		this.diffSettings = diffSettings;
-		
-		this.dialogTitle = this.param == null ? SVNUIMessages.EditFileAssociationsPanel_AddDialogTitle : SVNUIMessages.EditFileAssociationsPanel_EditDialogTitle;
-		this.dialogDescription = SVNUIMessages.EditFileAssociationsPanel_DialogDescription;
-		this.defaultMessage = SVNUIMessages.EditFileAssociationsPanel_DialogDefaultMessage;
+
+		dialogTitle = this.param == null
+				? SVNUIMessages.EditFileAssociationsPanel_AddDialogTitle
+				: SVNUIMessages.EditFileAssociationsPanel_EditDialogTitle;
+		dialogDescription = SVNUIMessages.EditFileAssociationsPanel_DialogDescription;
+		defaultMessage = SVNUIMessages.EditFileAssociationsPanel_DialogDefaultMessage;
 	}
-	
+
 	public ResourceSpecificParameters getResourceSpecificParameters() {
-		return this.param;
+		return param;
 	}
-	
+
+	@Override
 	protected void createControlsImpl(Composite parent) {
 		Composite composite = new Composite(parent, SWT.NONE);
 		GridLayout layout = new GridLayout();
@@ -67,86 +73,92 @@ public class EditFileAssociationsPanel extends AbstractDialogPanel {
 		GridData data = new GridData(GridData.FILL_BOTH);
 		composite.setLayout(layout);
 		composite.setLayoutData(data);
-		
+
 		//extension or mime-type
 		Label extensionLabel = new Label(composite, SWT.NONE);
 		data = new GridData();
 		extensionLabel.setLayoutData(data);
 		extensionLabel.setText(SVNUIMessages.EditFileAssociationsPanel_ExtensionMimeType_Label);
-		
-		this.extensionText = new Text(composite, SWT.SINGLE | SWT.BORDER);
+
+		extensionText = new Text(composite, SWT.SINGLE | SWT.BORDER);
 		data = new GridData();
 		data.widthHint = 100;
-		this.extensionText.setLayoutData(data);
-		
-		this.diffExternalComposite = new DiffViewerExternalProgramComposite(SVNUIMessages.DiffViewerExternalProgramComposite_DiffProgramArguments_Label, composite, this);
-		data = new GridData(GridData.FILL_HORIZONTAL);		
+		extensionText.setLayoutData(data);
+
+		diffExternalComposite = new DiffViewerExternalProgramComposite(
+				SVNUIMessages.DiffViewerExternalProgramComposite_DiffProgramArguments_Label, composite, this);
+		data = new GridData(GridData.FILL_HORIZONTAL);
 		data.horizontalSpan = 2;
-		this.diffExternalComposite.setLayoutData(data);			
-		
-		this.mergeExternalComposite = new DiffViewerExternalProgramComposite(SVNUIMessages.DiffViewerExternalProgramComposite_MergeProgramArguments_Label, composite, new AbstractValidationManagerProxy(this) {
-			protected boolean isVerificationEnabled(Control input) {			
-				return false;
-			}			
-		});
-		data = new GridData(GridData.FILL_HORIZONTAL);		
+		diffExternalComposite.setLayoutData(data);
+
+		mergeExternalComposite = new DiffViewerExternalProgramComposite(
+				SVNUIMessages.DiffViewerExternalProgramComposite_MergeProgramArguments_Label, composite,
+				new AbstractValidationManagerProxy(this) {
+					@Override
+					protected boolean isVerificationEnabled(Control input) {
+						return false;
+					}
+				});
+		data = new GridData(GridData.FILL_HORIZONTAL);
 		data.horizontalSpan = 2;
-		this.mergeExternalComposite.setLayoutData(data);			
-		
+		mergeExternalComposite.setLayoutData(data);
+
 		CompositeVerifier cmpVerifier = new CompositeVerifier();
 		cmpVerifier.add(new NonEmptyFieldVerifier(SVNUIMessages.EditFileAssociationsPanel_ExtensionMimeType_FieldName));
-		cmpVerifier.add(new AbstractFormattedVerifier(SVNUIMessages.EditFileAssociationsPanel_ExtensionMimeType_FieldName) {
-			protected String getErrorMessageImpl(Control input) {
-				String kindString = ((Text) input).getText();
-				ResourceSpecificParameterKind kind = ResourceSpecificParameterKind.getKind(kindString);				
-				ResourceSpecificParameters resourceParams = EditFileAssociationsPanel.this.diffSettings.getResourceSpecificParameters(kind);
-				if (resourceParams != null && (EditFileAssociationsPanel.this.param != null && !EditFileAssociationsPanel.this.param.kind.equals(kind) || EditFileAssociationsPanel.this.param == null)) {
-					return SVNUIMessages.EditFileAssociationsPanel_DuplicateExtension_Verifier_Error;
-				}
-				return null;
-			}
+		cmpVerifier.add(
+				new AbstractFormattedVerifier(SVNUIMessages.EditFileAssociationsPanel_ExtensionMimeType_FieldName) {
+					@Override
+					protected String getErrorMessageImpl(Control input) {
+						String kindString = ((Text) input).getText();
+						ResourceSpecificParameterKind kind = ResourceSpecificParameterKind.getKind(kindString);
+						ResourceSpecificParameters resourceParams = diffSettings.getResourceSpecificParameters(kind);
+						if (resourceParams != null && (param != null && !param.kind.equals(kind) || param == null)) {
+							return SVNUIMessages.EditFileAssociationsPanel_DuplicateExtension_Verifier_Error;
+						}
+						return null;
+					}
 
-			protected String getWarningMessageImpl(Control input) {			
-				return null;
-			}			
-		});
-		this.attachTo(this.extensionText, cmpVerifier);
-		
+					@Override
+					protected String getWarningMessageImpl(Control input) {
+						return null;
+					}
+				});
+		attachTo(extensionText, cmpVerifier);
+
 		//init value
-		if (this.param != null) {
-			if (this.param.kind.kindValue != null) {
-				this.extensionText.setText(this.param.kind.formatKindValue());	
-			}								
-			this.diffExternalComposite.setProgramPath(this.param.params.diffProgramPath);
-			this.diffExternalComposite.setProgramParameters(this.param.params.diffParamatersString);
-			
-			this.mergeExternalComposite.setProgramPath(this.param.params.mergeProgramPath);
-			this.mergeExternalComposite.setProgramParameters(this.param.params.mergeParamatersString);
+		if (param != null) {
+			if (param.kind.kindValue != null) {
+				extensionText.setText(param.kind.formatKindValue());
+			}
+			diffExternalComposite.setProgramPath(param.params.diffProgramPath);
+			diffExternalComposite.setProgramParameters(param.params.diffParamatersString);
+
+			mergeExternalComposite.setProgramPath(param.params.mergeProgramPath);
+			mergeExternalComposite.setProgramParameters(param.params.mergeParamatersString);
 		}
-	}		
-	
-	protected void saveChangesImpl() {
-		String extensionStr = this.extensionText.getText();
-		ResourceSpecificParameterKind kind = ResourceSpecificParameterKind.getKind(extensionStr);
-		
-		ExternalProgramParameters externalProgramParams = new ExternalProgramParameters(
-				this.diffExternalComposite.getProgramPath(),
-				this.mergeExternalComposite.getProgramPath(),
-				this.diffExternalComposite.getProgramParameters(), 
-				this.mergeExternalComposite.getProgramParameters());
-				
-		
-		if (this.param == null) {
-			this.param = new ResourceSpecificParameters(kind, externalProgramParams);
-			this.param.isEnabled = true;
-		} else {
-			this.param.kind = kind;
-			this.param.params = externalProgramParams;
-		}					
 	}
-	
+
+	@Override
+	protected void saveChangesImpl() {
+		String extensionStr = extensionText.getText();
+		ResourceSpecificParameterKind kind = ResourceSpecificParameterKind.getKind(extensionStr);
+
+		ExternalProgramParameters externalProgramParams = new ExternalProgramParameters(
+				diffExternalComposite.getProgramPath(), mergeExternalComposite.getProgramPath(),
+				diffExternalComposite.getProgramParameters(), mergeExternalComposite.getProgramParameters());
+
+		if (param == null) {
+			param = new ResourceSpecificParameters(kind, externalProgramParams);
+			param.isEnabled = true;
+		} else {
+			param.kind = kind;
+			param.params = externalProgramParams;
+		}
+	}
+
+	@Override
 	protected void cancelChangesImpl() {
-		this.param = null;		
+		param = null;
 	}
 
 }

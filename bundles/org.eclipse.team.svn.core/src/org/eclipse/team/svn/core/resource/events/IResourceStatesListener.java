@@ -23,6 +23,6 @@ import java.util.EventListener;
  */
 public interface IResourceStatesListener extends EventListener {
 
-	public void resourcesStateChanged(ResourceStatesChangedEvent event);
-	
+	void resourcesStateChanged(ResourceStatesChangedEvent event);
+
 }

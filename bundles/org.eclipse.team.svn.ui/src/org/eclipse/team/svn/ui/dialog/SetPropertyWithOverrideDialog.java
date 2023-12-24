@@ -17,6 +17,7 @@ package org.eclipse.team.svn.ui.dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.team.svn.core.BaseMessages;
 import org.eclipse.team.svn.ui.SVNUIMessages;
 
 /**
@@ -27,13 +28,9 @@ import org.eclipse.team.svn.ui.SVNUIMessages;
 public class SetPropertyWithOverrideDialog extends MessageDialog {
 
 	public SetPropertyWithOverrideDialog(Shell parentShell, String existingName) {
-		super(parentShell,
-			SVNUIMessages.SetPropertyWithOverrideDialog_Title, 
-			null, 
-			SVNUIMessages.format(SVNUIMessages.SetPropertyWithOverrideDialog_Message, new String[] {existingName}),
-			MessageDialog.QUESTION, 
-			new String[] {IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL}, 
-			0);
+		super(parentShell, SVNUIMessages.SetPropertyWithOverrideDialog_Title, null,
+				BaseMessages.format(SVNUIMessages.SetPropertyWithOverrideDialog_Message, new String[] { existingName }),
+				MessageDialog.QUESTION, new String[] { IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL }, 0);
 	}
-		
+
 }

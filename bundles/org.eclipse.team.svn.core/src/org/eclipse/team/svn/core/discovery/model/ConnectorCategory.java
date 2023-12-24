@@ -35,7 +35,7 @@ public class ConnectorCategory {
 
 	protected Overview overview;
 
-	protected java.util.List<Group> group = new java.util.ArrayList<Group>();
+	protected java.util.List<Group> group = new java.util.ArrayList<>();
 
 	public ConnectorCategory() {
 	}
@@ -74,8 +74,7 @@ public class ConnectorCategory {
 	}
 
 	/**
-	 * A relevance, which is a number from 0 to 100. Categories with higher relevance are displayed with preference in
-	 * the UI.
+	 * A relevance, which is a number from 0 to 100. Categories with higher relevance are displayed with preference in the UI.
 	 */
 	public String getRelevance() {
 		return relevance;

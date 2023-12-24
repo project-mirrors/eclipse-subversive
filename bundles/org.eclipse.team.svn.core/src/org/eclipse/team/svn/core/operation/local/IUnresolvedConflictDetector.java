@@ -22,12 +22,19 @@ import org.eclipse.core.resources.IResource;
  * @author Alexander Gurov
  */
 public interface IUnresolvedConflictDetector {
-	public void setUnresolvedConflict(boolean hasUnresolvedConflict);
-    public boolean hasUnresolvedConflicts();
-    public void addUnprocessed(IResource unprocessed);
-    public IResource []getUnprocessed();
-    public void removeProcessed(IResource resource);
-    public IResource []getProcessed();
-    public void setConflictMessage(String message);
-    public String getMessage();
+	void setUnresolvedConflict(boolean hasUnresolvedConflict);
+
+	boolean hasUnresolvedConflicts();
+
+	void addUnprocessed(IResource unprocessed);
+
+	IResource[] getUnprocessed();
+
+	void removeProcessed(IResource resource);
+
+	IResource[] getProcessed();
+
+	void setConflictMessage(String message);
+
+	String getMessage();
 }

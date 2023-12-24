@@ -36,58 +36,65 @@ import org.eclipse.team.svn.ui.preferences.SVNTeamPreferences;
  */
 public abstract class ColumnedViewerComparator extends ViewerComparator implements SelectionListener {
 	protected int column;
-    protected boolean reversed;
-    protected Viewer basedOn;
-    protected IPropertyChangeListener configurationListener;
+
+	protected boolean reversed;
+
+	protected Viewer basedOn;
+
+	protected IPropertyChangeListener configurationListener;
 
 	public static boolean CASE_INSENSITIVE = true;
-	
+
 	public ColumnedViewerComparator(Viewer basedOn) {
-		super();
 		this.basedOn = basedOn;
-		this.reversed = false;
-		this.column = 0;
-		 final IPreferenceStore store = SVNTeamUIPlugin.instance().getPreferenceStore();
-		 ColumnedViewerComparator.CASE_INSENSITIVE = SVNTeamPreferences.getBehaviourBoolean(store, SVNTeamPreferences.BEHAVIOUR_CASE_INSENSITIVE_TABLE_SORTING_NAME);
-	        this.configurationListener = new IPropertyChangeListener() {
-	        	public void propertyChange(PropertyChangeEvent event) {
-	        		if (event.getProperty().equals(SVNTeamPreferences.fullBehaviourName(SVNTeamPreferences.BEHAVIOUR_CASE_INSENSITIVE_TABLE_SORTING_NAME))) {
-	        			ColumnedViewerComparator.CASE_INSENSITIVE = SVNTeamPreferences.getBehaviourBoolean(store, SVNTeamPreferences.BEHAVIOUR_CASE_INSENSITIVE_TABLE_SORTING_NAME);
-	        			if (!ColumnedViewerComparator.this.basedOn.getControl().isDisposed()) {
-	        				ColumnedViewerComparator.this.basedOn.refresh();
-	        			}
-	        			else {
-	        				store.removePropertyChangeListener(this);
-	        			}
-	        		}
-	        	}
-	        };
-	        store.addPropertyChangeListener(this.configurationListener);
+		reversed = false;
+		column = 0;
+		final IPreferenceStore store = SVNTeamUIPlugin.instance().getPreferenceStore();
+		ColumnedViewerComparator.CASE_INSENSITIVE = SVNTeamPreferences.getBehaviourBoolean(store,
+				SVNTeamPreferences.BEHAVIOUR_CASE_INSENSITIVE_TABLE_SORTING_NAME);
+		configurationListener = new IPropertyChangeListener() {
+			@Override
+			public void propertyChange(PropertyChangeEvent event) {
+				if (event.getProperty()
+						.equals(SVNTeamPreferences
+								.fullBehaviourName(SVNTeamPreferences.BEHAVIOUR_CASE_INSENSITIVE_TABLE_SORTING_NAME))) {
+					ColumnedViewerComparator.CASE_INSENSITIVE = SVNTeamPreferences.getBehaviourBoolean(store,
+							SVNTeamPreferences.BEHAVIOUR_CASE_INSENSITIVE_TABLE_SORTING_NAME);
+					if (!ColumnedViewerComparator.this.basedOn.getControl().isDisposed()) {
+						ColumnedViewerComparator.this.basedOn.refresh();
+					} else {
+						store.removePropertyChangeListener(this);
+					}
+				}
+			}
+		};
+		store.addPropertyChangeListener(configurationListener);
 
 	}
-	
+
 	public boolean isReversed() {
-		return this.reversed;
+		return reversed;
 	}
 
 	public void setReversed(boolean reversed) {
 		this.reversed = reversed;
 	}
-	
+
 	public int getColumnNumber() {
-		return this.column;
+		return column;
 	}
-	
+
 	public void setColumnNumber(int column) {
 		this.column = column;
 	}
-	
+
+	@Override
 	public void widgetSelected(SelectionEvent e) {
-		if (this.basedOn instanceof TreeViewer) {
-			TreeViewer treeViewer = (TreeViewer)this.basedOn;
+		if (basedOn instanceof TreeViewer) {
+			TreeViewer treeViewer = (TreeViewer) basedOn;
 			int column = treeViewer.getTree().indexOf((TreeColumn) e.widget);
-			ColumnedViewerComparator oldSorter = (ColumnedViewerComparator)treeViewer.getComparator();
-			TreeColumn treeColumn = ((TreeColumn)e.widget);
+			ColumnedViewerComparator oldSorter = (ColumnedViewerComparator) treeViewer.getComparator();
+			TreeColumn treeColumn = (TreeColumn) e.widget;
 			if (oldSorter == null) {
 				return;
 			}
@@ -96,20 +103,18 @@ public abstract class ColumnedViewerComparator extends ViewerComparator implemen
 				treeViewer.getTree().setSortColumn(treeColumn);
 				treeViewer.getTree().setSortDirection(oldSorter.isReversed() ? SWT.DOWN : SWT.UP);
 				treeViewer.refresh();
-			}
-			else {
+			} else {
 				oldSorter.setColumnNumber(column);
 				oldSorter.setReversed(false);
 				treeViewer.getTree().setSortColumn(treeColumn);
 				treeViewer.getTree().setSortDirection(SWT.UP);
 				treeViewer.refresh();
 			}
-		}
-		else if (this.basedOn instanceof TableViewer) {
-			TableViewer tableViewer = (TableViewer)this.basedOn;
+		} else if (basedOn instanceof TableViewer) {
+			TableViewer tableViewer = (TableViewer) basedOn;
 			int column = tableViewer.getTable().indexOf((TableColumn) e.widget);
-			ColumnedViewerComparator oldSorter = (ColumnedViewerComparator)tableViewer.getComparator();
-			TableColumn tableColumn = ((TableColumn)e.widget);
+			ColumnedViewerComparator oldSorter = (ColumnedViewerComparator) tableViewer.getComparator();
+			TableColumn tableColumn = (TableColumn) e.widget;
 			if (oldSorter == null) {
 				return;
 			}
@@ -118,8 +123,7 @@ public abstract class ColumnedViewerComparator extends ViewerComparator implemen
 				tableViewer.getTable().setSortColumn(tableColumn);
 				tableViewer.getTable().setSortDirection(oldSorter.isReversed() ? SWT.DOWN : SWT.UP);
 				tableViewer.refresh();
-			}
-			else {
+			} else {
 				oldSorter.setColumnNumber(column);
 				oldSorter.setReversed(false);
 				tableViewer.getTable().setSortColumn(tableColumn);
@@ -128,19 +132,22 @@ public abstract class ColumnedViewerComparator extends ViewerComparator implemen
 			}
 		}
 	}
-	
-	public void widgetDefaultSelected(SelectionEvent e) {};
-	
-	public final int compare(Viewer viewer, Object row1, Object row2) {
-		return this.compareImpl(viewer, this.reversed ? row2 : row1, this.reversed ? row1 : row2);
+
+	@Override
+	public void widgetDefaultSelected(SelectionEvent e) {
 	}
-	
+
+	@Override
+	public final int compare(Viewer viewer, Object row1, Object row2) {
+		return compareImpl(viewer, reversed ? row2 : row1, reversed ? row1 : row2);
+	}
+
 	public abstract int compareImpl(Viewer viewer, Object row1, Object row2);
-	
+
 	public static int compare(String first, String second) {
 		first = first == null ? "" : first; //$NON-NLS-1$
 		second = second == null ? "" : second; //$NON-NLS-1$
 		return ColumnedViewerComparator.CASE_INSENSITIVE ? first.compareToIgnoreCase(second) : first.compareTo(second);
-    }
-	
+	}
+
 }

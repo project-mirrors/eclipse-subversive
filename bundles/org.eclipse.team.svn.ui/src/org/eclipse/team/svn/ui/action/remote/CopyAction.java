@@ -29,19 +29,18 @@ import org.eclipse.team.svn.ui.operation.PrepareRemoteResourcesTransferrableOper
 public class CopyAction extends AbstractRepositoryTeamAction {
 
 	public CopyAction() {
-		super();
 	}
 
+	@Override
 	public void runImpl(IAction action) {
-		this.runBusy(new PrepareRemoteResourcesTransferrableOperation(
-			this.getSelectedRepositoryResources(),
-			RemoteResourceTransferrable.OP_COPY, 
-			this.getShell().getDisplay()
+		runBusy(new PrepareRemoteResourcesTransferrableOperation(
+				getSelectedRepositoryResources(), RemoteResourceTransferrable.OP_COPY, getShell().getDisplay()
 		));
 	}
-	
+
+	@Override
 	public boolean isEnabled() {
-		IRepositoryResource []resources = this.getSelectedRepositoryResources();
+		IRepositoryResource[] resources = getSelectedRepositoryResources();
 		if (resources.length == 0) {
 			return false;
 		}

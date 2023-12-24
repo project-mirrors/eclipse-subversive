@@ -24,7 +24,7 @@ import org.eclipse.team.svn.ui.utility.UIMonitorUtility;
 import org.eclipse.team.ui.synchronize.ISynchronizePageConfiguration;
 
 /**
- * Replace with revision action 
+ * Replace with revision action
  * 
  * @author Igor Burilo
  */
@@ -33,18 +33,22 @@ public class ReplaceWithRevisionPaneAction extends AbstractSynchronizeModelActio
 	public ReplaceWithRevisionPaneAction(String text, ISynchronizePageConfiguration configuration) {
 		super(text, configuration);
 	}
-	
+
+	@Override
 	protected IActionOperation getOperation(ISynchronizePageConfiguration configuration, IDiffElement[] elements) {
-		IResource[] selectedResources = this.getAllSelectedResources();
-		IActionOperation op = ReplaceWithRevisionAction.getReplaceOperation(selectedResources, UIMonitorUtility.getShell());
+		IResource[] selectedResources = getAllSelectedResources();
+		IActionOperation op = ReplaceWithRevisionAction.getReplaceOperation(selectedResources,
+				UIMonitorUtility.getShell());
 		return op;
 	}
-	
+
+	@Override
 	protected boolean updateSelection(IStructuredSelection selection) {
 		if (super.updateSelection(selection)) {
 			if (selection.size() == 1) {
-				IResource[] selectedResources = this.getAllSelectedResources();
-				return FileUtility.checkForResourcesPresence(selectedResources, IStateFilter.SF_ONREPOSITORY, IResource.DEPTH_ZERO);	
+				IResource[] selectedResources = getAllSelectedResources();
+				return FileUtility.checkForResourcesPresence(selectedResources, IStateFilter.SF_ONREPOSITORY,
+						IResource.DEPTH_ZERO);
 			}
 		}
 		return false;

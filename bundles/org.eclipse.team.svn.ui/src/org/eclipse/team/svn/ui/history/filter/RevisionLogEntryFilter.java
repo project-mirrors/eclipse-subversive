@@ -22,20 +22,24 @@ import org.eclipse.team.svn.core.connector.SVNLogEntry;
  * @author Alexei Goncharov
  */
 public class RevisionLogEntryFilter implements ILogEntryFilter {
-	
+
 	protected long from;
+
 	protected long to;
-	
+
+	@Override
 	public boolean accept(SVNLogEntry logEntry) {
 		long current = logEntry.revision;
-		return (current > this.to || current < this.from);
+		return current > to || current < from;
 	}
-	
+
 	/**
 	 * Sets revisions range to exclude
 	 * 
-	 * @param from - lower revision
-	 * @param to - higher revision
+	 * @param from
+	 *            - lower revision
+	 * @param to
+	 *            - higher revision
 	 */
 	public void setRevisionstoHide(long from, long to) {
 		this.from = from;

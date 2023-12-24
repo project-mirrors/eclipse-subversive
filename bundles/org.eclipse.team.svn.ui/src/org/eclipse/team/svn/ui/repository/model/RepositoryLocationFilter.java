@@ -23,15 +23,16 @@ import org.eclipse.team.svn.core.resource.IRepositoryLocation;
  */
 public class RepositoryLocationFilter implements IRepositoryContentFilter {
 	protected String url;
-	
+
 	public RepositoryLocationFilter(String locationUrl) {
-		this.url = locationUrl;
+		url = locationUrl;
 	}
-	
+
+	@Override
 	public boolean accept(Object obj) {
 		if (obj instanceof RepositoryLocation) {
-			IRepositoryLocation location = ((RepositoryLocation)obj).getRepositoryLocation();
-			return location.getUrl().equals(this.url);
+			IRepositoryLocation location = ((RepositoryLocation) obj).getRepositoryLocation();
+			return location.getUrl().equals(url);
 		}
 		return true;
 	}

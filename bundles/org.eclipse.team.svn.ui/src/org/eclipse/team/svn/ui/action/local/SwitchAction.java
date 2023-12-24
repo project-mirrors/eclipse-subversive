@@ -54,19 +54,19 @@ import org.eclipse.team.svn.ui.utility.UIMonitorUtility;
 public class SwitchAction extends AbstractNonRecursiveTeamAction {
 
 	public SwitchAction() {
-		super();
 	}
-	
+
+	@Override
 	public void runImpl(IAction action) {
-		IResource []resources = this.getSelectedResources(IStateFilter.SF_EXCLUDE_DELETED);
-		
-		if (!OperationErrorDialog.isAcceptableAtOnce(resources, SVNUIMessages.SwitchAction_Error, this.getShell())) {
+		IResource[] resources = this.getSelectedResources(IStateFilter.SF_EXCLUDE_DELETED);
+
+		if (!OperationErrorDialog.isAcceptableAtOnce(resources, SVNUIMessages.SwitchAction_Error, getShell())) {
 			return;
 		}
-		
-		// in case of multiple switch selected repository resource should be recognized as branch/tag/trunk (using copied from). If "copied from" inaccessible multi switch will fails, single switch for project should be performed like for folders 
-		
-	//FIXME peg revision, revision limitation ???
+
+		// in case of multiple switch selected repository resource should be recognized as branch/tag/trunk (using copied from). If "copied from" inaccessible multi switch will fails, single switch for project should be performed like for folders
+
+		//FIXME peg revision, revision limitation ???
 		SwitchPanel panel;
 		if (resources.length > 1) {
 			boolean containFolders = false;
@@ -79,24 +79,26 @@ public class SwitchAction extends AbstractNonRecursiveTeamAction {
 			IRepositoryResource remote = SVNRemoteStorage.instance().asRepositoryResource(resources[0]);
 			remote = SVNUtility.getTrunkLocation(remote);
 			panel = new SwitchPanel(remote, SVNRevision.INVALID_REVISION_NUMBER, containFolders);
-		}
-		else {
+		} else {
 			IResource resource = resources[0];
 			IRepositoryResource remote = SVNRemoteStorage.instance().asRepositoryResource(resource);
 			ILocalResource local = SVNRemoteStorage.instance().asLocalResourceAccessible(resource);
 			panel = new SwitchPanel(remote, local.getRevision(), resources[0] instanceof IContainer);
 		}
-			
-		DefaultDialog dialog = new DefaultDialog(this.getShell(), panel);
+
+		DefaultDialog dialog = new DefaultDialog(getShell(), panel);
 		if (dialog.open() == 0) {
-			IRepositoryResource []destinations = panel.getSelection(resources);
-			boolean ignoreExternals = SVNTeamPreferences.getBehaviourBoolean(SVNTeamUIPlugin.instance().getPreferenceStore(), SVNTeamPreferences.BEHAVIOUR_IGNORE_EXTERNALS_NAME);
-			SwitchOperation mainOp = new SwitchOperation(resources, destinations, panel.getDepth(), panel.isStickyDepth(), ignoreExternals);
-			
+			IRepositoryResource[] destinations = panel.getSelection(resources);
+			boolean ignoreExternals = SVNTeamPreferences.getBehaviourBoolean(
+					SVNTeamUIPlugin.instance().getPreferenceStore(),
+					SVNTeamPreferences.BEHAVIOUR_IGNORE_EXTERNALS_NAME);
+			SwitchOperation mainOp = new SwitchOperation(resources, destinations, panel.getDepth(),
+					panel.isStickyDepth(), ignoreExternals);
+
 			CompositeOperation op = new CompositeOperation(mainOp.getId(), mainOp.getMessagesClass());
 
 			// see bug #406580
-			HashMap<IResource, String> externalsMap = new HashMap<IResource, String>();
+			HashMap<IResource, String> externalsMap = new HashMap<>();
 			for (int i = 0; i < resources.length; i++) {
 				ILocalResource local = SVNRemoteStorage.instance().asLocalResource(resources[i]);
 				if ((local.getChangeMask() & ILocalResource.IS_SVN_EXTERNALS) != 0) {
@@ -104,11 +106,16 @@ public class SwitchAction extends AbstractNonRecursiveTeamAction {
 					while (externalsPropNode == null && parent.getType() != IResource.PROJECT) {
 						parent = parent.getParent();
 						GetPropertiesOperation propOp = new GetPropertiesOperation(parent); // failure! it could be not a direct parent!
-						if (UIMonitorUtility.doTaskBusyDefault(propOp).getOperation().getExecutionState() == IActionOperation.OK) {
+						if (UIMonitorUtility.doTaskBusyDefault(propOp)
+								.getOperation()
+								.getExecutionState() == IActionOperation.OK) {
 							for (SVNProperty prop : propOp.getProperties()) {
 								if (SVNProperty.BuiltIn.EXTERNALS.equals(prop.name)) {
-									String tVal = externalsMap.containsKey(parent) ? externalsMap.get(parent) : prop.value;
-									SVNUtility.SVNExternalPropertyData []data = SVNUtility.SVNExternalPropertyData.parse(tVal);
+									String tVal = externalsMap.containsKey(parent)
+											? externalsMap.get(parent)
+											: prop.value;
+									SVNUtility.SVNExternalPropertyData[] data = SVNUtility.SVNExternalPropertyData
+											.parse(tVal);
 									for (SVNUtility.SVNExternalPropertyData entry : data) {
 										IPath localPath = FileUtility.getResourcePath(parent).append(entry.localPath);
 										if (localPath.equals(FileUtility.getResourcePath(resources[i]))) {
@@ -127,30 +134,36 @@ public class SwitchAction extends AbstractNonRecursiveTeamAction {
 				}
 			}
 			for (IResource propNode : externalsMap.keySet()) {
-				SetPropertiesOperation setOp = new SetPropertiesOperation(new IResource[] {propNode}, new SVNProperty[] {new SVNProperty(SVNProperty.BuiltIn.EXTERNALS, externalsMap.get(propNode))}, false);
+				SetPropertiesOperation setOp = new SetPropertiesOperation(new IResource[] { propNode },
+						new SVNProperty[] {
+								new SVNProperty(SVNProperty.BuiltIn.EXTERNALS, externalsMap.get(propNode)) },
+						false);
 				op.add(setOp);
 			}
 			if (externalsMap.size() > 0) {
-				op.add(new RefreshResourcesOperation(externalsMap.keySet().toArray(new IResource[externalsMap.size()]), IResource.DEPTH_ZERO, RefreshResourcesOperation.REFRESH_CACHE));
+				op.add(new RefreshResourcesOperation(externalsMap.keySet().toArray(new IResource[externalsMap.size()]),
+						IResource.DEPTH_ZERO, RefreshResourcesOperation.REFRESH_CACHE));
 			}
-			
+
 			SaveProjectMetaOperation saveOp = new SaveProjectMetaOperation(resources);
 			op.add(saveOp);
 			op.add(mainOp);
 			op.add(new RestoreProjectMetaOperation(saveOp));
 			op.add(new RefreshResourcesOperation(resources));
 			op.add(new NotifyUnresolvedConflictOperation(mainOp));
-			
-			this.runScheduled(op);
+
+			runScheduled(op);
 		}
 	}
 
+	@Override
 	public boolean isEnabled() {
-		return this.checkForResourcesPresence(IStateFilter.SF_EXCLUDE_DELETED);
+		return checkForResourcesPresence(IStateFilter.SF_EXCLUDE_DELETED);
 	}
-	
+
+	@Override
 	protected boolean needsToSaveDirtyEditors() {
 		return true;
 	}
-	
+
 }

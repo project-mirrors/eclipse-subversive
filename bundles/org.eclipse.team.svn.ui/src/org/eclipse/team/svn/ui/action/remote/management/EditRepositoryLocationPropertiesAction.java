@@ -38,18 +38,18 @@ import org.eclipse.team.svn.ui.wizard.NewRepositoryLocationWizard;
 public class EditRepositoryLocationPropertiesAction extends AbstractRepositoryModifyWorkspaceAction {
 
 	public EditRepositoryLocationPropertiesAction() {
-		super();
 	}
-	
+
+	@Override
 	public void runImpl(IAction action) {
-		final IRepositoryLocation []locations = this.getSelectedRepositoryLocations();
+		final IRepositoryLocation[] locations = getSelectedRepositoryLocations();
 		String oldRootUrl = locations[0].getRepositoryRootUrl();
-		
+
 		final IRepositoryLocation backup = SVNRemoteStorage.instance().newRepositoryLocation();
 		SVNRemoteStorage.instance().copyRepositoryLocation(backup, locations[0]);
-		
+
 		NewRepositoryLocationWizard wizard = new NewRepositoryLocationWizard(locations[0], false);
-		WizardDialog dialog = new WizardDialog(this.getShell(), wizard);
+		WizardDialog dialog = new WizardDialog(getShell(), wizard);
 		if (dialog.open() == 0) {
 			String newRootUrl = locations[0].getRepositoryRootUrl();
 			if (!newRootUrl.equals(oldRootUrl)) {
@@ -59,6 +59,7 @@ public class EditRepositoryLocationPropertiesAction extends AbstractRepositoryMo
 				op.add(scannerOp);
 				op.add(mainOp);
 				op.add(new AbstractActionOperation("Operation_CheckRelocationState", SVNUIMessages.class) { //$NON-NLS-1$
+					@Override
 					protected void runImpl(IProgressMonitor monitor) throws Exception {
 						if (mainOp.getExecutionState() != IActionOperation.OK) {
 							SVNRemoteStorage.instance().copyRepositoryLocation(locations[0], backup);
@@ -67,22 +68,23 @@ public class EditRepositoryLocationPropertiesAction extends AbstractRepositoryMo
 				});
 				op.add(wizard.getOperationToPerform());
 				op.add(new RefreshResourcesOperation(mainOp));
-				
-				this.runScheduled(op); 
-			}
-			else {
-				CompositeOperation op = (CompositeOperation)wizard.getOperationToPerform();
+
+				runScheduled(op);
+			} else {
+				CompositeOperation op = (CompositeOperation) wizard.getOperationToPerform();
 				FindRelatedProjectsOperation findOp = new FindRelatedProjectsOperation(locations[0]);
 				op.add(findOp);
-				op.add(new RefreshResourcesOperation(findOp, IResource.DEPTH_ZERO, RefreshResourcesOperation.REFRESH_CACHE));
-				
-				this.runScheduled(op);
+				op.add(new RefreshResourcesOperation(findOp, IResource.DEPTH_ZERO,
+						RefreshResourcesOperation.REFRESH_CACHE));
+
+				runScheduled(op);
 			}
 		}
 	}
 
+	@Override
 	public boolean isEnabled() {
-		return this.getSelectedRepositoryLocations().length == 1;
+		return getSelectedRepositoryLocations().length == 1;
 	}
 
 }

@@ -23,22 +23,23 @@ import org.eclipse.team.svn.core.utility.StringMatcher;
  * @author Alexei Goncharov
  */
 public class CommentLogEntryFilter implements ILogEntryFilter {
-	
+
 	protected String commentToAccept;
-	
+
 	public CommentLogEntryFilter() {
 		this(null);
 	}
-	
-	public CommentLogEntryFilter (String commentToAccept) {
+
+	public CommentLogEntryFilter(String commentToAccept) {
 		this.commentToAccept = commentToAccept;
 	}
 
+	@Override
 	public boolean accept(SVNLogEntry logEntry) {
-		if (this.commentToAccept == null) {
+		if (commentToAccept == null) {
 			return true;
 		}
-		StringMatcher matcher = new StringMatcher(this.commentToAccept);
+		StringMatcher matcher = new StringMatcher(commentToAccept);
 		String comment = logEntry.message == null ? "" : logEntry.message; //$NON-NLS-1$
 		return matcher.match(comment);
 	}
@@ -46,8 +47,8 @@ public class CommentLogEntryFilter implements ILogEntryFilter {
 	public void setCommentToAccept(String commentToAccept) {
 		this.commentToAccept = commentToAccept;
 	}
-	
+
 	public String getCommentToAccept() {
-		return this.commentToAccept;
+		return commentToAccept;
 	}
 }

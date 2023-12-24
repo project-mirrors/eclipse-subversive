@@ -24,9 +24,13 @@ import org.eclipse.team.svn.core.resource.IRepositoryResource;
  * @author Alexander Gurov
  */
 public interface IResourcePropertyProvider extends IActionOperation {
-	public IResource getLocal();
-	public IRepositoryResource getRemote();
-	public SVNProperty []getProperties();
-	public boolean isEditAllowed();
-	public void refresh();
+	IResource getLocal();
+
+	IRepositoryResource getRemote();
+
+	SVNProperty[] getProperties();
+
+	boolean isEditAllowed();
+
+	void refresh();
 }

@@ -86,7 +86,7 @@ public class DiscoveryConnector extends ConnectorDescriptor {
 	 *            true if available, false if not, or null if availability is unknown
 	 */
 	public void setAvailable(Boolean available) {
-		if (available != this.available || (available != null && !available.equals(this.available))) {
+		if (available != this.available || available != null && !available.equals(this.available)) {
 			Boolean previous = this.available;
 			this.available = available;
 			changeSupport.firePropertyChange("available", previous, this.available); //$NON-NLS-1$

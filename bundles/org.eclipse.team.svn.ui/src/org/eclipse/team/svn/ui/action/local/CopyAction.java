@@ -17,7 +17,6 @@ package org.eclipse.team.svn.ui.action.local;
 import java.io.File;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
@@ -48,144 +47,151 @@ import org.eclipse.team.svn.ui.panel.local.ContainerSelectionPanel;
  * @author Sergiy Logvin
  */
 public class CopyAction extends AbstractWorkingCopyAction {
-	
+
 	public CopyAction() {
-		super();
 	}
-		
+
+	@Override
 	public void runImpl(IAction action) {
-		IResource []AllResources = this.getSelectedResources(CopyAction.SF_EXCLUDE_DELETED_AND_PROJECTS);
-		
-		HashMap<String, IResource> resourcesWithoutEqualsNames = new HashMap<String, IResource>();
-		HashSet<String> conflictedResources = this.excludeResourcesWithEqualNames(resourcesWithoutEqualsNames, AllResources);
-		
+		IResource[] AllResources = this.getSelectedResources(CopyAction.SF_EXCLUDE_DELETED_AND_PROJECTS);
+
+		HashMap<String, IResource> resourcesWithoutEqualsNames = new HashMap<>();
+		HashSet<String> conflictedResources = excludeResourcesWithEqualNames(resourcesWithoutEqualsNames, AllResources);
+
 		if (resourcesWithoutEqualsNames.isEmpty()) {
-			MessageDialog dialog = new MessageDialog(this.getShell(), SVNUIMessages.CopyAction_Conflict_Title, null, 
-					SVNUIMessages.CopyAction_Conflict_Message, 
-					MessageDialog.WARNING, 
-					new String[] {IDialogConstants.OK_LABEL}, 
-					0);
+			MessageDialog dialog = new MessageDialog(getShell(), SVNUIMessages.CopyAction_Conflict_Title, null,
+					SVNUIMessages.CopyAction_Conflict_Message, MessageDialog.WARNING,
+					new String[] { IDialogConstants.OK_LABEL }, 0);
 			dialog.open();
 			return;
 		}
 		//make new filtered resources list without resources with equal names
-		final IResource []resources = resourcesWithoutEqualsNames.values().toArray(new IResource[resourcesWithoutEqualsNames.values().size()]);
+		final IResource[] resources = resourcesWithoutEqualsNames.values()
+				.toArray(new IResource[resourcesWithoutEqualsNames.size()]);
 
 		ContainerSelectionPanel panel = new ContainerSelectionPanel(resources, conflictedResources);
-		DefaultDialog dialog = new DefaultDialog(this.getShell(), panel);
+		DefaultDialog dialog = new DefaultDialog(getShell(), panel);
 		if (dialog.open() == 0) {
 			IPath path = panel.getSelectedPath();
 			boolean saveHistory = panel.isCopyWithHistorySelected();
-			
+
 			CompositeOperation op = new CompositeOperation("Operation_CopyResources", SVNUIMessages.class); //$NON-NLS-1$
-			
+
 			IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
 			IActionOperation addOp = null;
 			if (panel.isOverrideResourceName()) {
 				path = path.append(panel.getOverridenName());
 				if (resources.length == 1) {
-					IResource destination = resources[0].getType() == IResource.FILE ? (IResource)root.getFile(path) : root.getFolder(path);
+					IResource destination = resources[0].getType() == IResource.FILE
+							? (IResource) root.getFile(path)
+							: root.getFolder(path);
 					String dirPath = FileUtility.getWorkingCopyPath(destination.getParent());
 					if (dirPath != null) {
 						new File(dirPath).mkdirs();
 					}
-					boolean []checkSave = new boolean[] {saveHistory};
-					IActionOperation copyOp = this.getCopyOperation(resources[0], checkSave, destination);
+					boolean[] checkSave = { saveHistory };
+					IActionOperation copyOp = getCopyOperation(resources[0], checkSave, destination);
 					if (checkSave[0]) {
-						IResource []parents = FileUtility.getOperableParents(new IResource[] {destination}, IStateFilter.SF_UNVERSIONED, true);
+						IResource[] parents = FileUtility.getOperableParents(new IResource[] { destination },
+								IStateFilter.SF_UNVERSIONED, true);
 						if (parents.length > 0) {
 							addOp = new AddToSVNOperation(parents);
 						}
 					}
 					if (addOp != null) {
 						op.add(addOp);
-						op.add(copyOp, new IActionOperation[] {addOp});
-					}
-					else {
+						op.add(copyOp, new IActionOperation[] { addOp });
+					} else {
 						op.add(copyOp);
 					}
-				}
-				else {
+				} else {
 					IResource destination = root.getFolder(path);
 					String dirPath = FileUtility.getWorkingCopyPath(destination);
 					if (dirPath != null) {
 						new File(dirPath).mkdirs();
 					}
-					IResource []parents = FileUtility.addOperableParents(new IResource[] {destination}, IStateFilter.SF_UNVERSIONED, true);
+					IResource[] parents = FileUtility.addOperableParents(new IResource[] { destination },
+							IStateFilter.SF_UNVERSIONED, true);
 					if (parents.length > 0) {
 						addOp = new AddToSVNOperation(parents);
 						op.add(addOp);
 					}
 				}
 			}
-			
+
 			if (resources.length > 1 || !panel.isOverrideResourceName()) {
-				for (int i = 0; i < resources.length; i++) {
-					IPath tPath = path.append(resources[i].getName());
-					IResource target = resources[i].getType() == IResource.FILE ? (IResource)root.getFile(tPath) : root.getFolder(tPath);
-					IActionOperation copyOp = this.getCopyOperation(resources[i], new boolean[] {saveHistory}, target);
+				for (IResource element : resources) {
+					IPath tPath = path.append(element.getName());
+					IResource target = element.getType() == IResource.FILE
+							? (IResource) root.getFile(tPath)
+							: root.getFolder(tPath);
+					IActionOperation copyOp = getCopyOperation(element, new boolean[] { saveHistory }, target);
 					if (addOp != null) {
-						op.add(copyOp, new IActionOperation[] {addOp});
-					}
-					else {
+						op.add(copyOp, new IActionOperation[] { addOp });
+					} else {
 						op.add(copyOp);
 					}
 				}
 			}
-			
-			op.add(new RefreshResourcesOperation(new IResource[] {root.findMember(panel.getSelectedPath())}));
-			
-			this.runScheduled(op);
+
+			op.add(new RefreshResourcesOperation(new IResource[] { root.findMember(panel.getSelectedPath()) }));
+
+			runScheduled(op);
 		}
 	}
-	
-	protected IActionOperation getCopyOperation(IResource resource, boolean []saveHistory, IResource destination) {
+
+	protected IActionOperation getCopyOperation(IResource resource, boolean[] saveHistory, IResource destination) {
 		if (saveHistory[0]) {
 			CopyResourceWithHistoryOperation copyOp = new CopyResourceWithHistoryOperation(resource, destination);
 			if (copyOp.isAllowed()) {
 				return copyOp;
-			} 
+			}
 			saveHistory[0] = false;
 		}
 		return new CopyResourceOperation(resource, destination);
 	}
-	
+
+	@Override
 	public boolean isEnabled() {
-		return this.checkForResourcesPresence(CopyAction.SF_EXCLUDE_DELETED_AND_PROJECTS); 
+		return checkForResourcesPresence(CopyAction.SF_EXCLUDE_DELETED_AND_PROJECTS);
 	}
-	
+
+	@Override
 	protected boolean needsToSaveDirtyEditors() {
 		return true;
 	}
-	
+
 	protected static final IStateFilter SF_EXCLUDE_DELETED_AND_PROJECTS = new IStateFilter.AbstractStateFilter() {
-        protected boolean acceptImpl(ILocalResource local, IResource resource, String state, int mask) {
-        	if (!IStateFilter.SF_LINKED.accept(resource, state, mask) && !IStateFilter.SF_OBSTRUCTED.accept(resource, state, mask)) {
-        		return ((resource instanceof IFolder || resource instanceof IFile) && state != IStateFilter.ST_DELETED && state != IStateFilter.ST_MISSING);	
-        	}
-        	return false;
-        }
+		@Override
+		protected boolean acceptImpl(ILocalResource local, IResource resource, String state, int mask) {
+			if (!IStateFilter.SF_LINKED.accept(resource, state, mask)
+					&& !IStateFilter.SF_OBSTRUCTED.accept(resource, state, mask)) {
+				return (resource instanceof IFolder || resource instanceof IFile) && state != IStateFilter.ST_DELETED
+						&& state != IStateFilter.ST_MISSING;
+			}
+			return false;
+		}
+
+		@Override
 		protected boolean allowsRecursionImpl(ILocalResource local, IResource resource, String state, int mask) {
 			return state != IStateFilter.ST_LINKED && state != IStateFilter.ST_OBSTRUCTED;
 		}
-    };
+	};
 
-    protected HashSet<String> excludeResourcesWithEqualNames(HashMap<String, IResource> map, IResource []resources) {
-    	HashSet<String> conflicts = new HashSet<String>();
-    	for (int i = 0; i < resources.length; i++) {
-			if (map.containsKey(resources[i].getName())) {
-				conflicts.add(resources[i].getName());
-			}
-			else {
-				map.put(resources[i].getName(), resources[i]);
+	protected HashSet<String> excludeResourcesWithEqualNames(HashMap<String, IResource> map, IResource[] resources) {
+		HashSet<String> conflicts = new HashSet<>();
+		for (IResource element : resources) {
+			if (map.containsKey(element.getName())) {
+				conflicts.add(element.getName());
+			} else {
+				map.put(element.getName(), element);
 			}
 		}
-		//delete all conflicts from resources set 
-		for (Iterator<String> iter = conflicts.iterator(); iter.hasNext();) {
-			String element = iter.next();
+		//delete all conflicts from resources set
+		for (String element : conflicts) {
 			map.remove(element);
 		}
 		return conflicts;
-    }
+	}
 
 }

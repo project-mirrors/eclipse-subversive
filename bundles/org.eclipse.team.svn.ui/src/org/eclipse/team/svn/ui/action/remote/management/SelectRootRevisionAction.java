@@ -25,16 +25,17 @@ import org.eclipse.team.svn.ui.repository.model.RepositoryRevisions;
  */
 public class SelectRootRevisionAction extends SelectResourceRevisionAction {
 	public SelectRootRevisionAction() {
-		super();
 	}
 
+	@Override
 	public void runImpl(IAction action) {
-		RepositoryRevisions root = ((RepositoryRevisions [])this.getAdaptedSelection(RepositoryRevisions.class))[0];
-		this.runImpl(new IRepositoryResource[] {root.getRepositoryLocation().getRoot()});
+		RepositoryRevisions root = this.getAdaptedSelection(RepositoryRevisions.class)[0];
+		this.runImpl(new IRepositoryResource[] { root.getRepositoryLocation().getRoot() });
 	}
-	
+
+	@Override
 	public boolean isEnabled() {
 		return true;
 	}
-	
+
 }

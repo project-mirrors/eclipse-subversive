@@ -30,11 +30,17 @@ import org.eclipse.team.svn.core.utility.ProgressMonitorUtility;
  * @author Alexander Gurov
  */
 public class ProjectCloseListener implements IResourceChangeListener {
+	@Override
 	public void resourceChanged(IResourceChangeEvent event) {
-		IProject []projects = new IProject[] {(IProject)event.getResource()};
-		SVNRemoteStorage.instance().fireResourceStatesChangedEvent(new ProjectStatesChangedEvent(projects, event.getType() == IResourceChangeEvent.PRE_CLOSE ? ProjectStatesChangedEvent.ST_PRE_CLOSED : ProjectStatesChangedEvent.ST_PRE_DELETED));
+		IProject[] projects = { (IProject) event.getResource() };
+		SVNRemoteStorage.instance()
+				.fireResourceStatesChangedEvent(new ProjectStatesChangedEvent(projects,
+						event.getType() == IResourceChangeEvent.PRE_CLOSE
+								? ProjectStatesChangedEvent.ST_PRE_CLOSED
+								: ProjectStatesChangedEvent.ST_PRE_DELETED));
 		if (RepositoryProvider.getProvider(projects[0], SVNTeamPlugin.NATURE_ID) != null) {
-			ProgressMonitorUtility.doTaskScheduled(new RefreshResourcesOperation(projects, IResource.DEPTH_ZERO, RefreshResourcesOperation.REFRESH_CACHE));
+			ProgressMonitorUtility.doTaskScheduled(new RefreshResourcesOperation(projects, IResource.DEPTH_ZERO,
+					RefreshResourcesOperation.REFRESH_CACHE));
 		}
 	}
 

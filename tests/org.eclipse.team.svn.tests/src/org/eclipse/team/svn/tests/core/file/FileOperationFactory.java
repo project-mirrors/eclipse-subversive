@@ -59,9 +59,9 @@ import org.eclipse.team.svn.core.operation.file.refactor.CopyOperation;
 import org.eclipse.team.svn.core.operation.file.refactor.DeleteOperation;
 import org.eclipse.team.svn.core.operation.file.refactor.MoveOperation;
 import org.eclipse.team.svn.core.operation.remote.PreparedBranchTagOperation;
-import org.eclipse.team.svn.core.resource.IRemoteStorage;
 import org.eclipse.team.svn.core.resource.IRepositoryLocation;
 import org.eclipse.team.svn.core.resource.IRepositoryResource;
+import org.eclipse.team.svn.core.resource.ISVNStorage;
 import org.eclipse.team.svn.core.utility.FileUtility;
 import org.eclipse.team.svn.core.utility.SVNUtility;
 import org.eclipse.team.svn.tests.core.misc.TestUtil;
@@ -71,6 +71,7 @@ import org.eclipse.team.svn.tests.workflow.repository.TestRepositoryManager;
 public class FileOperationFactory {
 
 	private static final String TEST_PROPERTY_NAME = "test-property";
+
 	private static final String TEST_PROPERTY_VALUE = "test-value";
 
 	public FileOperationFactory() throws Exception {
@@ -89,23 +90,23 @@ public class FileOperationFactory {
 			}
 			return new AddToSVNIgnoreOperation(
 					new File[] { new File(TestUtil.getFirstProjectFolder().getPath() + "/src/bumprev.sh") },
-					IRemoteStorage.IGNORE_NAME, "");
+					ISVNStorage.IGNORE_NAME, "");
 		};
 	}
 
 	public Supplier<IActionOperation> createAddToSvnOperation() {
 		return () -> {
-			List<File> toCommit = new ArrayList<File>();
+			List<File> toCommit = new ArrayList<>();
 			File[] files = TestUtil.getFirstProjectFolder().listFiles();
-			for (int i = 0; i < files.length; i++) {
-				if (!TestUtil.isSVNInternals(files[i])) {
-					toCommit.add(files[i]);
+			for (File file : files) {
+				if (!TestUtil.isSVNInternals(file)) {
+					toCommit.add(file);
 				}
 			}
 			files = TestUtil.getSecondProjectFolder().listFiles();
-			for (int i = 0; i < files.length; i++) {
-				if (!TestUtil.isSVNInternals(files[i])) {
-					toCommit.add(files[i]);
+			for (File file : files) {
+				if (!TestUtil.isSVNInternals(file)) {
+					toCommit.add(file);
 				}
 			}
 
@@ -149,17 +150,17 @@ public class FileOperationFactory {
 
 	public Supplier<IActionOperation> createCommitOperation() {
 		return () -> {
-			List<File> toCommit = new ArrayList<File>();
+			List<File> toCommit = new ArrayList<>();
 			File[] files = TestUtil.getFirstProjectFolder().listFiles();
-			for (int i = 0; i < files.length; i++) {
-				if (!TestUtil.isSVNInternals(files[i])) {
-					toCommit.add(files[i]);
+			for (File file : files) {
+				if (!TestUtil.isSVNInternals(file)) {
+					toCommit.add(file);
 				}
 			}
 			files = TestUtil.getSecondProjectFolder().listFiles();
-			for (int i = 0; i < files.length; i++) {
-				if (!TestUtil.isSVNInternals(files[i])) {
-					toCommit.add(files[i]);
+			for (File file : files) {
+				if (!TestUtil.isSVNInternals(file)) {
+					toCommit.add(file);
 				}
 			}
 			return new CommitOperation(toCommit.toArray(new File[toCommit.size()]), "test commit", true, false);
@@ -203,21 +204,21 @@ public class FileOperationFactory {
 
 			@Override
 			public void runImpl(IProgressMonitor monitor) throws Exception {
-				new SetPropertyOperation(this.operableData(), TEST_PROPERTY_NAME, TEST_PROPERTY_VALUE.getBytes(), false)
+				new SetPropertyOperation(operableData(), TEST_PROPERTY_NAME, TEST_PROPERTY_VALUE.getBytes(), false)
 						.run(monitor);
-				LocalStatusOperation op = new LocalStatusOperation(this.operableData(), false);
+				LocalStatusOperation op = new LocalStatusOperation(operableData(), false);
 				op.run(monitor);
 				assertTrue(op.getStatuses().length > 0);
-				new RevertOperation(this.operableData(), true).run(monitor);
-				op = new LocalStatusOperation(this.operableData(), false);
+				new RevertOperation(operableData(), true).run(monitor);
+				op = new LocalStatusOperation(operableData(), false);
 				op.run(monitor);
 				assertTrue(op.getStatuses().length == 1);
-				new SetPropertyOperation(this.operableData(), TEST_PROPERTY_NAME, TEST_PROPERTY_VALUE.getBytes(), false)
+				new SetPropertyOperation(operableData(), TEST_PROPERTY_NAME, TEST_PROPERTY_VALUE.getBytes(), false)
 						.run(monitor);
-				op = new LocalStatusOperation(this.operableData(), false);
+				op = new LocalStatusOperation(operableData(), false);
 				op.run(monitor);
 				assertTrue(op.getStatuses().length > 0);
-				new CommitOperation(this.operableData(), "testCommit", false, false).run(monitor);
+				new CommitOperation(operableData(), "testCommit", false, false).run(monitor);
 			}
 		};
 	}
@@ -252,12 +253,7 @@ public class FileOperationFactory {
 	}
 
 	public Supplier<IActionOperation> createShareOperation() {
-		ShareOperation.IFolderNameMapper folderNameMapper = new ShareOperation.IFolderNameMapper() {
-			@Override
-			public String getRepositoryFolderName(File folder) {
-				return folder.getName();
-			}
-		};
+		ShareOperation.IFolderNameMapper folderNameMapper = File::getName;
 		return () -> new ShareOperation(TestUtil.getBothFolders(), TestUtil.getRepositoryLocation(), folderNameMapper,
 				"rootName", ShareOperation.LAYOUT_DEFAULT, true, "Share Project test", true);
 
@@ -281,9 +277,8 @@ public class FileOperationFactory {
 				getOp.run(monitor);
 				boolean containsTestProperty = false;
 				SVNProperty[] properties = getOp.getProperties();
-				for (int i = 0; i < properties.length; i++) {
-					if (properties[i].name.equals(TEST_PROPERTY_NAME)
-							&& properties[i].value.equals(TEST_PROPERTY_VALUE)) {
+				for (SVNProperty property : properties) {
+					if (property.name.equals(TEST_PROPERTY_NAME) && property.value.equals(TEST_PROPERTY_VALUE)) {
 						containsTestProperty = true;
 						break;
 					}
@@ -309,9 +304,9 @@ public class FileOperationFactory {
 				SVNFileStorage storage = SVNFileStorage.instance();
 				IRepositoryLocation newLocation = TestUtil.getRepositoryLocation();
 				String old = newLocation.getUrl();
-				new RelocateOperation(this.operableData(), "http://testurl").run(monitor);
+				new RelocateOperation(operableData(), "http://testurl").run(monitor);
 				IRepositoryResource remote = storage.asRepositoryResource(TestUtil.getFirstProjectFolder(), true);
-				new RelocateOperation(this.operableData(), old).run(monitor);
+				new RelocateOperation(operableData(), old).run(monitor);
 				remote = storage.asRepositoryResource(TestUtil.getFirstProjectFolder(), true);
 				assertTrue("Relocate Operation Test", remote.exists());
 			}

@@ -29,19 +29,20 @@ public abstract class SVNConflictDetectionProgressMonitor extends SVNProgressMon
 	public SVNConflictDetectionProgressMonitor(IActionOperation parent, IProgressMonitor monitor, IPath root) {
 		super(parent, monitor, root);
 	}
-	
-	public SVNConflictDetectionProgressMonitor(IActionOperation parent, IProgressMonitor monitor, IPath root, boolean enableConsoleOutput) {
+
+	public SVNConflictDetectionProgressMonitor(IActionOperation parent, IProgressMonitor monitor, IPath root,
+			boolean enableConsoleOutput) {
 		super(parent, monitor, root, enableConsoleOutput);
 	}
-	
+
+	@Override
 	public void progress(int current, int total, ItemState state) {
 		super.progress(current, total, state);
-	    if (state.contentState == NodeStatus.CONFLICTED.id || 
-	        state.propState == NodeStatus.CONFLICTED.id ||
-	        state.action == PerformedAction.TREE_CONFLICT.id) {	    	
-	    	this.processConflict(state);
-	    }
+		if (state.contentState == NodeStatus.CONFLICTED.id || state.propState == NodeStatus.CONFLICTED.id
+				|| state.action == PerformedAction.TREE_CONFLICT.id) {
+			processConflict(state);
+		}
 	}
-	
-	protected abstract void processConflict(ItemState state);	
+
+	protected abstract void processConflict(ItemState state);
 }

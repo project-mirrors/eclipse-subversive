@@ -35,44 +35,49 @@ import org.eclipse.team.svn.core.utility.FileUtility;
  */
 public class RestoreContentVisitor implements IResourceChangeVisitor {
 	protected boolean nodeKindChanged;
-	
+
 	public RestoreContentVisitor(boolean nodeKindChanged) {
 		this.nodeKindChanged = nodeKindChanged;
 	}
-	
-	public void preVisit(ResourceChange change, IActionOperationProcessor processor, IProgressMonitor monitor) throws Exception {
+
+	@Override
+	public void preVisit(ResourceChange change, IActionOperationProcessor processor, IProgressMonitor monitor)
+			throws Exception {
 	}
 
-	public void postVisit(ResourceChange change, IActionOperationProcessor processor, IProgressMonitor monitor) throws Exception {
+	@Override
+	public void postVisit(ResourceChange change, IActionOperationProcessor processor, IProgressMonitor monitor)
+			throws Exception {
 		ILocalResource local = change.getLocal();
-		
+
 		if (local instanceof ILocalFile) {
-	    	File real = new File(FileUtility.getWorkingCopyPath(local.getResource()));
-			
-	        boolean exists = real.exists();
-	        
+			File real = new File(FileUtility.getWorkingCopyPath(local.getResource()));
+
+			boolean exists = real.exists();
+
 			real.delete();
-	        
-	    	if (IStateFilter.SF_DELETED.accept(local)) {
-	    		if (exists && !IStateFilter.SF_MISSING.accept(local)) {
-	    			processor.doOperation(new DeleteResourceOperation(local.getResource()), monitor);
-	    		}
-	    		if (!IStateFilter.SF_PREREPLACEDREPLACED.accept(local)) {
-	        		return;//skip save file content for deleted files
-	    		}
-        	}
-	    	
-	    	if (change.getTemporary().exists() && !change.getTemporary().renameTo(real)) {
-	    		File parent = real.getParentFile();
-	    		if (parent != null) {
-	    			parent.mkdirs();
-	    		}
+
+			if (IStateFilter.SF_DELETED.accept(local)) {
+				if (exists && !IStateFilter.SF_MISSING.accept(local)) {
+					processor.doOperation(new DeleteResourceOperation(local.getResource()), monitor);
+				}
+				if (!IStateFilter.SF_PREREPLACEDREPLACED.accept(local)) {
+					return;//skip save file content for deleted files
+				}
+			}
+
+			if (change.getTemporary().exists() && !change.getTemporary().renameTo(real)) {
+				File parent = real.getParentFile();
+				if (parent != null) {
+					parent.mkdirs();
+				}
 				FileUtility.copyFile(real, change.getTemporary(), monitor);
 				change.getTemporary().delete();
-	    	}
-	    	
-			if (!this.nodeKindChanged && (IStateFilter.SF_REPLACED.accept(local) || !exists && IStateFilter.SF_VERSIONED.accept(local))) { 
-			    processor.doOperation(new AddToSVNOperation(new IResource[] {local.getResource()}, false), monitor);
+			}
+
+			if (!nodeKindChanged
+					&& (IStateFilter.SF_REPLACED.accept(local) || !exists && IStateFilter.SF_VERSIONED.accept(local))) {
+				processor.doOperation(new AddToSVNOperation(new IResource[] { local.getResource() }, false), monitor);
 			}
 		}
 	}

@@ -32,35 +32,36 @@ import org.eclipse.team.ui.synchronize.ISynchronizeScope;
  * @author Alexander Gurov
  */
 public class SynchronizeWizard extends AbstractSVNWizard {
-			  
+
 	protected GlobalRefreshElementSelectionPage selection;
 
 	public SynchronizeWizard() {
-		super();
-		this.setWindowTitle(SVNUIMessages.SynchronizeWizard_Title);
-	}
-	
-	public void addPages() {
-		if (ModelHelper.isShowModelSync()) {
-			this.selection = new ModelElementSelectionPage(UpdateSubscriber.instance().roots());
-		} else {
-			this.selection = new GlobalRefreshResourceSelectionPage(UpdateSubscriber.instance().roots());
-		}
-		this.selection.setImageDescriptor(SVNTeamUIPlugin.instance().getImageDescriptor("icons/wizards/newconnect.gif")); //$NON-NLS-1$
-		this.addPage(this.selection);
+		setWindowTitle(SVNUIMessages.SynchronizeWizard_Title);
 	}
 
+	@Override
+	public void addPages() {
+		if (ModelHelper.isShowModelSync()) {
+			selection = new ModelElementSelectionPage(UpdateSubscriber.instance().roots());
+		} else {
+			selection = new GlobalRefreshResourceSelectionPage(UpdateSubscriber.instance().roots());
+		}
+		selection.setImageDescriptor(SVNTeamUIPlugin.instance().getImageDescriptor("icons/wizards/newconnect.gif")); //$NON-NLS-1$
+		addPage(selection);
+	}
+
+	@Override
 	public boolean performFinish() {
 		ShowUpdateViewOperation op;
 		if (ModelHelper.isShowModelSync()) {
-			ResourceMapping[] mappings =  ((ModelElementSelectionPage) this.selection).getSelectedMappings();
-			op = new ShowUpdateViewOperation(mappings, null);	
+			ResourceMapping[] mappings = ((ModelElementSelectionPage) selection).getSelectedMappings();
+			op = new ShowUpdateViewOperation(mappings, null);
 		} else {
-			ISynchronizeScope scope = ((GlobalRefreshResourceSelectionPage) this.selection).getSynchronizeScope();  
-			op = new ShowUpdateViewOperation(scope, null);	
+			ISynchronizeScope scope = ((GlobalRefreshResourceSelectionPage) selection).getSynchronizeScope();
+			op = new ShowUpdateViewOperation(scope, null);
 		}
 		UIMonitorUtility.doTaskBusyDefault(op);
-		
+
 		return true;
 	}
 
@@ -74,10 +75,10 @@ public class SynchronizeWizard extends AbstractSVNWizard {
 //		if (roots == null) {
 //			roots = this.getRootResources();
 //		}
-//		
-//		SynchronizeParticipant participant = 
+//
+//		SynchronizeParticipant participant =
 //			(SynchronizeParticipant)SubscriberParticipant.getMatchingParticipant(SynchronizeParticipant.PARTICIPANT_ID, roots);
-//		
+//
 //		return participant == null ? new SynchronizeParticipant(scope) : participant;
 //	}
 //

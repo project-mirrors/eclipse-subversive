@@ -24,6 +24,7 @@ import java.lang.reflect.InvocationTargetException;
 //import java.util.HashMap;
 //import java.util.HashSet;
 import java.util.List;
+
 //import java.util.Map;
 //import java.util.Set;
 //
@@ -64,10 +65,9 @@ import org.eclipse.team.svn.core.discovery.model.ConnectorDescriptor;
 /**
  * Install job for Eclipse 3.5
  * 
- * A job that configures a p2 {@link #getInstallAction() install action} for installing one or more
- * {@link ConnectorDescriptor connectors}. The bulk of the installation work is done by p2; this class just sets up the
- * p2 repository metadata and selects the appropriate features to install. After running the job the
- * {@link #getInstallAction() install action} must be run to perform the installation.
+ * A job that configures a p2 {@link #getInstallAction() install action} for installing one or more {@link ConnectorDescriptor connectors}.
+ * The bulk of the installation work is done by p2; this class just sets up the p2 repository metadata and selects the appropriate features
+ * to install. After running the job the {@link #getInstallAction() install action} must be run to perform the installation.
  * 
  * @author David Green
  * @author Igor Burilo
@@ -87,19 +87,21 @@ public class PrepareInstallProfileJob_3_5_ implements IConnectorsInstallJob {
 //	private InstallAction installAction;
 
 	public PrepareInstallProfileJob_3_5_() {
-		
+
 	}
 
+	@Override
 	public void setInstallableConnectors(List<ConnectorDescriptor> installableConnectors) {
 //		this.installableConnectors = installableConnectors;
 	}
-	
+
+	@Override
 	public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 //		try {
 //			if (this.installableConnectors == null || this.installableConnectors.isEmpty()) {
 //				throw new IllegalArgumentException();
 //			}
-//			
+//
 //			doRun(monitor);
 //			if (monitor.isCanceled()) {
 //				throw new InterruptedException();
@@ -127,7 +129,7 @@ public class PrepareInstallProfileJob_3_5_ implements IConnectorsInstallJob {
 //			});
 //		}
 //	}
-//	
+//
 //	protected void doRun(IProgressMonitor monitor) throws CoreException {
 //		final int totalWork = installableConnectors.size() * 6;
 //		monitor.beginTask(SVNUIMessages.InstallConnectorsJob_task_configuring, totalWork);
@@ -145,7 +147,7 @@ public class PrepareInstallProfileJob_3_5_ implements IConnectorsInstallJob {
 //						try {
 //							InetAddress.getByName(host);
 //						} catch (UnknownHostException e) {
-//							throw new CoreException(new Status(IStatus.ERROR, SVNTeamPlugin.NATURE_ID, 
+//							throw new CoreException(new Status(IStatus.ERROR, SVNTeamPlugin.NATURE_ID,
 //									SVNUIMessages.format(SVNUIMessages.PrepareInstallProfileJob_errorResolvingHostname, new Object[]{descriptor.getName(), host}),
 //									e));
 //						}
@@ -256,7 +258,7 @@ public class PrepareInstallProfileJob_3_5_ implements IConnectorsInstallJob {
 //
 //			// filter those installable units that have a duplicate in the list with a higher version number.
 //			// it's possible that some repositories will host multiple versions of a particular feature.  we assume
-//			// that the user wants the highest version.			
+//			// that the user wants the highest version.
 //			Map<String, Version> symbolicNameToVersion = new HashMap<String, Version>();
 //			for (IInstallableUnit unit : installableUnits) {
 //				Version version = symbolicNameToVersion.get(unit.getId());
@@ -272,7 +274,7 @@ public class PrepareInstallProfileJob_3_5_ implements IConnectorsInstallJob {
 //					}
 //				}
 //			}
-//			
+//
 //			// Verify that we found what we were looking for: it's possible that we have connector descriptors
 //			// that are no longer available on their respective sites.  In that case we must inform the user.
 //			// (Unfortunately this is the earliest point at which we can know)
@@ -291,10 +293,10 @@ public class PrepareInstallProfileJob_3_5_ implements IConnectorsInstallJob {
 //					}
 //					foundIds.add(id);
 //				}
-//	
-//				final String notFound;			
+//
+//				final String notFound;
 //				String temp = ""; //$NON-NLS-1$
-//				for (ConnectorDescriptor descriptor : installableConnectors) {								
+//				for (ConnectorDescriptor descriptor : installableConnectors) {
 //					if (!foundIds.containsAll(descriptor.getInstallableUnits())) {
 //						if (temp.length() > 0) {
 //							temp += SVNUIMessages.InstallConnectorsJob_commaSeparator;
@@ -303,7 +305,7 @@ public class PrepareInstallProfileJob_3_5_ implements IConnectorsInstallJob {
 //					}
 //				}
 //				notFound = temp;
-//				
+//
 //				boolean proceed = false;
 //				if (!installableUnits.isEmpty()) {
 //					// instead of aborting here we ask the user if they wish to proceed anyways
@@ -336,7 +338,7 @@ public class PrepareInstallProfileJob_3_5_ implements IConnectorsInstallJob {
 //				// should never ever happen
 //				throw new IllegalStateException();
 //			}
-//			
+//
 //
 //			MultiStatus status = new MultiStatus(SVNTeamPlugin.NATURE_ID, 0, SVNUIMessages.PrepareInstallProfileJob_ok, null);
 //			ius = installableUnits.toArray(new IInstallableUnit[installableUnits.size()]);

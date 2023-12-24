@@ -32,31 +32,34 @@ import org.eclipse.team.svn.ui.operation.UILoggedOperation;
 public class CompareSelectedAction extends AbstractRepositoryTeamAction {
 
 	public CompareSelectedAction() {
-		super();
 	}
 
-    public void runImpl(IAction action) {
-    	IRepositoryResource []resources = this.getSelectedRepositoryResources();
-    	try {
-    		if (resources[1].getRevision() > resources[0].getRevision()) {
-    			IRepositoryResource tmp = resources[1];
-    			resources[1] = resources[0];
-    			resources[0] = tmp;
-    		}
-    	}
-    	catch (SVNConnectorException ex) {
-    		UILoggedOperation.reportError("Compare", ex);
-    	}
-        this.runScheduled(new CompareRepositoryResourcesOperation(resources[1], resources[0]));
-    }
+	@Override
+	public void runImpl(IAction action) {
+		IRepositoryResource[] resources = getSelectedRepositoryResources();
+		try {
+			if (resources[1].getRevision() > resources[0].getRevision()) {
+				IRepositoryResource tmp = resources[1];
+				resources[1] = resources[0];
+				resources[0] = tmp;
+			}
+		} catch (SVNConnectorException ex) {
+			UILoggedOperation.reportError("Compare", ex);
+		}
+		runScheduled(new CompareRepositoryResourcesOperation(resources[1], resources[0]));
+	}
 
+	@Override
 	public boolean isEnabled() {
-		IRepositoryResource []resources = this.getSelectedRepositoryResources();
+		IRepositoryResource[] resources = getSelectedRepositoryResources();
 		if (resources.length != 2) {
 			return false;
 		}
-		boolean isCompareFoldersAllowed = CoreExtensionsManager.instance().getSVNConnectorFactory().getSVNAPIVersion() >= ISVNConnectorFactory.APICompatibility.SVNAPI_1_5_x;
-		return (isCompareFoldersAllowed || resources[0] instanceof IRepositoryFile) && !(resources[0] instanceof IRepositoryFile ^ resources[1] instanceof IRepositoryFile);
+		boolean isCompareFoldersAllowed = CoreExtensionsManager.instance()
+				.getSVNConnectorFactory()
+				.getSVNAPIVersion() >= ISVNConnectorFactory.APICompatibility.SVNAPI_1_5_x;
+		return (isCompareFoldersAllowed || resources[0] instanceof IRepositoryFile)
+				&& !(resources[0] instanceof IRepositoryFile ^ resources[1] instanceof IRepositoryFile);
 	}
 
 }

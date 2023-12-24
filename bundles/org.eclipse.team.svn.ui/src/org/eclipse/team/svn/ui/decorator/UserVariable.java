@@ -15,7 +15,7 @@
 package org.eclipse.team.svn.ui.decorator;
 
 /**
- * User defined decoration variable 
+ * User defined decoration variable
  * 
  * @author Alexander Gurov
  */
@@ -23,9 +23,10 @@ public class UserVariable extends PredefinedVariable {
 	public UserVariable(String domain, String data) {
 		super(domain, data);
 	}
-	
+
+	@Override
 	public String getDescription() {
 		return this.getDescription("_user_defined_data"); //$NON-NLS-1$
 	}
-	
+
 }

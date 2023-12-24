@@ -18,8 +18,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.eclipse.jface.viewers.ISelectionChangedListener;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.team.svn.core.connector.SVNLogEntry;
 import org.eclipse.team.svn.core.connector.SVNRevision;
 import org.eclipse.team.svn.core.connector.SVNRevisionRange;
@@ -32,71 +30,74 @@ import org.eclipse.team.svn.ui.SVNUIMessages;
  * @author Alexander Gurov
  */
 public class SelectRevisionPanel extends SVNHistoryPanel {
-	
-	protected SVNLogEntry[] selectedLogMessages;	
-		 
-	public SelectRevisionPanel(GetLogMessagesOperation msgOp, boolean multiSelect, boolean useCheckboxes, long currentRevision) {
-		super(SVNUIMessages.SelectRevisionPanel_Title, SVNUIMessages.SelectRevisionPanel_Description, SVNUIMessages.SelectRevisionPanel_Message, msgOp, multiSelect, useCheckboxes, currentRevision);		
+
+	protected SVNLogEntry[] selectedLogMessages;
+
+	public SelectRevisionPanel(GetLogMessagesOperation msgOp, boolean multiSelect, boolean useCheckboxes,
+			long currentRevision) {
+		super(SVNUIMessages.SelectRevisionPanel_Title, SVNUIMessages.SelectRevisionPanel_Description,
+				SVNUIMessages.SelectRevisionPanel_Message, msgOp, multiSelect, useCheckboxes, currentRevision);
 	}
-	
+
 	public long getSelectedRevision() {
-		return this.selectedLogMessages[0].revision;
+		return selectedLogMessages[0].revision;
 	}
 
 	public SVNLogEntry[] getSelectedLogMessages() {
-	    return this.selectedLogMessages;
+		return selectedLogMessages;
 	}
 
 	public SVNRevisionRange[] getSelectedRevisions() {
-		ArrayList<SVNRevisionRange> revisions = new ArrayList<SVNRevisionRange>();
-	
-		List<SVNLogEntry> selected = Arrays.asList(this.selectedLogMessages);
+		ArrayList<SVNRevisionRange> revisions = new ArrayList<>();
+
+		List<SVNLogEntry> selected = Arrays.asList(selectedLogMessages);
 		long startRev = SVNRevision.INVALID_REVISION_NUMBER;
 		long lastRev = SVNRevision.INVALID_REVISION_NUMBER;
-		for (int i = 0; i < this.logMessages.length ; i ++ ) {
-			SVNLogEntry entry = this.logMessages[i];
+		for (int i = 0; i < logMessages.length; i++) {
+			SVNLogEntry entry = logMessages[i];
 			if (selected.indexOf(entry) != -1) {
 				startRev = entry.revision;
 				if (lastRev == SVNRevision.INVALID_REVISION_NUMBER) {
 					lastRev = entry.revision;
-				}				
+				}
 				//add the last element to result list
-				if (i == this.logMessages.length - 1) {
-					revisions.add(new SVNRevisionRange(startRev == lastRev || startRev == 0 ? startRev : startRev - 1, lastRev));	
+				if (i == logMessages.length - 1) {
+					revisions.add(new SVNRevisionRange(startRev == lastRev || startRev == 0 ? startRev : startRev - 1,
+							lastRev));
 				}
-			}
-			else {
-				if (lastRev != SVNRevision.INVALID_REVISION_NUMBER) {
-					revisions.add(new SVNRevisionRange(startRev == lastRev || startRev == 0 ? startRev : startRev - 1, lastRev));
-					lastRev = SVNRevision.INVALID_REVISION_NUMBER;
-				}
+			} else if (lastRev != SVNRevision.INVALID_REVISION_NUMBER) {
+				revisions.add(
+						new SVNRevisionRange(startRev == lastRev || startRev == 0 ? startRev : startRev - 1, lastRev));
+				lastRev = SVNRevision.INVALID_REVISION_NUMBER;
 			}
 		}
-		
-	    return revisions.toArray(new SVNRevisionRange[revisions.size()]);
+
+		return revisions.toArray(new SVNRevisionRange[revisions.size()]);
 	}
-	
+
+	@Override
 	public void postInit() {
-		this.manager.setButtonEnabled(0, false);
+		manager.setButtonEnabled(0, false);
 	}
-	
+
+	@Override
 	protected void initTableViewerListener() {
-		this.tableViewerListener = new ISelectionChangedListener() {
-			public void selectionChanged(SelectionChangedEvent event) {
-				if (SelectRevisionPanel.this.manager != null) {
-					SVNLogEntry []messages = SelectRevisionPanel.this.history.getSelectedLogMessages();
-					SelectRevisionPanel.this.manager.setButtonEnabled(0, messages != null && messages.length > 0);
-				}
+		tableViewerListener = event -> {
+			if (SelectRevisionPanel.this.manager != null) {
+				SVNLogEntry[] messages = SelectRevisionPanel.this.history.getSelectedLogMessages();
+				SelectRevisionPanel.this.manager.setButtonEnabled(0, messages != null && messages.length > 0);
 			}
-		};		
-		this.history.getTreeViewer().addSelectionChangedListener(this.tableViewerListener);
+		};
+		history.getTreeViewer().addSelectionChangedListener(tableViewerListener);
 	}
-	
-    protected void saveChangesImpl() {
-		this.selectedLogMessages = this.history.getSelectedLogMessages();
-    }
-    
+
+	@Override
+	protected void saveChangesImpl() {
+		selectedLogMessages = history.getSelectedLogMessages();
+	}
+
+	@Override
 	public String getHelpId() {
-    	return "org.eclipse.team.svn.help.revisionLinkDialogContext"; //$NON-NLS-1$
+		return "org.eclipse.team.svn.help.revisionLinkDialogContext"; //$NON-NLS-1$
 	}
 }

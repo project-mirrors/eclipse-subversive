@@ -21,12 +21,12 @@ import org.eclipse.team.ui.TeamOperation;
 import org.eclipse.ui.IWorkbenchPart;
 
 /**
- * This wrapper provide ability to run ICancellableOperationWrapper scheduled 
+ * This wrapper provide ability to run ICancellableOperationWrapper scheduled
  * 
  * @author Alexander Gurov
  */
 public class SVNTeamOperationWrapper extends TeamOperation {
-	
+
 	protected ICancellableOperationWrapper operationWrapper;
 
 	public SVNTeamOperationWrapper(IWorkbenchPart part, ICancellableOperationWrapper operationWrapper) {
@@ -34,16 +34,19 @@ public class SVNTeamOperationWrapper extends TeamOperation {
 		this.operationWrapper = operationWrapper;
 	}
 
+	@Override
 	public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-		this.operationWrapper.run(monitor);
+		operationWrapper.run(monitor);
 	}
-	
+
+	@Override
 	protected boolean canRunAsJob() {
 		return true;
 	}
-	
+
+	@Override
 	protected String getJobName() {
-		return this.operationWrapper.getOperationName();
+		return operationWrapper.getOperationName();
 	}
-	
+
 }

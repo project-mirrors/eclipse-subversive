@@ -30,48 +30,51 @@ import org.eclipse.team.svn.ui.operation.UILoggedOperation;
 import org.eclipse.team.svn.ui.utility.DateFormatter;
 
 /**
- * Local file revision representation.
- * Wrapper for both IFileState and IFile.
+ * Local file revision representation. Wrapper for both IFileState and IFile.
  * 
  * @author Alexei Goncharov
  */
 public class SVNLocalFileRevision extends LocalFileRevision implements IEditableContent {
-	public SVNLocalFileRevision (IFile file) {
+	public SVNLocalFileRevision(IFile file) {
 		super(file);
 	}
-	
-	public SVNLocalFileRevision (IFileState fileState) {
+
+	public SVNLocalFileRevision(IFileState fileState) {
 		super(fileState);
 	}
 
+	@Override
 	public String getComment() {
-		if (this.getFile() != null) {
+		if (getFile() != null) {
 			return SVNUIMessages.SVNLocalFileRevision_CurrentVersion;
 		}
 		return ""; //$NON-NLS-1$
 	}
-	
+
+	@Override
 	public String getContentIdentifier() {
-		if (this.getFile() != null) {
+		if (getFile() != null) {
 			return ""; //$NON-NLS-1$
 		}
-		return "[" + DateFormatter.formatDate(this.getTimestamp()) + "]";  //$NON-NLS-1$ //$NON-NLS-2$
-	}
-	
-	public boolean isEditable() {
-		return this.isCurrentState();
+		return "[" + DateFormatter.formatDate(getTimestamp()) + "]"; //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
+	@Override
+	public boolean isEditable() {
+		return isCurrentState();
+	}
+
+	@Override
 	public ITypedElement replace(ITypedElement dest, ITypedElement src) {
 		return dest;
 	}
-	
+
+	@Override
 	public void setContent(byte[] newContent) {
-		if (this.isEditable()) {
+		if (isEditable()) {
 			try {
-				this.getFile().setContents(new ByteArrayInputStream(newContent), true, true, new NullProgressMonitor());
-			}
-			catch (CoreException ex) {
+				getFile().setContents(new ByteArrayInputStream(newContent), true, true, new NullProgressMonitor());
+			} catch (CoreException ex) {
 				UILoggedOperation.reportError(SVNMessages.Operation_GetFileContent_SetContent, ex);
 			}
 		}

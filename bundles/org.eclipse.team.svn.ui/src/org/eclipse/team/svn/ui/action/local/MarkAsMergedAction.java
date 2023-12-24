@@ -33,29 +33,30 @@ import org.eclipse.team.svn.ui.preferences.SVNTeamPreferences;
  */
 public class MarkAsMergedAction extends AbstractNonRecursiveTeamAction {
 	public MarkAsMergedAction() {
-		super();
 	}
 
+	@Override
 	public void runImpl(IAction action) {
-		IResource []resources = this.getSelectedResources(IStateFilter.SF_CONFLICTING);
-		boolean ignoreExternals = SVNTeamPreferences.getBehaviourBoolean(SVNTeamUIPlugin.instance().getPreferenceStore(), SVNTeamPreferences.BEHAVIOUR_IGNORE_EXTERNALS_NAME);
+		IResource[] resources = this.getSelectedResources(IStateFilter.SF_CONFLICTING);
+		boolean ignoreExternals = SVNTeamPreferences.getBehaviourBoolean(
+				SVNTeamUIPlugin.instance().getPreferenceStore(), SVNTeamPreferences.BEHAVIOUR_IGNORE_EXTERNALS_NAME);
 		MarkAsMergedOperation mainOp = new MarkAsMergedOperation(resources, false, null, ignoreExternals);
 		CompositeOperation op = new CompositeOperation(mainOp.getId(), mainOp.getMessagesClass());
 		op.add(mainOp);
 		op.add(new ShowPostCommitErrorsOperation(mainOp));
 		op.add(new RefreshResourcesOperation(FileUtility.getParents(resources, false)));
-		
-		this.runScheduled(op);
-	}
-	
-	public boolean isEnabled() {
-		return 
-			this.getSelectedResources().length == 1 &&
-			this.checkForResourcesPresence(IStateFilter.SF_CONFLICTING);
+
+		runScheduled(op);
 	}
 
+	@Override
+	public boolean isEnabled() {
+		return this.getSelectedResources().length == 1 && checkForResourcesPresence(IStateFilter.SF_CONFLICTING);
+	}
+
+	@Override
 	protected boolean needsToSaveDirtyEditors() {
 		return true;
 	}
-	
+
 }

@@ -33,24 +33,27 @@ import org.eclipse.team.svn.core.utility.ProgressMonitorUtility;
  * @author Alexander Gurov
  */
 public class SVNLocalFolder extends SVNLocalResource implements ILocalFolder {
-	public SVNLocalFolder(IResource resource, long revision, long baseRevision, String textStatus, String propStatus, int changeMask, String author, long lastCommitDate, SVNConflictDescriptor treeConflictDescriptor) {
-		super(resource, revision, baseRevision, textStatus, propStatus, changeMask, author, lastCommitDate, treeConflictDescriptor);
+	public SVNLocalFolder(IResource resource, long revision, long baseRevision, String textStatus, String propStatus,
+			int changeMask, String author, long lastCommitDate, SVNConflictDescriptor treeConflictDescriptor) {
+		super(resource, revision, baseRevision, textStatus, propStatus, changeMask, author, lastCommitDate,
+				treeConflictDescriptor);
 	}
 
-	public ILocalResource []getChildren() {
-		IContainer root = (IContainer)this.resource;
-		List<ILocalResource> members = new ArrayList<ILocalResource>();
-		
+	@Override
+	public ILocalResource[] getChildren() {
+		IContainer root = (IContainer) resource;
+		List<ILocalResource> members = new ArrayList<>();
+
 		GetAllResourcesOperation op = new GetAllResourcesOperation(root);
 		ProgressMonitorUtility.doTaskExternalDefault(op, new NullProgressMonitor());
-		IResource []resources = op.getChildren();
-		for (int i = 0; i < resources.length; i++) {
-			ILocalResource local = SVNRemoteStorage.instance().asLocalResource(resources[i]);
+		IResource[] resources = op.getChildren();
+		for (IResource element : resources) {
+			ILocalResource local = SVNRemoteStorage.instance().asLocalResource(element);
 			if (!IStateFilter.SF_INTERNAL_INVALID.accept(local) && local.getStatus() != IStateFilter.ST_NOTEXISTS) {
 				members.add(local);
 			}
 		}
-		
+
 		return members.toArray(new ILocalResource[members.size()]);
 	}
 

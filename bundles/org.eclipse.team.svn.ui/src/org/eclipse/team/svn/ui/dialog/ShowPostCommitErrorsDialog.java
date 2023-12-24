@@ -26,14 +26,9 @@ import org.eclipse.team.svn.ui.SVNUIMessages;
  */
 public class ShowPostCommitErrorsDialog extends MessageDialog {
 
-    public ShowPostCommitErrorsDialog(Shell parentShell, String message) {
-		super(parentShell, 
-			SVNUIMessages.ShowPostCommitErrorsDialog_Title, 
-			null, 
-			message,
-			MessageDialog.WARNING, 
-			new String[] {IDialogConstants.OK_LABEL}, 
-			0);
-    }
+	public ShowPostCommitErrorsDialog(Shell parentShell, String message) {
+		super(parentShell, SVNUIMessages.ShowPostCommitErrorsDialog_Title, null, message, MessageDialog.WARNING,
+				new String[] { IDialogConstants.OK_LABEL }, 0);
+	}
 
 }

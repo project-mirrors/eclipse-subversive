@@ -25,54 +25,54 @@ public interface IReportingDescriptor {
 	 * 
 	 * @return report addressee
 	 */
-	public String getEmailTo();
+	String getEmailTo();
 
 	/**
 	 * Returns report sender
 	 * 
 	 * @return report sender
 	 */
-	public String getEmailFrom();
+	String getEmailFrom();
 
 	/**
 	 * Returns mail server host
 	 * 
 	 * @return mail server host
 	 */
-	public String getHost();
+	String getHost();
 
 	/**
 	 * Returns mail server port
 	 * 
 	 * @return mail server port
 	 */
-	public String getPort();
+	String getPort();
 
 	/**
 	 * Returns plug-in name
 	 * 
 	 * @return plug-in name
 	 */
-	public String getProductName();
+	String getProductName();
 
 	/**
 	 * Returns plug-in version
 	 * 
 	 * @return plug-in version
 	 */
-	public String getProductVersion();
+	String getProductVersion();
 
 	/**
 	 * Returns the product tracker URL.
 	 * 
 	 * @return the product tracker URL
 	 */
-	public String getTrackerUrl();
+	String getTrackerUrl();
 
 	/**
 	 * Returns <code>true</code> if a bug tracker supports HTML in reports
 	 * 
 	 * @return <code>true</code> if tracker supports HTML in reports
 	 */
-	public boolean isTrackerSupportsHTML();
+	boolean isTrackerSupportsHTML();
 }

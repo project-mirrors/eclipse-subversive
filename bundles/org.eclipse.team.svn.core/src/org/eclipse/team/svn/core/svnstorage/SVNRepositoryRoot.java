@@ -26,37 +26,43 @@ import org.eclipse.team.svn.core.resource.IRepositoryRoot;
  */
 public class SVNRepositoryRoot extends SVNRepositoryRootBase {
 	private static final long serialVersionUID = 8314649604979930219L;
-	
+
 	public SVNRepositoryRoot(IRepositoryLocation location) {
 		// do not ask root URL if not required !
 		super(location, null, SVNRevision.HEAD);
 	}
 
+	@Override
 	public String getUrl() {
-		return this.location.getRepositoryRootUrl();
+		return location.getRepositoryRootUrl();
 	}
-	
+
+	@Override
 	public IRepositoryResource getParent() {
 		return null;
 	}
-	
+
+	@Override
 	public IRepositoryResource getRoot() {
 		return this;
 	}
 
+	@Override
 	public int getKind() {
 		return IRepositoryRoot.KIND_ROOT;
 	}
-	
+
+	@Override
 	public boolean equals(Object obj) {
 		if (obj == null || !(obj instanceof IRepositoryRoot)) {
 			return false;
 		}
 		// do not ask root URL if not required !
-		if (this.getKind() == ((IRepositoryRoot)obj).getKind() && this.getRepositoryLocation() == ((IRepositoryRoot)obj).getRepositoryLocation()) {
+		if (getKind() == ((IRepositoryRoot) obj).getKind()
+				&& getRepositoryLocation() == ((IRepositoryRoot) obj).getRepositoryLocation()) {
 			return true;
 		}
 		return super.equals(obj);
 	}
-	
+
 }

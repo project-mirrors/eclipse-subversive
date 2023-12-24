@@ -22,7 +22,7 @@ import org.eclipse.team.svn.ui.composite.BranchTagSelectionComposite;
  * @author Alexei Goncharov
  */
 public class ReplaceWithTagAction extends ReplaceWithBranchTagAction {
-	
+
 	public ReplaceWithTagAction() {
 		super(BranchTagSelectionComposite.TAG_OPERATED);
 	}

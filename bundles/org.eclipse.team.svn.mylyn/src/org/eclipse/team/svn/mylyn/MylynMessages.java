@@ -19,24 +19,25 @@ import org.eclipse.team.svn.core.BaseMessages;
 
 public class MylynMessages extends BaseMessages {
 
-	protected static final String BUNDLE_NAME = "org.eclipse.team.svn.mylyn.messages";	 //$NON-NLS-1$
-	
+	protected static final String BUNDLE_NAME = "org.eclipse.team.svn.mylyn.messages"; //$NON-NLS-1$
+
 	public static String Operation_OpenReportEditor;
+
 	public static String Operation_OpenReportEditor_Id;
-	
+
 	static {
 		//load message values from bundle file
 		NLS.initializeMessages(BUNDLE_NAME, MylynMessages.class);
 	}
-	
+
 	public static String getString(String key) {
 		return BaseMessages.getString(key, MylynMessages.class);
 	}
-	
+
 	public static String getErrorString(String key) {
 		return BaseMessages.getErrorString(key, MylynMessages.class);
 	}
-	
+
 	public static String formatErrorString(String key, Object[] args) {
 		return BaseMessages.formatErrorString(key, args, MylynMessages.class);
 	}

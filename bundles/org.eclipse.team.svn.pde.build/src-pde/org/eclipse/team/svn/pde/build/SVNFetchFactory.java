@@ -37,65 +37,91 @@ import org.eclipse.team.svn.pde.build.IMapFileParser.FetchData;
  */
 public class SVNFetchFactory implements IFetchFactory {
 	public static final String TARGET_FETCH_FROM_SVN = "FetchFromSVN"; //$NON-NLS-1$
+
 	public static final String MAP_ENTRY_SEPARATOR = ","; //$NON-NLS-1$
+
 	public static final String VALUE_PAIR_SEPARATOR = "="; //$NON-NLS-1$
-	
+
 	public static final String OVERRIDE_TAG = "SVN"; //$NON-NLS-1$
 
 	public static final String KEY_URL = "url"; //$NON-NLS-1$
+
 	public static final String KEY_PEG = "peg"; //$NON-NLS-1$
+
 	public static final String KEY_TAG_PATH = "tagPath"; //$NON-NLS-1$
+
 	public static final String KEY_REVISION = "revision"; //$NON-NLS-1$
+
 	public static final String KEY_PATH = "path"; //$NON-NLS-1$
+
 	public static final String KEY_USERNAME = "username"; //$NON-NLS-1$
+
 	public static final String KEY_PASSWORD = "password"; //$NON-NLS-1$
+
 	public static final String KEY_FORCE = "force"; //$NON-NLS-1$
-	
+
 	public static final String PROP_FILETOCHECK = "fileToCheck"; //$NON-NLS-1$
+
 	public static final String PROP_ELEMENTNAME = "elementName"; //$NON-NLS-1$
+
 	public static final String PROP_DESTINATIONFOLDER = "destinationFolder"; //$NON-NLS-1$
+
 	public static final String PROP_URL = SVNFetchFactory.KEY_URL;
+
 	public static final String PROP_PEG = SVNFetchFactory.KEY_PEG;
+
 	public static final String PROP_REVISION = SVNFetchFactory.KEY_REVISION;
+
 	public static final String PROP_TAG = IFetchFactory.KEY_ELEMENT_TAG;
+
 	public static final String PROP_TAG_PATH = SVNFetchFactory.KEY_TAG_PATH;
+
 	public static final String PROP_PATH = SVNFetchFactory.KEY_PATH;
+
 	public static final String PROP_USERNAME = SVNFetchFactory.KEY_USERNAME;
+
 	public static final String PROP_PASSWORD = SVNFetchFactory.KEY_PASSWORD;
+
 	public static final String PROP_FORCE = KEY_FORCE;
 
 	protected static Pattern tagPattern = Pattern.compile("[\\.a-zA-Z_0-9-]+"); //$NON-NLS-1$
-	
+
 	public SVNFetchFactory() {
 
 	}
 
+	@Override
 	public void addTargets(IAntScript script) {
-		script.printTargetDeclaration(SVNFetchFactory.TARGET_FETCH_FROM_SVN, null, null, "${" + SVNFetchFactory.PROP_FILETOCHECK + "}", null); //$NON-NLS-1$ //$NON-NLS-2$
-		this.printSVNTask("export", "${" + SVNFetchFactory.PROP_URL + "}/${" + SVNFetchFactory.PROP_TAG_PATH + "}/${" + SVNFetchFactory.PROP_PATH + "}", "${" + SVNFetchFactory.PROP_PEG + "}", "${" + SVNFetchFactory.PROP_REVISION + "}", "${" + SVNFetchFactory.PROP_DESTINATIONFOLDER + "}/${" + SVNFetchFactory.PROP_ELEMENTNAME + "}", "${" + SVNFetchFactory.PROP_USERNAME + "}", "${" + SVNFetchFactory.PROP_PASSWORD + "}", script, "${" + SVNFetchFactory.PROP_FORCE + "}"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$ //$NON-NLS-8$ //$NON-NLS-9$ //$NON-NLS-10$ //$NON-NLS-11$ //$NON-NLS-12$ //$NON-NLS-13$ //$NON-NLS-14$ //$NON-NLS-15$ //$NON-NLS-16$ //$NON-NLS-17$ //$NON-NLS-18$
+		script.printTargetDeclaration(SVNFetchFactory.TARGET_FETCH_FROM_SVN, null, null,
+				"${" + SVNFetchFactory.PROP_FILETOCHECK + "}", null); //$NON-NLS-1$ //$NON-NLS-2$
+		this.printSVNTask("export", //$NON-NLS-1$
+				"${" + SVNFetchFactory.PROP_URL + "}/${" + SVNFetchFactory.PROP_TAG_PATH + "}/${" //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
+						+ SVNFetchFactory.PROP_PATH + "}", //$NON-NLS-1$
+				"${" + SVNFetchFactory.PROP_PEG + "}", "${" + SVNFetchFactory.PROP_REVISION + "}", //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$//$NON-NLS-4$
+				"${" + SVNFetchFactory.PROP_DESTINATIONFOLDER + "}/${" + SVNFetchFactory.PROP_ELEMENTNAME + "}", //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
+				"${" + SVNFetchFactory.PROP_USERNAME + "}", "${" + SVNFetchFactory.PROP_PASSWORD + "}", script, //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$//$NON-NLS-4$
+				"${" + SVNFetchFactory.PROP_FORCE + "}"); //$NON-NLS-1$ //$NON-NLS-2$
 		script.printTargetEnd();
 	}
 
+	@Override
 	public void generateRetrieveElementCall(Map entryInfos, IPath destination, IAntScript script) {
 		String type = (String) entryInfos.get(KEY_ELEMENT_TYPE);
 		String element = (String) entryInfos.get(KEY_ELEMENT_NAME);
 
-		HashMap<String, String> params = new HashMap<String, String>();
-		
-		IPath locationToCheck = (IPath)destination.clone();
+		HashMap<String, String> params = new HashMap<>();
+
+		IPath locationToCheck = (IPath) destination.clone();
 		if (type.equals(ELEMENT_TYPE_FEATURE)) {
 			locationToCheck = locationToCheck.append(Constants.FEATURE_FILENAME_DESCRIPTOR);
-		}
-		else if (type.equals(ELEMENT_TYPE_PLUGIN)) {
+		} else if (type.equals(ELEMENT_TYPE_PLUGIN)) {
 			locationToCheck = locationToCheck.append(Constants.PLUGIN_FILENAME_DESCRIPTOR);
-		}
-		else if (type.equals(ELEMENT_TYPE_FRAGMENT)) {
+		} else if (type.equals(ELEMENT_TYPE_FRAGMENT)) {
 			locationToCheck = locationToCheck.append(Constants.FRAGMENT_FILENAME_DESCRIPTOR);
-		}
-		else if (type.equals(ELEMENT_TYPE_BUNDLE)) {
+		} else if (type.equals(ELEMENT_TYPE_BUNDLE)) {
 			locationToCheck = locationToCheck.append(Constants.BUNDLE_FILENAME_DESCRIPTOR);
 		}
-		
+
 		/*
 		original code doesn't support same plugin with multiple plugins
 		to be downloaded into ${buildDirectory}/plugins/
@@ -103,54 +129,54 @@ public class SVNFetchFactory implements IFetchFactory {
 			com.compuware.bundles.axis (1.2.1)
 			com.compuware.bundles.axis (1.4.0)
 		both specified in feature.xml and .map
-		The fetch script generated by original code always trying to 
+		The fetch script generated by original code always trying to
 		download to one folder called
 		${buildDirectory}/plugins/com.compuware.bundles.axis
 		Do not like CVSFetchFactory, if you specify a version to the plugin in the map, for example, 'plugin@xxx,1.2.1=...'
-		it will download to 
+		it will download to
 		${buildDirectory}/plugins/com.compuware.bundles.axis_1.2.1 and
 		${buildDirectory}/plugins/com.compuware.bundles.axis_1.4.0 respectively.
 		This is needed when we want to build multiple versions of same bundle in a project
-		like Orbit or Compuware Commons. 
-		The following patch will solve the problem. 
+		like Orbit or Compuware Commons.
+		The following patch will solve the problem.
 		*/
 		// original code
-		// params.put(SVNFetchFactory.PROP_ELEMENTNAME, element);				
-		if(org.osgi.framework.Version.emptyVersion.equals(entryInfos.get("internal.matchedVersion"))) {  //$NON-NLS-1$
+		// params.put(SVNFetchFactory.PROP_ELEMENTNAME, element);
+		if (org.osgi.framework.Version.emptyVersion.equals(entryInfos.get("internal.matchedVersion"))) { //$NON-NLS-1$
 			params.put(SVNFetchFactory.PROP_ELEMENTNAME, element);
 		} else {
 			params.put(SVNFetchFactory.PROP_ELEMENTNAME, element + "_" + entryInfos.get("internal.matchedVersion")); //$NON-NLS-1$ //$NON-NLS-2$
 		}
-		
+
 		params.put(SVNFetchFactory.PROP_FILETOCHECK, locationToCheck.toString());
 		params.put(SVNFetchFactory.PROP_DESTINATIONFOLDER, destination.removeLastSegments(1).toString());
-		params.put(SVNFetchFactory.PROP_URL, (String)entryInfos.get(SVNFetchFactory.KEY_URL));
+		params.put(SVNFetchFactory.PROP_URL, (String) entryInfos.get(SVNFetchFactory.KEY_URL));
 		if (entryInfos.containsKey(SVNFetchFactory.KEY_PEG)) {
-			params.put(SVNFetchFactory.PROP_PEG, (String)entryInfos.get(SVNFetchFactory.KEY_PEG));
-		}
-		else {
+			params.put(SVNFetchFactory.PROP_PEG, (String) entryInfos.get(SVNFetchFactory.KEY_PEG));
+		} else {
 			params.put(SVNFetchFactory.PROP_PEG, "HEAD"); //$NON-NLS-1$
 		}
 		if (entryInfos.containsKey(SVNFetchFactory.KEY_REVISION)) {
-			params.put(SVNFetchFactory.PROP_REVISION, (String)entryInfos.get(SVNFetchFactory.KEY_REVISION));
-		}
-		else {
+			params.put(SVNFetchFactory.PROP_REVISION, (String) entryInfos.get(SVNFetchFactory.KEY_REVISION));
+		} else {
 			params.put(SVNFetchFactory.PROP_REVISION, "HEAD"); //$NON-NLS-1$
 		}
-		params.put(SVNFetchFactory.PROP_TAG, (String)entryInfos.get(SVNFetchFactory.KEY_ELEMENT_TAG));
-		params.put(SVNFetchFactory.PROP_TAG_PATH, (String)entryInfos.get(SVNFetchFactory.KEY_TAG_PATH));
-		params.put(SVNFetchFactory.PROP_PATH, (String)entryInfos.get(SVNFetchFactory.KEY_PATH));
-		String username = (String)entryInfos.get(SVNFetchFactory.KEY_USERNAME);
+		params.put(SVNFetchFactory.PROP_TAG, (String) entryInfos.get(IFetchFactory.KEY_ELEMENT_TAG));
+		params.put(SVNFetchFactory.PROP_TAG_PATH, (String) entryInfos.get(SVNFetchFactory.KEY_TAG_PATH));
+		params.put(SVNFetchFactory.PROP_PATH, (String) entryInfos.get(SVNFetchFactory.KEY_PATH));
+		String username = (String) entryInfos.get(SVNFetchFactory.KEY_USERNAME);
 		params.put(SVNFetchFactory.PROP_USERNAME, username != null ? username : ""); //$NON-NLS-1$
-		String password = (String)entryInfos.get(SVNFetchFactory.KEY_PASSWORD);
+		String password = (String) entryInfos.get(SVNFetchFactory.KEY_PASSWORD);
 		params.put(SVNFetchFactory.PROP_PASSWORD, password != null ? password : ""); //$NON-NLS-1$
-		params.put(SVNFetchFactory.PROP_FORCE, this.getBooleanValue(entryInfos, SVNFetchFactory.KEY_FORCE));
-		
-		this.printAvailableTask(locationToCheck.toString(), locationToCheck.toString(), script);
+		params.put(SVNFetchFactory.PROP_FORCE, getBooleanValue(entryInfos, SVNFetchFactory.KEY_FORCE));
+
+		printAvailableTask(locationToCheck.toString(), locationToCheck.toString(), script);
 		if (IFetchFactory.ELEMENT_TYPE_PLUGIN.equals(type) || IFetchFactory.ELEMENT_TYPE_FRAGMENT.equals(type)) {
-			this.printAvailableTask(locationToCheck.toString(), locationToCheck.removeLastSegments(1).append(Constants.BUNDLE_FILENAME_DESCRIPTOR).toString(), script);
+			printAvailableTask(locationToCheck.toString(),
+					locationToCheck.removeLastSegments(1).append(Constants.BUNDLE_FILENAME_DESCRIPTOR).toString(),
+					script);
 		}
-		
+
 		script.printAntCallTask(SVNFetchFactory.TARGET_FETCH_FROM_SVN, true, params);
 	}
 
@@ -160,16 +186,17 @@ public class SVNFetchFactory implements IFetchFactory {
 		if (str != null) {
 			res = Boolean.valueOf(str).toString();
 		}
-		return res;		
+		return res;
 	}
-	
+
+	@Override
 	public void generateRetrieveFilesCall(Map entryInfos, IPath destination, String[] files, IAntScript script) {
-		String rootUrl = (String)entryInfos.get(SVNFetchFactory.KEY_URL);
-		String pegRev = (String)entryInfos.get(SVNFetchFactory.KEY_PEG);
-		String rev = (String)entryInfos.get(SVNFetchFactory.KEY_REVISION);
-		
-		String tag = (String)entryInfos.get(SVNFetchFactory.KEY_TAG_PATH);
-		String path = (String)entryInfos.get(SVNFetchFactory.KEY_PATH);
+		String rootUrl = (String) entryInfos.get(SVNFetchFactory.KEY_URL);
+		String pegRev = (String) entryInfos.get(SVNFetchFactory.KEY_PEG);
+		String rev = (String) entryInfos.get(SVNFetchFactory.KEY_REVISION);
+
+		String tag = (String) entryInfos.get(SVNFetchFactory.KEY_TAG_PATH);
+		String path = (String) entryInfos.get(SVNFetchFactory.KEY_PATH);
 		String baseUrl = rootUrl;
 		if (tag != null && tag.length() > 0) {
 			baseUrl += "/" + tag; //$NON-NLS-1$
@@ -178,22 +205,24 @@ public class SVNFetchFactory implements IFetchFactory {
 			baseUrl += "/" + path; //$NON-NLS-1$
 		}
 		baseUrl += "/"; //$NON-NLS-1$
-					
+
 		String dest = destination.toString();
-		String username = (String)entryInfos.get(SVNFetchFactory.KEY_USERNAME);
-		String password = (String)entryInfos.get(SVNFetchFactory.KEY_PASSWORD);
-		String force = this.getBooleanValue(entryInfos, SVNFetchFactory.KEY_FORCE);
-						
+		String username = (String) entryInfos.get(SVNFetchFactory.KEY_USERNAME);
+		String password = (String) entryInfos.get(SVNFetchFactory.KEY_PASSWORD);
+		String force = getBooleanValue(entryInfos, SVNFetchFactory.KEY_FORCE);
+
 		for (String fileName : files) {
-			this.printSVNTask("cat", baseUrl + fileName, pegRev, rev, dest + "/" + fileName, username, password, script, force); //$NON-NLS-1$ //$NON-NLS-2$
+			this.printSVNTask("cat", baseUrl + fileName, pegRev, rev, dest + "/" + fileName, username, password, script, //$NON-NLS-1$//$NON-NLS-2$
+					force);
 		}
 	}
 
+	@Override
 	public void parseMapFileEntry(String rawEntry, Properties overrideTags, Map entryInfos) throws CoreException {
-		String []arguments = Utils.getArrayFromStringWithBlank(rawEntry, SVNFetchFactory.MAP_ENTRY_SEPARATOR);		
+		String[] arguments = Utils.getArrayFromStringWithBlank(rawEntry, SVNFetchFactory.MAP_ENTRY_SEPARATOR);
 		IMapFileParser parser = SVNFetchFactory.getMapFileParser(arguments);
 		FetchData data = parser.parse(rawEntry, arguments, overrideTags);
-						
+
 		//fill entryInfo
 		entryInfos.put(SVNFetchFactory.KEY_URL, data.url);
 		entryInfos.put(SVNFetchFactory.KEY_PATH, data.path);
@@ -204,55 +233,58 @@ public class SVNFetchFactory implements IFetchFactory {
 			int ind = data.tag.lastIndexOf("/"); //$NON-NLS-1$
 			String tagValue = ind > 0 ? data.tag.substring(ind + 1) : data.tag;
 			String tagPath = data.tag;
-			
+
 			if (!tagPath.contains("branches/")) { // branches are not used for qualifier replacement
 				//validate tag
 				if (tagValue != null && !SVNFetchFactory.tagPattern.matcher(tagValue).matches()) {
-					throw new RuntimeException("Tag doesn't match to pattern. Tag: " + tagValue + ", pattern: " + SVNFetchFactory.tagPattern.toString()); //$NON-NLS-1$ //$NON-NLS-2$
-				}	
+					throw new RuntimeException("Tag doesn't match to pattern. Tag: " + tagValue + ", pattern: " //$NON-NLS-1$//$NON-NLS-2$
+							+ SVNFetchFactory.tagPattern.toString());
+				}
 				if (tagValue != null) {
-					entryInfos.put(SVNFetchFactory.KEY_ELEMENT_TAG, tagValue);	
+					entryInfos.put(IFetchFactory.KEY_ELEMENT_TAG, tagValue);
 				}
 			}
 			entryInfos.put(SVNFetchFactory.KEY_TAG_PATH, tagPath);
-		}		
-		
+		}
+
 		if (data.revision != null) {
-			entryInfos.put(SVNFetchFactory.KEY_REVISION, data.revision);	
-		}		
+			entryInfos.put(SVNFetchFactory.KEY_REVISION, data.revision);
+		}
 		if (data.peg != null) {
-			entryInfos.put(SVNFetchFactory.KEY_PEG, data.peg);	
-		}		
+			entryInfos.put(SVNFetchFactory.KEY_PEG, data.peg);
+		}
 		if (data.username != null) {
-			entryInfos.put(SVNFetchFactory.KEY_USERNAME, data.username);	
+			entryInfos.put(SVNFetchFactory.KEY_USERNAME, data.username);
 		}
 		if (data.password != null) {
-			entryInfos.put(SVNFetchFactory.KEY_PASSWORD, data.password);	
+			entryInfos.put(SVNFetchFactory.KEY_PASSWORD, data.password);
 		}
 		if (data.force != null) {
-			entryInfos.put(SVNFetchFactory.KEY_FORCE, data.force);	
-		}		
+			entryInfos.put(SVNFetchFactory.KEY_FORCE, data.force);
+		}
 	}
-	
+
 	public static IMapFileParser getMapFileParser(String[] arguments) {
 		boolean isDefault = false;
 		//default handler contains key=value pair, where key is 'url' for second element
-		String arg = arguments[0];					
+		String arg = arguments[0];
 		int index = arg.indexOf(SVNFetchFactory.VALUE_PAIR_SEPARATOR);
 		if (index != -1) {
 			String key = arg.substring(0, index);
 			if (SVNFetchFactory.KEY_URL.equals(key)) {
 				isDefault = true;
 			}
-		}		
+		}
 		return isDefault ? IMapFileParser.DEFAULT : IMapFileParser.SOURCE_FORGE_PARSER;
 	}
-		
-	protected void printSVNTask(String command, String url, String pegRev, String rev, String dest, String username, String password, IAntScript script) {
+
+	protected void printSVNTask(String command, String url, String pegRev, String rev, String dest, String username,
+			String password, IAntScript script) {
 		this.printSVNTask(command, url, pegRev, rev, dest, username, password, script, "false"); //$NON-NLS-1$
 	}
-	
-	protected void printSVNTask(String command, String url, String pegRev, String rev, String dest, String username, String password, IAntScript script, String force) {		
+
+	protected void printSVNTask(String command, String url, String pegRev, String rev, String dest, String username,
+			String password, IAntScript script, String force) {
 		script.printTabs();
 		script.print("<svn"); //$NON-NLS-1$
 		script.printAttribute("command", command, false); //$NON-NLS-1$
@@ -265,7 +297,7 @@ public class SVNFetchFactory implements IFetchFactory {
 		script.printAttribute("force", force, false); //$NON-NLS-1$
 		script.println("/>"); //$NON-NLS-1$
 	}
-	
+
 	protected void printAvailableTask(String property, String file, IAntScript script) {
 		script.printTabs();
 		script.print("<available"); //$NON-NLS-1$
@@ -273,5 +305,5 @@ public class SVNFetchFactory implements IFetchFactory {
 		script.printAttribute("file", file, false); //$NON-NLS-1$
 		script.println("/>"); //$NON-NLS-1$
 	}
-	
+
 }

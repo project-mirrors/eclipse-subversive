@@ -35,14 +35,13 @@ public class ScheduledOperationWrapper extends Job {
 		this.operationWrapper = operationWrapper;
 	}
 
+	@Override
 	protected IStatus run(IProgressMonitor monitor) {
 		try {
-			this.operationWrapper.run(monitor);
-		} 
-		catch (InterruptedException e) {
-			this.operationWrapper.setCancelled(true);
-		} 
-		catch (InvocationTargetException e) {
+			operationWrapper.run(monitor);
+		} catch (InterruptedException e) {
+			operationWrapper.setCancelled(true);
+		} catch (InvocationTargetException e) {
 			throw new RuntimeException(e);
 		}
 		return Status.OK_STATUS;//this.operationWrapper.getOperation().getStatus()

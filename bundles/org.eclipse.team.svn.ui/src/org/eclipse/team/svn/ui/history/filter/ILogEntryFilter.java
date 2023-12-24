@@ -17,18 +17,17 @@ package org.eclipse.team.svn.ui.history.filter;
 import org.eclipse.team.svn.core.connector.SVNLogEntry;
 
 /**
- * Interface of an ILogMessage filter.
- * Filters to be added to {@link CompositeLogEntryFilter}
- * must implement this interface.
+ * Interface of an ILogMessage filter. Filters to be added to {@link CompositeLogEntryFilter} must implement this interface.
  * 
  * @author Alexei Goncharov
  */
 public interface ILogEntryFilter {
-	
+
 	/**
 	 * Returns if the filter accepts the given log node.
 	 * 
-	 * @param logEntry - log entry to check
+	 * @param logEntry
+	 *            - log entry to check
 	 * @return - true if accepted, otherwise false
 	 */
 	boolean accept(SVNLogEntry logEntry);

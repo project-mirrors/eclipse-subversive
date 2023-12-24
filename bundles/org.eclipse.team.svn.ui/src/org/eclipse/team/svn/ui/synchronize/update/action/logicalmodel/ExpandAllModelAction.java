@@ -35,23 +35,25 @@ public class ExpandAllModelAction extends AbstractModelToolbarAction {
 		super(text, configuration);
 	}
 
+	@Override
 	protected boolean needsToSaveDirtyEditors() {
 		return false;
 	}
-	
+
+	@Override
 	protected IActionOperation getOperation() {
 		return new AbstractActionOperation("Operation_UExpandAll", SVNUIMessages.class) { //$NON-NLS-1$
+			@Override
 			protected void runImpl(IProgressMonitor monitor) throws Exception {
-				UIMonitorUtility.getDisplay().syncExec(new Runnable() {
-					public void run() {
-						Viewer viewer = ExpandAllModelAction.this.getConfiguration().getPage().getViewer();
-						if (viewer == null || viewer.getControl().isDisposed() || !(viewer instanceof AbstractTreeViewer)) {
-							return;
-						}
-						viewer.getControl().setRedraw(false);		
-						((AbstractTreeViewer)viewer).expandAll();
-						viewer.getControl().setRedraw(true);
+				UIMonitorUtility.getDisplay().syncExec(() -> {
+					Viewer viewer = ExpandAllModelAction.this.getConfiguration().getPage().getViewer();
+					if (viewer == null || viewer.getControl().isDisposed()
+							|| !(viewer instanceof AbstractTreeViewer)) {
+						return;
 					}
+					viewer.getControl().setRedraw(false);
+					((AbstractTreeViewer) viewer).expandAll();
+					viewer.getControl().setRedraw(true);
 				});
 			}
 		};

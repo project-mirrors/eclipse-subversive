@@ -28,20 +28,22 @@ import org.eclipse.ui.PlatformUI;
  * @author Sergiy Logvin
  */
 public class ShowPropertiesAction extends AbstractRepositoryTeamAction {
-	
+
 	public ShowPropertiesAction() {
-		super();
 	}
-		
+
+	@Override
 	public void runImpl(IAction action) {
-		IRepositoryResource resource = this.getSelectedRepositoryResources()[0];
-		IResourcePropertyProvider provider = new GetRemotePropertiesOperation(resource);		
-		ShowPropertiesOperation op = new ShowPropertiesOperation(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage(), resource, provider);
-		this.runScheduled(op);
+		IRepositoryResource resource = getSelectedRepositoryResources()[0];
+		IResourcePropertyProvider provider = new GetRemotePropertiesOperation(resource);
+		ShowPropertiesOperation op = new ShowPropertiesOperation(
+				PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage(), resource, provider);
+		runScheduled(op);
 	}
-	
+
+	@Override
 	public boolean isEnabled() {
-		return this.getSelectedRepositoryResources().length == 1;
+		return getSelectedRepositoryResources().length == 1;
 	}
-	
+
 }

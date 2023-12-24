@@ -26,11 +26,10 @@ import org.eclipse.team.svn.core.utility.FileUtility;
 public abstract class AbstractWorkingCopyAction extends AbstractLocalTeamAction {
 
 	public AbstractWorkingCopyAction() {
-		super();
 	}
 
-	protected IResource []getSelectedResources(IStateFilter filter) {
+	protected IResource[] getSelectedResources(IStateFilter filter) {
 		return FileUtility.getResourcesRecursive(this.getSelectedResources(), filter, IResource.DEPTH_ZERO);
 	}
-	
+
 }

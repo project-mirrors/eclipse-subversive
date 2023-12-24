@@ -21,9 +21,8 @@ package org.eclipse.team.svn.core.operation;
  */
 public class ActivityCancelledException extends UnreportableException {
 	private static final long serialVersionUID = 6390395981269341729L;
-	
+
 	public ActivityCancelledException() {
-		super();
 	}
 
 	public ActivityCancelledException(String message) {

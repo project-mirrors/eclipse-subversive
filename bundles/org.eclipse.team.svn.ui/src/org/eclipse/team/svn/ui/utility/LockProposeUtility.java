@@ -21,6 +21,7 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.team.svn.core.BaseMessages;
 import org.eclipse.team.svn.core.SVNTeamPlugin;
 import org.eclipse.team.svn.core.operation.CompositeOperation;
 import org.eclipse.team.svn.core.operation.local.LockOperation;
@@ -45,18 +46,19 @@ public class LockProposeUtility {
 		if (op != null) {
 			UIMonitorUtility.doTaskBusyWorkspaceModify(op);
 			return op.getStatus();
-		}				
-		String msg = SVNUIMessages.format(SVNUIMessages.ErrorCancelPanel_Description_Cancelled, SVNUIMessages.LocksComposite_LockTitle);
-		return new Status(Status.CANCEL, SVNTeamPlugin.NATURE_ID, IStatus.CANCEL, msg, null);
+		}
+		String msg = BaseMessages.format(SVNUIMessages.ErrorCancelPanel_Description_Cancelled,
+				SVNUIMessages.LocksComposite_LockTitle);
+		return new Status(IStatus.CANCEL, SVNTeamPlugin.NATURE_ID, IStatus.CANCEL, msg, null);
 	}
 
 	public static IResource[] asResources(LockResource[] lockResources) {
-		List<IResource> res = new ArrayList<IResource>();
+		List<IResource> res = new ArrayList<>();
 		if (lockResources != null) {
-			for (int i = 0; i < lockResources.length; i ++) {
-				Object ob = lockResources[i].getAdapter(IResource.class);
+			for (LockResource element : lockResources) {
+				Object ob = element.getAdapter(IResource.class);
 				if (ob != null) {
-					res.add((IResource)ob);
+					res.add((IResource) ob);
 				}
 			}
 		}
@@ -64,12 +66,12 @@ public class LockProposeUtility {
 	}
 
 	public static IRepositoryResource[] asRepositoryResources(LockResource[] lockResources) {
-		List<IRepositoryResource> res = new ArrayList<IRepositoryResource>();
+		List<IRepositoryResource> res = new ArrayList<>();
 		if (lockResources != null) {
-			for (int i = 0; i < lockResources.length; i ++) {
-				Object ob = lockResources[i].getAdapter(IRepositoryResource.class);
+			for (LockResource element : lockResources) {
+				Object ob = element.getAdapter(IRepositoryResource.class);
 				if (ob != null) {
-					res.add((IRepositoryResource)ob);
+					res.add((IRepositoryResource) ob);
 				}
 			}
 		}
@@ -79,23 +81,27 @@ public class LockProposeUtility {
 	public static CompositeOperation performLockAction(IResource[] resourcesToProcess, boolean forceLock, Shell shell) {
 		return LockProposeUtility.performLockAction(resourcesToProcess, forceLock, shell, false);
 	}
-	
-	public static CompositeOperation performLockAction(IResource[] resourcesToProcess, boolean forceLock, Shell shell, boolean fromEditor) {
-		LockResource []lockResources = LockResource.getLockResources(resourcesToProcess, false);
+
+	public static CompositeOperation performLockAction(IResource[] resourcesToProcess, boolean forceLock, Shell shell,
+			boolean fromEditor) {
+		LockResource[] lockResources = LockResource.getLockResources(resourcesToProcess, false);
 		return LockProposeUtility.performLockAction(lockResources, forceLock, shell, fromEditor);
 	}
 
 	public static CompositeOperation performLockAction(LockResource[] lockResources, boolean forceLock, Shell shell) {
 		return LockProposeUtility.performLockAction(lockResources, forceLock, shell, false);
 	}
-	
-	public static CompositeOperation performLockAction(LockResource[] lockResources, boolean forceLock, Shell shell, boolean fromEditor) {
-		LockResourcesPanel panel = new LockResourcesPanel(lockResources, true, forceLock, SVNUIMessages.LocksComposite_LockTitle, SVNUIMessages.LocksComposite_LockDescription, SVNUIMessages.LocksComposite_LockDefaultMessage);
+
+	public static CompositeOperation performLockAction(LockResource[] lockResources, boolean forceLock, Shell shell,
+			boolean fromEditor) {
+		LockResourcesPanel panel = new LockResourcesPanel(lockResources, true, forceLock,
+				SVNUIMessages.LocksComposite_LockTitle, SVNUIMessages.LocksComposite_LockDescription,
+				SVNUIMessages.LocksComposite_LockDefaultMessage);
 		DefaultDialog dlg = new DefaultDialog(shell, panel);
-		if (dlg.open() == 0) {			
+		if (dlg.open() == 0) {
 			IResource[] resources = asResources(panel.getSelectedResources());
-							
-			LockOperation mainOp = new LockOperation(resources, panel.getMessage(), panel.getForce());			    
+
+			LockOperation mainOp = new LockOperation(resources, panel.getMessage(), panel.getForce());
 			CompositeOperation op = new CompositeOperation(mainOp.getId(), mainOp.getMessagesClass());
 			op.add(mainOp);
 			op.add(new RefreshResourcesOperation(resources, fromEditor));
@@ -105,34 +111,37 @@ public class LockProposeUtility {
 	}
 
 	public static CompositeOperation performUnlockAction(IResource[] resourcesToProcess, Shell shell) {
-		LockResource []lockResources = LockResource.getLockResources(resourcesToProcess, true);
+		LockResource[] lockResources = LockResource.getLockResources(resourcesToProcess, true);
 		return LockProposeUtility.performUnlockAction(lockResources, shell);
 	}
 
 	public static CompositeOperation performUnlockAction(LockResource[] lockResources, Shell shell) {
-		LockResourcesPanel unlockPanel = new LockResourcesPanel(lockResources, SVNUIMessages.LocksComposite_UnlockTitle, SVNUIMessages.LocksComposite_UnlockDescription, SVNUIMessages.LocksComposite_UnlockDefaultMessage);
+		LockResourcesPanel unlockPanel = new LockResourcesPanel(lockResources, SVNUIMessages.LocksComposite_UnlockTitle,
+				SVNUIMessages.LocksComposite_UnlockDescription, SVNUIMessages.LocksComposite_UnlockDefaultMessage);
 		DefaultDialog dlg = new DefaultDialog(shell, unlockPanel);
-		if (dlg.open() == 0) {								
+		if (dlg.open() == 0) {
 			IResource[] resources = asResources(unlockPanel.getSelectedResources());
-			UnlockOperation mainOp = new UnlockOperation(resources);							    
+			UnlockOperation mainOp = new UnlockOperation(resources);
 			CompositeOperation op = new CompositeOperation(mainOp.getId(), mainOp.getMessagesClass());
 			op.add(mainOp);
 			op.add(new RefreshResourcesOperation(resources));
-			return op;							
-		}		
+			return op;
+		}
 		return null;
 	}
 
 	public static CompositeOperation performBreakLockAction(LockResource[] lockResources, Shell shell) {
-		LockResourcesPanel panel = new LockResourcesPanel(lockResources, SVNUIMessages.LocksComposite_BreakLockTitle, SVNUIMessages.LocksComposite_BreakLockDescription, SVNUIMessages.LocksComposite_BreakLockDefaultMessage);
+		LockResourcesPanel panel = new LockResourcesPanel(lockResources, SVNUIMessages.LocksComposite_BreakLockTitle,
+				SVNUIMessages.LocksComposite_BreakLockDescription,
+				SVNUIMessages.LocksComposite_BreakLockDefaultMessage);
 		DefaultDialog dlg = new DefaultDialog(shell, panel);
-		if (dlg.open() == 0) {			
+		if (dlg.open() == 0) {
 			IRepositoryResource[] reposResources = asRepositoryResources(panel.getSelectedResources());
 			BreakLockOperation mainOp = new BreakLockOperation(reposResources);
 			CompositeOperation op = new CompositeOperation(mainOp.getId(), mainOp.getMessagesClass());
 			op.add(mainOp);
 			op.add(new RefreshRemoteResourcesOperation(reposResources));
-			return op;			
+			return op;
 		}
 		return null;
 	}

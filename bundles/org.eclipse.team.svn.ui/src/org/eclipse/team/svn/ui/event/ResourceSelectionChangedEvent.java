@@ -17,14 +17,14 @@ package org.eclipse.team.svn.ui.event;
 import org.eclipse.core.resources.IResource;
 
 /**
- * Resources selection changed event 
+ * Resources selection changed event
  * 
  * @author Sergiy Logvin
  */
 public class ResourceSelectionChangedEvent {
-	public final IResource []resources;
-	
-	public ResourceSelectionChangedEvent(IResource []resources) {
+	public final IResource[] resources;
+
+	public ResourceSelectionChangedEvent(IResource[] resources) {
 		this.resources = resources;
 	}
 

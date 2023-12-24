@@ -41,61 +41,71 @@ import org.eclipse.team.svn.ui.panel.local.RevertPanel;
 public class RevertAction extends AbstractRecursiveTeamAction {
 
 	public RevertAction() {
-		super();
 	}
 
+	@Override
 	public void runImpl(IAction action) {
-		IResource []changedResources = this.getSelectedResourcesRecursive(RevertAction.SF_REVERTABLE_OR_NEW);
-		IResource []userSelectedResources = this.getSelectedResources();
-		CompositeOperation revertOp = RevertAction.getRevertOperation(this.getShell(), changedResources, userSelectedResources);
+		IResource[] changedResources = this.getSelectedResourcesRecursive(RevertAction.SF_REVERTABLE_OR_NEW);
+		IResource[] userSelectedResources = this.getSelectedResources();
+		CompositeOperation revertOp = RevertAction.getRevertOperation(getShell(), changedResources,
+				userSelectedResources);
 		if (revertOp != null) {
-			this.runScheduled(revertOp);
+			runScheduled(revertOp);
 		}
 	}
-	
+
+	@Override
 	public boolean isEnabled() {
-		return this.checkForResourcesPresenceRecursive(RevertAction.SF_REVERTABLE_OR_NEW);
+		return checkForResourcesPresenceRecursive(RevertAction.SF_REVERTABLE_OR_NEW);
 	}
-	
-	public static CompositeOperation getRevertOperation(Shell shell, IResource[] changedResources, IResource[] selectedResources) {
+
+	public static CompositeOperation getRevertOperation(Shell shell, IResource[] changedResources,
+			IResource[] selectedResources) {
 		RevertPanel panel = new RevertPanel(changedResources, selectedResources);
 		DefaultDialog rDlg = new DefaultDialog(shell, panel);
 		if (rDlg.open() == 0) {
-		    boolean recursive = panel.getNotSelectedResources().length == 0;
+			boolean recursive = panel.getNotSelectedResources().length == 0;
 			changedResources = panel.getSelectedResources();
-		    IResource []revertableResources = FileUtility.getResourcesRecursive(changedResources, IStateFilter.SF_REVERTABLE, recursive ? IResource.DEPTH_INFINITE : IResource.DEPTH_ZERO);
-		    
+			IResource[] revertableResources = FileUtility.getResourcesRecursive(changedResources,
+					IStateFilter.SF_REVERTABLE, recursive ? IResource.DEPTH_INFINITE : IResource.DEPTH_ZERO);
+
 			RevertOperation mainOp = new RevertOperation(revertableResources, recursive);
-			
+
 			CompositeOperation op = new CompositeOperation(mainOp.getId(), mainOp.getMessagesClass());
-			
+
 			SaveProjectMetaOperation saveOp = new SaveProjectMetaOperation(changedResources);
 			RestoreProjectMetaOperation restoreOp = new RestoreProjectMetaOperation(saveOp);
-			
+
 			op.add(saveOp);
 			op.add(mainOp);
 			if (panel.getRemoveNonVersioned()) {
-				op.add(new RefreshResourcesOperation(selectedResources), new IActionOperation[] {mainOp});
-				op.add(new ResourcesTraversalOperation("Operation_RemoveNonSVN", SVNMessages.class, changedResources, new RemoveNonVersionedVisitor(true), IResource.DEPTH_INFINITE), new IActionOperation[] {mainOp});
+				op.add(new RefreshResourcesOperation(selectedResources), new IActionOperation[] { mainOp });
+				op.add(new ResourcesTraversalOperation("Operation_RemoveNonSVN", SVNMessages.class, changedResources,
+						new RemoveNonVersionedVisitor(true), IResource.DEPTH_INFINITE),
+						new IActionOperation[] { mainOp });
 			}
 			op.add(restoreOp);
 			op.add(new RefreshResourcesOperation(selectedResources));
 			return op;
 		}
-		
+
 		return null;
 	}
-	
+
 	public static IStateFilter SF_REVERTABLE_OR_NEW = new IStateFilter.AbstractStateFilter() {
 
+		@Override
 		protected boolean acceptImpl(ILocalResource local, IResource resource, String state, int mask) {
-			return IStateFilter.SF_REVERTABLE.accept(resource, state, mask) || IStateFilter.SF_NEW.accept(resource, state, mask);
+			return IStateFilter.SF_REVERTABLE.accept(resource, state, mask)
+					|| IStateFilter.SF_NEW.accept(resource, state, mask);
 		}
 
+		@Override
 		protected boolean allowsRecursionImpl(ILocalResource local, IResource resource, String state, int mask) {
-			return IStateFilter.SF_REVERTABLE.allowsRecursion(resource, state, mask) || IStateFilter.SF_NEW.allowsRecursion(resource, state, mask);
+			return IStateFilter.SF_REVERTABLE.allowsRecursion(resource, state, mask)
+					|| IStateFilter.SF_NEW.allowsRecursion(resource, state, mask);
 		}
-		
+
 	};
-	
+
 }

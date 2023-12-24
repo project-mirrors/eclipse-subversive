@@ -20,7 +20,9 @@ package org.eclipse.team.svn.ui.verifier;
  * @author Alexander Gurov
  */
 public interface IVerifierListener {
-    public void hasError(String errorReason);
-    public void hasWarning(String warningReason);
-    public void hasNoError();
+	void hasError(String errorReason);
+
+	void hasWarning(String warningReason);
+
+	void hasNoError();
 }

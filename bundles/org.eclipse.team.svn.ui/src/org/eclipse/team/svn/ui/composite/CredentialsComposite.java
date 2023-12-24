@@ -34,51 +34,54 @@ import org.eclipse.team.svn.ui.utility.UserInputHistory;
  */
 public class CredentialsComposite extends Composite {
 	protected static final String USER_HISTORY_NAME = "repositoryUser"; //$NON-NLS-1$
-	
+
 	protected Combo userName;
+
 	protected Text password;
+
 	protected Button savePassword;
-	
+
 	protected String usernameInput;
+
 	protected String passwordInput;
+
 	protected boolean passwordSaved;
-	
-	protected UserInputHistory userHistory; 
-	
+
+	protected UserInputHistory userHistory;
+
 	public CredentialsComposite(Composite parent, int style) {
 		super(parent, style);
-		this.createControls();
+		createControls();
 	}
-	
+
 	public void initialize() {
-		if (this.usernameInput != null && this.usernameInput.trim().length() > 0) {
-			this.userName.setText(this.usernameInput);
-		}
-		else {
-			this.userName.setFocus();
-		}
-
-		if (this.passwordInput != null) {
-			this.password.setText(this.passwordInput);
-		}
-		if (this.usernameInput != null && this.usernameInput.trim().length() > 0) {
-			this.password.setFocus();
-			this.password.selectAll();
+		if (usernameInput != null && usernameInput.trim().length() > 0) {
+			userName.setText(usernameInput);
+		} else {
+			userName.setFocus();
 		}
 
-		this.savePassword.setSelection(this.passwordSaved);
+		if (passwordInput != null) {
+			password.setText(passwordInput);
+		}
+		if (usernameInput != null && usernameInput.trim().length() > 0) {
+			password.setFocus();
+			password.selectAll();
+		}
+
+		savePassword.setSelection(passwordSaved);
 	}
 
 	public Text getPassword() {
-		return this.password;
+		return password;
 	}
 
 	public Button getSavePassword() {
-		return this.savePassword;
+		return savePassword;
 	}
 
 	public UserInputHistory getUserHistory() {
-		return this.userHistory;
+		return userHistory;
 	}
 
 	public void setUserHistory(UserInputHistory userHistory) {
@@ -86,9 +89,9 @@ public class CredentialsComposite extends Composite {
 	}
 
 	public Combo getUsername() {
-		return this.userName;
+		return userName;
 	}
-	
+
 	public void setPasswordInput(String passwordInput) {
 		this.passwordInput = passwordInput;
 	}
@@ -104,11 +107,11 @@ public class CredentialsComposite extends Composite {
 	private void createControls() {
 		GridLayout layout = new GridLayout();
 		layout.marginHeight = layout.marginWidth = 0;
-		this.setLayout(layout);
-		
+		setLayout(layout);
+
 		GridData data = new GridData(GridData.FILL_BOTH);
-		this.setLayoutData(data);
-		
+		setLayoutData(data);
+
 		Group authGroup = new Group(this, SWT.NONE);
 		layout = new GridLayout();
 		layout.verticalSpacing = 12;
@@ -117,7 +120,7 @@ public class CredentialsComposite extends Composite {
 		data.horizontalSpan = 2;
 		authGroup.setLayoutData(data);
 		authGroup.setText(SVNUIMessages.CredentialsComposite_Authentication);
-		
+
 		Composite inner = new Composite(authGroup, SWT.FILL);
 		layout = new GridLayout();
 		layout.numColumns = 2;
@@ -126,37 +129,37 @@ public class CredentialsComposite extends Composite {
 		data = new GridData(GridData.FILL_HORIZONTAL);
 		data.horizontalSpan = 2;
 		inner.setLayoutData(data);
-		
+
 		Label description = new Label(inner, SWT.NONE);
 		data = new GridData(GridData.FILL_HORIZONTAL);
 		data.grabExcessHorizontalSpace = false;
 		data.horizontalIndent = 0;
 		description.setLayoutData(data);
 		description.setText(SVNUIMessages.CredentialsComposite_User);
-		
-		this.userHistory = new UserInputHistory(CredentialsComposite.USER_HISTORY_NAME);
-		
-		this.userName = new Combo(inner, SWT.DROP_DOWN);
+
+		userHistory = new UserInputHistory(CredentialsComposite.USER_HISTORY_NAME);
+
+		userName = new Combo(inner, SWT.DROP_DOWN);
 		data = new GridData(GridData.FILL_HORIZONTAL);
 		data.grabExcessHorizontalSpace = true;
 		data.widthHint = IDialogConstants.ENTRY_FIELD_WIDTH;
-		this.userName.setLayoutData(data);
-		this.userName.setVisibleItemCount(this.userHistory.getDepth());
-		this.userName.setItems(this.userHistory.getHistory());
-		
+		userName.setLayoutData(data);
+		userName.setVisibleItemCount(userHistory.getDepth());
+		userName.setItems(userHistory.getHistory());
+
 		description = new Label(inner, SWT.NONE);
 		data = new GridData(GridData.FILL_HORIZONTAL);
 		data.grabExcessHorizontalSpace = false;
 		data.horizontalIndent = 0;
 		description.setLayoutData(data);
 		description.setText(SVNUIMessages.CredentialsComposite_Password);
-		
-		this.password = new Text(inner, SWT.SINGLE | SWT.BORDER | SWT.PASSWORD);
+
+		password = new Text(inner, SWT.SINGLE | SWT.BORDER | SWT.PASSWORD);
 		data = new GridData(GridData.FILL_HORIZONTAL);
 		data.grabExcessHorizontalSpace = true;
 		data.widthHint = IDialogConstants.ENTRY_FIELD_WIDTH;
-		this.password.setLayoutData(data);
-		
+		password.setLayoutData(data);
+
 		inner = new Composite(authGroup, SWT.FILL);
 		layout = new GridLayout();
 		layout.marginHeight = layout.marginWidth = 0;
@@ -164,12 +167,12 @@ public class CredentialsComposite extends Composite {
 		data = new GridData(GridData.FILL_HORIZONTAL);
 		data.horizontalSpan = 2;
 		inner.setLayoutData(data);
-		
-		this.savePassword = new Button(inner, SWT.CHECK);
+
+		savePassword = new Button(inner, SWT.CHECK);
 		data = new GridData();
-		this.savePassword.setLayoutData(data);
-		this.savePassword.setText(SVNUIMessages.CredentialsComposite_SavePassword);
-		
+		savePassword.setLayoutData(data);
+		savePassword.setText(SVNUIMessages.CredentialsComposite_SavePassword);
+
 		new SecurityWarningComposite(inner);
 	}
 

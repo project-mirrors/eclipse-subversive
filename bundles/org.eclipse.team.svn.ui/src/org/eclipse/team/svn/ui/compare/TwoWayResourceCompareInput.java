@@ -63,163 +63,183 @@ import org.eclipse.team.svn.ui.utility.UIMonitorUtility;
  * @author Alexander Gurov
  */
 public class TwoWayResourceCompareInput extends ResourceCompareInput {
-	protected SVNDiffStatus []statuses;
-	
-	public TwoWayResourceCompareInput(CompareConfiguration configuration, IRepositoryResource next, IRepositoryResource prev, Collection<SVNDiffStatus> statuses) {
+	protected SVNDiffStatus[] statuses;
+
+	public TwoWayResourceCompareInput(CompareConfiguration configuration, IRepositoryResource next,
+			IRepositoryResource prev, Collection<SVNDiffStatus> statuses) {
 		super(configuration);
-		
-		this.rootLeft = SVNUtility.copyOf(next);
-		this.rootRight = SVNUtility.copyOf(prev);
+
+		rootLeft = SVNUtility.copyOf(next);
+		rootRight = SVNUtility.copyOf(prev);
 		this.statuses = statuses.toArray(new SVNDiffStatus[statuses.size()]);
 	}
-	
+
+	@Override
 	protected void fillMenu(IMenuManager manager, TreeSelection selection) {
-		final CompareNode selectedNode = (CompareNode)selection.getFirstElement();
+		final CompareNode selectedNode = (CompareNode) selection.getFirstElement();
 		Action tAction = null;
-		manager.add(tAction = new Action(SVNUIMessages.SynchronizeActionGroup_CompareProperties){
+		manager.add(tAction = new Action(SVNUIMessages.SynchronizeActionGroup_CompareProperties) {
+			@Override
 			public void run() {
-				SVNRepositoryResource repoResource = (SVNRepositoryResource)((ResourceElement)selectedNode.getLeft()).getRepositoryResource();
+				SVNRepositoryResource repoResource = (SVNRepositoryResource) ((ResourceElement) selectedNode.getLeft())
+						.getRepositoryResource();
 				SVNEntryRevisionReference leftReference = new SVNEntryRevisionReference(
-							repoResource.getUrl(), repoResource.getPegRevision(), repoResource.getSelectedRevision());
-				repoResource = (SVNRepositoryResource)((ResourceElement)selectedNode.getRight()).getRepositoryResource();
+						repoResource.getUrl(), repoResource.getPegRevision(), repoResource.getSelectedRevision());
+				repoResource = (SVNRepositoryResource) ((ResourceElement) selectedNode.getRight())
+						.getRepositoryResource();
 				SVNEntryRevisionReference rightReference = new SVNEntryRevisionReference(
 						repoResource.getUrl(), repoResource.getPegRevision(), repoResource.getSelectedRevision());
 				TwoWayPropertyCompareInput input = new TwoWayPropertyCompareInput(
-						new CompareConfiguration(),
-						leftReference,
-						rightReference,
+						new CompareConfiguration(), leftReference, rightReference,
 						repoResource.getRepositoryLocation());
 				try {
 					input.run(new NullProgressMonitor());
 					if (input.getCompareResult() == null) {
 						MessageDialog dialog = new MessageDialog(
-								UIMonitorUtility.getShell(),
-								SVNUIMessages.ComparePropsNoDiff_Title,
-								null,
-								SVNUIMessages.ComparePropsNoDiff_Message,
-								MessageDialog.INFORMATION,
-								new String [] {IDialogConstants.OK_LABEL},
-								0);
+								UIMonitorUtility.getShell(), SVNUIMessages.ComparePropsNoDiff_Title, null,
+								SVNUIMessages.ComparePropsNoDiff_Message, MessageDialog.INFORMATION,
+								new String[] { IDialogConstants.OK_LABEL }, 0);
 						dialog.open();
-					}
-					else {
+					} else {
 						PropertyComparePanel panel = new PropertyComparePanel(input, false);
 						DefaultDialog dlg = new DefaultDialog(UIMonitorUtility.getShell(), panel);
 						dlg.open();
 					}
-				}
-				catch (Exception ex) {
+				} catch (Exception ex) {
 					UILoggedOperation.reportError("Compare Properties Operation", ex);
 				}
 			}
 		});
-		tAction.setEnabled(selection.size() == 1 && (selectedNode.getKind() & Differencer.CHANGE_TYPE_MASK) != Differencer.ADDITION
-				&& (selectedNode.getKind() & Differencer.CHANGE_TYPE_MASK) != Differencer.DELETION);
-		
-		//external compare action		
-		Action externalCompareAction = this.getOpenInExternalCompareEditorAction(selectedNode, selection);
+		tAction.setEnabled(
+				selection.size() == 1 && (selectedNode.getKind() & Differencer.CHANGE_TYPE_MASK) != Differencer.ADDITION
+						&& (selectedNode.getKind() & Differencer.CHANGE_TYPE_MASK) != Differencer.DELETION);
+
+		//external compare action
+		Action externalCompareAction = getOpenInExternalCompareEditorAction(selectedNode, selection);
 		manager.add(externalCompareAction);
 	}
 
-	protected Action getOpenInExternalCompareEditorAction(final CompareNode selectedNode, final TreeSelection selection) {
-		final IRepositoryResource leftResource = ((ResourceElement)selectedNode.getLeft()).getRepositoryResource();
-		final IRepositoryResource rightResource = ((ResourceElement)selectedNode.getRight()).getRepositoryResource();
-		
+	protected Action getOpenInExternalCompareEditorAction(final CompareNode selectedNode,
+			final TreeSelection selection) {
+		final IRepositoryResource leftResource = ((ResourceElement) selectedNode.getLeft()).getRepositoryResource();
+		final IRepositoryResource rightResource = ((ResourceElement) selectedNode.getRight()).getRepositoryResource();
+
 		DiffViewerSettings diffSettings = SVNTeamDiffViewerPage.loadDiffViewerSettings();
-		DetectExternalCompareOperationHelper detectCompareHelper = new DetectExternalCompareOperationHelper(leftResource, diffSettings, true);
+		DetectExternalCompareOperationHelper detectCompareHelper = new DetectExternalCompareOperationHelper(
+				leftResource, diffSettings, true);
 		detectCompareHelper.execute(new NullProgressMonitor());
-		
+
 		final ExternalProgramParameters externalProgramParams = detectCompareHelper.getExternalProgramParameters();
-		
+
 		boolean isEnabled = selection.size() == 1 && externalProgramParams != null;
-		
+
 		Action action = new Action(SVNUIMessages.OpenInExternalCompareEditor_Action) {
-			public void run() {				
-				if (externalProgramParams != null) {								
-					IActionOperation op = new ExternalCompareRepositoryOperation(leftResource, rightResource, new DefaultExternalProgramParametersProvider(externalProgramParams));
+			@Override
+			public void run() {
+				if (externalProgramParams != null) {
+					IActionOperation op = new ExternalCompareRepositoryOperation(leftResource, rightResource,
+							new DefaultExternalProgramParametersProvider(externalProgramParams));
 					UIMonitorUtility.doTaskScheduledActive(op);
-				}									
+				}
 			}
 		};
 		action.setEnabled(isEnabled);
-		
+
 		return action;
 	}
-	
+
+	@Override
 	public void initialize(IProgressMonitor monitor) throws Exception {
-		SVNUtility.reorder(this.statuses, true);
-		
+		SVNUtility.reorder(statuses, true);
+
 		HashMap path2node = new HashMap();
 		String message = SVNUIMessages.ResourceCompareInput_CheckingDelta;
-		for (int i = 0; i < this.statuses.length; i++) {
-			monitor.subTask(BaseMessages.format(message, new Object[] {SVNUtility.decodeURL(this.statuses[i].pathPrev)}));
-			
-			CompareNode node = this.makeNode(this.statuses[i], path2node, monitor);
-			path2node.put(SVNUtility.createPathForSVNUrl(((ResourceElement)node.getRight()).getRepositoryResource().getUrl()), node);
-			
-			ProgressMonitorUtility.progress(monitor, i, this.statuses.length);
+		for (int i = 0; i < statuses.length; i++) {
+			monitor.subTask(
+					BaseMessages.format(message, new Object[] { SVNUtility.decodeURL(statuses[i].pathPrev) }));
+
+			CompareNode node = makeNode(statuses[i], path2node, monitor);
+			path2node.put(SVNUtility
+					.createPathForSVNUrl(((ResourceElement) node.getRight()).getRepositoryResource().getUrl()), node);
+
+			ProgressMonitorUtility.progress(monitor, i, statuses.length);
 		}
-		
-		this.findRootNode(path2node, this.rootRight, monitor);
-		if (this.root == null) {
-			this.findRootNode(path2node, this.rootLeft, monitor);
+
+		findRootNode(path2node, rootRight, monitor);
+		if (root == null) {
+			findRootNode(path2node, rootLeft, monitor);
 		}
-		
+
 		super.initialize(monitor);
 	}
-	
+
 	protected CompareNode makeNode(SVNDiffStatus st, Map path2node, IProgressMonitor monitor) throws Exception {
 		String urlNext = SVNUtility.decodeURL(st.pathNext);
 		String urlPrev = SVNUtility.decodeURL(st.pathPrev);
-		SVNEntry.Kind nodeKind = this.getNodeKind(st, false);
-		
-		IRepositoryResource next = this.createResourceFor(this.rootLeft.getRepositoryLocation(), nodeKind, urlNext);
-		next.setSelectedRevision(this.rootLeft.getSelectedRevision());
-		next.setPegRevision(this.rootLeft.getPegRevision());
-		
-		IRepositoryResource prev = this.createResourceFor(this.rootRight.getRepositoryLocation(), nodeKind, urlPrev);
-		prev.setSelectedRevision(this.rootRight.getSelectedRevision());
-		prev.setPegRevision(this.rootRight.getPegRevision());
-		
-		IDiffContainer parent = this.getParentCompareNode(prev, path2node);
-		
+		SVNEntry.Kind nodeKind = getNodeKind(st, false);
+
+		IRepositoryResource next = createResourceFor(rootLeft.getRepositoryLocation(), nodeKind, urlNext);
+		next.setSelectedRevision(rootLeft.getSelectedRevision());
+		next.setPegRevision(rootLeft.getPegRevision());
+
+		IRepositoryResource prev = createResourceFor(rootRight.getRepositoryLocation(), nodeKind, urlPrev);
+		prev.setSelectedRevision(rootRight.getSelectedRevision());
+		prev.setPegRevision(rootRight.getPegRevision());
+
+		IDiffContainer parent = getParentCompareNode(prev, path2node);
+
 		// invert diffKind in order to make compare view the same as Eclipse "Compare Each Other"
 		int diffKind = ResourceCompareInput.getDiffKind(st.textStatus, st.propStatus);
-		diffKind = diffKind == Differencer.DELETION ? Differencer.ADDITION : (diffKind == Differencer.ADDITION ? Differencer.DELETION : diffKind);
-		
-		return new CompareNode(parent, diffKind, next, prev, st.textStatus == SVNEntryStatus.Kind.NORMAL ? st.propStatus : st.textStatus);
+		diffKind = diffKind == Differencer.DELETION
+				? Differencer.ADDITION
+				: diffKind == Differencer.ADDITION ? Differencer.DELETION : diffKind;
+
+		return new CompareNode(parent, diffKind, next, prev,
+				st.textStatus == SVNEntryStatus.Kind.NORMAL ? st.propStatus : st.textStatus);
 	}
-	
+
+	@Override
 	protected IDiffContainer makeStubNode(IDiffContainer parent, IRepositoryResource node) {
 		IRepositoryResource next = node;
-		
+
 		String prevUrl = node.getUrl();
-		if (prevUrl.length() > this.rootRight.getUrl().length()) {
-			String urlPart = prevUrl.substring(this.rootRight.getUrl().length());
-			String urlNext = this.rootLeft.getUrl() + urlPart;
-			
-			next = this.createResourceFor(this.rootLeft.getRepositoryLocation(), node instanceof IRepositoryFile ? SVNEntry.Kind.FILE : SVNEntry.Kind.DIR, urlNext);
-			next.setSelectedRevision(this.rootLeft.getSelectedRevision());
-			next.setPegRevision(this.rootLeft.getPegRevision());
+		if (prevUrl.length() > rootRight.getUrl().length()) {
+			String urlPart = prevUrl.substring(rootRight.getUrl().length());
+			String urlNext = rootLeft.getUrl() + urlPart;
+
+			next = createResourceFor(rootLeft.getRepositoryLocation(),
+					node instanceof IRepositoryFile ? SVNEntry.Kind.FILE : SVNEntry.Kind.DIR, urlNext);
+			next.setSelectedRevision(rootLeft.getSelectedRevision());
+			next.setPegRevision(rootLeft.getPegRevision());
 		}
-		
+
 		return new CompareNode(parent, Differencer.NO_CHANGE, next, node, SVNEntryStatus.Kind.NORMAL);
 	}
-	
+
+	@Override
 	protected boolean isThreeWay() {
 		return false;
 	}
 
+	@Override
 	protected ResourceCompareViewer createDiffViewerImpl(Composite parent, CompareConfiguration config) {
 		return new ResourceCompareViewer(parent, config) {
+			@Override
 			public void setLabelProvider(IBaseLabelProvider labelProvider) {
-				super.setLabelProvider(new LabelProviderWrapper((ILabelProvider)labelProvider) {
+				super.setLabelProvider(new LabelProviderWrapper((ILabelProvider) labelProvider) {
+					@Override
 					public Image getImage(Object element) {
-						if (element instanceof CompareNode && ((CompareNode)element).getChangeType() == SVNEntryStatus.Kind.REPLACED) {
-							Image image = this.images.get(element);
+						if (element instanceof CompareNode
+								&& ((CompareNode) element).getChangeType() == SVNEntryStatus.Kind.REPLACED) {
+							Image image = images.get(element);
 							if (image == null) {
-								OverlayedImageDescriptor imageDescriptor = new OverlayedImageDescriptor(this.baseProvider.getImage(element), SVNTeamUIPlugin.instance().getImageDescriptor("icons/overlays/replaced_2way.gif"), new Point(22, 16), OverlayedImageDescriptor.RIGHT | OverlayedImageDescriptor.CENTER_V); //$NON-NLS-1$
-								this.images.put(element,image = imageDescriptor.createImage());
+								OverlayedImageDescriptor imageDescriptor = new OverlayedImageDescriptor(
+										baseProvider.getImage(element),
+										SVNTeamUIPlugin.instance()
+												.getImageDescriptor("icons/overlays/replaced_2way.gif"), //$NON-NLS-1$
+										new Point(22, 16),
+										OverlayedImageDescriptor.RIGHT | OverlayedImageDescriptor.CENTER_V);
+								images.put(element, image = imageDescriptor.createImage());
 							}
 							return image;
 						}
@@ -229,23 +249,24 @@ public class TwoWayResourceCompareInput extends ResourceCompareInput {
 			}
 		};
 	}
-	
+
 	protected class CompareNode extends BaseCompareNode {
 		protected SVNEntryStatus.Kind changeType;
-		
-		public CompareNode(IDiffContainer parent, int kind, IRepositoryResource next, IRepositoryResource prev, SVNEntryStatus.Kind changeType) {
+
+		public CompareNode(IDiffContainer parent, int kind, IRepositoryResource next, IRepositoryResource prev,
+				SVNEntryStatus.Kind changeType) {
 			super(parent, kind);
-			
+
 			this.changeType = changeType;
-			
-			this.setRight(new ResourceElement(prev, null, changeType != SVNEntryStatus.Kind.ADDED));
-			this.setLeft(new ResourceElement(next, null, changeType != SVNEntryStatus.Kind.DELETED));
+
+			setRight(new ResourceElement(prev, null, changeType != SVNEntryStatus.Kind.ADDED));
+			setLeft(new ResourceElement(next, null, changeType != SVNEntryStatus.Kind.DELETED));
 		}
 
 		public SVNEntryStatus.Kind getChangeType() {
-			return this.changeType;
+			return changeType;
 		}
-		
+
 	}
-	
+
 }

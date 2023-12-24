@@ -28,23 +28,25 @@ import org.eclipse.team.svn.core.svnstorage.SVNRemoteStorage;
  */
 public class GetAllResourcesOperation extends AbstractActionOperation {
 	protected IContainer container;
-	protected IResource []children;
+
+	protected IResource[] children;
 
 	public GetAllResourcesOperation(IContainer container) {
 		super("Operation_GetResourceList", SVNMessages.class); //$NON-NLS-1$
 		this.container = container;
-		this.children = new IResource[0];
+		children = new IResource[0];
 	}
 
+	@Override
 	protected void runImpl(IProgressMonitor monitor) throws Exception {
-		IResource []retVal = SVNRemoteStorage.instance().getRegisteredChildren(this.container);
+		IResource[] retVal = SVNRemoteStorage.instance().getRegisteredChildren(container);
 		if (retVal != null) {
-			this.children = retVal;
+			children = retVal;
 		}
 	}
-	
-	public IResource []getChildren() {
-		return this.children;
+
+	public IResource[] getChildren() {
+		return children;
 	}
 
 }

@@ -23,22 +23,23 @@ import org.eclipse.team.svn.core.utility.StringMatcher;
  * @author Alexei Goncharov
  */
 public class AuthorNameLogEntryFilter implements ILogEntryFilter {
-	
+
 	protected String authorNameToAccept;
-	
+
 	public AuthorNameLogEntryFilter() {
 		this(null);
 	}
-	
-	public AuthorNameLogEntryFilter (String authorNameToAccept) {
+
+	public AuthorNameLogEntryFilter(String authorNameToAccept) {
 		this.authorNameToAccept = authorNameToAccept;
 	}
 
+	@Override
 	public boolean accept(SVNLogEntry logEntry) {
-		if (this.authorNameToAccept == null) {
+		if (authorNameToAccept == null) {
 			return true;
 		}
-		StringMatcher matcher = new StringMatcher(this.authorNameToAccept);
+		StringMatcher matcher = new StringMatcher(authorNameToAccept);
 		String authorName = logEntry.author == null ? "" : logEntry.author; //$NON-NLS-1$
 		return matcher.match(authorName);
 	}
@@ -46,8 +47,8 @@ public class AuthorNameLogEntryFilter implements ILogEntryFilter {
 	public void setAuthorNameToAccept(String authorNameToAccept) {
 		this.authorNameToAccept = authorNameToAccept;
 	}
-	
+
 	public String getAuthorNameToAccept() {
-		return this.authorNameToAccept;
+		return authorNameToAccept;
 	}
 }

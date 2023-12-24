@@ -23,12 +23,16 @@ import org.eclipse.swt.widgets.Control;
  */
 public interface IValidationManager {
 
-	public void attachTo(Control cmp, AbstractVerifier verifier);
-	public void detachFrom(Control cmp);
-	public void detachAll();
+	void attachTo(Control cmp, AbstractVerifier verifier);
 
-	public boolean isFilledRight();
-	public void validateContent();
-	public boolean validateControl(Control cmp);
-	
+	void detachFrom(Control cmp);
+
+	void detachAll();
+
+	boolean isFilledRight();
+
+	void validateContent();
+
+	boolean validateControl(Control cmp);
+
 }

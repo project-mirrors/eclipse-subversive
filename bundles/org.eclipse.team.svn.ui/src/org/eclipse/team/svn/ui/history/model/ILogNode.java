@@ -17,44 +17,62 @@ package org.eclipse.team.svn.ui.history.model;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.jface.resource.ImageDescriptor;
 
-
 /**
  * History view UI node interface
  * 
  * @author Alexander Gurov
  */
 public interface ILogNode extends IAdaptable {
-	public static final int TYPE_NONE = 0;
-	public static final int TYPE_CATEGORY = 1;
-	public static final int TYPE_SVN = 2;
-	public static final int TYPE_LOCAL = 3;
-	
-	public static final int LABEL_TRIM = 0;
-	public static final int LABEL_FLAT = 1;
-	public static final int LABEL_FULL = 2;
-	
-	public static final int COLUMN_REVISION = 0;
-	public static final int COLUMN_DATE = 1;
-	public static final int COLUMN_CHANGES = 2;
-	public static final int COLUMN_AUTHOR = 3;
-	public static final int COLUMN_COMMENT = 4;
-	public static final int NUM_OF_COLUMNS = 5;
-	
-	public int getType();
-	public ILogNode []getChildren();
-	public boolean hasChildren();
-	public boolean requiresBoldFont(long currentRevision);
-	public ImageDescriptor getImageDescriptor();
-	public String getLabel(int columnIndex, int labelType, long currentRevision);
-	
-	public Object getEntity();
-	
-	public long getRevision();
-	public long getTimeStamp();
-	public String getComment();
-	public String getAuthor();
-	public int getChangesCount();
-	
-	public ILogNode getParent();
-	
+	int TYPE_NONE = 0;
+
+	int TYPE_CATEGORY = 1;
+
+	int TYPE_SVN = 2;
+
+	int TYPE_LOCAL = 3;
+
+	int LABEL_TRIM = 0;
+
+	int LABEL_FLAT = 1;
+
+	int LABEL_FULL = 2;
+
+	int COLUMN_REVISION = 0;
+
+	int COLUMN_DATE = 1;
+
+	int COLUMN_CHANGES = 2;
+
+	int COLUMN_AUTHOR = 3;
+
+	int COLUMN_COMMENT = 4;
+
+	int NUM_OF_COLUMNS = 5;
+
+	int getType();
+
+	ILogNode[] getChildren();
+
+	boolean hasChildren();
+
+	boolean requiresBoldFont(long currentRevision);
+
+	ImageDescriptor getImageDescriptor();
+
+	String getLabel(int columnIndex, int labelType, long currentRevision);
+
+	Object getEntity();
+
+	long getRevision();
+
+	long getTimeStamp();
+
+	String getComment();
+
+	String getAuthor();
+
+	int getChangesCount();
+
+	ILogNode getParent();
+
 }

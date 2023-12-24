@@ -26,10 +26,15 @@ import org.eclipse.team.svn.core.operation.CompositeOperation;
  */
 public interface IProjectSetHandler {
 
-	public String asReference(IProject project) throws TeamException;
-	public String asReference(String resourceUrl, String projectName);
-	public String getProjectNameForReference(String fullReference);
-	public IProject configureCheckoutOperation(CompositeOperation op, IProject project, String fullReference) throws TeamException;
-	public boolean accept(String referenceString);
-	
+	String asReference(IProject project) throws TeamException;
+
+	String asReference(String resourceUrl, String projectName);
+
+	String getProjectNameForReference(String fullReference);
+
+	IProject configureCheckoutOperation(CompositeOperation op, IProject project, String fullReference)
+			throws TeamException;
+
+	boolean accept(String referenceString);
+
 }

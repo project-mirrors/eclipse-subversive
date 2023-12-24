@@ -31,16 +31,18 @@ import org.eclipse.team.svn.core.utility.FileUtility;
  * @author Alexander Gurov
  */
 public class SaveContentVisitor implements IResourceChangeVisitor {
-	
-	public void preVisit(ResourceChange change, IActionOperationProcessor processor, IProgressMonitor monitor) throws Exception {
+
+	@Override
+	public void preVisit(ResourceChange change, IActionOperationProcessor processor, IProgressMonitor monitor)
+			throws Exception {
 		ILocalResource local = change.getLocal();
 		if (local instanceof ILocalFile) {
-	    	if (IStateFilter.SF_DELETED.accept(local) && !IStateFilter.SF_PREREPLACEDREPLACED.accept(local) ||
-	    		IStateFilter.SF_UNVERSIONED.accept(local) && "dir_conflicts.prej".equals(local.getName())) { //$NON-NLS-1$
-        		return;//skip save file content for deleted files; skip directory property reject files
-        	}
-	    	File real = new File(FileUtility.getWorkingCopyPath(local.getResource()));
-		    // optimize operation performance using "move on FS" if possible
+			if (IStateFilter.SF_DELETED.accept(local) && !IStateFilter.SF_PREREPLACEDREPLACED.accept(local)
+					|| IStateFilter.SF_UNVERSIONED.accept(local) && "dir_conflicts.prej".equals(local.getName())) { //$NON-NLS-1$
+				return;//skip save file content for deleted files; skip directory property reject files
+			}
+			File real = new File(FileUtility.getWorkingCopyPath(local.getResource()));
+			// optimize operation performance using "move on FS" if possible
 			if (real.exists() && !real.renameTo(change.getTemporary())) {
 				FileUtility.copyFile(change.getTemporary(), real, monitor);
 				real.delete();
@@ -48,7 +50,9 @@ public class SaveContentVisitor implements IResourceChangeVisitor {
 		}
 	}
 
-	public void postVisit(ResourceChange change, IActionOperationProcessor processor, IProgressMonitor monitor) throws Exception {
+	@Override
+	public void postVisit(ResourceChange change, IActionOperationProcessor processor, IProgressMonitor monitor)
+			throws Exception {
 	}
 
 }

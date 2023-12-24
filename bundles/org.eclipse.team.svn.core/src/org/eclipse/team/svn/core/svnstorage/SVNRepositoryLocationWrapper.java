@@ -33,244 +33,302 @@ import org.eclipse.team.svn.core.resource.events.IRepositoryLocationStateListene
  */
 public class SVNRepositoryLocationWrapper implements IRepositoryLocation {
 	protected IRepositoryLocation location;
+
 	protected String url;
 
 	protected String repositoryRootUrl;
+
 	protected String repositoryUUID;
-	
+
 	public SVNRepositoryLocationWrapper(IRepositoryLocation location, String mappedUrl) {
 		this.location = location;
-		this.url = mappedUrl;
+		url = mappedUrl;
 	}
-	
+
+	@Override
 	public void addStateListener(IRepositoryLocationStateListener listener) {
-		this.location.addStateListener(listener);
+		location.addStateListener(listener);
 	}
 
+	@Override
 	public void removeStateListener(IRepositoryLocationStateListener listener) {
-		this.location.removeStateListener(listener);
+		location.removeStateListener(listener);
 	}
+
+	@Override
 	public String asReference(LocationReferenceTypeEnum locationReferenceType) {
-		return this.location.asReference(locationReferenceType);
+		return location.asReference(locationReferenceType);
 	}
-	
+
+	@Override
 	public void fillLocationFromReference(String[] referenceParts) {
-		this.location.fillLocationFromReference(referenceParts);
+		location.fillLocationFromReference(referenceParts);
 	}
-	
+
+	@Override
 	public String getUrlAsIs() {
-		return this.url;
+		return url;
 	}
 
+	@Override
 	public String getUrl() {
-		return this.url;
+		return url;
 	}
 
+	@Override
 	public void setUrl(String url) {
 		this.url = url;
 	}
 
+	@Override
 	public IRepositoryContainer asRepositoryContainer(String url, boolean allowsNull) {
-    	return SVNRepositoryLocation.asRepositoryContainer(this, url, allowsNull);
+		return SVNRepositoryLocation.asRepositoryContainer(this, url, allowsNull);
 	}
 
+	@Override
 	public IRepositoryFile asRepositoryFile(String url, boolean allowsNull) {
-    	return SVNRepositoryLocation.asRepositoryFile(this, url, allowsNull);
+		return SVNRepositoryLocation.asRepositoryFile(this, url, allowsNull);
 	}
 
+	@Override
 	public IRepositoryRoot getRepositoryRoot() {
 		return new SVNRepositoryRoot(this);
 	}
 
+	@Override
 	public IRepositoryRoot getRoot() {
 		return new SVNRepositoryLocationRoot(this);
 	}
 
+	@Override
 	public String getRepositoryRootUrl() {
-		if (this.repositoryRootUrl == null) {
-			this.fetchRepoInfo();
+		if (repositoryRootUrl == null) {
+			fetchRepoInfo();
 		}
-		return this.repositoryRootUrl == null ? this.getUrl() : this.repositoryRootUrl;
+		return repositoryRootUrl == null ? getUrl() : repositoryRootUrl;
 	}
 
+	@Override
 	public String getRepositoryUUID() {
-		if (this.repositoryUUID == null) {
-			this.fetchRepoInfo();
+		if (repositoryUUID == null) {
+			fetchRepoInfo();
 		}
-		return this.repositoryUUID;
+		return repositoryUUID;
 	}
 
+	@Override
 	public ISVNConnector acquireSVNProxy() {
-		return this.location.acquireSVNProxy();
+		return location.acquireSVNProxy();
 	}
 
+	@Override
 	public void addRealm(String realm, IRepositoryLocation location) {
 		this.location.addRealm(realm, location);
 	}
 
+	@Override
 	public void addRevisionLink(IRevisionLink link) {
-		this.location.addRevisionLink(link);
+		location.addRevisionLink(link);
 	}
 
+	@Override
 	public void dispose() {
-		this.location.dispose();
+		location.dispose();
 	}
 
+	@Override
 	public String getBranchesLocation() {
-		return this.location.getBranchesLocation();
+		return location.getBranchesLocation();
 	}
 
+	@Override
 	public String getId() {
-		return this.location.getId();
+		return location.getId();
 	}
 
+	@Override
 	public String getLabel() {
-		return this.location.getLabel();
+		return location.getLabel();
 	}
 
+	@Override
 	public IRepositoryLocation getLocationForRealm(String realm) {
-		return this.location.getLocationForRealm(realm);
+		return location.getLocationForRealm(realm);
 	}
 
+	@Override
 	public String getPassword() {
-		return this.location.getPassword();
+		return location.getPassword();
 	}
 
+	@Override
 	public Collection<IRepositoryLocation> getRealmLocations() {
-		return this.location.getRealmLocations();
+		return location.getRealmLocations();
 	}
 
+	@Override
 	public Collection<String> getRealms() {
-		return this.location.getRealms();
+		return location.getRealms();
 	}
 
-	public IRevisionLink []getRevisionLinks() {
-		return this.location.getRevisionLinks();
+	@Override
+	public IRevisionLink[] getRevisionLinks() {
+		return location.getRevisionLinks();
 	}
 
+	@Override
 	public SSHSettings getSSHSettings() {
-		return this.location.getSSHSettings();
+		return location.getSSHSettings();
 	}
 
+	@Override
 	public SSLSettings getSSLSettings() {
-		return this.location.getSSLSettings();
+		return location.getSSLSettings();
 	}
 
+	@Override
 	public String getTagsLocation() {
-		return this.location.getTagsLocation();
+		return location.getTagsLocation();
 	}
 
+	@Override
 	public String getTrunkLocation() {
-		return this.location.getTrunkLocation();
+		return location.getTrunkLocation();
 	}
 
+	@Override
 	public String getUserInputBranches() {
-		return this.location.getUserInputBranches();
+		return location.getUserInputBranches();
 	}
 
+	@Override
 	public String getUserInputTags() {
-		return this.location.getUserInputTags();
+		return location.getUserInputTags();
 	}
 
+	@Override
 	public String getUserInputTrunk() {
-		return this.location.getUserInputTrunk();
+		return location.getUserInputTrunk();
 	}
 
+	@Override
 	public String getUsername() {
-		return this.location.getUsername();
+		return location.getUsername();
 	}
 
+	@Override
 	public boolean isPasswordSaved() {
-		return this.location.isPasswordSaved();
+		return location.isPasswordSaved();
 	}
 
+	@Override
 	public boolean isStructureEnabled() {
-		return this.location.isStructureEnabled();
+		return location.isStructureEnabled();
 	}
 
+	@Override
 	public void reconfigure() {
-		this.location.reconfigure();
+		location.reconfigure();
 	}
 
+	@Override
 	public void releaseSVNProxy(ISVNConnector proxy) {
-		this.location.releaseSVNProxy(proxy);
+		location.releaseSVNProxy(proxy);
 	}
 
+	@Override
 	public void removeRealm(String realm) {
-		this.location.removeRealm(realm);
+		location.removeRealm(realm);
 	}
 
+	@Override
 	public void removeRevisionLink(IRevisionLink link) {
-		this.location.removeRevisionLink(link);
+		location.removeRevisionLink(link);
 	}
 
+	@Override
 	public void setBranchesLocation(String location) {
 		this.location.setBranchesLocation(location);
 	}
 
+	@Override
 	public void setLabel(String label) {
-		this.location.setLabel(label);
+		location.setLabel(label);
 	}
 
+	@Override
 	public void setPassword(String password) {
-		this.location.setPassword(password);
+		location.setPassword(password);
 	}
 
+	@Override
 	public void setPasswordSaved(boolean saved) {
-		this.location.setPasswordSaved(saved);
+		location.setPasswordSaved(saved);
 	}
 
+	@Override
 	public void setStructureEnabled(boolean enabled) {
-		this.location.setStructureEnabled(enabled);
+		location.setStructureEnabled(enabled);
 	}
 
+	@Override
 	public void setTagsLocation(String location) {
 		this.location.setTagsLocation(location);
 	}
 
+	@Override
 	public void setTrunkLocation(String location) {
 		this.location.setTrunkLocation(location);
 	}
 
+	@Override
 	public void setUsername(String username) {
-		this.location.setUsername(username);
+		location.setUsername(username);
 	}
 
+	@Override
 	public String getName() {
-		return this.location.getName();
-	}
-	
-	public boolean isAuthorNameEnabled() {
-		return this.location.isAuthorNameEnabled();
-	}
-	
-	public String getAuthorName() {
-		return this.location.getAuthorName();
-	}
-	
-	public void setAuthorNameEnabled(boolean isEnabled) {
-		this.location.setAuthorNameEnabled(isEnabled);
-	}
-	
-	public void setAuthorName(String name) {
-		this.location.setAuthorName(name);
+		return location.getName();
 	}
 
+	@Override
+	public boolean isAuthorNameEnabled() {
+		return location.isAuthorNameEnabled();
+	}
+
+	@Override
+	public String getAuthorName() {
+		return location.getAuthorName();
+	}
+
+	@Override
+	public void setAuthorNameEnabled(boolean isEnabled) {
+		location.setAuthorNameEnabled(isEnabled);
+	}
+
+	@Override
+	public void setAuthorName(String name) {
+		location.setAuthorName(name);
+	}
+
+	@Override
 	public Object getAdapter(Class adapter) {
-		return this.location.getAdapter(adapter);
+		return location.getAdapter(adapter);
 	}
 
 	protected void fetchRepoInfo() {
-		String []values = SVNRepositoryLocation.fetchRepoInfo(this, true);
-		this.repositoryRootUrl = values[0];
-		this.repositoryUUID = values[1];
+		String[] values = SVNRepositoryLocation.fetchRepoInfo(this, true);
+		repositoryRootUrl = values[0];
+		repositoryUUID = values[1];
 	}
 
+	@Override
 	public boolean isPasswordSavedForRealm(String realm) {
-		return this.location.isPasswordSavedForRealm(realm);
+		return location.isPasswordSavedForRealm(realm);
 	}
 
+	@Override
 	public boolean equals(Object obj) {
-		return this.location.equals(obj); 
+		return location.equals(obj);
 	}
 }

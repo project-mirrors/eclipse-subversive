@@ -14,7 +14,6 @@
 
 package org.eclipse.team.svn.ui.action.local;
 
-
 /**
  * Team services create tag operation implementation
  * 
@@ -25,5 +24,5 @@ public class TagAction extends BranchTagAction {
 	public TagAction() {
 		super(BranchTagAction.TAG_ACTION);
 	}
-	
+
 }

@@ -34,24 +34,27 @@ import org.eclipse.team.ui.synchronize.ISynchronizePageConfiguration;
 public class ComparePropertiesModelAction extends AbstractSynchronizeLogicalModelAction {
 
 	protected ComparePropertiesActionHelper actionHelper;
-	
+
 	public ComparePropertiesModelAction(String text, ISynchronizePageConfiguration configuration) {
 		super(text, configuration);
-		this.actionHelper = new ComparePropertiesActionHelper(this, configuration);
+		actionHelper = new ComparePropertiesActionHelper(this, configuration);
 	}
 
+	@Override
 	protected boolean needsToSaveDirtyEditors() {
 		return false;
 	}
-	
+
+	@Override
 	protected IActionOperation getOperation() {
-		return this.actionHelper.getOperation();
+		return actionHelper.getOperation();
 	}
-	
+
+	@Override
 	protected boolean updateSelection(IStructuredSelection selection) {
 		super.updateSelection(selection);
 		if (selection.size() == 1) {
-			AbstractSVNSyncInfo syncInfo = this.getSelectedSVNSyncInfo();
+			AbstractSVNSyncInfo syncInfo = getSelectedSVNSyncInfo();
 			if (syncInfo != null && syncInfo.getKind() != SyncInfo.IN_SYNC) {
 				ILocalResource incoming = syncInfo.getRemoteChangeResource();
 				boolean retVal = IStateFilter.SF_EXCLUDE_DELETED.accept(incoming);
@@ -63,7 +66,7 @@ public class ComparePropertiesModelAction extends AbstractSynchronizeLogicalMode
 						|| incoming.getResource() instanceof IContainer);
 			}
 		}
-		return false;		
+		return false;
 	}
 
 }

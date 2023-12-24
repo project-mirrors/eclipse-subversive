@@ -30,7 +30,7 @@ import org.eclipse.team.svn.core.resource.ILocalResource;
  */
 public class SavePropertiesVisitor implements IResourceChangeVisitor {
 	protected boolean foldersOnly;
-	
+
 	public SavePropertiesVisitor() {
 		this(false);
 	}
@@ -39,19 +39,23 @@ public class SavePropertiesVisitor implements IResourceChangeVisitor {
 		this.foldersOnly = foldersOnly;
 	}
 
-	public void preVisit(ResourceChange change, IActionOperationProcessor processor, IProgressMonitor monitor) throws Exception {
-		if (this.foldersOnly && !(change.getLocal() instanceof ILocalFolder)) {
+	@Override
+	public void preVisit(ResourceChange change, IActionOperationProcessor processor, IProgressMonitor monitor)
+			throws Exception {
+		if (foldersOnly && !(change.getLocal() instanceof ILocalFolder)) {
 			return;
 		}
 		ILocalResource local = change.getLocal();
-    	if (IStateFilter.SF_VERSIONED.accept(local)) {
+		if (IStateFilter.SF_VERSIONED.accept(local)) {
 			GetPropertiesOperation getProp = new GetPropertiesOperation(local.getResource());
-    		processor.doOperation(getProp, monitor);
-    		change.setProperties(getProp.getProperties());
-        }
+			processor.doOperation(getProp, monitor);
+			change.setProperties(getProp.getProperties());
+		}
 	}
 
-	public void postVisit(ResourceChange change, IActionOperationProcessor processor, IProgressMonitor monitor) throws Exception {
+	@Override
+	public void postVisit(ResourceChange change, IActionOperationProcessor processor, IProgressMonitor monitor)
+			throws Exception {
 	}
 
 }

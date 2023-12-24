@@ -31,27 +31,31 @@ import org.eclipse.team.ui.synchronize.ISynchronizePageConfiguration;
  * @author Sergiy Logvin
  */
 public class ExpandAllAction extends AbstractSynchronizeModelAction {
-	public ExpandAllAction(String text, ISynchronizePageConfiguration configuration, ISelectionProvider selectionProvider) {
+	public ExpandAllAction(String text, ISynchronizePageConfiguration configuration,
+			ISelectionProvider selectionProvider) {
 		super(text, configuration, selectionProvider);
 	}
-	
+
+	@Override
 	protected boolean needsToSaveDirtyEditors() {
 		return false;
 	}
-	
-	protected IActionOperation getOperation(final ISynchronizePageConfiguration configuration, IDiffElement[] elements) {
+
+	@Override
+	protected IActionOperation getOperation(final ISynchronizePageConfiguration configuration,
+			IDiffElement[] elements) {
 		return new AbstractActionOperation("Operation_UExpandAll", SVNUIMessages.class) { //$NON-NLS-1$
+			@Override
 			protected void runImpl(IProgressMonitor monitor) throws Exception {
-				UIMonitorUtility.getDisplay().syncExec(new Runnable() {
-					public void run() {
-						Viewer viewer = configuration.getPage().getViewer();
-						if (viewer == null || viewer.getControl().isDisposed() || !(viewer instanceof AbstractTreeViewer)) {
-							return;
-						}
-						viewer.getControl().setRedraw(false);		
-						((AbstractTreeViewer)viewer).expandAll();
-						viewer.getControl().setRedraw(true);
+				UIMonitorUtility.getDisplay().syncExec(() -> {
+					Viewer viewer = configuration.getPage().getViewer();
+					if (viewer == null || viewer.getControl().isDisposed()
+							|| !(viewer instanceof AbstractTreeViewer)) {
+						return;
 					}
+					viewer.getControl().setRedraw(false);
+					((AbstractTreeViewer) viewer).expandAll();
+					viewer.getControl().setRedraw(true);
 				});
 			}
 		};

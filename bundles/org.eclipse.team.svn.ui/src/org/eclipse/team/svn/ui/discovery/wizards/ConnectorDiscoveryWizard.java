@@ -23,6 +23,7 @@ import java.util.Map;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.wizard.Wizard;
+import org.eclipse.team.svn.core.BaseMessages;
 import org.eclipse.team.svn.core.SVNTeamPlugin;
 import org.eclipse.team.svn.core.discovery.model.ConnectorDescriptorKind;
 import org.eclipse.team.svn.core.discovery.model.ConnectorDiscovery;
@@ -32,8 +33,8 @@ import org.eclipse.team.svn.ui.discovery.IConnectorsInstallJob;
 import org.eclipse.team.svn.ui.discovery.util.DiscoveryUiUtil;
 
 /**
- * A wizard for performing discovery of connectors and selecting connectors to install. When finish is pressed, selected
- * connectors are downloaded and installed.
+ * A wizard for performing discovery of connectors and selecting connectors to install. When finish is pressed, selected connectors are
+ * downloaded and installed.
  * 
  * @see ConnectorDiscoveryWizardMainPage
  * 
@@ -45,8 +46,8 @@ public class ConnectorDiscoveryWizard extends Wizard {
 	private ConnectorDiscoveryWizardMainPage mainPage;
 
 	protected IConnectorsInstallJob installJob;
-	
-	private final Map<ConnectorDescriptorKind, Boolean> connectorDescriptorKindToVisibility = new HashMap<ConnectorDescriptorKind, Boolean>();
+
+	private final Map<ConnectorDescriptorKind, Boolean> connectorDescriptorKindToVisibility = new HashMap<>();
 	{
 		for (ConnectorDescriptorKind kind : ConnectorDescriptorKind.values()) {
 			connectorDescriptorKindToVisibility.put(kind, true);
@@ -61,7 +62,7 @@ public class ConnectorDiscoveryWizard extends Wizard {
 
 	public ConnectorDiscoveryWizard(IConnectorsInstallJob installJob) {
 		this.installJob = installJob;
-		
+
 		setWindowTitle(SVNUIMessages.ConnectorDiscoveryWizard_connectorDiscovery);
 		setNeedsProgressMonitor(true);
 		setDefaultPageImageDescriptor(SVNTeamUIPlugin.instance().getImageDescriptor("icons/wizards/newconnect.gif"));
@@ -69,7 +70,7 @@ public class ConnectorDiscoveryWizard extends Wizard {
 	}
 
 	private void createEnvironment() {
-		environment = new Hashtable<Object, Object>(System.getProperties());
+		environment = new Hashtable<>(System.getProperties());
 	}
 
 	@Override
@@ -80,11 +81,11 @@ public class ConnectorDiscoveryWizard extends Wizard {
 	@Override
 	public boolean performFinish() {
 		try {
-			this.installJob.setInstallableConnectors(this.mainPage.getInstallableConnectors());
-			this.getContainer().run(true, true, this.installJob);
+			installJob.setInstallableConnectors(mainPage.getInstallableConnectors());
+			getContainer().run(true, true, installJob);
 			return true;
 		} catch (InvocationTargetException e) {
-			IStatus status = new Status(IStatus.ERROR, SVNTeamPlugin.NATURE_ID, SVNUIMessages.format(
+			IStatus status = new Status(IStatus.ERROR, SVNTeamPlugin.NATURE_ID, BaseMessages.format(
 					SVNUIMessages.ConnectorDiscoveryWizard_installProblems, new Object[] { e.getCause().getMessage() }),
 					e.getCause());
 			DiscoveryUiUtil.logAndDisplayStatus(SVNUIMessages.ConnectorDiscoveryWizard_cannotInstall, status);
@@ -119,16 +120,16 @@ public class ConnectorDiscoveryWizard extends Wizard {
 	}
 
 	/**
-	 * indicate if the connector descriptor filters should be shown in the UI. Changing this setting only has an effect
-	 * before the UI is presented.
+	 * indicate if the connector descriptor filters should be shown in the UI. Changing this setting only has an effect before the UI is
+	 * presented.
 	 */
 	public boolean isShowConnectorDescriptorKindFilter() {
-		return this.showConnectorDescriptorKindFilter & false;	//TODO always disabled
+		return showConnectorDescriptorKindFilter & false; //TODO always disabled
 	}
 
 	/**
-	 * indicate if the connector descriptor filters should be shown in the UI. Changing this setting only has an effect
-	 * before the UI is presented.
+	 * indicate if the connector descriptor filters should be shown in the UI. Changing this setting only has an effect before the UI is
+	 * presented.
 	 */
 	public void setShowConnectorDescriptorKindFilter(boolean showConnectorDescriptorKindFilter) {
 		this.showConnectorDescriptorKindFilter = showConnectorDescriptorKindFilter;

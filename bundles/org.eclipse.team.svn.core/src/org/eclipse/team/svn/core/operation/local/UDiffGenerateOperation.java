@@ -38,41 +38,44 @@ import org.eclipse.team.svn.core.utility.SVNUtility;
 public class UDiffGenerateOperation extends AbstractActionOperation {
 
 	protected ILocalResource local;
+
 	protected IRepositoryResource remote;
+
 	protected String diffFile;
-	
+
 	public UDiffGenerateOperation(ILocalResource local, IRepositoryResource remote, String diffFile) {
 		super("Operation_UDiffGenerate", SVNMessages.class); //$NON-NLS-1$
 		this.local = local;
 		this.remote = remote;
 		this.diffFile = diffFile;
 	}
-	
+
+	@Override
 	protected void runImpl(IProgressMonitor monitor) throws Exception {
-		IRepositoryLocation location = SVNRemoteStorage.instance().getRepositoryLocation(this.local.getResource());
+		IRepositoryLocation location = SVNRemoteStorage.instance().getRepositoryLocation(local.getResource());
 		ISVNConnector proxy = location.acquireSVNProxy();
 		try {
-			String wcPath = FileUtility.getWorkingCopyPath(this.local.getResource());
-			SVNEntryRevisionReference refPrev = new SVNEntryRevisionReference(wcPath, null, SVNRevision.WORKING);			
-			SVNEntryRevisionReference refNext = SVNUtility.getEntryRevisionReference(this.remote);					
-						
-			String projectPath = FileUtility.getWorkingCopyPath(this.local.getResource().getProject());
+			String wcPath = FileUtility.getWorkingCopyPath(local.getResource());
+			SVNEntryRevisionReference refPrev = new SVNEntryRevisionReference(wcPath, null, SVNRevision.WORKING);
+			SVNEntryRevisionReference refNext = SVNUtility.getEntryRevisionReference(remote);
+
+			String projectPath = FileUtility.getWorkingCopyPath(local.getResource().getProject());
 			String relativeToDir = projectPath;
-								
-			SVNDepth depth = SVNDepth.INFINITY;							
+
+			SVNDepth depth = SVNDepth.INFINITY;
 			long options = ISVNConnector.Options.NONE;
-			//ISVNConnector.Options.IGNORE_ANCESTRY;					
-			String[] changelistNames = new String[0];
-								
-			this.writeToConsole(
+			//ISVNConnector.Options.IGNORE_ANCESTRY;
+			String[] changelistNames = {};
+
+			writeToConsole(
 					IConsoleStream.LEVEL_CMD, "svn diff -r " //$NON-NLS-1$
-					+ refNext.revision
-					+ " \"" + wcPath + "\"" //$NON-NLS-1$ //$NON-NLS-2$
-					//+ "@" + refNext.pegRevision + "\""
-					+ ISVNConnector.Options.asCommandLine(options)
-					+ FileUtility.getUsernameParam(location.getUsername()) + "\n"); //$NON-NLS-1$
-			
-			proxy.diffTwo(refPrev, refNext, relativeToDir, this.diffFile, depth, options, changelistNames, ISVNConnector.Options.NONE, new SVNProgressMonitor(this, monitor, null));			
+							+ refNext.revision + " \"" + wcPath + "\"" //$NON-NLS-1$ //$NON-NLS-2$
+							//+ "@" + refNext.pegRevision + "\""
+							+ ISVNConnector.Options.asCommandLine(options)
+							+ FileUtility.getUsernameParam(location.getUsername()) + "\n"); //$NON-NLS-1$
+
+			proxy.diffTwo(refPrev, refNext, relativeToDir, diffFile, depth, options, changelistNames,
+					ISVNConnector.Options.NONE, new SVNProgressMonitor(this, monitor, null));
 		} finally {
 			location.releaseSVNProxy(proxy);
 		}

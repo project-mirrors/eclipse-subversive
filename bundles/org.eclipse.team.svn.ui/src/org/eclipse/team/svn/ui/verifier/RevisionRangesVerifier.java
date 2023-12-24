@@ -18,6 +18,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.team.svn.core.BaseMessages;
 import org.eclipse.team.svn.ui.SVNUIMessages;
 
 /**
@@ -26,25 +27,28 @@ import org.eclipse.team.svn.ui.SVNUIMessages;
  * @author Alexander Gurov
  */
 public class RevisionRangesVerifier extends AbstractFormattedVerifier {
-    protected static String ERROR_MESSAGE;
-    
+	protected static String ERROR_MESSAGE;
+
 	protected Pattern pattern;
 
 	public RevisionRangesVerifier(String fieldName) {
 		super(fieldName);
-		RevisionRangesVerifier.ERROR_MESSAGE = SVNUIMessages.format(SVNUIMessages.Verifier_RevisionRanges, new String[] {AbstractFormattedVerifier.FIELD_NAME});
-		this.pattern = Pattern.compile("\\d+(-\\d+)?(\\s*,\\s*\\d+(-\\d+)?)*"); //$NON-NLS-1$
+		RevisionRangesVerifier.ERROR_MESSAGE = BaseMessages.format(SVNUIMessages.Verifier_RevisionRanges,
+				new String[] { AbstractFormattedVerifier.FIELD_NAME });
+		pattern = Pattern.compile("\\d+(-\\d+)?(\\s*,\\s*\\d+(-\\d+)?)*"); //$NON-NLS-1$
 	}
 
+	@Override
 	protected String getErrorMessageImpl(Control input) {
-        String text = this.getText(input);
-        Matcher matcher = this.pattern.matcher(text);
-        if (!matcher.matches()) {
-        	return RevisionRangesVerifier.ERROR_MESSAGE;
-        }
+		String text = getText(input);
+		Matcher matcher = pattern.matcher(text);
+		if (!matcher.matches()) {
+			return RevisionRangesVerifier.ERROR_MESSAGE;
+		}
 		return null;
 	}
 
+	@Override
 	protected String getWarningMessageImpl(Control input) {
 		return null;
 	}

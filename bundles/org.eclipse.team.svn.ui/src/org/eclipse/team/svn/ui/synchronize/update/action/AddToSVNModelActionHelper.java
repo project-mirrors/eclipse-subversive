@@ -39,32 +39,38 @@ public class AddToSVNModelActionHelper extends AbstractActionHelper {
 		super(action, configuration);
 	}
 
+	@Override
 	public FastSyncInfoFilter getSyncInfoFilter() {
-		return new FastSyncInfoFilter.SyncInfoDirectionFilter(new int[] {SyncInfo.OUTGOING, SyncInfo.CONFLICTING}) {
-            public boolean select(SyncInfo info) {
-				UpdateSyncInfo sync = (UpdateSyncInfo)info;
-				return super.select(info) && (IStateFilter.SF_NEW.accept(sync.getLocalResource()) || IStateFilter.SF_IGNORED.accept(sync.getLocalResource()));
+		return new FastSyncInfoFilter.SyncInfoDirectionFilter(new int[] { SyncInfo.OUTGOING, SyncInfo.CONFLICTING }) {
+			@Override
+			public boolean select(SyncInfo info) {
+				UpdateSyncInfo sync = (UpdateSyncInfo) info;
+				return super.select(info) && (IStateFilter.SF_NEW.accept(sync.getLocalResource())
+						|| IStateFilter.SF_IGNORED.accept(sync.getLocalResource()));
 			}
 		};
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.team.svn.ui.synchronize.action.AbstractActionHelper#getOperation()
 	 */
+	@Override
 	public IActionOperation getOperation() {
-	    QueryResourceAddition query = new QueryResourceAddition(this.getSyncInfoSelector(), configuration.getSite().getShell());
-	    IResource []resources = query.queryAddition();
+		QueryResourceAddition query = new QueryResourceAddition(getSyncInfoSelector(),
+				configuration.getSite().getShell());
+		IResource[] resources = query.queryAddition();
 		if (resources == null) {
 			return null;
 		}
 		AddToSVNWithPropertiesOperation mainOp = new AddToSVNWithPropertiesOperation(resources, false);
-		
+
 		CompositeOperation op = new CompositeOperation(mainOp.getId(), mainOp.getMessagesClass());
 
 		op.add(mainOp);
-		op.add(new RefreshResourcesOperation(resources/*, IResource.DEPTH_INFINITE, RefreshResourcesOperation.REFRESH_ALL*/));
+		op.add(new RefreshResourcesOperation(
+				resources/*, IResource.DEPTH_INFINITE, RefreshResourcesOperation.REFRESH_ALL*/));
 
-		return op;	
+		return op;
 	}
 
 }

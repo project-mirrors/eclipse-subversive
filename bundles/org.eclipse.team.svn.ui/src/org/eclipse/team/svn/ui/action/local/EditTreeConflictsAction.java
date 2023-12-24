@@ -32,9 +32,9 @@ import org.eclipse.team.svn.ui.utility.UIMonitorUtility;
 public class EditTreeConflictsAction extends AbstractRecursiveTeamAction {
 
 	public EditTreeConflictsAction() {
-		super();
 	}
 
+	@Override
 	public void runImpl(IAction action) {
 		IResource[] resources = this.getSelectedResources(IStateFilter.SF_TREE_CONFLICTING);
 		if (resources.length > 0) {
@@ -43,16 +43,18 @@ public class EditTreeConflictsAction extends AbstractRecursiveTeamAction {
 				EditTreeConflictsPanel editConflictsPanel = new EditTreeConflictsPanel(local);
 				DefaultDialog dialog = new DefaultDialog(UIMonitorUtility.getShell(), editConflictsPanel);
 				if (dialog.open() == 0 && editConflictsPanel.getOperation() != null) {
-					this.runScheduled(editConflictsPanel.getOperation());			
-				}		
+					runScheduled(editConflictsPanel.getOperation());
+				}
 			}
-		}		
-	}
-	
-	public boolean isEnabled() {
-		return this.getSelectedResources().length == 1 && this.checkForResourcesPresence(IStateFilter.SF_TREE_CONFLICTING);
+		}
 	}
 
+	@Override
+	public boolean isEnabled() {
+		return this.getSelectedResources().length == 1 && checkForResourcesPresence(IStateFilter.SF_TREE_CONFLICTING);
+	}
+
+	@Override
 	protected boolean needsToSaveDirtyEditors() {
 		return true;
 	}

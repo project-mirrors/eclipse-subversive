@@ -23,6 +23,7 @@ import org.eclipse.team.svn.core.IStateFilter;
  * @author Alexander Gurov
  */
 public interface IRecursiveResourceSelector {
-    public IResource []getSelectedResourcesRecursive(IStateFilter filter, int depth);
-    public IResource []getSelectedResourcesRecursive(IStateFilter filter);
+	IResource[] getSelectedResourcesRecursive(IStateFilter filter, int depth);
+
+	IResource[] getSelectedResourcesRecursive(IStateFilter filter);
 }

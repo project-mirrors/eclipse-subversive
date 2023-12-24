@@ -39,35 +39,42 @@ import org.eclipse.team.svn.ui.utility.UIMonitorUtility;
  */
 public class SetExternalDefinitionAction extends AbstractNonRecursiveTeamAction {
 
+	@Override
 	public void runImpl(IAction action) {
-		IResource resource = this.getSelectedResources()[0];	
-		IActionOperation op = SetExternalDefinitionAction.getAction(resource, this.getShell());
+		IResource resource = this.getSelectedResources()[0];
+		IActionOperation op = SetExternalDefinitionAction.getAction(resource, getShell());
 		if (op != null) {
-			this.runScheduled(op);
+			runScheduled(op);
 		}
 	}
-		
+
+	@Override
 	public boolean isEnabled() {
-		return this.getSelectedResources().length == 1 && this.checkForResourcesPresence(IStateFilter.SF_VERSIONED_FOLDERS);
+		return this.getSelectedResources().length == 1 && checkForResourcesPresence(IStateFilter.SF_VERSIONED_FOLDERS);
 	}
-	
-	public static IActionOperation getAction(IResource resource, Shell shell) {		
+
+	public static IActionOperation getAction(IResource resource, Shell shell) {
 		IRepositoryResource repositoryResource = SVNRemoteStorage.instance().asRepositoryResource(resource);
-		ExternalsEditPanel panel = new ExternalsEditPanel("SetExternalDefinitionPage", "RepositoryResourceOnlySelectionComposite_URL", resource, repositoryResource); //$NON-NLS-1$ //$NON-NLS-2$
+		ExternalsEditPanel panel = new ExternalsEditPanel("SetExternalDefinitionPage", //$NON-NLS-1$
+				"RepositoryResourceOnlySelectionComposite_URL", resource, repositoryResource); //$NON-NLS-1$
 		DefaultDialog dialog = new DefaultDialog(shell != null ? shell : UIMonitorUtility.getShell(), panel);
-		if (dialog.open() == 0) {						 									
-			GenerateExternalsPropertyOperation generatePropOp = new GenerateExternalsPropertyOperation(resource, panel.getUrl(), panel.getRevision(), panel.getLocalPath(), panel.isPriorToSVN15Format());			
-			ConcatenateProperyDataOperation concatOp = new ConcatenateProperyDataOperation(resource, SVNProperty.BuiltIn.EXTERNALS, generatePropOp);
+		if (dialog.open() == 0) {
+			GenerateExternalsPropertyOperation generatePropOp = new GenerateExternalsPropertyOperation(resource,
+					panel.getUrl(), panel.getRevision(), panel.getLocalPath(), panel.isPriorToSVN15Format());
+			ConcatenateProperyDataOperation concatOp = new ConcatenateProperyDataOperation(resource,
+					SVNProperty.BuiltIn.EXTERNALS, generatePropOp);
 			concatOp.setStringValuesSeparator(""); //$NON-NLS-1$
-			SetPropertiesOperation setPropsOp = new SetPropertiesOperation(new IResource[] {resource}, concatOp, false);			
+			SetPropertiesOperation setPropsOp = new SetPropertiesOperation(new IResource[] { resource }, concatOp,
+					false);
 			CompositeOperation op = new CompositeOperation(setPropsOp.getId(), setPropsOp.getMessagesClass());
 			op.add(generatePropOp);
-			op.add(concatOp, new IActionOperation[]{generatePropOp});
-			op.add(setPropsOp, new IActionOperation[]{concatOp});
-			op.add(new RefreshResourcesOperation(new IResource[] {resource}, IResource.DEPTH_INFINITE, RefreshResourcesOperation.REFRESH_ALL), new IActionOperation[] {setPropsOp});
-			return op;			
+			op.add(concatOp, new IActionOperation[] { generatePropOp });
+			op.add(setPropsOp, new IActionOperation[] { concatOp });
+			op.add(new RefreshResourcesOperation(new IResource[] { resource }, IResource.DEPTH_INFINITE,
+					RefreshResourcesOperation.REFRESH_ALL), new IActionOperation[] { setPropsOp });
+			return op;
 		}
 		return null;
 	}
-		  
+
 }

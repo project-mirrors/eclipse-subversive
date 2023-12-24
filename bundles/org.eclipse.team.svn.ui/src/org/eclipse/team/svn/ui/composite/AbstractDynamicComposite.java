@@ -22,15 +22,15 @@ import org.eclipse.swt.widgets.Composite;
  *
  */
 public abstract class AbstractDynamicComposite extends Composite {
-	
+
 	public AbstractDynamicComposite(Composite parent, int style) {
 		super(parent, style);
 	}
-	
+
 	public abstract void saveAppearance();
-	
+
 	public abstract void restoreAppearance();
-	
+
 	public abstract void revalidateContent();
 
 }

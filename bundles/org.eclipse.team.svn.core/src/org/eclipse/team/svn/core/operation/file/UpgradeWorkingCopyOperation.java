@@ -21,7 +21,6 @@ import org.eclipse.team.svn.core.SVNMessages;
 import org.eclipse.team.svn.core.connector.ISVNConnector;
 import org.eclipse.team.svn.core.extension.CoreExtensionsManager;
 import org.eclipse.team.svn.core.operation.IConsoleStream;
-import org.eclipse.team.svn.core.operation.IUnprotectedOperation;
 import org.eclipse.team.svn.core.operation.SVNProgressMonitor;
 import org.eclipse.team.svn.core.utility.FileUtility;
 
@@ -31,7 +30,7 @@ import org.eclipse.team.svn.core.utility.FileUtility;
  * @author Alexander Gurov
  */
 public class UpgradeWorkingCopyOperation extends AbstractFileOperation {
-	public UpgradeWorkingCopyOperation(File []files) {
+	public UpgradeWorkingCopyOperation(File[] files) {
 		super("Operation_Upgrade", SVNMessages.class, files); //$NON-NLS-1$
 	}
 
@@ -39,24 +38,22 @@ public class UpgradeWorkingCopyOperation extends AbstractFileOperation {
 		super("Operation_Upgrade", SVNMessages.class, provider); //$NON-NLS-1$
 	}
 
+	@Override
 	protected void runImpl(IProgressMonitor monitor) throws Exception {
-		File []files = this.operableData();
-		
+		File[] files = operableData();
+
 		files = FileUtility.shrinkChildNodes(files, false);
 
 		final ISVNConnector proxy = CoreExtensionsManager.instance().getSVNConnectorFactory().createConnector();
 		try {
 			for (int i = 0; i < files.length && !monitor.isCanceled(); i++) {
 				final File current = files[i];
-				this.writeToConsole(IConsoleStream.LEVEL_CMD, "svn upgrade \"" + FileUtility.normalizePath(current.getAbsolutePath()) + "\"\n"); //$NON-NLS-1$ //$NON-NLS-2$
-				this.protectStep(new IUnprotectedOperation() {
-					public void run(IProgressMonitor monitor) throws Exception {
-						proxy.upgrade(current.getAbsolutePath(), new SVNProgressMonitor(UpgradeWorkingCopyOperation.this, monitor, null));
-					}
-				}, monitor, files.length);
+				writeToConsole(IConsoleStream.LEVEL_CMD,
+						"svn upgrade \"" + FileUtility.normalizePath(current.getAbsolutePath()) + "\"\n"); //$NON-NLS-1$ //$NON-NLS-2$
+				this.protectStep(monitor1 -> proxy.upgrade(current.getAbsolutePath(),
+						new SVNProgressMonitor(UpgradeWorkingCopyOperation.this, monitor1, null)), monitor, files.length);
 			}
-		}		
-		finally {
+		} finally {
 			proxy.dispose();
 		}
 	}

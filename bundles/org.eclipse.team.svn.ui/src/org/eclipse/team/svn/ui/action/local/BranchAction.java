@@ -14,7 +14,6 @@
 
 package org.eclipse.team.svn.ui.action.local;
 
-
 /**
  * Team services create branch operation implementation
  * 
@@ -25,5 +24,5 @@ public class BranchAction extends BranchTagAction {
 	public BranchAction() {
 		super(BranchTagAction.BRANCH_ACTION);
 	}
-	
+
 }

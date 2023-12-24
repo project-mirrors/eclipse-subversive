@@ -27,7 +27,7 @@ import org.eclipse.team.svn.core.SVNMessages;
  */
 public class ConnectorDescriptor {
 
-	protected java.util.List<ConnectorDescriptorKind> kind = new java.util.ArrayList<ConnectorDescriptorKind>();
+	protected java.util.List<ConnectorDescriptorKind> kind = new java.util.ArrayList<>();
 
 	protected String name;
 
@@ -39,7 +39,7 @@ public class ConnectorDescriptor {
 
 	protected String siteUrl;
 
-	protected List<String> installableUnits = new ArrayList<String>();
+	protected List<String> installableUnits = new ArrayList<>();
 
 	protected String categoryId;
 
@@ -47,7 +47,7 @@ public class ConnectorDescriptor {
 
 	protected String groupId;
 
-	protected java.util.List<FeatureFilter> featureFilter = new java.util.ArrayList<FeatureFilter>();
+	protected java.util.List<FeatureFilter> featureFilter = new java.util.ArrayList<>();
 
 	protected Icon icon;
 
@@ -68,8 +68,8 @@ public class ConnectorDescriptor {
 	}
 
 	/**
-	 * the name of the connector including the name of the organization that produces the repository if appropriate, for
-	 * example 'Mozilla Bugzilla'.
+	 * the name of the connector including the name of the organization that produces the repository if appropriate, for example 'Mozilla
+	 * Bugzilla'.
 	 */
 	public String getName() {
 		return name;
@@ -102,8 +102,8 @@ public class ConnectorDescriptor {
 	}
 
 	/**
-	 * A description of the connector. Plug-ins should provide a description, especially if the description is not
-	 * self-evident from the @name and
+	 * A description of the connector. Plug-ins should provide a description, especially if the description is not self-evident from
+	 * the @name and
 	 * 
 	 * @organization.
 	 */
@@ -134,7 +134,7 @@ public class ConnectorDescriptor {
 	}
 
 	public void setInstallableUnits(List<String> id) {
-		this.installableUnits = id;
+		installableUnits = id;
 	}
 
 	/**

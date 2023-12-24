@@ -27,48 +27,59 @@ import org.eclipse.core.resources.IResource;
  */
 public class UnresolvedConflictDetectorHelper implements IUnresolvedConflictDetector {
 
-    protected Set<IResource> processed;
-    protected Set<IResource> unprocessed;
+	protected Set<IResource> processed;
+
+	protected Set<IResource> unprocessed;
+
 	protected boolean hasUnresolvedConflict;
+
 	protected String conflictMessage;
-	
+
+	@Override
 	public void setUnresolvedConflict(boolean hasUnresolvedConflict) {
 		this.hasUnresolvedConflict = hasUnresolvedConflict;
 	}
-	
+
+	@Override
 	public boolean hasUnresolvedConflicts() {
-        return this.hasUnresolvedConflict;
-    }
-    
-    public String getMessage() {
-    	return this.conflictMessage;
-    }
-    
-    public IResource []getUnprocessed() {
-		return this.unprocessed == null ? new IResource[0] : this.unprocessed.toArray(new IResource[this.unprocessed.size()]);
-    }
-
-	public IResource []getProcessed() {
-		return this.processed == null ? new IResource[0] : this.processed.toArray(new IResource[this.processed.size()]);
-	}
-	
-	protected void defineInitialResourceSet(IResource []resources) {
-        this.hasUnresolvedConflict = false;
-        this.unprocessed = new HashSet<IResource>();
-        this.processed = new HashSet<IResource>();
-		this.processed.addAll(Arrays.asList(resources));
+		return hasUnresolvedConflict;
 	}
 
+	@Override
+	public String getMessage() {
+		return conflictMessage;
+	}
+
+	@Override
+	public IResource[] getUnprocessed() {
+		return unprocessed == null ? new IResource[0] : unprocessed.toArray(new IResource[unprocessed.size()]);
+	}
+
+	@Override
+	public IResource[] getProcessed() {
+		return processed == null ? new IResource[0] : processed.toArray(new IResource[processed.size()]);
+	}
+
+	protected void defineInitialResourceSet(IResource[] resources) {
+		hasUnresolvedConflict = false;
+		unprocessed = new HashSet<>();
+		processed = new HashSet<>();
+		processed.addAll(Arrays.asList(resources));
+	}
+
+	@Override
 	public void addUnprocessed(IResource unprocessed) {
 		this.unprocessed.add(unprocessed);
 	}
 
+	@Override
 	public void setConflictMessage(String message) {
-		this.conflictMessage = message;
-		
+		conflictMessage = message;
+
 	}
-	
+
+	@Override
 	public void removeProcessed(IResource resource) {
-		this.unprocessed.remove(resource);		
+		unprocessed.remove(resource);
 	}
 }

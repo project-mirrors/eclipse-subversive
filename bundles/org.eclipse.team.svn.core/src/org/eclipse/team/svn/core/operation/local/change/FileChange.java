@@ -23,16 +23,20 @@ import org.eclipse.team.svn.core.resource.ILocalFile;
  * @author Alexander Gurov
  */
 public class FileChange extends ResourceChange {
-    public FileChange(ResourceChange parent, ILocalFile local, boolean needsTemporary) {
-        super(parent, local, needsTemporary);
-    }
+	public FileChange(ResourceChange parent, ILocalFile local, boolean needsTemporary) {
+		super(parent, local, needsTemporary);
+	}
 
-    protected void preTraverse(IResourceChangeVisitor visitor, int depth, IActionOperationProcessor processor, IProgressMonitor monitor) throws Exception {
-    	visitor.preVisit(this, processor, monitor);
-    }
-    
-    protected void postTraverse(IResourceChangeVisitor visitor, int depth, IActionOperationProcessor processor, IProgressMonitor monitor) throws Exception {
-    	visitor.postVisit(this, processor, monitor);
-    }
-    
+	@Override
+	protected void preTraverse(IResourceChangeVisitor visitor, int depth, IActionOperationProcessor processor,
+			IProgressMonitor monitor) throws Exception {
+		visitor.preVisit(this, processor, monitor);
+	}
+
+	@Override
+	protected void postTraverse(IResourceChangeVisitor visitor, int depth, IActionOperationProcessor processor,
+			IProgressMonitor monitor) throws Exception {
+		visitor.postVisit(this, processor, monitor);
+	}
+
 }

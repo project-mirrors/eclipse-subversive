@@ -33,9 +33,9 @@ public class Overview {
 	}
 
 	/**
-	 * A description providing detailed information about the item. Newlines can be used to format the text into
-	 * multiple paragraphs if necessary. Text must fit into an area 320x240, otherwise it will be truncated in the UI.
-	 * More lengthy descriptions can be provided on a web page if required, see @url.
+	 * A description providing detailed information about the item. Newlines can be used to format the text into multiple paragraphs if
+	 * necessary. Text must fit into an area 320x240, otherwise it will be truncated in the UI. More lengthy descriptions can be provided on
+	 * a web page if required, see @url.
 	 */
 	public String getSummary() {
 		return summary;

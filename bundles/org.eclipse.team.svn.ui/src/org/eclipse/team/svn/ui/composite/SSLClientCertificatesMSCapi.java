@@ -36,9 +36,10 @@ public class SSLClientCertificatesMSCapi extends ListDialog {
 	protected String alias;
 
 	/**
-     *
+	 *
 	 * @param parent
-     * @param url : the url from which we want to get the root url
+	 * @param url
+	 *            : the url from which we want to get the root url
 	 */
 	public SSLClientCertificatesMSCapi(Shell parent, String realm) {
 		super(parent);
@@ -50,62 +51,56 @@ public class SSLClientCertificatesMSCapi extends ListDialog {
 			KeyStore keyStore = null;
 			//use JACAPI
 			if (pmscapi != null) {
-				keyStore = KeyStore.getInstance("Windows-MY",pmscapi);
-				pmscapi.setProperty("Signature.SHA1withRSA","sun.security.mscapi.RSASignature$SHA1");
+				keyStore = KeyStore.getInstance("Windows-MY", pmscapi);
+				pmscapi.setProperty("Signature.SHA1withRSA", "sun.security.mscapi.RSASignature$SHA1");
 			} else if (pjacapi != null) {
 				keyStore = KeyStore.getInstance("CAPI");
 			}
-	        if (keyStore != null) {
-	            keyStore.load(null, null);
-	            //for (Enumeration<String> aliasEnumeration = keyStore.aliases();aliasEnumeration.hasMoreElements();) {
-	            for (Enumeration aliasEnumeration = keyStore.aliases();aliasEnumeration.hasMoreElements();) {
-	            	String alias = (String) aliasEnumeration.nextElement();
-	            	String issuer = "";
-	            	Certificate cert = keyStore.getCertificate(alias);
-	            	if (cert instanceof X509Certificate) {
-	            		issuer = ((X509Certificate) cert).getIssuerDN().getName();
-	            	}
-	            	list.add(new String[]{alias,issuer});
-	            	//keyStore.getCertificate(alias)
-	            }
-	        }
-		} catch (KeyStoreException e) {
-			e.printStackTrace();
-		} catch (NoSuchAlgorithmException e) {
-			e.printStackTrace();
-		} catch (CertificateException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
+			if (keyStore != null) {
+				keyStore.load(null, null);
+				//for (Enumeration<String> aliasEnumeration = keyStore.aliases();aliasEnumeration.hasMoreElements();) {
+				for (Enumeration aliasEnumeration = keyStore.aliases(); aliasEnumeration.hasMoreElements();) {
+					String alias = (String) aliasEnumeration.nextElement();
+					String issuer = "";
+					Certificate cert = keyStore.getCertificate(alias);
+					if (cert instanceof X509Certificate) {
+						issuer = ((X509Certificate) cert).getIssuerDN().getName();
+					}
+					list.add(new String[] { alias, issuer });
+					//keyStore.getCertificate(alias)
+				}
+			}
+		} catch (KeyStoreException | NoSuchAlgorithmException | CertificateException | IOException e) {
 			e.printStackTrace();
 		}
-        setTitle("Select Certificate Alias"); //$NON-NLS-1$
-        setAddCancelButton(true);
-        LabelProvider lp = new LabelProvider(){
-        	public String getText(Object element) {
-        		if (element == null) {
-        			return "";
-        		} else if (element instanceof String[] && ((String[]) element).length > 1) {
-        			return ((String[]) element)[0] + " | issued by: " + ((String[]) element)[1];
-        		} else {
-        			return element.toString();
-        		}
-        	}
-        };
-        setLabelProvider(lp);
-        setMessage("select the right certificate alias"); //$NON-NLS-1$
-        
-        setContentProvider(new ArrayStructuredContentProvider());
-        setInput(list.toArray());
+		setTitle("Select Certificate Alias"); //$NON-NLS-1$
+		setAddCancelButton(true);
+		LabelProvider lp = new LabelProvider() {
+			@Override
+			public String getText(Object element) {
+				if (element == null) {
+					return "";
+				} else if (element instanceof String[] && ((String[]) element).length > 1) {
+					return ((String[]) element)[0] + " | issued by: " + ((String[]) element)[1];
+				} else {
+					return element.toString();
+				}
+			}
+		};
+		setLabelProvider(lp);
+		setMessage("select the right certificate alias"); //$NON-NLS-1$
+
+		setContentProvider(new ArrayStructuredContentProvider());
+		setInput(list.toArray());
 	}
 
-
 	public String getAlias() {
-		if (getResult() != null && getResult().length>0) {
+		if (getResult() != null && getResult().length > 0) {
 			Object result = getResult()[0];
 			if (result instanceof String[]) {
-				this.alias = ((String[]) result)[0];
+				alias = ((String[]) result)[0];
 			} else {
-				this.alias = (String) result;
+				alias = (String) result;
 			}
 		}
 		return alias;

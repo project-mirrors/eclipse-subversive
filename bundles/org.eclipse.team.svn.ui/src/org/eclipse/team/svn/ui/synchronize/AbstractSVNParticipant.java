@@ -16,7 +16,6 @@
 package org.eclipse.team.svn.ui.synchronize;
 
 import java.util.Collection;
-import java.util.Iterator;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -42,13 +41,17 @@ import org.eclipse.ui.PartInitException;
  */
 public abstract class AbstractSVNParticipant extends SubscriberParticipant implements IChangeSetProvider {
 	public static ImageDescriptor OVR_OBSTRUCTED;
+
 	public static ImageDescriptor OVR_REPLACED_OUT;
+
 	public static ImageDescriptor OVR_REPLACED_IN;
+
 	public static ImageDescriptor OVR_REPLACED_CONF;
+
 	public static ImageDescriptor OVR_PROPCHANGE;
-	
+
 	protected ISynchronizePageConfiguration configuration;
-	
+
 	private ChangeSetCapability capability;
 
 	static {
@@ -59,65 +62,66 @@ public abstract class AbstractSVNParticipant extends SubscriberParticipant imple
 		AbstractSVNParticipant.OVR_REPLACED_CONF = instance.getImageDescriptor("icons/overlays/replaced_conf.gif"); //$NON-NLS-1$
 		AbstractSVNParticipant.OVR_PROPCHANGE = instance.getImageDescriptor("icons/overlays/prop_changed.png"); //$NON-NLS-1$
 	}
-	
-	public AbstractSVNParticipant() {
-        super();
-    }
 
-    public AbstractSVNParticipant(ISynchronizeScope scope) {
-        super(scope);
-		this.setSubscriber(this.getMatchingSubscriber());
-    }
-    
+	public AbstractSVNParticipant() {
+	}
+
+	public AbstractSVNParticipant(ISynchronizeScope scope) {
+		super(scope);
+		setSubscriber(getMatchingSubscriber());
+	}
+
+	@Override
 	public void init(String secondaryId, IMemento memento) throws PartInitException {
 		super.init(secondaryId, memento);
-		this.setSubscriber(this.getMatchingSubscriber());
+		setSubscriber(getMatchingSubscriber());
 	}
-    
-    public ISynchronizePageConfiguration getConfiguration() {
-        return this.configuration;
-    }
+
+	public ISynchronizePageConfiguration getConfiguration() {
+		return configuration;
+	}
 
 	// Change sets support
+	@Override
 	public synchronized ChangeSetCapability getChangeSetCapability() {
-		if (this.capability == null) {
-			this.capability = new SVNChangeSetCapability();
+		if (capability == null) {
+			capability = new SVNChangeSetCapability();
 		}
-		return this.capability;
+		return capability;
 	}
-	
+
 	protected ISynchronizeParticipantDescriptor getDescriptor() {
-		return TeamUI.getSynchronizeManager().getParticipantDescriptor(this.getParticipantId());
+		return TeamUI.getSynchronizeManager().getParticipantDescriptor(getParticipantId());
 	}
-	
-    protected boolean isViewerContributionsSupported() {
-        return true;
-    }
-    
+
+	@Override
+	protected boolean isViewerContributionsSupported() {
+		return true;
+	}
+
+	@Override
 	protected void initializeConfiguration(ISynchronizePageConfiguration configuration) {
 		super.initializeConfiguration(configuration);
-		
+
 		this.configuration = configuration;
 
-		Collection<AbstractSynchronizeActionGroup> actionGroups = this.getActionGroups();
+		Collection<AbstractSynchronizeActionGroup> actionGroups = getActionGroups();
 		// menu groups should be configured before actionGroups is added
-		for (Iterator<AbstractSynchronizeActionGroup> it = actionGroups.iterator(); it.hasNext(); ) {
-			AbstractSynchronizeActionGroup actionGroup = it.next();
+		for (AbstractSynchronizeActionGroup actionGroup : actionGroups) {
 			actionGroup.configureMenuGroups(configuration);
 		}
-		for (Iterator<AbstractSynchronizeActionGroup> it = actionGroups.iterator(); it.hasNext(); ) {
-			AbstractSynchronizeActionGroup actionGroup = it.next();
+		for (AbstractSynchronizeActionGroup actionGroup : actionGroups) {
 			configuration.addActionContribution(actionGroup);
 		}
-		
-		configuration.addLabelDecorator(this.createLabelDecorator(configuration));
-		
-		if (this.isSetModes()) {
-			configuration.setSupportedModes(this.getSupportedModes());
-			configuration.setMode(this.getDefaultMode());	
+
+		configuration.addLabelDecorator(createLabelDecorator(configuration));
+
+		if (isSetModes()) {
+			configuration.setSupportedModes(getSupportedModes());
+			configuration.setMode(getDefaultMode());
 		}
 	}
-	
+
 	/**
 	 * Flag which determines whether to set mode properties in synchronize page configuration
 	 * 
@@ -126,27 +130,32 @@ public abstract class AbstractSVNParticipant extends SubscriberParticipant imple
 	protected boolean isSetModes() {
 		return true;
 	}
-	
+
 	protected ILabelDecorator createLabelDecorator(ISynchronizePageConfiguration configuration) {
 		return new SynchronizeLabelDecorator(configuration);
 	}
-    
-    public abstract AbstractSVNSubscriber getMatchingSubscriber();
-    protected abstract String getParticipantId();
-    protected abstract Collection<AbstractSynchronizeActionGroup> getActionGroups();
-    protected abstract int getSupportedModes();
-    protected abstract int getDefaultMode();		
-	
+
+	public abstract AbstractSVNSubscriber getMatchingSubscriber();
+
+	protected abstract String getParticipantId();
+
+	protected abstract Collection<AbstractSynchronizeActionGroup> getActionGroups();
+
+	protected abstract int getSupportedModes();
+
+	protected abstract int getDefaultMode();
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.team.ui.synchronize.subscriber.SubscriberParticipant#setSubscriber(org.eclipse.team.core.subscribers.Subscriber)
 	 */
+	@Override
 	protected void setSubscriber(Subscriber subscriber) {
 		super.setSubscriber(subscriber);
 		try {
 			ISynchronizeParticipantDescriptor descriptor = getDescriptor();
 			setInitializationData(descriptor);
 		} catch (CoreException e) {
-			 LoggedOperation.reportError(this.getClass().getName(), e);
+			LoggedOperation.reportError(this.getClass().getName(), e);
 		}
 		if (getSecondaryId() == null) {
 			setSecondaryId(Long.toString(System.currentTimeMillis()));

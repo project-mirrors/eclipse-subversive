@@ -17,9 +17,9 @@ package org.eclipse.team.svn.core.connector;
 /**
  * Property data container
  * 
- * The JavaHL API's is the only way to interact between SVN and Java-based tools. At the same time JavaHL connector library
- * is not EPL compatible and we won't to pin plug-in with concrete connector implementation. So, the only way to do this is
- * providing our own connector interface which will be covered by concrete connector implementation.
+ * The JavaHL API's is the only way to interact between SVN and Java-based tools. At the same time JavaHL connector library is not EPL
+ * compatible and we won't to pin plug-in with concrete connector implementation. So, the only way to do this is providing our own connector
+ * interface which will be covered by concrete connector implementation.
  * 
  * @author Alexander Gurov
  */
@@ -59,8 +59,8 @@ public class SVNProperty {
 		public static final String EXECUTABLE_VALUE = "*"; //$NON-NLS-1$
 
 		/**
-		 * The new line-separated list of folders which contains resources not related to this working copy. The value
-		 * could be specified as follows:
+		 * The new line-separated list of folders which contains resources not related to this working copy. The value could be specified as
+		 * follows:
 		 * 
 		 * {Folder_name_without_spaces} [-r{revision_number} | -r {revision_number}] {encoded_URL}
 		 */
@@ -88,21 +88,24 @@ public class SVNProperty {
 
 		/**
 		 * If set points that lock is required to modify this node.
-		 * @since 1.2 
+		 * 
+		 * @since 1.2
 		 */
 		public static final String NEEDS_LOCK = "svn:needs-lock"; //$NON-NLS-1$
-		
-	    /**
-	     * server-side inherited configuration for auto-props
-	     * @since 1.9 
-	     */
-	    public static final String INHERITABLE_AUTO_PROPS = "svn:auto-props";
 
-	    /**
-	     * server-side inherited configuration for global ignore patterns
-	     * @since 1.9 
-	     */
-	    public static final String INHERITABLE_IGNORES = "svn:global-ignores";
+		/**
+		 * server-side inherited configuration for auto-props
+		 * 
+		 * @since 1.9
+		 */
+		public static final String INHERITABLE_AUTO_PROPS = "svn:auto-props";
+
+		/**
+		 * server-side inherited configuration for global ignore patterns
+		 * 
+		 * @since 1.9
+		 */
+		public static final String INHERITABLE_IGNORES = "svn:global-ignores";
 	}
 
 	/**
@@ -118,7 +121,7 @@ public class SVNProperty {
 	/**
 	 * The binary property value. Not <code>null</code>.
 	 */
-	public final byte []binValue;
+	public final byte[] binValue;
 
 	/**
 	 * The {@link SVNProperty} instance could be initialized only once because all fields are final
@@ -128,8 +131,8 @@ public class SVNProperty {
 	 */
 	public SVNProperty(String name) {
 		this.name = name;
-		this.value = null; 
-		this.binValue = null;
+		value = null;
+		binValue = null;
 	}
 
 	/**
@@ -142,8 +145,8 @@ public class SVNProperty {
 	 */
 	public SVNProperty(String name, String value) {
 		this.name = name;
-		this.value = SVNProperty.processTextProperty(value); 
-		this.binValue = value == null ? null : this.value.getBytes();
+		this.value = SVNProperty.processTextProperty(value);
+		binValue = value == null ? null : this.value.getBytes();
 	}
 
 	/**
@@ -154,10 +157,10 @@ public class SVNProperty {
 	 * @param value
 	 *            the value of the binary property
 	 */
-	public SVNProperty(String name, byte []value) {
+	public SVNProperty(String name, byte[] value) {
 		this.name = name;
 		this.value = value == null ? null : SVNProperty.processTextProperty(new String(value));
-		this.binValue = value == null ? null : this.value.getBytes();
+		binValue = value == null ? null : this.value.getBytes();
 	}
 
 	protected static String processTextProperty(String str) {

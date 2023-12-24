@@ -34,37 +34,43 @@ import org.eclipse.team.ui.synchronize.ISynchronizePageConfiguration;
 public class ShowHistoryModelAction extends AbstractSynchronizeLogicalModelAction {
 
 	protected ShowHistoryActionHelper actionHelper;
-	
+
 	public ShowHistoryModelAction(String text, ISynchronizePageConfiguration configuration) {
-		super(text, configuration);	
-		this.actionHelper = new ShowHistoryActionHelper(this, configuration);
+		super(text, configuration);
+		actionHelper = new ShowHistoryActionHelper(this, configuration);
 	}
-	
-	protected boolean needsToSaveDirtyEditors() {	
+
+	@Override
+	protected boolean needsToSaveDirtyEditors() {
 		return false;
 	}
-	
+
+	@Override
 	protected boolean updateSelection(IStructuredSelection selection) {
 		if (super.updateSelection(selection)) {
-			if (selection.size() == 1) {						
-				AbstractSVNSyncInfo syncInfo = this.getSelectedSVNSyncInfo();
+			if (selection.size() == 1) {
+				AbstractSVNSyncInfo syncInfo = getSelectedSVNSyncInfo();
 				if (syncInfo != null) {
 					ILocalResource incoming = syncInfo.getRemoteChangeResource();
 					if (incoming instanceof IResourceChange) {
-						return IStateFilter.SF_TREE_CONFLICTING.accept(incoming) ? IStateFilter.SF_TREE_CONFLICTING_REPOSITORY_EXIST.accept(incoming) : IStateFilter.ST_DELETED != incoming.getStatus();
+						return IStateFilter.SF_TREE_CONFLICTING.accept(incoming)
+								? IStateFilter.SF_TREE_CONFLICTING_REPOSITORY_EXIST.accept(incoming)
+								: IStateFilter.ST_DELETED != incoming.getStatus();
 					}
 				}
-				IResource selectedResource = this.getSelectedResource();
+				IResource selectedResource = getSelectedResource();
 				if (selectedResource != null) {
-					return IStateFilter.SF_ONREPOSITORY.accept(SVNRemoteStorage.instance().asLocalResource(selectedResource));
+					return IStateFilter.SF_ONREPOSITORY
+							.accept(SVNRemoteStorage.instance().asLocalResource(selectedResource));
 				}
-			}	
+			}
 		}
 		return false;
 	}
-	
+
+	@Override
 	protected IActionOperation getOperation() {
-		return this.actionHelper.getOperation();
+		return actionHelper.getOperation();
 	}
-	
+
 }

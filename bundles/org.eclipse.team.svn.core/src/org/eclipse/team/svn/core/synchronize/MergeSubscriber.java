@@ -55,122 +55,160 @@ import org.eclipse.team.svn.core.utility.SVNUtility;
  */
 public class MergeSubscriber extends AbstractSVNSubscriber {
 	private static MergeSubscriber instance = null;
-	
+
 	protected MergeScopeHelper mergeScopeHelper;
+
 	protected MergeStatusOperation mergeStatusOp;
-    protected IRemoteStatusCache baseStatusCache;
-	
+
+	protected IRemoteStatusCache baseStatusCache;
+
 	public static synchronized MergeSubscriber instance() {
 		if (MergeSubscriber.instance == null) {
-		    MergeSubscriber.instance = new MergeSubscriber();
+			MergeSubscriber.instance = new MergeSubscriber();
 		}
 		return MergeSubscriber.instance;
 	}
 
 	public MergeScopeHelper getMergeScopeHelper() {
-		return this.mergeScopeHelper;
+		return mergeScopeHelper;
 	}
-	
-    public void setMergeScopeHelper(MergeScopeHelper scope) {
-        this.mergeScopeHelper = scope;
-    }
-    
-    protected SyncInfo getSVNSyncInfo(ILocalResource localStatus, IResourceChange remoteStatus) throws TeamException {
-    	IResourceChange baseStatus = SVNRemoteStorage.instance().resourceChangeFromBytes(this.baseStatusCache.getBytes(localStatus.getResource()));
-    	AbstractSVNSyncInfo syncInfo;
-    	if (remoteStatus == null && baseStatus == null) {
-    		syncInfo = new MergeSyncInfo(localStatus, null, null, this.getResourceComparator());
-    	} else {
-    		SVNMergeStatus mergeStatus = this.getStatusFor(localStatus.getResource());
-    		if (mergeStatus != null) {
-        		if (mergeStatus.skipped) {
-        			syncInfo = new MergeSyncInfo(localStatus, baseStatus, remoteStatus, this.getResourceComparator());
-        		} else {
-        			syncInfo = new UpdateSyncInfoForMerge(localStatus, baseStatus, remoteStatus, this.getResourceComparator());
-        		}	
-    		} else {
-    			//should never happen
-    			syncInfo = new UpdateSyncInfo(localStatus, null, this.getResourceComparator());	
-    		}    		
-    	}
-    	return syncInfo;
-    }
-    
+
+	public void setMergeScopeHelper(MergeScopeHelper scope) {
+		mergeScopeHelper = scope;
+	}
+
+	@Override
+	protected SyncInfo getSVNSyncInfo(ILocalResource localStatus, IResourceChange remoteStatus) throws TeamException {
+		IResourceChange baseStatus = SVNRemoteStorage.instance()
+				.resourceChangeFromBytes(baseStatusCache.getBytes(localStatus.getResource()));
+		AbstractSVNSyncInfo syncInfo;
+		if (remoteStatus == null && baseStatus == null) {
+			syncInfo = new MergeSyncInfo(localStatus, null, null, getResourceComparator());
+		} else {
+			SVNMergeStatus mergeStatus = getStatusFor(localStatus.getResource());
+			if (mergeStatus != null) {
+				if (mergeStatus.skipped) {
+					syncInfo = new MergeSyncInfo(localStatus, baseStatus, remoteStatus, getResourceComparator());
+				} else {
+					syncInfo = new UpdateSyncInfoForMerge(localStatus, baseStatus, remoteStatus,
+							getResourceComparator());
+				}
+			} else {
+				//should never happen
+				syncInfo = new UpdateSyncInfo(localStatus, null, getResourceComparator());
+			}
+		}
+		return syncInfo;
+	}
+
 	protected SVNMergeStatus getStatusFor(IResource resource) {
-		SVNMergeStatus []statuses = this.mergeScopeHelper.getMergeSet().getStatuses();
+		SVNMergeStatus[] statuses = mergeScopeHelper.getMergeSet().getStatuses();
 		IPath target = FileUtility.getResourcePath(resource);
-		for (int i = 0; i < statuses.length; i++) {
-			if (target.equals(new Path(statuses[i].path))) {
-				return statuses[i];
+		for (SVNMergeStatus status : statuses) {
+			if (target.equals(new Path(status.path))) {
+				return status;
 			}
 		}
 		return null;
 	}
 
-    protected IRemoteStatusOperation addStatusOperation(CompositeOperation op, IResource[] resources, int depth) {
-    	MergeStatusOperation mergeOp = this.mergeStatusOp = (this.mergeScopeHelper == null ? null : new MergeStatusOperation(this.mergeScopeHelper.getMergeSet(), resources));
-    	if (mergeOp == null) {
-    		return null;
-    	}
+	@Override
+	protected IRemoteStatusOperation addStatusOperation(CompositeOperation op, IResource[] resources, int depth) {
+		MergeStatusOperation mergeOp = mergeStatusOp = mergeScopeHelper == null
+				? null
+				: new MergeStatusOperation(mergeScopeHelper.getMergeSet(), resources);
+		if (mergeOp == null) {
+			return null;
+		}
 		SaveProjectMetaOperation saveOp = new SaveProjectMetaOperation(resources);
 		op.add(saveOp);
-    	op.add(mergeOp);
+		op.add(mergeOp);
 		op.add(new RestoreProjectMetaOperation(saveOp));
-    	op.add(new RefreshResourcesOperation(resources, depth, RefreshResourcesOperation.REFRESH_CHANGES));
-        return mergeOp;
-    }
-    
-	protected HashSet<IResource> clearRemoteStatusesImpl(IResource []resources) throws TeamException {
-		this.clearRemoteStatusesImpl(this.baseStatusCache, resources);
+		op.add(new RefreshResourcesOperation(resources, depth, RefreshResourcesOperation.REFRESH_CHANGES));
+		return mergeOp;
+	}
+
+	@Override
+	protected HashSet<IResource> clearRemoteStatusesImpl(IResource[] resources) throws TeamException {
+		this.clearRemoteStatusesImpl(baseStatusCache, resources);
 		return super.clearRemoteStatusesImpl(resources);
 	}
-	
-    public void refresh(final IResource []resources, final int depth, IProgressMonitor monitor) throws TeamException {
-		if (this.mergeScopeHelper != null) {
-			this.baseStatusCache.clearAll();
-			this.mergeScopeHelper.getMergeSet().setStatuses(new SVNMergeStatus[0]);
+
+	@Override
+	public void refresh(final IResource[] resources, final int depth, IProgressMonitor monitor) throws TeamException {
+		if (mergeScopeHelper != null) {
+			baseStatusCache.clearAll();
+			mergeScopeHelper.getMergeSet().setStatuses(new SVNMergeStatus[0]);
 		}
-    	super.refresh(resources, depth, monitor);
-    }
-	
+		super.refresh(resources, depth, monitor);
+	}
+
+	@Override
 	protected IResourceChange handleResourceChange(IRemoteStatusOperation rStatusOp, SVNEntryStatus status) {
-		final SVNMergeStatus current = (SVNMergeStatus)status;
+		final SVNMergeStatus current = (SVNMergeStatus) status;
 		IChangeStateProvider endProvider = new IChangeStateProvider() {
+			@Override
 			public long getChangeDate() {
 				return current.date;
 			}
+
+			@Override
 			public String getChangeAuthor() {
 				return current.author;
 			}
+
+			@Override
 			public SVNRevision.Number getChangeRevision() {
-				return current.endRevision == SVNRevision.INVALID_REVISION_NUMBER ? null : SVNRevision.fromNumber(current.endRevision);
+				return current.endRevision == SVNRevision.INVALID_REVISION_NUMBER
+						? null
+						: SVNRevision.fromNumber(current.endRevision);
 			}
+
+			@Override
 			public Kind getTextChangeType() {
 				return current.textStatus;
 			}
+
+			@Override
 			public SVNEntryStatus.Kind getPropertiesChangeType() {
 				return current.propStatus;
 			}
+
+			@Override
 			public SVNEntry.Kind getNodeKind() {
 				SVNEntry.Kind kind = SVNUtility.getNodeKind(current.path, current.nodeKind, true);
 				// if not exists on repository try to check it with WC kind...
-				return kind == SVNEntry.Kind.NONE && !current.hasTreeConflict ? SVNUtility.getNodeKind(current.path, current.nodeKind, false) : kind;
+				return kind == SVNEntry.Kind.NONE && !current.hasTreeConflict
+						? SVNUtility.getNodeKind(current.path, current.nodeKind, false)
+						: kind;
 			}
+
+			@Override
 			public String getLocalPath() {
 				return current.path;
 			}
+
+			@Override
 			public String getComment() {
 				return current.comment;
 			}
+
+			@Override
 			public boolean isCopied() {
 				return false;
 			}
+
+			@Override
 			public boolean isSwitched() {
 				return false;
 			}
-			public IResource getExact(IResource []set) {
-				return FileUtility.selectOneOf(MergeSubscriber.this.mergeScopeHelper.getRoots(), set);
-			}		
+
+			@Override
+			public IResource getExact(IResource[] set) {
+				return FileUtility.selectOneOf(mergeScopeHelper.getRoots(), set);
+			}
+
+			@Override
 			public SVNConflictDescriptor getTreeConflictDescriptor() {
 				return current.treeConflictDescriptor;
 			}
@@ -183,49 +221,81 @@ public class MergeSubscriber extends AbstractSVNSubscriber {
 			return null;
 		}
 		if (endResourceChange.getRevision() != SVNRevision.INVALID_REVISION_NUMBER) {
-			IRepositoryResource originator = this.getEndOriginator();
+			IRepositoryResource originator = getEndOriginator();
 			String decodedUrl = SVNUtility.decodeURL(current.endUrl);
-			originator = endProvider.getNodeKind() == SVNEntry.Kind.DIR ? (IRepositoryResource)originator.asRepositoryContainer(decodedUrl, false) : originator.asRepositoryFile(decodedUrl, false);
-			originator.setSelectedRevision(SVNRevision.fromNumber(current.textStatus == SVNEntryStatus.Kind.DELETED ? current.endRevision - 1 : current.endRevision));
+			originator = endProvider.getNodeKind() == SVNEntry.Kind.DIR
+					? (IRepositoryResource) originator.asRepositoryContainer(decodedUrl, false)
+					: originator.asRepositoryFile(decodedUrl, false);
+			originator.setSelectedRevision(SVNRevision.fromNumber(
+					current.textStatus == SVNEntryStatus.Kind.DELETED ? current.endRevision - 1 : current.endRevision));
 			endResourceChange.setOriginator(originator);
 		}
-		
+
 		IChangeStateProvider startProvider = new IChangeStateProvider() {
+			@Override
 			public long getChangeDate() {
 				return current.date;
 			}
+
+			@Override
 			public String getChangeAuthor() {
 				return null;
 			}
+
+			@Override
 			public SVNRevision.Number getChangeRevision() {
-				return current.startRevision == SVNRevision.INVALID_REVISION_NUMBER ? null : SVNRevision.fromNumber(current.startRevision);
+				return current.startRevision == SVNRevision.INVALID_REVISION_NUMBER
+						? null
+						: SVNRevision.fromNumber(current.startRevision);
 			}
+
+			@Override
 			public Kind getTextChangeType() {
-				return current.startRevision == SVNRevision.INVALID_REVISION_NUMBER ? SVNEntryStatus.Kind.NONE : SVNEntryStatus.Kind.NORMAL;
+				return current.startRevision == SVNRevision.INVALID_REVISION_NUMBER
+						? SVNEntryStatus.Kind.NONE
+						: SVNEntryStatus.Kind.NORMAL;
 			}
+
+			@Override
 			public SVNEntryStatus.Kind getPropertiesChangeType() {
 				return SVNEntryStatus.Kind.NONE;
 			}
+
+			@Override
 			public SVNEntry.Kind getNodeKind() {
 				SVNEntry.Kind kind = SVNUtility.getNodeKind(current.path, current.nodeKind, true);
 				// if not exists on repository try to check it with WC kind...
-				return kind == SVNEntry.Kind.NONE && !current.hasTreeConflict ? SVNUtility.getNodeKind(current.path, current.nodeKind, false) : kind;
+				return kind == SVNEntry.Kind.NONE && !current.hasTreeConflict
+						? SVNUtility.getNodeKind(current.path, current.nodeKind, false)
+						: kind;
 			}
+
+			@Override
 			public String getLocalPath() {
 				return current.path;
 			}
+
+			@Override
 			public String getComment() {
 				return null;
 			}
+
+			@Override
 			public boolean isCopied() {
 				return false;
 			}
+
+			@Override
 			public boolean isSwitched() {
 				return false;
 			}
-			public IResource getExact(IResource []set) {
-				return FileUtility.selectOneOf(MergeSubscriber.this.mergeScopeHelper.getRoots(), set);
-			}			
+
+			@Override
+			public IResource getExact(IResource[] set) {
+				return FileUtility.selectOneOf(mergeScopeHelper.getRoots(), set);
+			}
+
+			@Override
 			public SVNConflictDescriptor getTreeConflictDescriptor() {
 				return current.treeConflictDescriptor;
 			}
@@ -233,53 +303,53 @@ public class MergeSubscriber extends AbstractSVNSubscriber {
 		IResourceChange startResourceChange = SVNRemoteStorage.instance().asResourceChange(startProvider, false);
 		if (startResourceChange.getRevision() != SVNRevision.INVALID_REVISION_NUMBER) {
 			String decodedUrl = SVNUtility.decodeURL(current.startUrl);
-			IRepositoryResource originator = this.getStartOriginator();
-			originator = startProvider.getNodeKind() == SVNEntry.Kind.DIR ? (IRepositoryResource)originator.asRepositoryContainer(decodedUrl, false) : originator.asRepositoryFile(decodedUrl, false);
+			IRepositoryResource originator = getStartOriginator();
+			originator = startProvider.getNodeKind() == SVNEntry.Kind.DIR
+					? (IRepositoryResource) originator.asRepositoryContainer(decodedUrl, false)
+					: originator.asRepositoryFile(decodedUrl, false);
 			originator.setSelectedRevision(SVNRevision.fromNumber(current.startRevision));
 			startResourceChange.setOriginator(originator);
 		}
 		try {
-			this.baseStatusCache.setBytes(startResourceChange.getResource(), SVNRemoteStorage.instance().resourceChangeAsBytes(startResourceChange));
+			baseStatusCache.setBytes(startResourceChange.getResource(),
+					SVNRemoteStorage.instance().resourceChangeAsBytes(startResourceChange));
 		} catch (TeamException e) {
 			LoggedOperation.reportError(this.getClass().getName(), e);
 		}
-		
+
 		return endResourceChange;
 	}
-	
+
 	protected IRepositoryResource getEndOriginator() {
-		AbstractMergeSet mergeSet = this.mergeScopeHelper.getMergeSet();
+		AbstractMergeSet mergeSet = mergeScopeHelper.getMergeSet();
 		if (mergeSet instanceof MergeSet1URL) {
-			return ((MergeSet1URL)mergeSet).from[0];
-		}
-		else if (mergeSet instanceof MergeSet2URL) {
-			return ((MergeSet2URL)mergeSet).fromEnd[0];
-		}
-		else {
-			return ((MergeSetReintegrate)mergeSet).from[0];
+			return ((MergeSet1URL) mergeSet).from[0];
+		} else if (mergeSet instanceof MergeSet2URL) {
+			return ((MergeSet2URL) mergeSet).fromEnd[0];
+		} else {
+			return ((MergeSetReintegrate) mergeSet).from[0];
 		}
 	}
-	
+
 	protected IRepositoryResource getStartOriginator() {
-		AbstractMergeSet mergeSet = this.mergeScopeHelper.getMergeSet();
+		AbstractMergeSet mergeSet = mergeScopeHelper.getMergeSet();
 		if (mergeSet instanceof MergeSet1URL) {
-			return ((MergeSet1URL)mergeSet).from[0];
-		}
-		else if (mergeSet instanceof MergeSet2URL) {
-			return ((MergeSet2URL)mergeSet).fromStart[0];
-		}
-		else {
-			return ((MergeSetReintegrate)mergeSet).from[0];
+			return ((MergeSet1URL) mergeSet).from[0];
+		} else if (mergeSet instanceof MergeSet2URL) {
+			return ((MergeSet2URL) mergeSet).fromStart[0];
+		} else {
+			return ((MergeSetReintegrate) mergeSet).from[0];
 		}
 	}
-	
+
+	@Override
 	protected boolean isIncoming(SVNEntryStatus status) {
 		return true;
 	}
-	
-    private MergeSubscriber() {
-        super(false, SVNMessages.MergeSubscriber_Name);
-		this.baseStatusCache = new RemoteStatusCache();
-    }
+
+	private MergeSubscriber() {
+		super(false, SVNMessages.MergeSubscriber_Name);
+		baseStatusCache = new RemoteStatusCache();
+	}
 
 }

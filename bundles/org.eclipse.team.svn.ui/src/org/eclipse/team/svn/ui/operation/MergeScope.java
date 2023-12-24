@@ -25,37 +25,39 @@ import org.eclipse.team.ui.synchronize.AbstractSynchronizeScope;
  * @author Alexander Gurov
  */
 public class MergeScope extends AbstractSynchronizeScope {
-	     
+
 	protected MergeScopeHelper scopeHelper;
-	
-    public MergeScope(AbstractMergeSet info) {
-        this.scopeHelper = new MergeScopeHelper(info);
-    }
-	
+
+	public MergeScope(AbstractMergeSet info) {
+		scopeHelper = new MergeScopeHelper(info);
+	}
+
 	public MergeScope() {
-		this.scopeHelper = new MergeScopeHelper();
+		scopeHelper = new MergeScopeHelper();
 	}
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.team.ui.synchronize.ISynchronizeScope#getName()
 	 */
+	@Override
 	public String getName() {
-		return this.scopeHelper.getName();
+		return scopeHelper.getName();
 	}
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.team.ui.synchronize.ISynchronizeScope#getRoots()
 	 */
-	public IResource[] getRoots() {		
-		return this.scopeHelper.getRoots();
+	@Override
+	public IResource[] getRoots() {
+		return scopeHelper.getRoots();
 	}
-	
-    public void setMergeSet(AbstractMergeSet info) {
-    	this.scopeHelper.setMergeSet(info);       
-        this.fireRootsChanges();
-    }
-    
-    public MergeScopeHelper getMergeScopeHelper() {
-    	return this.scopeHelper;
-    }
+
+	public void setMergeSet(AbstractMergeSet info) {
+		scopeHelper.setMergeSet(info);
+		fireRootsChanges();
+	}
+
+	public MergeScopeHelper getMergeScopeHelper() {
+		return scopeHelper;
+	}
 }

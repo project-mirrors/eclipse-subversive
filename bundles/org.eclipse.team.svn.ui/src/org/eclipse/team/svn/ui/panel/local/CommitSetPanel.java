@@ -44,37 +44,42 @@ import org.eclipse.team.svn.ui.verifier.NonEmptyFieldVerifier;
  */
 public class CommitSetPanel extends CommentPanel implements IModifiableCommentDialogPanel {
 	public static final int MSG_CREATE = 0;
+
 	public static final int MSG_EDIT = 1;
-	
-    private final ActiveChangeSet set;	
-    private Text nameText;
-	protected IResource []resources;
+
+	private final ActiveChangeSet set;
+
+	private Text nameText;
+
+	protected IResource[] resources;
+
 	protected List<IResourceSelectionChangeListener> changeListenerList;
-	
-	public CommitSetPanel(ActiveChangeSet set, IResource [] resources, int type) {
+
+	public CommitSetPanel(ActiveChangeSet set, IResource[] resources, int type) {
 		super(SVNUIMessages.CommitSetPanel_Title);
 		this.set = set;
 		this.resources = resources;
 		switch (type) {
-		case MSG_EDIT:
-			this.dialogDescription = SVNUIMessages.CommitSetPanel_Description_Edit;
-			this.defaultMessage = SVNUIMessages.CommitSetPanel_Message_Edit;
-			break;
-		default:
-			this.dialogDescription = SVNUIMessages.CommitSetPanel_Description_New;
-			this.defaultMessage = SVNUIMessages.CommitSetPanel_Message_New;
+			case MSG_EDIT:
+				dialogDescription = SVNUIMessages.CommitSetPanel_Description_Edit;
+				defaultMessage = SVNUIMessages.CommitSetPanel_Message_Edit;
+				break;
+			default:
+				dialogDescription = SVNUIMessages.CommitSetPanel_Description_New;
+				defaultMessage = SVNUIMessages.CommitSetPanel_Message_New;
 		}
-		
-        if (resources == null) {
-        	resources = set.getResources();
-        }
 
-		this.changeListenerList = new ArrayList<IResourceSelectionChangeListener>();
-    }
-    
+		if (resources == null) {
+			resources = set.getResources();
+		}
+
+		changeListenerList = new ArrayList<>();
+	}
+
+	@Override
 	public void createControlsImpl(Composite parent) {
-    	GridData data = null;
-    	GridLayout layout = null;
+		GridData data = null;
+		GridLayout layout = null;
 
 		Composite composite = new Composite(parent, SWT.NONE);
 		GridLayout nameLayout = new GridLayout();
@@ -85,63 +90,70 @@ public class CommitSetPanel extends CommentPanel implements IModifiableCommentDi
 		composite.setFont(parent.getFont());
 
 		Label label = new Label(composite, SWT.NONE);
-		label.setText(SVNUIMessages.CommitSetPanel_Name); 
+		label.setText(SVNUIMessages.CommitSetPanel_Name);
 		label.setLayoutData(new GridData(GridData.BEGINNING));
-		
-		this.nameText = new Text(composite, SWT.BORDER);
-		this.nameText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-        String initialText = this.set.getTitle();
-        if (initialText == null) {
-        	initialText = ""; //$NON-NLS-1$
-        }
-        this.nameText.setText(initialText);
-        this.nameText.selectAll();
-		this.attachTo(this.nameText, new NonEmptyFieldVerifier(SVNUIMessages.CommitSetPanel_Name_Verifier));
-        
+
+		nameText = new Text(composite, SWT.BORDER);
+		nameText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		String initialText = set.getTitle();
+		if (initialText == null) {
+			initialText = ""; //$NON-NLS-1$
+		}
+		nameText.setText(initialText);
+		nameText.selectAll();
+		attachTo(nameText, new NonEmptyFieldVerifier(SVNUIMessages.CommitSetPanel_Name_Verifier));
+
 		Group group = new Group(parent, SWT.NULL);
-    	layout = new GridLayout();
+		layout = new GridLayout();
 		group.setLayout(layout);
 		data = new GridData(GridData.FILL_BOTH);
 		group.setLayoutData(data);
 		group.setText(SVNUIMessages.CommitSetPanel_Comment);
-		
-		CommitPanel.CollectPropertiesOperation op = new CollectPropertiesOperation(this.resources);
-    	UIMonitorUtility.doTaskNowDefault(op, true);
-		
-		this.bugtraqModel = op.getBugtraqModel();
-    	this.comment = new CommentComposite(group, this.set.getComment(), this, op.getLogTemplates(), null, op.getMinLogSize(), op.getMaxLogWidth());
+
+		CommitPanel.CollectPropertiesOperation op = new CollectPropertiesOperation(resources);
+		UIMonitorUtility.doTaskNowDefault(op, true);
+
+		bugtraqModel = op.getBugtraqModel();
+		comment = new CommentComposite(group, set.getComment(), this, op.getLogTemplates(), null, op.getMinLogSize(),
+				op.getMaxLogWidth());
 		data = new GridData(GridData.FILL_BOTH);
-		this.comment.setLayoutData(data);
-    }
-	
+		comment.setLayoutData(data);
+	}
+
+	@Override
 	public String getHelpId() {
-    	return "org.eclipse.team.svn.help.commitSetDialogContext"; //$NON-NLS-1$
-    }
-    
-    public void addResourcesSelectionChangedListener(IResourceSelectionChangeListener listener) {
-		this.changeListenerList.add(listener);
+		return "org.eclipse.team.svn.help.commitSetDialogContext"; //$NON-NLS-1$
 	}
-	
+
+	@Override
+	public void addResourcesSelectionChangedListener(IResourceSelectionChangeListener listener) {
+		changeListenerList.add(listener);
+	}
+
+	@Override
 	public void removeResourcesSelectionChangedListener(IResourceSelectionChangeListener listener) {
-		this.changeListenerList.remove(listener);
+		changeListenerList.remove(listener);
 	}
-	
+
 	public void fireResourcesSelectionChanged(ResourceSelectionChangedEvent event) {
-		this.validateContent();
-		IResourceSelectionChangeListener []listeners = this.changeListenerList.toArray(new IResourceSelectionChangeListener[this.changeListenerList.size()]);
-		for (int i = 0; i < listeners.length; i++) {
-			listeners[i].resourcesSelectionChanged(event);
+		validateContent();
+		IResourceSelectionChangeListener[] listeners = changeListenerList
+				.toArray(new IResourceSelectionChangeListener[changeListenerList.size()]);
+		for (IResourceSelectionChangeListener listener : listeners) {
+			listener.resourcesSelectionChanged(event);
 		}
 	}
-        
-    public Point getPrefferedSizeImpl() {
-    	return new Point(525, SWT.DEFAULT);
-    }
-    
-    protected void saveChangesImpl() {
-    	super.saveChangesImpl();
-    	this.set.setTitle(this.nameText.getText());
-    	this.set.setComment(this.comment.getMessage());
-    }
-   
+
+	@Override
+	public Point getPrefferedSizeImpl() {
+		return new Point(525, SWT.DEFAULT);
+	}
+
+	@Override
+	protected void saveChangesImpl() {
+		super.saveChangesImpl();
+		set.setTitle(nameText.getText());
+		set.setComment(comment.getMessage());
+	}
+
 }

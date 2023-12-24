@@ -14,7 +14,6 @@
 
 package org.eclipse.team.svn.core.extension.factory;
 
-
 /**
  * Helper class for svn connectors
  * 

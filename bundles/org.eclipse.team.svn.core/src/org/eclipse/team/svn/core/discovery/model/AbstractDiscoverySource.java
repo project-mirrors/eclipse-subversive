@@ -8,7 +8,7 @@
  * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
- *    Tasktop Technologies - initial API and implementation     
+ *    Tasktop Technologies - initial API and implementation
  *    Alexander Fedorov (ArSysOp) - ongoing support
  *******************************************************************************/
 package org.eclipse.team.svn.core.discovery.model;

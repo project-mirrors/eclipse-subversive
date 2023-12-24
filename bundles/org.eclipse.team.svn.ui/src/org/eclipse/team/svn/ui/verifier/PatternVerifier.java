@@ -26,26 +26,29 @@ import org.eclipse.team.svn.ui.SVNUIMessages;
  * @author Sergiy Logvin
  */
 public class PatternVerifier extends AbstractFormattedVerifier {
-	protected IResource []resources;
+	protected IResource[] resources;
+
 	protected static String message;
 
-	public PatternVerifier(String fieldName, IResource []resources) {
+	public PatternVerifier(String fieldName, IResource[] resources) {
 		super(fieldName);
 		PatternVerifier.message = SVNUIMessages.Verifier_Pattern;
 		this.resources = resources;
 	}
 
+	@Override
 	protected String getErrorMessageImpl(Control input) {
-		String pattern = this.getText(input);
+		String pattern = getText(input);
 		StringMatcher matcher = new StringMatcher(pattern, true, false);
-		for (int i = 0; i < this.resources.length; i++) {
-			if (!matcher.match(this.resources[i].getName())) {
-				return BaseMessages.format(PatternVerifier.message, new Object[] {this.resources[i].getName()});
-			}				
+		for (IResource element : resources) {
+			if (!matcher.match(element.getName())) {
+				return BaseMessages.format(PatternVerifier.message, new Object[] { element.getName() });
+			}
 		}
 		return null;
 	}
 
+	@Override
 	protected String getWarningMessageImpl(Control input) {
 		return null;
 	}

@@ -28,8 +28,9 @@ public abstract class AbstractLogNode implements ILogNode {
 		this.parent = parent;
 	}
 
+	@Override
 	public ILogNode getParent() {
-		return this.parent;
+		return parent;
 	}
 
 	protected static String flattenMultiLineText(String input, String lineSeparatorReplacement) {
@@ -38,5 +39,5 @@ public abstract class AbstractLogNode implements ILogNode {
 		retVal = PatternProvider.replaceAll(retVal, "\r", lineSeparatorReplacement); //$NON-NLS-1$
 		return retVal;
 	}
-	
+
 }

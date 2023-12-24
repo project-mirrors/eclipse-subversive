@@ -42,57 +42,70 @@ import org.eclipse.team.svn.ui.preferences.SVNTeamPreferences;
  */
 public class CompareWithBranchTagAction extends AbstractWorkingCopyAction {
 	protected int type;
-	
+
 	public CompareWithBranchTagAction(int type) {
-		super();
 		this.type = type;
 	}
 
+	@Override
 	public boolean isEnabled() {
-		if (this.getSelectedResources().length == 1 && this.checkForResourcesPresence(CompareWithWorkingCopyAction.COMPARE_FILTER)) {
+		if (this.getSelectedResources().length == 1
+				&& checkForResourcesPresence(CompareWithWorkingCopyAction.COMPARE_FILTER)) {
 			IResource resource = this.getSelectedResources()[0];
 			ILocalResource local = SVNRemoteStorage.instance().asLocalResource(resource);
 			IRepositoryLocation location = SVNRemoteStorage.instance().getRepositoryLocation(resource);
 			if (local.isCopied()) {
-				IRepositoryResource remote = SVNUtility.getCopiedFrom(resource);		
+				IRepositoryResource remote = SVNUtility.getCopiedFrom(resource);
 				location = remote.getRepositoryLocation();
 			}
-			boolean isCompareFoldersAllowed = CoreExtensionsManager.instance().getSVNConnectorFactory().getSVNAPIVersion() >= ISVNConnectorFactory.APICompatibility.SVNAPI_1_5_x;
-			boolean recommendedLayoutUsed = 
-				SVNTeamPreferences.getRepositoryBoolean(SVNTeamUIPlugin.instance().getPreferenceStore(), SVNTeamPreferences.BRANCH_TAG_CONSIDER_STRUCTURE_NAME) &&
-				location.isStructureEnabled();
-			return (isCompareFoldersAllowed || this.getSelectedResources()[0].getType() == IResource.FILE) && recommendedLayoutUsed;
+			boolean isCompareFoldersAllowed = CoreExtensionsManager.instance()
+					.getSVNConnectorFactory()
+					.getSVNAPIVersion() >= ISVNConnectorFactory.APICompatibility.SVNAPI_1_5_x;
+			boolean recommendedLayoutUsed = SVNTeamPreferences.getRepositoryBoolean(
+					SVNTeamUIPlugin.instance().getPreferenceStore(),
+					SVNTeamPreferences.BRANCH_TAG_CONSIDER_STRUCTURE_NAME) && location.isStructureEnabled();
+			return (isCompareFoldersAllowed || this.getSelectedResources()[0].getType() == IResource.FILE)
+					&& recommendedLayoutUsed;
 		}
 		return false;
 	}
 
+	@Override
 	public void runImpl(IAction action) {
 		IResource resource = this.getSelectedResources()[0];
 		ILocalResource local = SVNRemoteStorage.instance().asLocalResourceAccessible(resource);
-		IRepositoryResource remote = local.isCopied() ? SVNUtility.getCopiedFrom(resource) : SVNRemoteStorage.instance().asRepositoryResource(resource);
-			
+		IRepositoryResource remote = local.isCopied()
+				? SVNUtility.getCopiedFrom(resource)
+				: SVNRemoteStorage.instance().asRepositoryResource(resource);
+
 		boolean considerStructure = BranchTagSelectionComposite.considerStructure(remote);
-		IRepositoryResource[] branchTagResources = considerStructure ? BranchTagSelectionComposite.calculateBranchTagResources(remote, this.type) : new IRepositoryResource[0];
+		IRepositoryResource[] branchTagResources = considerStructure
+				? BranchTagSelectionComposite.calculateBranchTagResources(remote, type)
+				: new IRepositoryResource[0];
 		if (!(considerStructure && branchTagResources.length == 0)) {
-			CompareBranchTagPanel panel = new CompareBranchTagPanel(remote, this.type, branchTagResources);
-			DefaultDialog dlg = new DefaultDialog(this.getShell(), panel);
-			if (dlg.open() == 0 && panel.getResourceToCompareWith() != null){
+			CompareBranchTagPanel panel = new CompareBranchTagPanel(remote, type, branchTagResources);
+			DefaultDialog dlg = new DefaultDialog(getShell(), panel);
+			if (dlg.open() == 0 && panel.getResourceToCompareWith() != null) {
 				remote = panel.getResourceToCompareWith();
 				String diffFile = panel.getDiffFile();
-				CompareResourcesOperation mainOp = new CompareResourcesOperation(local, remote, false, false, panel.getDiffOptions());
+				CompareResourcesOperation mainOp = new CompareResourcesOperation(local, remote, false, false,
+						panel.getDiffOptions());
 				mainOp.setDiffFile(diffFile);
 				CompositeOperation op = new CompositeOperation(mainOp.getId(), mainOp.getMessagesClass());
 				op.add(mainOp);
-				if (SVNTeamPreferences.getHistoryBoolean(SVNTeamUIPlugin.instance().getPreferenceStore(), SVNTeamPreferences.HISTORY_CONNECT_TO_COMPARE_WITH_NAME)) {
-					op.add(new ShowHistoryViewOperation(resource, remote, ISVNHistoryView.COMPARE_MODE, ISVNHistoryView.COMPARE_MODE), new IActionOperation[] {mainOp});
+				if (SVNTeamPreferences.getHistoryBoolean(SVNTeamUIPlugin.instance().getPreferenceStore(),
+						SVNTeamPreferences.HISTORY_CONNECT_TO_COMPARE_WITH_NAME)) {
+					op.add(new ShowHistoryViewOperation(resource, remote, ISVNHistoryView.COMPARE_MODE,
+							ISVNHistoryView.COMPARE_MODE), new IActionOperation[] { mainOp });
 				}
-				this.runScheduled(op);
-			}	
-		}		
+				runScheduled(op);
+			}
+		}
 	}
 
+	@Override
 	protected boolean needsToSaveDirtyEditors() {
 		return true;
 	}
-	
+
 }

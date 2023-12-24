@@ -32,38 +32,45 @@ import org.eclipse.team.ui.synchronize.ISynchronizePageConfiguration;
  * @author Alexander Gurov
  */
 public class ShowHistoryAction extends AbstractSynchronizeModelAction {
-	
+
 	protected ShowHistoryActionHelper actionHelper;
-	
+
 	public ShowHistoryAction(String text, ISynchronizePageConfiguration configuration) {
 		super(text, configuration);
-		this.actionHelper = new ShowHistoryActionHelper(this, configuration);
+		actionHelper = new ShowHistoryActionHelper(this, configuration);
 	}
 
+	@Override
 	protected boolean needsToSaveDirtyEditors() {
 		return false;
 	}
-	
+
+	@Override
 	protected boolean updateSelection(IStructuredSelection selection) {
 		super.updateSelection(selection);
 		if (selection.size() == 1) {
 			if (selection.getFirstElement() instanceof SyncInfoModelElement) {
-				AbstractSVNSyncInfo syncInfo = (AbstractSVNSyncInfo)((SyncInfoModelElement)selection.getFirstElement()).getSyncInfo();
+				AbstractSVNSyncInfo syncInfo = (AbstractSVNSyncInfo) ((SyncInfoModelElement) selection
+						.getFirstElement()).getSyncInfo();
 				ILocalResource incoming = syncInfo.getRemoteChangeResource();
 				if (incoming instanceof IResourceChange) {
-					return IStateFilter.SF_TREE_CONFLICTING.accept(incoming) ? IStateFilter.SF_TREE_CONFLICTING_REPOSITORY_EXIST.accept(incoming) : IStateFilter.ST_DELETED != incoming.getStatus(); 
+					return IStateFilter.SF_TREE_CONFLICTING.accept(incoming)
+							? IStateFilter.SF_TREE_CONFLICTING_REPOSITORY_EXIST.accept(incoming)
+							: IStateFilter.ST_DELETED != incoming.getStatus();
 				}
 			}
 			if (selection.getFirstElement() instanceof ISynchronizeModelElement) {
-				ISynchronizeModelElement element = (ISynchronizeModelElement)selection.getFirstElement();
-				return IStateFilter.SF_ONREPOSITORY.accept(SVNRemoteStorage.instance().asLocalResource(element.getResource()));
+				ISynchronizeModelElement element = (ISynchronizeModelElement) selection.getFirstElement();
+				return IStateFilter.SF_ONREPOSITORY
+						.accept(SVNRemoteStorage.instance().asLocalResource(element.getResource()));
 			}
 		}
 		return false;
 	}
 
+	@Override
 	protected IActionOperation getOperation(ISynchronizePageConfiguration configuration, IDiffElement[] elements) {
-		return this.actionHelper.getOperation();
+		return actionHelper.getOperation();
 	}
 
 }

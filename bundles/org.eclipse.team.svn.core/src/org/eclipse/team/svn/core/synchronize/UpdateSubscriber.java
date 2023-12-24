@@ -26,7 +26,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.team.core.TeamException;
 import org.eclipse.team.core.diff.IDiff;
-import org.eclipse.team.core.diff.IDiffVisitor;
 import org.eclipse.team.core.diff.IThreeWayDiff;
 import org.eclipse.team.core.subscribers.SubscriberResourceMappingContext;
 import org.eclipse.team.core.synchronize.SyncInfo;
@@ -63,86 +62,125 @@ import org.eclipse.team.svn.core.utility.SVNUtility;
  */
 public class UpdateSubscriber extends AbstractSVNSubscriber {
 	private static UpdateSubscriber instance = null;
-	
+
 	protected Map<SVNRevision, String> comments;
-	
+
 	public static synchronized UpdateSubscriber instance() {
 		if (UpdateSubscriber.instance == null) {
 			UpdateSubscriber.instance = new UpdateSubscriber();
 		}
 		return UpdateSubscriber.instance;
 	}
-	
+
+	@Override
 	public void refresh(IResource[] resources, int depth, IProgressMonitor monitor) throws TeamException {
-		this.comments.clear();
+		comments.clear();
 		super.refresh(resources, depth, monitor);
 	}
 
-    protected IRemoteStatusOperation addStatusOperation(CompositeOperation op, IResource[] resources, int depth) {
-    	RemoteStatusOperation rStatus = new RemoteStatusOperation(resources);
-    	op.add(rStatus);
-        return rStatus;
-    }
+	@Override
+	protected IRemoteStatusOperation addStatusOperation(CompositeOperation op, IResource[] resources, int depth) {
+		RemoteStatusOperation rStatus = new RemoteStatusOperation(resources);
+		op.add(rStatus);
+		return rStatus;
+	}
 
-    protected SyncInfo getSVNSyncInfo(ILocalResource localStatus, IResourceChange remoteStatus) {
-        return new UpdateSyncInfo(localStatus, remoteStatus, this.getResourceComparator());
-    }
+	@Override
+	protected SyncInfo getSVNSyncInfo(ILocalResource localStatus, IResourceChange remoteStatus) {
+		return new UpdateSyncInfo(localStatus, remoteStatus, getResourceComparator());
+	}
 
+	@Override
 	protected IResourceChange handleResourceChange(IRemoteStatusOperation rStatusOp, final SVNEntryStatus status) {
-		final SVNChangeStatus current = (SVNChangeStatus)status; 
+		final SVNChangeStatus current = (SVNChangeStatus) status;
 		if (current.textStatus == SVNEntryStatus.Kind.EXTERNAL) {
 			return null;
 		}
-		final IResource []scope = rStatusOp.getScope();
+		final IResource[] scope = rStatusOp.getScope();
 		IChangeStateProvider provider = new IChangeStateProvider() {
 			private SVNEntry.Kind kind;
+
 			private SVNRevision rev;
+
 			private IResource exact;
-			
+
+			@Override
 			public long getChangeDate() {
-				return current.reposLastCmtRevision == SVNRevision.INVALID_REVISION_NUMBER ? current.lastChangedDate : current.reposLastCmtDate;
+				return current.reposLastCmtRevision == SVNRevision.INVALID_REVISION_NUMBER
+						? current.lastChangedDate
+						: current.reposLastCmtDate;
 			}
+
+			@Override
 			public String getChangeAuthor() {
-				return current.reposLastCmtRevision == SVNRevision.INVALID_REVISION_NUMBER ? current.lastCommitAuthor : current.reposLastCmtAuthor;
+				return current.reposLastCmtRevision == SVNRevision.INVALID_REVISION_NUMBER
+						? current.lastCommitAuthor
+						: current.reposLastCmtAuthor;
 			}
+
+			@Override
 			public SVNRevision.Number getChangeRevision() {
-				if (this.rev == null) {
-					long changeRev = current.reposLastCmtRevision == SVNRevision.INVALID_REVISION_NUMBER ? current.lastChangedRevision : current.reposLastCmtRevision;
-					this.rev = changeRev == SVNRevision.INVALID_REVISION_NUMBER ? SVNRevision.INVALID_REVISION : (SVNRevision.Number)SVNRevision.fromNumber(changeRev);
+				if (rev == null) {
+					long changeRev = current.reposLastCmtRevision == SVNRevision.INVALID_REVISION_NUMBER
+							? current.lastChangedRevision
+							: current.reposLastCmtRevision;
+					rev = changeRev == SVNRevision.INVALID_REVISION_NUMBER
+							? SVNRevision.INVALID_REVISION
+							: (SVNRevision.Number) SVNRevision.fromNumber(changeRev);
 				}
-				return this.rev == SVNRevision.INVALID_REVISION ? null : (SVNRevision.Number)this.rev;
+				return rev == SVNRevision.INVALID_REVISION ? null : (SVNRevision.Number) rev;
 			}
+
+			@Override
 			public Kind getTextChangeType() {
 				return current.repositoryTextStatus;
 			}
+
+			@Override
 			public SVNEntryStatus.Kind getPropertiesChangeType() {
 				return current.repositoryPropStatus;
 			}
+
+			@Override
 			public SVNEntry.Kind getNodeKind() {
-				if (this.kind == null) {
-					this.kind = SVNUtility.getNodeKind(current.path, current.nodeKind, true);
-					this.kind = this.kind == SVNEntry.Kind.NONE ? SVNUtility.getNodeKind(current.path, current.reposKind, true) : this.kind;
+				if (kind == null) {
+					kind = SVNUtility.getNodeKind(current.path, current.nodeKind, true);
+					kind = kind == SVNEntry.Kind.NONE
+							? SVNUtility.getNodeKind(current.path, current.reposKind, true)
+							: kind;
 				}
-				return this.kind;
+				return kind;
 			}
+
+			@Override
 			public String getLocalPath() {
 				return current.path;
 			}
+
+			@Override
 			public String getComment() {
 				return null;
 			}
+
+			@Override
 			public boolean isCopied() {
 				return current.isCopied;
 			}
+
+			@Override
 			public boolean isSwitched() {
 				return current.isSwitched;
 			}
-			public IResource getExact(IResource []set) {
-				if (this.exact == null) {
-					this.exact = FileUtility.selectOneOf(scope, set);
+
+			@Override
+			public IResource getExact(IResource[] set) {
+				if (exact == null) {
+					exact = FileUtility.selectOneOf(scope, set);
 				}
-				return this.exact;
+				return exact;
 			}
+
+			@Override
 			public SVNConflictDescriptor getTreeConflictDescriptor() {
 				return current.treeConflicts == null ? null : current.treeConflicts[0];
 			}
@@ -151,17 +189,18 @@ public class UpdateSubscriber extends AbstractSVNSubscriber {
 			return null;
 		}
 		IResourceChange resourceChange = SVNRemoteStorage.instance().asResourceChange(provider, true);
-		if ((resourceChange == null || resourceChange.getRevision() == SVNRevision.INVALID_REVISION_NUMBER)/* && !resourceChange.hasTreeConflict()*/) {
+		if (resourceChange == null || resourceChange
+				.getRevision() == SVNRevision.INVALID_REVISION_NUMBER/* && !resourceChange.hasTreeConflict()*/) {
 			return null;
 		}
 		IResourceChange checkForReplacement = null;
 		try {
-			checkForReplacement = SVNRemoteStorage.instance().resourceChangeFromBytes(this.statusCache.getBytes(resourceChange.getResource()));
+			checkForReplacement = SVNRemoteStorage.instance()
+					.resourceChangeFromBytes(statusCache.getBytes(resourceChange.getResource()));
 		} catch (TeamException e) {
-			LoggedOperation.reportError(this.getClass().getName(), e);			
+			LoggedOperation.reportError(this.getClass().getName(), e);
 		}
-		if (checkForReplacement != null)
-		{
+		if (checkForReplacement != null) {
 			if (IStateFilter.SF_ADDED.accept(checkForReplacement)) {
 				if (IStateFilter.SF_DELETED.accept(resourceChange)) {
 					checkForReplacement.treatAsReplacement();
@@ -172,13 +211,15 @@ public class UpdateSubscriber extends AbstractSVNSubscriber {
 				resourceChange.treatAsReplacement();
 			}
 		}
-		
+
 		rStatusOp.setPegRevision(resourceChange);
 		IRepositoryResource originator = SVNRemoteStorage.instance().asRepositoryResource(resourceChange.getResource());
 		if (originator != null) {
 			// for case sensitive name changes, nulls allowed for externals roots
 			String url = SVNUtility.decodeURL(current.url);
-			IRepositoryResource tOriginator = resourceChange instanceof IFileChange ? (IRepositoryResource)originator.asRepositoryFile(url, true) : (IRepositoryResource)originator.asRepositoryContainer(url, true);
+			IRepositoryResource tOriginator = resourceChange instanceof IFileChange
+					? (IRepositoryResource) originator.asRepositoryFile(url, true)
+					: (IRepositoryResource) originator.asRepositoryContainer(url, true);
 			if (tOriginator != null) {
 				originator = tOriginator;
 			}
@@ -186,16 +227,17 @@ public class UpdateSubscriber extends AbstractSVNSubscriber {
 			originator.setPegRevision(resourceChange.getPegRevision());
 			resourceChange.setOriginator(originator);
 		}
-		
+
 		resourceChange.setCommentProvider(new ICommentProvider() {
+			@Override
 			public String getComment(IResource resource, SVNRevision rev, SVNRevision peg) {
 				//Null is also valid value if no comment was specified for revision. So, check for key presence.
-				if (!UpdateSubscriber.this.comments.containsKey(rev)) {
-					this.cacheComments(resource, rev, peg);
+				if (!comments.containsKey(rev)) {
+					cacheComments(resource, rev, peg);
 				}
-				return UpdateSubscriber.this.comments.get(rev);
+				return comments.get(rev);
 			}
-			
+
 			public void cacheComments(IResource resource, SVNRevision rev, SVNRevision peg) {
 				if (rev == SVNRevision.INVALID_REVISION || peg != null && peg == SVNRevision.INVALID_REVISION) {
 					return;
@@ -211,20 +253,22 @@ public class UpdateSubscriber extends AbstractSVNSubscriber {
 				ProgressMonitorUtility.doTaskExternalDefault(op, new NullProgressMonitor());
 				if (op.getExecutionState() == IActionOperation.OK) {
 					for (SVNLogEntry entry : op.getMessages()) {
-						UpdateSubscriber.this.comments.put(SVNRevision.fromNumber(entry.revision), entry.message);
+						comments.put(SVNRevision.fromNumber(entry.revision), entry.message);
 					}
 				}
 			}
 		});
 		return resourceChange;
 	}
-	
+
+	@Override
 	protected boolean isIncoming(SVNEntryStatus status) {
-		SVNChangeStatus st = (SVNChangeStatus)status;
-		return st.repositoryPropStatus == SVNEntryStatus.Kind.MODIFIED || st.repositoryTextStatus != SVNEntryStatus.Kind.NONE || st.hasConflict;
+		SVNChangeStatus st = (SVNChangeStatus) status;
+		return st.repositoryPropStatus == SVNEntryStatus.Kind.MODIFIED
+				|| st.repositoryTextStatus != SVNEntryStatus.Kind.NONE || st.hasConflict;
 	}
-	
-	/* 
+
+	/*
 	 * Override method from super class in order to not contact the server
 	 * if we're interested only in outgoing changes, see 'autoRefresh' param from SubscriberResourceMappingContext
 	 * 
@@ -235,35 +279,35 @@ public class UpdateSubscriber extends AbstractSVNSubscriber {
 	public int getState(ResourceMapping mapping, int stateMask, IProgressMonitor monitor) throws CoreException {
 		if ((stateMask & IThreeWayDiff.INCOMING) == 0) {
 			// If we're only interested in outgoing changes, used the cached modified state
-			ResourceTraversal[] traversals = mapping.getTraversals(new SubscriberResourceMappingContext(this, false), monitor);
-			final int[] direction = new int[] { 0 };
-			final int[] kind = new int[] { 0 };
-			accept(traversals, new IDiffVisitor() {
-				public boolean visit(IDiff diff) {
-					if (diff instanceof IThreeWayDiff) {
-						IThreeWayDiff twd = (IThreeWayDiff) diff;
-						direction[0] |= twd.getDirection();
-					}
-					// If the traversals contain a combination of kinds, return a CHANGE
-					int diffKind = diff.getKind();
-					if (kind[0] == 0)
-						kind[0] = diffKind;
-					if (kind[0] != diffKind) {
-						kind[0] = IDiff.CHANGE;
-					}
-					// Only need to visit the childen of a change
-					return diffKind == IDiff.CHANGE;
+			ResourceTraversal[] traversals = mapping.getTraversals(new SubscriberResourceMappingContext(this, false),
+					monitor);
+			final int[] direction = { 0 };
+			final int[] kind = { 0 };
+			accept(traversals, diff -> {
+				if (diff instanceof IThreeWayDiff) {
+					IThreeWayDiff twd = (IThreeWayDiff) diff;
+					direction[0] |= twd.getDirection();
 				}
+				// If the traversals contain a combination of kinds, return a CHANGE
+				int diffKind = diff.getKind();
+				if (kind[0] == 0) {
+					kind[0] = diffKind;
+				}
+				if (kind[0] != diffKind) {
+					kind[0] = IDiff.CHANGE;
+				}
+				// Only need to visit the childen of a change
+				return diffKind == IDiff.CHANGE;
 			});
 			return (direction[0] | kind[0]) & stateMask;
 		} else {
 			return super.getState(mapping, stateMask, monitor);
 		}
 	}
-	
+
 	private UpdateSubscriber() {
 		super(true, SVNMessages.UpdateSubscriber_Name);
-		this.comments = new HashMap<SVNRevision, String>();
+		comments = new HashMap<>();
 	}
 
 }

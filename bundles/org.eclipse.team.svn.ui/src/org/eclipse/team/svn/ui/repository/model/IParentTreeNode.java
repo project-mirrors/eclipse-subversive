@@ -20,5 +20,5 @@ package org.eclipse.team.svn.ui.repository.model;
  * @author Alexander Gurov
  */
 public interface IParentTreeNode {
-	public boolean hasChildren();
+	boolean hasChildren();
 }

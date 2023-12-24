@@ -28,25 +28,30 @@ import org.eclipse.team.ui.synchronize.ISynchronizePageConfiguration;
  * @author Igor Burilo
  */
 public class SetKeywordsModelAction extends AbstractSynchronizeLogicalModelAction {
-	
+
 	public SetKeywordsModelAction(String text, ISynchronizePageConfiguration configuration) {
 		super(text, configuration);
 	}
 
+	@Override
 	protected boolean needsToSaveDirtyEditors() {
 		return false;
 	}
-	
+
+	@Override
 	protected FastSyncInfoFilter getSyncInfoFilter() {
 		return new FastSyncInfoFilter() {
-            public boolean select(SyncInfo info) {
-                return super.select(info) && IStateFilter.SF_VERSIONED_FILES.accept(((AbstractSVNSyncInfo)info).getLocalResource());
-            }
-        };
+			@Override
+			public boolean select(SyncInfo info) {
+				return super.select(info)
+						&& IStateFilter.SF_VERSIONED_FILES.accept(((AbstractSVNSyncInfo) info).getLocalResource());
+			}
+		};
 	}
-	
+
+	@Override
 	protected IActionOperation getOperation() {
-		org.eclipse.team.svn.ui.action.local.SetKeywordsAction.doSetKeywords(this.syncInfoSelector.getSelectedResources());
+		org.eclipse.team.svn.ui.action.local.SetKeywordsAction.doSetKeywords(syncInfoSelector.getSelectedResources());
 		return null;
 	}
 

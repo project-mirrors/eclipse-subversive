@@ -33,85 +33,93 @@ import org.eclipse.core.runtime.Platform;
  */
 public class SVNTask extends Task {
 	public static final String CMD_EXPORT = "export";
+
 	public static final String CMD_CAT = "cat";
-	
+
 	protected String command;
+
 	protected String url;
+
 	protected String pegRev;
+
 	protected String rev;
+
 	protected String dest;
+
 	protected String username;
+
 	protected String password;
+
 	protected boolean force;
-	
+
 	protected String SPACE_WRAP_CHAR = Platform.OS_WIN32.equals(Platform.getOS()) ? "\"" : "'";
-	
+
+	@Override
 	public void execute() throws BuildException {
 		String cmdLine = null;
 		FileOutputStream oStream = null;
-		if (SVNTask.CMD_CAT.equals(this.command)) {
-			cmdLine = "svn cat " + this.SPACE_WRAP_CHAR + this.url;
-			if (this.pegRev != null) {
-				cmdLine += "@" + this.pegRev;
+		if (SVNTask.CMD_CAT.equals(command)) {
+			cmdLine = "svn cat " + SPACE_WRAP_CHAR + url;
+			if (pegRev != null) {
+				cmdLine += "@" + pegRev;
 			}
-			cmdLine += this.SPACE_WRAP_CHAR;
-			if (this.rev != null) {
-				cmdLine += " -r " + this.rev;
+			cmdLine += SPACE_WRAP_CHAR;
+			if (rev != null) {
+				cmdLine += " -r " + rev;
 			}
-			cmdLine += this.getCreadentialsPart();
+			cmdLine += getCreadentialsPart();
 			cmdLine += " --non-interactive";
-			
-			File folder = new File(this.dest).getParentFile();
+
+			File folder = new File(dest).getParentFile();
 			folder.mkdirs();
-			
+
 			try {
-				oStream = new FileOutputStream(this.dest);
-			}
-			catch (FileNotFoundException e) {
+				oStream = new FileOutputStream(dest);
+			} catch (FileNotFoundException e) {
 				throw new BuildException(e);
 			}
-		}
-		else if (SVNTask.CMD_EXPORT.equals(this.command)) {
+		} else if (SVNTask.CMD_EXPORT.equals(command)) {
 			cmdLine = "svn export ";
-					    
-			if (this.force) {
+
+			if (force) {
 				cmdLine += " --force ";
 			}
-			
-			if (this.rev != null) {
-				cmdLine += " -r " + this.rev;
+
+			if (rev != null) {
+				cmdLine += " -r " + rev;
 			}
-			
-			cmdLine += " " + this.SPACE_WRAP_CHAR + this.url;
-			if (this.pegRev != null) {
-				cmdLine += "@" + this.pegRev;
+
+			cmdLine += " " + SPACE_WRAP_CHAR + url;
+			if (pegRev != null) {
+				cmdLine += "@" + pegRev;
 			}
-			cmdLine += this.SPACE_WRAP_CHAR;
-			cmdLine += " " + this.SPACE_WRAP_CHAR + this.dest + this.SPACE_WRAP_CHAR;
-			cmdLine += this.getCreadentialsPart();
+			cmdLine += SPACE_WRAP_CHAR;
+			cmdLine += " " + SPACE_WRAP_CHAR + dest + SPACE_WRAP_CHAR;
+			cmdLine += getCreadentialsPart();
 			cmdLine += " -q --non-interactive";
 		}
-		
+
 		if (cmdLine != null) {
 			try {
 				Execute exe = new Execute(new PumpStreamHandler(oStream == null ? System.out : oStream, System.err));
-				exe.setAntRun(this.getProject());
+				exe.setAntRun(getProject());
 				exe.setCommandline(new Commandline(cmdLine).getCommandline());
 				exe.execute();
-			}
-			catch (IOException e) {
+			} catch (IOException e) {
 				throw new BuildException(e);
-			}
-			finally {
+			} finally {
 				if (oStream != null) {
-					try {oStream.close();} catch (IOException ex) {}
+					try {
+						oStream.close();
+					} catch (IOException ex) {
+					}
 				}
 			}
 		}
 	}
 
 	public String getCommand() {
-		return this.command;
+		return command;
 	}
 
 	public void setCommand(String command) {
@@ -123,11 +131,11 @@ public class SVNTask extends Task {
 	}
 
 	public boolean getForce() {
-		return this.force;
+		return force;
 	}
-	
+
 	public String getUrl() {
-		return this.url;
+		return url;
 	}
 
 	public void setUrl(String url) {
@@ -135,7 +143,7 @@ public class SVNTask extends Task {
 	}
 
 	public String getPegRev() {
-		return this.pegRev;
+		return pegRev;
 	}
 
 	public void setPegRev(String pegRev) {
@@ -143,7 +151,7 @@ public class SVNTask extends Task {
 	}
 
 	public String getRev() {
-		return this.rev;
+		return rev;
 	}
 
 	public void setRev(String rev) {
@@ -151,7 +159,7 @@ public class SVNTask extends Task {
 	}
 
 	public String getDest() {
-		return this.dest;
+		return dest;
 	}
 
 	public void setDest(String dest) {
@@ -159,7 +167,7 @@ public class SVNTask extends Task {
 	}
 
 	public String getUsername() {
-		return this.username;
+		return username;
 	}
 
 	public void setUsername(String username) {
@@ -167,7 +175,7 @@ public class SVNTask extends Task {
 	}
 
 	public String getPassword() {
-		return this.password;
+		return password;
 	}
 
 	public void setPassword(String password) {
@@ -176,13 +184,13 @@ public class SVNTask extends Task {
 
 	protected String getCreadentialsPart() {
 		String cmdLine = " --no-auth-cache";
-		if (this.username != null && this.username.length() != 0) {
-			cmdLine += " --username " + this.SPACE_WRAP_CHAR + this.username + this.SPACE_WRAP_CHAR;
+		if (username != null && username.length() != 0) {
+			cmdLine += " --username " + SPACE_WRAP_CHAR + username + SPACE_WRAP_CHAR;
 		}
-		if (this.password != null && this.password.length() != 0) {
-			cmdLine += " --password " + this.SPACE_WRAP_CHAR + this.password + this.SPACE_WRAP_CHAR;
+		if (password != null && password.length() != 0) {
+			cmdLine += " --password " + SPACE_WRAP_CHAR + password + SPACE_WRAP_CHAR;
 		}
 		return cmdLine;
 	}
-	
+
 }

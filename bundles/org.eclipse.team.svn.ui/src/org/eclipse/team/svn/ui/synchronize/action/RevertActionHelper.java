@@ -28,22 +28,27 @@ import org.eclipse.team.ui.synchronize.ISynchronizePageConfiguration;
  * @author Igor Burilo
  */
 public class RevertActionHelper extends AbstractActionHelper {
-	
+
 	public RevertActionHelper(IAction action, ISynchronizePageConfiguration configuration) {
 		super(action, configuration);
 	}
 
+	@Override
 	public FastSyncInfoFilter getSyncInfoFilter() {
 		return new FastSyncInfoFilter() {
+			@Override
 			public boolean select(SyncInfo info) {
-				return org.eclipse.team.svn.ui.action.local.RevertAction.SF_REVERTABLE_OR_NEW.accept(((AbstractSVNSyncInfo)info).getLocalResource());
+				return org.eclipse.team.svn.ui.action.local.RevertAction.SF_REVERTABLE_OR_NEW
+						.accept(((AbstractSVNSyncInfo) info).getLocalResource());
 			}
 		};
 	}
-	
+
+	@Override
 	public IActionOperation getOperation() {
-		IResource []changedResources = this.getSyncInfoSelector().getSelectedResources();
-		return org.eclipse.team.svn.ui.action.local.RevertAction.getRevertOperation(this.configuration.getSite().getShell(), changedResources, changedResources);
+		IResource[] changedResources = getSyncInfoSelector().getSelectedResources();
+		return org.eclipse.team.svn.ui.action.local.RevertAction.getRevertOperation(configuration.getSite().getShell(),
+				changedResources, changedResources);
 	}
 
 }

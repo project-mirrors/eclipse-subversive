@@ -17,9 +17,9 @@ package org.eclipse.team.svn.core.connector;
 /**
  * The status information container
  * 
- * The JavaHL API's is the only way to interact between SVN and Java-based tools. At the same time JavaHL connector
- * library is not EPL compatible and we won't to pin plug-in with concrete connector implementation. So, the only way to
- * do this is providing our own connector interface which will be covered by concrete connector implementation.
+ * The JavaHL API's is the only way to interact between SVN and Java-based tools. At the same time JavaHL connector library is not EPL
+ * compatible and we won't to pin plug-in with concrete connector implementation. So, the only way to do this is providing our own connector
+ * interface which will be covered by concrete connector implementation.
  * 
  * @author Alexander Gurov
  */
@@ -63,24 +63,22 @@ public class SVNMergeStatus extends SVNEntryStatus {
 	 * The comment entered for the last merged change in the merged repository resource. Could be <code>null</code>.
 	 */
 	public final String comment;
-	
+
 	/**
 	 * Tells if this resource is skipped during merge or not.
 	 */
 	public final boolean skipped;
 
 	/**
-     * @since 1.6
-     * is this item in a tree conflicted state
-     */
-    public final boolean hasTreeConflict;
+	 * @since 1.6 is this item in a tree conflicted state
+	 */
+	public final boolean hasTreeConflict;
 
-    /**
-     * @since 1.6
-     * description of the tree conflict
-     */
-    public final SVNConflictDescriptor treeConflictDescriptor;
-	
+	/**
+	 * @since 1.6 description of the tree conflict
+	 */
+	public final SVNConflictDescriptor treeConflictDescriptor;
+
 	/**
 	 * The {@link SVNMergeStatus} instance could be initialized only once because all fields are final
 	 * 
@@ -113,7 +111,9 @@ public class SVNMergeStatus extends SVNEntryStatus {
 	 * @param treeConflictDescriptor
 	 *            description of the tree conflict
 	 */
-	public SVNMergeStatus(String startUrl, String endUrl, String path, SVNEntry.Kind nodeKind, Kind textStatus, Kind propStatus, long startRevision, long endRevision, long date, String author, String comment, boolean skipped, boolean hasTreeConflict, SVNConflictDescriptor treeConflictDescriptor) {
+	public SVNMergeStatus(String startUrl, String endUrl, String path, SVNEntry.Kind nodeKind, Kind textStatus,
+			Kind propStatus, long startRevision, long endRevision, long date, String author, String comment,
+			boolean skipped, boolean hasTreeConflict, SVNConflictDescriptor treeConflictDescriptor) {
 		super(nodeKind, textStatus, propStatus);
 		this.startUrl = startUrl;
 		this.endUrl = endUrl;

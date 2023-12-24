@@ -20,7 +20,6 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.team.svn.core.SVNMessages;
 import org.eclipse.team.svn.core.operation.IActionOperation;
-import org.eclipse.team.svn.core.operation.IUnprotectedOperation;
 import org.eclipse.team.svn.core.operation.local.change.IActionOperationProcessor;
 import org.eclipse.team.svn.core.operation.local.change.ResourceChange;
 import org.eclipse.team.svn.core.operation.local.change.visitors.RestorePropertiesVisitor;
@@ -38,21 +37,19 @@ public class RestoreExternalsOperation extends AbstractWorkingCopyOperation impl
 		this.freezeOp = freezeOp;
 	}
 
+	@Override
 	protected void runImpl(IProgressMonitor monitor) throws Exception {
 		final RestorePropertiesVisitor visitor = new RestorePropertiesVisitor();
-		
-		for (Iterator<?> it = this.freezeOp.getChanges().iterator(); it.hasNext() && !monitor.isCanceled(); ) {
-			final ResourceChange change = (ResourceChange)it.next();
-			this.protectStep(new IUnprotectedOperation() {
-				public void run(IProgressMonitor monitor) throws Exception {
-					change.traverse(visitor, IResource.DEPTH_ZERO, RestoreExternalsOperation.this, monitor);
-				}
-			}, monitor, this.freezeOp.getChanges().size());
+
+		for (Iterator<?> it = freezeOp.getChanges().iterator(); it.hasNext() && !monitor.isCanceled();) {
+			final ResourceChange change = (ResourceChange) it.next();
+			this.protectStep(monitor1 -> change.traverse(visitor, IResource.DEPTH_ZERO, RestoreExternalsOperation.this, monitor1), monitor, freezeOp.getChanges().size());
 		}
 	}
 
+	@Override
 	public void doOperation(IActionOperation op, IProgressMonitor monitor) {
-    	this.reportStatus(op.run(monitor).getStatus());
+		this.reportStatus(op.run(monitor).getStatus());
 	}
 
 }

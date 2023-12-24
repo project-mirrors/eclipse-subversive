@@ -29,25 +29,28 @@ import org.eclipse.team.ui.synchronize.ISynchronizePageConfiguration;
  * @author Alexander Gurov
  */
 public class CommitAction extends AbstractSynchronizeModelAction {
-	
+
 	protected CommitActionHelper actionHelper;
-	
+
 	public CommitAction(String text, ISynchronizePageConfiguration configuration) {
 		super(text, configuration);
-		this.actionHelper = new CommitActionHelper(this, configuration);
+		actionHelper = new CommitActionHelper(this, configuration);
 	}
 
-	public CommitAction(String text, ISynchronizePageConfiguration configuration, ISelectionProvider selectionProvider) {
+	public CommitAction(String text, ISynchronizePageConfiguration configuration,
+			ISelectionProvider selectionProvider) {
 		super(text, configuration, selectionProvider);
-		this.actionHelper = new CommitActionHelper(this, configuration);
+		actionHelper = new CommitActionHelper(this, configuration);
 	}
 
+	@Override
 	protected FastSyncInfoFilter getSyncInfoFilter() {
-		return this.actionHelper.getSyncInfoFilter();
+		return actionHelper.getSyncInfoFilter();
 	}
 
+	@Override
 	protected IActionOperation getOperation(ISynchronizePageConfiguration configuration, IDiffElement[] elements) {
-		return this.actionHelper.getOperation();
+		return actionHelper.getOperation();
 	}
-	
+
 }

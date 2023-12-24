@@ -25,21 +25,24 @@ import org.eclipse.team.svn.core.resource.IRepositoryResourceProvider;
  * @author Alexander Gurov
  */
 public abstract class AbstractRepositoryOperation extends AbstractActionOperation {
-	private IRepositoryResource []resources;
+	private IRepositoryResource[] resources;
+
 	private IRepositoryResourceProvider provider;
-	
-	public AbstractRepositoryOperation(String operationName, Class<? extends NLS> messagesClass, IRepositoryResource []resources) {
+
+	public AbstractRepositoryOperation(String operationName, Class<? extends NLS> messagesClass,
+			IRepositoryResource[] resources) {
 		super(operationName, messagesClass);
 		this.resources = resources;
 	}
-	
-	public AbstractRepositoryOperation(String operationName, Class<? extends NLS> messagesClass, IRepositoryResourceProvider provider) {
+
+	public AbstractRepositoryOperation(String operationName, Class<? extends NLS> messagesClass,
+			IRepositoryResourceProvider provider) {
 		super(operationName, messagesClass);
 		this.provider = provider;
 	}
-	
-	protected IRepositoryResource []operableData() {
-		return this.resources == null ? this.provider.getRepositoryResources() : this.resources;
+
+	protected IRepositoryResource[] operableData() {
+		return resources == null ? provider.getRepositoryResources() : resources;
 	}
-	
+
 }

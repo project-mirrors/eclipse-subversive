@@ -49,12 +49,13 @@ public class ParameterizedWorkflowTest {
 
 	@Parameter
 	public ActionOperationWorkflow workflow;
+
 	private RemoteTestRepositoryManager repoManager;
 
 	@Parameters()
 	public static Collection<ActionOperationWorkflow> createTestData() throws Exception {
 		ActionOperationWorkflowBuilder workflowBuilder = new ActionOperationWorkflowBuilder();
-		List<ActionOperationWorkflow> result = new ArrayList<ActionOperationWorkflow>();
+		List<ActionOperationWorkflow> result = new ArrayList<>();
 		result.add(workflowBuilder.buildCoreWorkflow());
 		result.add(workflowBuilder.buildCommitUpdateWorkflow());
 		result.add(workflowBuilder.buildPlc312Workflow());
@@ -97,25 +98,25 @@ public class ParameterizedWorkflowTest {
 		}
 
 		try {
-			this.cleanRepositoryNode(SVNUtility.getProposedTags(repoManager.getRepositoryLocation()));
+			cleanRepositoryNode(SVNUtility.getProposedTags(repoManager.getRepositoryLocation()));
 		} catch (Exception ex) {
 		}
 		try {
-			this.cleanRepositoryNode(SVNUtility.getProposedBranches(repoManager.getRepositoryLocation()));
+			cleanRepositoryNode(SVNUtility.getProposedBranches(repoManager.getRepositoryLocation()));
 		} catch (Exception ex) {
 		}
 		try {
-			this.cleanRepositoryNode(SVNUtility.getProposedTrunk(repoManager.getRepositoryLocation()));
+			cleanRepositoryNode(SVNUtility.getProposedTrunk(repoManager.getRepositoryLocation()));
 		} catch (Exception ex) {
 		}
 
 		SVNRemoteStorage storage = SVNRemoteStorage.instance();
 		IRepositoryLocation[] locations = storage.getRepositoryLocations();
 
-		for (int i = 0; i < locations.length; i++) {
-			locations[i].dispose();
+		for (IRepositoryLocation location : locations) {
+			location.dispose();
 			try {
-				storage.removeRepositoryLocation(locations[i]);
+				storage.removeRepositoryLocation(location);
 			} catch (Exception ex) {
 			}
 		}

@@ -30,7 +30,6 @@ import org.eclipse.team.svn.core.connector.SVNDepth;
 import org.eclipse.team.svn.core.connector.SVNRevision;
 import org.eclipse.team.svn.core.operation.IActionOperation;
 import org.eclipse.team.svn.core.operation.IConsoleStream;
-import org.eclipse.team.svn.core.operation.IUnprotectedOperation;
 import org.eclipse.team.svn.core.operation.SVNConflictDetectionProgressMonitor;
 import org.eclipse.team.svn.core.resource.IRemoteStorage;
 import org.eclipse.team.svn.core.resource.IRepositoryLocation;
@@ -46,106 +45,110 @@ import org.eclipse.team.svn.core.utility.SVNUtility;
  */
 public class UpdateOperation extends AbstractConflictDetectionOperation implements IResourceProvider {
 	protected SVNRevision selectedRevision;
+
 	protected SVNDepth depth;
+
 	protected long options;
+
 	protected String updateDepthPath;
-	
-	public UpdateOperation(IResource []resources, boolean ignoreExternals) {
-	    this(resources, null, ignoreExternals);
+
+	public UpdateOperation(IResource[] resources, boolean ignoreExternals) {
+		this(resources, null, ignoreExternals);
 	}
 
 	public UpdateOperation(IResourceProvider provider, boolean ignoreExternals) {
-	    this(provider, null, ignoreExternals);
+		this(provider, null, ignoreExternals);
 	}
 
 	public UpdateOperation(IResourceProvider provider, SVNRevision selectedRevision, boolean ignoreExternals) {
-		this(provider, selectedRevision, SVNDepth.INFINITY, ignoreExternals ? ISVNConnector.Options.IGNORE_EXTERNALS : ISVNConnector.Options.NONE, null);
+		this(provider, selectedRevision, SVNDepth.INFINITY,
+				ignoreExternals ? ISVNConnector.Options.IGNORE_EXTERNALS : ISVNConnector.Options.NONE, null);
 	}
-	
+
 	public UpdateOperation(IResource[] resources, SVNRevision selectedRevision, boolean ignoreExternals) {
-		this(resources, selectedRevision, SVNDepth.INFINITY, ignoreExternals ? ISVNConnector.Options.IGNORE_EXTERNALS : ISVNConnector.Options.NONE, null);
+		this(resources, selectedRevision, SVNDepth.INFINITY,
+				ignoreExternals ? ISVNConnector.Options.IGNORE_EXTERNALS : ISVNConnector.Options.NONE, null);
 	}
-	
-	public UpdateOperation(IResourceProvider provider, SVNRevision selectedRevision, SVNDepth depth, long options, String updateDepthPath) {
-		super("Operation_Update", SVNMessages.class, provider); //$NON-NLS-1$		
+
+	public UpdateOperation(IResourceProvider provider, SVNRevision selectedRevision, SVNDepth depth, long options,
+			String updateDepthPath) {
+		super("Operation_Update", SVNMessages.class, provider); //$NON-NLS-1$
 		this.selectedRevision = selectedRevision == null ? SVNRevision.HEAD : selectedRevision;
 		this.depth = depth;
 		this.options = options & ISVNConnector.CommandMasks.UPDATE;
 		this.updateDepthPath = updateDepthPath;
 	}
-	
-	public UpdateOperation(IResource[] resources, SVNRevision selectedRevision, SVNDepth depth, long options, String updateDepthPath) {
+
+	public UpdateOperation(IResource[] resources, SVNRevision selectedRevision, SVNDepth depth, long options,
+			String updateDepthPath) {
 		super("Operation_Update", SVNMessages.class, resources); //$NON-NLS-1$
 		this.selectedRevision = selectedRevision == null ? SVNRevision.HEAD : selectedRevision;
 		this.depth = depth;
 		this.options = options & ISVNConnector.CommandMasks.UPDATE;
 		this.updateDepthPath = updateDepthPath;
 	}
-	
+
 	public void setDepthOptions(SVNDepth depth, boolean isStickyDepth, String updateDepthPath) {
 		this.depth = depth;
-		this.options &= ~ISVNConnector.Options.DEPTH_IS_STICKY;
-		this.options |= isStickyDepth ? ISVNConnector.Options.DEPTH_IS_STICKY : ISVNConnector.Options.NONE;
+		options &= ~ISVNConnector.Options.DEPTH_IS_STICKY;
+		options |= isStickyDepth ? ISVNConnector.Options.DEPTH_IS_STICKY : ISVNConnector.Options.NONE;
 		this.updateDepthPath = updateDepthPath;
 	}
-	
+
+	@Override
 	public int getOperationWeight() {
 		return 19;
 	}
-	
-	public IResource []getResources() {
-	    return this.getProcessed();
+
+	@Override
+	public IResource[] getResources() {
+		return getProcessed();
 	}
-	
+
+	@Override
 	protected void runImpl(final IProgressMonitor monitor) throws Exception {
-		IResource []resources = this.operableData();
-		
+		IResource[] resources = operableData();
+
 		// container with resources that is really updated
-		this.defineInitialResourceSet(resources);
+		defineInitialResourceSet(resources);
 
 		IRemoteStorage storage = SVNRemoteStorage.instance();
 		Map wc2Resources = SVNUtility.splitWorkingCopies(resources);
-		for (Iterator it = wc2Resources.entrySet().iterator(); it.hasNext() && !monitor.isCanceled(); ) {
-			Map.Entry entry = (Map.Entry)it.next();
-			final IRepositoryLocation location = storage.getRepositoryLocation((IProject)entry.getKey());
-			IResource []wcResources = (IResource [])((List)entry.getValue()).toArray(new IResource[0]);
-			if (this.depth == SVNDepth.INFINITY || this.depth == SVNDepth.UNKNOWN) {
-			    wcResources = FileUtility.shrinkChildNodes(wcResources);
+		for (Iterator it = wc2Resources.entrySet().iterator(); it.hasNext() && !monitor.isCanceled();) {
+			Map.Entry entry = (Map.Entry) it.next();
+			final IRepositoryLocation location = storage.getRepositoryLocation((IProject) entry.getKey());
+			IResource[] wcResources = (IResource[]) ((List) entry.getValue()).toArray(new IResource[0]);
+			if (depth == SVNDepth.INFINITY || depth == SVNDepth.UNKNOWN) {
+				wcResources = FileUtility.shrinkChildNodes(wcResources);
+			} else {
+				FileUtility.reorder(wcResources, true);
 			}
-			else {
-			    FileUtility.reorder(wcResources, true);
-			}
-			final String []paths = FileUtility.asPathArray(wcResources);
-			
+			final String[] paths = FileUtility.asPathArray(wcResources);
+
 			//append update depth path
-			if ((this.options & ISVNConnector.Options.DEPTH_IS_STICKY) != 0 && this.updateDepthPath != null &&  paths.length == 1) {
-				String newPath = paths[0] + "/" + this.updateDepthPath;
+			if ((options & ISVNConnector.Options.DEPTH_IS_STICKY) != 0 && updateDepthPath != null
+					&& paths.length == 1) {
+				String newPath = paths[0] + "/" + updateDepthPath;
 				newPath = FileUtility.normalizePath(newPath);
 				paths[0] = newPath;
-			}						
-			
-			this.complexWriteToConsole(new Runnable() {
-				public void run() {
-					UpdateOperation.this.writeToConsole(IConsoleStream.LEVEL_CMD, "svn update" + ISVNConnector.Options.asCommandLine(UpdateOperation.this.options)); //$NON-NLS-1$
-					for (int i = 0; i < paths.length && !monitor.isCanceled(); i++) {
-						UpdateOperation.this.writeToConsole(IConsoleStream.LEVEL_CMD, " \"" + paths[i] + "\""); //$NON-NLS-1$ //$NON-NLS-2$
-					}
-					UpdateOperation.this.writeToConsole(IConsoleStream.LEVEL_CMD, " -r " + UpdateOperation.this.selectedRevision + SVNUtility.getDepthArg(UpdateOperation.this.depth, UpdateOperation.this.options) + FileUtility.getUsernameParam(location.getUsername()) + "\n"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+			}
+
+			complexWriteToConsole(() -> {
+				UpdateOperation.this.writeToConsole(IConsoleStream.LEVEL_CMD,
+						"svn update" + ISVNConnector.Options.asCommandLine(options)); //$NON-NLS-1$
+				for (int i = 0; i < paths.length && !monitor.isCanceled(); i++) {
+					UpdateOperation.this.writeToConsole(IConsoleStream.LEVEL_CMD, " \"" + paths[i] + "\""); //$NON-NLS-1$ //$NON-NLS-2$
 				}
+				UpdateOperation.this.writeToConsole(IConsoleStream.LEVEL_CMD, " -r " + selectedRevision //$NON-NLS-1$
+						+ SVNUtility.getDepthArg(depth, options)
+						+ FileUtility.getUsernameParam(location.getUsername()) + "\n"); //$NON-NLS-1$
 			});
-			
+
 			final ISVNConnector proxy = location.acquireSVNProxy();
-			this.protectStep(new IUnprotectedOperation() {
-				public void run(IProgressMonitor monitor) throws Exception {
-					proxy.update(
-					    paths, 
-					    UpdateOperation.this.selectedRevision, 
-					    UpdateOperation.this.depth,
-					    UpdateOperation.this.options, 
-						new ConflictDetectionProgressMonitor(UpdateOperation.this, monitor, null));
-				}
-			}, monitor, wc2Resources.size());
-			
+			this.protectStep(monitor1 -> proxy.update(
+					paths, selectedRevision, depth, options,
+					new ConflictDetectionProgressMonitor(UpdateOperation.this, monitor1, null)), monitor, wc2Resources.size());
+
 			location.releaseSVNProxy(proxy);
 		}
 	}
@@ -154,24 +157,29 @@ public class UpdateOperation extends AbstractConflictDetectionOperation implemen
 		public ConflictDetectionProgressMonitor(IActionOperation parent, IProgressMonitor monitor, IPath root) {
 			super(parent, monitor, root);
 		}
+
+		@Override
 		protected void processConflict(ItemState state) {
-			UpdateOperation.this.setUnresolvedConflict(true);
-		    for (IResource res : UpdateOperation.this.getProcessed()) {
-		        IPath conflictPath = new Path(state.path);
-		        IPath resourcePath = FileUtility.getResourcePath(res);
-		        if (resourcePath.isPrefixOf(conflictPath)) {
-			        if (resourcePath.equals(conflictPath)) {
-			        	UpdateOperation.this.removeProcessed(res);
-			        }
-		        	IResource conflictResource = ResourcesPlugin.getWorkspace().getRoot().findMember(res.getFullPath().append(conflictPath.removeFirstSegments(resourcePath.segmentCount())));
-		            if (conflictResource != null) {
-		            	UpdateOperation.this.addUnprocessed(conflictResource);
-		            }
-		            break;
-		        }
-		    }			
+			setUnresolvedConflict(true);
+			for (IResource res : getProcessed()) {
+				IPath conflictPath = new Path(state.path);
+				IPath resourcePath = FileUtility.getResourcePath(res);
+				if (resourcePath.isPrefixOf(conflictPath)) {
+					if (resourcePath.equals(conflictPath)) {
+						removeProcessed(res);
+					}
+					IResource conflictResource = ResourcesPlugin.getWorkspace()
+							.getRoot()
+							.findMember(res.getFullPath()
+									.append(conflictPath.removeFirstSegments(resourcePath.segmentCount())));
+					if (conflictResource != null) {
+						addUnprocessed(conflictResource);
+					}
+					break;
+				}
+			}
 		}
-		
+
 	}
 
 }

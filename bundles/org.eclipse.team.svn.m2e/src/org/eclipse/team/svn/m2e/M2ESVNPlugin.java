@@ -29,23 +29,22 @@ public class M2ESVNPlugin extends AbstractUIPlugin {
 	public static final String PLUGIN_ID = "org.polarion.eclipse.team.svn.m2eclipse";
 
 	private static M2ESVNPlugin instance;
-	
+
 	public M2ESVNPlugin() {
-		super();
 		M2ESVNPlugin.instance = this;
 	}
-	
+
 	public static M2ESVNPlugin instance() {
-    	return M2ESVNPlugin.instance;
+		return M2ESVNPlugin.instance;
 	}
 
-    public String getResource(String key) {
-        return FileUtility.getResource(Platform.getResourceBundle(this.getBundle()), key);
-    }
-    
-    public String getResource(String key, Object []args) {
-        String message = this.getResource(key);
-        return MessageFormat.format(message, args);
-    }
-    
+	public String getResource(String key) {
+		return FileUtility.getResource(Platform.getResourceBundle(getBundle()), key);
+	}
+
+	public String getResource(String key, Object[] args) {
+		String message = this.getResource(key);
+		return MessageFormat.format(message, args);
+	}
+
 }

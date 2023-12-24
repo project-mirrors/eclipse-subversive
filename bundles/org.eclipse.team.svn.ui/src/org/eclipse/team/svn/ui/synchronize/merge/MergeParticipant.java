@@ -42,74 +42,87 @@ import org.eclipse.team.ui.synchronize.ISynchronizeScope;
  */
 public class MergeParticipant extends AbstractSVNParticipant {
 	public static final String PARTICIPANT_ID = MergeParticipant.class.getName();
+
 	public static final int SUPPORTED_MODES = ISynchronizePageConfiguration.ALL_MODES;
 
 	protected IPropertyChangeListener configurationListener;
-	
-    public MergeParticipant() {
-        super();
-    }
 
-    public MergeParticipant(ISynchronizeScope scope) {
-        super(scope);
-    }
-    
-    public AbstractSVNSubscriber getMatchingSubscriber() {
-        MergeSubscriber subscriber = MergeSubscriber.instance();
-        MergeScope scope = (MergeScope) this.getScope();        
-        
-        subscriber.setMergeScopeHelper(scope.getMergeScopeHelper());
-        return subscriber;
-    }
+	public MergeParticipant() {
+	}
 
-    protected void initializeConfiguration(ISynchronizePageConfiguration configuration) {
-    	super.initializeConfiguration(configuration);
-    }
-    
-    public void dispose() {
-    	super.dispose();
-    }
-    
-    protected String getParticipantId() {
-        return MergeParticipant.PARTICIPANT_ID;
-    }
+	public MergeParticipant(ISynchronizeScope scope) {
+		super(scope);
+	}
 
+	@Override
+	public AbstractSVNSubscriber getMatchingSubscriber() {
+		MergeSubscriber subscriber = MergeSubscriber.instance();
+		MergeScope scope = (MergeScope) getScope();
+
+		subscriber.setMergeScopeHelper(scope.getMergeScopeHelper());
+		return subscriber;
+	}
+
+	@Override
+	protected void initializeConfiguration(ISynchronizePageConfiguration configuration) {
+		super.initializeConfiguration(configuration);
+	}
+
+	@Override
+	public void dispose() {
+		super.dispose();
+	}
+
+	@Override
+	protected String getParticipantId() {
+		return MergeParticipant.PARTICIPANT_ID;
+	}
+
+	@Override
 	protected Collection<AbstractSynchronizeActionGroup> getActionGroups() {
 		return ExtensionsManager.getInstance().getCurrentSynchronizeActionContributor().getMergeContributions();
 	}
 
-    protected int getSupportedModes() {
-        return MergeParticipant.SUPPORTED_MODES;
-    }
+	@Override
+	protected int getSupportedModes() {
+		return MergeParticipant.SUPPORTED_MODES;
+	}
 
-    protected int getDefaultMode() {
-        return ISynchronizePageConfiguration.BOTH_MODE;
-    }
+	@Override
+	protected int getDefaultMode() {
+		return ISynchronizePageConfiguration.BOTH_MODE;
+	}
 
-    protected String getShortTaskName() {
-        return SVNUIMessages.MergeView_TaskName;
-    }
-    
-    protected ILabelDecorator createLabelDecorator(ISynchronizePageConfiguration configuration) {
-    	return new MergeLabelDecorator(configuration);
-    }
-    
+	@Override
+	protected String getShortTaskName() {
+		return SVNUIMessages.MergeView_TaskName;
+	}
+
+	@Override
+	protected ILabelDecorator createLabelDecorator(ISynchronizePageConfiguration configuration) {
+		return new MergeLabelDecorator(configuration);
+	}
+
 	protected class MergeLabelDecorator extends SynchronizeLabelDecorator {
-	    public MergeLabelDecorator(ISynchronizePageConfiguration configuration) {
-	        super(configuration);
-	    }
-	    
+		public MergeLabelDecorator(ISynchronizePageConfiguration configuration) {
+			super(configuration);
+		}
+
+		@Override
 		public Image decorateImage(Image image, Object element) {
-		    AbstractSVNSyncInfo info = this.getSyncInfo(element);
-			if (info != null && (info.getKind() & SynchronizeLabelDecorator.CONFLICTING_REPLACEMENT_MASK) == SynchronizeLabelDecorator.CONFLICTING_REPLACEMENT_MASK) {
+			AbstractSVNSyncInfo info = getSyncInfo(element);
+			if (info != null && (info.getKind()
+					& SynchronizeLabelDecorator.CONFLICTING_REPLACEMENT_MASK) == SynchronizeLabelDecorator.CONFLICTING_REPLACEMENT_MASK) {
 				ILocalResource local = info.getLocalResource();
-		        if (IStateFilter.SF_PREREPLACEDREPLACED.accept(local)) {
-				    return this.registerImageDescriptor(new OverlayedImageDescriptor(image, AbstractSVNParticipant.OVR_REPLACED_CONF, new Point(22, 16), OverlayedImageDescriptor.RIGHT | OverlayedImageDescriptor.CENTER_V));
-		        }
+				if (IStateFilter.SF_PREREPLACEDREPLACED.accept(local)) {
+					return registerImageDescriptor(new OverlayedImageDescriptor(image,
+							AbstractSVNParticipant.OVR_REPLACED_CONF, new Point(22, 16),
+							OverlayedImageDescriptor.RIGHT | OverlayedImageDescriptor.CENTER_V));
+				}
 			}
 			return super.decorateImage(image, element);
 		}
-		
+
 	}
 
 }

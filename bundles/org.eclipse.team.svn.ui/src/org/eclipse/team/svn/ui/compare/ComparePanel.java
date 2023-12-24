@@ -36,37 +36,44 @@ import org.eclipse.team.svn.ui.utility.UIMonitorUtility;
  * @author Sergiy Logvin
  */
 public class ComparePanel extends AbstractDialogPanel {
-	
+
 	protected CompareEditorInput compareInput;
+
 	protected IResource resource;
-	
+
 	public ComparePanel(CompareEditorInput compareInput, IResource resource) {
-		super(new String[] {SVNUIMessages.CompareLocalPanel_Save, IDialogConstants.CANCEL_LABEL});
+		super(new String[] { SVNUIMessages.CompareLocalPanel_Save, IDialogConstants.CANCEL_LABEL });
 		this.compareInput = compareInput;
 		this.resource = resource;
-		this.dialogTitle = SVNUIMessages.CompareLocalPanel_Title;
-		this.dialogDescription = SVNUIMessages.CompareLocalPanel_Description;
-		this.defaultMessage = SVNUIMessages.CompareLocalPanel_Message;
-	}
-	
-	public void createControlsImpl(Composite parent) {
-		Control control = this.compareInput.createContents(parent);
-		control.setLayoutData(new GridData(GridData.FILL_BOTH));
-		Shell shell= control.getShell();
-		shell.setText(this.compareInput.getTitle());
-		shell.setImage(this.compareInput.getTitleImage());
+		dialogTitle = SVNUIMessages.CompareLocalPanel_Title;
+		dialogDescription = SVNUIMessages.CompareLocalPanel_Description;
+		defaultMessage = SVNUIMessages.CompareLocalPanel_Message;
 	}
 
+	@Override
+	public void createControlsImpl(Composite parent) {
+		Control control = compareInput.createContents(parent);
+		control.setLayoutData(new GridData(GridData.FILL_BOTH));
+		Shell shell = control.getShell();
+		shell.setText(compareInput.getTitle());
+		shell.setImage(compareInput.getTitleImage());
+	}
+
+	@Override
 	protected void cancelChangesImpl() {
 
 	}
 
+	@Override
 	protected void saveChangesImpl() {
-		
-		RefreshResourcesOperation refreshOp = new RefreshResourcesOperation(new IResource[] {this.resource.getProject()});
-		AbstractWorkingCopyOperation mainOp = new AbstractWorkingCopyOperation("Operation_SaveChanges", SVNUIMessages.class, new IResource[] {this.resource.getProject()}) { //$NON-NLS-1$
+
+		RefreshResourcesOperation refreshOp = new RefreshResourcesOperation(
+				new IResource[] { resource.getProject() });
+		AbstractWorkingCopyOperation mainOp = new AbstractWorkingCopyOperation("Operation_SaveChanges", //$NON-NLS-1$
+				SVNUIMessages.class, new IResource[] { resource.getProject() }) {
+			@Override
 			protected void runImpl(IProgressMonitor monitor) throws Exception {
-				ComparePanel.this.compareInput.saveChanges(monitor);
+				compareInput.saveChanges(monitor);
 			}
 		};
 		CompositeOperation composite = new CompositeOperation(mainOp.getId(), mainOp.getMessagesClass());
@@ -74,9 +81,10 @@ public class ComparePanel extends AbstractDialogPanel {
 		composite.add(refreshOp);
 		UIMonitorUtility.doTaskBusyWorkspaceModify(composite);
 	}
-	
+
+	@Override
 	public Point getPrefferedSizeImpl() {
-        return new Point(650, 500);
-    }
+		return new Point(650, 500);
+	}
 
 }

@@ -35,65 +35,77 @@ import org.eclipse.team.svn.core.utility.SVNUtility;
  */
 public class SVNRemoteResourceRevision extends FileRevision {
 	protected SVNLogEntry msg;
+
 	protected IRepositoryResource remote;
+
 	protected boolean isDeletionRev;
 
 	public SVNRemoteResourceRevision(IRepositoryResource remote, SVNLogEntry msg) {
-		this.msg = msg;		
+		this.msg = msg;
 		this.remote = SVNUtility.copyOf(remote);
 		this.remote.setSelectedRevision(SVNRevision.fromNumber(msg.revision));
 		if (this.msg.changedPaths != null) {
-			for (int i = 0; i < this.msg.changedPaths.length && !this.isDeletionRev; i++) {
-				if (this.msg.changedPaths[i].action == SVNLogPath.ChangeType.DELETED && this.remote.getUrl().endsWith(this.msg.changedPaths[i].path)) {
-					this.isDeletionRev = true;
+			for (int i = 0; i < this.msg.changedPaths.length && !isDeletionRev; i++) {
+				if (this.msg.changedPaths[i].action == SVNLogPath.ChangeType.DELETED
+						&& this.remote.getUrl().endsWith(this.msg.changedPaths[i].path)) {
+					isDeletionRev = true;
 				}
 			}
 		}
 	}
 
+	@Override
 	public URI getURI() {
 		try {
-			return new URI(this.remote.getUrl());
-		}
-		catch (URISyntaxException ex) {
+			return new URI(remote.getUrl());
+		} catch (URISyntaxException ex) {
 			throw new RuntimeException(ex);
 		}
 	}
 
+	@Override
 	public long getTimestamp() {
-		return this.msg.date == 0 ? -1 : this.msg.date;
+		return msg.date == 0 ? -1 : msg.date;
 	}
 
+	@Override
 	public boolean exists() {
-		return !this.isDeletionRev;
+		return !isDeletionRev;
 	}
 
+	@Override
 	public String getContentIdentifier() {
-		return String.valueOf(this.msg.revision);
+		return String.valueOf(msg.revision);
 	}
 
+	@Override
 	public String getAuthor() {
-		return this.msg.author;
+		return msg.author;
 	}
 
+	@Override
 	public String getComment() {
-		return this.msg.message;
-	}
-	
-	public String getName() {
-		return this.remote.getName();
+		return msg.message;
 	}
 
+	@Override
+	public String getName() {
+		return remote.getName();
+	}
+
+	@Override
 	public IStorage getStorage(IProgressMonitor monitor) throws CoreException {
-		ResourceContentStorage retVal = new ResourceContentStorage(this.remote);
+		ResourceContentStorage retVal = new ResourceContentStorage(remote);
 		retVal.fetchContents(monitor);
 		return retVal;
 	}
 
+	@Override
 	public boolean isPropertyMissing() {
 		return false;
 	}
 
+	@Override
 	public IFileRevision withAllProperties(IProgressMonitor monitor) throws CoreException {
 		return this;
 	}

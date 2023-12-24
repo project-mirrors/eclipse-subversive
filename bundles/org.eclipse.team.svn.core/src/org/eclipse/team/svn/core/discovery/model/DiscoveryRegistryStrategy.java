@@ -32,6 +32,7 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.spi.IDynamicExtensionRegistry;
 import org.eclipse.core.runtime.spi.RegistryContributor;
 import org.eclipse.core.runtime.spi.RegistryStrategy;
+import org.eclipse.team.svn.core.BaseMessages;
 import org.eclipse.team.svn.core.SVNMessages;
 import org.eclipse.team.svn.core.extension.CoreExtensionsManager;
 import org.eclipse.team.svn.core.operation.LoggedOperation;
@@ -43,17 +44,18 @@ import org.osgi.framework.Bundle;
  */
 class DiscoveryRegistryStrategy extends RegistryStrategy {
 
-	private final List<JarFile> jars = new ArrayList<JarFile>();
+	private final List<JarFile> jars = new ArrayList<>();
 
-	private final Map<IContributor, File> contributorToJarFile = new HashMap<IContributor, File>();
+	private final Map<IContributor, File> contributorToJarFile = new HashMap<>();
 
-	private final Map<IContributor, String> contributorToDirectoryEntry = new HashMap<IContributor, String>();
+	private final Map<IContributor, String> contributorToDirectoryEntry = new HashMap<>();
 
 	private final Object token;
 
 	private File bundleFile;
+
 	private String discoveryUrl;
-	
+
 	public DiscoveryRegistryStrategy(File[] storageDirs, boolean[] cacheReadOnly, Object token) {
 		super(storageDirs, cacheReadOnly);
 		this.token = token;
@@ -71,16 +73,14 @@ class DiscoveryRegistryStrategy extends RegistryStrategy {
 	private void processDiscoveryCoreBundle(IExtensionRegistry registry) {
 		// we must add a contribution from the core bundle so that we get the
 		// extension point itself
-		try {			
+		try {
 			Bundle bundle = Platform.getBundle(CoreExtensionsManager.EXTENSION_NAMESPACE);
-			IContributor contributor = new RegistryContributor(bundle.getSymbolicName(), bundle.getSymbolicName(),
-					null, null);
+			IContributor contributor = new RegistryContributor(bundle.getSymbolicName(), bundle.getSymbolicName(), null,
+					null);
 
 			InputStream inputStream = bundle.getEntry("plugin.xml").openStream(); //$NON-NLS-1$
-			try {
+			try (inputStream) {
 				registry.addContribution(inputStream, contributor, false, bundle.getSymbolicName(), null, token);
-			} finally {
-				inputStream.close();
 			}
 		} catch (IOException e) {
 			throw new IllegalStateException();
@@ -88,18 +88,18 @@ class DiscoveryRegistryStrategy extends RegistryStrategy {
 	}
 
 	private void processBundles(IExtensionRegistry registry) {
-		if (this.bundleFile == null || this.discoveryUrl == null) {
+		if (bundleFile == null || discoveryUrl == null) {
 			throw new IllegalStateException();
 		}
-		
+
 		try {
 			processBundle(registry);
 		} catch (Exception e) {
-			String errMessage = SVNMessages.format(
-					SVNMessages.DiscoveryRegistryStrategy_cannot_load_bundle, new Object[] {
-							this.bundleFile.getName(), this.discoveryUrl, e.getMessage() }); 
-			LoggedOperation.reportError(this.getClass().getName(), new Exception(errMessage, e));						
-		}		
+			String errMessage = BaseMessages.format(
+					SVNMessages.DiscoveryRegistryStrategy_cannot_load_bundle,
+					new Object[] { bundleFile.getName(), discoveryUrl, e.getMessage() });
+			LoggedOperation.reportError(this.getClass().getName(), new Exception(errMessage, e));
+		}
 	}
 
 	private void processBundle(IExtensionRegistry registry) throws IOException {
@@ -115,16 +115,14 @@ class DiscoveryRegistryStrategy extends RegistryStrategy {
 			jarFile.close();
 			return;
 		}
-		contributorToJarFile.put(contributor, this.bundleFile);
-		contributorToDirectoryEntry.put(contributor, this.discoveryUrl);
+		contributorToJarFile.put(contributor, bundleFile);
+		contributorToDirectoryEntry.put(contributor, discoveryUrl);
 
 		ResourceBundle translationBundle = loadTranslationBundle(jarFile);
 
 		InputStream inputStream = jarFile.getInputStream(pluginXmlEntry);
-		try {
+		try (inputStream) {
 			registry.addContribution(inputStream, contributor, false, bundleFile.getPath(), translationBundle, token);
-		} finally {
-			inputStream.close();
 		}
 	}
 
@@ -134,11 +132,9 @@ class DiscoveryRegistryStrategy extends RegistryStrategy {
 			ZipEntry entry = jarFile.getEntry(bundleName);
 			if (entry != null) {
 				InputStream inputStream = jarFile.getInputStream(entry);
-				try {
+				try (inputStream) {
 					PropertyResourceBundle resourceBundle = new PropertyResourceBundle(inputStream);
 					return resourceBundle;
-				} finally {
-					inputStream.close();
 				}
 			}
 		}
@@ -148,7 +144,7 @@ class DiscoveryRegistryStrategy extends RegistryStrategy {
 	private List<String> computeBundleNames(String baseName) {
 		String suffix = ".properties"; //$NON-NLS-1$
 		String name = baseName;
-		List<String> bundleNames = new ArrayList<String>();
+		List<String> bundleNames = new ArrayList<>();
 		Locale locale = Locale.getDefault();
 		bundleNames.add(name + suffix);
 		if (locale.getLanguage() != null && locale.getLanguage().length() > 0) {

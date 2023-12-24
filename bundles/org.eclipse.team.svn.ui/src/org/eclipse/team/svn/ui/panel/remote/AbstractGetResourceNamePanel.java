@@ -41,99 +41,111 @@ import org.eclipse.team.svn.ui.verifier.ResourceNameVerifier;
  */
 public abstract class AbstractGetResourceNamePanel extends AbstractDialogPanel {
 	protected String resourceName;
+
 	protected String disallowedName;
+
 	protected Text text;
+
 	protected CommentComposite comment;
+
 	protected boolean allowMultipart;
 
-    public AbstractGetResourceNamePanel(String title, boolean allowMultipart) {
-        super();
-        this.dialogTitle = title;
-        this.allowMultipart = allowMultipart;
-        this.defaultMessage = allowMultipart ? SVNUIMessages.AbstractGetResourceNamePanel_Message_MultiPart : SVNUIMessages.AbstractGetResourceNamePanel_Message_Simple;
-        this.resourceName = ""; //$NON-NLS-1$
-    }
+	public AbstractGetResourceNamePanel(String title, boolean allowMultipart) {
+		dialogTitle = title;
+		this.allowMultipart = allowMultipart;
+		defaultMessage = allowMultipart
+				? SVNUIMessages.AbstractGetResourceNamePanel_Message_MultiPart
+				: SVNUIMessages.AbstractGetResourceNamePanel_Message_Simple;
+		resourceName = ""; //$NON-NLS-1$
+	}
 
 	public String getResourceName() {
-		return this.resourceName.trim();
+		return resourceName.trim();
 	}
 
 	public String getMessage() {
-		return this.comment.getMessage();
+		return comment.getMessage();
 	}
-    
-    public void createControlsImpl(Composite parent) {
-        GridData data = null;
-        GridLayout layout = null;
 
-        Composite nameComposite = new Composite(parent, SWT.NONE);
-        layout = new GridLayout();
-        layout.numColumns = 2;
-        layout.marginWidth = 0;
-        layout.marginHeight = 0;
-        nameComposite.setLayout(layout);
-        data = new GridData(GridData.FILL_HORIZONTAL);        
-        nameComposite.setLayoutData(data);
-        
-        Label nameLabel = new Label(nameComposite, SWT.NONE);
-        nameLabel.setText(SVNUIMessages.AbstractGetResourceNamePanel_Name);
-		this.text = new Text(nameComposite, SWT.SINGLE | SWT.BORDER);
+	@Override
+	public void createControlsImpl(Composite parent) {
+		GridData data = null;
+		GridLayout layout = null;
+
+		Composite nameComposite = new Composite(parent, SWT.NONE);
+		layout = new GridLayout();
+		layout.numColumns = 2;
+		layout.marginWidth = 0;
+		layout.marginHeight = 0;
+		nameComposite.setLayout(layout);
 		data = new GridData(GridData.FILL_HORIZONTAL);
-		this.text.setLayoutData(data);
-		this.text.setEditable(true);
+		nameComposite.setLayoutData(data);
+
+		Label nameLabel = new Label(nameComposite, SWT.NONE);
+		nameLabel.setText(SVNUIMessages.AbstractGetResourceNamePanel_Name);
+		text = new Text(nameComposite, SWT.SINGLE | SWT.BORDER);
+		data = new GridData(GridData.FILL_HORIZONTAL);
+		text.setLayoutData(data);
+		text.setEditable(true);
 		CompositeVerifier verifier = new CompositeVerifier();
-		verifier.add(this.createNonEmptyNameFieldVerifier());
+		verifier.add(createNonEmptyNameFieldVerifier());
 		String name = SVNUIMessages.AbstractGetResourceNamePanel_Name_Verifier;
-		verifier.add(new ResourceNameVerifier(name, this.allowMultipart));
+		verifier.add(new ResourceNameVerifier(name, allowMultipart));
 		verifier.add(new AbsolutePathVerifier(name));
 		verifier.add(new AbstractFormattedVerifier(name) {
 			private String msg = SVNUIMessages.AbstractGetResourceNamePanel_Name_Verifier_Error;
-			
+
+			@Override
 			protected String getErrorMessageImpl(Control input) {
-				String text = this.getText(input);
-				if (AbstractGetResourceNamePanel.this.disallowedName != null &&
-					AbstractGetResourceNamePanel.this.disallowedName.equals(text)) {
-					return BaseMessages.format(this.msg, new Object[] {AbstractFormattedVerifier.FIELD_NAME, text});
+				String text = getText(input);
+				if (disallowedName != null && disallowedName.equals(text)) {
+					return BaseMessages.format(msg, new Object[] { AbstractFormattedVerifier.FIELD_NAME, text });
 				}
 				return null;
 			}
+
+			@Override
 			protected String getWarningMessageImpl(Control input) {
 				return null;
-			};
+			}
 		});
-		this.attachTo(this.text, verifier);
+		attachTo(text, verifier);
 
 		Group group = new Group(parent, SWT.NULL);
 		group.setLayout(new GridLayout());
 		data = new GridData(GridData.FILL_BOTH);
 		group.setLayoutData(data);
 		group.setText(SVNUIMessages.AbstractGetResourceNamePanel_Comment);
-		
-        this.comment = new CommentComposite(group, this);
+
+		comment = new CommentComposite(group, this);
 		data = new GridData(GridData.FILL_BOTH);
-		this.comment.setLayoutData(data);
-    }
-    
-    public Point getPrefferedSizeImpl() {
-    	return new Point(525, SWT.DEFAULT);
-    }
-    
-    public void postInit() {
-    	super.postInit();
-    	this.comment.postInit(this.manager);
-    }
-    
-    protected void saveChangesImpl() {
-        this.resourceName = this.text.getText();
-        this.comment.saveChanges();
-    }
+		comment.setLayoutData(data);
+	}
 
-    protected void cancelChangesImpl() {
-    	this.comment.cancelChanges();
-    }
+	@Override
+	public Point getPrefferedSizeImpl() {
+		return new Point(525, SWT.DEFAULT);
+	}
 
-    protected AbstractVerifier createNonEmptyNameFieldVerifier() {
-    	return new NonEmptyFieldVerifier(SVNUIMessages.AbstractGetResourceNamePanel_Name_Verifier);
-    }
-    
+	@Override
+	public void postInit() {
+		super.postInit();
+		comment.postInit(manager);
+	}
+
+	@Override
+	protected void saveChangesImpl() {
+		resourceName = text.getText();
+		comment.saveChanges();
+	}
+
+	@Override
+	protected void cancelChangesImpl() {
+		comment.cancelChanges();
+	}
+
+	protected AbstractVerifier createNonEmptyNameFieldVerifier() {
+		return new NonEmptyFieldVerifier(SVNUIMessages.AbstractGetResourceNamePanel_Name_Verifier);
+	}
+
 }

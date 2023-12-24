@@ -41,85 +41,88 @@ import org.eclipse.ui.part.DrillDownAdapter;
  */
 public class RepositoryTreeComposite extends Composite {
 	protected RepositoryTreeViewer repositoryTree;
+
 	protected DrillDownAdapter ddAdapter;
+
 	protected RepositoryContentProvider provider;
+
 	protected boolean autoExpandFirstLevel;
-	
+
 	public RepositoryTreeComposite(Composite parent, int style) {
 		this(parent, style, false);
 	}
-	
+
 	public RepositoryTreeComposite(Composite parent, int style, boolean multiSelect) {
 		this(parent, style, multiSelect, new RepositoriesRoot());
 	}
-	
+
 	public RepositoryTreeComposite(Composite parent, int style, boolean multiSelect, Object input) {
 		super(parent, style);
-        this.createControls(multiSelect ? SWT.MULTI : SWT.SINGLE, input);
+		createControls(multiSelect ? SWT.MULTI : SWT.SINGLE, input);
 	}
-	
+
 	public RepositoryTreeViewer getRepositoryTreeViewer() {
-		return this.repositoryTree;
+		return repositoryTree;
 	}
-	
+
 	public void setAutoExpandFirstLevel(boolean autoExpandFirstLevel) {
 		this.autoExpandFirstLevel = autoExpandFirstLevel;
 	}
-	
+
 	public Object getModelRoot() {
-		return this.repositoryTree.getInput();
+		return repositoryTree.getInput();
 	}
-	
+
 	public void setModelRoot(Object root) {
 		if (root instanceof IRepositoryLocation) {
-			this.repositoryTree.setInput(new RepositoryLocation((IRepositoryLocation)root));
-		} else if (root instanceof IRepositoryBase) {		
-			RepositoryResource resource = RepositoryFolder.wrapChild(null, (IRepositoryResource)root, null);
-			resource.setViewer(this.repositoryTree);
-			this.repositoryTree.setInput(resource);
+			repositoryTree.setInput(new RepositoryLocation((IRepositoryLocation) root));
+		} else if (root instanceof IRepositoryBase) {
+			RepositoryResource resource = RepositoryFolder.wrapChild(null, (IRepositoryResource) root, null);
+			resource.setViewer(repositoryTree);
+			repositoryTree.setInput(resource);
 		} else {
-			this.repositoryTree.setInput(root);
+			repositoryTree.setInput(root);
 		}
 	}
 
 	public IRepositoryContentFilter getFilter() {
-		return this.provider.getFilter();
+		return provider.getFilter();
 	}
-	
+
 	public void setFilter(IRepositoryContentFilter filter) {
-		this.provider.setFilter(filter);
-		this.repositoryTree.refresh();
+		provider.setFilter(filter);
+		repositoryTree.refresh();
 	}
-	
+
 	private void createControls(int style, Object input) {
 		GridData data = null;
 		GridLayout layout = null;
-		
+
 		layout = new GridLayout();
 		layout.marginHeight = layout.marginWidth = 0;
-		this.setLayout(layout);
-		
+		setLayout(layout);
+
 		ToolBarManager toolBarMgr = new ToolBarManager(SWT.FLAT);
-        ToolBar toolBar = toolBarMgr.createControl(this);
-        data = new GridData();
-        data.horizontalAlignment = GridData.FILL;
-        data.verticalAlignment = GridData.BEGINNING;
-        toolBar.setLayoutData(data);
-		
-        this.repositoryTree = new RepositoryTreeViewer(this, style | SWT.H_SCROLL | SWT.V_SCROLL);
-        if (this.autoExpandFirstLevel) {
-			this.repositoryTree.setAutoExpandLevel(2);
+		ToolBar toolBar = toolBarMgr.createControl(this);
+		data = new GridData();
+		data.horizontalAlignment = GridData.FILL;
+		data.verticalAlignment = GridData.BEGINNING;
+		toolBar.setLayoutData(data);
+
+		repositoryTree = new RepositoryTreeViewer(this, style | SWT.H_SCROLL | SWT.V_SCROLL);
+		if (autoExpandFirstLevel) {
+			repositoryTree.setAutoExpandLevel(2);
 		}
-        this.repositoryTree.getTree().setLayoutData(new GridData(GridData.FILL_BOTH));
-        this.provider = new RepositoryContentProvider(this.repositoryTree);
-		this.repositoryTree.setContentProvider(this.provider);
-		this.repositoryTree.setLabelProvider(new WorkbenchLabelProvider());
-		this.setModelRoot(input);
-		
-		this.repositoryTree.setAutoExpandLevel(2);
-		this.ddAdapter = new DrillDownAdapter(this.repositoryTree);
-		this.ddAdapter.addNavigationActions(toolBarMgr);
+		repositoryTree.getTree().setLayoutData(new GridData(GridData.FILL_BOTH));
+		provider = new RepositoryContentProvider(repositoryTree);
+		repositoryTree.setContentProvider(provider);
+		repositoryTree.setLabelProvider(new WorkbenchLabelProvider());
+		setModelRoot(input);
+
+		repositoryTree.setAutoExpandLevel(2);
+		ddAdapter = new DrillDownAdapter(repositoryTree);
+		ddAdapter.addNavigationActions(toolBarMgr);
 		toolBarMgr.update(true);
 	}
-	
+
 }

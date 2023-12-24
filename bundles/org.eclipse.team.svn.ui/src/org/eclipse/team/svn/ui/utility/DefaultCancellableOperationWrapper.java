@@ -28,34 +28,40 @@ import org.eclipse.team.svn.core.utility.ProgressMonitorUtility;
  */
 public class DefaultCancellableOperationWrapper implements ICancellableOperationWrapper {
 	protected IProgressMonitor attachedMonitor;
+
 	protected IActionOperation operation;
-	
+
 	public DefaultCancellableOperationWrapper(IActionOperation operation) {
 		this.operation = operation;
-		this.attachedMonitor = new NullProgressMonitor();
-	}
-	
-	public void setCancelled(boolean cancelled) {
-		this.attachedMonitor.setCanceled(cancelled);
-	}
-	
-	public boolean isCancelled() {
-		return this.attachedMonitor.isCanceled();
-	}
-	
-	public IActionOperation getOperation() {
-		return this.operation;
-	}
-	
-	public String getOperationName() {
-		return this.operation.getOperationName();
+		attachedMonitor = new NullProgressMonitor();
 	}
 
+	@Override
+	public void setCancelled(boolean cancelled) {
+		attachedMonitor.setCanceled(cancelled);
+	}
+
+	@Override
+	public boolean isCancelled() {
+		return attachedMonitor.isCanceled();
+	}
+
+	@Override
+	public IActionOperation getOperation() {
+		return operation;
+	}
+
+	@Override
+	public String getOperationName() {
+		return operation.getOperationName();
+	}
+
+	@Override
 	public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-		monitor.setCanceled(this.attachedMonitor.isCanceled());
-		this.attachedMonitor = monitor;
+		monitor.setCanceled(attachedMonitor.isCanceled());
+		attachedMonitor = monitor;
 		// wrap external monitor and make instance of SubProgressMonitorWithInfo
-		ProgressMonitorUtility.doTaskExternal(this.operation, this.attachedMonitor, null);
+		ProgressMonitorUtility.doTaskExternal(operation, attachedMonitor, null);
 	}
 
 }

@@ -22,16 +22,18 @@ import org.eclipse.team.svn.core.operation.LoggedOperation;
 public class SVNChangeSetModelProvider extends ModelProvider {
 
 	public static final String ID = "org.eclipse.team.svn.core.svnChangeSetModel"; //$NON-NLS-1$
+
 	private static SVNChangeSetModelProvider provider;
-	
+
 	public SVNChangeSetModelProvider() {
-		super();
 	}
-	
+
 	public static SVNChangeSetModelProvider getProvider() {
 		if (SVNChangeSetModelProvider.provider == null) {
 			try {
-				SVNChangeSetModelProvider.provider = (SVNChangeSetModelProvider)ModelProvider.getModelProviderDescriptor(SVNChangeSetModelProvider.ID).getModelProvider();
+				SVNChangeSetModelProvider.provider = (SVNChangeSetModelProvider) ModelProvider
+						.getModelProviderDescriptor(SVNChangeSetModelProvider.ID)
+						.getModelProvider();
 			} catch (CoreException e) {
 				LoggedOperation.reportError(SVNTeamPlugin.NATURE_ID, e);
 			}

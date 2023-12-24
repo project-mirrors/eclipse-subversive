@@ -26,24 +26,27 @@ import org.eclipse.team.ui.synchronize.ISynchronizePageConfiguration;
  * @author Alexander Gurov
  */
 public class AddToSVNIgnoreAction extends AbstractSynchronizeModelAction {
-	
+
 	protected AddToSVNIgnoreActionHelper actionHelper;
-	
+
 	public AddToSVNIgnoreAction(String text, ISynchronizePageConfiguration configuration) {
 		super(text, configuration);
-		this.actionHelper = new AddToSVNIgnoreActionHelper(this, configuration);
+		actionHelper = new AddToSVNIgnoreActionHelper(this, configuration);
 	}
 
+	@Override
 	protected boolean needsToSaveDirtyEditors() {
 		return false;
 	}
-		
+
+	@Override
 	protected FastSyncInfoFilter getSyncInfoFilter() {
-		return this.actionHelper.getSyncInfoFilter();
+		return actionHelper.getSyncInfoFilter();
 	}
 
+	@Override
 	protected IActionOperation getOperation(ISynchronizePageConfiguration configuration, IDiffElement[] elements) {
-		return this.actionHelper.getOperation();
+		return actionHelper.getOperation();
 	}
 
 }

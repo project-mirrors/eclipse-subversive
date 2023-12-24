@@ -20,7 +20,7 @@ package org.eclipse.team.svn.ui.event;
  * @author Sergiy Logvin
  */
 public interface IResourceSelectionChangeListener {
-	
-	public void resourcesSelectionChanged(ResourceSelectionChangedEvent event);
-	
+
+	void resourcesSelectionChanged(ResourceSelectionChangedEvent event);
+
 }

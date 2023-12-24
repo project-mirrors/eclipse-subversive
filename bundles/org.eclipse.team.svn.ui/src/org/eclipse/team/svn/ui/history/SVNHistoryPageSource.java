@@ -24,10 +24,12 @@ import org.eclipse.ui.part.Page;
  */
 public class SVNHistoryPageSource extends HistoryPageSource {
 
+	@Override
 	public boolean canShowHistoryFor(Object object) {
 		return SVNHistoryPage.isValidData(object);
 	}
 
+	@Override
 	public Page createPage(Object object) {
 		return new SVNHistoryPage(object);
 	}

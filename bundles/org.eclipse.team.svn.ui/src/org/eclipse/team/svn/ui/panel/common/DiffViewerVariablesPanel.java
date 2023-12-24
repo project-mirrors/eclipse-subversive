@@ -21,46 +21,58 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.List;
-import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.team.svn.core.BaseMessages;
 import org.eclipse.team.svn.ui.SVNUIMessages;
 import org.eclipse.team.svn.ui.dialog.DefaultDialog;
 import org.eclipse.team.svn.ui.panel.AbstractDialogPanel;
 
 /**
- * Pre-defined variables selection panel for diff viewer's external program 
+ * Pre-defined variables selection panel for diff viewer's external program
  * 
  * @author Igor Burilo
  */
 public class DiffViewerVariablesPanel extends AbstractDialogPanel {
 
 	protected List variablesList;
+
 	protected Text variableDescription;
-	
-	protected Map<String, String> variablesMap = new LinkedHashMap<String, String>();
+
+	protected Map<String, String> variablesMap = new LinkedHashMap<>();
+
 	protected String variable;
-	
+
 	public DiffViewerVariablesPanel() {
-		this.dialogTitle = SVNUIMessages.DiffViewerVariablesPanel_DialogTitle;
-		this.dialogDescription = SVNUIMessages.DiffViewerVariablesPanel_DialogDescription;
-		this.defaultMessage = SVNUIMessages.DiffViewerVariablesPanel_DialogDefaultMessage;
-							
-		this.variablesMap.put("base", SVNUIMessages.DiffViewerVariablesPanel_BaseVariable_Description); //$NON-NLS-1$
-		this.variablesMap.put("mine", SVNUIMessages.DiffViewerVariablesPanel_MineVariable_Description); //$NON-NLS-1$
-		this.variablesMap.put("theirs", SVNUIMessages.DiffViewerVariablesPanel_TheirsVariable_Description); //$NON-NLS-1$
-		this.variablesMap.put("merged", SVNUIMessages.DiffViewerVariablesPanel_MergedVariable_Description); //$NON-NLS-1$
-		
-		this.variablesMap.put("default-doc-program", SVNUIMessages.format(SVNUIMessages.DiffViewerVariablesPanel_DefaultVariable_Description, SVNUIMessages.DiffViewerVariablesPanel_DefaultDocVariable_Program)); //$NON-NLS-1$				
-		this.variablesMap.put("default-xls-program", SVNUIMessages.format(SVNUIMessages.DiffViewerVariablesPanel_DefaultVariable_Description, SVNUIMessages.DiffViewerVariablesPanel_DefaultXlsVariable_Program)); //$NON-NLS-1$		
-		this.variablesMap.put("default-ppt-program", SVNUIMessages.format(SVNUIMessages.DiffViewerVariablesPanel_DefaultVariable_Description, SVNUIMessages.DiffViewerVariablesPanel_DefaultPptVariable_Program)); //$NON-NLS-1$
-		
-		this.variablesMap.put("default-odt-program", SVNUIMessages.format(SVNUIMessages.DiffViewerVariablesPanel_DefaultVariable_Description, SVNUIMessages.DiffViewerVariablesPanel_DefaultOdtVariable_Program)); //$NON-NLS-1$
-		this.variablesMap.put("default-ods-program", SVNUIMessages.format(SVNUIMessages.DiffViewerVariablesPanel_DefaultVariable_Description, SVNUIMessages.DiffViewerVariablesPanel_DefaultOdsVariable_Program)); //$NON-NLS-1$
+		dialogTitle = SVNUIMessages.DiffViewerVariablesPanel_DialogTitle;
+		dialogDescription = SVNUIMessages.DiffViewerVariablesPanel_DialogDescription;
+		defaultMessage = SVNUIMessages.DiffViewerVariablesPanel_DialogDefaultMessage;
+
+		variablesMap.put("base", SVNUIMessages.DiffViewerVariablesPanel_BaseVariable_Description); //$NON-NLS-1$
+		variablesMap.put("mine", SVNUIMessages.DiffViewerVariablesPanel_MineVariable_Description); //$NON-NLS-1$
+		variablesMap.put("theirs", SVNUIMessages.DiffViewerVariablesPanel_TheirsVariable_Description); //$NON-NLS-1$
+		variablesMap.put("merged", SVNUIMessages.DiffViewerVariablesPanel_MergedVariable_Description); //$NON-NLS-1$
+
+		variablesMap.put("default-doc-program", //$NON-NLS-1$
+				BaseMessages.format(SVNUIMessages.DiffViewerVariablesPanel_DefaultVariable_Description,
+						SVNUIMessages.DiffViewerVariablesPanel_DefaultDocVariable_Program));
+		variablesMap.put("default-xls-program", //$NON-NLS-1$
+				BaseMessages.format(SVNUIMessages.DiffViewerVariablesPanel_DefaultVariable_Description,
+						SVNUIMessages.DiffViewerVariablesPanel_DefaultXlsVariable_Program));
+		variablesMap.put("default-ppt-program", //$NON-NLS-1$
+				BaseMessages.format(SVNUIMessages.DiffViewerVariablesPanel_DefaultVariable_Description,
+						SVNUIMessages.DiffViewerVariablesPanel_DefaultPptVariable_Program));
+
+		variablesMap.put("default-odt-program", //$NON-NLS-1$
+				BaseMessages.format(SVNUIMessages.DiffViewerVariablesPanel_DefaultVariable_Description,
+						SVNUIMessages.DiffViewerVariablesPanel_DefaultOdtVariable_Program));
+		variablesMap.put("default-ods-program", //$NON-NLS-1$
+				BaseMessages.format(SVNUIMessages.DiffViewerVariablesPanel_DefaultVariable_Description,
+						SVNUIMessages.DiffViewerVariablesPanel_DefaultOdsVariable_Program));
 	}
-	
+
+	@Override
 	protected void createControlsImpl(Composite parent) {
 		Composite composite = new Composite(parent, SWT.NONE);
 		GridLayout layout = new GridLayout();
@@ -69,74 +81,74 @@ public class DiffViewerVariablesPanel extends AbstractDialogPanel {
 		GridData data = new GridData(GridData.FILL_BOTH);
 		composite.setLayout(layout);
 		composite.setLayoutData(data);
-		
-		this.variablesList = new List(composite, SWT.SINGLE | SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL);
+
+		variablesList = new List(composite, SWT.SINGLE | SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL);
 		data = new GridData(GridData.FILL_BOTH);
-		data.heightHint = DefaultDialog.convertHeightInCharsToPixels(this.variablesList, 10);
-		this.variablesList.setLayoutData(data);
-		
+		data.heightHint = DefaultDialog.convertHeightInCharsToPixels(variablesList, 10);
+		variablesList.setLayoutData(data);
+
 		Label variableDescriptionLabel = new Label(composite, SWT.NONE);
 		data = new GridData();
 		variableDescriptionLabel.setLayoutData(data);
 		variableDescriptionLabel.setText(SVNUIMessages.DiffViewerVariablesPanel_VariableDescriptionLabel);
-		
-		this.variableDescription = new Text(composite, SWT.BORDER | SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL | SWT.WRAP);
+
+		variableDescription = new Text(composite, SWT.BORDER | SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL | SWT.WRAP);
 		data = new GridData(GridData.FILL_HORIZONTAL);
-		data.heightHint = DefaultDialog.convertHeightInCharsToPixels(this.variableDescription, 4);
-		this.variableDescription.setLayoutData(data);
-		this.variableDescription.setBackground(variableDescription.getBackground());
-		this.variableDescription.setEditable(false);
-		
+		data.heightHint = DefaultDialog.convertHeightInCharsToPixels(variableDescription, 4);
+		variableDescription.setLayoutData(data);
+		variableDescription.setBackground(variableDescription.getBackground());
+		variableDescription.setEditable(false);
+
 		//handlers
-		
-		this.variablesList.addListener(SWT.Selection, new Listener() {
-			public void handleEvent(Event event) {
-				String variableName = DiffViewerVariablesPanel.this.getSelectedVariable();
-				if (variableName != null) {
-					//init description
-					DiffViewerVariablesPanel.this.variableDescription.setText(DiffViewerVariablesPanel.this.variablesMap.get(variableName));
-					
-					//run validation
-					DiffViewerVariablesPanel.this.validateContent();					
-				}					
-			}			
+
+		variablesList.addListener(SWT.Selection, event -> {
+			String variableName = DiffViewerVariablesPanel.this.getSelectedVariable();
+			if (variableName != null) {
+				//init description
+				variableDescription.setText(variablesMap.get(variableName));
+
+				//run validation
+				DiffViewerVariablesPanel.this.validateContent();
+			}
 		});
-		
-		this.initializeControls();
+
+		initializeControls();
 	}
-	
+
 	protected String getSelectedVariable() {
-		String variable = null; 
+		String variable = null;
 		String[] selected = DiffViewerVariablesPanel.this.variablesList.getSelection();
 		if (selected.length > 0) {
 			variable = selected[0];
 		}
 		return variable;
 	}
-	
+
 	protected void initializeControls() {
 		String firstVariable = null;
-		for (String variableName : this.variablesMap.keySet()) {
-			this.variablesList.add(variableName);
+		for (String variableName : variablesMap.keySet()) {
+			variablesList.add(variableName);
 			if (firstVariable == null) {
 				firstVariable = variableName;
 			}
-		}		
-		this.variablesList.select(0);
-		this.variableDescription.setText(this.variablesMap.get(firstVariable));
+		}
+		variablesList.select(0);
+		variableDescription.setText(variablesMap.get(firstVariable));
 	}
-	
+
+	@Override
 	protected void saveChangesImpl() {
-		String var = this.getSelectedVariable();
-		this.variable = var != null ? ("\"${" + var + "}\"") : ""; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		String var = getSelectedVariable();
+		variable = var != null ? "\"${" + var + "}\"" : ""; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	}
-	
+
+	@Override
 	protected void cancelChangesImpl() {
-		this.variable = null;
+		variable = null;
 	}
 
 	public String getVariable() {
-		return this.variable;
+		return variable;
 	}
 
 }

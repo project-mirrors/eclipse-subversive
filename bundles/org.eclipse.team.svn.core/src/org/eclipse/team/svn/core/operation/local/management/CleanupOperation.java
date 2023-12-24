@@ -19,7 +19,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.team.svn.core.SVNMessages;
 import org.eclipse.team.svn.core.connector.ISVNConnector;
 import org.eclipse.team.svn.core.operation.IConsoleStream;
-import org.eclipse.team.svn.core.operation.IUnprotectedOperation;
 import org.eclipse.team.svn.core.operation.SVNProgressMonitor;
 import org.eclipse.team.svn.core.operation.local.AbstractWorkingCopyOperation;
 import org.eclipse.team.svn.core.resource.IRemoteStorage;
@@ -43,25 +42,24 @@ public class CleanupOperation extends AbstractWorkingCopyOperation {
 		super("Operation_CleanupResources", SVNMessages.class, provider); //$NON-NLS-1$
 	}
 
+	@Override
 	protected void runImpl(IProgressMonitor monitor) throws Exception {
-		IResource []resources = this.operableData();
+		IResource[] resources = operableData();
 
 		IRemoteStorage storage = SVNRemoteStorage.instance();
-		
+
 		for (int i = 0; i < resources.length; i++) {
 			IRepositoryLocation location = storage.getRepositoryLocation(resources[i]);
 			final String wcPath = FileUtility.getWorkingCopyPath(resources[i]);
 			final ISVNConnector proxy = location.acquireSVNProxy();
-			
+
 			ProgressMonitorUtility.setTaskInfo(monitor, this, resources[i].getName());
 
-			this.writeToConsole(IConsoleStream.LEVEL_CMD, "svn cleanup \"" + FileUtility.normalizePath(wcPath) + "\"\n"); //$NON-NLS-1$ //$NON-NLS-2$
-			
-			this.protectStep(new IUnprotectedOperation() {
-				public void run(IProgressMonitor monitor) throws Exception {
-					proxy.cleanup(wcPath, ISVNConnector.Options.BREAK_LOCKS | ISVNConnector.Options.INCLUDE_TIMESTAMPS | ISVNConnector.Options.INCLUDE_DAVCACHE | ISVNConnector.Options.INCLUDE_UNUSED_PRISTINES, new SVNProgressMonitor(CleanupOperation.this, monitor, null));
-				}
-			}, monitor, resources.length);
+			writeToConsole(IConsoleStream.LEVEL_CMD, "svn cleanup \"" + FileUtility.normalizePath(wcPath) + "\"\n"); //$NON-NLS-1$ //$NON-NLS-2$
+
+			this.protectStep(monitor1 -> proxy.cleanup(wcPath, ISVNConnector.Options.BREAK_LOCKS | ISVNConnector.Options.INCLUDE_TIMESTAMPS
+					| ISVNConnector.Options.INCLUDE_DAVCACHE | ISVNConnector.Options.INCLUDE_UNUSED_PRISTINES,
+					new SVNProgressMonitor(CleanupOperation.this, monitor1, null)), monitor, resources.length);
 			location.releaseSVNProxy(proxy);
 			ProgressMonitorUtility.progress(monitor, i, resources.length);
 		}

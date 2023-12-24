@@ -26,7 +26,6 @@ import java.util.function.Supplier;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IResourceVisitor;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.team.svn.core.IStateFilter;
@@ -90,7 +89,9 @@ public class LocalOperationFactory {
 			// NIC quick fix for problematic 'bin' folder -> probably a real bug that needs
 			// to be addressed somewhere else ('bin' is added without any action)!?
 			IResource[] filteredRessources = Arrays.stream(scheduledForCommit)
-					.filter(r -> !r.getFullPath().toFile().getAbsolutePath()
+					.filter(r -> !r.getFullPath()
+							.toFile()
+							.getAbsolutePath()
 							.equals(TestUtil.getFirstProject().getFullPath().toFile().getAbsolutePath() + "/bin"))
 					.toArray(IResource[]::new);
 			return new CommitOperation(filteredRessources, "test commit", true, false);
@@ -137,7 +138,7 @@ public class LocalOperationFactory {
 			SVNRemoteStorage storage = SVNRemoteStorage.instance();
 			IResource local = TestUtil.getFirstProject().getFile("maven.xml");
 			IRepositoryResource remote = storage.asRepositoryResource(TestUtil.getFirstProject().getFile("maven.xml"));
-			HashMap<String, String> remote2local = new HashMap<String, String>();
+			HashMap<String, String> remote2local = new HashMap<>();
 			remote2local.put(SVNUtility.encodeURL(remote.getUrl()), FileUtility.getWorkingCopyPath(local));
 			return new GetRemoteContentsOperation(new IResource[] { local }, new IRepositoryResource[] { remote },
 					remote2local, true);
@@ -205,9 +206,11 @@ public class LocalOperationFactory {
 	public Supplier<IActionOperation> createSwitchOperation() {
 		return () -> {
 			IResource project = TestUtil.getFirstProject();
-			IRepositoryResource switchDestination = TestUtil.getRepositoryLocation().asRepositoryContainer(
-					SVNUtility.getProposedBranchesLocation(TestUtil.getRepositoryLocation()) + "/" + project.getName(),
-					false);
+			IRepositoryResource switchDestination = TestUtil.getRepositoryLocation()
+					.asRepositoryContainer(
+							SVNUtility.getProposedBranchesLocation(TestUtil.getRepositoryLocation()) + "/"
+									+ project.getName(),
+							false);
 			return new SwitchOperation(new IResource[] { project }, new IRepositoryResource[] { switchDestination },
 					SVNDepth.INFINITY, false, true);
 		};
@@ -243,7 +246,7 @@ public class LocalOperationFactory {
 				assertFalse("FileUtility.isTeamPrivateMember", FileUtility.isSVNInternals(prj1));
 				assertFalse("FileUtility.isTeamPrivateMember", FileUtility.isSVNInternals(prj2));
 
-				IResource[] projectSet = new IResource[] { prj1, prj2 };
+				IResource[] projectSet = { prj1, prj2 };
 
 				String[] pathArray = FileUtility.asPathArray(projectSet);
 				assertTrue("FileUtility.asPathArray", pathArray.length == projectSet.length);
@@ -255,25 +258,19 @@ public class LocalOperationFactory {
 				IResource[] all = FileUtility.getResourcesRecursive(projectSet, IStateFilter.SF_ALL);
 				final int[] cntr = new int[1];
 				cntr[0] = 0;
-				FileUtility.visitNodes(prj1, new IResourceVisitor() {
-					@Override
-					public boolean visit(IResource resource) throws CoreException {
-						if (FileUtility.isNotSupervised(resource)) {
-							return false;
-						}
-						cntr[0]++;
-						return true;
+				FileUtility.visitNodes(prj1, resource -> {
+					if (FileUtility.isNotSupervised(resource)) {
+						return false;
 					}
+					cntr[0]++;
+					return true;
 				}, IResource.DEPTH_INFINITE);
-				FileUtility.visitNodes(prj2, new IResourceVisitor() {
-					@Override
-					public boolean visit(IResource resource) throws CoreException {
-						if (FileUtility.isNotSupervised(resource)) {
-							return false;
-						}
-						cntr[0]++;
-						return true;
+				FileUtility.visitNodes(prj2, resource -> {
+					if (FileUtility.isNotSupervised(resource)) {
+						return false;
 					}
+					cntr[0]++;
+					return true;
 				}, IResource.DEPTH_INFINITE);
 				assertTrue("FileUtility.visitNodes != IStateFilter.SF_ALL", cntr[0] == all.length);
 
@@ -296,12 +293,12 @@ public class LocalOperationFactory {
 				File folderToCopy = TestUtil.getSecondProject().getFolder("web").getLocation().toFile();
 				File folderWhereToCopy = TestUtil.getFirstProject().getFolder("src").getLocation().toFile();
 				FileUtility.copyAll(folderWhereToCopy, folderToCopy, monitor);
-				File copiedFolder = new File((folderWhereToCopy.getAbsolutePath() + "/" + folderToCopy.getName()));
+				File copiedFolder = new File(folderWhereToCopy.getAbsolutePath() + "/" + folderToCopy.getName());
 				assertTrue("FileUtility.copyFolder", copiedFolder.exists());
 
 				File fileToCopy = TestUtil.getSecondProject().getFile(".project").getLocation().toFile();
 				FileUtility.copyFile(folderWhereToCopy, fileToCopy, monitor);
-				File copiedFile = new File((folderWhereToCopy.getAbsolutePath() + "/" + fileToCopy.getName()));
+				File copiedFile = new File(folderWhereToCopy.getAbsolutePath() + "/" + fileToCopy.getName());
 				assertTrue("FileUtility.copyFile", copiedFile.exists());
 
 				IResource child1 = TestUtil.getFirstProject().getFolder("src/web");
@@ -358,7 +355,7 @@ public class LocalOperationFactory {
 				op.run(monitor);
 				remote = SVNRemoteStorage.instance().asRepositoryResource(TestUtil.getFirstProject().getFolder("src"));
 				assertTrue("RelocateWorkingCopyOperation Test", remote != null && remote.exists());
-			};
+			}
 		};
 	}
 
@@ -391,13 +388,13 @@ public class LocalOperationFactory {
 
 				IRepositoryResource remote1 = SVNRemoteStorage.instance().asRepositoryResource(prj1);
 				IRepositoryResource remote2 = SVNRemoteStorage.instance().asRepositoryResource(prj2);
-				IRepositoryResource[] remoteProjectSet = new IRepositoryResource[] { remote1, remote2 };
+				IRepositoryResource[] remoteProjectSet = { remote1, remote2 };
 				assertTrue("SVNUtility.asURLArray",
-						(SVNUtility.asURLArray(remoteProjectSet, false)).length == remoteProjectSet.length);
+						SVNUtility.asURLArray(remoteProjectSet, false).length == remoteProjectSet.length);
 
 				IResource local1 = prj1;
 				IResource local2 = prj2;
-				IResource[] localProjectSet = new IResource[] { local1, local2 };
+				IResource[] localProjectSet = { local1, local2 };
 				assertTrue("SVNUtility.splitWorkingCopies",
 						SVNUtility.splitWorkingCopies(localProjectSet).size() == localProjectSet.length);
 

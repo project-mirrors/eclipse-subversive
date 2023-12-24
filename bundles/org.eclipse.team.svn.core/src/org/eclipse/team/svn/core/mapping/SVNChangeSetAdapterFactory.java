@@ -18,6 +18,7 @@ import org.eclipse.core.runtime.IAdapterFactory;
 
 public class SVNChangeSetAdapterFactory implements IAdapterFactory {
 
+	@Override
 	@SuppressWarnings("unchecked")
 	public Object getAdapter(Object adaptableObject, Class adapterType) {
 		if (adaptableObject instanceof SVNActiveChangeSet && adapterType == ResourceMapping.class) {
@@ -35,6 +36,7 @@ public class SVNChangeSetAdapterFactory implements IAdapterFactory {
 		return null;
 	}
 
+	@Override
 	@SuppressWarnings("unchecked")
 	public Class[] getAdapterList() {
 		return new Class[] { ResourceMapping.class };

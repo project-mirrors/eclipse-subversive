@@ -23,6 +23,7 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.osgi.util.NLS;
+import org.eclipse.team.svn.core.BaseMessages;
 import org.eclipse.team.svn.core.SVNMessages;
 import org.eclipse.team.svn.core.SVNTeamPlugin;
 import org.eclipse.team.svn.core.connector.SVNConnectorCancelException;
@@ -39,95 +40,103 @@ public class LoggedOperation implements IActionOperation {
 		this.op = op;
 	}
 
+	@Override
 	final public IActionOperation run(IProgressMonitor monitor) {
-		IStatus status = this.op.run(monitor).getStatus();
+		IStatus status = op.run(monitor).getStatus();
 		if (status.getSeverity() != IStatus.OK) {
-			this.handleError(status);
+			handleError(status);
 		}
-		return this.op;
+		return op;
 	}
-	
+
+	@Override
 	public int getOperationWeight() {
 		return IActionOperation.DEFAULT_WEIGHT;
 	}
-	
+
+	@Override
 	public IConsoleStream getConsoleStream() {
-		return this.op.getConsoleStream();
-	}
-	
-	public void setConsoleStream(IConsoleStream stream) {
-		this.op.setConsoleStream(stream);
+		return op.getConsoleStream();
 	}
 
+	@Override
+	public void setConsoleStream(IConsoleStream stream) {
+		op.setConsoleStream(stream);
+	}
+
+	@Override
 	public ISchedulingRule getSchedulingRule() {
-		return this.op.getSchedulingRule();
+		return op.getSchedulingRule();
 	}
-	
+
+	@Override
 	public String getOperationName() {
-		return this.op.getOperationName();
+		return op.getOperationName();
 	}
-	
+
+	@Override
 	public String getId() {
-		return this.op.getId();
+		return op.getId();
 	}
-	
+
+	@Override
 	public Class<? extends NLS> getMessagesClass() {
-		return this.op.getMessagesClass();
+		return op.getMessagesClass();
 	}
-	
+
+	@Override
 	public final IStatus getStatus() {
-		return this.op.getStatus();
+		return op.getStatus();
 	}
-	
+
+	@Override
 	public int getExecutionState() {
-		return this.op.getExecutionState();
+		return op.getExecutionState();
 	}
-	
+
+	@Override
 	public void reportStatus(int severity, String message, Throwable t) {
-		this.op.reportStatus(severity, message, t);
+		op.reportStatus(severity, message, t);
 	}
 
 	public static void reportError(String where, Throwable t) {
-		String errMessage = SVNMessages.format(SVNMessages.Operation_Error_LogHeader, new String[] {where});
-	    MultiStatus status = new MultiStatus(SVNTeamPlugin.NATURE_ID, IStatus.OK, errMessage, null);
-		Status st = 
-			new Status(
-					IStatus.ERROR, 
-					SVNTeamPlugin.NATURE_ID, 
-					IStatus.OK, 
-					status.getMessage() + ": " + t.getMessage(),  //$NON-NLS-1$
-					t);
+		String errMessage = BaseMessages.format(SVNMessages.Operation_Error_LogHeader, new String[] { where });
+		MultiStatus status = new MultiStatus(SVNTeamPlugin.NATURE_ID, IStatus.OK, errMessage, null);
+		Status st = new Status(
+				IStatus.ERROR, SVNTeamPlugin.NATURE_ID, IStatus.OK, status.getMessage() + ": " + t.getMessage(), //$NON-NLS-1$
+				t);
 		status.merge(st);
 		LoggedOperation.logError(status);
 	}
-	
+
 	protected void handleError(IStatus errorStatus) {
 		if (!errorStatus.isMultiStatus()) {
 			Throwable ex = errorStatus.getException();
-			if (!(ex instanceof SVNConnectorCancelException) && !(ex instanceof ActivityCancelledException) && !(ex instanceof OperationCanceledException)) {
+			if (!(ex instanceof SVNConnectorCancelException) && !(ex instanceof ActivityCancelledException)
+					&& !(ex instanceof OperationCanceledException)) {
 				LoggedOperation.logError(errorStatus);
 			}
 			return;
-        }
-		
-		IStatus []children = errorStatus.getChildren();
-		ArrayList <IStatus>statusesWithoutCancel = new ArrayList<IStatus>(); 
-        for (int i = 0; i < children.length; i++) {
-            Throwable exception = children[i].getException();
-        	if (!(exception instanceof SVNConnectorCancelException) && !(exception instanceof ActivityCancelledException) && !(exception instanceof OperationCanceledException)) {
-        		statusesWithoutCancel.add(children[i]);
-            }
-        }
-        if (statusesWithoutCancel.size() > 0) {
-		    IStatus newStatus = new MultiStatus(errorStatus.getPlugin(), 
-		    		errorStatus.getCode(), 
-		    		statusesWithoutCancel.toArray(new IStatus[statusesWithoutCancel.size()]),
-		    		errorStatus.getMessage(),
-		    		errorStatus.getException());
-		    LoggedOperation.logError(newStatus);
-        }
+		}
+
+		IStatus[] children = errorStatus.getChildren();
+		ArrayList<IStatus> statusesWithoutCancel = new ArrayList<>();
+		for (IStatus child : children) {
+			Throwable exception = child.getException();
+			if (!(exception instanceof SVNConnectorCancelException)
+					&& !(exception instanceof ActivityCancelledException)
+					&& !(exception instanceof OperationCanceledException)) {
+				statusesWithoutCancel.add(child);
+			}
+		}
+		if (statusesWithoutCancel.size() > 0) {
+			IStatus newStatus = new MultiStatus(errorStatus.getPlugin(), errorStatus.getCode(),
+					statusesWithoutCancel.toArray(new IStatus[statusesWithoutCancel.size()]), errorStatus.getMessage(),
+					errorStatus.getException());
+			LoggedOperation.logError(newStatus);
+		}
 	}
-	
+
 	protected static void logError(IStatus errorStatus) {
 		SVNTeamPlugin.instance().getLog().log(errorStatus);
 	}

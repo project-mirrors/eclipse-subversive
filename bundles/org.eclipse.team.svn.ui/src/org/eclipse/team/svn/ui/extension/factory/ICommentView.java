@@ -19,7 +19,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.team.svn.core.resource.IRepositoryResource;
 
 /**
- * This interface will provide PolClipse 
+ * This interface will provide PolClipse
  * 
  * @author Alexander Gurov
  */
@@ -31,14 +31,14 @@ public interface ICommentView {
 	 * @param parent
 	 * @return
 	 */
-	public void createCommentView(Composite parent);
-	
-	public void createCommentView(Composite parent, int style);
-	
-	public void usedFor(IResource resource);
-	
-	public void usedFor(IRepositoryResource resource);
-	
-	public void setComment(String comment);
-	
+	void createCommentView(Composite parent);
+
+	void createCommentView(Composite parent, int style);
+
+	void usedFor(IResource resource);
+
+	void usedFor(IRepositoryResource resource);
+
+	void setComment(String comment);
+
 }

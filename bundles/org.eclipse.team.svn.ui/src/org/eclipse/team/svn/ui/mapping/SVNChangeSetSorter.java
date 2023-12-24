@@ -27,44 +27,45 @@ public class SVNChangeSetSorter extends ResourceModelSorter implements IProperty
 
 	// Comment sorting options
 	public final static int DATE = 1;
+
 	public final static int COMMENT = 2;
+
 	public final static int USER = 3;
+
 	private ISynchronizePageConfiguration configuration;
+
 	private int reorderingCriteria = SVNChangeSetSorter.DATE;
-	
+
 	public SVNChangeSetSorter() {
-		super();
 	}
 
+	@Override
 	@SuppressWarnings("deprecation")
 	public int compare(Viewer viewer, Object o1, Object o2) {
 		if (o1 instanceof ChangeSet && o2 instanceof ChangeSet) {
-		    if (o1 instanceof ActiveChangeSet && o2 instanceof ActiveChangeSet) {
-		        return this.compareNames(((ActiveChangeSet)o1).getTitle(), ((ActiveChangeSet)o2).getTitle());
-		    }
-		    if (o1 instanceof SVNIncomingChangeSet && o2 instanceof SVNIncomingChangeSet) {
-		    	SVNIncomingChangeSet r1 = (SVNIncomingChangeSet)o1;
-		    	SVNIncomingChangeSet r2 = (SVNIncomingChangeSet)o2;
-				if (this.reorderingCriteria == COMMENT) {
+			if (o1 instanceof ActiveChangeSet && o2 instanceof ActiveChangeSet) {
+				return this.compareNames(((ActiveChangeSet) o1).getTitle(), ((ActiveChangeSet) o2).getTitle());
+			}
+			if (o1 instanceof SVNIncomingChangeSet && o2 instanceof SVNIncomingChangeSet) {
+				SVNIncomingChangeSet r1 = (SVNIncomingChangeSet) o1;
+				SVNIncomingChangeSet r2 = (SVNIncomingChangeSet) o2;
+				if (reorderingCriteria == COMMENT) {
 					return this.compareNames(r1.getComment(), r2.getComment());
-				}
-				else if (this.reorderingCriteria == USER) {
+				} else if (reorderingCriteria == USER) {
 					return this.compareNames(r1.getAuthor(), r2.getAuthor());
 				}
 				return r1.getDate().compareTo(r2.getDate());
-		    }
-		    if (o1 instanceof ActiveChangeSet) {
-		        return -1;
-		    }
-		    else if (o2 instanceof ActiveChangeSet) {
-		        return 1;
-		    }
-		    if (o1 instanceof SVNIncomingChangeSet) {
-		        return 1;
-		    }
-		    else if (o2 instanceof SVNIncomingChangeSet) {
-		        return -1;
-		    }
+			}
+			if (o1 instanceof ActiveChangeSet) {
+				return -1;
+			} else if (o2 instanceof ActiveChangeSet) {
+				return 1;
+			}
+			if (o1 instanceof SVNIncomingChangeSet) {
+				return 1;
+			} else if (o2 instanceof SVNIncomingChangeSet) {
+				return -1;
+			}
 		}
 		return super.compare(viewer, o1, o2);
 	}
@@ -75,15 +76,16 @@ public class SVNChangeSetSorter extends ResourceModelSorter implements IProperty
 		s2 = s2 == null ? "" : s2; //$NON-NLS-1$
 		return collator.compare(s1, s2);
 	}
-	
+
 	public void setConfiguration(ISynchronizePageConfiguration configuration) {
 		this.configuration = configuration;
 		this.configuration.addPropertyChangeListener(this);
-		this.reorderingCriteria = SVNChangeSetActionProvider.getSortCriteria(this.configuration);
+		reorderingCriteria = SVNChangeSetActionProvider.getSortCriteria(this.configuration);
 	}
 
+	@Override
 	public void propertyChange(PropertyChangeEvent event) {
-		this.reorderingCriteria = SVNChangeSetActionProvider.getSortCriteria(this.configuration);
+		reorderingCriteria = SVNChangeSetActionProvider.getSortCriteria(configuration);
 	}
-	
+
 }

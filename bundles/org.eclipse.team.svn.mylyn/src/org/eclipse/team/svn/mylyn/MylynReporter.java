@@ -30,10 +30,9 @@ import org.eclipse.team.svn.core.operation.AbstractActionOperation;
 import org.eclipse.team.svn.core.utility.StringId;
 import org.eclipse.team.svn.ui.debugmail.ReportPartsFactory;
 import org.eclipse.team.svn.ui.extension.factory.IReporter;
-import org.eclipse.team.svn.ui.extension.factory.IReportingDescriptor;
 import org.eclipse.team.svn.ui.extension.factory.IReporterFactory.ReportType;
+import org.eclipse.team.svn.ui.extension.factory.IReportingDescriptor;
 import org.eclipse.team.svn.ui.utility.UIMonitorUtility;
-
 
 /**
  * Allows to post a product bug or tip directly to Eclipse.org Bugzilla
@@ -42,120 +41,141 @@ import org.eclipse.team.svn.ui.utility.UIMonitorUtility;
  */
 public class MylynReporter extends AbstractActionOperation implements IReporter {
 	protected TaskRepository repository;
+
 	protected AbstractTaskDataHandler taskDataHandler;
-	
+
 	protected IReportingDescriptor settings;
+
 	protected ReportType type;
-	
+
 	protected IStatus problemStatus;
+
 	protected String summary;
+
 	protected String reportId;
+
 	protected String userComment;
-	
-	public MylynReporter(TaskRepository repository, AbstractTaskDataHandler taskDataHandler, IReportingDescriptor settings, ReportType type) {
+
+	public MylynReporter(TaskRepository repository, AbstractTaskDataHandler taskDataHandler,
+			IReportingDescriptor settings, ReportType type) {
 		super(MylynMessages.getErrorString("Operation_OpenReportEditor"), MylynMessages.class); //$NON-NLS-1$
-		
+
 		this.settings = settings;
 		this.type = type;
 		this.repository = repository;
 		this.taskDataHandler = taskDataHandler;
-		this.reportId = StringId.generateRandom("ID", 5);
+		reportId = StringId.generateRandom("ID", 5);
 	}
 
+	@Override
 	protected void runImpl(IProgressMonitor monitor) throws Exception {
-		String kind = this.repository.getConnectorKind();
-		TaskAttributeMapper attributeFactory = this.taskDataHandler.getAttributeMapper(this.repository);
-		final TaskData taskData = new TaskData(attributeFactory, kind, this.repository.getRepositoryUrl(), ""); // ID must be empty (but not null) for new task
-		
-		boolean isInitializedSuccessfully = this.taskDataHandler.initializeTaskData(this.repository, taskData, new TaskMapping() {
+		String kind = repository.getConnectorKind();
+		TaskAttributeMapper attributeFactory = taskDataHandler.getAttributeMapper(repository);
+		final TaskData taskData = new TaskData(attributeFactory, kind, repository.getRepositoryUrl(), ""); // ID must be empty (but not null) for new task
+
+		boolean isInitializedSuccessfully = taskDataHandler.initializeTaskData(repository, taskData, new TaskMapping() {
+			@Override
 			public String getSummary() {
 				return MylynReporter.this.buildSubject();
 			}
+
+			@Override
 			public String getTaskKind() {
-				return MylynReporter.this.type == ReportType.BUG ? "normal" : "enhancement";
+				return type == ReportType.BUG ? "normal" : "enhancement";
 			}
+
+			@Override
 			public String getDescription() {
 				return MylynReporter.this.buildReport();
 			}
+
+			@Override
 			public String getProduct() {
-				return MylynReporter.this.settings.getProductName();
+				return settings.getProductName();
 			}
 		}, monitor);
-		
+
 		if (!isInitializedSuccessfully) {
 			throw new CoreException(new RepositoryStatus(IStatus.ERROR, SVNMylynIntegrationPlugin.ID,
-					RepositoryStatus.ERROR_REPOSITORY,
-					"The selected repository does not support creating new tasks."));
+					RepositoryStatus.ERROR_REPOSITORY, "The selected repository does not support creating new tasks."));
 		}
 
 		//does not work for Bugzilla connector
-		taskData.getRoot().getMappedAttribute(TaskAttribute.SUMMARY).setValue(this.buildSubject());
-		taskData.getRoot().getMappedAttribute(TaskAttribute.DESCRIPTION).setValue(this.buildReport());
-		
+		taskData.getRoot().getMappedAttribute(TaskAttribute.SUMMARY).setValue(buildSubject());
+		taskData.getRoot().getMappedAttribute(TaskAttribute.DESCRIPTION).setValue(buildReport());
+
 		// has no public key
-		taskData.getRoot().getAttribute(BugzillaAttribute.BUG_SEVERITY.getKey()).setValue(this.type == ReportType.BUG ? "normal" : "enhancement");
-		
+		taskData.getRoot()
+				.getAttribute(BugzillaAttribute.BUG_SEVERITY.getKey())
+				.setValue(type == ReportType.BUG ? "normal" : "enhancement");
+
 		// open task editor
-		UIMonitorUtility.getDisplay().syncExec(new Runnable() {
-			public void run() {
-				try {
-					TasksUiInternal.createAndOpenNewTask(taskData);
-				}
-				catch (CoreException e) {
-					MylynReporter.this.reportStatus(IStatus.ERROR, null, e);
-				}
+		UIMonitorUtility.getDisplay().syncExec(() -> {
+			try {
+				TasksUiInternal.createAndOpenNewTask(taskData);
+			} catch (CoreException e) {
+				MylynReporter.this.reportStatus(IStatus.ERROR, null, e);
 			}
 		});
 	}
 
+	@Override
 	public String buildReport() {
-		String report = ReportPartsFactory.getVersionPart(this.settings);
-		if (this.userComment != null) {
-			report += ReportPartsFactory.getUserCommentPart(this.userComment);
+		String report = ReportPartsFactory.getVersionPart(settings);
+		if (userComment != null) {
+			report += ReportPartsFactory.getUserCommentPart(userComment);
 		}
 		report += ReportPartsFactory.getSVNClientPart();
-		
-		if (this.type == ReportType.BUG) {
+
+		if (type == ReportType.BUG) {
 			report += ReportPartsFactory.getJVMPropertiesPart();
-			if (this.problemStatus != null) {
-				report += ReportPartsFactory.getStatusPart(this.problemStatus);
+			if (problemStatus != null) {
+				report += ReportPartsFactory.getStatusPart(problemStatus);
 			}
 		}
-		
-		if (!this.settings.isTrackerSupportsHTML()) {
+
+		if (!settings.isTrackerSupportsHTML()) {
 			report = ReportPartsFactory.removeHTMLTags(report);
 		}
 		return report;
 	}
 
+	@Override
 	public String buildSubject() {
-		String subject = this.summary != null ? this.summary : this.reportId;
+		String subject = summary != null ? summary : reportId;
 		return subject;
 	}
 
+	@Override
 	public IReportingDescriptor getReportingDescriptor() {
-		return this.settings;
+		return settings;
 	}
 
+	@Override
 	public boolean isCustomEditorSupported() {
 		return true;
 	}
 
+	@Override
 	public void setProblemStatus(IStatus problemStatus) {
 		this.problemStatus = problemStatus;
 	}
 
+	@Override
 	public void setSummary(String summary) {
 		this.summary = summary;
 	}
 
+	@Override
 	public void setUserComment(String userComment) {
 		this.userComment = userComment;
 	}
 
+	@Override
 	public void setUserEMail(String userEMail) {
 	}
 
+	@Override
 	public void setUserName(String userName) {
 	}
 

@@ -23,5 +23,5 @@ import org.eclipse.team.svn.core.connector.SVNProperty;
  * @author Alexander Gurov
  */
 public interface IPropertyProvider {
-	public SVNProperty []getProperties(IResource resource);
+	SVNProperty[] getProperties(IResource resource);
 }

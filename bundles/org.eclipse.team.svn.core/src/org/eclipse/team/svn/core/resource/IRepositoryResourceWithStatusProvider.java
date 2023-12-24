@@ -23,20 +23,23 @@ import java.util.Map;
  */
 public interface IRepositoryResourceWithStatusProvider extends IRepositoryResourceProvider {
 
-	public class DefaultRepositoryResourceWithStatusProvider extends DefaultRepositoryResourceProvider implements IRepositoryResourceWithStatusProvider {
+	public class DefaultRepositoryResourceWithStatusProvider extends DefaultRepositoryResourceProvider
+			implements IRepositoryResourceWithStatusProvider {
 
 		protected Map<String, String> url2status;
-		
-		public DefaultRepositoryResourceWithStatusProvider(IRepositoryResource []resources, Map<String, String> url2status) {
+
+		public DefaultRepositoryResourceWithStatusProvider(IRepositoryResource[] resources,
+				Map<String, String> url2status) {
 			super(resources);
 			this.url2status = url2status;
 		}
 
+		@Override
 		public Map<String, String> getStatusesMap() {
-			return this.url2status;
+			return url2status;
 		}
 	}
-	
-	public Map<String, String> getStatusesMap();
-	
+
+	Map<String, String> getStatusesMap();
+
 }

@@ -61,188 +61,215 @@ import org.eclipse.team.svn.core.utility.SVNUtility;
 @SuppressWarnings("deprecation")
 public class SVNTeamProvider extends RepositoryProvider implements IConnectedProjectInformation {
 	public final static QualifiedName LOCATION_PROPERTY = new QualifiedName("org.eclipse.team.svn", "location"); //$NON-NLS-1$ //$NON-NLS-2$
-	public final static QualifiedName VERIFY_TAG_ON_COMMIT_PROPERTY = new QualifiedName("org.eclipse.team.svn", "verifyTagOnCommit"); //$NON-NLS-1$ //$NON-NLS-2$
-	
+
+	public final static QualifiedName VERIFY_TAG_ON_COMMIT_PROPERTY = new QualifiedName("org.eclipse.team.svn", //$NON-NLS-1$
+			"verifyTagOnCommit"); //$NON-NLS-1$
+
 	public final static boolean DEFAULT_VERIFY_TAG_ON_COMMIT = true;
 
 	protected IRepositoryLocation location;
+
 	protected IRepositoryResource resource;
+
 	protected String relocatedTo;
+
 	protected int errorCode;
+
 	protected int state;
 
 	public SVNTeamProvider() {
-		super();
-		this.state = 0;
+		state = 0;
 	}
-	
+
+	@Override
 	public synchronized IRepositoryLocation getRepositoryLocation() throws HiddenException {
-		if (this.state != 1) {
-			this.restoreLocation();
+		if (state != 1) {
+			restoreLocation();
 		}
-		return this.location;
+		return location;
 	}
-	
+
+	@Override
 	public synchronized IRepositoryResource getRepositoryResource() throws HiddenException {
-		if (this.state != 1) {
-			this.connectToProject();
+		if (state != 1) {
+			connectToProject();
 		}
-		return this.resource;
+		return resource;
 	}
-	
+
+	@Override
 	public synchronized void switchResource(IRepositoryResource resource) throws CoreException {
 		//does not affect finite automate state
 		this.resource = SVNUtility.copyOf(resource);
-		this.location = resource.getRepositoryLocation();
-		SVNTeamProvider.setRepositoryLocation(this.getProject(), this.location);
+		location = resource.getRepositoryLocation();
+		SVNTeamProvider.setRepositoryLocation(getProject(), location);
 	}
-	
+
+	@Override
 	public synchronized void relocateResource() throws CoreException {
-		if (this.state != 1) {
-			this.restoreLocation();
+		if (state != 1) {
+			restoreLocation();
 		}
-		SVNTeamProvider.setRepositoryLocation(this.getProject(), this.location);
-		this.state = 0;
+		SVNTeamProvider.setRepositoryLocation(getProject(), location);
+		state = 0;
 	}
-	
+
 	public static void map(IProject project, IRepositoryResource resource) throws CoreException {
 		SVNTeamProvider.setRepositoryLocation(project, resource.getRepositoryLocation());
 		RepositoryProvider.map(project, SVNTeamPlugin.NATURE_ID);
 	}
-	
+
+	@Override
 	public String getID() {
 		return SVNTeamPlugin.NATURE_ID;
 	}
 
+	@Override
 	public void configureProject() {
-		this.connectToProject();
-		SVNRemoteStorage.instance().fireResourceStatesChangedEvent(new ResourceStatesChangedEvent(new IResource[] {this.getProject()}, IResource.DEPTH_ZERO, ResourceStatesChangedEvent.CHANGED_NODES));		
+		connectToProject();
+		SVNRemoteStorage.instance()
+				.fireResourceStatesChangedEvent(new ResourceStatesChangedEvent(new IResource[] { getProject() },
+						IResource.DEPTH_ZERO, ResourceStatesChangedEvent.CHANGED_NODES));
 	}
 
+	@Override
 	public void deconfigure() throws CoreException {
 
 	}
 
+	@Override
 	public IMoveDeleteHook getMoveDeleteHook() {
 		return new SVNTeamMoveDeleteHook();
 	}
-	
-    public FileModificationValidator getFileModificationValidator2() {
-        return SVNTeamPlugin.instance().getOptionProvider().getFileModificationValidator();
-    }
-	
-    public boolean canHandleLinkedResources() {
-    	// deprecated in Eclipse 3.2
-        return this.canHandleLinkedResourceURI();
-    }
-    
+
+	@Override
+	public FileModificationValidator getFileModificationValidator2() {
+		return SVNTeamPlugin.instance().getOptionProvider().getFileModificationValidator();
+	}
+
+	@Override
+	public boolean canHandleLinkedResources() {
+		// deprecated in Eclipse 3.2
+		return canHandleLinkedResourceURI();
+	}
+
+	@Override
 	public boolean canHandleLinkedResourceURI() {
 		// since Eclipse 3.2
-        return true;
+		return true;
 	}
-	
-    public IResourceRuleFactory getRuleFactory() {
-    	return SVNResourceRuleFactory.INSTANCE;
-    }
-    
-    public IFileHistoryProvider getFileHistoryProvider() {
-    	return new SVNFileHistoryProvider();
-    }
-    
+
+	@Override
+	public IResourceRuleFactory getRuleFactory() {
+		return SVNResourceRuleFactory.INSTANCE;
+	}
+
+	@Override
+	public IFileHistoryProvider getFileHistoryProvider() {
+		return new SVNFileHistoryProvider();
+	}
+
+	@Override
 	protected void deconfigured() {
-		IProject project = this.getProject();
+		IProject project = getProject();
 		if (project != null) {
-			try {project.setPersistentProperty(SVNTeamProvider.LOCATION_PROPERTY, null);} catch (Exception ex) {}
+			try {
+				project.setPersistentProperty(SVNTeamProvider.LOCATION_PROPERTY, null);
+			} catch (Exception ex) {
+			}
 		}
-		SVNRemoteStorage.instance().fireResourceStatesChangedEvent(new ResourceStatesChangedEvent(new IResource[] {this.getProject()}, IResource.DEPTH_ZERO, ResourceStatesChangedEvent.CHANGED_NODES));		
+		SVNRemoteStorage.instance()
+				.fireResourceStatesChangedEvent(new ResourceStatesChangedEvent(new IResource[] { getProject() },
+						IResource.DEPTH_ZERO, ResourceStatesChangedEvent.CHANGED_NODES));
 		super.deconfigured();
 	}
-	
+
 	protected static void setRepositoryLocation(IProject project, IRepositoryLocation location) throws CoreException {
 		//as property length is limited by size, we save only required data
-		project.setPersistentProperty(SVNTeamProvider.LOCATION_PROPERTY, SVNRemoteStorage.instance().repositoryLocationAsReference(location, LocationReferenceTypeEnum.ONLY_REQUIRED_DATA));
+		project.setPersistentProperty(SVNTeamProvider.LOCATION_PROPERTY, SVNRemoteStorage.instance()
+				.repositoryLocationAsReference(location, LocationReferenceTypeEnum.ONLY_REQUIRED_DATA));
 	}
-	
+
 	protected void restoreLocation() throws HiddenException {
-		if (this.state == 0) {
-			this.location = null;
-			if ((this.errorCode = this.uploadRepositoryLocation()) == ErrorDescription.SUCCESS ||
-				(this.errorCode = this.acquireResolution(false)) == ErrorDescription.SUCCESS) {
-    			return;
+		if (state == 0) {
+			location = null;
+			if ((errorCode = uploadRepositoryLocation()) == ErrorDescription.SUCCESS
+					|| (errorCode = acquireResolution(false)) == ErrorDescription.SUCCESS) {
+				return;
 			}
-			
-			this.performDisconnect(new Exception());
+
+			performDisconnect(new Exception());
 		}
-		this.breakThreadExecution();
+		breakThreadExecution();
 	}
-	
-	protected synchronized void connectToProject() throws HiddenException {				
-		if (this.state == 0) {
-			this.location = null;
-			this.resource = null;
-			this.relocatedTo = null;
-			if ((this.errorCode = this.uploadRepositoryResource()) == ErrorDescription.SUCCESS ||
-				(this.errorCode = this.acquireResolution(true)) == ErrorDescription.SUCCESS) {
-    			this.state = 1;
-    			return;
+
+	protected synchronized void connectToProject() throws HiddenException {
+		if (state == 0) {
+			location = null;
+			resource = null;
+			relocatedTo = null;
+			if ((errorCode = uploadRepositoryResource()) == ErrorDescription.SUCCESS
+					|| (errorCode = acquireResolution(true)) == ErrorDescription.SUCCESS) {
+				state = 1;
+				return;
 			}
-			this.performDisconnect(new Exception());
+			performDisconnect(new Exception());
 		}
-		this.breakThreadExecution();
+		breakThreadExecution();
 	}
-	
+
 	protected int acquireResolution(boolean full) {
 		while (true) {
 			Object context = null;
-			if (this.errorCode == ErrorDescription.REPOSITORY_LOCATION_IS_DISCARDED) {
-				context = new Object[] {this.getProject(), this.location};
+			if (errorCode == ErrorDescription.REPOSITORY_LOCATION_IS_DISCARDED) {
+				context = new Object[] { getProject(), location };
+			} else if (errorCode == ErrorDescription.PROJECT_IS_RELOCATED_OUTSIDE_PLUGIN) {
+				context = new Object[] { getProject(), relocatedTo, location };
+			} else if (errorCode == ErrorDescription.CANNOT_READ_LOCATION_DATA) {
+				context = new Object[] { getProject(), relocatedTo };
+			} else {
+				context = getProject();
 			}
-			else if (this.errorCode == ErrorDescription.PROJECT_IS_RELOCATED_OUTSIDE_PLUGIN) {
-				context = new Object[] {this.getProject(), this.relocatedTo, this.location};
-			}
-			else if (this.errorCode == ErrorDescription.CANNOT_READ_LOCATION_DATA) {
-				context = new Object[] {this.getProject(), this.relocatedTo};
-			}
-			else {
-				context = this.getProject();
-			}
-				
-    		if (SVNTeamPlugin.instance().getErrorHandlingFacility().acquireResolution(new ErrorDescription(this.errorCode, context))) {
-    			int newError = full ? this.uploadRepositoryResource() : this.uploadRepositoryLocation();
+
+			if (SVNTeamPlugin.instance()
+					.getErrorHandlingFacility()
+					.acquireResolution(new ErrorDescription(errorCode, context))) {
+				int newError = full ? uploadRepositoryResource() : uploadRepositoryLocation();
 				if (newError != ErrorDescription.SUCCESS) {
-					if (newError != this.errorCode) {
-						this.errorCode = newError;
+					if (newError != errorCode) {
+						errorCode = newError;
 						continue;
 					}
 					return newError;
 				}
-    			return ErrorDescription.SUCCESS;
-    		}
-			return this.errorCode;
+				return ErrorDescription.SUCCESS;
+			}
+			return errorCode;
 		}
 	}
 
 	protected void performDisconnect(final Throwable source) {
-    	this.state = -1;
-    	CompositeOperation op = new CompositeOperation("Operation_OpenProject", SVNMessages.class); //$NON-NLS-1$
-    	op.add(new DisconnectOperation(new IProject[] {this.getProject()}, false));
-    	// notify user about the problem is happened
-    	op.add(new AbstractActionOperation(op.getId(), op.getMessagesClass()) {
+		state = -1;
+		CompositeOperation op = new CompositeOperation("Operation_OpenProject", SVNMessages.class); //$NON-NLS-1$
+		op.add(new DisconnectOperation(new IProject[] { getProject() }, false));
+		// notify user about the problem is happened
+		op.add(new AbstractActionOperation(op.getId(), op.getMessagesClass()) {
+			@Override
 			protected void runImpl(IProgressMonitor monitor) throws Exception {
 				throw new UnreportableException(SVNTeamProvider.this.getAutoDisconnectMessage(), source);
 			}
 		});
-    	ProgressMonitorUtility.doTaskScheduled(op);
+		ProgressMonitorUtility.doTaskScheduled(op);
 	}
-	
+
 	protected void breakThreadExecution() {
-		throw new HiddenException(this.getAutoDisconnectMessage());
+		throw new HiddenException(getAutoDisconnectMessage());
 	}
-	
+
 	protected String getAutoDisconnectMessage() {
-		return SVNMessages.formatErrorString("Error_AutoDisconnect", new String[] {this.getProject().getName()}); //$NON-NLS-1$
+		return SVNMessages.formatErrorString("Error_AutoDisconnect", new String[] { getProject().getName() }); //$NON-NLS-1$
 	}
-	
+
 	public static boolean requiresUpgrade(IProject project) {
 		RepositoryProvider provider = RepositoryProvider.getProvider(project);
 		if (provider == null || !SVNTeamPlugin.NATURE_ID.equals(provider.getID())) {
@@ -250,58 +277,57 @@ public class SVNTeamProvider extends RepositoryProvider implements IConnectedPro
 		}
 		IPath location = FileUtility.getResourcePath(project);
 		location = location.append(SVNUtility.getSVNFolderName());
-		if (SVNUtility.isPriorToSVN17())
-		{
+		if (SVNUtility.isPriorToSVN17()) {
 			return false;
 		}
-		if (location.toFile().exists() && !location.append("pristine").toFile().exists())
-		{
+		if (location.toFile().exists() && !location.append("pristine").toFile().exists()) {
 			return true;
 		}
 		IRepositoryLocation rLocation = SVNRemoteStorage.instance().getRepositoryLocation(project);
 		ISVNConnector proxy = rLocation.acquireSVNProxy();
 		try {
-			SVNUtility.properties(proxy, new SVNEntryRevisionReference(FileUtility.getWorkingCopyPath(project), null, SVNRevision.WORKING), ISVNConnector.Options.NONE, new SVNNullProgressMonitor());
-		} 
-		catch (SVNConnectorException e) {
+			SVNUtility.properties(proxy,
+					new SVNEntryRevisionReference(FileUtility.getWorkingCopyPath(project), null, SVNRevision.WORKING),
+					ISVNConnector.Options.NONE, new SVNNullProgressMonitor());
+		} catch (SVNConnectorException e) {
 			return e.getErrorId() == SVNErrorCodes.wcOldFormat;
-		}
-		finally {
+		} finally {
 			rLocation.releaseSVNProxy(proxy);
 		}
 		return false;
 	}
-	
+
 	protected int uploadRepositoryResource() {
-		int errorCode = this.uploadRepositoryLocation();
-		
-		IProject project = this.getProject();
+		int errorCode = uploadRepositoryLocation();
+
+		IProject project = getProject();
 		IPath location = FileUtility.getResourcePath(project);
 		if (SVNUtility.isPriorToSVN17() && !location.append(SVNUtility.getSVNFolderName()).toFile().exists()) {
 			return ErrorDescription.CANNOT_READ_PROJECT_METAINFORMATION;
 		}
 		ISVNConnector proxy = CoreExtensionsManager.instance().getSVNConnectorFactory().createConnector();
 		try {
-			SVNChangeStatus []sts = SVNUtility.status(proxy, location.toString(), SVNDepth.IMMEDIATES, ISVNConnector.Options.INCLUDE_UNCHANGED, new SVNNullProgressMonitor());
+			SVNChangeStatus[] sts = SVNUtility.status(proxy, location.toString(), SVNDepth.IMMEDIATES,
+					ISVNConnector.Options.INCLUDE_UNCHANGED, new SVNNullProgressMonitor());
 			if (sts != null && sts.length > 0) {
-				this.relocatedTo = this.getProjectURL(location.toString(), sts);
-				if (this.relocatedTo == null) {
+				relocatedTo = getProjectURL(location.toString(), sts);
+				if (relocatedTo == null) {
 					// the last try to avoid problem with the client library not returning URL's sometimes, since it could cause a request to the server, as far as I remember...
-					SVNEntryInfo []info = SVNUtility.info(proxy, new SVNEntryRevisionReference(location.toString()), SVNDepth.EMPTY, new SVNNullProgressMonitor());
+					SVNEntryInfo[] info = SVNUtility.info(proxy, new SVNEntryRevisionReference(location.toString()),
+							SVNDepth.EMPTY, new SVNNullProgressMonitor());
 					if (info == null || info.length == 0 || info[0].url == null) {
 						return ErrorDescription.CANNOT_READ_PROJECT_METAINFORMATION;
 					}
-					this.relocatedTo = SVNUtility.decodeURL(info[0].url);
+					relocatedTo = SVNUtility.decodeURL(info[0].url);
 				}
 				if (this.location != null) {
-					this.resource = this.location.asRepositoryContainer(this.relocatedTo, true);
-					if (this.resource == null) {
+					resource = this.location.asRepositoryContainer(relocatedTo, true);
+					if (resource == null) {
 						return ErrorDescription.PROJECT_IS_RELOCATED_OUTSIDE_PLUGIN;
 					}
 				}
 			}
-		}		
-		catch (SVNConnectorException ex) {
+		} catch (SVNConnectorException ex) {
 			if (ex.getErrorId() == SVNErrorCodes.wcCleanupRequired) {
 				// no way to read statuses, return some fake for now...
 				return ErrorDescription.WORKING_COPY_REQUIRES_CLEANUP;
@@ -310,14 +336,13 @@ public class SVNTeamProvider extends RepositoryProvider implements IConnectedPro
 				return ErrorDescription.WORKING_COPY_REQUIRES_UPGRADE;
 			}
 			return ErrorDescription.CANNOT_READ_PROJECT_METAINFORMATION;
-		}
-		finally {
+		} finally {
 			proxy.dispose();
 		}
 		return errorCode;
 	}
-	
-	protected String getProjectURL(String projectPath, SVNChangeStatus []sts) {
+
+	protected String getProjectURL(String projectPath, SVNChangeStatus[] sts) {
 		SVNUtility.reorder(sts, true);
 		for (SVNChangeStatus st : sts) {
 			if (st.url != null && !st.isFileExternal && !st.isSwitched && !st.isCopied) { // sometime SVN client library fails to return URL for an unknown reason, so, we'll just take it from one of the children resources
@@ -328,47 +353,47 @@ public class SVNTeamProvider extends RepositoryProvider implements IConnectedPro
 		}
 		return null;
 	}
-	
+
 	public IRepositoryLocation peekAtLocation() {
 		try {
-			IProject project = this.getProject();
+			IProject project = getProject();
 			String data = project.getPersistentProperty(SVNTeamProvider.LOCATION_PROPERTY);
 			if (data != null) {
 				return SVNRemoteStorage.instance().newRepositoryLocation(data);
 			}
-		}
-		catch (CoreException ex) {
+		} catch (CoreException ex) {
 			// do nothing
 		}
 		return null;
 	}
-	
+
 	protected int uploadRepositoryLocation() {
-		this.location = this.peekAtLocation();
-		if (this.location == null) {
+		location = peekAtLocation();
+		if (location == null) {
 			return ErrorDescription.CANNOT_READ_LOCATION_DATA;
 		}
-		if (SVNRemoteStorage.instance().getRepositoryLocation(this.location.getId()) == null) {
+		if (SVNRemoteStorage.instance().getRepositoryLocation(location.getId()) == null) {
 			return ErrorDescription.REPOSITORY_LOCATION_IS_DISCARDED;
 		}
 		return ErrorDescription.SUCCESS;
 	}
-	
+
 	public boolean isVerifyTagOnCommit() {
 		try {
-			String strProp = this.getProject().getPersistentProperty(SVNTeamProvider.VERIFY_TAG_ON_COMMIT_PROPERTY);	
+			String strProp = getProject().getPersistentProperty(SVNTeamProvider.VERIFY_TAG_ON_COMMIT_PROPERTY);
 			if (strProp == null) {
 				return SVNTeamProvider.DEFAULT_VERIFY_TAG_ON_COMMIT;
 			}
-			return Boolean.valueOf(strProp).booleanValue();	
+			return Boolean.parseBoolean(strProp);
 		} catch (CoreException e) {
 			//ignore and return default value
 			return SVNTeamProvider.DEFAULT_VERIFY_TAG_ON_COMMIT;
-		}		
+		}
 	}
 
 	public void setVerifyTagOnCommit(boolean isVerifyTagOnCommit) throws CoreException {
-		this.getProject().setPersistentProperty(SVNTeamProvider.VERIFY_TAG_ON_COMMIT_PROPERTY, String.valueOf(isVerifyTagOnCommit));		
+		getProject().setPersistentProperty(SVNTeamProvider.VERIFY_TAG_ON_COMMIT_PROPERTY,
+				String.valueOf(isVerifyTagOnCommit));
 	}
-	
+
 }

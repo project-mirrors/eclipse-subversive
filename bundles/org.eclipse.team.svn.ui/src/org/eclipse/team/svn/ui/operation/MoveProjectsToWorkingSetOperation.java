@@ -35,8 +35,8 @@ import org.eclipse.ui.IWorkingSetManager;
  */
 public class MoveProjectsToWorkingSetOperation extends AbstractWorkingCopyOperation {
 	protected String workingSetName;
-	
-	public MoveProjectsToWorkingSetOperation(IResource []projects, String workingSetName) {
+
+	public MoveProjectsToWorkingSetOperation(IResource[] projects, String workingSetName) {
 		super("Operation_MoveToWorkingSet", SVNUIMessages.class, projects); //$NON-NLS-1$
 		this.workingSetName = workingSetName;
 	}
@@ -45,28 +45,29 @@ public class MoveProjectsToWorkingSetOperation extends AbstractWorkingCopyOperat
 		super("Operation_MoveToWorkingSet", SVNUIMessages.class, provider); //$NON-NLS-1$
 		this.workingSetName = workingSetName;
 	}
-	
+
+	@Override
 	public int getOperationWeight() {
 		return 0;
 	}
 
+	@Override
 	protected void runImpl(IProgressMonitor monitor) throws Exception {
-		IResource []projects = this.operableData();
-		IWorkingSet wSet = null; 
+		IResource[] projects = operableData();
+		IWorkingSet wSet = null;
 		IWorkingSetManager workingSetManager = SVNTeamUIPlugin.instance().getWorkbench().getWorkingSetManager();
-		IWorkingSet []workingSets = workingSetManager.getWorkingSets();
-		for (int i = 0; i < workingSets.length; i++) {
-			if (workingSets[i].getName().equals(this.workingSetName)) {
-				wSet = workingSets[i];
-				List<IAdaptable> existing = new ArrayList<IAdaptable>();
-				existing.addAll(Arrays.asList(wSet.getElements()));
+		IWorkingSet[] workingSets = workingSetManager.getWorkingSets();
+		for (IWorkingSet workingSet : workingSets) {
+			if (workingSet.getName().equals(workingSetName)) {
+				wSet = workingSet;
+				List<IAdaptable> existing = new ArrayList<>(Arrays.asList(wSet.getElements()));
 				existing.addAll(Arrays.asList(projects));
 				wSet.setElements(existing.toArray(new IAdaptable[existing.size()]));
 				break;
 			}
 		}
 		if (wSet == null) {
-			wSet = workingSetManager.createWorkingSet(this.workingSetName, projects);
+			wSet = workingSetManager.createWorkingSet(workingSetName, projects);
 			wSet.setId("org.eclipse.ui.resourceWorkingSetPage"); //$NON-NLS-1$
 			workingSetManager.addWorkingSet(wSet);
 		}

@@ -30,28 +30,29 @@ import org.eclipse.team.svn.ui.operation.RefreshRemoteResourcesOperation;
 public class BreakLockAction extends AbstractRepositoryTeamAction {
 
 	public BreakLockAction() {
-		super();
 	}
-	
+
+	@Override
 	public void runImpl(IAction action) {
-		IRepositoryResource []resources = this.getSelectedRepositoryResources();
-		
+		IRepositoryResource[] resources = getSelectedRepositoryResources();
+
 		BreakLockOperation mainOp = new BreakLockOperation(resources);
 		CompositeOperation op = new CompositeOperation(mainOp.getId(), mainOp.getMessagesClass());
 		op.add(mainOp);
 		op.add(new RefreshRemoteResourcesOperation(resources));
-		
-		this.runScheduled(op);
+
+		runScheduled(op);
 	}
 
+	@Override
 	public boolean isEnabled() {
-		IRepositoryResource []resources = this.getSelectedRepositoryResources();
+		IRepositoryResource[] resources = getSelectedRepositoryResources();
 		if (resources.length == 0) {
 			return false;
 		}
-		for (int i = 0; i < resources.length; i++) {
-			if (!(resources[i] instanceof IRepositoryFile) || 
-				!(resources[i].getInfo() != null && resources[i].getInfo().lock != null)) {
+		for (IRepositoryResource element : resources) {
+			if (!(element instanceof IRepositoryFile)
+					|| !(element.getInfo() != null && element.getInfo().lock != null)) {
 				return false;
 			}
 		}

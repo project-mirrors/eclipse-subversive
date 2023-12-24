@@ -24,14 +24,17 @@ import org.eclipse.team.svn.ui.synchronize.AbstractSynchronizeActionGroup;
  * @author Jiri Walek
  */
 public interface ISynchronizeViewActionContributor {
-    /**
-     * This method returns synchronize view action contributions for update mode
-     * @return collection of AbstractSynchronizeActionGroup
-     */
-	public Collection<AbstractSynchronizeActionGroup> getUpdateContributions();
-    /**
-     * This method returns synchronize view action contributions for merge mode
-     * @return collection of AbstractSynchronizeActionGroup
-     */
-	public Collection<AbstractSynchronizeActionGroup> getMergeContributions();
+	/**
+	 * This method returns synchronize view action contributions for update mode
+	 * 
+	 * @return collection of AbstractSynchronizeActionGroup
+	 */
+	Collection<AbstractSynchronizeActionGroup> getUpdateContributions();
+
+	/**
+	 * This method returns synchronize view action contributions for merge mode
+	 * 
+	 * @return collection of AbstractSynchronizeActionGroup
+	 */
+	Collection<AbstractSynchronizeActionGroup> getMergeContributions();
 }

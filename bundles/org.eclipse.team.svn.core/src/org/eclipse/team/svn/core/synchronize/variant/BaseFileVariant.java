@@ -25,7 +25,6 @@ import org.eclipse.team.svn.core.operation.local.GetLocalFileContentOperation;
 import org.eclipse.team.svn.core.resource.ILocalResource;
 import org.eclipse.team.svn.core.utility.ProgressMonitorUtility;
 
-
 /**
  * Base WC revision file variant
  * 
@@ -36,18 +35,20 @@ public class BaseFileVariant extends ResourceVariant {
 		super(local);
 	}
 
+	@Override
 	protected void fetchContents(IProgressMonitor monitor) throws TeamException {
-		if (!IStateFilter.SF_VERSIONED.accept(this.local)) {
-			this.setContents(new ByteArrayInputStream(new byte[0]), monitor);
+		if (!IStateFilter.SF_VERSIONED.accept(local)) {
+			setContents(new ByteArrayInputStream(new byte[0]), monitor);
 			return;
 		}
-		GetLocalFileContentOperation op = new GetLocalFileContentOperation(this.local.getResource(), Kind.BASE);
+		GetLocalFileContentOperation op = new GetLocalFileContentOperation(local.getResource(), Kind.BASE);
 		ProgressMonitorUtility.doTaskExternal(op, monitor);
 		if (op.getExecutionState() == IActionOperation.OK) {
-			this.setContents(op.getContent(), monitor);
+			setContents(op.getContent(), monitor);
 		}
 	}
 
+	@Override
 	public boolean isContainer() {
 		return false;
 	}

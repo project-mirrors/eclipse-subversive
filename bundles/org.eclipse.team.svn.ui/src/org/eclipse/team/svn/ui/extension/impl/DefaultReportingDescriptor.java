@@ -24,34 +24,42 @@ import org.eclipse.team.svn.ui.extension.factory.IReportingDescriptor;
  */
 
 public class DefaultReportingDescriptor implements IReportingDescriptor {
+	@Override
 	public String getEmailTo() {
 		return "subversive-bugs@polarion.org"; //$NON-NLS-1$
 	}
-	
+
+	@Override
 	public String getEmailFrom() {
 		return "subversive-bugs@polarion.org"; //$NON-NLS-1$
 	}
 
+	@Override
 	public String getHost() {
 		return "mail.polarion.cz"; //$NON-NLS-1$
 	}
 
+	@Override
 	public String getPort() {
 		return "25"; //$NON-NLS-1$
-	}	
+	}
 
+	@Override
 	public String getProductName() {
 		return "Subversive"; //$NON-NLS-1$
 	}
 
+	@Override
 	public String getProductVersion() {
 		return SVNTeamUIPlugin.instance().getVersionString();
 	}
 
+	@Override
 	public String getTrackerUrl() {
 		return "https://bugs.eclipse.org/bugs"; //$NON-NLS-1$
 	}
-	
+
+	@Override
 	public boolean isTrackerSupportsHTML() {
 		return false;
 	}

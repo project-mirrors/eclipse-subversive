@@ -26,14 +26,15 @@ import org.eclipse.team.svn.core.operation.AbstractActionOperation;
  */
 public class FiniExtractLogOperation extends AbstractActionOperation {
 	protected InitExtractLogOperation logger;
-	
+
 	public FiniExtractLogOperation(InitExtractLogOperation logger) {
 		super("Operation_FiniExtractLog", SVNMessages.class); //$NON-NLS-1$
 		this.logger = logger;
 	}
 
+	@Override
 	protected void runImpl(IProgressMonitor monitor) throws Exception {
-		this.logger.flushLog();
+		logger.flushLog();
 	}
-	
+
 }

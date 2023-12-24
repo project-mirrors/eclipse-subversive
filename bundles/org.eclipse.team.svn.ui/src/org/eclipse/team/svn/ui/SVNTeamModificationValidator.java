@@ -31,39 +31,39 @@ import org.eclipse.team.svn.ui.utility.LockProposeUtility;
 import org.eclipse.team.svn.ui.utility.UIMonitorUtility;
 
 /**
- * SVN file modification validator 
+ * SVN file modification validator
  * 
  * @author Sergiy Logvin
  */
 public class SVNTeamModificationValidator extends FileModificationValidator {
+	@Override
 	public IStatus validateEdit(IFile[] files, final FileModificationValidationContext context) {
 		if (FileUtility.isConnected(files[0])) {
-			final IResource[] needsLockResources = this.getNeedsLockResources(files);
-			if (needsLockResources.length > 0)
-			{
-				final IStatus []retVal = new IStatus[1];
-				final Shell shell = context.getShell() == null ? UIMonitorUtility.getShell() : (Shell)context.getShell();
-				shell.getDisplay().syncExec(new Runnable() {
-					public void run() {
-						retVal[0] = LockProposeUtility.proposeLock(needsLockResources, shell, true);
-					}
-				});
+			final IResource[] needsLockResources = getNeedsLockResources(files);
+			if (needsLockResources.length > 0) {
+				final IStatus[] retVal = new IStatus[1];
+				final Shell shell = context.getShell() == null
+						? UIMonitorUtility.getShell()
+						: (Shell) context.getShell();
+				shell.getDisplay().syncExec(() -> retVal[0] = LockProposeUtility.proposeLock(needsLockResources, shell, true));
 				return retVal[0];
 			}
 		}
 		return Status.OK_STATUS;
 	}
-	
+
+	@Override
 	public IStatus validateSave(IFile file) {
 		return Status.OK_STATUS;
 	}
-	
-	protected IResource[] getNeedsLockResources(IResource []files) {
-		List<IResource> returnResources = new ArrayList<IResource>();
-		IResource[] needsLockResources = FileUtility.getResourcesRecursive(files, IStateFilter.SF_NEEDS_LOCK, IResource.DEPTH_ZERO);
-		for (int i = 0; i < needsLockResources.length; i++) {
-			if (!SVNRemoteStorage.instance().asLocalResource(needsLockResources[i]).isLocked()) {
-				returnResources.add(needsLockResources[i]);
+
+	protected IResource[] getNeedsLockResources(IResource[] files) {
+		List<IResource> returnResources = new ArrayList<>();
+		IResource[] needsLockResources = FileUtility.getResourcesRecursive(files, IStateFilter.SF_NEEDS_LOCK,
+				IResource.DEPTH_ZERO);
+		for (IResource element : needsLockResources) {
+			if (!SVNRemoteStorage.instance().asLocalResource(element).isLocked()) {
+				returnResources.add(element);
 			}
 		}
 		return returnResources.toArray(new IResource[returnResources.size()]);

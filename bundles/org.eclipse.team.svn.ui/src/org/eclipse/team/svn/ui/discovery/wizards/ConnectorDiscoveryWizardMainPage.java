@@ -62,12 +62,8 @@ import org.eclipse.swt.accessibility.AccessibleEvent;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.ControlAdapter;
 import org.eclipse.swt.events.ControlEvent;
-import org.eclipse.swt.events.DisposeEvent;
-import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.FocusAdapter;
 import org.eclipse.swt.events.FocusEvent;
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseListener;
@@ -94,13 +90,13 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
+import org.eclipse.team.svn.core.BaseMessages;
 import org.eclipse.team.svn.core.SVNTeamPlugin;
 import org.eclipse.team.svn.core.discovery.model.AbstractDiscoverySource;
 import org.eclipse.team.svn.core.discovery.model.BundleDiscoveryStrategy;
@@ -129,25 +125,29 @@ import org.eclipse.ui.progress.WorkbenchJob;
  * @author David Green
  * @author Igor Burilo
  */
-public class ConnectorDiscoveryWizardMainPage extends WizardPage {	
+public class ConnectorDiscoveryWizardMainPage extends WizardPage {
 
 	private static String DISCOVERY_PROPERTIES_FILE = "discovery.properties";
+
 	private static String URL_DISCOVERY_PROPERTY = "url";
-		
+
 	private static final String COLOR_WHITE = "white"; //$NON-NLS-1$
+
 	private static final String COLOR_DARK_GRAY = "DarkGray"; //$NON-NLS-1$
+
 	private static final String COLOR_CATEGORY_GRADIENT_START = "category.gradient.start"; //$NON-NLS-1$
-	private static final String COLOR_CATEGORY_GRADIENT_END = "category.gradient.end"; //$NON-NLS-1$ 
-	
+
+	private static final String COLOR_CATEGORY_GRADIENT_END = "category.gradient.end"; //$NON-NLS-1$
+
 	private static Boolean useNativeSearchField;
 
-	private final List<ConnectorDescriptor> installableConnectors = new ArrayList<ConnectorDescriptor>();
+	private final List<ConnectorDescriptor> installableConnectors = new ArrayList<>();
 
 	private ConnectorDiscovery discovery;
 
 	private Composite body;
 
-	private final List<Resource> disposables = new ArrayList<Resource>();
+	private final List<Resource> disposables = new ArrayList<>();
 
 	private Font h2Font;
 
@@ -187,24 +187,22 @@ public class ConnectorDiscoveryWizardMainPage extends WizardPage {
 		setPageComplete(false);
 	}
 
+	@Override
 	public void createControl(Composite parent) {
 		createRefreshJob();
 
 		Composite container = new Composite(parent, SWT.NULL);
-		container.addDisposeListener(new DisposeListener() {
-			public void widgetDisposed(DisposeEvent e) {
-				refreshJob.cancel();
-			}
-		});
+		container.addDisposeListener(e -> refreshJob.cancel());
 		container.setLayout(new GridLayout(1, false));
-		//		
+		//
 		{ // header
 			Composite header = new Composite(container, SWT.NULL);
 			GridLayoutFactory.fillDefaults().applyTo(header);
 			GridDataFactory.fillDefaults().grab(true, false).applyTo(header);
 
 //			 TODO: refresh button?
-			if (getWizard().isShowConnectorDescriptorKindFilter() || getWizard().isShowConnectorDescriptorTextFilter()) {
+			if (getWizard().isShowConnectorDescriptorKindFilter()
+					|| getWizard().isShowConnectorDescriptorTextFilter()) {
 				Composite filterContainer = new Composite(header, SWT.NULL);
 				GridDataFactory.fillDefaults().grab(true, false).applyTo(filterContainer);
 
@@ -226,23 +224,20 @@ public class ConnectorDiscoveryWizardMainPage extends WizardPage {
 						textFilterContainer = new Composite(filterContainer, SWT.NULL);
 					} else {
 						textFilterContainer = new Composite(filterContainer, SWT.BORDER);
-						textFilterContainer.setBackground(header.getDisplay().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
+						textFilterContainer
+								.setBackground(header.getDisplay().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
 					}
 					GridDataFactory.fillDefaults().grab(true, false).applyTo(textFilterContainer);
 					GridLayoutFactory.fillDefaults().numColumns(2).applyTo(textFilterContainer);
 
 					if (nativeSearch) {
-						filterText = new Text(textFilterContainer, SWT.SINGLE | SWT.BORDER | SWT.SEARCH
-								| SWT.ICON_CANCEL);
+						filterText = new Text(textFilterContainer,
+								SWT.SINGLE | SWT.BORDER | SWT.SEARCH | SWT.ICON_CANCEL);
 					} else {
 						filterText = new Text(textFilterContainer, SWT.SINGLE);
 					}
 
-					filterText.addModifyListener(new ModifyListener() {
-						public void modifyText(ModifyEvent e) {
-							filterTextChanged();
-						}
-					});
+					filterText.addModifyListener(e -> filterTextChanged());
 					if (nativeSearch) {
 						filterText.addSelectionListener(new SelectionAdapter() {
 							@Override
@@ -267,12 +262,14 @@ public class ConnectorDiscoveryWizardMainPage extends WizardPage {
 						checkbox.setSelection(getWizard().isVisible(kind));
 						checkbox.setText(getFilterLabel(kind));
 						checkbox.addSelectionListener(new SelectionListener() {
+							@Override
 							public void widgetSelected(SelectionEvent e) {
 								boolean selection = checkbox.getSelection();
 								getWizard().setVisibility(kind, selection);
 								connectorDescriptorKindVisibilityUpdated();
 							}
 
+							@Override
 							public void widgetDefaultSelected(SelectionEvent e) {
 								widgetSelected(e);
 							}
@@ -289,10 +286,11 @@ public class ConnectorDiscoveryWizardMainPage extends WizardPage {
 		}
 		Dialog.applyDialogFont(container);
 		setControl(container);
-		
 
 		//Setting context help
-        PlatformUI.getWorkbench().getHelpSystem().setHelp(parent, "org.eclipse.team.svn.help.connectorDiscoveryWizContext"); //$NON-NLS-1$
+		PlatformUI.getWorkbench()
+				.getHelpSystem()
+				.setHelp(parent, "org.eclipse.team.svn.help.connectorDiscoveryWizContext"); //$NON-NLS-1$
 	}
 
 	private static boolean useNativeSearchField(Composite composite) {
@@ -301,7 +299,7 @@ public class ConnectorDiscoveryWizardMainPage extends WizardPage {
 			Text testText = null;
 			try {
 				testText = new Text(composite, SWT.SEARCH | SWT.ICON_CANCEL);
-				useNativeSearchField = new Boolean((testText.getStyle() & SWT.ICON_CANCEL) != 0);
+				useNativeSearchField = (testText.getStyle() & SWT.ICON_CANCEL) != 0;
 			} finally {
 				if (testText != null) {
 					testText.dispose();
@@ -347,8 +345,12 @@ public class ConnectorDiscoveryWizardMainPage extends WizardPage {
 	}
 
 	private Label createClearFilterTextControl(Composite filterContainer, final Text filterText) {
-		final Image inactiveImage = SVNTeamUIPlugin.instance().getImageDescriptor("icons/wizards/find-clear-disabled.gif").createImage();
-		final Image activeImage = SVNTeamUIPlugin.instance().getImageDescriptor("icons/wizards/find-clear.gif").createImage();
+		final Image inactiveImage = SVNTeamUIPlugin.instance()
+				.getImageDescriptor("icons/wizards/find-clear-disabled.gif")
+				.createImage();
+		final Image activeImage = SVNTeamUIPlugin.instance()
+				.getImageDescriptor("icons/wizards/find-clear.gif")
+				.createImage();
 		final Image pressedImage = new Image(filterContainer.getDisplay(), activeImage, SWT.IMAGE_GRAY);
 
 		final Label clearButton = new Label(filterContainer, SWT.NONE);
@@ -365,6 +367,7 @@ public class ConnectorDiscoveryWizardMainPage extends WizardPage {
 				fMoveListener = new MouseMoveListener() {
 					private boolean fMouseInButton = true;
 
+					@Override
 					public void mouseMove(MouseEvent e) {
 						boolean mouseInButton = isMouseInButton(e);
 						if (mouseInButton != fMouseInButton) {
@@ -396,23 +399,24 @@ public class ConnectorDiscoveryWizardMainPage extends WizardPage {
 			}
 		});
 		clearButton.addMouseTrackListener(new MouseTrackListener() {
+			@Override
 			public void mouseEnter(MouseEvent e) {
 				clearButton.setImage(activeImage);
 			}
 
+			@Override
 			public void mouseExit(MouseEvent e) {
 				clearButton.setImage(inactiveImage);
 			}
 
+			@Override
 			public void mouseHover(MouseEvent e) {
 			}
 		});
-		clearButton.addDisposeListener(new DisposeListener() {
-			public void widgetDisposed(DisposeEvent e) {
-				inactiveImage.dispose();
-				activeImage.dispose();
-				pressedImage.dispose();
-			}
+		clearButton.addDisposeListener(e -> {
+			inactiveImage.dispose();
+			activeImage.dispose();
+			pressedImage.dispose();
 		});
 		clearButton.getAccessible().addAccessibleListener(new AccessibleAdapter() {
 			@Override
@@ -446,14 +450,14 @@ public class ConnectorDiscoveryWizardMainPage extends WizardPage {
 
 	private String getFilterLabel(ConnectorDescriptorKind kind) {
 		switch (kind) {
-		case DOCUMENT:
-			return SVNUIMessages.ConnectorDiscoveryWizardMainPage_filter_documents;
-		case TASK:
-			return SVNUIMessages.ConnectorDiscoveryWizardMainPage_filter_tasks;
-		case VCS:
-			return SVNUIMessages.ConnectorDiscoveryWizardMainPage_filter_vcs;
-		default:
-			throw new IllegalStateException(kind.name());
+			case DOCUMENT:
+				return SVNUIMessages.ConnectorDiscoveryWizardMainPage_filter_documents;
+			case TASK:
+				return SVNUIMessages.ConnectorDiscoveryWizardMainPage_filter_tasks;
+			case VCS:
+				return SVNUIMessages.ConnectorDiscoveryWizardMainPage_filter_vcs;
+			default:
+				throw new IllegalStateException(kind.name());
 		}
 	}
 
@@ -570,7 +574,7 @@ public class ConnectorDiscoveryWizardMainPage extends WizardPage {
 			}
 			colorDisabled = colorRegistry.get(COLOR_DARK_GRAY);
 		}
-		
+
 		if (colorCategoryGradientStart == null) {
 			ColorRegistry colorRegistry = JFaceResources.getColorRegistry();
 			if (!colorRegistry.hasValueFor(COLOR_CATEGORY_GRADIENT_START)) {
@@ -578,14 +582,14 @@ public class ConnectorDiscoveryWizardMainPage extends WizardPage {
 			}
 			colorCategoryGradientStart = colorRegistry.get(COLOR_CATEGORY_GRADIENT_START);
 		}
-		
+
 		if (colorCategoryGradientEnd == null) {
 			ColorRegistry colorRegistry = JFaceResources.getColorRegistry();
 			if (!colorRegistry.hasValueFor(COLOR_CATEGORY_GRADIENT_END)) {
 				colorRegistry.put(COLOR_CATEGORY_GRADIENT_END, new RGB(220, 220, 220));
 			}
 			colorCategoryGradientEnd = colorRegistry.get(COLOR_CATEGORY_GRADIENT_END);
-		}		
+		}
 	}
 
 	private void initializeFonts() {
@@ -694,8 +698,9 @@ public class ConnectorDiscoveryWizardMainPage extends WizardPage {
 			providerLabel = new Label(connectorContainer, SWT.NULL);
 			configureLook(providerLabel, background);
 			GridDataFactory.fillDefaults().align(SWT.END, SWT.CENTER).applyTo(providerLabel);
-			providerLabel.setText(SVNUIMessages.format(SVNUIMessages.ConnectorDiscoveryWizardMainPage_provider_and_license,
-					new Object[]{connector.getProvider(), connector.getLicense()}));
+			providerLabel
+					.setText(BaseMessages.format(SVNUIMessages.ConnectorDiscoveryWizardMainPage_provider_and_license,
+							new Object[] { connector.getProvider(), connector.getLicense() }));
 
 			if (hasTooltip(connector)) {
 				ToolBar toolBar = new ToolBar(connectorContainer, SWT.FLAT);
@@ -726,10 +731,12 @@ public class ConnectorDiscoveryWizardMainPage extends WizardPage {
 			providerLabel.setForeground(colorDisabled);
 
 			checkbox.addSelectionListener(new SelectionListener() {
+				@Override
 				public void widgetDefaultSelected(SelectionEvent e) {
 					widgetSelected(e);
 				}
 
+				@Override
 				public void widgetSelected(SelectionEvent e) {
 					boolean selected = checkbox.getSelection();
 					maybeModifySelection(selected);
@@ -759,13 +766,14 @@ public class ConnectorDiscoveryWizardMainPage extends WizardPage {
 				}
 				if (!connector.getAvailable()) {
 					MessageDialog.openWarning(getShell(),
-							SVNUIMessages.ConnectorDiscoveryWizardMainPage_warningTitleConnectorUnavailable, SVNUIMessages.format(
+							SVNUIMessages.ConnectorDiscoveryWizardMainPage_warningTitleConnectorUnavailable,
+							BaseMessages.format(
 									SVNUIMessages.ConnectorDiscoveryWizardMainPage_warningMessageConnectorUnavailable,
 									connector.getName()));
 					return false;
 				}
 			}
-			ConnectorDiscoveryWizardMainPage.this.modifySelection(connector, selected);
+			modifySelection(connector, selected);
 			return true;
 		}
 
@@ -789,7 +797,8 @@ public class ConnectorDiscoveryWizardMainPage extends WizardPage {
 				boolean unavailable = !enabled && connector.getAvailable() != null;
 				if (unavailable) {
 					if (warningIconImage == null) {
-						warningIconImage = new DecorationOverlayIcon(iconImage, SVNTeamUIPlugin.instance().getImageDescriptor("icons/discovery/message_warning.gif"),
+						warningIconImage = new DecorationOverlayIcon(iconImage,
+								SVNTeamUIPlugin.instance().getImageDescriptor("icons/discovery/message_warning.gif"),
 								IDecoration.TOP_LEFT).createImage();
 						disposables.add(warningIconImage);
 					}
@@ -800,10 +809,12 @@ public class ConnectorDiscoveryWizardMainPage extends WizardPage {
 			}
 		}
 
+		@Override
 		public void propertyChange(PropertyChangeEvent evt) {
 			display.asyncExec(this);
 		}
 
+		@Override
 		public void run() {
 			if (!connectorContainer.isDisposed()) {
 				updateAvailability();
@@ -831,11 +842,9 @@ public class ConnectorDiscoveryWizardMainPage extends WizardPage {
 
 				link.setFont(container.getFont());
 				link.setText(SVNUIMessages.ConnectorDiscoveryWizardMainPage_noMatchingItems_withFilterText);
-				link.addListener(SWT.Selection, new Listener() {
-					public void handleEvent(Event event) {
-						clearFilterText();
-						filterText.setFocus();
-					}
+				link.addListener(SWT.Selection, event -> {
+					clearFilterText();
+					filterText.setFocus();
 				});
 				helpTextControl = link;
 			} else {
@@ -853,7 +862,7 @@ public class ConnectorDiscoveryWizardMainPage extends WizardPage {
 		} else {
 			GridLayoutFactory.fillDefaults().numColumns(2).spacing(0, 0).applyTo(container);
 
-			List<DiscoveryCategory> categories = new ArrayList<DiscoveryCategory>(discovery.getCategories());
+			List<DiscoveryCategory> categories = new ArrayList<>(discovery.getCategories());
 			Collections.sort(categories, new DiscoveryCategoryComparator());
 
 			Composite categoryChildrenContainer = null;
@@ -866,14 +875,19 @@ public class ConnectorDiscoveryWizardMainPage extends WizardPage {
 					final GradientCanvas categoryHeaderContainer = new GradientCanvas(container, SWT.NONE);
 					categoryHeaderContainer.setSeparatorVisible(true);
 					categoryHeaderContainer.setSeparatorAlignment(SWT.TOP);
-					categoryHeaderContainer.setBackgroundGradient(new Color[] { colorCategoryGradientStart,
-							colorCategoryGradientEnd }, new int[] { 100 }, true);
+					categoryHeaderContainer.setBackgroundGradient(
+							new Color[] { colorCategoryGradientStart, colorCategoryGradientEnd }, new int[] { 100 },
+							true);
 					categoryHeaderContainer.putColor(IFormColors.H_BOTTOM_KEYLINE1, colorCategoryGradientStart);
 					categoryHeaderContainer.putColor(IFormColors.H_BOTTOM_KEYLINE2, colorCategoryGradientEnd);
 
 					GridDataFactory.fillDefaults().span(2, 1).applyTo(categoryHeaderContainer);
-					GridLayoutFactory.fillDefaults().numColumns(3).margins(5, 5).equalWidth(false).applyTo(
-							categoryHeaderContainer);
+					GridLayoutFactory.fillDefaults()
+							.numColumns(3)
+							.margins(5, 5)
+							.equalWidth(false)
+							.applyTo(
+									categoryHeaderContainer);
 
 					Label iconLabel = new Label(categoryHeaderContainer, SWT.NULL);
 					if (category.getIcon() != null) {
@@ -904,8 +918,12 @@ public class ConnectorDiscoveryWizardMainPage extends WizardPage {
 						new Label(categoryHeaderContainer, SWT.NULL).setText(" "); //$NON-NLS-1$
 					}
 					Label description = new Label(categoryHeaderContainer, SWT.WRAP);
-					GridDataFactory.fillDefaults().grab(true, false).span(2, 1).hint(100, SWT.DEFAULT).applyTo(
-							description);
+					GridDataFactory.fillDefaults()
+							.grab(true, false)
+							.span(2, 1)
+							.hint(100, SWT.DEFAULT)
+							.applyTo(
+									description);
 					description.setBackground(null);
 					description.setText(category.getDescription());
 				}
@@ -916,7 +934,7 @@ public class ConnectorDiscoveryWizardMainPage extends WizardPage {
 				GridLayoutFactory.fillDefaults().spacing(0, 0).applyTo(categoryChildrenContainer);
 
 				int numChildren = 0;
-				List<DiscoveryConnector> connectors = new ArrayList<DiscoveryConnector>(category.getConnectors());
+				List<DiscoveryConnector> connectors = new ArrayList<>(category.getConnectors());
 				Collections.sort(connectors, new DiscoveryConnectorComparator(category));
 				for (final DiscoveryConnector connector : connectors) {
 					if (isFiltered(connector)) {
@@ -953,16 +971,14 @@ public class ConnectorDiscoveryWizardMainPage extends WizardPage {
 	private void hookTooltip(final Control tooltipControl, final ToolItem tipActivator, final Control exitControl,
 			final Control titleControl, AbstractDiscoverySource source, Overview overview) {
 		final OverviewToolTip toolTip = new OverviewToolTip(tooltipControl, source, overview);
-		Listener listener = new Listener() {
-			public void handleEvent(Event event) {
-				switch (event.type) {
+		Listener listener = event -> {
+			switch (event.type) {
 				case SWT.Dispose:
 				case SWT.MouseWheel:
 					toolTip.hide();
 					break;
-				}
-
 			}
+
 		};
 		tipActivator.addListener(SWT.Dispose, listener);
 		tipActivator.addListener(SWT.MouseWheel, listener);
@@ -979,9 +995,8 @@ public class ConnectorDiscoveryWizardMainPage extends WizardPage {
 				toolTip.show(new Point(relativeX, relativeY));
 			}
 		});
-		Listener exitListener = new Listener() {
-			public void handleEvent(Event event) {
-				switch (event.type) {
+		Listener exitListener = event -> {
+			switch (event.type) {
 				case SWT.MouseWheel:
 					toolTip.hide();
 					break;
@@ -999,7 +1014,6 @@ public class ConnectorDiscoveryWizardMainPage extends WizardPage {
 					}
 					toolTip.hide();
 					break;
-				}
 			}
 		};
 		hookRecursively(exitControl, exitListener);
@@ -1066,10 +1080,7 @@ public class ConnectorDiscoveryWizardMainPage extends WizardPage {
 				break;
 			}
 		}
-		if (kindFiltered) {
-			return true;
-		}
-		if (installedFeatures != null && installedFeatures.contains(descriptor.getInstallableUnits())) {
+		if (kindFiltered || (installedFeatures != null && installedFeatures.contains(descriptor.getInstallableUnits()))) {
 			// always filter installed features per bug 275777
 			return true;
 		}
@@ -1086,24 +1097,25 @@ public class ConnectorDiscoveryWizardMainPage extends WizardPage {
 		return text != null && filterPattern.matcher(text).find();
 	}
 
-	private Image computeIconImage(AbstractDiscoverySource discoverySource, Icon icon, int dimension, boolean fallback) {
+	private Image computeIconImage(AbstractDiscoverySource discoverySource, Icon icon, int dimension,
+			boolean fallback) {
 		String imagePath;
 		switch (dimension) {
-		case 64:
-			imagePath = icon.getImage64();
-			if (imagePath != null || !fallback) {
+			case 64:
+				imagePath = icon.getImage64();
+				if (imagePath != null || !fallback) {
+					break;
+				}
+			case 48:
+				imagePath = icon.getImage48();
+				if (imagePath != null || !fallback) {
+					break;
+				}
+			case 32:
+				imagePath = icon.getImage32();
 				break;
-			}
-		case 48:
-			imagePath = icon.getImage48();
-			if (imagePath != null || !fallback) {
-				break;
-			}
-		case 32:
-			imagePath = icon.getImage32();
-			break;
-		default:
-			throw new IllegalArgumentException();
+			default:
+				throw new IllegalArgumentException();
 		}
 		if (imagePath != null && imagePath.length() > 0) {
 			URL resource = discoverySource.getResource(imagePath);
@@ -1125,10 +1137,11 @@ public class ConnectorDiscoveryWizardMainPage extends WizardPage {
 			boolean wasCancelled = false;
 			try {
 				getContainer().run(true, true, new IRunnableWithProgress() {
+					@Override
 					public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 
-						if (ConnectorDiscoveryWizardMainPage.this.installedFeatures == null) {
-							Set<String> installedFeatures = new HashSet<String>();
+						if (installedFeatures == null) {
+							Set<String> installedFeatures = new HashSet<>();
 							IBundleGroupProvider[] bundleGroupProviders = Platform.getBundleGroupProviders();
 							for (IBundleGroupProvider provider : bundleGroupProviders) {
 								if (monitor.isCanceled()) {
@@ -1144,21 +1157,23 @@ public class ConnectorDiscoveryWizardMainPage extends WizardPage {
 
 						ConnectorDiscovery connectorDiscovery = new ConnectorDiscovery();
 						connectorDiscovery.getDiscoveryStrategies().add(new BundleDiscoveryStrategy());
-											
+
 						//retrieve discovery url from properties file and call remote discovery strategy
-						URL discoveryFileUrl = FileLocator.find(SVNTeamUIPlugin.instance().getBundle(), new Path(ConnectorDiscoveryWizardMainPage.DISCOVERY_PROPERTIES_FILE), null);
+						URL discoveryFileUrl = FileLocator.find(SVNTeamUIPlugin.instance().getBundle(),
+								new Path(ConnectorDiscoveryWizardMainPage.DISCOVERY_PROPERTIES_FILE), null);
 						if (discoveryFileUrl != null) {
 							InputStream in = null;
 							try {
 								Properties props = new Properties();
 								in = discoveryFileUrl.openStream();
-								props.load(in);							
-								String discoveryUrl = props.getProperty(ConnectorDiscoveryWizardMainPage.URL_DISCOVERY_PROPERTY);								
+								props.load(in);
+								String discoveryUrl = props
+										.getProperty(ConnectorDiscoveryWizardMainPage.URL_DISCOVERY_PROPERTY);
 								RemoteBundleDiscoveryStrategy remoteDiscoveryStrategy = new RemoteBundleDiscoveryStrategy();
 								remoteDiscoveryStrategy.setDiscoveryUrl(discoveryUrl);
-								connectorDiscovery.getDiscoveryStrategies().add(remoteDiscoveryStrategy);								
+								connectorDiscovery.getDiscoveryStrategies().add(remoteDiscoveryStrategy);
 							} catch (IOException ie) {
-								LoggedOperation.reportError(this.getClass().getName(), ie);		
+								LoggedOperation.reportError(this.getClass().getName(), ie);
 							} finally {
 								if (in != null) {
 									try {
@@ -1167,9 +1182,9 @@ public class ConnectorDiscoveryWizardMainPage extends WizardPage {
 										//ignore
 									}
 								}
-							}							
-						}						
-						
+							}
+						}
+
 						connectorDiscovery.setEnvironment(environment);
 						connectorDiscovery.setVerifyUpdateSiteAvailability(false);
 						try {
@@ -1177,7 +1192,7 @@ public class ConnectorDiscoveryWizardMainPage extends WizardPage {
 						} catch (CoreException e) {
 							throw new InvocationTargetException(e);
 						} finally {
-							ConnectorDiscoveryWizardMainPage.this.discovery = connectorDiscovery;
+							discovery = connectorDiscovery;
 						}
 						if (monitor.isCanceled()) {
 							throw new InterruptedException();
@@ -1186,8 +1201,8 @@ public class ConnectorDiscoveryWizardMainPage extends WizardPage {
 				});
 			} catch (InvocationTargetException e) {
 				IStatus status = computeStatus(e, SVNUIMessages.ConnectorDiscoveryWizardMainPage_unexpectedException);
-				DiscoveryUiUtil.logAndDisplayStatus(getShell(), SVNUIMessages.ConnectorDiscoveryWizardMainPage_errorTitle,
-						status);
+				DiscoveryUiUtil.logAndDisplayStatus(getShell(),
+						SVNUIMessages.ConnectorDiscoveryWizardMainPage_errorTitle, status);
 			} catch (InterruptedException e) {
 				// cancelled by user so nothing to do here.
 				wasCancelled = true;
@@ -1196,14 +1211,10 @@ public class ConnectorDiscoveryWizardMainPage extends WizardPage {
 				discoveryUpdated(wasCancelled);
 				if (!discovery.getConnectors().isEmpty()) {
 					try {
-						getContainer().run(true, true, new IRunnableWithProgress() {
-							public void run(IProgressMonitor monitor) throws InvocationTargetException,
-									InterruptedException {
-								discovery.verifySiteAvailability(monitor);
-							}
-						});
+						getContainer().run(true, true, monitor -> discovery.verifySiteAvailability(monitor));
 					} catch (InvocationTargetException e) {
-						IStatus status = computeStatus(e, SVNUIMessages.ConnectorDiscoveryWizardMainPage_unexpectedException);
+						IStatus status = computeStatus(e,
+								SVNUIMessages.ConnectorDiscoveryWizardMainPage_unexpectedException);
 						DiscoveryUiUtil.logAndDisplayStatus(getShell(),
 								SVNUIMessages.ConnectorDiscoveryWizardMainPage_errorTitle, status);
 					} catch (InterruptedException e) {
@@ -1211,7 +1222,7 @@ public class ConnectorDiscoveryWizardMainPage extends WizardPage {
 						wasCancelled = true;
 					}
 				}
-				// createBodyContents() shouldn't be necessary but for some reason checkboxes don't 
+				// createBodyContents() shouldn't be necessary but for some reason checkboxes don't
 				// regain their enabled state
 				createBodyContents();
 			}
@@ -1229,8 +1240,8 @@ public class ConnectorDiscoveryWizardMainPage extends WizardPage {
 			statusCause = new Status(IStatus.ERROR, SVNTeamPlugin.NATURE_ID, cause.getMessage(), cause);
 		}
 		if (statusCause.getMessage() != null) {
-			message = SVNUIMessages.format(SVNUIMessages.ConnectorDiscoveryWizardMainPage_message_with_cause, 
-					new Object[]{message, statusCause.getMessage()});
+			message = BaseMessages.format(SVNUIMessages.ConnectorDiscoveryWizardMainPage_message_with_cause,
+					new Object[] { message, statusCause.getMessage() });
 		}
 		IStatus status = new MultiStatus(SVNTeamPlugin.NATURE_ID, 0, new IStatus[] { statusCause }, message, cause);
 		return status;
@@ -1240,11 +1251,7 @@ public class ConnectorDiscoveryWizardMainPage extends WizardPage {
 	public void setVisible(boolean visible) {
 		super.setVisible(visible);
 		if (visible && discovery == null) {
-			Display.getCurrent().asyncExec(new Runnable() {
-				public void run() {
-					maybeUpdateDiscovery();
-				}
-			});
+			Display.getCurrent().asyncExec(this::maybeUpdateDiscovery);
 		}
 	}
 
@@ -1258,8 +1265,7 @@ public class ConnectorDiscoveryWizardMainPage extends WizardPage {
 			if (categoryWithConnectorCount == 0) {
 				// nothing was discovered: notify the user
 				MessageDialog.openWarning(
-						getShell(),
-						SVNUIMessages.ConnectorDiscoveryWizardMainPage_noConnectorsFound,
+						getShell(), SVNUIMessages.ConnectorDiscoveryWizardMainPage_noConnectorsFound,
 						SVNUIMessages.ConnectorDiscoveryWizardMainPage_noConnectorsFound_description);
 			}
 		}
@@ -1281,6 +1287,7 @@ public class ConnectorDiscoveryWizardMainPage extends WizardPage {
 	}
 
 	public class ConnectorBorderPaintListener implements PaintListener {
+		@Override
 		public void paintControl(PaintEvent e) {
 			Composite composite = (Composite) e.widget;
 			Rectangle bounds = composite.getBounds();

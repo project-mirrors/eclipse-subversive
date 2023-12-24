@@ -24,19 +24,19 @@ import org.eclipse.team.svn.core.resource.IRepositoryLocation;
  */
 public interface ISelectProjectNamePageData {
 
-	void setProjectsAndLocation(IProject []projects, IRepositoryLocation location, boolean multiProject);
-	
+	void setProjectsAndLocation(IProject[] projects, IRepositoryLocation location, boolean multiProject);
+
 	ShareProjectOperation.IFolderNameMapper getSelectedNames();
-	
+
 	String getRootProjectName();
-	
+
 	int getLayoutType();
-	
+
 	boolean isManagementFoldersEnabled();
-	
+
 	void validateContent();
-	
+
 	IRepositoryLocation getRepositoryLocation();
-	
+
 	void save();
 }

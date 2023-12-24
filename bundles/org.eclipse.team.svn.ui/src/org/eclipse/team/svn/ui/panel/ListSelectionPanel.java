@@ -23,9 +23,7 @@ import java.util.List;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.IBaseLabelProvider;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TableLayout;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -47,45 +45,51 @@ import org.eclipse.team.svn.ui.dialog.DefaultDialog;
  */
 public class ListSelectionPanel extends AbstractDialogPanel {
 	protected Object inputElement;
+
 	protected IBaseLabelProvider labelProvider;
+
 	protected IStructuredContentProvider contentProvider;
+
 	protected List initialSelections;
+
 	protected List initialGrayed;
-	protected Object []resultSelections;
+
+	protected Object[] resultSelections;
+
 	protected boolean multipleColumns;
-	
+
 	protected CheckboxTableViewer listViewer;
-	
-	public ListSelectionPanel(Object input, IStructuredContentProvider contentProvider, IBaseLabelProvider labelProvider, String description, String defaultMessage) {
-		this(input, contentProvider, labelProvider, description, defaultMessage, SVNUIMessages.ListSelectionPanel_Title, false);
+
+	public ListSelectionPanel(Object input, IStructuredContentProvider contentProvider,
+			IBaseLabelProvider labelProvider, String description, String defaultMessage) {
+		this(input, contentProvider, labelProvider, description, defaultMessage, SVNUIMessages.ListSelectionPanel_Title,
+				false);
 	}
-	
-	public ListSelectionPanel(Object input, IStructuredContentProvider contentProvider, IBaseLabelProvider labelProvider, String description, String defaultMessage, String title, boolean multipleColumns) {
-		super();
-		this.initialSelections = Collections.EMPTY_LIST;
-		this.initialGrayed = Collections.EMPTY_LIST;
-		this.dialogTitle = title;
-		this.inputElement = input;
+
+	public ListSelectionPanel(Object input, IStructuredContentProvider contentProvider,
+			IBaseLabelProvider labelProvider, String description, String defaultMessage, String title,
+			boolean multipleColumns) {
+		initialSelections = Collections.EMPTY_LIST;
+		initialGrayed = Collections.EMPTY_LIST;
+		dialogTitle = title;
+		inputElement = input;
 		this.contentProvider = contentProvider;
 		this.labelProvider = labelProvider;
-		this.dialogDescription = description;
+		dialogDescription = description;
 		this.defaultMessage = defaultMessage;
 		this.multipleColumns = multipleColumns;
 	}
-	
+
+	@Override
 	public void createControlsImpl(Composite parent) {
-		this.listViewer = this.createViewer(parent);
+		listViewer = createViewer(parent);
 		GridData data = new GridData(GridData.FILL_BOTH);
 		data.heightHint = 120;
-		this.listViewer.getTable().setLayoutData(data);
-		this.listViewer.setLabelProvider(this.labelProvider);
-		this.listViewer.setContentProvider(this.contentProvider);
-		this.listViewer.addSelectionChangedListener(new ISelectionChangedListener() {
-			public void selectionChanged(SelectionChangedEvent event) {
-				ListSelectionPanel.this.validateContent();
-			}
-		});
-		
+		listViewer.getTable().setLayoutData(data);
+		listViewer.setLabelProvider(labelProvider);
+		listViewer.setContentProvider(contentProvider);
+		listViewer.addSelectionChangedListener(event -> ListSelectionPanel.this.validateContent());
+
 		Composite tComposite = new Composite(parent, SWT.RIGHT);
 		GridLayout gLayout = new GridLayout();
 		gLayout.numColumns = 2;
@@ -94,101 +98,106 @@ public class ListSelectionPanel extends AbstractDialogPanel {
 		data = new GridData(GridData.HORIZONTAL_ALIGN_END | GridData.GRAB_HORIZONTAL);
 		data.grabExcessHorizontalSpace = true;
 		tComposite.setData(data);
-	
+
 		Button selectButton = new Button(tComposite, SWT.PUSH);
 		selectButton.setText(SVNUIMessages.Button_SelectAll);
 		data = new GridData();
 		data.widthHint = DefaultDialog.computeButtonWidth(selectButton);
 		selectButton.setLayoutData(data);
 		SelectionListener listener = new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
-			    ListSelectionPanel.this.listViewer.setAllChecked(true);
+				listViewer.setAllChecked(true);
 				ListSelectionPanel.this.validateContent();
 			}
 		};
 		selectButton.addSelectionListener(listener);
-	
+
 		Button deselectButton = new Button(tComposite, SWT.PUSH);
 		deselectButton.setText(SVNUIMessages.Button_ClearSelection);
 		data = new GridData();
 		data.widthHint = DefaultDialog.computeButtonWidth(deselectButton);
 		deselectButton.setLayoutData(data);
 		listener = new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
-				ListSelectionPanel.this.listViewer.setAllChecked(false);
+				listViewer.setAllChecked(false);
 				ListSelectionPanel.this.validateContent();
 			}
 		};
 		deselectButton.addSelectionListener(listener);
 	}
-	
+
+	@Override
 	public void postInit() {
-		this.listViewer.setInput(this.inputElement);
-		for (Iterator it = this.initialSelections.iterator(); it.hasNext(); ) {
-			this.listViewer.setChecked(it.next(), true);
+		listViewer.setInput(inputElement);
+		for (Iterator it = initialSelections.iterator(); it.hasNext();) {
+			listViewer.setChecked(it.next(), true);
 		}
-		for (Iterator it = this.initialGrayed.iterator(); it.hasNext(); ) {
-			this.listViewer.setGrayed(it.next(), true);
+		for (Iterator it = initialGrayed.iterator(); it.hasNext();) {
+			listViewer.setGrayed(it.next(), true);
 		}
 		super.postInit();
 	}
-	
-	public Object []getResultSelections() {
-		return this.resultSelections;
+
+	public Object[] getResultSelections() {
+		return resultSelections;
 	}
-	
-	public Object []getInitialSelections() {
-		return this.initialSelections.toArray();
+
+	public Object[] getInitialSelections() {
+		return initialSelections.toArray();
 	}
-	
-	public void setInitialSelections(Object []selectedElements) {
-		this.initialSelections = Arrays.asList(selectedElements);
+
+	public void setInitialSelections(Object[] selectedElements) {
+		initialSelections = Arrays.asList(selectedElements);
 	}
-	
+
 	public void setInitialGrayed(Object[] grayedElements) {
-		this.initialGrayed = Arrays.asList(grayedElements);
+		initialGrayed = Arrays.asList(grayedElements);
 	}
-	
+
 	protected CheckboxTableViewer createViewer(Composite parent) {
-		if (!this.multipleColumns) {
+		if (!multipleColumns) {
 			return CheckboxTableViewer.newCheckList(parent, SWT.BORDER);
 		}
 		Table table = new Table(parent, SWT.CHECK | SWT.BORDER);
 		table.setLinesVisible(true);
 		GridData data = new GridData(GridData.FILL_BOTH);
 		table.setLayoutData(data);
-	
+
 		TableLayout layout = new TableLayout();
 		table.setLayout(layout);
-		
+
 		// resource name
 		TableColumn col = new TableColumn(table, SWT.NONE);
 		col.setResizable(true);
 		col.setText(SVNUIMessages.ListSelectionPanel_Resource);
 		layout.addColumnData(new ColumnWeightData(60, true));
-	
+
 		// local presentation
 		col = new TableColumn(table, SWT.NONE);
 		col.setResizable(true);
 		col.setText(SVNUIMessages.ListSelectionPanel_LocalPresentation);
 		layout.addColumnData(new ColumnWeightData(40, true));
-		
-		return new CheckboxTableViewer(table); 
+
+		return new CheckboxTableViewer(table);
 	}
-	
+
+	@Override
 	protected void saveChangesImpl() {
-		Object[] children = this.contentProvider.getElements(this.inputElement);
+		Object[] children = contentProvider.getElements(inputElement);
 		if (children != null) {
 			ArrayList list = new ArrayList();
-			for (int i = 0; i < children.length; i++) {
-				if (this.listViewer.getChecked(children[i])) {
-					list.add(children[i]);
+			for (Object child : children) {
+				if (listViewer.getChecked(child)) {
+					list.add(child);
 				}
 			}
-			this.resultSelections = list.toArray();
+			resultSelections = list.toArray();
 		}
 	}
 
+	@Override
 	protected void cancelChangesImpl() {
 	}
 

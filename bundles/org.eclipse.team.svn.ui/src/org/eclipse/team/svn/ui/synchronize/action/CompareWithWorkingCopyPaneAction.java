@@ -29,35 +29,40 @@ import org.eclipse.team.svn.ui.operation.CompareResourcesOperation;
 import org.eclipse.team.ui.synchronize.ISynchronizePageConfiguration;
 
 /**
- * Compare with working copy action 
+ * Compare with working copy action
  * 
  * @author Igor Burilo
  */
 public class CompareWithWorkingCopyPaneAction extends AbstractSynchronizeModelAction {
-	
+
 	public CompareWithWorkingCopyPaneAction(String text, ISynchronizePageConfiguration configuration) {
-		super(text, configuration);			
+		super(text, configuration);
 	}
 
+	@Override
 	protected IActionOperation getOperation(ISynchronizePageConfiguration configuration, IDiffElement[] elements) {
-		IResource resource = this.getAllSelectedResources()[0];
+		IResource resource = getAllSelectedResources()[0];
 		ILocalResource local = SVNRemoteStorage.instance().asLocalResource(resource);
 		if (!IStateFilter.SF_INTERNAL_INVALID.accept(local)) {
-			IRepositoryResource remote = local.isCopied() ? SVNUtility.getCopiedFrom(resource) : SVNRemoteStorage.instance().asRepositoryResource(resource);
+			IRepositoryResource remote = local.isCopied()
+					? SVNUtility.getCopiedFrom(resource)
+					: SVNRemoteStorage.instance().asRepositoryResource(resource);
 			remote.setSelectedRevision(SVNRevision.BASE);
 			CompareResourcesOperation op = new CompareResourcesOperation(local, remote, false, true);
 			return op;
 		}
 		return null;
 	}
-	
+
+	@Override
 	protected boolean updateSelection(IStructuredSelection selection) {
 		if (super.updateSelection(selection)) {
 			if (selection.size() == 1) {
-				IResource[] selectedResources = this.getAllSelectedResources();
-				return FileUtility.checkForResourcesPresence(selectedResources, CompareWithWorkingCopyAction.COMPARE_FILTER, IResource.DEPTH_ZERO);
-			}	
+				IResource[] selectedResources = getAllSelectedResources();
+				return FileUtility.checkForResourcesPresence(selectedResources,
+						CompareWithWorkingCopyAction.COMPARE_FILTER, IResource.DEPTH_ZERO);
+			}
 		}
 		return false;
-	}		    		    		    		
+	}
 }

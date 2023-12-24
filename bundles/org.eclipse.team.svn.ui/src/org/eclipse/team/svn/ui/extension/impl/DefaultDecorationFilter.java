@@ -23,6 +23,7 @@ import org.eclipse.team.svn.ui.decorator.IDecorationFilter;
  * @author Alexander Gurov
  */
 public class DefaultDecorationFilter implements IDecorationFilter {
+	@Override
 	public boolean isAcceptable(IResource resource) {
 		return true;
 	}

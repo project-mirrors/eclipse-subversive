@@ -23,9 +23,9 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.team.svn.core.utility.SVNUtility;
 
 /**
- * SVN folder matcher, though it is not used by Subversive, it still could be used by some external plug-ins.
- * Usage sample:
- *		this.getProject().createFilter(IResourceFilterDescription.INHERITABLE | IResourceFilterDescription.FOLDERS, new FileInfoMatcherDescription("org.eclipse.team.svn.core.svnmeta", null), IResource.DEPTH_INFINITE, new NullProgressMonitor());
+ * SVN folder matcher, though it is not used by Subversive, it still could be used by some external plug-ins. Usage sample:
+ * this.getProject().createFilter(IResourceFilterDescription.INHERITABLE | IResourceFilterDescription.FOLDERS, new
+ * FileInfoMatcherDescription("org.eclipse.team.svn.core.svnmeta", null), IResource.DEPTH_INFINITE, new NullProgressMonitor());
  * 
  * @author Alexander Gurov
  */

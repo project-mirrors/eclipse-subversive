@@ -23,8 +23,6 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.window.ToolTip;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.DisposeEvent;
-import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Color;
@@ -38,6 +36,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
+import org.eclipse.team.svn.core.BaseMessages;
 import org.eclipse.team.svn.core.discovery.model.AbstractDiscoverySource;
 import org.eclipse.team.svn.core.discovery.model.Overview;
 import org.eclipse.team.svn.ui.SVNUIMessages;
@@ -61,10 +60,7 @@ class OverviewToolTip extends GradientToolTip {
 
 	public OverviewToolTip(Control control, AbstractDiscoverySource source, Overview overview) {
 		super(control, ToolTip.RECREATE, true);
-		if (source == null) {
-			throw new IllegalArgumentException();
-		}
-		if (overview == null) {
+		if ((source == null) || (overview == null)) {
 			throw new IllegalArgumentException();
 		}
 		this.source = source;
@@ -92,11 +88,7 @@ class OverviewToolTip extends GradientToolTip {
 			image = computeImage(source, overview.getScreenshot());
 			if (image != null) {
 				final Image fimage = image;
-				container.addDisposeListener(new DisposeListener() {
-					public void widgetDisposed(DisposeEvent e) {
-						fimage.dispose();
-					}
-				});
+				container.addDisposeListener(e -> fimage.dispose());
 			}
 		}
 		final boolean hasLearnMoreLink = overview.getUrl() != null && overview.getUrl().length() > 0;
@@ -104,15 +96,18 @@ class OverviewToolTip extends GradientToolTip {
 		final int borderWidth = 1;
 		final int fixedImageHeight = 240;
 		final int fixedImageWidth = 320;
-		final int heightHint = fixedImageHeight + (borderWidth * 2);
+		final int heightHint = fixedImageHeight + borderWidth * 2;
 		final int widthHint = fixedImageWidth;
 
 		final int containerWidthHintWithImage = 650;
 		final int containerWidthHintWithoutImage = 500;
 
-		GridDataFactory.fillDefaults().grab(true, true).hint(
-				image == null ? containerWidthHintWithoutImage : containerWidthHintWithImage, SWT.DEFAULT).applyTo(
-				container);
+		GridDataFactory.fillDefaults()
+				.grab(true, true)
+				.hint(
+						image == null ? containerWidthHintWithoutImage : containerWidthHintWithImage, SWT.DEFAULT)
+				.applyTo(
+						container);
 
 		GridLayoutFactory.fillDefaults().numColumns(2).margins(5, 5).spacing(3, 0).applyTo(container);
 
@@ -140,52 +135,60 @@ class OverviewToolTip extends GradientToolTip {
 			final Composite imageContainer = new Composite(container, SWT.BORDER);
 			GridLayoutFactory.fillDefaults().applyTo(imageContainer);
 
-			GridDataFactory.fillDefaults().grab(false, false).align(SWT.CENTER, SWT.BEGINNING).hint(
-					widthHint + (borderWidth * 2), heightHint).applyTo(imageContainer);
+			GridDataFactory.fillDefaults()
+					.grab(false, false)
+					.align(SWT.CENTER, SWT.BEGINNING)
+					.hint(
+							widthHint + borderWidth * 2, heightHint)
+					.applyTo(imageContainer);
 
 			Label imageLabel = new Label(imageContainer, SWT.NULL);
-			GridDataFactory.fillDefaults().hint(widthHint, fixedImageHeight).indent(borderWidth, borderWidth).applyTo(
-					imageLabel);
+			GridDataFactory.fillDefaults()
+					.hint(widthHint, fixedImageHeight)
+					.indent(borderWidth, borderWidth)
+					.applyTo(
+							imageLabel);
 			imageLabel.setImage(image);
 			imageLabel.setBackground(null);
 			imageLabel.setSize(widthHint, fixedImageHeight);
 
 			// creates a border
 			imageContainer.setBackground(colorBlack);
-		}			
-		
+		}
+
 		if (hasLearnMoreLink) {
 			Link link = new Link(summaryContainer, SWT.NULL);
 			GridDataFactory.fillDefaults().grab(false, false).align(SWT.BEGINNING, SWT.CENTER).applyTo(link);
 			link.setText(SVNUIMessages.ConnectorDescriptorToolTip_detailsLink);
 			link.setBackground(null);
-			link.setToolTipText(SVNUIMessages.format(SVNUIMessages.ConnectorDescriptorToolTip_detailsLink_tooltip, overview.getUrl()));
+			link.setToolTipText(BaseMessages.format(SVNUIMessages.ConnectorDescriptorToolTip_detailsLink_tooltip,
+					overview.getUrl()));
 			link.addSelectionListener(new SelectionListener() {
+				@Override
 				public void widgetSelected(SelectionEvent e) {
 					WorkbenchUtil.openUrl(overview.getUrl(), IWorkbenchBrowserSupport.AS_EXTERNAL);
 				}
 
+				@Override
 				public void widgetDefaultSelected(SelectionEvent e) {
 					widgetSelected(e);
 				}
 			});
 		}
-		
+
 		if (image == null) {
 			// prevent overviews with no image from providing unlimited text.
 			Point optimalSize = summaryContainer.computeSize(SWT.DEFAULT, SWT.DEFAULT, true);
-			if (optimalSize.y > (heightHint + 10)) {
+			if (optimalSize.y > heightHint + 10) {
 				((GridData) summaryContainer.getLayoutData()).heightHint = heightHint;
 				container.layout(true);
 			}
 		}
 		// hack: cause the tooltip to gain focus so that we can capture the escape key
 		//       this must be done async since the tooltip is not yet visible.
-		Display.getCurrent().asyncExec(new Runnable() {
-			public void run() {
-				if (!parent.isDisposed()) {
-					parent.setFocus();
-				}
+		Display.getCurrent().asyncExec(() -> {
+			if (!parent.isDisposed()) {
+				parent.setFocus();
 			}
 		});
 		return container;

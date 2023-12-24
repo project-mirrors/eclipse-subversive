@@ -25,13 +25,14 @@ import org.eclipse.team.svn.ui.utility.ColumnedViewerComparator;
 public class LockResourcesTableComparator extends ColumnedViewerComparator {
 
 	public LockResourcesTableComparator(Viewer tableViewer) {
-		super(tableViewer);		
+		super(tableViewer);
 	}
 
+	@Override
 	public int compareImpl(Viewer viewer, Object row1, Object row2) {
-		LockResource data1 = (LockResource)row1;
-		LockResource data2 = (LockResource)row2;
-		switch (this.column) {
+		LockResource data1 = (LockResource) row1;
+		LockResource data2 = (LockResource) row2;
+		switch (column) {
 			case LockResourceSelectionComposite.COLUMN_NAME: {
 				return ColumnedViewerComparator.compare(data1.getName(), data2.getName());
 			}
@@ -41,12 +42,12 @@ public class LockResourcesTableComparator extends ColumnedViewerComparator {
 			case LockResourceSelectionComposite.COLUMN_OWNER: {
 				return ColumnedViewerComparator.compare(data1.getOwner(), data2.getOwner());
 			}
-			case LockResourceSelectionComposite.COLUMN_STATE : {
+			case LockResourceSelectionComposite.COLUMN_STATE: {
 				return data1.getLockStatus().compareTo(data2.getLockStatus());
 			}
-			case LockResourceSelectionComposite.COLUMN_DATE : {
+			case LockResourceSelectionComposite.COLUMN_DATE: {
 				return data1.getCreationDate().compareTo(data2.getCreationDate());
-			}		
+			}
 		}
 		return 0;
 	}

@@ -30,11 +30,13 @@ public class SaveRepositoryLocationsOperation extends AbstractActionOperation {
 	public SaveRepositoryLocationsOperation() {
 		super("Operation_SaveRepositoryLocations", SVNMessages.class); //$NON-NLS-1$
 	}
-	
+
+	@Override
 	public int getOperationWeight() {
 		return 0;
 	}
 
+	@Override
 	protected void runImpl(IProgressMonitor monitor) throws Exception {
 		SVNRemoteStorage.instance().saveConfiguration();
 		if (SVNTeamPlugin.instance().isLocationsDirty()) {
@@ -42,5 +44,5 @@ public class SaveRepositoryLocationsOperation extends AbstractActionOperation {
 			SVNTeamPlugin.instance().setLocationsDirty(false);
 		}
 	}
-	
+
 }

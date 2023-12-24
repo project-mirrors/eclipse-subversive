@@ -30,29 +30,33 @@ import org.eclipse.team.svn.ui.repository.model.RepositoryFile;
  */
 public class OpenFileAction extends AbstractRepositoryTeamAction {
 	public OpenFileAction() {
-		super();
 	}
 
+	@Override
 	public void runImpl(IAction action) {
-		RepositoryFile []resources = (RepositoryFile [])this.getAdaptedSelection(RepositoryFile.class);
-	    IRepositoryFile []files = new IRepositoryFile[resources.length];
-	    for (int i = 0; i < resources.length; i++) {
-	    	files[i] = (IRepositoryFile)resources[i].getRepositoryResource();
-	    }
-		this.runScheduled(new OpenRemoteFileOperation(files, OpenRemoteFileOperation.OPEN_DEFAULT));
+		RepositoryFile[] resources = this.getAdaptedSelection(RepositoryFile.class);
+		IRepositoryFile[] files = new IRepositoryFile[resources.length];
+		for (int i = 0; i < resources.length; i++) {
+			files[i] = (IRepositoryFile) resources[i].getRepositoryResource();
+		}
+		runScheduled(new OpenRemoteFileOperation(files, OpenRemoteFileOperation.OPEN_DEFAULT));
 	}
 
+	@Override
 	public void selectionChanged(IAction action, ISelection selection) {
 		super.selectionChanged(action, selection);
-		if (this.isEnabled()) {
-			IRepositoryResource []resources = this.getSelectedRepositoryResources();
-			action.setImageDescriptor(SVNTeamUIPlugin.instance().getWorkbench().getEditorRegistry().getImageDescriptor(resources[0].getName()));
-		}
-		else {
+		if (isEnabled()) {
+			IRepositoryResource[] resources = getSelectedRepositoryResources();
+			action.setImageDescriptor(SVNTeamUIPlugin.instance()
+					.getWorkbench()
+					.getEditorRegistry()
+					.getImageDescriptor(resources[0].getName()));
+		} else {
 			action.setImageDescriptor(null);
 		}
 	}
-	
+
+	@Override
 	public boolean isEnabled() {
 		return this.getAdaptedSelection(RepositoryFile.class).length > 0;
 	}

@@ -33,6 +33,7 @@ public class DefaultSynchronizeViewActionContributor implements ISynchronizeView
 
 	}
 
+	@Override
 	public Collection getUpdateContributions() {
 		ArrayList actionGroups = new ArrayList();
 		actionGroups.add(new UpdateActionGroup());
@@ -40,11 +41,11 @@ public class DefaultSynchronizeViewActionContributor implements ISynchronizeView
 		return actionGroups;
 	}
 
+	@Override
 	public Collection getMergeContributions() {
 		ArrayList actionGroups = new ArrayList();
 		actionGroups.add(new MergeActionGroup());
 		return actionGroups;
 	}
 
-	
 }

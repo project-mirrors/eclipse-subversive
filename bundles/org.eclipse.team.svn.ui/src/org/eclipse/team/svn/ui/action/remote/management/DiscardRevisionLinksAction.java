@@ -20,7 +20,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.team.svn.core.operation.AbstractActionOperation;
 import org.eclipse.team.svn.core.operation.CompositeOperation;
-import org.eclipse.team.svn.core.operation.IUnprotectedOperation;
 import org.eclipse.team.svn.core.operation.remote.management.SaveRepositoryLocationsOperation;
 import org.eclipse.team.svn.core.resource.IRepositoryLocation;
 import org.eclipse.team.svn.core.resource.IRevisionLink;
@@ -38,26 +37,27 @@ import org.eclipse.team.svn.ui.repository.model.RepositoryRevision;
 public class DiscardRevisionLinksAction extends AbstractRepositoryTeamAction {
 
 	public DiscardRevisionLinksAction() {
-		super();
 	}
 
+	@Override
 	public void runImpl(IAction action) {
-		final RepositoryRevision []revisions = ((RepositoryRevision [])this.getAdaptedSelection(RepositoryRevision.class));
-		DiscardConfirmationDialog dialog = new DiscardConfirmationDialog(this.getShell(), revisions.length == 1, DiscardConfirmationDialog.MSG_LINK);
+		final RepositoryRevision[] revisions = this.getAdaptedSelection(RepositoryRevision.class);
+		DiscardConfirmationDialog dialog = new DiscardConfirmationDialog(getShell(), revisions.length == 1,
+				DiscardConfirmationDialog.MSG_LINK);
 		if (dialog.open() == 0) {
-			HashSet<IRepositoryLocation> locations = new HashSet<IRepositoryLocation>();
-			for (int i = 0; i < revisions.length; i++) {
-				locations.add(revisions[i].getRevisionLink().getRepositoryResource().getRepositoryLocation());
+			HashSet<IRepositoryLocation> locations = new HashSet<>();
+			for (RepositoryRevision revision : revisions) {
+				locations.add(revision.getRevisionLink().getRepositoryResource().getRepositoryLocation());
 			}
-			AbstractActionOperation mainOp = new AbstractActionOperation("Operation_RemoveRevisionLinks", SVNUIMessages.class) { //$NON-NLS-1$
+			AbstractActionOperation mainOp = new AbstractActionOperation("Operation_RemoveRevisionLinks", //$NON-NLS-1$
+					SVNUIMessages.class) {
+				@Override
 				protected void runImpl(IProgressMonitor monitor) throws Exception {
-					for (int i = 0; i < revisions.length; i++) {
-						final IRevisionLink link = revisions[i].getRevisionLink();
-						this.protectStep(new IUnprotectedOperation() {
-							public void run(IProgressMonitor monitor) throws Exception {
-								IRepositoryLocation location = link.getRepositoryResource().getRepositoryLocation();
-								location.removeRevisionLink(link);
-							}
+					for (RepositoryRevision revision : revisions) {
+						final IRevisionLink link = revision.getRevisionLink();
+						this.protectStep(monitor1 -> {
+							IRepositoryLocation location = link.getRepositoryResource().getRepositoryLocation();
+							location.removeRevisionLink(link);
 						}, monitor, revisions.length);
 					}
 				}
@@ -65,12 +65,14 @@ public class DiscardRevisionLinksAction extends AbstractRepositoryTeamAction {
 			CompositeOperation op = new CompositeOperation(mainOp.getId(), mainOp.getMessagesClass());
 			op.add(mainOp);
 			op.add(new SaveRepositoryLocationsOperation());
-			op.add(new RefreshRepositoryLocationsOperation(locations.toArray(new IRepositoryLocation[locations.size()]), true));
-			
-			this.runBusy(op);
+			op.add(new RefreshRepositoryLocationsOperation(locations.toArray(new IRepositoryLocation[locations.size()]),
+					true));
+
+			runBusy(op);
 		}
 	}
-	
+
+	@Override
 	public boolean isEnabled() {
 		return this.getAdaptedSelection(RepositoryRevision.class).length > 0;
 	}

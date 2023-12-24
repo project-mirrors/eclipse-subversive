@@ -25,21 +25,32 @@ import org.eclipse.team.svn.core.resource.events.ResourceStatesChangedEvent;
  * @author Alexander Gurov
  */
 public interface IRemoteStorage extends ISVNStorage {
-	public void addResourceStatesListener(Class eventClass, IResourceStatesListener listener);
-	public void removeResourceStatesListener(Class eventClass, IResourceStatesListener listener);
-    public void fireResourceStatesChangedEvent(ResourceStatesChangedEvent event);
-	
-	public IResourceChange asResourceChange(IChangeStateProvider changeState, boolean update);
-	public ILocalResource asLocalResource(IResource resource);
-	public ILocalResource asLocalResourceAccessible(IResource resource);
-	public ILocalResource asLocalResourceDirty(IResource resource);
-	public void refreshLocalResources(IResource []resources, int depth);
-	public IRepositoryResource asRepositoryResource(IRepositoryLocation location, String url, boolean isFile);
-	public IRepositoryResource asRepositoryResource(IResource resource);
-	public ILocalResource asLocalResource(IProject project, String url, int kind);
-	public IRepositoryLocation getRepositoryLocation(IResource resource);
-	
-	public byte []resourceChangeAsBytes(IResourceChange resource);
-	public IResourceChange resourceChangeFromBytes(byte []bytes);
+	void addResourceStatesListener(Class eventClass, IResourceStatesListener listener);
+
+	void removeResourceStatesListener(Class eventClass, IResourceStatesListener listener);
+
+	void fireResourceStatesChangedEvent(ResourceStatesChangedEvent event);
+
+	IResourceChange asResourceChange(IChangeStateProvider changeState, boolean update);
+
+	ILocalResource asLocalResource(IResource resource);
+
+	ILocalResource asLocalResourceAccessible(IResource resource);
+
+	ILocalResource asLocalResourceDirty(IResource resource);
+
+	void refreshLocalResources(IResource[] resources, int depth);
+
+	IRepositoryResource asRepositoryResource(IRepositoryLocation location, String url, boolean isFile);
+
+	IRepositoryResource asRepositoryResource(IResource resource);
+
+	ILocalResource asLocalResource(IProject project, String url, int kind);
+
+	IRepositoryLocation getRepositoryLocation(IResource resource);
+
+	byte[] resourceChangeAsBytes(IResourceChange resource);
+
+	IResourceChange resourceChangeFromBytes(byte[] bytes);
 
 }

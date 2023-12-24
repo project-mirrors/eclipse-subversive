@@ -37,26 +37,31 @@ public class ShowIncomingAnnotationModelAction extends AbstractSynchronizeLogica
 		super(text, configuration);
 	}
 
+	@Override
 	protected boolean needsToSaveDirtyEditors() {
 		return false;
 	}
-	
+
+	@Override
 	protected boolean updateSelection(IStructuredSelection selection) {
-		super.updateSelection(selection);		
+		super.updateSelection(selection);
 		if (selection.size() == 1) {
-			AbstractSVNSyncInfo syncInfo = this.getSelectedSVNSyncInfo();
+			AbstractSVNSyncInfo syncInfo = getSelectedSVNSyncInfo();
 			if (syncInfo != null && syncInfo.getKind() != SyncInfo.IN_SYNC) {
 				ILocalResource incoming = syncInfo.getRemoteChangeResource();
 				if (incoming instanceof IFileChange) {
-					return IStateFilter.SF_TREE_CONFLICTING.accept(incoming) ? IStateFilter.SF_TREE_CONFLICTING_REPOSITORY_EXIST.accept(incoming) : IStateFilter.ST_DELETED != incoming.getStatus();
-				}				
+					return IStateFilter.SF_TREE_CONFLICTING.accept(incoming)
+							? IStateFilter.SF_TREE_CONFLICTING_REPOSITORY_EXIST.accept(incoming)
+							: IStateFilter.ST_DELETED != incoming.getStatus();
+				}
 			}
-		}		
+		}
 		return false;
 	}
-	
+
+	@Override
 	protected IActionOperation getOperation() {
-		IResourceChange change = (IResourceChange)this.getSelectedSVNSyncInfo().getRemoteChangeResource();
+		IResourceChange change = (IResourceChange) getSelectedSVNSyncInfo().getRemoteChangeResource();
 		return new RemoteShowAnnotationOperation(change.getOriginator());
 	}
 

@@ -32,8 +32,7 @@ import org.eclipse.team.ui.synchronize.ISynchronizeScope;
 import org.eclipse.ui.IWorkbenchActionConstants;
 
 /**
- * Base pane participant class 
- * Used by ParticipantPagePane to show resources like in Synchronize view
+ * Base pane participant class Used by ParticipantPagePane to show resources like in Synchronize view
  * 
  * Note: in order to add actions you need to override getActionGroups method
  * 
@@ -42,9 +41,9 @@ import org.eclipse.ui.IWorkbenchActionConstants;
 public class BasePaneParticipant extends UpdateParticipant {
 
 	protected IValidationManager validationManager;
-	
+
 	public BasePaneParticipant(ISynchronizeScope scope, IValidationManager validationManager) {
-		super(scope);	   
+		super(scope);
 		this.validationManager = validationManager;
 	}
 
@@ -54,84 +53,90 @@ public class BasePaneParticipant extends UpdateParticipant {
 	 * @author Igor Burilo
 	 */
 	public static class BasePaneActionGroup extends AbstractSynchronizeActionGroup {
-		
+
 		protected static final String GROUP_SYNC_NORMAL = "syncNormal"; //$NON-NLS-1$
-		
+
 		protected IValidationManager validationManager;
-		
+
 		public BasePaneActionGroup(IValidationManager validationManager) {
 			this.validationManager = validationManager;
 		}
-				
+
 		/* (non-Javadoc)
 		 * @see org.eclipse.team.ui.synchronize.SynchronizePageActionGroup#modelChanged(org.eclipse.team.ui.synchronize.ISynchronizeModelElement)
 		 */
+		@Override
 		public void modelChanged(ISynchronizeModelElement root) {
-            super.modelChanged(root);
-            
-            Display.getDefault().asyncExec(new Runnable() {
-                public void run() {                
-                    if (BasePaneActionGroup.this.validationManager != null) {
-                    	BasePaneActionGroup.this.validationManager.validateContent();
-                    }
-                }
-            });
-        }
-		
+			super.modelChanged(root);
+
+			Display.getDefault().asyncExec(() -> {
+				if (validationManager != null) {
+					validationManager.validateContent();
+				}
+			});
+		}
+
+		@Override
 		public void configureMenuGroups(ISynchronizePageConfiguration configuration) {
 			configuration.addMenuGroup(
-					ISynchronizePageConfiguration.P_CONTEXT_MENU, 
-					BasePaneActionGroup.GROUP_SYNC_NORMAL);
-		}   
-		
+					ISynchronizePageConfiguration.P_CONTEXT_MENU, BasePaneActionGroup.GROUP_SYNC_NORMAL);
+		}
+
+		@Override
 		protected void configureActions(ISynchronizePageConfiguration configuration) {
 			this.appendToGroup(
-					ISynchronizePageConfiguration.P_CONTEXT_MENU, 
-					BasePaneActionGroup.GROUP_SYNC_NORMAL,
-					new Separator(IWorkbenchActionConstants.MB_ADDITIONS));		
-					
+					ISynchronizePageConfiguration.P_CONTEXT_MENU, BasePaneActionGroup.GROUP_SYNC_NORMAL,
+					new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
+
 			//expand all
-			ExpandAllAction expandAllAction = new ExpandAllAction(SVNUIMessages.SynchronizeActionGroup_ExpandAll, configuration, this.getVisibleRootsSelectionProvider());
-			expandAllAction.setImageDescriptor(SVNTeamUIPlugin.instance().getImageDescriptor("icons/views/expandall.gif")); //$NON-NLS-1$
+			ExpandAllAction expandAllAction = new ExpandAllAction(SVNUIMessages.SynchronizeActionGroup_ExpandAll,
+					configuration, getVisibleRootsSelectionProvider());
+			expandAllAction
+					.setImageDescriptor(SVNTeamUIPlugin.instance().getImageDescriptor("icons/views/expandall.gif")); //$NON-NLS-1$
 			this.appendToGroup(
-					ISynchronizePageConfiguration.P_TOOLBAR_MENU, 
-					ISynchronizePageConfiguration.NAVIGATE_GROUP,
+					ISynchronizePageConfiguration.P_TOOLBAR_MENU, ISynchronizePageConfiguration.NAVIGATE_GROUP,
 					expandAllAction);
 		}
-	} 
-	
-	protected int getSupportedModes() {
-        return ISynchronizePageConfiguration.OUTGOING_MODE;
-    }
+	}
 
-    protected int getDefaultMode() {
-        return ISynchronizePageConfiguration.OUTGOING_MODE;
-    }
-    
-    public ChangeSetCapability getChangeSetCapability() {
-        return null; // we don't want that button
-    }
-    
-    /* (non-Javadoc)
-     * @see org.eclipse.team.ui.synchronize.AbstractSynchronizeParticipant#doesSupportSynchronize()
-     */
-    public boolean doesSupportSynchronize() {
-        return false;
-    }
-    
-    /* (non-Javadoc)
-     * @see org.eclipse.team.svn.ui.synchronize.AbstractSVNParticipant#isSetModes()
-     */    
-    protected boolean isSetModes() {
-    	return false;
-    }
-        
-    /* (non-Javadoc)
-     * @see org.eclipse.team.svn.ui.synchronize.update.UpdateParticipant#getActionGroups()
-     */    
-    protected Collection<AbstractSynchronizeActionGroup> getActionGroups() {
-    	Collection<AbstractSynchronizeActionGroup> actionGroups = new ArrayList<AbstractSynchronizeActionGroup>();
-    	return actionGroups;
-    }
-    
+	@Override
+	protected int getSupportedModes() {
+		return ISynchronizePageConfiguration.OUTGOING_MODE;
+	}
+
+	@Override
+	protected int getDefaultMode() {
+		return ISynchronizePageConfiguration.OUTGOING_MODE;
+	}
+
+	@Override
+	public ChangeSetCapability getChangeSetCapability() {
+		return null; // we don't want that button
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.team.ui.synchronize.AbstractSynchronizeParticipant#doesSupportSynchronize()
+	 */
+	@Override
+	public boolean doesSupportSynchronize() {
+		return false;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.team.svn.ui.synchronize.AbstractSVNParticipant#isSetModes()
+	 */
+	@Override
+	protected boolean isSetModes() {
+		return false;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.team.svn.ui.synchronize.update.UpdateParticipant#getActionGroups()
+	 */
+	@Override
+	protected Collection<AbstractSynchronizeActionGroup> getActionGroups() {
+		Collection<AbstractSynchronizeActionGroup> actionGroups = new ArrayList<>();
+		return actionGroups;
+	}
+
 }

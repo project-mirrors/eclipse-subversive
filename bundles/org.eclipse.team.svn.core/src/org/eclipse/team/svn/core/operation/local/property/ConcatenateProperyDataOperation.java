@@ -31,113 +31,124 @@ import org.eclipse.team.svn.core.utility.FileUtility;
 
 /**
  * Concatenate new property value with already existing value (by retrieving it from SVN)
- *   
+ * 
  * @author Igor Burilo
  */
 public class ConcatenateProperyDataOperation extends AbstractActionOperation implements IResourcePropertyProvider {
 
 	protected IResource resource;
+
 	protected String propertyName;
-	protected boolean isStringValue;	
-	
+
+	protected boolean isStringValue;
+
 	protected String stringValuesSeparator;
+
 	protected String newStringValue;
-	protected byte[] newByteValue;	
+
+	protected byte[] newByteValue;
+
 	protected IResourcePropertyProvider propertyProvider;
-	
+
 	protected SVNProperty property;
-	
-	public ConcatenateProperyDataOperation(IResource resource, String propertyName, IResourcePropertyProvider propertyProvider) {
+
+	public ConcatenateProperyDataOperation(IResource resource, String propertyName,
+			IResourcePropertyProvider propertyProvider) {
 		this(resource, propertyName, true);
 		this.propertyProvider = propertyProvider;
 	}
-	
+
 	public ConcatenateProperyDataOperation(IResource resource, String propertyName, String newStringValue) {
-		this(resource, propertyName, true);		
+		this(resource, propertyName, true);
 		this.newStringValue = newStringValue;
 	}
-	
+
 	public ConcatenateProperyDataOperation(IResource resource, String propertyName, byte[] newByteValue) {
-		this(resource, propertyName, false);		
+		this(resource, propertyName, false);
 		this.newByteValue = newByteValue;
 	}
-	
+
 	private ConcatenateProperyDataOperation(IResource resource, String propertyName, boolean isStringValue) {
 		super("Operation_ConcatenatePropertyData", SVNMessages.class); //$NON-NLS-1$
 		this.resource = resource;
 		this.propertyName = propertyName;
-		this.isStringValue = isStringValue;		
-		this.stringValuesSeparator = "\r\n"; //$NON-NLS-1$
+		this.isStringValue = isStringValue;
+		stringValuesSeparator = "\r\n"; //$NON-NLS-1$
 	}
 
+	@Override
 	protected void runImpl(IProgressMonitor monitor) throws Exception {
-		final String wcPath = FileUtility.getWorkingCopyPath(this.resource);
-		IRepositoryLocation location = SVNRemoteStorage.instance().getRepositoryLocation(this.resource);
+		final String wcPath = FileUtility.getWorkingCopyPath(resource);
+		IRepositoryLocation location = SVNRemoteStorage.instance().getRepositoryLocation(resource);
 		final ISVNConnector proxy = location.acquireSVNProxy();
 		SVNProperty existingProperty;
 		try {
-			existingProperty = proxy.getProperty(new SVNEntryRevisionReference(wcPath), this.propertyName, null, new SVNProgressMonitor(this, monitor, null));
-		}
-		finally {
+			existingProperty = proxy.getProperty(new SVNEntryRevisionReference(wcPath), propertyName, null,
+					new SVNProgressMonitor(this, monitor, null));
+		} finally {
 			location.releaseSVNProxy(proxy);
 		}
 		if (existingProperty != null && existingProperty.value != null) {
-			if (this.isStringValue) {
-				String value = existingProperty.value;												
-				value += this.stringValuesSeparator + this.getNewStringValue();
-				this.property = new SVNProperty(this.propertyName, value);
+			if (isStringValue) {
+				String value = existingProperty.value;
+				value += stringValuesSeparator + getNewStringValue();
+				property = new SVNProperty(propertyName, value);
 			} else {
 				byte[] existingData = existingProperty.value.getBytes();
-				byte[] newData = new byte[existingData.length + this.getNewByteValue().length];
+				byte[] newData = new byte[existingData.length + getNewByteValue().length];
 				System.arraycopy(existingData, 0, newData, 0, existingData.length);
-				System.arraycopy(this.getNewByteValue(), 0, newData, existingData.length, this.getNewByteValue().length);
-				this.property = new SVNProperty(this.propertyName, new String(newData));	
+				System.arraycopy(getNewByteValue(), 0, newData, existingData.length, getNewByteValue().length);
+				property = new SVNProperty(propertyName, new String(newData));
 			}
+		} else if (isStringValue) {
+			property = new SVNProperty(propertyName, getNewStringValue());
 		} else {
-			if (this.isStringValue) {
-				this.property = new SVNProperty(this.propertyName, this.getNewStringValue());
-			} else {
-				this.property = new SVNProperty(this.propertyName, new String(this.getNewByteValue()));	
-			}
+			property = new SVNProperty(propertyName, new String(getNewByteValue()));
 		}
 	}
 
 	protected String getNewStringValue() {
-		if (!this.isStringValue) {
+		if (!isStringValue) {
 			return null;
-		} 
-		return this.propertyProvider != null ? this.propertyProvider.getProperties()[0].value : this.newStringValue;
+		}
+		return propertyProvider != null ? propertyProvider.getProperties()[0].value : newStringValue;
 	}
-	
+
 	protected byte[] getNewByteValue() {
-		return this.newByteValue;
+		return newByteValue;
 	}
-	
+
 	public void setStringValuesSeparator(String stringValuesSeparator) {
 		this.stringValuesSeparator = stringValuesSeparator;
 	}
-	
+
+	@Override
 	public IResource getLocal() {
-		return this.resource;
+		return resource;
 	}
 
+	@Override
 	public SVNProperty[] getProperties() {
-		return new SVNProperty[] {this.property};
+		return new SVNProperty[] { property };
 	}
 
+	@Override
 	public IRepositoryResource getRemote() {
-		return SVNRemoteStorage.instance().asRepositoryResource(this.resource);
+		return SVNRemoteStorage.instance().asRepositoryResource(resource);
 	}
 
+	@Override
 	public boolean isEditAllowed() {
 		return false;
 	}
 
+	@Override
 	public void refresh() {
-		
+
 	}
-	
+
+	@Override
 	protected String getShortErrorMessage(Throwable t) {
-		return BaseMessages.format(super.getShortErrorMessage(t), new Object[] {this.propertyName, this.resource.getName()});
+		return BaseMessages.format(super.getShortErrorMessage(t), new Object[] { propertyName, resource.getName() });
 	}
 }

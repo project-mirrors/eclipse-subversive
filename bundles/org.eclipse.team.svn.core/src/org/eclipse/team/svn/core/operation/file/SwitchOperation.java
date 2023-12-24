@@ -36,36 +36,43 @@ import org.eclipse.team.svn.core.utility.SVNUtility;
  */
 public class SwitchOperation extends AbstractFileConflictDetectionOperation {
 	protected IRepositoryResource destination;
+
 	protected long options;
-	
+
 	public SwitchOperation(File file, IRepositoryResource destination, boolean ignoreExternals) {
 		this(file, destination, ignoreExternals ? ISVNConnector.Options.IGNORE_EXTERNALS : ISVNConnector.Options.NONE);
 	}
 
 	public SwitchOperation(File file, IRepositoryResource destination, long options) {
-		super("Operation_SwitchFile", SVNMessages.class, new File[] {file}); //$NON-NLS-1$
+		super("Operation_SwitchFile", SVNMessages.class, new File[] { file }); //$NON-NLS-1$
 		this.destination = destination;
 		this.options = options & ISVNConnector.CommandMasks.SWITCH;
 	}
 
+	@Override
 	protected void runImpl(IProgressMonitor monitor) throws Exception {
-		File file = this.operableData()[0];
-		
-		IRepositoryLocation location = this.destination.getRepositoryLocation();
+		File file = operableData()[0];
+
+		IRepositoryLocation location = destination.getRepositoryLocation();
 		ISVNConnector proxy = location.acquireSVNProxy();
-		this.writeToConsole(IConsoleStream.LEVEL_CMD, "svn switch \"" + this.destination.getUrl() + "\" \"" + FileUtility.normalizePath(file.getAbsolutePath()) + "\" -r " + this.destination.getSelectedRevision() + ISVNConnector.Options.asCommandLine(this.options) + FileUtility.getUsernameParam(location.getUsername()) + "\n"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+		writeToConsole(IConsoleStream.LEVEL_CMD, "svn switch \"" + destination.getUrl() + "\" \"" //$NON-NLS-1$//$NON-NLS-2$
+				+ FileUtility.normalizePath(file.getAbsolutePath()) + "\" -r " //$NON-NLS-1$
+				+ destination.getSelectedRevision() + ISVNConnector.Options.asCommandLine(options)
+				+ FileUtility.getUsernameParam(location.getUsername()) + "\n"); //$NON-NLS-1$
 		try {
-			proxy.switchTo(file.getAbsolutePath(), SVNUtility.getEntryRevisionReference(this.destination), SVNDepth.infinityOrFiles(true), this.options, new ConflictDetectionProgressMonitor(this, monitor, null));
-		}
-		finally {
+			proxy.switchTo(file.getAbsolutePath(), SVNUtility.getEntryRevisionReference(destination),
+					SVNDepth.infinityOrFiles(true), options, new ConflictDetectionProgressMonitor(this, monitor, null));
+		} finally {
 			location.releaseSVNProxy(proxy);
 		}
 	}
-	
+
 	protected class ConflictDetectionProgressMonitor extends SVNConflictDetectionProgressMonitor {
 		public ConflictDetectionProgressMonitor(IActionOperation parent, IProgressMonitor monitor, IPath root) {
 			super(parent, monitor, root);
 		}
+
+		@Override
 		protected void processConflict(ItemState state) {
 			SwitchOperation.this.hasUnresolvedConflict = true;
 		}

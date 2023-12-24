@@ -21,7 +21,7 @@ import org.eclipse.team.svn.core.resource.IRepositoryResource;
 import org.eclipse.team.svn.ui.SVNTeamUIPlugin;
 
 /**
- * HEAD node representation 
+ * HEAD node representation
  * 
  * @author Alexander Gurov
  */
@@ -30,20 +30,26 @@ public class RepositoryTrunk extends RepositoryFolder {
 		super(parent, resource);
 	}
 
+	@Override
 	protected ImageDescriptor getImageDescriptorImpl() {
-		return this.isExternals() ? super.getImageDescriptorImpl() : SVNTeamUIPlugin.instance().getImageDescriptor("icons/objects/head.gif"); //$NON-NLS-1$
+		return isExternals()
+				? super.getImageDescriptorImpl()
+				: SVNTeamUIPlugin.instance().getImageDescriptor("icons/objects/head.gif"); //$NON-NLS-1$
 	}
-	
+
+	@Override
 	public RGB getForeground(Object element) {
 		return RepositoryResource.STRUCTURE_DEFINED_NODES_FOREGROUND;
 	}
-	
+
+	@Override
 	public RGB getBackground(Object element) {
-    	return RepositoryResource.STRUCTURE_DEFINED_NODES_BACKGROUND;
-    }
-    
-    public FontData getFont(Object element) {
-    	return RepositoryResource.STRUCTURE_DEFINED_NODES_FONT.getFontData()[0];
-    }
+		return RepositoryResource.STRUCTURE_DEFINED_NODES_BACKGROUND;
+	}
+
+	@Override
+	public FontData getFont(Object element) {
+		return RepositoryResource.STRUCTURE_DEFINED_NODES_FONT.getFontData()[0];
+	}
 
 }

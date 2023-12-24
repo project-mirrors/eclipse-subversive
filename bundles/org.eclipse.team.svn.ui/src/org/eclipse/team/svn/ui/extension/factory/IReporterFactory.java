@@ -29,10 +29,11 @@ public interface IReporterFactory {
 
 	/**
 	 * Returns <code>true</code> if report could be edited in the custom feature-reach editor
+	 * 
 	 * @return <code>true</code> if the custom editor is supported by reporter
 	 */
-	public boolean isCustomEditorSupported();
-	
+	boolean isCustomEditorSupported();
+
 	/**
 	 * Create new issue reporter instance based on {@link IReportingDescriptor} descriptor
 	 * 
@@ -40,5 +41,5 @@ public interface IReporterFactory {
 	 *            tracker settings descriptor
 	 * @return new issue reporter instance or <code>null</code>
 	 */
-	public IReporter newReporter(IReportingDescriptor settings, ReportType type);
+	IReporter newReporter(IReportingDescriptor settings, ReportType type);
 }

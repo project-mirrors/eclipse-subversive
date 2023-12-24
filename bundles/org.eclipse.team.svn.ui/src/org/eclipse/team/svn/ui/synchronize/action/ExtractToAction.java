@@ -24,37 +24,39 @@ import org.eclipse.team.svn.core.synchronize.AbstractSVNSyncInfo;
 import org.eclipse.team.ui.synchronize.ISynchronizePageConfiguration;
 
 /**
- * Extract To action for Synchronize View (both incoming and outgoing - 
- * the conflicting resources are ignored)
+ * Extract To action for Synchronize View (both incoming and outgoing - the conflicting resources are ignored)
  * 
  * @author Alexei Goncharov
  */
 public class ExtractToAction extends AbstractSynchronizeModelAction {
 
 	protected ExtractToActionHelper actionHelper;
-	
+
 	public ExtractToAction(String text, ISynchronizePageConfiguration configuration) {
 		super(text, configuration);
-		this.actionHelper = new ExtractToActionHelper(this, configuration);
+		actionHelper = new ExtractToActionHelper(this, configuration);
 	}
 
+	@Override
 	protected FastSyncInfoFilter getSyncInfoFilter() {
-		return this.actionHelper.getSyncInfoFilter();
+		return actionHelper.getSyncInfoFilter();
 	}
-	
+
+	@Override
 	protected boolean updateSelection(IStructuredSelection selection) {
 		super.updateSelection(selection);
-		AbstractSVNSyncInfo [] infos = this.getSVNSyncInfos();
-		for (int i = 0; i < infos.length; i++) {
-			if (SyncInfo.getDirection(infos[i].getKind()) == SyncInfo.CONFLICTING) {
+		AbstractSVNSyncInfo[] infos = getSVNSyncInfos();
+		for (AbstractSVNSyncInfo element : infos) {
+			if (SyncInfo.getDirection(element.getKind()) == SyncInfo.CONFLICTING) {
 				return false;
 			}
 		}
 		return infos.length > 0;
 	}
-	
+
+	@Override
 	protected IActionOperation getOperation(ISynchronizePageConfiguration configuration, IDiffElement[] elements) {
-		return this.actionHelper.getOperation();
+		return actionHelper.getOperation();
 	}
 
 }

@@ -32,27 +32,29 @@ import org.eclipse.team.svn.ui.panel.remote.ImportPanel;
  * @author Sergiy Logvin
  */
 public class ImportAction extends AbstractRepositoryTeamAction {
-	
+
 	public ImportAction() {
-		super();
 	}
-	
+
+	@Override
 	public void runImpl(IAction action) {
-		IRepositoryResource resource = this.getSelectedRepositoryResources()[0];
+		IRepositoryResource resource = getSelectedRepositoryResources()[0];
 		ImportPanel panel = new ImportPanel(resource.getUrl());
-		DefaultDialog dialog = new DefaultDialog(this.getShell(), panel);
-	    if (dialog.open() == 0) {
-	    	ImportOperation mainOp = new ImportOperation(resource, panel.getLocation(), panel.getMessage(), panel.getDepth());
+		DefaultDialog dialog = new DefaultDialog(getShell(), panel);
+		if (dialog.open() == 0) {
+			ImportOperation mainOp = new ImportOperation(resource, panel.getLocation(), panel.getMessage(),
+					panel.getDepth());
 			CompositeOperation op = new CompositeOperation(mainOp.getId(), mainOp.getMessagesClass());
 			op.add(mainOp);
-			op.add(new RefreshRemoteResourcesOperation(this.getSelectedRepositoryResources()));
-			op.add(new SetRevisionAuthorNameOperation(mainOp, Options.FORCE), new IActionOperation[] {mainOp});
-			this.runScheduled(op);
-	    }
+			op.add(new RefreshRemoteResourcesOperation(getSelectedRepositoryResources()));
+			op.add(new SetRevisionAuthorNameOperation(mainOp, Options.FORCE), new IActionOperation[] { mainOp });
+			runScheduled(op);
+		}
 	}
-	
+
+	@Override
 	public boolean isEnabled() {
-		return this.getSelectedRepositoryResources().length == 1;
+		return getSelectedRepositoryResources().length == 1;
 	}
-	
+
 }

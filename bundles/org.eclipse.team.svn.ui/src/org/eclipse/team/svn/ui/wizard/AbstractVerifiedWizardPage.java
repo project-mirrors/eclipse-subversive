@@ -29,122 +29,133 @@ import org.eclipse.team.svn.ui.verifier.IValidationManager;
  * @author Alexander Gurov
  */
 public abstract class AbstractVerifiedWizardPage extends WizardPage implements IValidationManager {
-    private VerificationKeyListener changeListener;
-    
-    public AbstractVerifiedWizardPage(String pageName) {
-        super(pageName);
-        this.changeListener = new VerificationKeyListener();
-    }
+	private VerificationKeyListener changeListener;
 
-    public AbstractVerifiedWizardPage(String pageName, String title, ImageDescriptor titleImage) {
-        super(pageName, title, titleImage);
-        this.changeListener = new VerificationKeyListener();
-    }
+	public AbstractVerifiedWizardPage(String pageName) {
+		super(pageName);
+		changeListener = new VerificationKeyListener();
+	}
 
+	public AbstractVerifiedWizardPage(String pageName, String title, ImageDescriptor titleImage) {
+		super(pageName, title, titleImage);
+		changeListener = new VerificationKeyListener();
+	}
+
+	@Override
 	public void createControl(Composite parent) {
-		this.setControl(this.createControlImpl(parent));
-		this.addListeners();
+		setControl(createControlImpl(parent));
+		addListeners();
 	}
-	
+
+	@Override
 	public boolean isFilledRight() {
-		return this.changeListener.isFilledRight();
+		return changeListener.isFilledRight();
 	}
 
+	@Override
 	public void attachTo(Control cmp, AbstractVerifier verifier) {
-		this.changeListener.attachTo(cmp, verifier);
+		changeListener.attachTo(cmp, verifier);
 	}
-	
-	public void addListeners() {
-		this.changeListener.addListeners();		
-		this.validateContent();
-		this.setMessage(this.getDescription(), IMessageProvider.NONE);
-	}
-	
-	public void detachFrom(Control cmp) {
-		this.changeListener.detachFrom(cmp);
-	}
-		
-	public void detachAll() {
-		this.changeListener.detachAll();
-	}
-	
-	public void validateContent() {
-		this.changeListener.validateContent();
-	}
-	
-	public boolean validateControl(Control cmp) {
-		return this.changeListener.validateControl(cmp);
-	}
-	
-    public void setPageComplete(boolean complete) {
-        super.setPageComplete(complete && this.isFilledRight() && this.isPageCompleteImpl());
-    }
 
-    public boolean isPageComplete() {
-    	if (this.getContainer().getCurrentPage() == this) {
-        	return super.isPageComplete();
-    	}
-    	return true;
-    }
-    
+	public void addListeners() {
+		changeListener.addListeners();
+		validateContent();
+		this.setMessage(getDescription(), IMessageProvider.NONE);
+	}
+
+	@Override
+	public void detachFrom(Control cmp) {
+		changeListener.detachFrom(cmp);
+	}
+
+	@Override
+	public void detachAll() {
+		changeListener.detachAll();
+	}
+
+	@Override
+	public void validateContent() {
+		changeListener.validateContent();
+	}
+
+	@Override
+	public boolean validateControl(Control cmp) {
+		return changeListener.validateControl(cmp);
+	}
+
+	@Override
+	public void setPageComplete(boolean complete) {
+		super.setPageComplete(complete && isFilledRight() && isPageCompleteImpl());
+	}
+
+	@Override
+	public boolean isPageComplete() {
+		if (getContainer().getCurrentPage() == this) {
+			return super.isPageComplete();
+		}
+		return true;
+	}
+
+	@Override
 	public void setVisible(boolean visible) {
 		super.setVisible(visible);
 		if (visible) {
-			this.getControl().setFocus();
+			getControl().setFocus();
 		}
 	}
-	
-    public void setMessage(String newMessage, int newType) {
-    	if (newType == IMessageProvider.WARNING) {
-        	//NOTE Eclipse workaround: all warnings are rendered as animated but old message does not cleared. So, old error still visible after warning is shown.
-            AbstractVerifiedWizardPage.this.setMessage("", IMessageProvider.NONE); //$NON-NLS-1$
-        	//NOTE Eclipse workaround: clear error message before setting warning message
-            AbstractVerifiedWizardPage.this.setErrorMessage(null);
-        	super.setMessage(newMessage, newType);
-    	}
-    	else if (newType == IMessageProvider.ERROR) {
-        	//NOTE Eclipse workaround: all warnings are rendered as animated but old message does not cleared. So, old error still visible after warning is shown.
-            AbstractVerifiedWizardPage.this.setMessage("", IMessageProvider.NONE); //$NON-NLS-1$
-        	//NOTE Eclipse workaround: error will be rendered as animated only when setErrorMessage() is used.
-            AbstractVerifiedWizardPage.this.setErrorMessage(newMessage);
-    	}
-    	else {
-        	//NOTE Eclipse workaround: clear error message before setting default message
-            AbstractVerifiedWizardPage.this.setErrorMessage(null);
-        	super.setMessage(newMessage, newType);
-    	}
-    }
-    
-    protected abstract Composite createControlImpl(Composite parent);
-    
-	protected boolean isPageCompleteImpl() {
-	    return true;
+
+	@Override
+	public void setMessage(String newMessage, int newType) {
+		if (newType == IMessageProvider.WARNING) {
+			//NOTE Eclipse workaround: all warnings are rendered as animated but old message does not cleared. So, old error still visible after warning is shown.
+			AbstractVerifiedWizardPage.this.setMessage("", IMessageProvider.NONE); //$NON-NLS-1$
+			//NOTE Eclipse workaround: clear error message before setting warning message
+			AbstractVerifiedWizardPage.this.setErrorMessage(null);
+			super.setMessage(newMessage, newType);
+		} else if (newType == IMessageProvider.ERROR) {
+			//NOTE Eclipse workaround: all warnings are rendered as animated but old message does not cleared. So, old error still visible after warning is shown.
+			AbstractVerifiedWizardPage.this.setMessage("", IMessageProvider.NONE); //$NON-NLS-1$
+			//NOTE Eclipse workaround: error will be rendered as animated only when setErrorMessage() is used.
+			AbstractVerifiedWizardPage.this.setErrorMessage(newMessage);
+		} else {
+			//NOTE Eclipse workaround: clear error message before setting default message
+			AbstractVerifiedWizardPage.this.setErrorMessage(null);
+			super.setMessage(newMessage, newType);
+		}
 	}
-	
-    protected class VerificationKeyListener extends AbstractVerificationKeyListener {
-        public VerificationKeyListener() {
-            super();
-        }
-        
-        public void hasError(String errorReason) {
-            AbstractVerifiedWizardPage.this.setMessage(errorReason, IMessageProvider.ERROR);
-			this.handleButtons();
-        }
 
-        public void hasWarning(String warningReason) {
-            AbstractVerifiedWizardPage.this.setMessage(warningReason, IMessageProvider.WARNING);
-			this.handleButtons();
-        }
+	protected abstract Composite createControlImpl(Composite parent);
 
-        public void hasNoError() {
-            AbstractVerifiedWizardPage.this.setMessage(AbstractVerifiedWizardPage.this.getDescription(), IMessageProvider.NONE);
-			this.handleButtons();
-        }
+	protected boolean isPageCompleteImpl() {
+		return true;
+	}
 
-        protected void handleButtons() {
-            AbstractVerifiedWizardPage.this.setPageComplete(this.isFilledRight());
-        }
-        
-    }
-    
+	protected class VerificationKeyListener extends AbstractVerificationKeyListener {
+		public VerificationKeyListener() {
+		}
+
+		@Override
+		public void hasError(String errorReason) {
+			AbstractVerifiedWizardPage.this.setMessage(errorReason, IMessageProvider.ERROR);
+			handleButtons();
+		}
+
+		@Override
+		public void hasWarning(String warningReason) {
+			AbstractVerifiedWizardPage.this.setMessage(warningReason, IMessageProvider.WARNING);
+			handleButtons();
+		}
+
+		@Override
+		public void hasNoError() {
+			AbstractVerifiedWizardPage.this.setMessage(getDescription(), IMessageProvider.NONE);
+			handleButtons();
+		}
+
+		protected void handleButtons() {
+			setPageComplete(isFilledRight());
+		}
+
+	}
+
 }

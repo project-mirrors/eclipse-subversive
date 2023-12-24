@@ -28,28 +28,34 @@ import org.eclipse.team.svn.core.operation.local.change.ResourceChange;
  * @author Alexander Gurov
  */
 public class CompositeVisitor implements IResourceChangeVisitor {
-	protected static IResourceChangeVisitor []EMPTY = new IResourceChangeVisitor[0];
-	protected IResourceChangeVisitor []visitors;
-	
+	protected static IResourceChangeVisitor[] EMPTY = {};
+
+	protected IResourceChangeVisitor[] visitors;
+
 	public CompositeVisitor() {
-		this.visitors = CompositeVisitor.EMPTY;
+		visitors = CompositeVisitor.EMPTY;
 	}
-	
+
 	public void add(IResourceChangeVisitor visitor) {
-		LinkedHashSet<IResourceChangeVisitor> visitors = new LinkedHashSet<IResourceChangeVisitor>(Arrays.asList(this.visitors));
+		LinkedHashSet<IResourceChangeVisitor> visitors = new LinkedHashSet<>(
+				Arrays.asList(this.visitors));
 		visitors.add(visitor);
 		this.visitors = visitors.toArray(new IResourceChangeVisitor[visitors.size()]);
 	}
 
-	public void postVisit(ResourceChange change, IActionOperationProcessor processor, IProgressMonitor monitor) throws Exception {
-		for (int i = 0; i < this.visitors.length && !monitor.isCanceled(); i++) {
-			this.visitors[i].postVisit(change, processor, monitor);
+	@Override
+	public void postVisit(ResourceChange change, IActionOperationProcessor processor, IProgressMonitor monitor)
+			throws Exception {
+		for (int i = 0; i < visitors.length && !monitor.isCanceled(); i++) {
+			visitors[i].postVisit(change, processor, monitor);
 		}
 	}
 
-	public void preVisit(ResourceChange change, IActionOperationProcessor processor, IProgressMonitor monitor) throws Exception {
-		for (int i = 0; i < this.visitors.length && !monitor.isCanceled(); i++) {
-			this.visitors[i].preVisit(change, processor, monitor);
+	@Override
+	public void preVisit(ResourceChange change, IActionOperationProcessor processor, IProgressMonitor monitor)
+			throws Exception {
+		for (int i = 0; i < visitors.length && !monitor.isCanceled(); i++) {
+			visitors[i].preVisit(change, processor, monitor);
 		}
 	}
 

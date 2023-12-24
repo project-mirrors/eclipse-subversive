@@ -22,8 +22,11 @@ import java.io.File;
  * @author Alexander Gurov
  */
 public interface IUnresolvedConflictDetector {
-    public boolean hasUnresolvedConflicts();
-    public File []getUnprocessed();
-    public File []getProcessed();
-    public String getMessage();
+	boolean hasUnresolvedConflicts();
+
+	File[] getUnprocessed();
+
+	File[] getProcessed();
+
+	String getMessage();
 }

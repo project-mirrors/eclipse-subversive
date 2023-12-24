@@ -25,39 +25,42 @@ import org.eclipse.swt.widgets.Control;
  * @author Alexei Goncharov
  */
 public class CompositePropertiesVerifier extends AbstractVerifier {
-	
+
 	private HashMap<String, AbstractFormattedVerifier> verifiers;
+
 	private Combo propNameCombo;
-		
+
 	public CompositePropertiesVerifier(Combo propNameCombo, HashMap<String, AbstractFormattedVerifier> verifierParam) {
-		this.verifiers = verifierParam;
+		verifiers = verifierParam;
 		this.propNameCombo = propNameCombo;
 	}
-	
+
+	@Override
 	public boolean verify(Control input) {
-		AbstractFormattedVerifier current = this.verifiers.get(this.propNameCombo.getText());
+		AbstractFormattedVerifier current = verifiers.get(propNameCombo.getText());
 		if (current == null) {
 			return true;
 		}
 		String msg = current.getErrorMessage(input);
 		if (msg != null) {
-			this.fireError(msg);
+			fireError(msg);
 			return false;
 		}
 		msg = current.getWarningMessage(input);
 		if (msg != null) {
-			this.fireWarning(msg);
-		}
-		else {
-			this.fireOk();
+			fireWarning(msg);
+		} else {
+			fireOk();
 		}
 		return true;
 	}
-	
+
+	@Override
 	protected String getErrorMessage(Control input) {
 		return null;
 	}
 
+	@Override
 	protected String getWarningMessage(Control input) {
 		return null;
 	}

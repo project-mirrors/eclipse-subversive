@@ -15,11 +15,10 @@
 package org.eclipse.team.svn.ui.decorator;
 
 /**
- * Implementros of this interface will provide the content of
- * the decoration variable 
+ * Implementros of this interface will provide the content of the decoration variable
  * 
  * @author Alexander Gurov
  */
 public interface IVariableContentProvider {
-	public String getValue(IVariable var);
+	String getValue(IVariable var);
 }

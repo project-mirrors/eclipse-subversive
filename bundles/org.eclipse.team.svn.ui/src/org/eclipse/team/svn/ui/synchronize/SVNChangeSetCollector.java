@@ -20,9 +20,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.eclipse.core.resources.IWorkspaceRunnable;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.team.core.synchronize.SyncInfo;
 import org.eclipse.team.internal.core.subscribers.ChangeSet;
@@ -46,20 +43,22 @@ public class SVNChangeSetCollector extends SyncInfoSetChangeSetCollector {
 	public SVNChangeSetCollector(ISynchronizePageConfiguration configuration) {
 		super(configuration);
 	}
-	
+
+	@Override
 	public void dispose() {
 		SVNChangeSetCapability.isEnabled = false;
 		super.dispose();
 	}
-	
+
+	@Override
 	protected void add(SyncInfo[] infos) {
 		if (infos == null || infos.length == 0) {
 			return;
 		}
-		Map<Long, SVNCheckedInChangeSet> sets = new HashMap<Long, SVNCheckedInChangeSet>();
-		final Set<SVNCheckedInChangeSet> added = new HashSet<SVNCheckedInChangeSet>();
-		for (ChangeSet set : this.getSets()) {
-			SVNCheckedInChangeSet svnSet = (SVNCheckedInChangeSet)set;
+		Map<Long, SVNCheckedInChangeSet> sets = new HashMap<>();
+		final Set<SVNCheckedInChangeSet> added = new HashSet<>();
+		for (ChangeSet set : getSets()) {
+			SVNCheckedInChangeSet svnSet = (SVNCheckedInChangeSet) set;
 			sets.put(svnSet.getRevision(), svnSet);
 		}
 		// change set name format is: revisionNum (date) [author] ...comment...
@@ -81,26 +80,28 @@ public class SVNChangeSetCollector extends SyncInfoSetChangeSetCollector {
 				set.date = new Date(resource.getLastCommitDate());
 				set.revision = revision;
 				if (resource instanceof IResourceChange) {
-					set.comment = ((IResourceChange)resource).getComment();
+					set.comment = ((IResourceChange) resource).getComment();
 				}
 				updateName = true;
 				sets.put(revision, set);
 				added.add(set);
-			}
-			else if (set.date.getTime() == 0) {
+			} else if (set.date.getTime() == 0) {
 				updateName = true;
 				set.date = new Date(resource.getLastCommitDate());
-			}
-			else if (set.author == null) {
+			} else if (set.author == null) {
 				updateName = true;
 				set.author = resource.getAuthor();
 			}
 			if (updateName) {
 				// rebuild name
-				String name = 
-					String.valueOf(revision) + " " +  //$NON-NLS-1$
-					(resource.getLastCommitDate() == 0 ? svnNoDate : BaseMessages.format(svnDate, new Object[] {DateFormatter.formatDate(set.date)})) + " " +  //$NON-NLS-1$
-					(resource.getAuthor() == null ? svnNoAuthor : BaseMessages.format(svnAuthor, new Object[] {resource.getAuthor()}));
+				String name = String.valueOf(revision) + " " + //$NON-NLS-1$
+						(resource.getLastCommitDate() == 0
+								? svnNoDate
+								: BaseMessages.format(svnDate, new Object[] { DateFormatter.formatDate(set.date) }))
+						+ " " + //$NON-NLS-1$
+						(resource.getAuthor() == null
+								? svnNoAuthor
+								: BaseMessages.format(svnAuthor, new Object[] { resource.getAuthor() }));
 				if (set.comment != null) {
 					String comment = set.comment;
 					if (FileUtility.isWindows()) {
@@ -110,51 +111,54 @@ public class SVNChangeSetCollector extends SyncInfoSetChangeSetCollector {
 				}
 				set.setName(name);
 			}
-			
+
 			set.add(info);
 		}
-		
+
 		// lesser UI blinking and thread safe...
-		this.performUpdate(new IWorkspaceRunnable() {
-			public void run(IProgressMonitor monitor) throws CoreException {
-				for (SVNCheckedInChangeSet set : added) {
-					SVNChangeSetCollector.this.add(set);
-				}
+		performUpdate(monitor -> {
+			for (SVNCheckedInChangeSet set : added) {
+				SVNChangeSetCollector.this.add(set);
 			}
 		}, true, new NullProgressMonitor());
 	}
 
+	@Override
 	protected void initializeSets() {
 	}
-	
+
 	public static class SVNCheckedInChangeSet extends CheckedInChangeSet {
 		private String author;
 
 		private String comment;
 
 		private Date date;
-		
+
 		private long revision;
 
 		public long getRevision() {
-			return this.revision;
+			return revision;
 		}
 
+		@Override
 		public String getAuthor() {
-			return this.author;
+			return author;
 		}
 
+		@Override
 		public Date getDate() {
-			return this.date;
+			return date;
 		}
 
+		@Override
 		public String getComment() {
-			return this.comment;
+			return comment;
 		}
-		
+
+		@Override
 		public void setName(String name) {
 			super.setName(name);
 		}
 	}
-	
+
 }

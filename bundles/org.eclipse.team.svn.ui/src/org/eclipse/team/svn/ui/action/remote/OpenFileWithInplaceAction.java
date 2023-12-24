@@ -29,31 +29,39 @@ import org.eclipse.team.svn.ui.operation.OpenRemoteFileOperation;
  */
 public class OpenFileWithInplaceAction extends AbstractRepositoryTeamAction {
 	public OpenFileWithInplaceAction() {
-		super();
 	}
 
+	@Override
 	public void runImpl(IAction action) {
-		IRepositoryResource []resources = this.getSelectedRepositoryResources();
-		this.runScheduled(new OpenRemoteFileOperation(new IRepositoryFile[] {(IRepositoryFile)resources[0]}, OpenRemoteFileOperation.OPEN_INPLACE));
+		IRepositoryResource[] resources = getSelectedRepositoryResources();
+		runScheduled(new OpenRemoteFileOperation(new IRepositoryFile[] { (IRepositoryFile) resources[0] },
+				OpenRemoteFileOperation.OPEN_INPLACE));
 	}
-	
+
+	@Override
 	public void selectionChanged(IAction action, ISelection selection) {
 		super.selectionChanged(action, selection);
-		if (this.isEnabled()) {
-			IRepositoryResource []resources = this.getSelectedRepositoryResources();
-			action.setImageDescriptor(SVNTeamUIPlugin.instance().getWorkbench().getEditorRegistry().getSystemExternalEditorImageDescriptor(resources[0].getName()));
-		}
-		else {
+		if (isEnabled()) {
+			IRepositoryResource[] resources = getSelectedRepositoryResources();
+			action.setImageDescriptor(SVNTeamUIPlugin.instance()
+					.getWorkbench()
+					.getEditorRegistry()
+					.getSystemExternalEditorImageDescriptor(resources[0].getName()));
+		} else {
 			action.setImageDescriptor(null);
 		}
 	}
-	
+
+	@Override
 	public boolean isEnabled() {
-		IRepositoryResource []resources = this.getSelectedRepositoryResources();
+		IRepositoryResource[] resources = getSelectedRepositoryResources();
 		if (resources.length != 1 || !(resources[0] instanceof IRepositoryFile)) {
 			return false;
 		}
-		return SVNTeamUIPlugin.instance().getWorkbench().getEditorRegistry().isSystemInPlaceEditorAvailable(resources[0].getName());
+		return SVNTeamUIPlugin.instance()
+				.getWorkbench()
+				.getEditorRegistry()
+				.isSystemInPlaceEditorAvailable(resources[0].getName());
 	}
 
 }

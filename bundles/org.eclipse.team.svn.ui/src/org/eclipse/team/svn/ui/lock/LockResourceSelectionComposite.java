@@ -25,7 +25,6 @@ import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TableLayout;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
@@ -41,6 +40,7 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
+import org.eclipse.team.svn.core.BaseMessages;
 import org.eclipse.team.svn.ui.SVNUIMessages;
 import org.eclipse.team.svn.ui.dialog.DefaultDialog;
 import org.eclipse.team.svn.ui.utility.ArrayStructuredContentProvider;
@@ -53,146 +53,159 @@ import org.eclipse.team.svn.ui.utility.ArrayStructuredContentProvider;
  * @author Igor Burilo
  */
 public class LockResourceSelectionComposite extends Composite {
-	
+
 	public final static int COLUMN_NAME = 1;
+
 	public final static int COLUMN_PATH = 2;
+
 	public final static int COLUMN_STATE = 3;
+
 	public final static int COLUMN_OWNER = 4;
+
 	public final static int COLUMN_DATE = 5;
-	
+
 	protected LockResource[] resources;
+
 	protected boolean showCheckBoxesAndButtons;
+
 	protected boolean hasBorder;
-	
-	protected CheckboxTableViewer tableViewer;	
+
+	protected CheckboxTableViewer tableViewer;
+
 	protected Label lblSelectedResourcesNumber;
 
 	protected ISelectionChangedListener selectionListener;
+
 	protected List<ILockResourceSelectionChangeListener> selectionChangedListeners;
-	
+
 	protected LockResource[] selectedResources;
+
 	protected LockResource[] notSelectedResources;
 
-	public static interface ILockResourceSelectionChangeListener {
-		public void resourcesSelectionChanged(LockResourceSelectionChangedEvent event);
+	public interface ILockResourceSelectionChangeListener {
+		void resourcesSelectionChanged(LockResourceSelectionChangedEvent event);
 	}
-	
+
 	public static class LockResourceSelectionChangedEvent {
 		public final LockResource[] checkedResources;
+
 		public final IStructuredSelection selection;
-		
-		public LockResourceSelectionChangedEvent(LockResource []resources, ISelection selection) {
-			this.checkedResources = resources;
+
+		public LockResourceSelectionChangedEvent(LockResource[] resources, ISelection selection) {
+			checkedResources = resources;
 			this.selection = (IStructuredSelection) selection;
 		}
 	}
-		
-	public LockResourceSelectionComposite(Composite parent, int style, boolean hasBorder, boolean showCheckBoxesAndButtons) {
+
+	public LockResourceSelectionComposite(Composite parent, int style, boolean hasBorder,
+			boolean showCheckBoxesAndButtons) {
 		super(parent, style);
 		this.showCheckBoxesAndButtons = showCheckBoxesAndButtons;
 		this.hasBorder = hasBorder;
-		
-		this.resources = new LockResource[0];
-		this.selectedResources = new LockResource[0];
-		this.notSelectedResources = new LockResource[0];
-		
-		this.selectionChangedListeners = new ArrayList<ILockResourceSelectionChangeListener>();
-		
-		this.createControls();
+
+		resources = new LockResource[0];
+		selectedResources = new LockResource[0];
+		notSelectedResources = new LockResource[0];
+
+		selectionChangedListeners = new ArrayList<>();
+
+		createControls();
 	}
-	
+
 	protected void createControls() {
 		GridLayout gridLayout = null;
 		GridData data = null;
 
 		gridLayout = new GridLayout();
 		gridLayout.marginHeight = gridLayout.marginWidth = 0;
-		this.setLayout(gridLayout);
+		setLayout(gridLayout);
 
 		int style = SWT.H_SCROLL | SWT.V_SCROLL | SWT.FULL_SELECTION | SWT.MULTI;
-		if (this.hasBorder) {
+		if (hasBorder) {
 			style |= SWT.BORDER;
 		}
-		Table table = new Table(this, this.showCheckBoxesAndButtons ? style | SWT.CHECK : style);
+		Table table = new Table(this, showCheckBoxesAndButtons ? style | SWT.CHECK : style);
 		table.setHeaderVisible(true);
 		table.setLinesVisible(true);
 		TableLayout layout = new TableLayout();
 		table.setLayout(layout);
 
-		this.tableViewer = new CheckboxTableViewer(table);
+		tableViewer = new CheckboxTableViewer(table);
 		data = new GridData(GridData.FILL_BOTH);
-		this.tableViewer.getTable().setLayoutData(data);
-		
-		LockResourcesTableComparator tableComparator = new LockResourcesTableComparator(this.tableViewer);		
-		
-		if (this.showCheckBoxesAndButtons) {
+		tableViewer.getTable().setLayoutData(data);
+
+		LockResourcesTableComparator tableComparator = new LockResourcesTableComparator(tableViewer);
+
+		if (showCheckBoxesAndButtons) {
 			//0.checkbox
 			TableColumn col = new TableColumn(table, SWT.NONE);
 			col.setResizable(false);
-			layout.addColumnData(new ColumnPixelData(20, false));	
+			layout.addColumnData(new ColumnPixelData(20, false));
 		} else {
 			//0.image
-	        TableColumn col = new TableColumn(table, SWT.NONE);
+			TableColumn col = new TableColumn(table, SWT.NONE);
 			col.setText(""); //$NON-NLS-1$
 			col.setResizable(false);
 			col.setAlignment(SWT.CENTER);
-	        layout.addColumnData(new ColumnPixelData(20, false));
-		}		
-        
-        //1.name
+			layout.addColumnData(new ColumnPixelData(20, false));
+		}
+
+		//1.name
 		TableColumn col = new TableColumn(table, SWT.NONE);
-        col.setText(SVNUIMessages.LocksComposite_Name);
-        col.addSelectionListener(tableComparator);
-        layout.addColumnData(new ColumnWeightData(20, true));
-        
-        //2.path
-        col = new TableColumn(table, SWT.NONE);
-        col.setText(SVNUIMessages.LocksComposite_Path);
-        col.addSelectionListener(tableComparator);
-        layout.addColumnData(new ColumnWeightData(30, true));
-        
-        //3.state
-        col = new TableColumn(table, SWT.NONE);
-        col.setText(SVNUIMessages.LocksComposite_State);
-        col.addSelectionListener(tableComparator);
-        layout.addColumnData(new ColumnWeightData(20, true));
-        
-        //4.owner
-        col = new TableColumn(table, SWT.NONE);
-        col.setText(SVNUIMessages.LocksComposite_Owner);
-        col.addSelectionListener(tableComparator);
-        layout.addColumnData(new ColumnWeightData(20, true));
-        
-        //5.date
-        col = new TableColumn(table, SWT.NONE);
-        col.setText(SVNUIMessages.LocksComposite_CreationDate);
-        col.addSelectionListener(tableComparator);
-        layout.addColumnData(new ColumnWeightData(10, true));
-        
-        tableComparator.setReversed(false);
-        tableComparator.setColumnNumber(LockResourceSelectionComposite.COLUMN_PATH);
-        this.tableViewer.setComparator(tableComparator);
-        this.tableViewer.getTable().setSortColumn(this.tableViewer.getTable().getColumn(LockResourceSelectionComposite.COLUMN_PATH));
-        this.tableViewer.getTable().setSortDirection(SWT.UP);
-        
-        this.tableViewer.setContentProvider(new ArrayStructuredContentProvider());
-		this.tableViewer.setLabelProvider(new LockResourcesTableLabelProvider(this.showCheckBoxesAndButtons));		
-		
-		this.tableViewer.addSelectionChangedListener(this.selectionListener = new ISelectionChangedListener() {
-			public void selectionChanged(SelectionChangedEvent event) {											
-				if (LockResourceSelectionComposite.this.showCheckBoxesAndButtons) {
-					LockResourceSelectionComposite.this.updateSelectedResources();												
-					int selectedNumber = LockResourceSelectionComposite.this.selectedResources.length;
-					LockResourceSelectionComposite.this.lblSelectedResourcesNumber.setText(LockResourceSelectionComposite.this.resourceNumberToString(selectedNumber));
-				}
-				LockResourceSelectionComposite.this.fireResourcesSelectionChanged(new LockResourceSelectionChangedEvent(LockResourceSelectionComposite.this.selectedResources, event != null ? event.getSelection() : null));
+		col.setText(SVNUIMessages.LocksComposite_Name);
+		col.addSelectionListener(tableComparator);
+		layout.addColumnData(new ColumnWeightData(20, true));
+
+		//2.path
+		col = new TableColumn(table, SWT.NONE);
+		col.setText(SVNUIMessages.LocksComposite_Path);
+		col.addSelectionListener(tableComparator);
+		layout.addColumnData(new ColumnWeightData(30, true));
+
+		//3.state
+		col = new TableColumn(table, SWT.NONE);
+		col.setText(SVNUIMessages.LocksComposite_State);
+		col.addSelectionListener(tableComparator);
+		layout.addColumnData(new ColumnWeightData(20, true));
+
+		//4.owner
+		col = new TableColumn(table, SWT.NONE);
+		col.setText(SVNUIMessages.LocksComposite_Owner);
+		col.addSelectionListener(tableComparator);
+		layout.addColumnData(new ColumnWeightData(20, true));
+
+		//5.date
+		col = new TableColumn(table, SWT.NONE);
+		col.setText(SVNUIMessages.LocksComposite_CreationDate);
+		col.addSelectionListener(tableComparator);
+		layout.addColumnData(new ColumnWeightData(10, true));
+
+		tableComparator.setReversed(false);
+		tableComparator.setColumnNumber(LockResourceSelectionComposite.COLUMN_PATH);
+		tableViewer.setComparator(tableComparator);
+		tableViewer.getTable()
+				.setSortColumn(tableViewer.getTable().getColumn(LockResourceSelectionComposite.COLUMN_PATH));
+		tableViewer.getTable().setSortDirection(SWT.UP);
+
+		tableViewer.setContentProvider(new ArrayStructuredContentProvider());
+		tableViewer.setLabelProvider(new LockResourcesTableLabelProvider(showCheckBoxesAndButtons));
+
+		tableViewer.addSelectionChangedListener(selectionListener = event -> {
+			if (showCheckBoxesAndButtons) {
+				LockResourceSelectionComposite.this.updateSelectedResources();
+				int selectedNumber = selectedResources.length;
+				lblSelectedResourcesNumber
+						.setText(LockResourceSelectionComposite.this.resourceNumberToString(selectedNumber));
 			}
+			LockResourceSelectionComposite.this.fireResourcesSelectionChanged(
+					new LockResourceSelectionChangedEvent(selectedResources,
+							event != null ? event.getSelection() : null));
 		});
-		
-		if (!this.showCheckBoxesAndButtons) {
+
+		if (!showCheckBoxesAndButtons) {
 			return;
-		}					
-						
+		}
+
 		Composite tComposite = new Composite(this, SWT.RIGHT);
 		GridLayout gLayout = new GridLayout();
 		gLayout.numColumns = 3;
@@ -207,11 +220,13 @@ public class LockResourceSelectionComposite extends Composite {
 		data.widthHint = DefaultDialog.computeButtonWidth(selectButton);
 		selectButton.setLayoutData(data);
 		SelectionListener listener = new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
-				LockResourceSelectionComposite.this.tableViewer.setAllChecked(true);
-				Object[] elements = LockResourceSelectionComposite.this.tableViewer.getCheckedElements();
-				LockResourceSelectionComposite.this.selectionListener.selectionChanged(null);
-				LockResourceSelectionComposite.this.fireResourcesSelectionChanged(new LockResourceSelectionChangedEvent(Arrays.asList(elements).toArray(new LockResource[elements.length]), null));
+				tableViewer.setAllChecked(true);
+				Object[] elements = tableViewer.getCheckedElements();
+				selectionListener.selectionChanged(null);
+				LockResourceSelectionComposite.this.fireResourcesSelectionChanged(new LockResourceSelectionChangedEvent(
+						Arrays.asList(elements).toArray(new LockResource[elements.length]), null));
 			}
 		};
 		selectButton.addSelectionListener(listener);
@@ -222,10 +237,12 @@ public class LockResourceSelectionComposite extends Composite {
 		data.widthHint = DefaultDialog.computeButtonWidth(deselectButton);
 		deselectButton.setLayoutData(data);
 		listener = new SelectionAdapter() {
-			public void widgetSelected(SelectionEvent e) {				
-				LockResourceSelectionComposite.this.tableViewer.setAllChecked(false);
-				LockResourceSelectionComposite.this.selectionListener.selectionChanged(null);
-				LockResourceSelectionComposite.this.fireResourcesSelectionChanged(new LockResourceSelectionChangedEvent(new LockResource[0], null));
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				tableViewer.setAllChecked(false);
+				selectionListener.selectionChanged(null);
+				LockResourceSelectionComposite.this.fireResourcesSelectionChanged(
+						new LockResourceSelectionChangedEvent(new LockResource[0], null));
 			}
 		};
 		deselectButton.addSelectionListener(listener);
@@ -238,87 +255,88 @@ public class LockResourceSelectionComposite extends Composite {
 		data = new GridData(GridData.HORIZONTAL_ALIGN_FILL | GridData.GRAB_HORIZONTAL);
 		lComposite.setLayoutData(data);
 
-		this.lblSelectedResourcesNumber = new Label(lComposite, SWT.RIGHT);
-		this.lblSelectedResourcesNumber.setText(this.resourceNumberToString(this.selectedResources.length));
+		lblSelectedResourcesNumber = new Label(lComposite, SWT.RIGHT);
+		lblSelectedResourcesNumber.setText(resourceNumberToString(selectedResources.length));
 		data = new GridData(GridData.HORIZONTAL_ALIGN_FILL | GridData.GRAB_HORIZONTAL);
-		this.lblSelectedResourcesNumber.setLayoutData(data);
+		lblSelectedResourcesNumber.setLayoutData(data);
 	}
-	
+
 	protected String resourceNumberToString(int value) {
-		return SVNUIMessages.format(SVNUIMessages.ResourceSelectionComposite_Info, new String[] { String.valueOf(value), String.valueOf(this.resources.length) });
+		return BaseMessages.format(SVNUIMessages.ResourceSelectionComposite_Info,
+				new String[] { String.valueOf(value), String.valueOf(resources.length) });
 	}
-	
-	public void setInput(LockResource[] resources) {		
-		this.selectedResources = this.resources = resources;		
-		this.tableViewer.setInput(resources);
+
+	public void setInput(LockResource[] resources) {
+		selectedResources = this.resources = resources;
+		tableViewer.setInput(resources);
 		if (this.resources != null) {
-			for (int i = 0; i < this.resources.length; i++) {
-				this.tableViewer.setChecked(this.resources[i], true);
+			for (LockResource element : this.resources) {
+				tableViewer.setChecked(element, true);
 			}
-			
-			if (this.showCheckBoxesAndButtons) {
-				this.lblSelectedResourcesNumber.setText(this.resourceNumberToString(this.selectedResources.length));	
-			}	
+
+			if (showCheckBoxesAndButtons) {
+				lblSelectedResourcesNumber.setText(resourceNumberToString(selectedResources.length));
+			}
 		}
-		
+
 		//TODO select first row in View
 //		if (!this.showCheckBoxesAndButtons) {
 //			Table table = this.tableViewer.getTable();
 //			TableItem firstItem = table.getItem(0);
-//			
+//
 //			//TODO it doesn't work when change selection outside, e.g. from Package Explorer
 //			table.setSelection(firstItem);
-//			((Table)this.tableViewer.getControl()).showSelection();	
+//			((Table)this.tableViewer.getControl()).showSelection();
 //		}
-		
-		if (this.showCheckBoxesAndButtons) {
-			this.updateSelectedResources();
-			this.selectionListener.selectionChanged(null);	
-		}		
-		this.tableViewer.refresh();
-	}
-	
-	protected void updateSelectedResources() {
-		TableItem[] items = this.tableViewer.getTable().getItems();
-		List<LockResource> checked = new ArrayList<LockResource>(items.length);
-		List<LockResource> unchecked = new ArrayList<LockResource>();
-		for (int i = 0; i < items.length; i++) {
-			(items[i].getChecked() ? checked : unchecked).add((LockResource)items[i].getData());
+
+		if (showCheckBoxesAndButtons) {
+			updateSelectedResources();
+			selectionListener.selectionChanged(null);
 		}
-		this.selectedResources = checked.toArray(new LockResource[checked.size()]);
-		this.notSelectedResources = unchecked.toArray(new LockResource[unchecked.size()]);
+		tableViewer.refresh();
 	}
-	
+
+	protected void updateSelectedResources() {
+		TableItem[] items = tableViewer.getTable().getItems();
+		List<LockResource> checked = new ArrayList<>(items.length);
+		List<LockResource> unchecked = new ArrayList<>();
+		for (TableItem item : items) {
+			(item.getChecked() ? checked : unchecked).add((LockResource) item.getData());
+		}
+		selectedResources = checked.toArray(new LockResource[checked.size()]);
+		notSelectedResources = unchecked.toArray(new LockResource[unchecked.size()]);
+	}
+
 	public TableViewer getTableViewer() {
-		return this.tableViewer;
+		return tableViewer;
 	}
-	
+
 	public LockResource[] getSelectedResources() {
-		return this.selectedResources;
+		return selectedResources;
 	}
 
 	public LockResource[] getNotSelectedResources() {
-		return this.notSelectedResources;
+		return notSelectedResources;
 	}
 
 	public void addResourcesSelectionChangedListener(ILockResourceSelectionChangeListener listener) {
-		this.selectionChangedListeners.add(listener);
+		selectionChangedListeners.add(listener);
 	}
 
 	public void removeResourcesSelectionChangedListener(ILockResourceSelectionChangeListener listener) {
-		this.selectionChangedListeners.remove(listener);
+		selectionChangedListeners.remove(listener);
 	}
 
 	public void fireResourcesSelectionChanged(LockResourceSelectionChangedEvent event) {
-		ILockResourceSelectionChangeListener[] listeners = (ILockResourceSelectionChangeListener[]) this.selectionChangedListeners
-				.toArray(new ILockResourceSelectionChangeListener[this.selectionChangedListeners.size()]);
-		for (int i = 0; i < listeners.length; i++) {
-			listeners[i].resourcesSelectionChanged(event);
+		ILockResourceSelectionChangeListener[] listeners = selectionChangedListeners
+				.toArray(new ILockResourceSelectionChangeListener[selectionChangedListeners.size()]);
+		for (ILockResourceSelectionChangeListener listener : listeners) {
+			listener.resourcesSelectionChanged(event);
 		}
 	}
-	
+
 	public void setMenuManager(MenuManager menuMgr) {
-		Menu menu = menuMgr.createContextMenu(this.tableViewer.getTable());		
-		this.tableViewer.getTable().setMenu(menu);
-	} 	
+		Menu menu = menuMgr.createContextMenu(tableViewer.getTable());
+		tableViewer.getTable().setMenu(menu);
+	}
 }

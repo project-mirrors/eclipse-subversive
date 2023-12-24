@@ -28,16 +28,19 @@ import org.eclipse.team.svn.ui.extension.factory.IReportingDescriptor;
  * @author Alexander Gurov
  */
 public class MylynReporterFactory implements IReporterFactory {
+	@Override
 	public boolean isCustomEditorSupported() {
 		return true;
 	}
 
+	@Override
 	public IReporter newReporter(IReportingDescriptor settings, ReportType type) {
 		TaskRepository repository = MylynReporterFactory.getRepository(settings.getTrackerUrl());
 		if (repository == null) {
 			return null;
 		}
-		AbstractRepositoryConnector connector = TasksUi.getRepositoryManager().getRepositoryConnector(repository.getConnectorKind());
+		AbstractRepositoryConnector connector = TasksUi.getRepositoryManager()
+				.getRepositoryConnector(repository.getConnectorKind());
 		AbstractTaskDataHandler taskDataHandler = connector.getTaskDataHandler();
 		if (taskDataHandler == null) {
 			return null;
@@ -45,15 +48,13 @@ public class MylynReporterFactory implements IReporterFactory {
 		return new MylynReporter(repository, taskDataHandler, settings, type);
 	}
 
-	public static TaskRepository getRepository(String url)
-	{
-		for (TaskRepository repository : TasksUi.getRepositoryManager().getAllRepositories())
-		{
+	public static TaskRepository getRepository(String url) {
+		for (TaskRepository repository : TasksUi.getRepositoryManager().getAllRepositories()) {
 			if (repository.getRepositoryUrl().equals(url)) {
 				return repository;
 			}
 		}
 		return null;
 	}
-	
+
 }

@@ -15,14 +15,15 @@
 package org.eclipse.team.svn.ui.decorator;
 
 /**
- * Implementors of this interface will provide variables that can be used
- * for various decoration purposes
+ * Implementors of this interface will provide variables that can be used for various decoration purposes
  *
  * @author Alexey Mikoyan
  *
  */
 public interface IVariableSetProvider {
-	public IVariable getVariable(String name);
-	public IVariable getCenterVariable();
-	public String getDomainName();
+	IVariable getVariable(String name);
+
+	IVariable getCenterVariable();
+
+	String getDomainName();
 }

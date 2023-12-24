@@ -14,7 +14,6 @@
 
 package org.eclipse.team.svn.core.connector;
 
-
 /**
  * SVN post-commit hook's message holder
  * 
@@ -22,9 +21,13 @@ package org.eclipse.team.svn.core.connector;
  */
 public class SVNCommitStatus {
 	public final String message;
+
 	public final String repository;
+
 	public final long revision;
+
 	public final String author;
+
 	public final long date;
 
 	public SVNCommitStatus(String message, String repository, long revision, long date, String author) {

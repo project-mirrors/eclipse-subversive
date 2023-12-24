@@ -30,29 +30,37 @@ import org.eclipse.team.svn.ui.panel.ItemListPanel;
  * @author Sergiy Logvin
  */
 public class DiscardLocationFailurePanel extends ItemListPanel {
-	
-	protected IProject []projects;
-	
-	public DiscardLocationFailurePanel(String []locations, IProject []projects) {
+
+	protected IProject[] projects;
+
+	public DiscardLocationFailurePanel(String[] locations, IProject[] projects) {
 		super(locations, SVNTeamUIPlugin.instance().getImageDescriptor("icons/objects/repository.gif"), //$NON-NLS-1$
-				locations.length == 1 ? SVNUIMessages.DiscardLocationFailurePanel_Title_Single : SVNUIMessages.DiscardLocationFailurePanel_Title_Multi, 
-				locations.length == 1 ? SVNUIMessages.DiscardLocationFailurePanel_Description_Single : SVNUIMessages.DiscardLocationFailurePanel_Description_Multi, 
-				locations.length == 1 ? SVNUIMessages.DiscardLocationFailurePanel_Message_Single : SVNUIMessages.DiscardLocationFailurePanel_Message_Multi, 
-				new String[] {SVNUIMessages.DiscardLocationFailurePanel_Disconnect, SVNUIMessages.DiscardLocationFailurePanel_Delete, IDialogConstants.CANCEL_LABEL});
+				locations.length == 1
+						? SVNUIMessages.DiscardLocationFailurePanel_Title_Single
+						: SVNUIMessages.DiscardLocationFailurePanel_Title_Multi,
+				locations.length == 1
+						? SVNUIMessages.DiscardLocationFailurePanel_Description_Single
+						: SVNUIMessages.DiscardLocationFailurePanel_Description_Multi,
+				locations.length == 1
+						? SVNUIMessages.DiscardLocationFailurePanel_Message_Single
+						: SVNUIMessages.DiscardLocationFailurePanel_Message_Multi,
+				new String[] { SVNUIMessages.DiscardLocationFailurePanel_Disconnect,
+						SVNUIMessages.DiscardLocationFailurePanel_Delete, IDialogConstants.CANCEL_LABEL });
 		this.projects = projects;
 	}
-	
+
+	@Override
 	public void createControlsImpl(Composite parent) {
 		super.createControlsImpl(parent);
-		
-		GridData data = (GridData)this.table.getLayoutData();
+
+		GridData data = (GridData) table.getLayoutData();
 		data.heightHint = 50;
-		this.table.setLayoutData(data);
-		
-		ProjectListComposite composite = new ProjectListComposite(parent, SWT.NONE, this.projects, true);
+		table.setLayoutData(data);
+
+		ProjectListComposite composite = new ProjectListComposite(parent, SWT.NONE, projects, true);
 		composite.initialize();
-		
-		data = (GridData)composite.getLayoutData();
+
+		data = (GridData) composite.getLayoutData();
 		data.heightHint = 100;
 		composite.setLayoutData(data);
 	}

@@ -26,48 +26,48 @@ import org.eclipse.team.svn.core.connector.SVNRevision;
  * @author Igor Burilo
  */
 public class SVNLogEntryCallbackWithMergeInfo implements ISVNLogEntryCallback {
-	
-	protected Stack<SVNLogEntry> mergeTreeBuilder = new Stack<SVNLogEntry>();
-	
-	protected ArrayList<SVNLogEntry> entries = new ArrayList<SVNLogEntry>();
-	
+
+	protected Stack<SVNLogEntry> mergeTreeBuilder = new Stack<>();
+
+	protected ArrayList<SVNLogEntry> entries = new ArrayList<>();
+
+	@Override
 	public void next(SVNLogEntry log) {
 		if (log.revision == SVNRevision.INVALID_REVISION_NUMBER) {
-			if (!this.mergeTreeBuilder.isEmpty()) {
-				log = this.mergeTreeBuilder.pop();						
-				if (this.mergeTreeBuilder.isEmpty()) {					
-					this.addEntry(log);
+			if (!mergeTreeBuilder.isEmpty()) {
+				log = mergeTreeBuilder.pop();
+				if (mergeTreeBuilder.isEmpty()) {
+					addEntry(log);
 				}
-			}															
+			}
 			return;
 		}
-		
-		if (!this.mergeTreeBuilder.isEmpty()) {
-			this.addChildEntry(this.mergeTreeBuilder.peek(), log);
-		}
-		else if (!log.hasChildren()) {
-			this.addEntry(log);
+
+		if (!mergeTreeBuilder.isEmpty()) {
+			addChildEntry(mergeTreeBuilder.peek(), log);
+		} else if (!log.hasChildren()) {
+			addEntry(log);
 		}
 		if (log.hasChildren()) {
-			this.mergeTreeBuilder.push(log);
-		}			
+			mergeTreeBuilder.push(log);
+		}
 	}
-	
+
 	/*
 	 * Can be overridden in sub classes
 	 */
 	protected void addEntry(SVNLogEntry entry) {
-		this.entries.add(entry);
+		entries.add(entry);
 	}
-	
+
 	/*
 	 * Can be overridden in sub classes
 	 */
 	protected void addChildEntry(SVNLogEntry parent, SVNLogEntry child) {
 		parent.add(child);
 	}
-	
+
 	public SVNLogEntry[] getEntries() {
-		return this.entries.toArray(new SVNLogEntry[entries.size()]);
+		return entries.toArray(new SVNLogEntry[entries.size()]);
 	}
 }

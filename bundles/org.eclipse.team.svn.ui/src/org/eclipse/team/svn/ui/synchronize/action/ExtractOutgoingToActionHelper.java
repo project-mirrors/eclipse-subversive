@@ -40,13 +40,15 @@ import org.eclipse.team.ui.synchronize.ISynchronizePageConfiguration;
  *
  */
 public class ExtractOutgoingToActionHelper extends AbstractActionHelper {
-	
+
 	public ExtractOutgoingToActionHelper(IAction action, ISynchronizePageConfiguration configuration) {
 		super(action, configuration);
 	}
 
+	@Override
 	public FastSyncInfoFilter getSyncInfoFilter() {
-		return new FastSyncInfoFilter.SyncInfoDirectionFilter(new int[] {SyncInfo.OUTGOING, SyncInfo.CONFLICTING}) {
+		return new FastSyncInfoFilter.SyncInfoDirectionFilter(new int[] { SyncInfo.OUTGOING, SyncInfo.CONFLICTING }) {
+			@Override
 			public boolean select(SyncInfo info) {
 				if (super.select(info)) {
 					AbstractSVNSyncInfo syncInfo = (AbstractSVNSyncInfo) info;
@@ -58,7 +60,8 @@ public class ExtractOutgoingToActionHelper extends AbstractActionHelper {
 			}
 		};
 	}
-	
+
+	@Override
 	public IActionOperation getOperation() {
 		DirectoryDialog fileDialog = new DirectoryDialog(configuration.getSite().getShell());
 		fileDialog.setText(SVNUIMessages.ExtractToAction_Select_Title);
@@ -67,13 +70,15 @@ public class ExtractOutgoingToActionHelper extends AbstractActionHelper {
 		if (path == null) {
 			return null;
 		}
-		IResource []selectedOutgoingResources = this.getSyncInfoSelector().getSelectedResources(new ISyncStateFilter.StateFilterWrapper(IStateFilter.SF_ANY_CHANGE, true));
-		HashSet<IResource> outgoingResources = new HashSet<IResource>(Arrays.asList(selectedOutgoingResources));
+		IResource[] selectedOutgoingResources = getSyncInfoSelector()
+				.getSelectedResources(new ISyncStateFilter.StateFilterWrapper(IStateFilter.SF_ANY_CHANGE, true));
+		HashSet<IResource> outgoingResources = new HashSet<>(Arrays.asList(selectedOutgoingResources));
 		for (IResource current : selectedOutgoingResources) {
 			outgoingResources.add(current.getProject());
 		}
 		InitExtractLogOperation logger = new InitExtractLogOperation(path);
-		ExtractToOperationLocal mainOp = new ExtractToOperationLocal(outgoingResources.toArray(new IResource[outgoingResources.size()]), path, true, logger);
+		ExtractToOperationLocal mainOp = new ExtractToOperationLocal(
+				outgoingResources.toArray(new IResource[outgoingResources.size()]), path, true, logger);
 		CompositeOperation op = new CompositeOperation(mainOp.getId(), mainOp.getMessagesClass());
 		op.add(logger);
 		op.add(mainOp);
