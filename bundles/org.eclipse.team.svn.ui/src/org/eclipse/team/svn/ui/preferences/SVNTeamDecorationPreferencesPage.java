@@ -1,15 +1,18 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2004 IBM Corporation and others.
- * All rights reserved. This program and the accompanying materials 
- * are made available under the terms of the Common Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * Copyright (c) 2000, 2023 IBM Corporation and others.
  * 
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License v. 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0
+ * 
+ * SPDX-License-Identifier: EPL-2.0
+ *
  * Contributors:
  *    IBM Corporation - Initial API and implementation
  *    Alexander Gurov - adaptation for Subversive
  *    Dann Martens - [patch] Text decorations 'ascendant' variable, More decoration options
  *    Thomas Champagne - Bug 217561 : additional date formats for label decorations
+ *    Alexander Fedorov (ArSysOp) - ongoing support
  *******************************************************************************/
  
 package org.eclipse.team.svn.ui.preferences;
