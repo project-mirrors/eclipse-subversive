@@ -23,34 +23,36 @@ import org.eclipse.team.svn.ui.SVNUIMessages;
  * @author Alexander Gurov
  */
 public class IntegerFieldVerifier extends AbstractFormattedVerifier {
-    protected static String ERROR_NAN;
-    protected static String ERROR_NEGATIVE;
-    
-    protected boolean positive;
-    
-    public IntegerFieldVerifier(String fieldName, boolean positive) {
-        super(fieldName);
-        this.positive = positive;
-        IntegerFieldVerifier.ERROR_NAN = SVNUIMessages.format(SVNUIMessages.Verifier_IntegerField_NaN, new String[] {AbstractFormattedVerifier.FIELD_NAME});
-        IntegerFieldVerifier.ERROR_NEGATIVE = SVNUIMessages.format(SVNUIMessages.Verifier_IntegerField_Negative, new String[] {AbstractFormattedVerifier.FIELD_NAME});
-    }
-    
-    protected String getErrorMessageImpl(Control input) {
-        String text = this.getText(input);
-        try {
-            long i = Long.parseLong(text);
-            if (this.positive && i < 0) {
-            	return IntegerFieldVerifier.ERROR_NEGATIVE;
-            }
-        }
-        catch (Exception ex) {
-            return IntegerFieldVerifier.ERROR_NAN;
-        }
-        return null;
-    }
+	protected static String ERROR_NAN;
 
-    protected String getWarningMessageImpl(Control input) {    	
-        return null;
-    }
+	protected static String ERROR_NEGATIVE;
+
+	protected boolean positive;
+
+	public IntegerFieldVerifier(String fieldName, boolean positive) {
+		super(fieldName);
+		this.positive = positive;
+		IntegerFieldVerifier.ERROR_NAN = SVNUIMessages.format(SVNUIMessages.Verifier_IntegerField_NaN,
+				new String[] { AbstractFormattedVerifier.FIELD_NAME });
+		IntegerFieldVerifier.ERROR_NEGATIVE = SVNUIMessages.format(SVNUIMessages.Verifier_IntegerField_Negative,
+				new String[] { AbstractFormattedVerifier.FIELD_NAME });
+	}
+
+	protected String getErrorMessageImpl(Control input) {
+		String text = this.getText(input);
+		try {
+			long i = Long.parseLong(text);
+			if (this.positive && i < 0) {
+				return IntegerFieldVerifier.ERROR_NEGATIVE;
+			}
+		} catch (Exception ex) {
+			return IntegerFieldVerifier.ERROR_NAN;
+		}
+		return null;
+	}
+
+	protected String getWarningMessageImpl(Control input) {
+		return null;
+	}
 
 }

@@ -51,25 +51,33 @@ import org.eclipse.team.svn.ui.verifier.IValidationManager;
  */
 public class SSLComposite extends Composite implements IPropertiesPanel {
 	protected boolean callback;
-	
+
 	protected Button enableAuthenticationCheckBox;
+
 	protected Text certificateFileText;
+
 	protected Button browseButton;
+
 	protected Text certificatePassphraseText;
+
 	protected Button savePassphraseCheckBox;
+
 	protected Button mscapiButton;
+
 	protected Button aliasButton;
+
 	protected Text aliasText;
+
 	protected boolean mscapiSupport;
-	
+
 	protected IValidationManager validationManager;
-	
+
 	protected SSLSettings credentialsInput;
 
 	public SSLComposite(Composite parent, int style, IValidationManager validationManager) {
 		this(parent, style, validationManager, false);
 	}
-	
+
 	public SSLComposite(Composite parent, int style, IValidationManager validationManager, boolean callback) {
 		super(parent, style);
 		this.validationManager = validationManager;
@@ -82,7 +90,7 @@ public class SSLComposite extends Composite implements IPropertiesPanel {
 		this.getSSLSettingsDirectImpl(settings);
 		return settings;
 	}
-	
+
 	public void setSSLSettingsDirect(SSLSettings settings) {
 		this.savePassphraseCheckBox.setSelection(settings.isPassPhraseSaved());
 		this.enableAuthenticationCheckBox.setSelection(settings.isAuthenticationEnabled());
@@ -90,24 +98,23 @@ public class SSLComposite extends Composite implements IPropertiesPanel {
 		this.certificatePassphraseText.setText(text == null ? "" : text); //$NON-NLS-1$
 		text = settings.getCertificatePath();
 		this.certificateFileText.setText(text == null ? "" : text); //$NON-NLS-1$
-		
+
 		if (this.callback) {
 			if (text != null && text.length() > 0) {
 				this.certificatePassphraseText.setFocus();
 				this.certificatePassphraseText.selectAll();
-			}
-			else {
+			} else {
 				this.certificateFileText.setFocus();
 			}
 		}
-		
+
 		this.refreshControlsEnablement();
 	}
-	
+
 	public void initialize() {
 		GridLayout layout = null;
 		GridData data = null;
-		
+
 		layout = new GridLayout();
 		layout.numColumns = 2;
 		layout.marginHeight = 7;
@@ -115,36 +122,37 @@ public class SSLComposite extends Composite implements IPropertiesPanel {
 		data = new GridData(GridData.FILL_BOTH);
 		this.setLayout(layout);
 		this.setLayoutData(data);
-		
+
 		this.enableAuthenticationCheckBox = new Button(this, SWT.CHECK);
 		data = new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
 		data.horizontalSpan = 2;
 		this.enableAuthenticationCheckBox.setLayoutData(data);
 		this.enableAuthenticationCheckBox.setText(SVNUIMessages.SSLComposite_EnableAuthentication);
-		this.enableAuthenticationCheckBox.addSelectionListener(new SelectionListener() {			
+		this.enableAuthenticationCheckBox.addSelectionListener(new SelectionListener() {
 			public void widgetSelected(SelectionEvent e) {
 				SSLComposite.this.refreshControlsEnablement();
 			}
-			public void widgetDefaultSelected(SelectionEvent e) {			
-			}			
+
+			public void widgetDefaultSelected(SelectionEvent e) {
+			}
 		});
 		this.mscapiSupport = false;
 		Provider pjacapi = Security.getProvider("CAPI"); //$NON-NLS-1$
-        Provider pmscapi = Security.getProvider("SunMSCAPI"); //$NON-NLS-1$
-        // Check that Java supports MSCAPI
-        if (pmscapi != null) {
-        	try {
-        		ClassLoader.getSystemClassLoader().loadClass("sun.security.mscapi.NONEwithRSASignature");
+		Provider pmscapi = Security.getProvider("SunMSCAPI"); //$NON-NLS-1$
+		// Check that Java supports MSCAPI
+		if (pmscapi != null) {
+			try {
+				ClassLoader.getSystemClassLoader().loadClass("sun.security.mscapi.NONEwithRSASignature");
 			} catch (Exception e1) {
 				pmscapi = null;
 			}
-        }
-        // ms capi is only suported for windows and for provider SunMSCAPI and JACAPI from keyon
-        // further ms capi is only supported from svnkit as client!
-        // JAVAHL supports this feature, with version > 1.6.16 and windows 32 platforms 
-        String svnClientText = CoreExtensionsManager.instance().getSVNConnectorFactory().getId();
-        if (FileUtility.isWindows() && (pjacapi != null || pmscapi != null) && svnClientText.contains("svnkit")) { //$NON-NLS-1$
-        	this.mscapiSupport = true;
+		}
+		// ms capi is only suported for windows and for provider SunMSCAPI and JACAPI from keyon
+		// further ms capi is only supported from svnkit as client!
+		// JAVAHL supports this feature, with version > 1.6.16 and windows 32 platforms 
+		String svnClientText = CoreExtensionsManager.instance().getSVNConnectorFactory().getId();
+		if (FileUtility.isWindows() && (pjacapi != null || pmscapi != null) && svnClientText.contains("svnkit")) { //$NON-NLS-1$
+			this.mscapiSupport = true;
 		}
 		if (this.mscapiSupport) {
 			this.mscapiButton = new Button(this, SWT.CHECK);
@@ -152,14 +160,14 @@ public class SSLComposite extends Composite implements IPropertiesPanel {
 			data.horizontalSpan = 2;
 			this.mscapiButton.setLayoutData(data);
 			this.mscapiButton.setText("Use MSCAPI");
-	    	SelectionListener mscapiSelectionListener = new SelectionAdapter() {
+			SelectionListener mscapiSelectionListener = new SelectionAdapter() {
 				public void widgetSelected(SelectionEvent e) {
 					if (mscapiButton.getSelection()) {
 						certificateFileText.setText("MSCAPI");
 						certificateFileText.setEnabled(false);
 						certificatePassphraseText.setEnabled(false);
 						browseButton.setEnabled(false);
-						aliasButton.setEnabled(true);					
+						aliasButton.setEnabled(true);
 					} else {
 						certificateFileText.setEnabled(true);
 						certificatePassphraseText.setEnabled(true);
@@ -187,7 +195,7 @@ public class SSLComposite extends Composite implements IPropertiesPanel {
 		data = new GridData(GridData.FILL_HORIZONTAL);
 		data.horizontalSpan = 2;
 		group.setLayoutData(data);
-		
+
 		Composite fileAndPassphrase = new Composite(group, SWT.NONE);
 		layout = new GridLayout();
 		layout.marginHeight = layout.marginWidth = 0;
@@ -195,12 +203,12 @@ public class SSLComposite extends Composite implements IPropertiesPanel {
 		fileAndPassphrase.setLayout(layout);
 		data = new GridData(GridData.FILL_HORIZONTAL);
 		fileAndPassphrase.setLayoutData(data);
-		
+
 		Label description = new Label(fileAndPassphrase, SWT.NULL);
 		data = new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
 		description.setLayoutData(data);
 		description.setText(SVNUIMessages.SSLComposite_File);
-		
+
 		Composite inner = new Composite(fileAndPassphrase, SWT.FILL);
 		layout = new GridLayout();
 		layout.numColumns = 2;
@@ -208,19 +216,20 @@ public class SSLComposite extends Composite implements IPropertiesPanel {
 		inner.setLayout(layout);
 		data = new GridData(GridData.FILL_HORIZONTAL);
 		inner.setLayoutData(data);
-		
+
 		this.certificateFileText = new Text(inner, SWT.BORDER);
 		data = new GridData(GridData.FILL_HORIZONTAL);
 		data.widthHint = IDialogConstants.ENTRY_FIELD_WIDTH;
 		this.certificateFileText.setLayoutData(data);
-		this.validationManager.attachTo(this.certificateFileText, new AbstractVerifierProxy(new SSLCertificateResourceVerifier(SVNUIMessages.SSLComposite_File_Verifier, true)) {
+		this.validationManager.attachTo(this.certificateFileText, new AbstractVerifierProxy(
+				new SSLCertificateResourceVerifier(SVNUIMessages.SSLComposite_File_Verifier, true)) {
 			protected boolean isVerificationEnabled(Control input) {
 				return SSLComposite.this.enableAuthenticationCheckBox.getSelection();
 			}
 		});
-		this.browseButton = new Button (inner, SWT.PUSH);
+		this.browseButton = new Button(inner, SWT.PUSH);
 		this.browseButton.setText(SVNUIMessages.Button_Browse);
-		data = new GridData(GridData.HORIZONTAL_ALIGN_END);	
+		data = new GridData(GridData.HORIZONTAL_ALIGN_END);
 		data.widthHint = DefaultDialog.computeButtonWidth(this.browseButton);
 		this.browseButton.setLayoutData(data);
 		this.browseButton.addListener(SWT.Selection, new Listener() {
@@ -233,23 +242,23 @@ public class SSLComposite extends Composite implements IPropertiesPanel {
 				}
 			}
 		});
-				
+
 		description = new Label(fileAndPassphrase, SWT.NULL);
 		data = new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
 		description.setLayoutData(data);
 		description.setText(SVNUIMessages.SSLComposite_Passphrase);
-		
+
 		this.certificatePassphraseText = new Text(fileAndPassphrase, SWT.BORDER | SWT.PASSWORD);
 		data = new GridData(GridData.FILL_HORIZONTAL);
 		data.widthHint = IDialogConstants.ENTRY_FIELD_WIDTH;
 		this.certificatePassphraseText.setLayoutData(data);
-		
+
 		if (this.mscapiSupport) { //$NON-NLS-1$
 			description = new Label(fileAndPassphrase, SWT.NULL);
 			data = new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
 			description.setLayoutData(data);
 			description.setText("Certificate Alias:"); //$NON-NLS-1$
-			
+
 			inner = new Composite(fileAndPassphrase, SWT.FILL);
 			layout = new GridLayout();
 			layout.numColumns = 2;
@@ -257,31 +266,32 @@ public class SSLComposite extends Composite implements IPropertiesPanel {
 			inner.setLayout(layout);
 			data = new GridData(GridData.FILL_HORIZONTAL);
 			inner.setLayoutData(data);
-			
+
 			this.aliasText = new Text(inner, SWT.BORDER);
 			data = new GridData(GridData.FILL_HORIZONTAL);
 			data.widthHint = IDialogConstants.ENTRY_FIELD_WIDTH;
-			this.aliasText.setLayoutData(data);			
+			this.aliasText.setLayoutData(data);
 			aliasText.setEnabled(false);
-			
-			this.aliasButton = new Button (inner, SWT.PUSH);
+
+			this.aliasButton = new Button(inner, SWT.PUSH);
 			this.aliasButton.setText("Select alias"); //$NON-NLS-1$
-			data = new GridData(GridData.HORIZONTAL_ALIGN_END);	
+			data = new GridData(GridData.HORIZONTAL_ALIGN_END);
 			data.widthHint = DefaultDialog.computeButtonWidth(this.aliasButton);
 			this.aliasButton.setLayoutData(data);
 			SelectionListener msCapiCertificateSelectionListener = new SelectionAdapter() {
 				public void widgetSelected(SelectionEvent e) {
-					SSLClientCertificatesMSCapi dialog = new SSLClientCertificatesMSCapi(Display.getCurrent().getActiveShell(), "Certifacte selection");
-			        if (dialog.open() == SSLClientCertificatesMSCapi.OK) {
-			            aliasText.setText(dialog.getAlias());
-			            certificateFileText.setText("MSCAPI;"+dialog.getAlias());
-			        }
+					SSLClientCertificatesMSCapi dialog = new SSLClientCertificatesMSCapi(
+							Display.getCurrent().getActiveShell(), "Certifacte selection");
+					if (dialog.open() == SSLClientCertificatesMSCapi.OK) {
+						aliasText.setText(dialog.getAlias());
+						certificateFileText.setText("MSCAPI;" + dialog.getAlias());
+					}
 				}
 			};
 			this.aliasButton.addSelectionListener(msCapiCertificateSelectionListener);
 			this.aliasButton.setEnabled(false);
 		}
-		
+
 		inner = new Composite(group, SWT.FILL);
 		layout = new GridLayout();
 		layout.marginHeight = layout.marginWidth = 0;
@@ -292,10 +302,10 @@ public class SSLComposite extends Composite implements IPropertiesPanel {
 
 		this.savePassphraseCheckBox = new Button(inner, SWT.CHECK);
 		this.savePassphraseCheckBox.setText(SVNUIMessages.SSLComposite_SavePassphrase);
-		
+
 		new SecurityWarningComposite(inner);
 	}
-	
+
 	public void setCredentialsInput(SSLSettings input) {
 		this.credentialsInput = input;
 	}
@@ -309,19 +319,21 @@ public class SSLComposite extends Composite implements IPropertiesPanel {
 	}
 
 	public void cancelChanges() {
-		
+
 	}
 
 	protected void getSSLSettingsDirectImpl(SSLSettings settings) {
-		settings.setAuthenticationEnabled(this.enableAuthenticationCheckBox.getSelection());		
+		settings.setAuthenticationEnabled(this.enableAuthenticationCheckBox.getSelection());
 		settings.setCertificatePath(this.certificateFileText.getText());
 		settings.setPassPhrase(this.certificatePassphraseText.getText());
 		settings.setPassPhraseSaved(this.savePassphraseCheckBox.getSelection());
 	}
-	
+
 	protected void refreshControlsEnablement() {
 		boolean enabled = this.enableAuthenticationCheckBox.getSelection();
-		if (enabled && this.mscapiSupport && this.certificateFileText != null && this.certificateFileText.getText() != null && this.certificateFileText.getText().startsWith("MSCAPI")) {
+		if (enabled && this.mscapiSupport && this.certificateFileText != null
+				&& this.certificateFileText.getText() != null
+				&& this.certificateFileText.getText().startsWith("MSCAPI")) {
 			this.certificateFileText.setEnabled(false);
 			this.certificatePassphraseText.setEnabled(false);
 			this.browseButton.setEnabled(false);
@@ -330,7 +342,7 @@ public class SSLComposite extends Composite implements IPropertiesPanel {
 			this.mscapiButton.setEnabled(true);
 			this.mscapiButton.setSelection(true);
 			String[] certAlias = this.certificateFileText.getText().split(";");
-			if (certAlias.length>1) {
+			if (certAlias.length > 1) {
 				this.aliasText.setText(certAlias[1]);
 			}
 		} else {

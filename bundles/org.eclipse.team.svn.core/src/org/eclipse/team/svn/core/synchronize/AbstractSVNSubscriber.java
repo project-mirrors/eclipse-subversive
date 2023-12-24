@@ -78,76 +78,87 @@ import org.eclipse.team.svn.core.utility.SVNUtility;
  */
 public abstract class AbstractSVNSubscriber extends Subscriber implements IResourceStatesListener {
 	protected static final IResourceVariantComparator RV_COMPARATOR = new ResourceVariantComparator();
+
 	public static final String CONTIGOUS_PREF_NODE = "contigous"; //$NON-NLS-1$
+
 	public static final String CONTIGOUS_REPORT_DEFAULT = "true"; //$NON-NLS-1$
-	
-	protected final static QualifiedName REMOTE_CACHE_KEY = new QualifiedName("org.eclipse.team.svn", "remote-cache-key"); //$NON-NLS-1$ //$NON-NLS-2$
-	
-    protected IRemoteStatusCache statusCache;
-    protected Set<IResource> oldResources;
-    
-    protected String name;
-    
-    public AbstractSVNSubscriber(boolean usePersistentCache, String name) {
-        super();
-        this.name = name;
-        if (usePersistentCache) {
-        	this.statusCache = new PersistentRemoteStatusCache(REMOTE_CACHE_KEY);	
-        } else {
-        	this.statusCache = new RemoteStatusCache();
-        }		
+
+	protected final static QualifiedName REMOTE_CACHE_KEY = new QualifiedName("org.eclipse.team.svn", //$NON-NLS-1$
+			"remote-cache-key"); //$NON-NLS-1$
+
+	protected IRemoteStatusCache statusCache;
+
+	protected Set<IResource> oldResources;
+
+	protected String name;
+
+	public AbstractSVNSubscriber(boolean usePersistentCache, String name) {
+		super();
+		this.name = name;
+		if (usePersistentCache) {
+			this.statusCache = new PersistentRemoteStatusCache(REMOTE_CACHE_KEY);
+		} else {
+			this.statusCache = new RemoteStatusCache();
+		}
 		SVNRemoteStorage.instance().addResourceStatesListener(ResourceStatesChangedEvent.class, this);
 		this.oldResources = new HashSet<IResource>();
-    }
+	}
 
-    public static boolean getSynchInfoContigous() {
-    	return Boolean.parseBoolean(SVNTeamPlugin.instance().getPreferences().node("synch_info").get(AbstractSVNSubscriber.CONTIGOUS_PREF_NODE, AbstractSVNSubscriber.CONTIGOUS_REPORT_DEFAULT)); //$NON-NLS-1$
-    }
-    
-    public static void setSynchInfoContigous(boolean isContigous) {
-    	SVNTeamPlugin.instance().getPreferences().node("synch_info").put(AbstractSVNSubscriber.CONTIGOUS_PREF_NODE, String.valueOf(isContigous)); //$NON-NLS-1$
+	public static boolean getSynchInfoContigous() {
+		return Boolean.parseBoolean(SVNTeamPlugin.instance()
+				.getPreferences()
+				.node("synch_info") //$NON-NLS-1$
+				.get(AbstractSVNSubscriber.CONTIGOUS_PREF_NODE, AbstractSVNSubscriber.CONTIGOUS_REPORT_DEFAULT));
+	}
+
+	public static void setSynchInfoContigous(boolean isContigous) {
+		SVNTeamPlugin.instance()
+				.getPreferences()
+				.node("synch_info") //$NON-NLS-1$
+				.put(AbstractSVNSubscriber.CONTIGOUS_PREF_NODE, String.valueOf(isContigous));
 		SVNTeamPlugin.instance().savePreferences();
-    }
-    
-    public boolean isSynchronizedWithRepository() throws TeamException {
-    	return this.statusCache.containsData();
-    }
-    
-    public String getName() {
-        return this.name;
-    }
+	}
 
-    public boolean isSupervised(IResource resource) {
+	public boolean isSynchronizedWithRepository() throws TeamException {
+		return this.statusCache.containsData();
+	}
+
+	public String getName() {
+		return this.name;
+	}
+
+	public boolean isSupervised(IResource resource) {
 		return FileUtility.isConnected(resource) && !FileUtility.isNotSupervised(resource);
-    }
+	}
 
-    public IResource []members(IResource resource) throws TeamException {
-    	ILocalResource local = SVNRemoteStorage.instance().asLocalResource(resource);
-    	/*
-    	 * Don't filter out incoming changes here (which don't exist on file system but are phantoms)
-    	 * 
-    	 * Allow to return members for unversioned external
-    	 */
-    	if (IStateFilter.SF_INTERNAL_INVALID.accept(local) || IStateFilter.SF_IGNORED.accept(local) && !IStateFilter.SF_UNVERSIONED_EXTERNAL.accept(local)) {
-    		return FileUtility.NO_CHILDREN;
-    	}
-    	return this.statusCache.allMembers(resource);
-    }
+	public IResource[] members(IResource resource) throws TeamException {
+		ILocalResource local = SVNRemoteStorage.instance().asLocalResource(resource);
+		/*
+		 * Don't filter out incoming changes here (which don't exist on file system but are phantoms)
+		 * 
+		 * Allow to return members for unversioned external
+		 */
+		if (IStateFilter.SF_INTERNAL_INVALID.accept(local)
+				|| IStateFilter.SF_IGNORED.accept(local) && !IStateFilter.SF_UNVERSIONED_EXTERNAL.accept(local)) {
+			return FileUtility.NO_CHILDREN;
+		}
+		return this.statusCache.allMembers(resource);
+	}
 
-    public IResource []roots() {
-        ArrayList<IResource> roots = new ArrayList<IResource>();
-		IProject []projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
+	public IResource[] roots() {
+		ArrayList<IResource> roots = new ArrayList<IResource>();
+		IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
 		for (int i = 0; i < projects.length; i++) {
 			if (FileUtility.isConnected(projects[i])) {
 				roots.add(projects[i]);
 			}
 		}
 		return roots.toArray(new IResource[roots.size()]);
-    }
-    
-    // override in order to correctly support models
+	}
+
+	// override in order to correctly support models
 	public IDiff getDiff(IResource resource) throws CoreException {
-		AbstractSVNSyncInfo info = (AbstractSVNSyncInfo)this.getSyncInfo(resource);
+		AbstractSVNSyncInfo info = (AbstractSVNSyncInfo) this.getSyncInfo(resource);
 		if (info == null || info.getKind() == SyncInfo.IN_SYNC) {
 			return null;
 		}
@@ -158,13 +169,12 @@ public abstract class AbstractSVNSubscriber extends Subscriber implements IResou
 			if (resource.getType() == IResource.FILE) {
 				IFileRevision before = this.asFileState(info.getBase());
 				//FIXME: SVNLocalFileRevision - move all the related stuff from the UI plug-in
-				IFileRevision after = new LocalFileRevision((IFile)local);
+				IFileRevision after = new LocalFileRevision((IFile) local);
 				local = new ResourceDiff(info.getLocal(), kind, 0, before, after);
-			}
-			else {// For folders, we don't need file states
+			} else {// For folders, we don't need file states
 				local = new ResourceDiff(info.getLocal(), kind, 0, null, null); // using this type of constructor instead of shorthand notation, since we don't want assertion in case of obstructed resources of different kinds
 			}
-		}		
+		}
 		ITwoWayDiff remote = null;
 		if (direction == SyncInfo.INCOMING || direction == SyncInfo.CONFLICTING) {
 			int kind = AbstractSVNSubscriber.syncKind2DiffKind(info.getRemoteKind());
@@ -172,36 +182,41 @@ public abstract class AbstractSVNSubscriber extends Subscriber implements IResou
 				IFileRevision before = this.asFileState(info.getBase());
 				IFileRevision after = this.asFileState(info.getRemote());
 				remote = new ResourceDiff(info.getLocal(), kind, 0, before, after);
-			}
-			else {
+			} else {
 				remote = new ResourceDiff(info.getLocal(), kind);
 			}
 		}
 		return new ThreeWayDiff(local, remote);
 	}
-	
+
 	private static int syncKind2DiffKind(int kind) {
 		kind = SyncInfo.getChange(kind);
-		return kind == SyncInfo.ADDITION ? IDiff.ADD : (kind == SyncInfo.DELETION ? IDiff.REMOVE : kind == SyncInfo.CHANGE ? IDiff.CHANGE : IDiff.NO_CHANGE);
+		return kind == SyncInfo.ADDITION
+				? IDiff.ADD
+				: (kind == SyncInfo.DELETION ? IDiff.REMOVE : kind == SyncInfo.CHANGE ? IDiff.CHANGE : IDiff.NO_CHANGE);
 	}
 
 	private IFileRevision asFileState(IResourceVariant variant) {
 		return variant == null ? null : new ResourceVariantFileRevision(variant);
 	}
 
-    public SyncInfo getSyncInfo(IResource resource) throws TeamException {
+	public SyncInfo getSyncInfo(IResource resource) throws TeamException {
 		if (!this.isSupervised(resource)) {
 			return null;
 		}
-		IResourceChange remoteStatus = SVNRemoteStorage.instance().resourceChangeFromBytes(this.statusCache.getBytes(resource));
-    	// incoming additions shouldn't call WC access
-		ILocalResource localStatus = this.statusCache.containsData() ? SVNRemoteStorage.instance().asLocalResourceDirty(resource) : SVNRemoteStorage.instance().asLocalResource(resource);
+		IResourceChange remoteStatus = SVNRemoteStorage.instance()
+				.resourceChangeFromBytes(this.statusCache.getBytes(resource));
+		// incoming additions shouldn't call WC access
+		ILocalResource localStatus = this.statusCache.containsData()
+				? SVNRemoteStorage.instance().asLocalResourceDirty(resource)
+				: SVNRemoteStorage.instance().asLocalResource(resource);
 		if (!IStateFilter.SF_INTERNAL_INVALID.accept(localStatus) || remoteStatus != null) {
 			SyncInfo info = this.getSVNSyncInfo(localStatus, remoteStatus);
 			if (info != null) {
 				info.init();
 				int kind = info.getKind();
-				if (SyncInfo.getChange(kind) == SyncInfo.DELETION && (SyncInfo.getDirection(kind) & SyncInfo.OUTGOING) != 0 && !resource.exists()) {
+				if (SyncInfo.getChange(kind) == SyncInfo.DELETION
+						&& (SyncInfo.getDirection(kind) & SyncInfo.OUTGOING) != 0 && !resource.exists()) {
 					synchronized (this.oldResources) {
 						this.oldResources.add(resource);
 					}
@@ -225,55 +240,56 @@ public abstract class AbstractSVNSubscriber extends Subscriber implements IResou
 			return info;
 		}
 		return null;
-    }
+	}
 
-    public IResourceVariantComparator getResourceComparator() {
+	public IResourceVariantComparator getResourceComparator() {
 		return AbstractSVNSubscriber.RV_COMPARATOR;
-    }
+	}
 
-    public void refresh(IResource []resources, int depth, IProgressMonitor monitor) throws TeamException {
-    	ArrayList<IResource> resourcesToOperateList = new ArrayList<IResource>();
-    	for (IResource current : resources) {
-    		if (FileUtility.isConnected(current)) {
-    			resourcesToOperateList.add(current);
-    		}
-    	}
-    	IResource [] operableData = resourcesToOperateList.toArray(new IResource[0]); 
+	public void refresh(IResource[] resources, int depth, IProgressMonitor monitor) throws TeamException {
+		ArrayList<IResource> resourcesToOperateList = new ArrayList<IResource>();
+		for (IResource current : resources) {
+			if (FileUtility.isConnected(current)) {
+				resourcesToOperateList.add(current);
+			}
+		}
+		IResource[] operableData = resourcesToOperateList.toArray(new IResource[0]);
 		HashSet<IResource> refreshScope = this.clearRemoteStatusesImpl(operableData);
 		AbstractSVNSubscriber.this.resourcesStateChangedImpl(refreshScope.toArray(new IResource[refreshScope.size()]));
 		if (AbstractSVNSubscriber.getSynchInfoContigous()) {
 			IActionOperation op = new UpdateStatusOperation(operableData, depth);
 			ProgressMonitorUtility.doTaskExternal(op, monitor);
+		} else {
+			this.resourcesStateChangedImpl(this.findChanges(operableData, depth, monitor,
+					SVNTeamPlugin.instance().getOptionProvider().getLoggedOperationFactory()));
 		}
-		else {
-			this.resourcesStateChangedImpl(this.findChanges(operableData, depth, monitor, SVNTeamPlugin.instance().getOptionProvider().getLoggedOperationFactory()));
-		}
-    }
+	}
 
-	public void clearRemoteStatuses(IResource []resources) throws TeamException {
-	    HashSet<IResource> refreshScope = this.clearRemoteStatusesImpl(resources);
+	public void clearRemoteStatuses(IResource[] resources) throws TeamException {
+		HashSet<IResource> refreshScope = this.clearRemoteStatusesImpl(resources);
 		this.resourcesStateChangedImpl(refreshScope.toArray(new IResource[refreshScope.size()]));
 	}
-	
-    public void resourcesStateChanged(ResourceStatesChangedEvent event) {
-    	try {
-    		if (event.type == ResourceStatesChangedEvent.CHANGED_NODES) {    	
-    			// event contains roots list + depth (and depth could be one of: zero, one, infinite)
+
+	public void resourcesStateChanged(ResourceStatesChangedEvent event) {
+		try {
+			if (event.type == ResourceStatesChangedEvent.CHANGED_NODES) {
+				// event contains roots list + depth (and depth could be one of: zero, one, infinite)
 				this.resourcesStateChangedImpl(event.getResourcesRecursivelly());
-    		}
+			}
 		} catch (TeamException e) {
 			LoggedOperation.reportError(this.getClass().getName(), e);
-		}    	
-    }
-    
-	protected HashSet<IResource> clearRemoteStatusesImpl(IResource []resources) throws TeamException {
+		}
+	}
+
+	protected HashSet<IResource> clearRemoteStatusesImpl(IResource[] resources) throws TeamException {
 		return this.clearRemoteStatusesImpl(this.statusCache, resources);
 	}
-	
-	protected HashSet<IResource> clearRemoteStatusesImpl(IRemoteStatusCache cache, IResource []resources)  throws TeamException {
+
+	protected HashSet<IResource> clearRemoteStatusesImpl(IRemoteStatusCache cache, IResource[] resources)
+			throws TeamException {
 		final HashSet<IResource> refreshSet = new HashSet<IResource>();
 		cache.traverse(resources, IResource.DEPTH_INFINITE, new RemoteStatusCache.ICacheVisitor() {
-			public void visit(IPath current, byte []data) {
+			public void visit(IPath current, byte[] data) {
 				IResource resource = SVNRemoteStorage.instance().resourceChangeFromBytes(data).getResource();
 				if (resource != null) {
 					refreshSet.add(resource);
@@ -285,11 +301,11 @@ public abstract class AbstractSVNSubscriber extends Subscriber implements IResou
 		}
 		return refreshSet;
 	}
-	
-    protected void resourcesStateChangedImpl(IResource []resources) throws TeamException {
-    	synchronized (this.oldResources) {
-        	Set<IResource> allResources = new HashSet<IResource>(Arrays.asList(resources));
-    		for (Iterator<IResource> it = this.oldResources.iterator(); it.hasNext(); ) {
+
+	protected void resourcesStateChangedImpl(IResource[] resources) throws TeamException {
+		synchronized (this.oldResources) {
+			Set<IResource> allResources = new HashSet<IResource>(Arrays.asList(resources));
+			for (Iterator<IResource> it = this.oldResources.iterator(); it.hasNext();) {
 				IResource resource = it.next();
 				/*
 				 * See https://bugs.eclipse.org/bugs/show_bug.cgi?id=207026
@@ -303,118 +319,126 @@ public abstract class AbstractSVNSubscriber extends Subscriber implements IResou
 				 */
 				if (resource.getLocation() == null) {
 					it.remove(); // no need to keep checking the resource if it became inaccessible
-				}
-				else if (!allResources.contains(resource)) {
+				} else if (!allResources.contains(resource)) {
 					SVNChangeStatus status = SVNUtility.getSVNInfoForNotConnected(resource);
 					// when the status changes from deleted/missing it is time to refresh corresponding resource
-					if (status == null || (status.textStatus != SVNEntryStatus.Kind.DELETED && status.textStatus != SVNEntryStatus.Kind.MISSING)) {
+					if (status == null || (status.textStatus != SVNEntryStatus.Kind.DELETED
+							&& status.textStatus != SVNEntryStatus.Kind.MISSING)) {
 						allResources.add(resource);
 						it.remove();
 					}
 				}
 			}
-    		if (allResources.isEmpty()) {
-    			return;
-    		}
-        	IResource []refreshSet = allResources.toArray(new IResource[allResources.size()]);
-        	// ensure we cached all locally-known resources (used in pair with asLocalResourceDirty() in getSyncInfo())
-        	//	TODO best case - the code should not exists. Needs to be verified if there is a different approach.
-        	if (CoreExtensionsManager.instance().getOptionProvider().is(IOptionProvider.SVN_CACHE_ENABLED)) {
-        		IResource []parents = FileUtility.getParents(refreshSet, false);
-        		FileUtility.reorder(parents, true); //ensure the proper load order, so that there is no performance overhead
-            	for (int i = 0; i < parents.length; i++) {
-            		try {
-    					SVNRemoteStorage.instance().getRegisteredChildren((IContainer)parents[i]);
-    				}
-    				catch (Exception ex) {
-    					LoggedOperation.reportError(SVNMessages.getErrorString("Error_CheckCache"), ex); //$NON-NLS-1$
-    				}
-            	}
-        	}
-        	this.fireTeamResourceChange(SubscriberChangeEvent.asSyncChangedDeltas(this, refreshSet));
-    	}
-  	}
-    
-	protected IResource []findChanges(IResource []resources, int depth, IProgressMonitor monitor, ILoggedOperationFactory operationWrapperFactory) {
+			if (allResources.isEmpty()) {
+				return;
+			}
+			IResource[] refreshSet = allResources.toArray(new IResource[allResources.size()]);
+			// ensure we cached all locally-known resources (used in pair with asLocalResourceDirty() in getSyncInfo())
+			//	TODO best case - the code should not exists. Needs to be verified if there is a different approach.
+			if (CoreExtensionsManager.instance().getOptionProvider().is(IOptionProvider.SVN_CACHE_ENABLED)) {
+				IResource[] parents = FileUtility.getParents(refreshSet, false);
+				FileUtility.reorder(parents, true); //ensure the proper load order, so that there is no performance overhead
+				for (int i = 0; i < parents.length; i++) {
+					try {
+						SVNRemoteStorage.instance().getRegisteredChildren((IContainer) parents[i]);
+					} catch (Exception ex) {
+						LoggedOperation.reportError(SVNMessages.getErrorString("Error_CheckCache"), ex); //$NON-NLS-1$
+					}
+				}
+			}
+			this.fireTeamResourceChange(SubscriberChangeEvent.asSyncChangedDeltas(this, refreshSet));
+		}
+	}
+
+	protected IResource[] findChanges(IResource[] resources, int depth, IProgressMonitor monitor,
+			ILoggedOperationFactory operationWrapperFactory) {
 		CompositeOperation op = new CompositeOperation("", SVNMessages.class); //$NON-NLS-1$
-		
+
 		final IRemoteStatusOperation rStatusOp = this.addStatusOperation(op, resources, depth);
 		if (rStatusOp == null) {
-    		return FileUtility.NO_CHILDREN;
+			return FileUtility.NO_CHILDREN;
 		}
 		op.setOperationName(rStatusOp.getId());
-		
+
 		final ArrayList<IResource> changes = new ArrayList<IResource>();
 		op.add(new AbstractActionOperation("Operation_FetchChanges", SVNMessages.class) { //$NON-NLS-1$
 			protected void runImpl(IProgressMonitor monitor) throws Exception {
-				SVNEntryStatus []statuses = rStatusOp.getStatuses();
+				SVNEntryStatus[] statuses = rStatusOp.getStatuses();
 				if (statuses != null) {
-					
+
 					//prepare and sort resources
 					//If we don't sort them, PersistentRemoteStatusCache.setBytes will fail
 					//because it can't set bytes for resource which doesn't have a parent
 					Map<IResource, IResourceChange> resourcesMap = new HashMap<IResource, IResourceChange>();
 					for (int i = 0; i < statuses.length && !monitor.isCanceled(); i++) {
 						if (AbstractSVNSubscriber.this.isIncoming(statuses[i])) {
-							IResourceChange resourceChange = AbstractSVNSubscriber.this.handleResourceChange(rStatusOp, statuses[i]);
+							IResourceChange resourceChange = AbstractSVNSubscriber.this.handleResourceChange(rStatusOp,
+									statuses[i]);
 							if (resourceChange != null) {
-								IResource resource = resourceChange.getResource();								
+								IResource resource = resourceChange.getResource();
 								resourcesMap.put(resource, resourceChange);
 							}
 						}
 					}
-					
-					if (!resourcesMap.isEmpty()) {												
+
+					if (!resourcesMap.isEmpty()) {
 						IResource[] resources = resourcesMap.keySet().toArray(new IResource[0]);
-						FileUtility.reorder(resources, true);						
-																		
+						FileUtility.reorder(resources, true);
+
 						//process
 						for (int i = 0; i < resources.length && !monitor.isCanceled(); i++) {
 							IResource resource = resources[i];
 							final IResourceChange resourceChange = resourcesMap.get(resource);
 							final AbstractActionOperation self = this;
-							
+
 							this.protectStep(new IUnprotectedOperation() {
 								public void run(IProgressMonitor monitor) throws Exception {
-									ProgressMonitorUtility.setTaskInfo(monitor, self, String.valueOf(resourceChange.getRevision()));
-									AbstractSVNSubscriber.this.statusCache.setBytes(resourceChange.getResource(), SVNRemoteStorage.instance().resourceChangeAsBytes(resourceChange));
+									ProgressMonitorUtility.setTaskInfo(monitor, self,
+											String.valueOf(resourceChange.getRevision()));
+									AbstractSVNSubscriber.this.statusCache.setBytes(resourceChange.getResource(),
+											SVNRemoteStorage.instance().resourceChangeAsBytes(resourceChange));
 								}
 							}, monitor, resources.length);
 							changes.add(resourceChange.getResource());
-						}																								
+						}
 					}
 				}
 			}
-		}, new IActionOperation[] {rStatusOp});
+		}, new IActionOperation[] { rStatusOp });
 		ProgressMonitorUtility.doTaskExternal(op, monitor, operationWrapperFactory);
-		
+
 		return changes.toArray(new IResource[changes.size()]);
 	}
-	
-	protected abstract boolean isIncoming(SVNEntryStatus status);
-	protected abstract IResourceChange handleResourceChange(IRemoteStatusOperation rStatusOp, SVNEntryStatus status);
-    protected abstract SyncInfo getSVNSyncInfo(ILocalResource localStatus, IResourceChange remoteStatus) throws TeamException;
-    protected abstract IRemoteStatusOperation addStatusOperation(CompositeOperation op, IResource []resources, int depth);
 
-    public class UpdateStatusOperation extends AbstractActionOperation implements ILoggedOperationFactory {
-    	protected IResource []resources;
-    	protected int depth;
-    	
-    	public UpdateStatusOperation(IResource []resources, int depth) {
-    		super("Operation_UpdateStatus", SVNMessages.class); //$NON-NLS-1$
-    		ArrayList<IResource> tResources = new ArrayList<IResource>();
-    		for (IResource resource : resources) {
-    			if (resource.getType() == IResource.ROOT) {
-    				tResources.addAll(Arrays.asList(((IWorkspaceRoot)resource).getProjects()));
-    			}
-    			else {
-    				tResources.add(resource);
-    			}
-    		}
-    		this.resources = resources;
-    		this.depth = depth;
-    	}
-    	
+	protected abstract boolean isIncoming(SVNEntryStatus status);
+
+	protected abstract IResourceChange handleResourceChange(IRemoteStatusOperation rStatusOp, SVNEntryStatus status);
+
+	protected abstract SyncInfo getSVNSyncInfo(ILocalResource localStatus, IResourceChange remoteStatus)
+			throws TeamException;
+
+	protected abstract IRemoteStatusOperation addStatusOperation(CompositeOperation op, IResource[] resources,
+			int depth);
+
+	public class UpdateStatusOperation extends AbstractActionOperation implements ILoggedOperationFactory {
+		protected IResource[] resources;
+
+		protected int depth;
+
+		public UpdateStatusOperation(IResource[] resources, int depth) {
+			super("Operation_UpdateStatus", SVNMessages.class); //$NON-NLS-1$
+			ArrayList<IResource> tResources = new ArrayList<IResource>();
+			for (IResource resource : resources) {
+				if (resource.getType() == IResource.ROOT) {
+					tResources.addAll(Arrays.asList(((IWorkspaceRoot) resource).getProjects()));
+				} else {
+					tResources.add(resource);
+				}
+			}
+			this.resources = resources;
+			this.depth = depth;
+		}
+
 		public IActionOperation getLogged(IActionOperation operation) {
 			return new LoggedOperation(operation) {
 				protected void handleError(IStatus errorStatus) {
@@ -422,19 +446,21 @@ public abstract class AbstractSVNSubscriber extends Subscriber implements IResou
 				}
 			};
 		}
-		
-    	protected void runImpl(IProgressMonitor monitor) throws Exception {
-    		Map<IProject, List<IResource>> project2Resources = SVNUtility.splitWorkingCopies(this.resources);
-            for (Iterator<List<IResource>> it = project2Resources.values().iterator(); it.hasNext() && !monitor.isCanceled(); ) {
-            	List<IResource> entry = it.next();
-    			final IResource []wcResources = entry.toArray(new IResource[entry.size()]);
-    			this.protectStep(new IUnprotectedOperation() {
+
+		protected void runImpl(IProgressMonitor monitor) throws Exception {
+			Map<IProject, List<IResource>> project2Resources = SVNUtility.splitWorkingCopies(this.resources);
+			for (Iterator<List<IResource>> it = project2Resources.values().iterator(); it.hasNext()
+					&& !monitor.isCanceled();) {
+				List<IResource> entry = it.next();
+				final IResource[] wcResources = entry.toArray(new IResource[entry.size()]);
+				this.protectStep(new IUnprotectedOperation() {
 					public void run(IProgressMonitor monitor) throws Exception {
-						AbstractSVNSubscriber.this.resourcesStateChangedImpl(AbstractSVNSubscriber.this.findChanges(wcResources, UpdateStatusOperation.this.depth, monitor, UpdateStatusOperation.this)); 
+						AbstractSVNSubscriber.this.resourcesStateChangedImpl(AbstractSVNSubscriber.this.findChanges(
+								wcResources, UpdateStatusOperation.this.depth, monitor, UpdateStatusOperation.this));
 					}
 				}, monitor, project2Resources.size());
-            }                
-        }
-      	
-    };
+			}
+		}
+
+	};
 }

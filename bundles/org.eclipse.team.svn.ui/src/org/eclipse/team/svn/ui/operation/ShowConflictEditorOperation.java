@@ -65,8 +65,8 @@ import org.eclipse.team.svn.ui.utility.UIMonitorUtility;
 public class ShowConflictEditorOperation extends AbstractWorkingCopyOperation {
 
 	protected boolean showInDialog;
-	
-	public ShowConflictEditorOperation(IResource []resources, boolean showInDialog) {
+
+	public ShowConflictEditorOperation(IResource[] resources, boolean showInDialog) {
 		super("Operation_ShowConflictEditor", SVNUIMessages.class, resources); //$NON-NLS-1$
 		this.showInDialog = showInDialog;
 	}
@@ -76,26 +76,26 @@ public class ShowConflictEditorOperation extends AbstractWorkingCopyOperation {
 		this.showInDialog = showInDialog;
 	}
 
-    public ISchedulingRule getSchedulingRule() {
-    	ISchedulingRule rule = super.getSchedulingRule();
-    	if (rule instanceof IWorkspaceRoot) {
-    		return rule;
-    	}
-    	IResource []resources = this.operableData();
-    	HashSet<ISchedulingRule> ruleSet = new HashSet<ISchedulingRule>();
-    	for (int i = 0; i < resources.length; i++) {
+	public ISchedulingRule getSchedulingRule() {
+		ISchedulingRule rule = super.getSchedulingRule();
+		if (rule instanceof IWorkspaceRoot) {
+			return rule;
+		}
+		IResource[] resources = this.operableData();
+		HashSet<ISchedulingRule> ruleSet = new HashSet<ISchedulingRule>();
+		for (int i = 0; i < resources.length; i++) {
 			ruleSet.add(SVNResourceRuleFactory.INSTANCE.refreshRule(resources[i].getParent()));
-    	}
-    	return new MultiRule(ruleSet.toArray(new IResource[ruleSet.size()]));
-    }
+		}
+		return new MultiRule(ruleSet.toArray(new IResource[ruleSet.size()]));
+	}
 
-    public int getOperationWeight() {
+	public int getOperationWeight() {
 		return 0;
 	}
-    
+
 	protected void runImpl(IProgressMonitor monitor) throws Exception {
-		IResource []conflictingResources = this.operableData();
-		
+		IResource[] conflictingResources = this.operableData();
+
 		for (int i = 0; i < conflictingResources.length && !monitor.isCanceled(); i++) {
 			final IResource current = conflictingResources[i];
 			this.protectStep(new IUnprotectedOperation() {
@@ -108,26 +108,28 @@ public class ShowConflictEditorOperation extends AbstractWorkingCopyOperation {
 
 	protected void showEditorFor(final IResource resource, IProgressMonitor monitor) throws Exception {
 		IRemoteStorage storage = SVNRemoteStorage.instance();
-		
+
 		IRepositoryLocation location = storage.getRepositoryLocation(resource);
 		ISVNConnector proxy = location.acquireSVNProxy();
-		SVNChangeStatus []status;
-		
+		SVNChangeStatus[] status;
+
 		try {
-			status = SVNUtility.status(proxy, FileUtility.getWorkingCopyPath(resource), SVNDepth.EMPTY, ISVNConnector.Options.NONE, new SVNNullProgressMonitor());
-		}
-		finally {
+			status = SVNUtility.status(proxy, FileUtility.getWorkingCopyPath(resource), SVNDepth.EMPTY,
+					ISVNConnector.Options.NONE, new SVNNullProgressMonitor());
+		} finally {
 			location.releaseSVNProxy(proxy);
 		}
-		
+
 		// open property editor if required
 		if (status.length == 1 && status[0].propStatus == SVNEntryStatus.Kind.CONFLICTED) {
 			CompareConfiguration cc = new CompareConfiguration();
 			cc.setProperty(CompareEditor.CONFIRM_SAVE_PROPERTY, Boolean.TRUE);
 			ILocalResource baseResource = SVNRemoteStorage.instance().asLocalResource(resource);
-			IRepositoryResource remote =  SVNRemoteStorage.instance().asRepositoryResource(resource);
-		    SVNEntryRevisionReference baseReference = new SVNEntryRevisionReference(FileUtility.getWorkingCopyPath(resource), null, SVNRevision.BASE);
-			final PropertyCompareInput compare = new ThreeWayPropertyCompareInput(cc, resource, null, baseReference, remote.getRepositoryLocation(), baseResource.getRevision());
+			IRepositoryResource remote = SVNRemoteStorage.instance().asRepositoryResource(resource);
+			SVNEntryRevisionReference baseReference = new SVNEntryRevisionReference(
+					FileUtility.getWorkingCopyPath(resource), null, SVNRevision.BASE);
+			final PropertyCompareInput compare = new ThreeWayPropertyCompareInput(cc, resource, null, baseReference,
+					remote.getRepositoryLocation(), baseResource.getRevision());
 			compare.run(monitor);
 			UIMonitorUtility.getDisplay().syncExec(new Runnable() {
 				public void run() {
@@ -136,18 +138,17 @@ public class ShowConflictEditorOperation extends AbstractWorkingCopyOperation {
 						DefaultDialog dlg = new DefaultDialog(UIMonitorUtility.getShell(), panel);
 						dlg.open();
 						//CompareUI.openCompareDialog(compare);
-					}
-					else {
+					} else {
 						CompareUI.openCompareEditor(compare);
 					}
 				}
 			});
 		}
-		
+
 		// open compare editor if required
-		if (resource.getType() == IResource.FILE && 
-			status.length == 1 && status[0].hasConflict && status[0].treeConflicts != null && 
-			status[0].treeConflicts[0].remotePath != null && status[0].treeConflicts[0].basePath != null) {
+		if (resource.getType() == IResource.FILE && status.length == 1 && status[0].hasConflict
+				&& status[0].treeConflicts != null && status[0].treeConflicts[0].remotePath != null
+				&& status[0].treeConflicts[0].basePath != null) {
 			IContainer parent = resource.getParent();
 			parent.refreshLocal(IResource.DEPTH_ONE, monitor);
 			/*
@@ -161,38 +162,42 @@ public class ShowConflictEditorOperation extends AbstractWorkingCopyOperation {
 				local = parent.getFile(tPath.removeFirstSegments(tPath.segmentCount() - 1));
 				if (!local.exists()) {
 					local = null;
-				}					
+				}
 			}
-			local = local == null ? (IFile)resource : local;
-			
+			local = local == null ? (IFile) resource : local;
+
 			tPath = new Path(status[0].treeConflicts[0].remotePath);
 			IFile remote = parent.getFile(tPath.removeFirstSegments(tPath.segmentCount() - 1));
 			tPath = new Path(status[0].treeConflicts[0].basePath);
 			IFile ancestor = parent.getFile(tPath.removeFirstSegments(tPath.segmentCount() - 1));
-			
+
 			//detect compare editor
-			DetectExternalCompareOperationHelper detectCompareEditorHelper = new DetectExternalCompareOperationHelper(resource, SVNTeamDiffViewerPage.loadDiffViewerSettings(), false);
+			DetectExternalCompareOperationHelper detectCompareEditorHelper = new DetectExternalCompareOperationHelper(
+					resource, SVNTeamDiffViewerPage.loadDiffViewerSettings(), false);
 			detectCompareEditorHelper.execute(monitor);
 			ExternalProgramParameters externalProgramParams = detectCompareEditorHelper.getExternalProgramParameters();
 			if (externalProgramParams != null) {
-				this.openExternalEditor((IFile)resource, local, remote, ancestor, externalProgramParams, monitor);
+				this.openExternalEditor((IFile) resource, local, remote, ancestor, externalProgramParams, monitor);
 			} else {
-				this.openEclipseEditor((IFile)resource, local, remote, ancestor, monitor);	
+				this.openEclipseEditor((IFile) resource, local, remote, ancestor, monitor);
 			}
 		}
 	}
-	
-	protected void openExternalEditor(IFile target, IFile left, IFile right, IFile ancestor, ExternalProgramParameters externalProgramParams, IProgressMonitor monitor) throws Exception {
+
+	protected void openExternalEditor(IFile target, IFile left, IFile right, IFile ancestor,
+			ExternalProgramParameters externalProgramParams, IProgressMonitor monitor) throws Exception {
 		String targetFile = FileUtility.getWorkingCopyPath(target);
 		String oldFile = FileUtility.getWorkingCopyPath(ancestor);
 		String workingFile = FileUtility.getWorkingCopyPath(left);
-		String newFile = FileUtility.getWorkingCopyPath(right);				
-		
-		ExternalCompareOperationHelper compareRunner = new ExternalCompareOperationHelper(oldFile, workingFile, newFile, targetFile, externalProgramParams, false);
+		String newFile = FileUtility.getWorkingCopyPath(right);
+
+		ExternalCompareOperationHelper compareRunner = new ExternalCompareOperationHelper(oldFile, workingFile, newFile,
+				targetFile, externalProgramParams, false);
 		compareRunner.execute(monitor);
 	}
 
-	protected void openEclipseEditor(final IFile target, IFile left, IFile right, IFile ancestor, IProgressMonitor monitor) throws Exception {
+	protected void openEclipseEditor(final IFile target, IFile left, IFile right, IFile ancestor,
+			IProgressMonitor monitor) throws Exception {
 		CompareConfiguration cc = new CompareConfiguration();
 		cc.setProperty(CompareEditor.CONFIRM_SAVE_PROPERTY, Boolean.TRUE);
 		final ConflictingFileEditorInput compare = new ConflictingFileEditorInput(cc, target, left, right, ancestor);
@@ -204,13 +209,12 @@ public class ShowConflictEditorOperation extends AbstractWorkingCopyOperation {
 					DefaultDialog dlg = new DefaultDialog(UIMonitorUtility.getShell(), panel);
 					dlg.open();
 					//CompareUI.openCompareDialog(compare);
-				}
-				else {
+				} else {
 					CompareUI.openCompareEditor(compare);
 				}
 				compare.setDirty(true);
 			}
 		});
 	}
-	
+
 }

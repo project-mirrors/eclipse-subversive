@@ -23,42 +23,40 @@ import org.eclipse.team.svn.core.resource.IRevisionLink;
  * 
  * @author Alexander Gurov
  */
-public class RepositoryLocationStateAdapter
-	implements IRepositoryLocationStateListener
-{
+public class RepositoryLocationStateAdapter implements IRepositoryLocationStateListener {
 	public void sshChanged(IRepositoryLocation where, String field, Object oldValue, Object newValue) {
-		
+
 	}
 
 	public void sslChanged(IRepositoryLocation where, String field, Object oldValue, Object newValue) {
-		
+
 	}
 
 	public void changed(IRepositoryLocation where, String field, Object oldValue, Object newValue) {
-		
+
 	}
 
 	public void realmAdded(IRepositoryLocation where, String realm, IRepositoryLocation location) {
-		
+
 	}
 
 	public void realmRemoved(IRepositoryLocation where, String realm) {
-		
+
 	}
 
 	public void revisionLinkAdded(IRepositoryLocation where, IRevisionLink link) {
-		
+
 	}
 
 	public void revisionLinkRemoved(IRepositoryLocation where, IRevisionLink link) {
-		
+
 	}
 
 	public void proxyAcquired(IRepositoryLocation where, ISVNConnector proxy) {
-		
+
 	}
 
 	public void proxyDisposed(IRepositoryLocation where, ISVNConnector proxy) {
-		
+
 	}
 }

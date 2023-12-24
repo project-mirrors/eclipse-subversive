@@ -51,44 +51,46 @@ public class PasteAction extends AbstractRepositoryTeamAction {
 	public PasteAction() {
 		super();
 	}
-	
+
 	public void runImpl(IAction action) {
 		final RemoteResourceTransferrable transferrable = this.getTransferrable();
-	    CommentPanel commentPanel = new CommentPanel(SVNUIMessages.PasteAction_Comment_Title);
+		CommentPanel commentPanel = new CommentPanel(SVNUIMessages.PasteAction_Comment_Title);
 		DefaultDialog dialog = new DefaultDialog(this.getShell(), commentPanel);
 		if (dialog.open() == 0) {
 			this.clearClipboard(transferrable);
-			
-			final IRepositoryResource []resources = this.getSelectedRepositoryResources();
+
+			final IRepositoryResource[] resources = this.getSelectedRepositoryResources();
 			resources[0] = resources[0] instanceof IRepositoryContainer ? resources[0] : resources[0].getParent();
 
-			final AbstractCopyMoveResourcesOperation pasteOp = 
-				transferrable.operation == RemoteResourceTransferrable.OP_COPY ? 
-				(AbstractCopyMoveResourcesOperation)new CopyResourcesOperation(resources[0], transferrable.resources, commentPanel.getMessage(), null) :
-				new MoveResourcesOperation(resources[0], transferrable.resources, commentPanel.getMessage(), null);
+			final AbstractCopyMoveResourcesOperation pasteOp = transferrable.operation == RemoteResourceTransferrable.OP_COPY
+					? (AbstractCopyMoveResourcesOperation) new CopyResourcesOperation(resources[0],
+							transferrable.resources, commentPanel.getMessage(), null)
+					: new MoveResourcesOperation(resources[0], transferrable.resources, commentPanel.getMessage(),
+							null);
 
 			CompositeOperation op = new CompositeOperation(pasteOp.getId(), pasteOp.getMessagesClass());
-			
+
 			op.add(pasteOp);
 			op.add(new RefreshRemoteResourcesOperation(
-				new IRepositoryResourceProvider() {
-					public IRepositoryResource[] getRepositoryResources() {
-						if (transferrable.operation == RemoteResourceTransferrable.OP_COPY) {
-							return resources;
+					new IRepositoryResourceProvider() {
+						public IRepositoryResource[] getRepositoryResources() {
+							if (transferrable.operation == RemoteResourceTransferrable.OP_COPY) {
+								return resources;
+							}
+							HashSet<IRepositoryResource> fullSet = new HashSet<IRepositoryResource>(
+									Arrays.asList(resources));
+							fullSet.addAll(Arrays.asList(SVNUtility.getCommonParents(transferrable.resources)));
+							return fullSet.toArray(new IRepositoryResource[fullSet.size()]);
 						}
-						HashSet<IRepositoryResource> fullSet = new HashSet<IRepositoryResource>(Arrays.asList(resources));
-						fullSet.addAll(Arrays.asList(SVNUtility.getCommonParents(transferrable.resources)));
-						return fullSet.toArray(new IRepositoryResource[fullSet.size()]);
-					}
-				}));
-			op.add(new SetRevisionAuthorNameOperation(pasteOp, Options.FORCE), new IActionOperation[] {pasteOp});
-			
+					}));
+			op.add(new SetRevisionAuthorNameOperation(pasteOp, Options.FORCE), new IActionOperation[] { pasteOp });
+
 			this.runScheduled(op);
 		}
 	}
 
 	public boolean isEnabled() {
-		IRepositoryResource []selected = this.getSelectedRepositoryResources();
+		IRepositoryResource[] selected = this.getSelectedRepositoryResources();
 		if (selected.length != 1 || selected[0].getSelectedRevision().getKind() != Kind.HEAD) {
 			return false;
 		}
@@ -96,33 +98,34 @@ public class PasteAction extends AbstractRepositoryTeamAction {
 		if (transferrable == null) {
 			return false;
 		}
-        IRepositoryResource target = selected[0] instanceof IRepositoryContainer ? selected[0] : selected[0].getParent();
-        for (int i = 0; i < transferrable.resources.length; i++) {
-        	if (this.isSource(target, transferrable.resources[i])) {
-        		return false;
-        	}
-        }
-        return selected[0].getRepositoryLocation() == transferrable.resources[0].getRepositoryLocation();
+		IRepositoryResource target = selected[0] instanceof IRepositoryContainer
+				? selected[0]
+				: selected[0].getParent();
+		for (int i = 0; i < transferrable.resources.length; i++) {
+			if (this.isSource(target, transferrable.resources[i])) {
+				return false;
+			}
+		}
+		return selected[0].getRepositoryLocation() == transferrable.resources[0].getRepositoryLocation();
 	}
-	
+
 	protected boolean isSource(IRepositoryResource selectedResource, IRepositoryResource resource) {
 		IPath selectedUrl = SVNUtility.createPathForSVNUrl(selectedResource.getUrl());
-		return 
-			SVNUtility.createPathForSVNUrl(resource.getUrl()).isPrefixOf(selectedUrl) || 
-			resource.getParent() != null && SVNUtility.createPathForSVNUrl(resource.getParent().getUrl()).equals(selectedUrl);
+		return SVNUtility.createPathForSVNUrl(resource.getUrl()).isPrefixOf(selectedUrl) || resource.getParent() != null
+				&& SVNUtility.createPathForSVNUrl(resource.getParent().getUrl()).equals(selectedUrl);
 	}
-	
+
 	protected RemoteResourceTransferrable getTransferrable() {
 		Clipboard clipboard = new Clipboard(this.getShell().getDisplay());
 		try {
-			RemoteResourceTransferrable transferrable = (RemoteResourceTransferrable)clipboard.getContents(RemoteResourceTransfer.getInstance());
-			if (transferrable == null || transferrable.operation == RemoteResourceTransferrable.OP_NONE ||
-				transferrable.resources == null || transferrable.resources.length == 0) {
+			RemoteResourceTransferrable transferrable = (RemoteResourceTransferrable) clipboard
+					.getContents(RemoteResourceTransfer.getInstance());
+			if (transferrable == null || transferrable.operation == RemoteResourceTransferrable.OP_NONE
+					|| transferrable.resources == null || transferrable.resources.length == 0) {
 				return null;
 			}
 			return transferrable;
-		}
-		finally {
+		} finally {
 			clipboard.dispose();
 		}
 	}
@@ -131,14 +134,13 @@ public class PasteAction extends AbstractRepositoryTeamAction {
 		if (transferrable.operation == RemoteResourceTransferrable.OP_CUT) {
 			Clipboard clipboard = new Clipboard(this.getShell().getDisplay());
 			try {
-		        // Eclipse 3.1.0 API incompatibility fix instead of clipboard.setContents(new Object[0], new Transfer[0]);
-		        //clipboard.clearContents(); - does not work for unknown reasons (when MS Office clipboard features are enabled)
-		        //COM.OleSetClipboard(0); - incompatible with UNIX'like
-		        clipboard.setContents(
-		        	new Object[] {new RemoteResourceTransferrable(null, RemoteResourceTransferrable.OP_NONE)}, 
-		        	new Transfer[] {RemoteResourceTransfer.getInstance()});
-			}
-			finally {
+				// Eclipse 3.1.0 API incompatibility fix instead of clipboard.setContents(new Object[0], new Transfer[0]);
+				//clipboard.clearContents(); - does not work for unknown reasons (when MS Office clipboard features are enabled)
+				//COM.OleSetClipboard(0); - incompatible with UNIX'like
+				clipboard.setContents(
+						new Object[] { new RemoteResourceTransferrable(null, RemoteResourceTransferrable.OP_NONE) },
+						new Transfer[] { RemoteResourceTransfer.getInstance() });
+			} finally {
 				clipboard.dispose();
 			}
 		}

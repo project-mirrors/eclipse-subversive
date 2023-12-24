@@ -42,18 +42,18 @@ public abstract class AbstractSVNWizard extends Wizard {
 		}
 		super.createPageControls(pageContainer);
 	}
-	
+
 	protected ProgressMonitorPart findProgressMonitorPart(Composite container) {
 		if (container == null) {
 			return null;
 		}
-		Control []children = container.getChildren();
+		Control[] children = container.getChildren();
 		for (int i = 0; i < children.length; i++) {
 			if (children[i] instanceof ProgressMonitorPart) {
-				return (ProgressMonitorPart)children[i];
+				return (ProgressMonitorPart) children[i];
 			}
 		}
 		return this.findProgressMonitorPart(container.getParent());
 	}
-	
+
 }

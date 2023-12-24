@@ -19,8 +19,7 @@ import org.eclipse.team.svn.ui.SVNTeamUIPlugin;
 import org.eclipse.team.svn.ui.SVNUIMessages;
 
 /**
- * Action that removes the SVN console from the console view. The console
- * can be re-added via the console view "Open Console" drop-down.
+ * Action that removes the SVN console from the console view. The console can be re-added via the console view "Open Console" drop-down.
  * 
  * @author Igor Burilo
  */
@@ -30,9 +29,9 @@ public class SVNConsoleRemoveAction extends Action {
 		super(SVNUIMessages.SVNConsoleRemoveAction_CloseConsole);
 		this.setImageDescriptor(SVNTeamUIPlugin.instance().getImageDescriptor("icons/common/remove.gif")); //$NON-NLS-1$
 	}
-	
+
 	public void run() {
 		SVNConsoleFactory.destroyConsole();
 	}
-	
+
 }

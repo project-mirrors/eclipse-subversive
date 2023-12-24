@@ -46,21 +46,28 @@ import org.eclipse.team.svn.ui.utility.UIMonitorUtility;
  */
 public class CompareRepositoryResourcesInernalOperation extends AbstractActionOperation {
 	protected IRepositoryResource next;
+
 	protected IRepositoryResource prev;
+
 	protected IRepositoryResourceProvider provider;
+
 	protected boolean forceReuse;
+
 	protected String forceId;
+
 	protected long options;
 
-	public CompareRepositoryResourcesInernalOperation(IRepositoryResource prev, IRepositoryResource next, boolean forceReuse, long options) {
+	public CompareRepositoryResourcesInernalOperation(IRepositoryResource prev, IRepositoryResource next,
+			boolean forceReuse, long options) {
 		super("Operation_CompareRepository", SVNUIMessages.class); //$NON-NLS-1$
 		this.prev = prev;
 		this.next = next;
 		this.forceReuse = forceReuse;
 		this.options = options;
 	}
-	
-	public CompareRepositoryResourcesInernalOperation(IRepositoryResourceProvider provider, boolean forceReuse, long options) {
+
+	public CompareRepositoryResourcesInernalOperation(IRepositoryResourceProvider provider, boolean forceReuse,
+			long options) {
 		this(null, null, forceReuse, options);
 		this.provider = provider;
 	}
@@ -75,51 +82,61 @@ public class CompareRepositoryResourcesInernalOperation extends AbstractActionOp
 
 	protected void runImpl(IProgressMonitor monitor) throws Exception {
 		if (this.provider != null) {
-			IRepositoryResource []toCompare = this.provider.getRepositoryResources(); 
+			IRepositoryResource[] toCompare = this.provider.getRepositoryResources();
 			this.prev = toCompare[0];
 			this.next = toCompare[1];
 		}
-		
+
 		IRepositoryLocation location = this.prev.getRepositoryLocation();
 		final ISVNConnector proxy = location.acquireSVNProxy();
 		final ArrayList<SVNDiffStatus> statuses = new ArrayList<SVNDiffStatus>();
-		
+
 		ProgressMonitorUtility.setTaskInfo(monitor, this, SVNMessages.Progress_Running);
 		this.protectStep(new IUnprotectedOperation() {
 			public void run(IProgressMonitor monitor) throws Exception {
-				SVNEntryRevisionReference refPrev = SVNUtility.getEntryRevisionReference(CompareRepositoryResourcesInernalOperation.this.prev);
-				SVNEntryRevisionReference refNext = SVNUtility.getEntryRevisionReference(CompareRepositoryResourcesInernalOperation.this.next);
+				SVNEntryRevisionReference refPrev = SVNUtility
+						.getEntryRevisionReference(CompareRepositoryResourcesInernalOperation.this.prev);
+				SVNEntryRevisionReference refNext = SVNUtility
+						.getEntryRevisionReference(CompareRepositoryResourcesInernalOperation.this.next);
 				if (SVNUtility.useSingleReferenceSignature(refPrev, refNext)) {
-					SVNUtility.diffStatus(proxy, statuses, refPrev, new SVNRevisionRange(refPrev.revision, refNext.revision), SVNDepth.INFINITY, CompareRepositoryResourcesInernalOperation.this.options, new SVNProgressMonitor(CompareRepositoryResourcesInernalOperation.this, monitor, null, false));
-				}
-				else {
-					SVNUtility.diffStatus(proxy, statuses, refPrev, refNext, SVNDepth.INFINITY, CompareRepositoryResourcesInernalOperation.this.options, new SVNProgressMonitor(CompareRepositoryResourcesInernalOperation.this, monitor, null, false));
+					SVNUtility.diffStatus(proxy, statuses, refPrev,
+							new SVNRevisionRange(refPrev.revision, refNext.revision), SVNDepth.INFINITY,
+							CompareRepositoryResourcesInernalOperation.this.options, new SVNProgressMonitor(
+									CompareRepositoryResourcesInernalOperation.this, monitor, null, false));
+				} else {
+					SVNUtility.diffStatus(proxy, statuses, refPrev, refNext, SVNDepth.INFINITY,
+							CompareRepositoryResourcesInernalOperation.this.options, new SVNProgressMonitor(
+									CompareRepositoryResourcesInernalOperation.this, monitor, null, false));
 				}
 			}
 		}, monitor, 100, 20);
-		
+
 		location.releaseSVNProxy(proxy);
-		
+
 		if (!monitor.isCanceled()) {
 			this.protectStep(new IUnprotectedOperation() {
 				public void run(IProgressMonitor monitor) throws Exception {
 					CompareConfiguration cc = new CompareConfiguration();
 					cc.setProperty(CompareEditor.CONFIRM_SAVE_PROPERTY, Boolean.FALSE);
-					final TwoWayResourceCompareInput compare = new TwoWayResourceCompareInput(cc, CompareRepositoryResourcesInernalOperation.this.next, CompareRepositoryResourcesInernalOperation.this.prev, statuses);
+					final TwoWayResourceCompareInput compare = new TwoWayResourceCompareInput(cc,
+							CompareRepositoryResourcesInernalOperation.this.next,
+							CompareRepositoryResourcesInernalOperation.this.prev, statuses);
 					compare.setForceId(CompareRepositoryResourcesInernalOperation.this.forceId);
 					compare.initialize(monitor);
 					UIMonitorUtility.getDisplay().syncExec(new Runnable() {
 						public void run() {
-							ResourceCompareInput.openCompareEditor(compare, CompareRepositoryResourcesInernalOperation.this.forceReuse);
+							ResourceCompareInput.openCompareEditor(compare,
+									CompareRepositoryResourcesInernalOperation.this.forceReuse);
 						}
 					});
 				}
 			}, monitor, 100, 20);
 		}
 	}
-	
-    protected String getShortErrorMessage(Throwable t) {
-		return BaseMessages.format(super.getShortErrorMessage(t), new Object[] {this.next.getName(), this.prev.getName()});
+
+	protected String getShortErrorMessage(Throwable t) {
+		return BaseMessages.format(super.getShortErrorMessage(t),
+				new Object[] { this.next.getName(), this.prev.getName() });
 	}
 
 }

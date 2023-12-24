@@ -23,16 +23,18 @@ import org.eclipse.team.svn.core.connector.SVNDepth;
  * @author Alexander Gurov
  */
 public abstract class AbstractMergeSetURL extends AbstractMergeSet {
-    public final boolean ignoreAncestry;
-    public final SVNDepth depth;
-    public final boolean recordOnly;
+	public final boolean ignoreAncestry;
+
+	public final SVNDepth depth;
+
+	public final boolean recordOnly;
 
 	public AbstractMergeSetURL(IResource[] to, boolean ignoreAncestry, boolean recordOnly, SVNDepth depth) {
 		super(to);
-		
-    	this.ignoreAncestry = ignoreAncestry;
-    	this.recordOnly = recordOnly;
-    	this.depth = depth;
+
+		this.ignoreAncestry = ignoreAncestry;
+		this.recordOnly = recordOnly;
+		this.depth = depth;
 	}
 
 }

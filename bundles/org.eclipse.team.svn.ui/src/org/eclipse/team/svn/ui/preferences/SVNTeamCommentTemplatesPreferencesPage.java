@@ -57,42 +57,63 @@ import org.eclipse.ui.PlatformUI;
  *
  * @author Sergiy Logvin
  */
-public class SVNTeamCommentTemplatesPreferencesPage extends AbstractSVNTeamPreferencesPage implements ISelectionChangedListener {
+public class SVNTeamCommentTemplatesPreferencesPage extends AbstractSVNTeamPreferencesPage
+		implements ISelectionChangedListener {
 	protected StyledText previewText;
+
 	protected ListViewer listViewer;
+
 	protected Button newButton;
+
 	protected Button editButton;
+
 	protected Button removeButton;
+
 	protected Button useLogTemplatesButton;
+
 	protected Button useTemplatesButton;
+
 	protected Button useShiftEnterButton;
+
 	protected int savedCommentsCount;
+
 	protected int savedPathsCount;
+
 	protected Text savedCommentsCountField;
+
 	protected Text savedPathsCountField;
+
 	protected boolean logTemplatesEnabled;
+
 	protected boolean userTemplatesEnabled;
+
 	protected boolean useShiftEnter;
-	
+
 	public SVNTeamCommentTemplatesPreferencesPage() {
 		super();
 	}
-	
+
 	protected void saveValues(IPreferenceStore store) {
-		SVNTeamPreferences.setCommentTemplatesInt(store, SVNTeamPreferences.COMMENT_SAVED_COMMENTS_COUNT_NAME, this.savedCommentsCount);
-		SVNTeamPreferences.setCommentTemplatesInt(store, SVNTeamPreferences.COMMENT_SAVED_PATHS_COUNT_NAME, this.savedPathsCount);
-		SVNTeamPreferences.setCommentTemplatesBoolean(store, SVNTeamPreferences.COMMENT_LOG_TEMPLATES_ENABLED_NAME, this.logTemplatesEnabled);
-		SVNTeamPreferences.setCommentTemplatesBoolean(store, SVNTeamPreferences.COMMENT_TEMPLATES_LIST_ENABLED_NAME, this.userTemplatesEnabled);
-		SVNTeamPreferences.setCommentTemplatesBoolean(store, SVNTeamPreferences.COMMENT_USE_SHIFT_ENTER_NAME, this.useShiftEnter);
-		
+		SVNTeamPreferences.setCommentTemplatesInt(store, SVNTeamPreferences.COMMENT_SAVED_COMMENTS_COUNT_NAME,
+				this.savedCommentsCount);
+		SVNTeamPreferences.setCommentTemplatesInt(store, SVNTeamPreferences.COMMENT_SAVED_PATHS_COUNT_NAME,
+				this.savedPathsCount);
+		SVNTeamPreferences.setCommentTemplatesBoolean(store, SVNTeamPreferences.COMMENT_LOG_TEMPLATES_ENABLED_NAME,
+				this.logTemplatesEnabled);
+		SVNTeamPreferences.setCommentTemplatesBoolean(store, SVNTeamPreferences.COMMENT_TEMPLATES_LIST_ENABLED_NAME,
+				this.userTemplatesEnabled);
+		SVNTeamPreferences.setCommentTemplatesBoolean(store, SVNTeamPreferences.COMMENT_USE_SHIFT_ENTER_NAME,
+				this.useShiftEnter);
+
 		int numTemplates = this.listViewer.getList().getItemCount();
 		String[] templates = new String[numTemplates];
 		for (int i = 0; i < numTemplates; i++) {
-			templates[i] = (String)this.listViewer.getElementAt(i);
+			templates[i] = (String) this.listViewer.getElementAt(i);
 		}
-		SVNTeamPreferences.setCommentTemplatesString(store, SVNTeamPreferences.COMMENT_TEMPLATES_LIST_NAME, FileUtility.encodeArrayToString(templates));
+		SVNTeamPreferences.setCommentTemplatesString(store, SVNTeamPreferences.COMMENT_TEMPLATES_LIST_NAME,
+				FileUtility.encodeArrayToString(templates));
 	}
-	
+
 	protected void loadDefaultValues(IPreferenceStore store) {
 		this.savedCommentsCount = SVNTeamPreferences.COMMENT_SAVED_COMMENTS_COUNT_DEFAULT;
 		this.savedPathsCount = SVNTeamPreferences.COMMENT_SAVED_PATHS_COUNT_DEFAULT;
@@ -100,52 +121,57 @@ public class SVNTeamCommentTemplatesPreferencesPage extends AbstractSVNTeamPrefe
 		this.userTemplatesEnabled = SVNTeamPreferences.COMMENT_TEMPLATES_LIST_ENABLED_DEFAULT;
 		this.useShiftEnter = SVNTeamPreferences.COMMENT_USE_SHIFT_ENTER_DEFAULT;
 	}
-	
+
 	protected void loadValues(IPreferenceStore store) {
-		this.savedCommentsCount = SVNTeamPreferences.getCommentTemplatesInt(store, SVNTeamPreferences.COMMENT_SAVED_COMMENTS_COUNT_NAME);
-		this.savedPathsCount = SVNTeamPreferences.getCommentTemplatesInt(store, SVNTeamPreferences.COMMENT_SAVED_PATHS_COUNT_NAME);
-		this.logTemplatesEnabled = SVNTeamPreferences.getCommentTemplatesBoolean(store, SVNTeamPreferences.COMMENT_LOG_TEMPLATES_ENABLED_NAME);
-		this.userTemplatesEnabled = SVNTeamPreferences.getCommentTemplatesBoolean(store, SVNTeamPreferences.COMMENT_TEMPLATES_LIST_ENABLED_NAME);
-		this.useShiftEnter = SVNTeamPreferences.getCommentTemplatesBoolean(store, SVNTeamPreferences.COMMENT_USE_SHIFT_ENTER_NAME);
+		this.savedCommentsCount = SVNTeamPreferences.getCommentTemplatesInt(store,
+				SVNTeamPreferences.COMMENT_SAVED_COMMENTS_COUNT_NAME);
+		this.savedPathsCount = SVNTeamPreferences.getCommentTemplatesInt(store,
+				SVNTeamPreferences.COMMENT_SAVED_PATHS_COUNT_NAME);
+		this.logTemplatesEnabled = SVNTeamPreferences.getCommentTemplatesBoolean(store,
+				SVNTeamPreferences.COMMENT_LOG_TEMPLATES_ENABLED_NAME);
+		this.userTemplatesEnabled = SVNTeamPreferences.getCommentTemplatesBoolean(store,
+				SVNTeamPreferences.COMMENT_TEMPLATES_LIST_ENABLED_NAME);
+		this.useShiftEnter = SVNTeamPreferences.getCommentTemplatesBoolean(store,
+				SVNTeamPreferences.COMMENT_USE_SHIFT_ENTER_NAME);
 	}
-	
+
 	protected void initializeControls() {
 		this.savedCommentsCountField.setText(String.valueOf(this.savedCommentsCount));
 		this.savedPathsCountField.setText(String.valueOf(this.savedPathsCount));
 		this.useLogTemplatesButton.setSelection(this.logTemplatesEnabled);
 		this.useTemplatesButton.setSelection(this.userTemplatesEnabled);
 		this.useShiftEnterButton.setSelection(this.useShiftEnter);
-		
+
 		this.listViewer.getControl().setEnabled(this.userTemplatesEnabled);
 		this.newButton.setEnabled(this.userTemplatesEnabled);
 		this.previewText.setEnabled(this.userTemplatesEnabled);
-		
+
 		IStructuredSelection selection = (IStructuredSelection) this.listViewer.getSelection();
 		this.editButton.setEnabled(this.userTemplatesEnabled && selection.size() == 1);
 		this.removeButton.setEnabled(this.userTemplatesEnabled && selection.size() > 0);
-		this.previewText.setText(selection.size() == 1 ? (String)selection.getFirstElement() : ""); //$NON-NLS-1$
+		this.previewText.setText(selection.size() == 1 ? (String) selection.getFirstElement() : ""); //$NON-NLS-1$
 	}
-	
+
 	protected Control createContentsImpl(Composite parent) {
 		Composite composite = new Composite(parent, SWT.NONE);
 		GridLayout layout = new GridLayout();
 		layout.marginWidth = layout.marginHeight = 0;
 		composite.setLayout(layout);
 		composite.setLayoutData(new GridData(GridData.FILL_BOTH));
-		
+
 		Composite checkBoxComposite = new Composite(composite, SWT.NONE);
 		layout = new GridLayout();
 		layout.marginWidth = layout.marginHeight = 0;
 		layout.numColumns = 2;
 		checkBoxComposite.setLayout(layout);
 		checkBoxComposite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		
+
 		Label label = new Label(checkBoxComposite, SWT.NONE);
 		GridData data = new GridData();
 		label.setLayoutData(data);
 		String labelText = SVNUIMessages.CommentTemplatesPreferencePage_historySavedCommentsCount;
 		label.setText(labelText);
-		
+
 		this.savedCommentsCountField = new Text(checkBoxComposite, SWT.SINGLE | SWT.BORDER);
 		data = new GridData(GridData.FILL_HORIZONTAL);
 		this.savedCommentsCountField.setLayoutData(data);
@@ -156,19 +182,19 @@ public class SVNTeamCommentTemplatesPreferencesPage extends AbstractSVNTeamPrefe
 		this.savedCommentsCountField.addModifyListener(new ModifyListener() {
 			public void modifyText(ModifyEvent e) {
 				try {
-					SVNTeamCommentTemplatesPreferencesPage.this.savedCommentsCount = Integer.parseInt(SVNTeamCommentTemplatesPreferencesPage.this.savedCommentsCountField.getText());
-				}
-				catch (Exception ex) {
+					SVNTeamCommentTemplatesPreferencesPage.this.savedCommentsCount = Integer
+							.parseInt(SVNTeamCommentTemplatesPreferencesPage.this.savedCommentsCountField.getText());
+				} catch (Exception ex) {
 				}
 			}
 		});
-		
+
 		label = new Label(checkBoxComposite, SWT.NONE);
 		data = new GridData();
 		label.setLayoutData(data);
 		labelText = SVNUIMessages.CommentTemplatesPreferencePage_historySavedPathsCount;
 		label.setText(labelText);
-		
+
 		this.savedPathsCountField = new Text(checkBoxComposite, SWT.SINGLE | SWT.BORDER);
 		data = new GridData(GridData.FILL_HORIZONTAL);
 		this.savedPathsCountField.setLayoutData(data);
@@ -179,13 +205,13 @@ public class SVNTeamCommentTemplatesPreferencesPage extends AbstractSVNTeamPrefe
 		this.savedPathsCountField.addModifyListener(new ModifyListener() {
 			public void modifyText(ModifyEvent e) {
 				try {
-					SVNTeamCommentTemplatesPreferencesPage.this.savedPathsCount = Integer.parseInt(SVNTeamCommentTemplatesPreferencesPage.this.savedPathsCountField.getText());
-				}
-				catch (Exception ex) {
+					SVNTeamCommentTemplatesPreferencesPage.this.savedPathsCount = Integer
+							.parseInt(SVNTeamCommentTemplatesPreferencesPage.this.savedPathsCountField.getText());
+				} catch (Exception ex) {
 				}
 			}
 		});
-		
+
 		this.useShiftEnterButton = new Button(checkBoxComposite, SWT.CHECK);
 		data = new GridData(GridData.FILL_HORIZONTAL);
 		data.horizontalSpan = 2;
@@ -193,10 +219,11 @@ public class SVNTeamCommentTemplatesPreferencesPage extends AbstractSVNTeamPrefe
 		this.useShiftEnterButton.setText(SVNUIMessages.CommentTemplatesPreferencePage_UseShiftEnter);
 		this.useShiftEnterButton.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				SVNTeamCommentTemplatesPreferencesPage.this.useShiftEnter = SVNTeamCommentTemplatesPreferencesPage.this.useShiftEnterButton.getSelection();
+				SVNTeamCommentTemplatesPreferencesPage.this.useShiftEnter = SVNTeamCommentTemplatesPreferencesPage.this.useShiftEnterButton
+						.getSelection();
 			}
 		});
-		
+
 		this.useLogTemplatesButton = new Button(checkBoxComposite, SWT.CHECK);
 		data = new GridData(GridData.FILL_HORIZONTAL);
 		data.horizontalSpan = 2;
@@ -204,10 +231,10 @@ public class SVNTeamCommentTemplatesPreferencesPage extends AbstractSVNTeamPrefe
 		this.useLogTemplatesButton.setText(SVNUIMessages.CommentTemplatesPreferencePage_LogTemplates);
 		this.useLogTemplatesButton.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				SVNTeamCommentTemplatesPreferencesPage.this.logTemplatesEnabled = ((Button)e.widget).getSelection();
+				SVNTeamCommentTemplatesPreferencesPage.this.logTemplatesEnabled = ((Button) e.widget).getSelection();
 			}
 		});
-		
+
 		this.useTemplatesButton = new Button(checkBoxComposite, SWT.CHECK);
 		data = new GridData(GridData.FILL_HORIZONTAL);
 		data.horizontalSpan = 2;
@@ -223,17 +250,19 @@ public class SVNTeamCommentTemplatesPreferencesPage extends AbstractSVNTeamPrefe
 		data = new GridData(GridData.FILL_HORIZONTAL);
 		data.horizontalSpan = 2;
 		separator.setLayoutData(data);
-		
+
 		Label templatesLabel = new Label(composite, SWT.NONE);
 		templatesLabel.setText(SVNUIMessages.CommentTemplatesPreferencePage_EditHint);
 
 		this.createTemplatesList(composite);
-		
+
 		Dialog.applyDialogFont(parent);
 
 //		Setting context help
-		PlatformUI.getWorkbench().getHelpSystem().setHelp(parent, "org.eclipse.team.svn.help.commentTemplatesPreferencesContext"); //$NON-NLS-1$
-		
+		PlatformUI.getWorkbench()
+				.getHelpSystem()
+				.setHelp(parent, "org.eclipse.team.svn.help.commentTemplatesPreferencesContext"); //$NON-NLS-1$
+
 		return composite;
 	}
 
@@ -244,9 +273,9 @@ public class SVNTeamCommentTemplatesPreferencesPage extends AbstractSVNTeamPrefe
 		layout.numColumns = 2;
 		listAndButtons.setLayout(layout);
 		GridData data = new GridData(GridData.FILL_BOTH);
-		data.widthHint= 430;
+		data.widthHint = 430;
 		listAndButtons.setLayoutData(data);
-		
+
 		this.listViewer = new ListViewer(listAndButtons);
 		this.listViewer.setLabelProvider(new LabelProvider() {
 			public String getText(Object element) {
@@ -269,11 +298,11 @@ public class SVNTeamCommentTemplatesPreferencesPage extends AbstractSVNTeamPrefe
 		});
 		List list = this.listViewer.getList();
 		list.setLayoutData(new GridData(GridData.FILL_BOTH));
-		
+
 		IPreferenceStore store = SVNTeamUIPlugin.instance().getPreferenceStore();
-		String []templates = FileUtility.decodeStringToArray(SVNTeamPreferences.getCommentTemplatesString(store, 
-				SVNTeamPreferences.COMMENT_TEMPLATES_LIST_NAME));
-		
+		String[] templates = FileUtility.decodeStringToArray(
+				SVNTeamPreferences.getCommentTemplatesString(store, SVNTeamPreferences.COMMENT_TEMPLATES_LIST_NAME));
+
 		// populate list
 		for (int i = 0; i < templates.length; i++) {
 			this.listViewer.add(templates[i]);
@@ -286,12 +315,13 @@ public class SVNTeamCommentTemplatesPreferencesPage extends AbstractSVNTeamPrefe
 		data.horizontalSpan = 2;
 		previewLabel.setLayoutData(data);
 		previewLabel.setText(SVNUIMessages.CommentTemplatesPreferencePage_ViewHint);
-		
+
 		data = new GridData(GridData.FILL_HORIZONTAL);
 		data.heightHint = this.convertHeightInCharsToPixels(5);
-		this.previewText = SpellcheckedTextProvider.getTextWidget(listAndButtons, data, SWT.MULTI | SWT.V_SCROLL | SWT.WRAP);
+		this.previewText = SpellcheckedTextProvider.getTextWidget(listAndButtons, data,
+				SWT.MULTI | SWT.V_SCROLL | SWT.WRAP);
 		this.previewText.setEditable(false);
-		
+
 		return listAndButtons;
 	}
 
@@ -341,7 +371,7 @@ public class SVNTeamCommentTemplatesPreferencesPage extends AbstractSVNTeamPrefe
 			}
 		});
 	}
-	
+
 	protected void newTemplate() {
 		EditCommentTemplatePanel panel = new EditCommentTemplatePanel(null);
 		DefaultDialog dialog = new DefaultDialog(this.getShell(), panel);
@@ -353,18 +383,18 @@ public class SVNTeamCommentTemplatesPreferencesPage extends AbstractSVNTeamPrefe
 	protected void editTemplate() {
 		IStructuredSelection selection = (IStructuredSelection) this.listViewer.getSelection();
 		if (selection.size() == 1) {
-			String oldTemplate = (String)selection.getFirstElement();
+			String oldTemplate = (String) selection.getFirstElement();
 			EditCommentTemplatePanel panel = new EditCommentTemplatePanel(oldTemplate);
 			DefaultDialog dialog = new DefaultDialog(this.getShell(), panel);
 			if (dialog.open() == 0) {
 				this.listViewer.remove(oldTemplate);
 				this.listViewer.add(panel.getTemplate());
-			}	
+			}
 		}
 	}
-	
+
 	protected void remove() {
-		IStructuredSelection selection = (IStructuredSelection)this.listViewer.getSelection();
+		IStructuredSelection selection = (IStructuredSelection) this.listViewer.getSelection();
 		this.listViewer.remove(selection.toArray());
 	}
 
@@ -373,11 +403,11 @@ public class SVNTeamCommentTemplatesPreferencesPage extends AbstractSVNTeamPrefe
 		this.listViewer.getControl().setEnabled(this.userTemplatesEnabled);
 		this.newButton.setEnabled(this.userTemplatesEnabled);
 		this.previewText.setEnabled(this.userTemplatesEnabled);
-		
+
 		IStructuredSelection selection = (IStructuredSelection) this.listViewer.getSelection();
 		this.editButton.setEnabled(this.userTemplatesEnabled && selection.size() == 1);
 		this.removeButton.setEnabled(this.userTemplatesEnabled && selection.size() > 0);
-		this.previewText.setText(selection.size() == 1 ? (String)selection.getFirstElement() : ""); //$NON-NLS-1$
+		this.previewText.setText(selection.size() == 1 ? (String) selection.getFirstElement() : ""); //$NON-NLS-1$
 	}
-	
+
 }

@@ -38,87 +38,101 @@ import org.eclipse.ui.IWorkbenchPart;
  * @author Alexander Gurov
  */
 public class ShowMergeViewOperation extends AbstractActionOperation {
-    protected IWorkbenchPart part;
-    protected IResource []locals;
-    protected IRepositoryResourceProvider from;
-    protected IRepositoryResourceProvider fromEnd;
-    protected SVNRevisionRange []revisions;
-    protected boolean ignoreAncestry;
-    protected boolean recordOnly;
-    protected SVNDepth depth;
+	protected IWorkbenchPart part;
 
-    public ShowMergeViewOperation(IResource []locals, IRepositoryResource []from, SVNRevisionRange []revisions, boolean ignoreAncestry, SVNDepth depth, IWorkbenchPart part) {
-        this(locals, new IRepositoryResourceProvider.DefaultRepositoryResourceProvider(from), revisions, ignoreAncestry, depth, part);
-    }
+	protected IResource[] locals;
 
-    public ShowMergeViewOperation(IResource []locals, IRepositoryResource []fromStart, IRepositoryResource []fromEnd, boolean ignoreAncestry, SVNDepth depth, IWorkbenchPart part) {
-        this(locals, new IRepositoryResourceProvider.DefaultRepositoryResourceProvider(fromStart), new IRepositoryResourceProvider.DefaultRepositoryResourceProvider(fromEnd), ignoreAncestry, depth, part);
-    }
+	protected IRepositoryResourceProvider from;
 
-    public ShowMergeViewOperation(IResource []locals, IRepositoryResource []from, IWorkbenchPart part) {
-        this(locals, new IRepositoryResourceProvider.DefaultRepositoryResourceProvider(from), part);
-    }
+	protected IRepositoryResourceProvider fromEnd;
 
-    public ShowMergeViewOperation(IResource []locals, IRepositoryResourceProvider from, SVNRevisionRange []revisions, boolean ignoreAncestry, SVNDepth depth, IWorkbenchPart part) {
-        super("Operation_ShowMergeView", SVNUIMessages.class); //$NON-NLS-1$
-        this.part = part;
-        this.locals = locals;
-        this.from = from;
-        this.revisions = revisions;
-        this.ignoreAncestry = ignoreAncestry;
-        this.depth = depth;
-    }
-    
-    public ShowMergeViewOperation(IResource []locals, IRepositoryResourceProvider fromStart, IRepositoryResourceProvider fromEnd, boolean ignoreAncestry, SVNDepth depth, IWorkbenchPart part) {
-        super("Operation_ShowMergeView", SVNUIMessages.class); //$NON-NLS-1$
-        this.part = part;
-        this.locals = locals;
-        this.from = fromStart;
-        this.fromEnd = fromEnd;
-        this.ignoreAncestry = ignoreAncestry;
-        this.depth = depth;
-    }
-    
-    public ShowMergeViewOperation(IResource []locals, IRepositoryResourceProvider from, IWorkbenchPart part) {
-        super("Operation_ShowMergeView", SVNUIMessages.class); //$NON-NLS-1$
-        this.part = part;
-        this.locals = locals;
-        this.from = from;
-    }
-    
+	protected SVNRevisionRange[] revisions;
+
+	protected boolean ignoreAncestry;
+
+	protected boolean recordOnly;
+
+	protected SVNDepth depth;
+
+	public ShowMergeViewOperation(IResource[] locals, IRepositoryResource[] from, SVNRevisionRange[] revisions,
+			boolean ignoreAncestry, SVNDepth depth, IWorkbenchPart part) {
+		this(locals, new IRepositoryResourceProvider.DefaultRepositoryResourceProvider(from), revisions, ignoreAncestry,
+				depth, part);
+	}
+
+	public ShowMergeViewOperation(IResource[] locals, IRepositoryResource[] fromStart, IRepositoryResource[] fromEnd,
+			boolean ignoreAncestry, SVNDepth depth, IWorkbenchPart part) {
+		this(locals, new IRepositoryResourceProvider.DefaultRepositoryResourceProvider(fromStart),
+				new IRepositoryResourceProvider.DefaultRepositoryResourceProvider(fromEnd), ignoreAncestry, depth,
+				part);
+	}
+
+	public ShowMergeViewOperation(IResource[] locals, IRepositoryResource[] from, IWorkbenchPart part) {
+		this(locals, new IRepositoryResourceProvider.DefaultRepositoryResourceProvider(from), part);
+	}
+
+	public ShowMergeViewOperation(IResource[] locals, IRepositoryResourceProvider from, SVNRevisionRange[] revisions,
+			boolean ignoreAncestry, SVNDepth depth, IWorkbenchPart part) {
+		super("Operation_ShowMergeView", SVNUIMessages.class); //$NON-NLS-1$
+		this.part = part;
+		this.locals = locals;
+		this.from = from;
+		this.revisions = revisions;
+		this.ignoreAncestry = ignoreAncestry;
+		this.depth = depth;
+	}
+
+	public ShowMergeViewOperation(IResource[] locals, IRepositoryResourceProvider fromStart,
+			IRepositoryResourceProvider fromEnd, boolean ignoreAncestry, SVNDepth depth, IWorkbenchPart part) {
+		super("Operation_ShowMergeView", SVNUIMessages.class); //$NON-NLS-1$
+		this.part = part;
+		this.locals = locals;
+		this.from = fromStart;
+		this.fromEnd = fromEnd;
+		this.ignoreAncestry = ignoreAncestry;
+		this.depth = depth;
+	}
+
+	public ShowMergeViewOperation(IResource[] locals, IRepositoryResourceProvider from, IWorkbenchPart part) {
+		super("Operation_ShowMergeView", SVNUIMessages.class); //$NON-NLS-1$
+		this.part = part;
+		this.locals = locals;
+		this.from = from;
+	}
+
 	public void setRecordOnly(boolean recordOnly) {
 		this.recordOnly = recordOnly;
 	}
-	
-    public int getOperationWeight() {
+
+	public int getOperationWeight() {
 		return 0;
 	}
 
-    protected void runImpl(IProgressMonitor monitor) throws Exception {
-    	AbstractMergeSet mergeSet = null;
-    	if (this.fromEnd != null) {
-        	mergeSet = new MergeSet2URL(this.locals, this.from.getRepositoryResources(), this.fromEnd.getRepositoryResources(), this.ignoreAncestry, this.recordOnly, this.depth);
-    	}
-    	else if (this.revisions != null) {
-        	mergeSet = new MergeSet1URL(this.locals, this.from.getRepositoryResources(), this.revisions, this.ignoreAncestry, this.recordOnly, this.depth);
-    	}
-    	else {
-        	mergeSet = new MergeSetReintegrate(this.locals, this.from.getRepositoryResources());
-    	}
-        
-    	//SubscriberParticipant.getMatchingParticipant silently changes resources order. So, make a copy...
-    	IResource []copy = new IResource[mergeSet.to.length];
-    	System.arraycopy(mergeSet.to, 0, copy, 0, mergeSet.to.length);
-		MergeParticipant participant = (MergeParticipant)SubscriberParticipant.getMatchingParticipant(MergeParticipant.PARTICIPANT_ID, copy);
+	protected void runImpl(IProgressMonitor monitor) throws Exception {
+		AbstractMergeSet mergeSet = null;
+		if (this.fromEnd != null) {
+			mergeSet = new MergeSet2URL(this.locals, this.from.getRepositoryResources(),
+					this.fromEnd.getRepositoryResources(), this.ignoreAncestry, this.recordOnly, this.depth);
+		} else if (this.revisions != null) {
+			mergeSet = new MergeSet1URL(this.locals, this.from.getRepositoryResources(), this.revisions,
+					this.ignoreAncestry, this.recordOnly, this.depth);
+		} else {
+			mergeSet = new MergeSetReintegrate(this.locals, this.from.getRepositoryResources());
+		}
+
+		//SubscriberParticipant.getMatchingParticipant silently changes resources order. So, make a copy...
+		IResource[] copy = new IResource[mergeSet.to.length];
+		System.arraycopy(mergeSet.to, 0, copy, 0, mergeSet.to.length);
+		MergeParticipant participant = (MergeParticipant) SubscriberParticipant
+				.getMatchingParticipant(MergeParticipant.PARTICIPANT_ID, copy);
 		if (participant == null) {
 			participant = new MergeParticipant(new MergeScope(mergeSet));
-			TeamUI.getSynchronizeManager().addSynchronizeParticipants(new ISynchronizeParticipant[] {participant});
-		}
-		else {
-		    ((MergeScope)participant.getScope()).setMergeSet(mergeSet);
+			TeamUI.getSynchronizeManager().addSynchronizeParticipants(new ISynchronizeParticipant[] { participant });
+		} else {
+			((MergeScope) participant.getScope()).setMergeSet(mergeSet);
 		}
 
 		participant.run(this.part);
-    }
-    
+	}
+
 }

@@ -41,8 +41,9 @@ import org.eclipse.team.svn.core.utility.ProgressMonitorUtility;
  */
 public class RemoteStatusCache extends ResourceVariantByteStore implements IRemoteStatusCache {
 	protected Map<IPath, byte[]> resourceStateMap;
+
 	protected Map<IPath, Set<IResource>> resourceChildrenMap;
-	
+
 	public RemoteStatusCache() {
 		this.resourceStateMap = new HashMap<IPath, byte[]>();
 		this.resourceChildrenMap = new HashMap<IPath, Set<IResource>>();
@@ -51,22 +52,22 @@ public class RemoteStatusCache extends ResourceVariantByteStore implements IRemo
 	public synchronized boolean containsData() {
 		return this.resourceStateMap.size() > 0;
 	}
-	
+
 	public void dispose() {
 
 	}
-	
+
 	public synchronized void clearAll() {
 		this.resourceChildrenMap.clear();
 		this.resourceStateMap.clear();
 	}
 
-	public synchronized byte []getBytes(IResource resource) {
+	public synchronized byte[] getBytes(IResource resource) {
 		return this.resourceStateMap.get(resource.getFullPath());
 	}
 
-	public synchronized boolean setBytes(IResource resource, byte []bytes) {
-		byte []old = this.resourceStateMap.put(resource.getFullPath(), bytes);
+	public synchronized boolean setBytes(IResource resource, byte[] bytes) {
+		byte[] old = this.resourceStateMap.put(resource.getFullPath(), bytes);
 		IPath parentPath = resource.getParent().getFullPath();
 		Set<IResource> members = this.resourceChildrenMap.get(parentPath);
 		if (members == null) {
@@ -99,14 +100,14 @@ public class RemoteStatusCache extends ResourceVariantByteStore implements IRemo
 		return this.flushBytes(resource, IResource.DEPTH_ZERO);
 	}
 
-	public synchronized IResource []members(IResource resource) {
+	public synchronized IResource[] members(IResource resource) {
 		Set<?> members = this.resourceChildrenMap.get(resource.getFullPath());
 		return members == null ? FileUtility.NO_CHILDREN : members.toArray(new IResource[members.size()]);
 	}
 
-	public synchronized IResource []allMembers(IResource resource) {
+	public synchronized IResource[] allMembers(IResource resource) {
 		if (!(resource instanceof IContainer)) {
-    		return FileUtility.NO_CHILDREN;
+			return FileUtility.NO_CHILDREN;
 		}
 		IResource[] known = this.members(resource);
 		List<IResource> members;
@@ -116,7 +117,7 @@ public class RemoteStatusCache extends ResourceVariantByteStore implements IRemo
 			members = new ArrayList<IResource>(Arrays.asList(known));
 		}
 		if (RepositoryProvider.getProvider(resource.getProject(), SVNTeamPlugin.NATURE_ID) != null) {
-			IContainer container = (IContainer)resource;
+			IContainer container = (IContainer) resource;
 			GetAllResourcesOperation op = new GetAllResourcesOperation(container);
 			ProgressMonitorUtility.doTaskExternal(op, new NullProgressMonitor());
 			IResource[] children = op.getChildren();
@@ -127,32 +128,32 @@ public class RemoteStatusCache extends ResourceVariantByteStore implements IRemo
 		return members.toArray(new IResource[members.size()]);
 	}
 
-	public synchronized void traverse(IResource []resources, int depth, ICacheVisitor visitor) {
+	public synchronized void traverse(IResource[] resources, int depth, ICacheVisitor visitor) {
 		for (int i = 0; i < resources.length; i++) {
 			this.traverse(resources[i], depth, visitor);
 		}
 	}
-	
+
 	protected void traverse(IResource resource, int depth, ICacheVisitor visitor) {
 		IPath base = resource.getFullPath();
-	    for (Map.Entry<IPath, byte[]> entry : this.resourceStateMap.entrySet()) {
-	    	IPath current = entry.getKey();
-	    	if (this.isChildOf(base, current, depth)) {
-	    		visitor.visit(current, entry.getValue());
-	    	}
-	    }
+		for (Map.Entry<IPath, byte[]> entry : this.resourceStateMap.entrySet()) {
+			IPath current = entry.getKey();
+			if (this.isChildOf(base, current, depth)) {
+				visitor.visit(current, entry.getValue());
+			}
+		}
 	}
-	
+
 	protected boolean isChildOf(IPath base, IPath current, int depth) {
 		if (base.isPrefixOf(current)) {
-            int cachedSegmentsCount = current.segmentCount();
-            int matchingSegmentsCount = base.matchingFirstSegments(current);
-            int difference = cachedSegmentsCount - matchingSegmentsCount;
-            if (difference >= 0 && depth == IResource.DEPTH_INFINITE ? true : depth >= difference) {
-            	return true;
-            }
+			int cachedSegmentsCount = current.segmentCount();
+			int matchingSegmentsCount = base.matchingFirstSegments(current);
+			int difference = cachedSegmentsCount - matchingSegmentsCount;
+			if (difference >= 0 && depth == IResource.DEPTH_INFINITE ? true : depth >= difference) {
+				return true;
+			}
 		}
 		return false;
 	}
-	
+
 }

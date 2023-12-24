@@ -26,20 +26,31 @@ import org.eclipse.team.svn.core.resource.events.ResourceStatesChangedEvent;
  */
 public interface IRemoteStorage extends ISVNStorage {
 	public void addResourceStatesListener(Class eventClass, IResourceStatesListener listener);
+
 	public void removeResourceStatesListener(Class eventClass, IResourceStatesListener listener);
-    public void fireResourceStatesChangedEvent(ResourceStatesChangedEvent event);
-	
+
+	public void fireResourceStatesChangedEvent(ResourceStatesChangedEvent event);
+
 	public IResourceChange asResourceChange(IChangeStateProvider changeState, boolean update);
+
 	public ILocalResource asLocalResource(IResource resource);
+
 	public ILocalResource asLocalResourceAccessible(IResource resource);
+
 	public ILocalResource asLocalResourceDirty(IResource resource);
-	public void refreshLocalResources(IResource []resources, int depth);
+
+	public void refreshLocalResources(IResource[] resources, int depth);
+
 	public IRepositoryResource asRepositoryResource(IRepositoryLocation location, String url, boolean isFile);
+
 	public IRepositoryResource asRepositoryResource(IResource resource);
+
 	public ILocalResource asLocalResource(IProject project, String url, int kind);
+
 	public IRepositoryLocation getRepositoryLocation(IResource resource);
-	
-	public byte []resourceChangeAsBytes(IResourceChange resource);
-	public IResourceChange resourceChangeFromBytes(byte []bytes);
+
+	public byte[] resourceChangeAsBytes(IResourceChange resource);
+
+	public IResourceChange resourceChangeFromBytes(byte[] bytes);
 
 }

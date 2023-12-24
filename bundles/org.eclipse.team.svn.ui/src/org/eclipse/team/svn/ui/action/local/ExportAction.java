@@ -36,26 +36,28 @@ public class ExportAction extends AbstractWorkingCopyAction {
 	public ExportAction() {
 		super();
 	}
-	
+
 	public void runImpl(IAction action) {
-		IResource []resources = this.getSelectedResources(IStateFilter.SF_EXCLUDE_DELETED);
-		
+		IResource[] resources = this.getSelectedResources(IStateFilter.SF_EXCLUDE_DELETED);
+
 		DirectoryDialog fileDialog = new DirectoryDialog(this.getShell());
 		fileDialog.setText(SVNUIMessages.ExportAction_Select_Title);
 		fileDialog.setMessage(SVNUIMessages.ExportAction_Select_Description);
 		String path = fileDialog.open();
 		if (path != null) {
-			boolean ignoreExternals = SVNTeamPreferences.getBehaviourBoolean(SVNTeamUIPlugin.instance().getPreferenceStore(), SVNTeamPreferences.BEHAVIOUR_IGNORE_EXTERNALS_NAME);
+			boolean ignoreExternals = SVNTeamPreferences.getBehaviourBoolean(
+					SVNTeamUIPlugin.instance().getPreferenceStore(),
+					SVNTeamPreferences.BEHAVIOUR_IGNORE_EXTERNALS_NAME);
 			this.runScheduled(new ExportOperation(resources, path, SVNRevision.WORKING, ignoreExternals));
 		}
 	}
-	
+
 	public boolean isEnabled() {
 		return this.checkForResourcesPresence(IStateFilter.SF_EXCLUDE_DELETED);
 	}
-	
+
 	protected boolean needsToSaveDirtyEditors() {
 		return true;
 	}
-	
+
 }

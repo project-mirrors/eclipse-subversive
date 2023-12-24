@@ -30,17 +30,20 @@ import org.eclipse.team.svn.ui.SVNUIMessages;
  * @author Alexander Gurov
  */
 public class PrepareRemoteResourcesTransferrableOperation extends AbstractActionOperation {
-	protected IRepositoryResource []resources;
+	protected IRepositoryResource[] resources;
+
 	protected Display display;
+
 	protected int operation;
 
-	public PrepareRemoteResourcesTransferrableOperation(IRepositoryResource []resources, int operation, Display display) {
+	public PrepareRemoteResourcesTransferrableOperation(IRepositoryResource[] resources, int operation,
+			Display display) {
 		super("Operation_FillCopyPaste", SVNUIMessages.class); //$NON-NLS-1$
 		this.resources = resources;
 		this.display = display;
 		this.operation = operation;
 	}
-	
+
 	public int getOperationWeight() {
 		return 0;
 	}
@@ -49,12 +52,11 @@ public class PrepareRemoteResourcesTransferrableOperation extends AbstractAction
 		Clipboard clipboard = new Clipboard(this.display);
 		try {
 			clipboard.setContents(
-				new Object[] {new RemoteResourceTransferrable(this.resources, this.operation)}, 
-				new Transfer[] {RemoteResourceTransfer.getInstance()});
-		}
-		finally {
+					new Object[] { new RemoteResourceTransferrable(this.resources, this.operation) },
+					new Transfer[] { RemoteResourceTransfer.getInstance() });
+		} finally {
 			clipboard.dispose();
 		}
 	}
-	
+
 }

@@ -33,16 +33,18 @@ import org.eclipse.team.svn.core.resource.events.IRepositoryLocationStateListene
  */
 public class SVNRepositoryLocationWrapper implements IRepositoryLocation {
 	protected IRepositoryLocation location;
+
 	protected String url;
 
 	protected String repositoryRootUrl;
+
 	protected String repositoryUUID;
-	
+
 	public SVNRepositoryLocationWrapper(IRepositoryLocation location, String mappedUrl) {
 		this.location = location;
 		this.url = mappedUrl;
 	}
-	
+
 	public void addStateListener(IRepositoryLocationStateListener listener) {
 		this.location.addStateListener(listener);
 	}
@@ -50,14 +52,15 @@ public class SVNRepositoryLocationWrapper implements IRepositoryLocation {
 	public void removeStateListener(IRepositoryLocationStateListener listener) {
 		this.location.removeStateListener(listener);
 	}
+
 	public String asReference(LocationReferenceTypeEnum locationReferenceType) {
 		return this.location.asReference(locationReferenceType);
 	}
-	
+
 	public void fillLocationFromReference(String[] referenceParts) {
 		this.location.fillLocationFromReference(referenceParts);
 	}
-	
+
 	public String getUrlAsIs() {
 		return this.url;
 	}
@@ -71,11 +74,11 @@ public class SVNRepositoryLocationWrapper implements IRepositoryLocation {
 	}
 
 	public IRepositoryContainer asRepositoryContainer(String url, boolean allowsNull) {
-    	return SVNRepositoryLocation.asRepositoryContainer(this, url, allowsNull);
+		return SVNRepositoryLocation.asRepositoryContainer(this, url, allowsNull);
 	}
 
 	public IRepositoryFile asRepositoryFile(String url, boolean allowsNull) {
-    	return SVNRepositoryLocation.asRepositoryFile(this, url, allowsNull);
+		return SVNRepositoryLocation.asRepositoryFile(this, url, allowsNull);
 	}
 
 	public IRepositoryRoot getRepositoryRoot() {
@@ -144,7 +147,7 @@ public class SVNRepositoryLocationWrapper implements IRepositoryLocation {
 		return this.location.getRealms();
 	}
 
-	public IRevisionLink []getRevisionLinks() {
+	public IRevisionLink[] getRevisionLinks() {
 		return this.location.getRevisionLinks();
 	}
 
@@ -239,19 +242,19 @@ public class SVNRepositoryLocationWrapper implements IRepositoryLocation {
 	public String getName() {
 		return this.location.getName();
 	}
-	
+
 	public boolean isAuthorNameEnabled() {
 		return this.location.isAuthorNameEnabled();
 	}
-	
+
 	public String getAuthorName() {
 		return this.location.getAuthorName();
 	}
-	
+
 	public void setAuthorNameEnabled(boolean isEnabled) {
 		this.location.setAuthorNameEnabled(isEnabled);
 	}
-	
+
 	public void setAuthorName(String name) {
 		this.location.setAuthorName(name);
 	}
@@ -261,7 +264,7 @@ public class SVNRepositoryLocationWrapper implements IRepositoryLocation {
 	}
 
 	protected void fetchRepoInfo() {
-		String []values = SVNRepositoryLocation.fetchRepoInfo(this, true);
+		String[] values = SVNRepositoryLocation.fetchRepoInfo(this, true);
 		this.repositoryRootUrl = values[0];
 		this.repositoryUUID = values[1];
 	}
@@ -271,6 +274,6 @@ public class SVNRepositoryLocationWrapper implements IRepositoryLocation {
 	}
 
 	public boolean equals(Object obj) {
-		return this.location.equals(obj); 
+		return this.location.equals(obj);
 	}
 }

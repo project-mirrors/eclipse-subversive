@@ -31,42 +31,48 @@ import org.eclipse.team.svn.core.utility.FileUtility;
 
 /**
  * Concatenate new property value with already existing value (by retrieving it from SVN)
- *   
+ * 
  * @author Igor Burilo
  */
 public class ConcatenateProperyDataOperation extends AbstractActionOperation implements IResourcePropertyProvider {
 
 	protected IResource resource;
+
 	protected String propertyName;
-	protected boolean isStringValue;	
-	
+
+	protected boolean isStringValue;
+
 	protected String stringValuesSeparator;
+
 	protected String newStringValue;
-	protected byte[] newByteValue;	
+
+	protected byte[] newByteValue;
+
 	protected IResourcePropertyProvider propertyProvider;
-	
+
 	protected SVNProperty property;
-	
-	public ConcatenateProperyDataOperation(IResource resource, String propertyName, IResourcePropertyProvider propertyProvider) {
+
+	public ConcatenateProperyDataOperation(IResource resource, String propertyName,
+			IResourcePropertyProvider propertyProvider) {
 		this(resource, propertyName, true);
 		this.propertyProvider = propertyProvider;
 	}
-	
+
 	public ConcatenateProperyDataOperation(IResource resource, String propertyName, String newStringValue) {
-		this(resource, propertyName, true);		
+		this(resource, propertyName, true);
 		this.newStringValue = newStringValue;
 	}
-	
+
 	public ConcatenateProperyDataOperation(IResource resource, String propertyName, byte[] newByteValue) {
-		this(resource, propertyName, false);		
+		this(resource, propertyName, false);
 		this.newByteValue = newByteValue;
 	}
-	
+
 	private ConcatenateProperyDataOperation(IResource resource, String propertyName, boolean isStringValue) {
 		super("Operation_ConcatenatePropertyData", SVNMessages.class); //$NON-NLS-1$
 		this.resource = resource;
 		this.propertyName = propertyName;
-		this.isStringValue = isStringValue;		
+		this.isStringValue = isStringValue;
 		this.stringValuesSeparator = "\r\n"; //$NON-NLS-1$
 	}
 
@@ -76,28 +82,29 @@ public class ConcatenateProperyDataOperation extends AbstractActionOperation imp
 		final ISVNConnector proxy = location.acquireSVNProxy();
 		SVNProperty existingProperty;
 		try {
-			existingProperty = proxy.getProperty(new SVNEntryRevisionReference(wcPath), this.propertyName, null, new SVNProgressMonitor(this, monitor, null));
-		}
-		finally {
+			existingProperty = proxy.getProperty(new SVNEntryRevisionReference(wcPath), this.propertyName, null,
+					new SVNProgressMonitor(this, monitor, null));
+		} finally {
 			location.releaseSVNProxy(proxy);
 		}
 		if (existingProperty != null && existingProperty.value != null) {
 			if (this.isStringValue) {
-				String value = existingProperty.value;												
+				String value = existingProperty.value;
 				value += this.stringValuesSeparator + this.getNewStringValue();
 				this.property = new SVNProperty(this.propertyName, value);
 			} else {
 				byte[] existingData = existingProperty.value.getBytes();
 				byte[] newData = new byte[existingData.length + this.getNewByteValue().length];
 				System.arraycopy(existingData, 0, newData, 0, existingData.length);
-				System.arraycopy(this.getNewByteValue(), 0, newData, existingData.length, this.getNewByteValue().length);
-				this.property = new SVNProperty(this.propertyName, new String(newData));	
+				System.arraycopy(this.getNewByteValue(), 0, newData, existingData.length,
+						this.getNewByteValue().length);
+				this.property = new SVNProperty(this.propertyName, new String(newData));
 			}
 		} else {
 			if (this.isStringValue) {
 				this.property = new SVNProperty(this.propertyName, this.getNewStringValue());
 			} else {
-				this.property = new SVNProperty(this.propertyName, new String(this.getNewByteValue()));	
+				this.property = new SVNProperty(this.propertyName, new String(this.getNewByteValue()));
 			}
 		}
 	}
@@ -105,24 +112,24 @@ public class ConcatenateProperyDataOperation extends AbstractActionOperation imp
 	protected String getNewStringValue() {
 		if (!this.isStringValue) {
 			return null;
-		} 
+		}
 		return this.propertyProvider != null ? this.propertyProvider.getProperties()[0].value : this.newStringValue;
 	}
-	
+
 	protected byte[] getNewByteValue() {
 		return this.newByteValue;
 	}
-	
+
 	public void setStringValuesSeparator(String stringValuesSeparator) {
 		this.stringValuesSeparator = stringValuesSeparator;
 	}
-	
+
 	public IResource getLocal() {
 		return this.resource;
 	}
 
 	public SVNProperty[] getProperties() {
-		return new SVNProperty[] {this.property};
+		return new SVNProperty[] { this.property };
 	}
 
 	public IRepositoryResource getRemote() {
@@ -134,10 +141,11 @@ public class ConcatenateProperyDataOperation extends AbstractActionOperation imp
 	}
 
 	public void refresh() {
-		
+
 	}
-	
+
 	protected String getShortErrorMessage(Throwable t) {
-		return BaseMessages.format(super.getShortErrorMessage(t), new Object[] {this.propertyName, this.resource.getName()});
+		return BaseMessages.format(super.getShortErrorMessage(t),
+				new Object[] { this.propertyName, this.resource.getName() });
 	}
 }

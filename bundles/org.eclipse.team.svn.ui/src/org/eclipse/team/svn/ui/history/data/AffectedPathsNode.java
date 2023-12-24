@@ -19,20 +19,24 @@ import java.util.List;
 
 import org.eclipse.team.svn.core.connector.SVNLogPath;
 
-
 /**
- * Node for the tree of the affected paths 
+ * Node for the tree of the affected paths
  *
  * @author Sergiy Logvin
  */
 public class AffectedPathsNode {
 	protected String name;
+
 	protected String compressedName;
-	protected List<AffectedPathsNode> children; 
+
+	protected List<AffectedPathsNode> children;
+
 	protected AffectedPathsNode parent;
+
 	protected ArrayList<SVNChangedPathData> data;
+
 	protected SVNLogPath.ChangeType status;
-	
+
 	public AffectedPathsNode(String name, AffectedPathsNode parent, SVNLogPath.ChangeType status) {
 		this.name = this.compressedName = name;
 		this.parent = parent;
@@ -40,73 +44,73 @@ public class AffectedPathsNode {
 		this.children = new ArrayList<AffectedPathsNode>();
 		this.status = status;
 	}
-	
+
 	public String getName() {
 		return this.name;
 	}
-	
+
 	public String getCompressedName() {
 		return this.compressedName;
 	}
-	
+
 	public void addCompressedNameSegment(String compressedName) {
 		this.compressedName += "/" + compressedName; //$NON-NLS-1$
 	}
-	
+
 	public String toString() {
 		return this.compressedName;
 	}
-	
+
 	public boolean hasChildren() {
 		return this.children.size() > 0;
 	}
-	
+
 	public AffectedPathsNode getParent() {
 		return this.parent;
 	}
-	
-	public List<AffectedPathsNode> getChildren() {		
+
+	public List<AffectedPathsNode> getChildren() {
 		return this.children;
 	}
-	
-	public boolean addChild(AffectedPathsNode child) {		
+
+	public boolean addChild(AffectedPathsNode child) {
 		if (this.children.contains(child)) {
 			return false;
 		}
 		return this.children.add(child);
 	}
-	
+
 	public boolean removeChild(AffectedPathsNode child) {
 		if (this.children.contains(child)) {
 			return this.children.remove(child);
 		}
 		return false;
 	}
-	
+
 	public boolean equals(Object arg0) {
 		if (arg0 instanceof AffectedPathsNode) {
-			AffectedPathsNode node2 = (AffectedPathsNode)arg0;
+			AffectedPathsNode node2 = (AffectedPathsNode) arg0;
 			if (this.parent == null) {
 				return node2.parent == null;
-			}		
+			}
 			if (this.parent.equals(node2.parent) && this.name.equals(node2.name)) {
 				return true;
 			}
 		}
 		return false;
 	}
-	
+
 	public int hashCode() {
 		int h = 17;
-        h += (31 * (this.parent != null ? this.parent.hashCode() : 0));
-        h += (31 * this.name.hashCode());
-        return h;		
+		h += (31 * (this.parent != null ? this.parent.hashCode() : 0));
+		h += (31 * this.name.hashCode());
+		return h;
 	}
 
-	public SVNChangedPathData [] getData() {
+	public SVNChangedPathData[] getData() {
 		return this.data.toArray(new SVNChangedPathData[this.data.size()]);
 	}
-	
+
 	protected List<SVNChangedPathData> getPathDataImpl(List<SVNChangedPathData> result) {
 		result.addAll(this.data);
 		for (AffectedPathsNode node : this.children) {
@@ -121,11 +125,11 @@ public class AffectedPathsNode {
 		}
 	}
 
-	public SVNChangedPathData [] getPathData() {
-    	List<SVNChangedPathData> tmp = this.getPathDataImpl(new ArrayList<SVNChangedPathData>());
-    	return tmp.toArray(new SVNChangedPathData[tmp.size()]);
+	public SVNChangedPathData[] getPathData() {
+		List<SVNChangedPathData> tmp = this.getPathDataImpl(new ArrayList<SVNChangedPathData>());
+		return tmp.toArray(new SVNChangedPathData[tmp.size()]);
 	}
-	
+
 	public void setParent(AffectedPathsNode parent) {
 		this.parent = parent;
 	}
@@ -133,12 +137,11 @@ public class AffectedPathsNode {
 	public void setChildren(List<AffectedPathsNode> children) {
 		if (children != null) {
 			this.children = children;
-		}
-		else {
+		} else {
 			this.children.clear();
 		}
 	}
-	
+
 	public String getFullPath() {
 		return this.parent != null ? this.parent.getFullPath() + "/" + this.compressedName : ""; //$NON-NLS-1$ //$NON-NLS-2$
 	}
@@ -146,9 +149,9 @@ public class AffectedPathsNode {
 	public SVNLogPath.ChangeType getStatus() {
 		return this.status;
 	}
-	
+
 	public void setStatus(SVNLogPath.ChangeType status) {
 		this.status = status;
 	}
-	
+
 }

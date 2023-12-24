@@ -61,7 +61,9 @@ import org.eclipse.team.svn.tests.core.misc.TestUtil;
  */
 public class ActionOperationWorkflowBuilder {
 	private FileOperationFactory fileOperationFactory;
+
 	private LocalOperationFactory localOperationFactory = new LocalOperationFactory();
+
 	private RemoteOperationFactory remoteOperationFactory = new RemoteOperationFactory();
 
 	public ActionOperationWorkflowBuilder() throws Exception {
@@ -190,8 +192,7 @@ public class ActionOperationWorkflowBuilder {
 	}
 
 	/**
-	 * Reproducing steps, which are described in PLC-366 defect (Commit doesn't work
-	 * for folders with svn:ignore resources)
+	 * Reproducing steps, which are described in PLC-366 defect (Commit doesn't work for folders with svn:ignore resources)
 	 * 
 	 * @author Sergiy Logvin
 	 */
@@ -223,8 +224,7 @@ public class ActionOperationWorkflowBuilder {
 	}
 
 	/**
-	 * Reproducing steps, which are described in PLC-375 defect (Committing new
-	 * folder with the name of deleted file finishes with error)
+	 * Reproducing steps, which are described in PLC-375 defect (Committing new folder with the name of deleted file finishes with error)
 	 *
 	 * @author Sergiy Logvin
 	 */
@@ -272,7 +272,8 @@ public class ActionOperationWorkflowBuilder {
 			@Override
 			protected void runImpl(IProgressMonitor monitor) throws Exception {
 				new CheckoutAsOperation(
-						"CopyProject", SVNUtility.getProposedTrunk(TestUtil.getRepositoryLocation())
+						"CopyProject",
+						SVNUtility.getProposedTrunk(TestUtil.getRepositoryLocation())
 								.asRepositoryContainer(TestUtil.getFirstProject().getName(), false),
 						SVNDepth.INFINITY, true).run(monitor);
 				FileOutputStream fos = null;
@@ -304,8 +305,8 @@ public class ActionOperationWorkflowBuilder {
 	}
 
 	/**
-	 * Reproducing steps, which are described in PLC-379 defect (Incorrect commit of
-	 * the file with the name added to svn:ignore in another workspace)
+	 * Reproducing steps, which are described in PLC-379 defect (Incorrect commit of the file with the name added to svn:ignore in another
+	 * workspace)
 	 *
 	 * @author Sergiy Logvin
 	 */
@@ -320,7 +321,8 @@ public class ActionOperationWorkflowBuilder {
 			@Override
 			protected void runImpl(IProgressMonitor monitor) throws Exception {
 				new CheckoutAsOperation(
-						"TestProject", SVNUtility.getProposedTrunk(TestUtil.getRepositoryLocation())
+						"TestProject",
+						SVNUtility.getProposedTrunk(TestUtil.getRepositoryLocation())
 								.asRepositoryContainer(TestUtil.getSecondProject().getName(), false),
 						SVNDepth.INFINITY, true).run(monitor);
 				FileOutputStream fos = null;
@@ -354,8 +356,7 @@ public class ActionOperationWorkflowBuilder {
 	}
 
 	/**
-	 * Reproducing steps, which are described in PLC-380 defect (File updating error
-	 * when repository contains an empty copy of it)
+	 * Reproducing steps, which are described in PLC-380 defect (File updating error when repository contains an empty copy of it)
 	 *
 	 * @author Sergiy Logvin
 	 */
@@ -383,7 +384,8 @@ public class ActionOperationWorkflowBuilder {
 						.getResourcesRecursive(new IResource[] { TestUtil.getSecondProject() }, IStateFilter.SF_ADDED);
 				new CommitOperation(forCommit, "test PLC380", false, false).run(monitor);
 				new CheckoutAsOperation(
-						"TestProject", SVNUtility.getProposedTrunk(TestUtil.getRepositoryLocation())
+						"TestProject",
+						SVNUtility.getProposedTrunk(TestUtil.getRepositoryLocation())
 								.asRepositoryContainer(TestUtil.getSecondProject().getName(), false),
 						SVNDepth.INFINITY, true).run(monitor);
 				try {

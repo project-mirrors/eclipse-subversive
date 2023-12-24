@@ -25,7 +25,7 @@ import org.eclipse.team.ui.mapping.ISynchronizationCompareAdapter;
 public class SVNAdapterFactory implements IAdapterFactory {
 
 	protected ChangeSetCompareAdapter compareAdapter;
-	
+
 	@SuppressWarnings("unchecked")
 	public Object getAdapter(Object adaptableObject, Class adapterType) {
 		if (ISynchronizationCompareAdapter.class == adapterType) {
@@ -34,7 +34,7 @@ public class SVNAdapterFactory implements IAdapterFactory {
 			}
 			return this.compareAdapter;
 		}
-		
+
 		return null;
 	}
 

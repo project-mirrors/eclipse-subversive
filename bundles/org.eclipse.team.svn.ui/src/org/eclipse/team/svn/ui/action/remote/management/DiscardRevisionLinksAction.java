@@ -42,14 +42,17 @@ public class DiscardRevisionLinksAction extends AbstractRepositoryTeamAction {
 	}
 
 	public void runImpl(IAction action) {
-		final RepositoryRevision []revisions = ((RepositoryRevision [])this.getAdaptedSelection(RepositoryRevision.class));
-		DiscardConfirmationDialog dialog = new DiscardConfirmationDialog(this.getShell(), revisions.length == 1, DiscardConfirmationDialog.MSG_LINK);
+		final RepositoryRevision[] revisions = ((RepositoryRevision[]) this
+				.getAdaptedSelection(RepositoryRevision.class));
+		DiscardConfirmationDialog dialog = new DiscardConfirmationDialog(this.getShell(), revisions.length == 1,
+				DiscardConfirmationDialog.MSG_LINK);
 		if (dialog.open() == 0) {
 			HashSet<IRepositoryLocation> locations = new HashSet<IRepositoryLocation>();
 			for (int i = 0; i < revisions.length; i++) {
 				locations.add(revisions[i].getRevisionLink().getRepositoryResource().getRepositoryLocation());
 			}
-			AbstractActionOperation mainOp = new AbstractActionOperation("Operation_RemoveRevisionLinks", SVNUIMessages.class) { //$NON-NLS-1$
+			AbstractActionOperation mainOp = new AbstractActionOperation("Operation_RemoveRevisionLinks", //$NON-NLS-1$
+					SVNUIMessages.class) {
 				protected void runImpl(IProgressMonitor monitor) throws Exception {
 					for (int i = 0; i < revisions.length; i++) {
 						final IRevisionLink link = revisions[i].getRevisionLink();
@@ -65,12 +68,13 @@ public class DiscardRevisionLinksAction extends AbstractRepositoryTeamAction {
 			CompositeOperation op = new CompositeOperation(mainOp.getId(), mainOp.getMessagesClass());
 			op.add(mainOp);
 			op.add(new SaveRepositoryLocationsOperation());
-			op.add(new RefreshRepositoryLocationsOperation(locations.toArray(new IRepositoryLocation[locations.size()]), true));
-			
+			op.add(new RefreshRepositoryLocationsOperation(locations.toArray(new IRepositoryLocation[locations.size()]),
+					true));
+
 			this.runBusy(op);
 		}
 	}
-	
+
 	public boolean isEnabled() {
 		return this.getAdaptedSelection(RepositoryRevision.class).length > 0;
 	}

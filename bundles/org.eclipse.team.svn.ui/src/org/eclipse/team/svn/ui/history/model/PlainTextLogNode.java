@@ -31,44 +31,44 @@ public class PlainTextLogNode extends AbstractLogNode {
 		super(parent);
 		this.label = label;
 	}
-	
+
 	public Object getAdapter(Class adapter) {
 		if (adapter.equals(String.class)) {
 			return this.label;
 		}
 		return null;
 	}
-	
+
 	public int getType() {
 		return ILogNode.TYPE_NONE;
 	}
-	
+
 	public Object getEntity() {
 		return this.label;
 	}
-	
+
 	public boolean requiresBoldFont(long currentRevision) {
 		return true;
 	}
-	
+
 	public ImageDescriptor getImageDescriptor() {
 		if (this.label.equals(RootHistoryCategory.PENDING[0])) {
 			return SVNTeamUIPlugin.instance().getImageDescriptor("icons/views/repositories/browser_pending.gif"); //$NON-NLS-1$
 		}
 		return null;
 	}
-	
+
 	public String getLabel(int columnIndex, int labelType, long currentRevision) {
 		if (columnIndex == ILogNode.COLUMN_REVISION) {
 			return this.label;
 		}
 		return ""; //$NON-NLS-1$
 	}
-	
-	public ILogNode []getChildren() {
+
+	public ILogNode[] getChildren() {
 		return null;
 	}
-	
+
 	public boolean hasChildren() {
 		return false;
 	}
@@ -92,16 +92,16 @@ public class PlainTextLogNode extends AbstractLogNode {
 	public long getTimeStamp() {
 		return 0;
 	}
-	
+
 	public int hashCode() {
 		return this.label.hashCode();
 	}
-	
+
 	public boolean equals(Object obj) {
 		if (obj instanceof PlainTextLogNode) {
-			return this.label.equals(((PlainTextLogNode)obj).label);
+			return this.label.equals(((PlainTextLogNode) obj).label);
 		}
 		return false;
 	}
-	
+
 }

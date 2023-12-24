@@ -48,10 +48,13 @@ import org.eclipse.ui.model.WorkbenchLabelProvider;
  */
 public class SavePatchInWorkspacePanel extends AbstractDialogPanel {
 	protected TreeViewer treeViewer;
+
 	protected Text workspaceFilenameField;
+
 	protected String proposedName;
-	
+
 	protected IFile file;
+
 	protected IProject proposedDestination;
 
 	public SavePatchInWorkspacePanel(String proposedName, IProject proposedDestination) {
@@ -62,22 +65,22 @@ public class SavePatchInWorkspacePanel extends AbstractDialogPanel {
 		this.proposedName = proposedName;
 		this.proposedDestination = proposedDestination;
 	}
-	
+
 	public IFile getFile() {
 		return this.file;
 	}
-	
-    public String getHelpId() {
-    	return "org.eclipse.team.svn.help.savePatchInWorkspaceContext"; //$NON-NLS-1$
-    }
-    
-    public void initPanel(IDialogManager manager) {
-    	super.initPanel(manager);
-		
+
+	public String getHelpId() {
+		return "org.eclipse.team.svn.help.savePatchInWorkspaceContext"; //$NON-NLS-1$
+	}
+
+	public void initPanel(IDialogManager manager) {
+		super.initPanel(manager);
+
 		this.treeViewer.setSelection(new StructuredSelection(this.proposedDestination));
 		this.workspaceFilenameField.setText(this.proposedName);
-    }
-    
+	}
+
 	protected Point getPrefferedSizeImpl() {
 		return new Point(640, 300);
 	}
@@ -85,7 +88,7 @@ public class SavePatchInWorkspacePanel extends AbstractDialogPanel {
 	protected void createControlsImpl(Composite parent) {
 		GridData data = null;
 		GridLayout layout = null;
-		
+
 		this.treeViewer = new TreeViewer(parent, SWT.BORDER);
 		data = new GridData(GridData.FILL_BOTH);
 		this.treeViewer.getTree().setLayoutData(data);
@@ -101,13 +104,18 @@ public class SavePatchInWorkspacePanel extends AbstractDialogPanel {
 				SavePatchInWorkspacePanel.this.validateContent();
 			}
 		});
-		AbstractFormattedVerifier verifier = new AbstractFormattedVerifier(SVNUIMessages.SavePatchInWorkspace_WorkspaceTree) {
+		AbstractFormattedVerifier verifier = new AbstractFormattedVerifier(
+				SVNUIMessages.SavePatchInWorkspace_WorkspaceTree) {
 			protected String getWarningMessageImpl(Control input) {
 				return null;
 			}
+
 			protected String getErrorMessageImpl(Control input) {
-				IStructuredSelection selection = (IStructuredSelection)SavePatchInWorkspacePanel.this.treeViewer.getSelection();
-				return selection != null && !selection.isEmpty() ? null : SVNUIMessages.SavePatchInWorkspace_WorkspaceTree_Verifier_Error;
+				IStructuredSelection selection = (IStructuredSelection) SavePatchInWorkspacePanel.this.treeViewer
+						.getSelection();
+				return selection != null && !selection.isEmpty()
+						? null
+						: SVNUIMessages.SavePatchInWorkspace_WorkspaceTree_Verifier_Error;
 			}
 		};
 		this.attachTo(this.treeViewer.getTree(), verifier);
@@ -120,12 +128,12 @@ public class SavePatchInWorkspacePanel extends AbstractDialogPanel {
 		wsComposite.setLayout(layout);
 		data = new GridData(GridData.FILL_HORIZONTAL);
 		wsComposite.setLayoutData(data);
-		
-		Label description = new Label(wsComposite,SWT.NONE);
+
+		Label description = new Label(wsComposite, SWT.NONE);
 		data = new GridData();
 		description.setLayoutData(data);
 		description.setText(SVNUIMessages.SavePatchInWorkspace_FileName);
-	
+
 		this.workspaceFilenameField = new Text(wsComposite, SWT.BORDER | SWT.SINGLE);
 		data = new GridData(GridData.FILL_HORIZONTAL);
 		this.workspaceFilenameField.setLayoutData(data);
@@ -134,16 +142,18 @@ public class SavePatchInWorkspacePanel extends AbstractDialogPanel {
 		cVerifier.add(new NonEmptyFieldVerifier(name));
 		cVerifier.add(new ResourceNameVerifier(name, false));
 		cVerifier.add(new AbstractFormattedVerifier(name) {
-		    protected String getErrorMessageImpl(Control input) {
-		        return null;
-		    }
-		    protected String getWarningMessageImpl(Control input) {
-		    	IFile file = SavePatchInWorkspacePanel.this.makeFile();
-		        if (file != null && file.isAccessible()) {
-		            return SVNUIMessages.format(SVNUIMessages.SavePatchInWorkspace_FileName_Verifier_Warning, new String[] {AbstractFormattedVerifier.FIELD_NAME});
-		        }
-		        return null;
-		    }
+			protected String getErrorMessageImpl(Control input) {
+				return null;
+			}
+
+			protected String getWarningMessageImpl(Control input) {
+				IFile file = SavePatchInWorkspacePanel.this.makeFile();
+				if (file != null && file.isAccessible()) {
+					return SVNUIMessages.format(SVNUIMessages.SavePatchInWorkspace_FileName_Verifier_Warning,
+							new String[] { AbstractFormattedVerifier.FIELD_NAME });
+				}
+				return null;
+			}
 		});
 		this.attachTo(this.workspaceFilenameField, cVerifier);
 	}
@@ -155,12 +165,12 @@ public class SavePatchInWorkspacePanel extends AbstractDialogPanel {
 	protected void saveChangesImpl() {
 		this.file = this.makeFile();
 	}
-	
+
 	protected IFile makeFile() {
 		String fileName = this.workspaceFilenameField.getText();
-		IStructuredSelection selection = (IStructuredSelection)this.treeViewer.getSelection();
+		IStructuredSelection selection = (IStructuredSelection) this.treeViewer.getSelection();
 		if (selection != null && !selection.isEmpty()) {
-			IContainer treeNode = (IContainer)selection.getFirstElement();
+			IContainer treeNode = (IContainer) selection.getFirstElement();
 			return treeNode.getProject().getFile(treeNode.getFullPath().append(fileName).removeFirstSegments(1));
 		}
 		return null;

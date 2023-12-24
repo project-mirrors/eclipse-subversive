@@ -17,9 +17,9 @@ package org.eclipse.team.svn.core.connector;
 /**
  * The revision range container
  * 
- * The JavaHL API's is the only way to interact between SVN and Java-based tools. At the same time JavaHL connector library
- * is not EPL compatible and we won't to pin plug-in with concrete connector implementation. So, the only way to do this is
- * providing our own connector interface which will be covered by concrete connector implementation.
+ * The JavaHL API's is the only way to interact between SVN and Java-based tools. At the same time JavaHL connector library is not EPL
+ * compatible and we won't to pin plug-in with concrete connector implementation. So, the only way to do this is providing our own connector
+ * interface which will be covered by concrete connector implementation.
  * 
  * @author Alexander Gurov
  */
@@ -33,7 +33,7 @@ public class SVNRevisionRange {
 	 * The "to" revision object
 	 */
 	public final SVNRevision to;
-	
+
 	/**
 	 * @since 1.9
 	 */
@@ -124,17 +124,16 @@ public class SVNRevisionRange {
 	 *             if the string does not contain a parsable <code>long</code>.
 	 */
 	public SVNRevisionRange(String revisionElement) {
-        this.inheritable = !revisionElement.endsWith("*");
-        if (!this.inheritable) {
-            revisionElement = revisionElement.substring(0, revisionElement.length() - 1);
-        }
+		this.inheritable = !revisionElement.endsWith("*");
+		if (!this.inheritable) {
+			revisionElement = revisionElement.substring(0, revisionElement.length() - 1);
+		}
 
 		int hyphen = revisionElement.indexOf('-');
 		if (hyphen > 0) {
 			this.from = SVNRevision.fromNumber(Long.parseLong(revisionElement.substring(0, hyphen)));
 			this.to = SVNRevision.fromNumber(Long.parseLong(revisionElement.substring(hyphen + 1)));
-		}
-		else {
+		} else {
 			long rev = Long.parseLong(revisionElement.trim());
 			this.to = SVNRevision.fromNumber(rev);
 			this.from = SVNRevision.fromNumber(rev - 1);
@@ -142,9 +141,9 @@ public class SVNRevisionRange {
 	}
 
 	public String toString() {
-		if (this.from.equals(this.to) || 
-			this.from.getKind() == SVNRevision.Kind.NUMBER && this.from.getKind() == this.to.getKind() && 
-			((SVNRevision.Number)this.from).getNumber() == ((SVNRevision.Number)this.to).getNumber() - 1) {
+		if (this.from.equals(this.to) || this.from.getKind() == SVNRevision.Kind.NUMBER
+				&& this.from.getKind() == this.to.getKind()
+				&& ((SVNRevision.Number) this.from).getNumber() == ((SVNRevision.Number) this.to).getNumber() - 1) {
 			return this.from.toString() + (this.inheritable ? "" : "*");
 		}
 		return this.from.toString() + '-' + this.to.toString() + (this.inheritable ? "" : "*");

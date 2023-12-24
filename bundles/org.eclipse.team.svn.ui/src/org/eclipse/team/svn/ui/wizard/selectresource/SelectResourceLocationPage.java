@@ -41,78 +41,83 @@ import org.eclipse.ui.PlatformUI;
 public class SelectResourceLocationPage extends AbstractVerifiedWizardPage {
 
 	protected RepositoryTreeComposite repositoryTree;
-	
+
 	protected IRepositoryResource resource;
-	
+
 	protected Object modelRoot;
+
 	//if 'true',  then don't show files
 	//if 'false', then don't allow to select folders
 	protected boolean showOnlyFolders;
-	
+
 	public SelectResourceLocationPage(boolean showOnlyFolders, Object modelRoot) {
-		super(SelectResourceLocationPage.class.getName(), SVNUIMessages.SelectResourceLocationPage_Title, SVNTeamUIPlugin.instance().getImageDescriptor("icons/wizards/newconnect.gif")); //$NON-NLS-1$
+		super(SelectResourceLocationPage.class.getName(), SVNUIMessages.SelectResourceLocationPage_Title,
+				SVNTeamUIPlugin.instance().getImageDescriptor("icons/wizards/newconnect.gif")); //$NON-NLS-1$
 		this.setDescription(SVNUIMessages.SelectResourceLocationPage_Description);
 		this.showOnlyFolders = showOnlyFolders;
 		this.modelRoot = modelRoot;
 	}
-	
+
 	protected Composite createControlImpl(Composite parent) {
 		GridLayout layout = null;
 		GridData data = null;
 		this.initializeDialogUnits(parent);
-		
+
 		Composite composite = new Composite(parent, SWT.NONE);
 		layout = new GridLayout();
 		composite.setLayout(layout);
 		data = new GridData(GridData.FILL_BOTH);
 		composite.setLayoutData(data);
-		
+
 		this.repositoryTree = new RepositoryTreeComposite(composite, SWT.BORDER);
 		data = new GridData(GridData.FILL_BOTH);
 		this.repositoryTree.setLayoutData(data);
-		
+
 		this.repositoryTree.getRepositoryTreeViewer().addSelectionChangedListener(new ISelectionChangedListener() {
 			public void selectionChanged(SelectionChangedEvent event) {
-				SelectResourceLocationPage.this.resource = null;				
-				IStructuredSelection sel = (IStructuredSelection) SelectResourceLocationPage.this.repositoryTree.getRepositoryTreeViewer().getSelection();
+				SelectResourceLocationPage.this.resource = null;
+				IStructuredSelection sel = (IStructuredSelection) SelectResourceLocationPage.this.repositoryTree
+						.getRepositoryTreeViewer()
+						.getSelection();
 				IRepositoryResource rr;
 				if (!sel.isEmpty() && sel.getFirstElement() instanceof RepositoryResource) {
-					rr = ((RepositoryResource)sel.getFirstElement()).getRepositoryResource();
+					rr = ((RepositoryResource) sel.getFirstElement()).getRepositoryResource();
 					if (SelectResourceLocationPage.this.showOnlyFolders && !(rr instanceof IRepositoryFile)) {
 						SelectResourceLocationPage.this.resource = rr;
 					} else if (!SelectResourceLocationPage.this.showOnlyFolders && rr instanceof IRepositoryFile) {
 						SelectResourceLocationPage.this.resource = rr;
 					}
-				}								
+				}
 				SelectResourceLocationPage.this.validateContent();
 			}
 		});
-		
+
 		//filter out revisions and files (if necessary)
 		this.repositoryTree.setFilter(new IRepositoryContentFilter() {
 			public boolean accept(Object obj) {
-				if (obj instanceof RepositoryRevisions || SelectResourceLocationPage.this.showOnlyFolders && obj instanceof RepositoryFile) {
+				if (obj instanceof RepositoryRevisions
+						|| SelectResourceLocationPage.this.showOnlyFolders && obj instanceof RepositoryFile) {
 					return false;
 				}
-				return true;								
-			}			
-		});	
-		
+				return true;
+			}
+		});
+
 		if (this.modelRoot != null) {
 			this.repositoryTree.setModelRoot(this.modelRoot);
-		} 	
-		
+		}
+
 		//Setting context help
-        PlatformUI.getWorkbench().getHelpSystem().setHelp(composite, "org.eclipse.team.svn.help.selectResourceContext"); //$NON-NLS-1$
-		
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(composite, "org.eclipse.team.svn.help.selectResourceContext"); //$NON-NLS-1$
+
 		return composite;
 	}
-	
+
 	public void setModelRoot(Object modelRoot) {
 		this.modelRoot = modelRoot;
 		this.repositoryTree.setModelRoot(this.modelRoot);
 	}
-	
+
 	public IRepositoryResource getRepositoryResource() {
 		return this.resource;
 	}

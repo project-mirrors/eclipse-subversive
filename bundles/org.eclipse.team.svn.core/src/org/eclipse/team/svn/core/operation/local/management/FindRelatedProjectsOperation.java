@@ -40,14 +40,16 @@ import org.eclipse.team.svn.core.resource.IResourceProvider;
  */
 public class FindRelatedProjectsOperation extends AbstractActionOperation implements IResourceProvider {
 	protected IRepositoryLocation location;
+
 	protected List<IProject> resources;
+
 	protected Set<IProject> exceptProjects;
-	
+
 	public FindRelatedProjectsOperation(IRepositoryLocation location) {
 		this(location, null);
 	}
-	
-	public FindRelatedProjectsOperation(IRepositoryLocation location, IProject []exceptProjects) {
+
+	public FindRelatedProjectsOperation(IRepositoryLocation location, IProject[] exceptProjects) {
 		super("Operation_FindRelatedProjects", SVNMessages.class); //$NON-NLS-1$
 		this.location = location;
 		if (exceptProjects != null) {
@@ -55,21 +57,23 @@ public class FindRelatedProjectsOperation extends AbstractActionOperation implem
 		}
 	}
 
-	public IResource []getResources() {
+	public IResource[] getResources() {
 		return this.resources == null ? new IProject[0] : this.resources.toArray(new IProject[this.resources.size()]);
 	}
 
 	protected void runImpl(IProgressMonitor monitor) throws Exception {
 		this.resources = new ArrayList<IProject>();
-		IProject []projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
+		IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
 		for (int i = 0; i < projects.length && !monitor.isCanceled(); i++) {
 			final IProject current = projects[i];
 			this.protectStep(new IUnprotectedOperation() {
 				public void run(IProgressMonitor monitor) throws Exception {
-					SVNTeamProvider provider = (SVNTeamProvider)RepositoryProvider.getProvider(current, SVNTeamPlugin.NATURE_ID);
-					if (provider != null && 
-						(FindRelatedProjectsOperation.this.exceptProjects == null || !FindRelatedProjectsOperation.this.exceptProjects.contains(current)) &&
-						provider.peekAtLocation() == FindRelatedProjectsOperation.this.location) {
+					SVNTeamProvider provider = (SVNTeamProvider) RepositoryProvider.getProvider(current,
+							SVNTeamPlugin.NATURE_ID);
+					if (provider != null
+							&& (FindRelatedProjectsOperation.this.exceptProjects == null
+									|| !FindRelatedProjectsOperation.this.exceptProjects.contains(current))
+							&& provider.peekAtLocation() == FindRelatedProjectsOperation.this.location) {
 						FindRelatedProjectsOperation.this.resources.add(current);
 					}
 				}

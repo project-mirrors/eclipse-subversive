@@ -50,9 +50,9 @@ public class ShowHistoryActionHelper extends AbstractActionHelper {
 			if (info != null) {
 				ILocalResource incoming = info.getRemoteChangeResource();
 				if (incoming instanceof IResourceChange) {
-					return new ShowHistoryViewOperation(((IResourceChange)incoming).getOriginator(), 0, 0);
+					return new ShowHistoryViewOperation(((IResourceChange) incoming).getOriginator(), 0, 0);
 				}
-			}	
+			}
 		}
 		return new ShowHistoryViewOperation(this.getSelectedResource(), 0, 0);
 	}

@@ -68,8 +68,8 @@ public class ConnectorDescriptor {
 	}
 
 	/**
-	 * the name of the connector including the name of the organization that produces the repository if appropriate, for
-	 * example 'Mozilla Bugzilla'.
+	 * the name of the connector including the name of the organization that produces the repository if appropriate, for example 'Mozilla
+	 * Bugzilla'.
 	 */
 	public String getName() {
 		return name;
@@ -102,8 +102,8 @@ public class ConnectorDescriptor {
 	}
 
 	/**
-	 * A description of the connector. Plug-ins should provide a description, especially if the description is not
-	 * self-evident from the @name and
+	 * A description of the connector. Plug-ins should provide a description, especially if the description is not self-evident from
+	 * the @name and
 	 * 
 	 * @organization.
 	 */

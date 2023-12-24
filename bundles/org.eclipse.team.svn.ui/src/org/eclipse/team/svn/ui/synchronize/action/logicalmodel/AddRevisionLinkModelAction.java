@@ -43,25 +43,27 @@ public class AddRevisionLinkModelAction extends AbstractSynchronizeLogicalModelA
 	protected FastSyncInfoFilter getSyncInfoFilter() {
 		return new FastSyncInfoFilter() {
 			public boolean select(SyncInfo info) {
-				return IStateFilter.SF_ONREPOSITORY.accept(((AbstractSVNSyncInfo)info).getLocalResource());
+				return IStateFilter.SF_ONREPOSITORY.accept(((AbstractSVNSyncInfo) info).getLocalResource());
 			}
 		};
 	}
-	
+
 	protected boolean needsToSaveDirtyEditors() {
 		return false;
 	}
-	
-	protected IActionOperation getOperation() {		
-		IResource[] selectedResources = FileUtility.getResourcesRecursive(this.getAllSelectedResources(), IStateFilter.SF_ONREPOSITORY, IResource.DEPTH_ZERO);
+
+	protected IActionOperation getOperation() {
+		IResource[] selectedResources = FileUtility.getResourcesRecursive(this.getAllSelectedResources(),
+				IStateFilter.SF_ONREPOSITORY, IResource.DEPTH_ZERO);
 		IRepositoryResource[] resources = new IRepositoryResource[selectedResources.length];
-		for (int i = 0; i < selectedResources.length; i ++) {
+		for (int i = 0; i < selectedResources.length; i++) {
 			resources[i] = SVNRemoteStorage.instance().asRepositoryResource(selectedResources[i]);
 			//create revision link for revision from working copy even if there are incoming changes
-			ILocalResource local = SVNRemoteStorage.instance().asLocalResource(selectedResources[i]);			
-			resources[i].setSelectedRevision(SVNRevision.fromNumber(local.getRevision()));			
-		}		
-		return SelectResourceRevisionAction.getAddRevisionLinkOperation(resources, this.getConfiguration().getSite().getShell());
+			ILocalResource local = SVNRemoteStorage.instance().asLocalResource(selectedResources[i]);
+			resources[i].setSelectedRevision(SVNRevision.fromNumber(local.getRevision()));
+		}
+		return SelectResourceRevisionAction.getAddRevisionLinkOperation(resources,
+				this.getConfiguration().getSite().getShell());
 	}
 
 }

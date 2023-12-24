@@ -21,6 +21,6 @@ package org.eclipse.team.svn.core.resource;
  */
 public interface ILocalFolder extends ILocalResource {
 
-	public ILocalResource []getChildren();
-	
+	public ILocalResource[] getChildren();
+
 }

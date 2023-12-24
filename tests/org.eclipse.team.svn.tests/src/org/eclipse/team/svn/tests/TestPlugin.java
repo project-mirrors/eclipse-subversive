@@ -34,7 +34,9 @@ import org.osgi.framework.BundleContext;
  */
 public class TestPlugin extends AbstractUIPlugin {
 	private static TestPlugin plugin;
+
 	private String location;
+
 	private SVNRemoteStorage remoteStorage;
 
 	public TestPlugin() {

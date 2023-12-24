@@ -48,62 +48,66 @@ public class EditRevisionLinkAction extends AbstractRepositoryTeamAction {
 	}
 
 	public void runImpl(IAction action) {
-		RepositoryRevision revision = ((RepositoryRevision [])this.getAdaptedSelection(RepositoryRevision.class))[0];
+		RepositoryRevision revision = ((RepositoryRevision[]) this.getAdaptedSelection(RepositoryRevision.class))[0];
 		final IRevisionLink oldLink = revision.getRevisionLink();
 		IRepositoryResource resource = oldLink.getRepositoryResource();
-		SVNRevision oldRevision = revision.getRevision();					
-		
+		SVNRevision oldRevision = revision.getRevision();
+
 		InputRevisionPanel panel = new InputRevisionPanel(oldLink.getRepositoryResource(), true, oldLink.getComment());
 		DefaultDialog dialog = new DefaultDialog(this.getShell(), panel);
 		if (dialog.open() == Dialog.OK) {
 			SVNRevision selectedRevision = panel.getSelectedRevision();
 			final String comment = panel.getRevisionComment();
-			
+
 			CompositeOperation op = new CompositeOperation("Operation_EditRevisionLink", SVNUIMessages.class); //$NON-NLS-1$
 			if (!oldRevision.equals(selectedRevision)) {
 				//delete old link and re-create new link															
-				IActionOperation mainOp = new AbstractActionOperation("Operation_EditRevisionLink", SVNUIMessages.class) { //$NON-NLS-1$
+				IActionOperation mainOp = new AbstractActionOperation("Operation_EditRevisionLink", //$NON-NLS-1$
+						SVNUIMessages.class) {
 					protected void runImpl(IProgressMonitor monitor) throws Exception {
-						oldLink.getRepositoryResource().getRepositoryLocation().removeRevisionLink(oldLink);						
+						oldLink.getRepositoryResource().getRepositoryLocation().removeRevisionLink(oldLink);
 					}
 				};
-												
+
 				resource = SVNUtility.copyOf(resource);
 				resource.setSelectedRevision(selectedRevision);
-				
-				final LocateResourceURLInHistoryOperation locateOp = new LocateResourceURLInHistoryOperation(new IRepositoryResource[]{resource});
-								
-				AddRevisionLinkOperation addOp = new AddRevisionLinkOperation(new IRevisionLinkProvider() {			
+
+				final LocateResourceURLInHistoryOperation locateOp = new LocateResourceURLInHistoryOperation(
+						new IRepositoryResource[] { resource });
+
+				AddRevisionLinkOperation addOp = new AddRevisionLinkOperation(new IRevisionLinkProvider() {
 					public IRevisionLink[] getRevisionLinks() {
 						IRepositoryResource[] resources = locateOp.getRepositoryResources();
 						IRevisionLink[] links = new IRevisionLink[resources.length];
-						for (int i = 0; i < resources.length; i ++) {
+						for (int i = 0; i < resources.length; i++) {
 							links[i] = SVNUtility.createRevisionLink(resources[i]);
 							links[i].setComment(comment);
-						} 							
+						}
 						return links;
 					}
 				}, selectedRevision);
-				
+
 				op.add(mainOp);
-				op.add(locateOp, new IActionOperation[]{mainOp});
-				op.add(addOp, new IActionOperation[] {mainOp, locateOp});				
+				op.add(locateOp, new IActionOperation[] { mainOp });
+				op.add(addOp, new IActionOperation[] { mainOp, locateOp });
 			} else {
 				//change link comment								
-				IActionOperation mainOp = new AbstractActionOperation("Operation_EditRevisionLink", SVNUIMessages.class) { //$NON-NLS-1$
+				IActionOperation mainOp = new AbstractActionOperation("Operation_EditRevisionLink", //$NON-NLS-1$
+						SVNUIMessages.class) {
 					protected void runImpl(IProgressMonitor monitor) throws Exception {
 						oldLink.setComment(comment);
 					}
-				};				
-				op.add(mainOp);				
-			}	
-			
+				};
+				op.add(mainOp);
+			}
+
 			op.add(new SaveRepositoryLocationsOperation());
-			op.add(new RefreshRepositoryLocationsOperation(new IRepositoryLocation[]{resource.getRepositoryLocation()}, true));
+			op.add(new RefreshRepositoryLocationsOperation(
+					new IRepositoryLocation[] { resource.getRepositoryLocation() }, true));
 			this.runScheduled(op);
 		}
 	}
-	
+
 	public boolean isEnabled() {
 		return this.getAdaptedSelection(RepositoryRevision.class).length == 1;
 	}

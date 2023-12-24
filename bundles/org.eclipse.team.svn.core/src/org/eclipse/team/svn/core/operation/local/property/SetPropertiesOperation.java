@@ -36,42 +36,45 @@ import org.eclipse.team.svn.core.utility.ProgressMonitorUtility;
  * @author Sergiy Logvin
  */
 public class SetPropertiesOperation extends AbstractWorkingCopyOperation {
-	protected SVNProperty []propertyData;
+	protected SVNProperty[] propertyData;
+
 	protected boolean isRecursive;
+
 	protected IResourcePropertyProvider propertyProvider;
-	
-	public SetPropertiesOperation(IResource []resources, String name, byte []data, boolean isRecursive) {
-		this(resources, new SVNProperty[] {new SVNProperty(name, new String(data))}, isRecursive);
+
+	public SetPropertiesOperation(IResource[] resources, String name, byte[] data, boolean isRecursive) {
+		this(resources, new SVNProperty[] { new SVNProperty(name, new String(data)) }, isRecursive);
 	}
-	
-	public SetPropertiesOperation(IResource []resources, SVNProperty []data, boolean isRecursive) {
+
+	public SetPropertiesOperation(IResource[] resources, SVNProperty[] data, boolean isRecursive) {
 		super("Operation_SetProperties", SVNMessages.class, resources); //$NON-NLS-1$
 		this.propertyData = data;
 		this.isRecursive = isRecursive;
 	}
-	
-	public SetPropertiesOperation(IResourceProvider resourceProvider, SVNProperty []data, boolean isRecursive) {
+
+	public SetPropertiesOperation(IResourceProvider resourceProvider, SVNProperty[] data, boolean isRecursive) {
 		super("Operation_SetProperties", SVNMessages.class, resourceProvider); //$NON-NLS-1$
 		this.propertyData = data;
 		this.isRecursive = isRecursive;
 	}
-	
-	public SetPropertiesOperation(IResource []resources, IResourcePropertyProvider propertyProvider, boolean isRecursive) {
+
+	public SetPropertiesOperation(IResource[] resources, IResourcePropertyProvider propertyProvider,
+			boolean isRecursive) {
 		super("Operation_SetProperties", SVNMessages.class, resources); //$NON-NLS-1$
 		this.propertyProvider = propertyProvider;
 		this.isRecursive = isRecursive;
 	}
-	
+
 	protected void runImpl(IProgressMonitor monitor) throws Exception {
-		IResource []resources = this.operableData();
-		
+		IResource[] resources = this.operableData();
+
 		if (this.isRecursive) {
 			resources = FileUtility.shrinkChildNodes(resources);
 		}
-		
+
 		for (int i = 0; i < resources.length && !monitor.isCanceled(); i++) {
 			final IResource resource = resources[i];
-			
+
 			IRepositoryLocation location = SVNRemoteStorage.instance().getRepositoryLocation(resource);
 			final ISVNConnector proxy = location.acquireSVNProxy();
 
@@ -84,25 +87,28 @@ public class SetPropertiesOperation extends AbstractWorkingCopyOperation {
 			location.releaseSVNProxy(proxy);
 		}
 	}
-	
+
 	protected void processResource(final ISVNConnector proxy, IResource resource, IProgressMonitor monitor) {
 		ProgressMonitorUtility.setTaskInfo(monitor, this, resource.getFullPath().toString());
 		final String wcPath = FileUtility.getWorkingCopyPath(resource);
-		
+
 		SVNProperty[] properties = this.getOperableProperties();
-		
+
 		for (int i = 0; i < properties.length && !monitor.isCanceled(); i++) {
-		    final SVNProperty current = properties[i];
-		    this.protectStep(new IUnprotectedOperation() {
-                public void run(IProgressMonitor monitor) throws Exception {
-					proxy.setPropertyLocal(new String[] {wcPath}, current, SVNDepth.infinityOrEmpty(SetPropertiesOperation.this.isRecursive), ISVNConnector.Options.NONE, null, new SVNProgressMonitor(SetPropertiesOperation.this, monitor, null));
-                }
-            }, monitor, properties.length);
+			final SVNProperty current = properties[i];
+			this.protectStep(new IUnprotectedOperation() {
+				public void run(IProgressMonitor monitor) throws Exception {
+					proxy.setPropertyLocal(new String[] { wcPath }, current,
+							SVNDepth.infinityOrEmpty(SetPropertiesOperation.this.isRecursive),
+							ISVNConnector.Options.NONE, null,
+							new SVNProgressMonitor(SetPropertiesOperation.this, monitor, null));
+				}
+			}, monitor, properties.length);
 		}
 	}
-	
+
 	protected SVNProperty[] getOperableProperties() {
 		return this.propertyData == null ? this.propertyProvider.getProperties() : this.propertyData;
 	}
-	
+
 }

@@ -41,20 +41,21 @@ public class ShowOutgoingAnnotationAction extends AbstractSynchronizeModelAction
 	protected boolean needsToSaveDirtyEditors() {
 		return false;
 	}
-	
+
 	protected boolean updateSelection(IStructuredSelection selection) {
 		super.updateSelection(selection);
 		if (selection.size() == 1) {
-			ISynchronizeModelElement element = (ISynchronizeModelElement)selection.getFirstElement();
+			ISynchronizeModelElement element = (ISynchronizeModelElement) selection.getFirstElement();
 			ILocalResource local = SVNRemoteStorage.instance().asLocalResource(element.getResource());
 			// null for change set nodes
 			return local instanceof ILocalFile && IStateFilter.SF_ONREPOSITORY.accept(local);
 		}
-	    return false;
+		return false;
 	}
-	
+
 	protected IActionOperation getOperation(ISynchronizePageConfiguration configuration, IDiffElement[] elements) {
-		return new BuiltInAnnotate().getAnnotateOperation(UIMonitorUtility.getActivePage(), (IFile)this.getSelectedResource(), UIMonitorUtility.getShell());
+		return new BuiltInAnnotate().getAnnotateOperation(UIMonitorUtility.getActivePage(),
+				(IFile) this.getSelectedResource(), UIMonitorUtility.getShell());
 	}
 
 }

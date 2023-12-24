@@ -23,23 +23,24 @@ import org.eclipse.team.svn.ui.SVNUIMessages;
  * @author Sergiy Logvin
  */
 public class NonEmptyFieldVerifier extends AbstractFormattedVerifier {
-    protected static String ERROR_MESSAGE;
-        
-    public NonEmptyFieldVerifier(String fieldName) {
-        super(fieldName);
-        NonEmptyFieldVerifier.ERROR_MESSAGE = SVNUIMessages.format(SVNUIMessages.Verifier_NonEmpty, new String[] {AbstractFormattedVerifier.FIELD_NAME});
-    }
-    
-    protected String getErrorMessageImpl(Control input) {
-        String text = this.getText(input);
-        if (text.trim().length() == 0) {
-            return NonEmptyFieldVerifier.ERROR_MESSAGE;
-        }
-        return null;
-    }
+	protected static String ERROR_MESSAGE;
 
-    protected String getWarningMessageImpl(Control input) {    	
-        return null;
-    }
+	public NonEmptyFieldVerifier(String fieldName) {
+		super(fieldName);
+		NonEmptyFieldVerifier.ERROR_MESSAGE = SVNUIMessages.format(SVNUIMessages.Verifier_NonEmpty,
+				new String[] { AbstractFormattedVerifier.FIELD_NAME });
+	}
+
+	protected String getErrorMessageImpl(Control input) {
+		String text = this.getText(input);
+		if (text.trim().length() == 0) {
+			return NonEmptyFieldVerifier.ERROR_MESSAGE;
+		}
+		return null;
+	}
+
+	protected String getWarningMessageImpl(Control input) {
+		return null;
+	}
 
 }

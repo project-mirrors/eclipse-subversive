@@ -26,14 +26,10 @@ import org.eclipse.team.svn.ui.SVNUIMessages;
  */
 public class NotifyUnresolvedConflictDialog extends MessageDialog {
 
-    public NotifyUnresolvedConflictDialog(Shell parentShell, String message) {
-		super(parentShell, 
-			SVNUIMessages.NotifyUnresolvedConflictDialog_Title, 
-			null, 
-			message != null ? message : SVNUIMessages.NotifyUnresolvedConflictDialog_Message,
-			MessageDialog.WARNING, 
-			new String[] {IDialogConstants.OK_LABEL}, 
-			0);
-    }
+	public NotifyUnresolvedConflictDialog(Shell parentShell, String message) {
+		super(parentShell, SVNUIMessages.NotifyUnresolvedConflictDialog_Title, null,
+				message != null ? message : SVNUIMessages.NotifyUnresolvedConflictDialog_Message, MessageDialog.WARNING,
+				new String[] { IDialogConstants.OK_LABEL }, 0);
+	}
 
 }

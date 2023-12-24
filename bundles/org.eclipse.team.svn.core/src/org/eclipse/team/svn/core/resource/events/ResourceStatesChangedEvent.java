@@ -28,21 +28,25 @@ import org.eclipse.team.svn.core.utility.IQueuedElement;
 import org.eclipse.team.svn.core.utility.SVNUtility;
 
 /**
- * Basic "resources changed event" implementation 
+ * Basic "resources changed event" implementation
  * 
  * @author Alexander Gurov
  */
 public class ResourceStatesChangedEvent implements IQueuedElement<ResourceStatesChangedEvent> {
 	public static final int CHANGED_NODES = 0;
-	public static final int PATH_NODES = 1;
-	public final IResource []resources;
-	public final int depth;
-	public final int type;
-	
-	private IResource []fullSet;
 
-	public ResourceStatesChangedEvent(IResource []resources, int depth, int type) {
-    	// notify in parent to child order
+	public static final int PATH_NODES = 1;
+
+	public final IResource[] resources;
+
+	public final int depth;
+
+	public final int type;
+
+	private IResource[] fullSet;
+
+	public ResourceStatesChangedEvent(IResource[] resources, int depth, int type) {
+		// notify in parent to child order
 		FileUtility.reorder(this.resources = resources, true);
 		this.depth = depth;
 		this.type = type;
@@ -50,20 +54,19 @@ public class ResourceStatesChangedEvent implements IQueuedElement<ResourceStates
 			this.fullSet = this.resources;
 		}
 	}
-	
-	public IResource []getResourcesRecursivelly() {
+
+	public IResource[] getResourcesRecursivelly() {
 		if (this.fullSet == null) {
 			try {
 				this.fullSet = ResourceStatesChangedEvent.collectResources(this.resources, this.depth);
 				FileUtility.reorder(this.fullSet, true);
-			} 
-			catch (Exception e) {
+			} catch (Exception e) {
 				this.fullSet = this.resources;
 			}
 		}
 		return this.fullSet;
 	}
-	
+
 	public boolean contains(IResource resource) {
 		if (this.containsImpl(resource)) {
 			return true;
@@ -84,14 +87,14 @@ public class ResourceStatesChangedEvent implements IQueuedElement<ResourceStates
 		return false;
 	}
 
-	public static IResource []collectResources(IResource []resources, int depth) throws Exception {
-    	if (depth == IResource.DEPTH_ZERO) {
-    		return resources;
-    	}
-    	
+	public static IResource[] collectResources(IResource[] resources, int depth) throws Exception {
+		if (depth == IResource.DEPTH_ZERO) {
+			return resources;
+		}
+
 		final HashSet<IResource> fullList = new HashSet<IResource>();
 		for (int i = 0; i < resources.length; i++) {
-    		FileUtility.visitNodes(resources[i], new IResourceVisitor() {
+			FileUtility.visitNodes(resources[i], new IResourceVisitor() {
 				public boolean visit(IResource resource) throws CoreException {
 					if (FileUtility.isNotSupervised(resource)) {
 						return false;
@@ -108,7 +111,7 @@ public class ResourceStatesChangedEvent implements IQueuedElement<ResourceStates
 		}
 		return fullList.toArray(new IResource[fullList.size()]);
 	}
-	
+
 	protected boolean containsImpl(IResource resource) {
 		for (int i = 0; i < this.resources.length; i++) {
 			if (this.resources[i].equals(resource)) {
@@ -117,11 +120,11 @@ public class ResourceStatesChangedEvent implements IQueuedElement<ResourceStates
 		}
 		return false;
 	}
-	
-	public int getSize(){
+
+	public int getSize() {
 		return this.resources.length;
 	}
-	
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -152,17 +155,17 @@ public class ResourceStatesChangedEvent implements IQueuedElement<ResourceStates
 		}
 		return true;
 	}
-	
+
 	public boolean canSkip() {
 		return true;
 	}
-	
-	public boolean canMerge(ResourceStatesChangedEvent e){
+
+	public boolean canMerge(ResourceStatesChangedEvent e) {
 		return this.depth == e.depth && this.type == e.type;
 	}
-	
-	public ResourceStatesChangedEvent merge(ResourceStatesChangedEvent event){
-		IResource [] arr = new IResource[this.resources.length + event.resources.length];
+
+	public ResourceStatesChangedEvent merge(ResourceStatesChangedEvent event) {
+		IResource[] arr = new IResource[this.resources.length + event.resources.length];
 		System.arraycopy(this.resources, 0, arr, 0, this.resources.length);
 		System.arraycopy(event.resources, 0, arr, this.resources.length, event.resources.length);
 		return new ResourceStatesChangedEvent(arr, this.depth, this.type);

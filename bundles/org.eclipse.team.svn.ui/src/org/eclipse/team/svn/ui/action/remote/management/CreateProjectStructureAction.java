@@ -43,25 +43,27 @@ public class CreateProjectStructureAction extends AbstractRepositoryTeamAction {
 		DefaultDialog dialog = new DefaultDialog(this.getShell(), panel);
 		if (dialog.open() == 0) {
 			String name = panel.getResourceName();
-			IRepositoryResource []parent = this.getSelectedRepositoryResources();
+			IRepositoryResource[] parent = this.getSelectedRepositoryResources();
 			IRepositoryLocation location = parent[0].getRepositoryLocation();
 			String trunk = ShareProjectOperation.getTrunkName(location);
 			String branches = ShareProjectOperation.getBranchesName(location);
 			String tags = ShareProjectOperation.getTagsName(location);
-			String []folders = name.length() == 0 ? new String[] {trunk, branches, tags} : new String[] {name + "/" + trunk, name + "/" + branches, name + "/" + tags}; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			String[] folders = name.length() == 0
+					? new String[] { trunk, branches, tags }
+					: new String[] { name + "/" + trunk, name + "/" + branches, name + "/" + tags }; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 
 			CreateFolderOperation mainOp = new CreateFolderOperation(parent[0], folders, panel.getMessage());
 			CompositeOperation op = new CompositeOperation(mainOp.getId(), mainOp.getMessagesClass());
 			op.add(mainOp);
-			op.add(new RefreshRemoteResourcesOperation(parent), new IActionOperation[] {mainOp});
-			
+			op.add(new RefreshRemoteResourcesOperation(parent), new IActionOperation[] { mainOp });
+
 			this.runScheduled(op);
 		}
 	}
 
 	public boolean isEnabled() {
-		IRepositoryResource []resources = this.getSelectedRepositoryResources();
+		IRepositoryResource[] resources = this.getSelectedRepositoryResources();
 		return resources.length == 1 && resources[0] instanceof IRepositoryContainer;
 	}
-	
+
 }

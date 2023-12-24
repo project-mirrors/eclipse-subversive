@@ -30,7 +30,7 @@ public class SaveRepositoryLocationsOperation extends AbstractActionOperation {
 	public SaveRepositoryLocationsOperation() {
 		super("Operation_SaveRepositoryLocations", SVNMessages.class); //$NON-NLS-1$
 	}
-	
+
 	public int getOperationWeight() {
 		return 0;
 	}
@@ -42,5 +42,5 @@ public class SaveRepositoryLocationsOperation extends AbstractActionOperation {
 			SVNTeamPlugin.instance().setLocationsDirty(false);
 		}
 	}
-	
+
 }

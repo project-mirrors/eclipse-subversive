@@ -53,160 +53,167 @@ import org.eclipse.team.svn.ui.utility.UIMonitorUtility;
 public class AddRepositoryPanel extends AbstractDialogPanel {
 
 	protected PathSelectionComposite pathSelectionComposite;
+
 	protected Button createRepositoryLocaton;
+
 	protected Button fsfsButton;
-	protected Button bdbButton;	
-	
+
+	protected Button bdbButton;
+
 	protected IActionOperation operationToPerform;
-	
-	public AddRepositoryPanel() {	
+
+	public AddRepositoryPanel() {
 		super();
 		this.dialogTitle = SVNUIMessages.AddRepositoryPage_Title;
-		this.dialogDescription = SVNUIMessages.AddRepositoryPage_Description;	
-		this.defaultMessage = SVNUIMessages.AddRepositoryPage_Message;		
+		this.dialogDescription = SVNUIMessages.AddRepositoryPage_Description;
+		this.defaultMessage = SVNUIMessages.AddRepositoryPage_Message;
 	}
 
 	protected void createControlsImpl(Composite parent) {
 		Composite composite = new Composite(parent, SWT.NONE);
 		GridLayout layout = new GridLayout();
-		layout.marginHeight = 0; 
-		layout.marginWidth = 0; 
+		layout.marginHeight = 0;
+		layout.marginWidth = 0;
 		composite.setLayout(layout);
 		GridData data = new GridData(GridData.FILL_BOTH);
 		composite.setLayoutData(data);
-		
+
 		//path
 		this.pathSelectionComposite = new PathSelectionComposite(
-			SVNUIMessages.AddRepositoryPage_RepositoryPath_Label,
-			SVNUIMessages.AddRepositoryPage_RepositoryPath_Name,
-			SVNUIMessages.AddRepositoryPage_DirectoryDialog_Title,
-			SVNUIMessages.AddRepositoryPage_DirectoryDialog_Description,
-			true,
-			composite, 
-			this);
-		
+				SVNUIMessages.AddRepositoryPage_RepositoryPath_Label,
+				SVNUIMessages.AddRepositoryPage_RepositoryPath_Name,
+				SVNUIMessages.AddRepositoryPage_DirectoryDialog_Title,
+				SVNUIMessages.AddRepositoryPage_DirectoryDialog_Description, true, composite, this);
+
 		//repository type
 		Group typeGroup = new Group(composite, SWT.NONE);
 		layout = new GridLayout();
-		layout.horizontalSpacing = 40;		
+		layout.horizontalSpacing = 40;
 		layout.numColumns = 2;
 		typeGroup.setLayout(layout);
 		data = new GridData(GridData.FILL_HORIZONTAL);
 		typeGroup.setLayoutData(data);
 		typeGroup.setText(SVNUIMessages.AddRepositoryPage_RepositoryType_Group);
-		
+
 		this.fsfsButton = new Button(typeGroup, SWT.RADIO);
 		data = new GridData();
 		this.fsfsButton.setLayoutData(data);
-		this.fsfsButton.setText(SVNUIMessages.AddRepositoryPage_FileSystem_Button);		
+		this.fsfsButton.setText(SVNUIMessages.AddRepositoryPage_FileSystem_Button);
 		this.fsfsButton.setSelection(true);
 		this.bdbButton = new Button(typeGroup, SWT.RADIO);
 		data = new GridData();
 		this.bdbButton.setLayoutData(data);
 		this.bdbButton.setText(SVNUIMessages.AddRepositoryPage_BerkeleyDB_Button);
 		int features = CoreExtensionsManager.instance().getSVNConnectorFactory().getSupportedFeatures();
-		if ((features & ISVNConnectorFactory.OptionalFeatures.CREATE_REPOSITORY_FSFS) == 0)
-		{
+		if ((features & ISVNConnectorFactory.OptionalFeatures.CREATE_REPOSITORY_FSFS) == 0) {
 			this.fsfsButton.setSelection(false);
 			this.fsfsButton.setEnabled(false);
 			this.bdbButton.setSelection(true);
 		}
-		if ((features & ISVNConnectorFactory.OptionalFeatures.CREATE_REPOSITORY_BDB) == 0)
-		{
+		if ((features & ISVNConnectorFactory.OptionalFeatures.CREATE_REPOSITORY_BDB) == 0) {
 			this.bdbButton.setSelection(false);
 			this.bdbButton.setEnabled(false);
 		}
-		
+
 		//create repository location		
 		this.createRepositoryLocaton = new Button(composite, SWT.CHECK);
 		data = new GridData();
 		this.createRepositoryLocaton.setLayoutData(data);
 		this.createRepositoryLocaton.setText(SVNUIMessages.AddRepositoryPage_CreateRepositoryLocation_Button);
-		this.createRepositoryLocaton.setSelection(true);							     		
+		this.createRepositoryLocaton.setSelection(true);
 	}
-	
+
 	public String getRepositoryPath() {
-		return this.pathSelectionComposite.getSelectedPath();		
+		return this.pathSelectionComposite.getSelectedPath();
 	}
-	
+
 	public ISVNManager.RepositoryKind getRepositoryType() {
 		return this.fsfsButton.getSelection() ? ISVNManager.RepositoryKind.FSFS : ISVNManager.RepositoryKind.BDB;
 	}
-	
+
 	public boolean isCreateRepositoryLocation() {
 		return this.createRepositoryLocaton.getSelection();
 	}
-	
-	public boolean performFinish() {		
-		final ISVNManager.RepositoryKind repositoryType = this.getRepositoryType();				
+
+	public boolean performFinish() {
+		final ISVNManager.RepositoryKind repositoryType = this.getRepositoryType();
 		File repositoryPathFile = new File(this.getRepositoryPath());
-		final String repositoryPath =  repositoryPathFile.isAbsolute() ? this.getRepositoryPath() : repositoryPathFile.getAbsolutePath();
-		
+		final String repositoryPath = repositoryPathFile.isAbsolute()
+				? this.getRepositoryPath()
+				: repositoryPathFile.getAbsolutePath();
+
 		String url = "file:///" + repositoryPath; //$NON-NLS-1$
-		url = SVNUtility.normalizeURL(url);				
-				
+		url = SVNUtility.normalizeURL(url);
+
 		final IRepositoryLocation location = SVNRemoteStorage.instance().newRepositoryLocation();
 		SVNUtility.initializeRepositoryLocation(location, url);
-		
-		AbstractActionOperation mainOp = new AbstractActionOperation("Operation_CreateRepository", SVNUIMessages.class) { //$NON-NLS-1$
+
+		AbstractActionOperation mainOp = new AbstractActionOperation("Operation_CreateRepository", //$NON-NLS-1$
+				SVNUIMessages.class) {
 			protected void runImpl(IProgressMonitor monitor) throws Exception {
 				ISVNManager proxy = CoreExtensionsManager.instance().getSVNConnectorFactory().createManager();
-				try {					
+				try {
 					StringBuffer msg = new StringBuffer();
-					msg.append("svnadmin create").append(" ");  //$NON-NLS-1$ //$NON-NLS-2$
+					msg.append("svnadmin create").append(" "); //$NON-NLS-1$ //$NON-NLS-2$
 					msg.append("--fs-type ").append(repositoryType).append(" "); //$NON-NLS-1$ //$NON-NLS-2$
 					if (ISVNManager.RepositoryKind.BDB == repositoryType) {
 						msg.append("--bdb-txn-nosync").append(" "); //$NON-NLS-1$ //$NON-NLS-2$
-						msg.append("--bdb-log-keep").append(" ");	 //$NON-NLS-1$ //$NON-NLS-2$
-					}					
+						msg.append("--bdb-log-keep").append(" "); //$NON-NLS-1$ //$NON-NLS-2$
+					}
 					msg.append("\"").append(FileUtility.normalizePath(repositoryPath)).append("\""); //$NON-NLS-1$ //$NON-NLS-2$
 					msg.append("\n"); //$NON-NLS-1$
 					this.writeToConsole(IConsoleStream.LEVEL_CMD, msg.toString());
-					proxy.create(repositoryPath, repositoryType, null, ISVNManager.Options.NONE, new SVNProgressMonitor(this, monitor, null));
+					proxy.create(repositoryPath, repositoryType, null, ISVNManager.Options.NONE,
+							new SVNProgressMonitor(this, monitor, null));
 				} finally {
 					proxy.dispose();
 				}
-			}			
+			}
 		};
-				
+
 		CompositeOperation op = new CompositeOperation(mainOp.getId(), mainOp.getMessagesClass());
 		op.add(mainOp);
-		
-		if (this.isCreateRepositoryLocation()) {			
+
+		if (this.isCreateRepositoryLocation()) {
 			op.add(new AbstractActionOperation("Operation_AddRepositoryLocation", SVNUIMessages.class) { //$NON-NLS-1$
-				protected void runImpl(IProgressMonitor monitor) throws Exception {		
+				protected void runImpl(IProgressMonitor monitor) throws Exception {
 					//validate repository location before adding
 					final boolean[] isAddLocation = new boolean[1];
 					isAddLocation[0] = true;
-					final Exception validationException = SVNUtility.validateRepositoryLocation(location, new SVNProgressMonitor(this, monitor, null));
+					final Exception validationException = SVNUtility.validateRepositoryLocation(location,
+							new SVNProgressMonitor(this, monitor, null));
 					if (validationException != null) {
 						UIMonitorUtility.getDisplay().syncExec(new Runnable() {
 							public void run() {
-								Shell shell = AddRepositoryPanel.this.manager.getShell() != null ? AddRepositoryPanel.this.manager.getShell() : UIMonitorUtility.getShell();
-								NonValidLocationErrorDialog dialog = new NonValidLocationErrorDialog(shell, validationException.getMessage());
+								Shell shell = AddRepositoryPanel.this.manager.getShell() != null
+										? AddRepositoryPanel.this.manager.getShell()
+										: UIMonitorUtility.getShell();
+								NonValidLocationErrorDialog dialog = new NonValidLocationErrorDialog(shell,
+										validationException.getMessage());
 								if (dialog.open() != Window.OK) {
 									isAddLocation[0] = false;
-								}															
-							}							
-						});						
-					}			
-										
-					if (isAddLocation[0]) {						
-						AddRepositoryLocationOperation addLocationOperation = new AddRepositoryLocationOperation(location);
-						ProgressMonitorUtility.doTaskExternal(addLocationOperation, monitor);						
+								}
+							}
+						});
 					}
-				}				
-			}, new IActionOperation[] {mainOp});																					
-		}						
-				
+
+					if (isAddLocation[0]) {
+						AddRepositoryLocationOperation addLocationOperation = new AddRepositoryLocationOperation(
+								location);
+						ProgressMonitorUtility.doTaskExternal(addLocationOperation, monitor);
+					}
+				}
+			}, new IActionOperation[] { mainOp });
+		}
+
 		this.operationToPerform = op;
-									
+
 		return true;
-	}	
-	
+	}
+
 	public IActionOperation getOperationToPeform() {
 		return this.operationToPerform;
-	}	
+	}
 
 	protected void cancelChangesImpl() {
 		this.operationToPerform = null;
@@ -215,9 +222,9 @@ public class AddRepositoryPanel extends AbstractDialogPanel {
 	protected void saveChangesImpl() {
 		this.performFinish();
 	}
-		
-	public String getHelpId() {		
-        return "org.eclipse.team.svn.help.addRepositoryContext"; //$NON-NLS-1$
+
+	public String getHelpId() {
+		return "org.eclipse.team.svn.help.addRepositoryContext"; //$NON-NLS-1$
 	}
 
 }

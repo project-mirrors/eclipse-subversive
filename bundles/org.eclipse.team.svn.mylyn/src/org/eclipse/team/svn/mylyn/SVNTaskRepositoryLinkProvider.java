@@ -29,14 +29,14 @@ public class SVNTaskRepositoryLinkProvider extends AbstractTaskRepositoryLinkPro
 	public TaskRepository getTaskRepository(IResource resource, IRepositoryManager repositoryManager) {
 		String url = SVNLinkedTaskInfoAdapterFactory.getBugtraqModel(resource).getUrl();
 		if (url != null) {
-		    for (TaskRepository repository : repositoryManager.getAllRepositories()) {
-		    	String tUrl = repository.getRepositoryUrl();
-		    	if (url.startsWith(tUrl)) {
-		    		return repository;
-		    	}
-		    }
+			for (TaskRepository repository : repositoryManager.getAllRepositories()) {
+				String tUrl = repository.getRepositoryUrl();
+				if (url.startsWith(tUrl)) {
+					return repository;
+				}
+			}
 		}
 		return null;
 	}
-	
+
 }

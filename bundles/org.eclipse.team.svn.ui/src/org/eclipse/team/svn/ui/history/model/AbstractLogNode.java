@@ -38,5 +38,5 @@ public abstract class AbstractLogNode implements ILogNode {
 		retVal = PatternProvider.replaceAll(retVal, "\r", lineSeparatorReplacement); //$NON-NLS-1$
 		return retVal;
 	}
-	
+
 }

@@ -36,23 +36,24 @@ import org.eclipse.team.svn.core.operation.LoggedOperation;
  */
 public final class ProgressMonitorUtility {
 	public static final int TOTAL_WORK = 100;
-	
+
 	public static Job doTaskScheduledDefault(IActionOperation runnable) {
 		return ProgressMonitorUtility.doTaskScheduledDefault(runnable, true);
 	}
-	
+
 	public static Job doTaskScheduled(IActionOperation runnable) {
 		return ProgressMonitorUtility.doTaskScheduled(runnable, true);
 	}
-	
+
 	public static Job doTaskScheduledDefault(IActionOperation runnable, boolean system) {
 		return ProgressMonitorUtility.doTaskScheduled(runnable, ILoggedOperationFactory.DEFAULT, system);
 	}
-	
+
 	public static Job doTaskScheduled(IActionOperation runnable, boolean system) {
-		return ProgressMonitorUtility.doTaskScheduled(runnable, SVNTeamPlugin.instance().getOptionProvider().getLoggedOperationFactory(), system);
+		return ProgressMonitorUtility.doTaskScheduled(runnable,
+				SVNTeamPlugin.instance().getOptionProvider().getLoggedOperationFactory(), system);
 	}
-	
+
 	public static Job doTaskScheduled(IActionOperation runnable, ILoggedOperationFactory factory, boolean system) {
 		final IActionOperation logged = factory == null ? runnable : factory.getLogged(runnable);
 		Job job = new Job(logged.getOperationName()) {
@@ -63,8 +64,7 @@ public final class ProgressMonitorUtility {
 							ProgressMonitorUtility.doTaskExternal(logged, monitor, null);
 						}
 					}, this.getRule(), IWorkspace.AVOID_UPDATE, monitor);
-				} 
-				catch (CoreException e) {
+				} catch (CoreException e) {
 					LoggedOperation.reportError(SVNMessages.getErrorString("Error_ScheduledTask"), e); //$NON-NLS-1$
 				}
 				return Status.OK_STATUS;
@@ -75,68 +75,73 @@ public final class ProgressMonitorUtility {
 		job.schedule();
 		return job;
 	}
-	
+
 	public static void doTaskExternalDefault(IActionOperation runnable, IProgressMonitor monitor) {
 		ProgressMonitorUtility.doTaskExternal(runnable, monitor, ILoggedOperationFactory.DEFAULT);
 	}
-	
+
 	public static void doTaskExternal(IActionOperation runnable, IProgressMonitor monitor) {
-		ProgressMonitorUtility.doTaskExternal(runnable, monitor, SVNTeamPlugin.instance().getOptionProvider().getLoggedOperationFactory());
+		ProgressMonitorUtility.doTaskExternal(runnable, monitor,
+				SVNTeamPlugin.instance().getOptionProvider().getLoggedOperationFactory());
 	}
-	
-	public static void doTaskExternal(IActionOperation runnable, IProgressMonitor monitor, ILoggedOperationFactory factory) {
+
+	public static void doTaskExternal(IActionOperation runnable, IProgressMonitor monitor,
+			ILoggedOperationFactory factory) {
 		if (monitor == null) {
 			monitor = new NullProgressMonitor();
 		}
 		monitor.beginTask(null, ProgressMonitorUtility.TOTAL_WORK);
 		try {
-			ProgressMonitorUtility.doTask(factory == null ? runnable : factory.getLogged(runnable), monitor, IActionOperation.DEFAULT_WEIGHT, IActionOperation.DEFAULT_WEIGHT);
-		}
-		finally {
+			ProgressMonitorUtility.doTask(factory == null ? runnable : factory.getLogged(runnable), monitor,
+					IActionOperation.DEFAULT_WEIGHT, IActionOperation.DEFAULT_WEIGHT);
+		} finally {
 			monitor.done();
 		}
 	}
-	
+
 	public static void doTask(IActionOperation runnable, IProgressMonitor monitor, int totalWeight, int currentWeight) {
 		if (totalWeight > 0) {
-			monitor = new SubProgressMonitorWithInfo(monitor, ProgressMonitorUtility.TOTAL_WORK * currentWeight / totalWeight);
+			monitor = new SubProgressMonitorWithInfo(monitor,
+					ProgressMonitorUtility.TOTAL_WORK * currentWeight / totalWeight);
 		}
 		monitor.beginTask(runnable.getOperationName(), ProgressMonitorUtility.TOTAL_WORK);
 		ProgressMonitorUtility.setTaskInfo(monitor, runnable, SVNMessages.Progress_Running);
 		try {
 			runnable.run(monitor);
-		}
-		finally {
+		} finally {
 			monitor.done();
 			ProgressMonitorUtility.setTaskInfo(monitor, runnable, SVNMessages.Progress_Done);
 		}
 	}
-	
-	public static void doSubTask(IActionOperation runnable, IUnprotectedOperation op, IProgressMonitor monitor, int totalWeight, int currentWeight) throws Exception {
+
+	public static void doSubTask(IActionOperation runnable, IUnprotectedOperation op, IProgressMonitor monitor,
+			int totalWeight, int currentWeight) throws Exception {
 		if (totalWeight > 0) {
-			monitor = new SubProgressMonitorWithInfo(monitor, ((double)ProgressMonitorUtility.TOTAL_WORK) * currentWeight / totalWeight);
+			monitor = new SubProgressMonitorWithInfo(monitor,
+					((double) ProgressMonitorUtility.TOTAL_WORK) * currentWeight / totalWeight);
 		}
 		monitor.beginTask(runnable.getOperationName(), ProgressMonitorUtility.TOTAL_WORK);
 		try {
 			op.run(monitor);
-		}
-		finally {
+		} finally {
 			monitor.done();
 		}
 	}
-	
+
 	public static void progress(IProgressMonitor monitor, int current, int total) {
 		if (monitor instanceof SubProgressMonitorWithInfo) {
-			SubProgressMonitorWithInfo info = (SubProgressMonitorWithInfo)monitor;
-			info.worked(total == IProgressMonitor.UNKNOWN ? IProgressMonitor.UNKNOWN : (ProgressMonitorUtility.TOTAL_WORK * current / total - info.getCurrentProgress()));
-		}
-		else {
+			SubProgressMonitorWithInfo info = (SubProgressMonitorWithInfo) monitor;
+			info.worked(total == IProgressMonitor.UNKNOWN
+					? IProgressMonitor.UNKNOWN
+					: (ProgressMonitorUtility.TOTAL_WORK * current / total - info.getCurrentProgress()));
+		} else {
 			monitor.worked(1);
 		}
 	}
 
 	public static void setTaskInfo(IProgressMonitor monitor, IActionOperation op, String subTask) {
-		String message = SVNMessages.format(SVNMessages.Progress_SubTask, new String[] {op.getOperationName(), subTask == null || subTask.length() == 0 ? SVNMessages.Progress_Running : subTask});
+		String message = SVNMessages.format(SVNMessages.Progress_SubTask, new String[] { op.getOperationName(),
+				subTask == null || subTask.length() == 0 ? SVNMessages.Progress_Running : subTask });
 		monitor.subTask(message);
 	}
 

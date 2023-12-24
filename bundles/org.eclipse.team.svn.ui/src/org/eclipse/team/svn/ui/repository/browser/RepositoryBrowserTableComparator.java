@@ -33,43 +33,40 @@ public class RepositoryBrowserTableComparator extends ColumnedViewerComparator {
 	public RepositoryBrowserTableComparator(Viewer basedOn) {
 		super(basedOn);
 	}
-	
+
 	public int compareImpl(Viewer viewer, Object row1, Object row2) {
 		if (row1 instanceof RepositoryFictiveWorkingDirectory) {
 			return -1;
 		}
 		if (row2 instanceof RepositoryFictiveWorkingDirectory) {
-			return  1;
+			return 1;
 		}
-		IRepositoryResource rowData1 = ((RepositoryResource)row1).getRepositoryResource();
-		IRepositoryResource rowData2 = ((RepositoryResource)row2).getRepositoryResource();
+		IRepositoryResource rowData1 = ((RepositoryResource) row1).getRepositoryResource();
+		IRepositoryResource rowData2 = ((RepositoryResource) row2).getRepositoryResource();
 		Information info1 = (rowData1).getInfo();
 		Information info2 = (rowData2).getInfo();
 		boolean cnd1 = rowData1 instanceof IRepositoryContainer;
-        boolean cnd2 = rowData2 instanceof IRepositoryContainer;
-        if (cnd1 && !cnd2) {
-            return -1;
-        }
-        else if (cnd2 && !cnd1) {
-            return 1;
-        }
+		boolean cnd2 = rowData2 instanceof IRepositoryContainer;
+		if (cnd1 && !cnd2) {
+			return -1;
+		} else if (cnd2 && !cnd1) {
+			return 1;
+		}
 		if (this.column == RepositoryBrowserTableViewer.COLUMN_NAME) {
 			String name1 = rowData1.getName();
 			String name2 = rowData2.getName();
-            return ColumnedViewerComparator.compare(name1, name2);
-		}
-		else if (this.column == RepositoryBrowserTableViewer.COLUMN_REVISION) {
+			return ColumnedViewerComparator.compare(name1, name2);
+		} else if (this.column == RepositoryBrowserTableViewer.COLUMN_REVISION) {
 			try {
-				long rev1 = rowData1.getRevision(); 
+				long rev1 = rowData1.getRevision();
 				long rev2 = rowData2.getRevision();
 				return rev1 < rev2 ? -1 : rev1 > rev2 ? 1 : 0;
-			}
-			catch (Exception ex) {
+			} catch (Exception ex) {
 				// not interesting in this context, will never happen
 			}
 		} else if (info1 != null && info2 != null) {
 			if (this.column == RepositoryBrowserTableViewer.COLUMN_LAST_CHANGE_DATE) {
-				long d1 = info1.lastChangedDate; 
+				long d1 = info1.lastChangedDate;
 				long d2 = info2.lastChangedDate;
 				return d1 < d2 ? -1 : d1 > d2 ? 1 : 0;
 			} else if (this.column == RepositoryBrowserTableViewer.COLUMN_LAST_CHANGE_AUTHOR) {
@@ -94,7 +91,7 @@ public class RepositoryBrowserTableComparator extends ColumnedViewerComparator {
 				long s1 = info1.fileSize;
 				long s2 = info2.fileSize;
 				return s1 < s2 ? -1 : s1 > s2 ? 1 : 0;
-			}					
+			}
 		}
 		return 0;
 	}

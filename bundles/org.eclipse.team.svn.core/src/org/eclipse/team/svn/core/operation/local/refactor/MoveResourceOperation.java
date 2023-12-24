@@ -37,6 +37,7 @@ import org.eclipse.team.svn.core.utility.FileUtility;
  */
 public class MoveResourceOperation extends AbstractActionOperation {
 	protected IResource source;
+
 	protected IResource destination;
 
 	public MoveResourceOperation(IResource source, IResource destination) {
@@ -44,13 +45,13 @@ public class MoveResourceOperation extends AbstractActionOperation {
 		this.source = source;
 		this.destination = destination;
 	}
-	
+
 	public ISchedulingRule getSchedulingRule() {
 		return MultiRule.combine(
-				this.source instanceof IProject ? this.source : this.source.getParent(), 
+				this.source instanceof IProject ? this.source : this.source.getParent(),
 				this.destination instanceof IProject ? this.destination : this.destination.getParent());
 	}
-	
+
 	public boolean isAllowed() {
 		IRemoteStorage storage = SVNRemoteStorage.instance();
 		String locationSourceUrl = storage.getRepositoryLocation(this.source).getRepositoryRootUrl();
@@ -61,22 +62,28 @@ public class MoveResourceOperation extends AbstractActionOperation {
 	protected void runImpl(IProgressMonitor monitor) throws Exception {
 		IRemoteStorage storage = SVNRemoteStorage.instance();
 		IRepositoryLocation location = storage.getRepositoryLocation(this.source);
-		
+
 		ISVNConnector proxy = location.acquireSVNProxy();
-		
+
 		String srcPath = FileUtility.getWorkingCopyPath(this.source);
 		String dstPath = FileUtility.getWorkingCopyPath(this.destination);
 		try {
-			this.writeToConsole(IConsoleStream.LEVEL_CMD, "svn move \"" + FileUtility.normalizePath(srcPath) + "\" \"" + FileUtility.normalizePath(dstPath) + "\"" + ISVNConnector.Options.asCommandLine(ISVNConnector.Options.FORCE | ISVNConnector.Options.ALLOW_MIXED_REVISIONS) + " \n");
-			proxy.moveLocal(new String[] {srcPath}, dstPath, ISVNConnector.Options.FORCE | ISVNConnector.Options.ALLOW_MIXED_REVISIONS, new SVNProgressMonitor(this, monitor, null));
-		}
-		finally {
-		    location.releaseSVNProxy(proxy);
+			this.writeToConsole(IConsoleStream.LEVEL_CMD,
+					"svn move \"" + FileUtility.normalizePath(srcPath) + "\" \"" + FileUtility.normalizePath(dstPath)
+							+ "\"" + ISVNConnector.Options.asCommandLine(
+									ISVNConnector.Options.FORCE | ISVNConnector.Options.ALLOW_MIXED_REVISIONS)
+							+ " \n");
+			proxy.moveLocal(new String[] { srcPath }, dstPath,
+					ISVNConnector.Options.FORCE | ISVNConnector.Options.ALLOW_MIXED_REVISIONS,
+					new SVNProgressMonitor(this, monitor, null));
+		} finally {
+			location.releaseSVNProxy(proxy);
 		}
 	}
-	
+
 	protected String getShortErrorMessage(Throwable t) {
-		return BaseMessages.format(super.getShortErrorMessage(t), new Object[] {this.source.getName(), this.destination.getParent().getFullPath().toString()});
+		return BaseMessages.format(super.getShortErrorMessage(t),
+				new Object[] { this.source.getName(), this.destination.getParent().getFullPath().toString() });
 	}
 
 }

@@ -43,14 +43,15 @@ public class EditTreeConflictsAction extends AbstractRecursiveTeamAction {
 				EditTreeConflictsPanel editConflictsPanel = new EditTreeConflictsPanel(local);
 				DefaultDialog dialog = new DefaultDialog(UIMonitorUtility.getShell(), editConflictsPanel);
 				if (dialog.open() == 0 && editConflictsPanel.getOperation() != null) {
-					this.runScheduled(editConflictsPanel.getOperation());			
-				}		
+					this.runScheduled(editConflictsPanel.getOperation());
+				}
 			}
-		}		
+		}
 	}
-	
+
 	public boolean isEnabled() {
-		return this.getSelectedResources().length == 1 && this.checkForResourcesPresence(IStateFilter.SF_TREE_CONFLICTING);
+		return this.getSelectedResources().length == 1
+				&& this.checkForResourcesPresence(IStateFilter.SF_TREE_CONFLICTING);
 	}
 
 	protected boolean needsToSaveDirtyEditors() {

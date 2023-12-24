@@ -26,28 +26,28 @@ import org.eclipse.team.svn.core.connector.SVNMergeStatus;
  * @author Alexander Gurov
  */
 public abstract class AbstractMergeSet {
-    public final IResource []to;
-    
-    protected ArrayList<SVNMergeStatus> statuses;
-    
-    public AbstractMergeSet(IResource []to) {
-    	this.to = to;
-    	this.statuses = new ArrayList<SVNMergeStatus>();
-    }
+	public final IResource[] to;
 
-	public SVNMergeStatus []getStatuses() {
+	protected ArrayList<SVNMergeStatus> statuses;
+
+	public AbstractMergeSet(IResource[] to) {
+		this.to = to;
+		this.statuses = new ArrayList<SVNMergeStatus>();
+	}
+
+	public SVNMergeStatus[] getStatuses() {
 		return this.statuses.toArray(new SVNMergeStatus[this.statuses.size()]);
 	}
 
-	public void setStatuses(SVNMergeStatus []statuses) {
+	public void setStatuses(SVNMergeStatus[] statuses) {
 		this.statuses.clear();
 		this.addStatuses(statuses);
 	}
-    
-	public void addStatuses(SVNMergeStatus []statuses) {
+
+	public void addStatuses(SVNMergeStatus[] statuses) {
 		if (statuses != null) {
 			this.statuses.addAll(Arrays.asList(statuses));
 		}
 	}
-    
+
 }

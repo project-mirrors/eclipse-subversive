@@ -29,19 +29,20 @@ import org.eclipse.team.svn.ui.repository.model.RepositoryLocation;
  * @author Alexander Gurov
  */
 public class RefreshRepositoryLocationsOperation extends AbstractActionOperation {
-	protected IRepositoryLocation []resources;
+	protected IRepositoryLocation[] resources;
+
 	protected boolean deep;
-	
+
 	public RefreshRepositoryLocationsOperation(boolean deep) {
 		this(null, deep);
 	}
 
-	public RefreshRepositoryLocationsOperation(IRepositoryLocation []resources, boolean deep) {
+	public RefreshRepositoryLocationsOperation(IRepositoryLocation[] resources, boolean deep) {
 		super("Operation_RefreshLocations", SVNUIMessages.class); //$NON-NLS-1$
 		this.resources = resources;
 		this.deep = deep;
 	}
-	
+
 	public int getOperationWeight() {
 		return 0;
 	}
@@ -51,7 +52,7 @@ public class RefreshRepositoryLocationsOperation extends AbstractActionOperation
 			RepositoriesView.refreshRepositories(this.deep);
 			return;
 		}
-		
+
 		for (int i = 0; i < this.resources.length; i++) {
 			final IRepositoryLocation current = this.resources[i];
 			this.protectStep(new IUnprotectedOperation() {
@@ -59,7 +60,7 @@ public class RefreshRepositoryLocationsOperation extends AbstractActionOperation
 					RepositoriesView.refresh(current, new RepositoryTreeViewer.IRefreshVisitor() {
 						public void visit(Object data) {
 							if (data instanceof RepositoryLocation && RefreshRepositoryLocationsOperation.this.deep) {
-								((RepositoryLocation)data).refresh();
+								((RepositoryLocation) data).refresh();
 							}
 						}
 					});
@@ -67,5 +68,5 @@ public class RefreshRepositoryLocationsOperation extends AbstractActionOperation
 			}, monitor, this.resources.length);
 		}
 	}
-	
+
 }

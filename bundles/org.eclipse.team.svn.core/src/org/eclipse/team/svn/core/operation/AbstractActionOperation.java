@@ -34,27 +34,32 @@ import org.eclipse.team.svn.core.utility.ProgressMonitorUtility;
  */
 public abstract class AbstractActionOperation implements IActionOperation {
 	private final MultiStatus status = new MultiStatus(SVNTeamPlugin.NATURE_ID, IStatus.OK, "", null); //$NON-NLS-1$
+
 	protected String nameId;
+
 	protected String name;
+
 	protected boolean isExecuted;
+
 	protected IConsoleStream consoleStream;
+
 	protected Class<? extends NLS> messagesClass;
-	
+
 	public AbstractActionOperation(String operationName, Class<? extends NLS> messagesClass) {
 		this.isExecuted = false;
 		this.messagesClass = messagesClass;
 		this.setOperationName(operationName);
 		this.updateStatusMessage();
 	}
-	
+
 	public int getOperationWeight() {
 		return IActionOperation.DEFAULT_WEIGHT;
 	}
-	
+
 	public IConsoleStream getConsoleStream() {
 		return this.consoleStream;
 	}
-	
+
 	public void setConsoleStream(IConsoleStream stream) {
 		this.consoleStream = stream;
 	}
@@ -67,7 +72,7 @@ public abstract class AbstractActionOperation implements IActionOperation {
 		// do not lock anything by default 
 		return null;
 	}
-	
+
 	public int getExecutionState() {
 		if (this.status.isOK()) {
 			return this.isExecuted ? IActionOperation.OK : IActionOperation.NOTEXECUTED;
@@ -84,14 +89,14 @@ public abstract class AbstractActionOperation implements IActionOperation {
 			}
 			this.runImpl(monitor);
 			if (monitor.isCanceled()) {
-				boolean hasCanceledException = false;	
+				boolean hasCanceledException = false;
 				// We have a multi status, so we iterate the children
 				IStatus[] children = this.status.getChildren();
 				for (int i = 0; i < children.length; i++) {
 					Throwable exception = children[i].getException();
-					if (exception instanceof SVNConnectorCancelException || 
-						exception instanceof ActivityCancelledException ||
-						exception instanceof OperationCanceledException) {
+					if (exception instanceof SVNConnectorCancelException
+							|| exception instanceof ActivityCancelledException
+							|| exception instanceof OperationCanceledException) {
 						hasCanceledException = true;
 						break;
 					}
@@ -100,93 +105,90 @@ public abstract class AbstractActionOperation implements IActionOperation {
 					throw new ActivityCancelledException();
 				}
 			}
-		}
-		catch (Throwable t) {
+		} catch (Throwable t) {
 			this.reportStatus(IStatus.ERROR, null, t);
-		}
-		finally {
+		} finally {
 			if (this.consoleStream != null) {
 				this.consoleStream.markEnd();
 			}
 		}
-		
+
 		return this;
 	}
-	
+
 	public void setOperationName(String name) {
 		this.nameId = name;
 		this.name = this.getNationalizedString(name);
 	}
-	
+
 	public String getOperationName() {
 		return this.name;
 	}
-	
+
 	public String getId() {
 		return this.nameId;
 	}
-	
+
 	public Class<? extends NLS> getMessagesClass() {
 		return this.messagesClass;
 	}
-	
+
 	protected abstract void runImpl(IProgressMonitor monitor) throws Exception;
-	
+
 	protected void writeCancelledToConsole() {
 		if (this.consoleStream != null) {
 			this.consoleStream.markCancelled();
 		}
 	}
-	
+
 	protected void writeToConsole(int severity, String data) {
 		if (this.consoleStream != null) {
 			this.consoleStream.write(severity, data);
 		}
 	}
-	
+
 	protected void complexWriteToConsole(Runnable runnable) {
 		if (this.consoleStream != null) {
 			this.consoleStream.doComplexWrite(runnable);
 		}
 	}
-	
+
 	protected void protectStep(IUnprotectedOperation step, IProgressMonitor monitor, int subTaskCnt) {
 		this.protectStep(step, monitor, IActionOperation.DEFAULT_WEIGHT * subTaskCnt, IActionOperation.DEFAULT_WEIGHT);
 	}
-	
-	protected void protectStep(IUnprotectedOperation step, IProgressMonitor monitor, int totalWeight, int currentWeight) {
+
+	protected void protectStep(IUnprotectedOperation step, IProgressMonitor monitor, int totalWeight,
+			int currentWeight) {
 		try {
 			ProgressMonitorUtility.doSubTask(this, step, monitor, totalWeight, currentWeight);
-		}
-		catch (Throwable t) {
+		} catch (Throwable t) {
 			this.reportStatus(IStatus.ERROR, null, t);
 		}
 	}
-	
+
 	protected void reportWarning(String message, Throwable t) { //$NON-NLS-1$
 		this.reportStatus(IStatus.WARNING, message, t);
 	}
-	
+
 	protected void reportError(Throwable t) {
 		this.reportStatus(IStatus.ERROR, null, t);
 	}
-	
+
 	public void reportStatus(int severity, String message, Throwable t) {
 		String msg = message != null ? message : this.getShortErrorMessage(t);
 		if (severity == IStatus.ERROR) {
-			if (t instanceof SVNConnectorCancelException || t instanceof ActivityCancelledException || t instanceof OperationCanceledException) {
+			if (t instanceof SVNConnectorCancelException || t instanceof ActivityCancelledException
+					|| t instanceof OperationCanceledException) {
 				this.writeCancelledToConsole();
-			}
-			else {
+			} else {
 				this.writeToConsole(IConsoleStream.LEVEL_ERROR, msg + "\n"); //$NON-NLS-1$
 			}
-		}
-		else if (severity == IStatus.WARNING) {
-			this.writeToConsole(IConsoleStream.LEVEL_WARNING, message + "\n");			
+		} else if (severity == IStatus.WARNING) {
+			this.writeToConsole(IConsoleStream.LEVEL_WARNING, message + "\n");
 		}
 		this.reportStatus(new Status(severity, SVNTeamPlugin.NATURE_ID, IStatus.OK, msg, t));
 	}
-	
+
 	protected String getShortErrorMessage(Throwable t) {
 		String key = this.nameId + "_Error"; //$NON-NLS-1$
 		String retVal = this.getNationalizedString(key);
@@ -195,35 +197,37 @@ public abstract class AbstractActionOperation implements IActionOperation {
 		}
 		return retVal;
 	}
-	
+
 	protected void reportStatus(IStatus st) {
 		if (st.getSeverity() != IStatus.OK) {
 			this.status.merge(st);
 		}
 	}
-	
+
 	protected String getOperationResource(String key) {
 		return this.getNationalizedString(this.nameId + "_" + key); //$NON-NLS-1$
 	}
-	
-	protected final String getNationalizedString(String key) {		
+
+	protected final String getNationalizedString(String key) {
 		String retVal = BaseMessages.getErrorString(key, this.messagesClass);
 		if (retVal.equals(key)) {
 			return CoreExtensionsManager.instance().getOptionProvider().getResource(key);
 		}
 		return retVal;
 	}
-	
+
 	private void updateStatusMessage() {
 		String key = this.nameId + "_Id"; //$NON-NLS-1$
 		String prefix = this.getNationalizedString(key);
 		prefix = prefix.equals(key) ? "" : (prefix + ": "); //$NON-NLS-1$ //$NON-NLS-2$
-		String errMessage = SVNMessages.format(SVNMessages.Operation_Error_LogHeader, new String[] {prefix + this.name});
+		String errMessage = SVNMessages.format(SVNMessages.Operation_Error_LogHeader,
+				new String[] { prefix + this.name });
 		this.status.setMessage(errMessage);
 	}
-	
+
 	/**
 	 * Give us an accessible version of MultiStatus to be able to update the message.
+	 * 
 	 * @author Alessandro Nistico
 	 */
 	private static class MultiStatus extends org.eclipse.core.runtime.MultiStatus {
@@ -234,12 +238,12 @@ public abstract class AbstractActionOperation implements IActionOperation {
 		public MultiStatus(String pluginId, int code, String message, Throwable exception) {
 			super(pluginId, code, message, exception);
 		}
-		
+
 		public void setMessage(String message) {
 			super.setMessage(message);
 		}
-		
+
 		// The severity is set automatically by org.eclipse.core.runtime.MultiStatus.add() method which is called every time child status is added. So we don't need to override the severity field manually.
 	}
-	
+
 }

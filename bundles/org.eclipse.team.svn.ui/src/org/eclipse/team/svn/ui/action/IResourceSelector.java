@@ -19,7 +19,6 @@ package org.eclipse.team.svn.ui.action;
  * 
  * @author Alexander Gurov
  */
-public interface IResourceSelector extends IPlainResourceSelector,
-        IRecursiveResourceSelector {
+public interface IResourceSelector extends IPlainResourceSelector, IRecursiveResourceSelector {
 
 }

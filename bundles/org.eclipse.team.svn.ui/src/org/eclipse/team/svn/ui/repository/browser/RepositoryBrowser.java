@@ -67,24 +67,31 @@ import org.eclipse.ui.PlatformUI;
  *
  * @author Sergiy Logvin
  */
-public class RepositoryBrowser extends AbstractSVNView implements ISelectionChangedListener, RepositoryTreeViewer.IRefreshListener {
+public class RepositoryBrowser extends AbstractSVNView
+		implements ISelectionChangedListener, RepositoryTreeViewer.IRefreshListener {
 	public static final String VIEW_ID = RepositoryBrowser.class.getName();
-	
+
 	protected static RepositoryBrowser instance = null;
+
 	protected IPartListener2 partListener;
+
 	protected RepositoryResource inputElement;
+
 	protected Object rawInputElement;
+
 	protected RepositoryFile selectedFile;
 
 	protected IRepositoryLocation location;
+
 	protected RepositoryBrowserTableViewer tableViewer;
+
 	protected RepositoryBrowserContentProvider contentProvider;
-	
+
 	public RepositoryBrowser() {
 		super(SVNUIMessages.RepositoriesView_Browser_Description);
 		RepositoryBrowser.instance = this;
 	}
-	
+
 	public IRepositoryResource getResource() {
 		return this.repositoryResource;
 	}
@@ -94,44 +101,41 @@ public class RepositoryBrowser extends AbstractSVNView implements ISelectionChan
 		if (firstElement != null) {
 			boolean selectedFileChanged = false;
 			if (firstElement instanceof RepositoryFile) {
-				if (!((RepositoryFile)firstElement).equals(this.selectedFile)) {
+				if (!((RepositoryFile) firstElement).equals(this.selectedFile)) {
 					selectedFileChanged = true;
-					this.selectedFile = (RepositoryFile)firstElement;
+					this.selectedFile = (RepositoryFile) firstElement;
 				}
-	    		RepositoriesView instance = RepositoriesView.instance();
-	    		if (instance != null) {
+				RepositoriesView instance = RepositoriesView.instance();
+				if (instance != null) {
 					RepositoryTreeViewer repositoryTree = instance.getRepositoryTree();
 					TreeItem[] items = repositoryTree.getIdenticalNodes(firstElement, true);
 					if (items != null && items.length != 0 && items[0] != null) {
 						TreeItem item = items[0].getParentItem();
 						if (item != null) {
 							firstElement = item.getData();
-						}
-						else {
+						} else {
 							firstElement = repositoryTree.getInput();
 						}
 					}
-	    		}
-			}
-			else {
+				}
+			} else {
 				if (this.selectedFile != null) {
 					this.selectedFile = null;
 					selectedFileChanged = true;
 				}
 			}
-			
+
 			if (firstElement instanceof RepositoryLocation) {
 				this.rawInputElement = firstElement;
-				firstElement = ((RepositoryLocation)firstElement).getResourceWrapper();
-			}
-			else {
+				firstElement = ((RepositoryLocation) firstElement).getResourceWrapper();
+			} else {
 				this.rawInputElement = null;
 			}
 			if (firstElement instanceof RepositoryResource) {
-				if (this.getResource() == null ||
-					!this.getResource().equals(((RepositoryResource)firstElement).getRepositoryResource()) ||
-					selectedFileChanged) {
-					this.connectTo((RepositoryResource)firstElement);
+				if (this.getResource() == null
+						|| !this.getResource().equals(((RepositoryResource) firstElement).getRepositoryResource())
+						|| selectedFileChanged) {
+					this.connectTo((RepositoryResource) firstElement);
 					this.refreshTableView();
 				}
 				return;
@@ -139,7 +143,7 @@ public class RepositoryBrowser extends AbstractSVNView implements ISelectionChan
 		}
 		this.disconnect();
 	}
-	
+
 	public void refreshed(Object data) {
 		this.refreshTableView();
 	}
@@ -147,22 +151,23 @@ public class RepositoryBrowser extends AbstractSVNView implements ISelectionChan
 	public void setFocus() {
 
 	}
-	
+
 	public void createPartControl(Composite parent) {
 		super.createPartControl(parent);
-		this.tableViewer = new RepositoryBrowserTableViewer(parent, SWT.FULL_SELECTION | SWT.H_SCROLL | SWT.V_SCROLL | SWT.MULTI);	
+		this.tableViewer = new RepositoryBrowserTableViewer(parent,
+				SWT.FULL_SELECTION | SWT.H_SCROLL | SWT.V_SCROLL | SWT.MULTI);
 		this.tableViewer.initialize();
 		this.contentProvider = new RepositoryBrowserContentProvider();
 		this.tableViewer.setContentProvider(this.contentProvider);
 		this.tableViewer.setLabelProvider(new RepositoryBrowserLabelProvider(this.tableViewer));
-		
-        MenuManager menuMgr = RepositoriesView.newMenuInstance(this.tableViewer);
-        this.tableViewer.getTable().setMenu(menuMgr.createContextMenu(this.tableViewer.getTable()));
-        this.getSite().registerContextMenu(menuMgr, this.tableViewer);
-        
+
+		MenuManager menuMgr = RepositoriesView.newMenuInstance(this.tableViewer);
+		this.tableViewer.getTable().setMenu(menuMgr.createContextMenu(this.tableViewer.getTable()));
+		this.getSite().registerContextMenu(menuMgr, this.tableViewer);
+
 		IActionBars actionBars = this.getViewSite().getActionBars();
 		IToolBarManager tbm = actionBars.getToolBarManager();
-	    Action refreshAction = new Action(SVNUIMessages.SVNView_Refresh_Label) {
+		Action refreshAction = new Action(SVNUIMessages.SVNView_Refresh_Label) {
 			public void run() {
 				RepositoryBrowser.this.handleRefresh();
 			}
@@ -170,75 +175,87 @@ public class RepositoryBrowser extends AbstractSVNView implements ISelectionChan
 		refreshAction.setImageDescriptor(SVNTeamUIPlugin.instance().getImageDescriptor("icons/common/refresh.gif")); //$NON-NLS-1$
 		refreshAction.setToolTipText(SVNUIMessages.SVNView_Refresh_ToolTip);
 		tbm.add(refreshAction);
-		
+
 		this.tableViewer.getControl().addKeyListener(new KeyAdapter() {
-        	public void keyPressed(KeyEvent event) {
-        		if (event.keyCode == SWT.F5) {
-        			RepositoryBrowser.this.handleRefresh();
-        		}
-    			if (RepositoryBrowser.this.tableViewer.getSelection() instanceof IStructuredSelection) {
-        			IStructuredSelection selection = (IStructuredSelection)RepositoryBrowser.this.tableViewer.getSelection();
-	        		if (event.keyCode == SWT.DEL) {
-	        			RepositoryBrowser.this.handleDeleteKey(selection);
-	        			RepositoriesView.refresh(RepositoryBrowser.this.repositoryResource);
-	        		}
-    			}
-    			if (event.keyCode == SWT.BS) {
-    				RepositoryBrowser.this.handleBackspaceKey();
-    			}
-        	}
-        });
+			public void keyPressed(KeyEvent event) {
+				if (event.keyCode == SWT.F5) {
+					RepositoryBrowser.this.handleRefresh();
+				}
+				if (RepositoryBrowser.this.tableViewer.getSelection() instanceof IStructuredSelection) {
+					IStructuredSelection selection = (IStructuredSelection) RepositoryBrowser.this.tableViewer
+							.getSelection();
+					if (event.keyCode == SWT.DEL) {
+						RepositoryBrowser.this.handleDeleteKey(selection);
+						RepositoriesView.refresh(RepositoryBrowser.this.repositoryResource);
+					}
+				}
+				if (event.keyCode == SWT.BS) {
+					RepositoryBrowser.this.handleBackspaceKey();
+				}
+			}
+		});
 		this.tableViewer.addDoubleClickListener(new IDoubleClickListener() {
 			public void doubleClick(DoubleClickEvent e) {
 				ISelection selection = e.getSelection();
 				if (selection instanceof IStructuredSelection) {
-					IStructuredSelection structured = (IStructuredSelection)selection;
+					IStructuredSelection structured = (IStructuredSelection) selection;
 					if (structured.size() == 1) {
 						RepositoryBrowser.this.handleDoubleClick(structured);
 					}
 				}
 			}
 		});
-        this.tableViewer.refresh();
+		this.tableViewer.refresh();
 		this.showResourceLabel();
 		this.partListener = new IPartListener2() {
 			public void partVisible(IWorkbenchPartReference partRef) {
 				this.setViewState(partRef, true);
 			}
+
 			public void partHidden(IWorkbenchPartReference partRef) {
 				this.setViewState(partRef, false);
 			}
+
 			public void partInputChanged(IWorkbenchPartReference partRef) {
 			}
+
 			public void partOpened(IWorkbenchPartReference partRef) {
 			}
+
 			public void partDeactivated(IWorkbenchPartReference partRef) {
 			}
+
 			public void partClosed(IWorkbenchPartReference partRef) {
 				if (partRef.getId().equals(RepositoryBrowser.VIEW_ID)) {
 					RepositoryBrowser.this.getViewSite().getPage().removePartListener(this);
 				}
 			}
+
 			public void partBroughtToTop(IWorkbenchPartReference partRef) {
 			}
+
 			public void partActivated(IWorkbenchPartReference partRef) {
 			}
+
 			protected void setViewState(IWorkbenchPartReference partRef, boolean visible) {
-				if (partRef.getId().equals(RepositoryBrowser.VIEW_ID) ||
-					partRef.getId().equals(RepositoriesView.VIEW_ID)) {
+				if (partRef.getId().equals(RepositoryBrowser.VIEW_ID)
+						|| partRef.getId().equals(RepositoriesView.VIEW_ID)) {
 					if (partRef.getId().equals(RepositoryBrowser.VIEW_ID)) {
 						IPreferenceStore store = SVNTeamUIPlugin.instance().getPreferenceStore();
-						SVNTeamPreferences.setRepositoryBoolean(store, SVNTeamPreferences.REPOSITORY_SHOW_BROWSER_NAME, visible);
+						SVNTeamPreferences.setRepositoryBoolean(store, SVNTeamPreferences.REPOSITORY_SHOW_BROWSER_NAME,
+								visible);
 					}
 					RepositoryBrowser.this.setViewState(visible);
 				}
 			}
 		};
-		
+
 		this.getViewSite().getPage().addPartListener(this.partListener);
-	
+
 		//Setting context help
-	    PlatformUI.getWorkbench().getHelpSystem().setHelp(parent, "org.eclipse.team.svn.help.repositoryBrowserViewContext"); //$NON-NLS-1$
+		PlatformUI.getWorkbench()
+				.getHelpSystem()
+				.setHelp(parent, "org.eclipse.team.svn.help.repositoryBrowserViewContext"); //$NON-NLS-1$
 	}
 
 	protected void connectTo(RepositoryResource inputElement) {
@@ -246,20 +263,19 @@ public class RepositoryBrowser extends AbstractSVNView implements ISelectionChan
 		this.repositoryResource = inputElement.getRepositoryResource();
 		this.showResourceLabel();
 	}
-	
+
 	protected void refreshTableView() {
 		if (!this.tableViewer.getTable().isDisposed()) {
 			boolean hideGrid = false;
 			if (this.inputElement instanceof RepositoryFolder) {
-				Object []children = ((RepositoryFolder)this.inputElement).peekChildren(null);
+				Object[] children = ((RepositoryFolder) this.inputElement).peekChildren(null);
 				hideGrid = children != null && children.length > 0 && children[0] instanceof RepositoryFictiveNode;
 			}
 			this.tableViewer.getTable().setLinesVisible(!hideGrid);
 			this.tableViewer.setInput(this.inputElement);
 			if (this.selectedFile != null) {
 				this.tableViewer.setSelection(new StructuredSelection(this.selectedFile), true);
-			}
-			else {
+			} else {
 				this.tableViewer.getTable().setSelection(0);
 			}
 		}
@@ -274,8 +290,7 @@ public class RepositoryBrowser extends AbstractSVNView implements ISelectionChan
 				this.selectionChanged(new SelectionChangedEvent(viewer, viewer.getSelection()));
 				viewer.addSelectionChangedListener(this);
 				viewer.addRefreshListener(this);
-			}
-			else {
+			} else {
 				viewer.removeSelectionChangedListener(this);
 				viewer.removeRefreshListener(this);
 			}
@@ -284,39 +299,39 @@ public class RepositoryBrowser extends AbstractSVNView implements ISelectionChan
 			this.disconnect();
 		}
 	}
-	
+
 	protected void handleRefresh() {
 		if (this.repositoryResource != null) {
-		    UIMonitorUtility.doTaskBusyDefault(new RefreshRemoteResourcesOperation(new IRepositoryResource[] {this.repositoryResource}));
+			UIMonitorUtility.doTaskBusyDefault(
+					new RefreshRemoteResourcesOperation(new IRepositoryResource[] { this.repositoryResource }));
 		}
 	}
-	
+
 	protected void handleDeleteKey(IStructuredSelection selection) {
-	    Action tmp = new Action() {}; 
-	    AbstractSVNTeamAction action = new DeleteAction();
-	    action.selectionChanged(tmp, selection);
-	    action.setActivePart(tmp, RepositoryBrowser.this);
-	    if (tmp.isEnabled()) {
-		    action.run(tmp);
-	    }
-	    else {
-		    action = new DiscardRevisionLinksAction();
-		    action.selectionChanged(tmp, selection);
-		    action.setActivePart(tmp, RepositoryBrowser.this);
-		    if (tmp.isEnabled()) {
-			    action.run(tmp);
-		    }
-		    else {
-			    action = new DiscardRepositoryLocationAction();
-			    action.selectionChanged(tmp, selection);
-			    action.setActivePart(tmp, RepositoryBrowser.this);
-			    if (tmp.isEnabled()) {
-				    action.run(tmp);
-			    }
-		    }
-	    }
+		Action tmp = new Action() {
+		};
+		AbstractSVNTeamAction action = new DeleteAction();
+		action.selectionChanged(tmp, selection);
+		action.setActivePart(tmp, RepositoryBrowser.this);
+		if (tmp.isEnabled()) {
+			action.run(tmp);
+		} else {
+			action = new DiscardRevisionLinksAction();
+			action.selectionChanged(tmp, selection);
+			action.setActivePart(tmp, RepositoryBrowser.this);
+			if (tmp.isEnabled()) {
+				action.run(tmp);
+			} else {
+				action = new DiscardRepositoryLocationAction();
+				action.selectionChanged(tmp, selection);
+				action.setActivePart(tmp, RepositoryBrowser.this);
+				if (tmp.isEnabled()) {
+					action.run(tmp);
+				}
+			}
+		}
 	}
-	
+
 	protected void handleBackspaceKey() {
 		Table table = this.tableViewer.getTable();
 		TableItem[] items = table.getItems();
@@ -327,40 +342,38 @@ public class RepositoryBrowser extends AbstractSVNView implements ISelectionChan
 			}
 		}
 	}
-	
+
 	protected void handleDoubleClick(IStructuredSelection selection) {
-	    Action tmp = new Action() {};
-	    AbstractSVNTeamAction action = new OpenFileAction();
-	    action.selectionChanged(tmp, selection);
-	    action.setActivePart(tmp, RepositoryBrowser.this);
-	    if (tmp.isEnabled()) {
-		    action.run(tmp);
-	    }
-	    else {
+		Action tmp = new Action() {
+		};
+		AbstractSVNTeamAction action = new OpenFileAction();
+		action.selectionChanged(tmp, selection);
+		action.setActivePart(tmp, RepositoryBrowser.this);
+		if (tmp.isEnabled()) {
+			action.run(tmp);
+		} else {
 			Object node = selection.getFirstElement();
-	    	if (node instanceof RepositoryFictiveWorkingDirectory) {
-	    		this.goUp();
-	    	}
-	    	else if (node instanceof IParentTreeNode) {
-	    		this.goDown(node);
-	    	}
-	    }
+			if (node instanceof RepositoryFictiveWorkingDirectory) {
+				this.goUp();
+			} else if (node instanceof IParentTreeNode) {
+				this.goDown(node);
+			}
+		}
 	}
-	
+
 	protected void goUp() {
 		RepositoriesView view = RepositoriesView.instance();
 		RepositoryResource node = this.inputElement;
 		if (view == null || node == null) {
 			return;
 		}
-		
+
 		Object parent = node.getParent();
 		if (parent != null) {
 			Object oldInput = node;
 			if (this.isTopLevelNode(view.getRepositoryTree(), node)) {
 				this.goBack(view, node);
-			}
-			else {
+			} else {
 				RepositoryTreeViewer treeViewer = view.getRepositoryTree();
 				TreeItem[] items = treeViewer.getIdenticalNodes(node, false);
 				if (items != null && items.length != 0 && items[0] != null && items != parent) {
@@ -384,7 +397,7 @@ public class RepositoryBrowser extends AbstractSVNView implements ISelectionChan
 			}
 		}
 	}
-	
+
 	protected void goBack(RepositoriesView view, Object node) {
 		if (!view.canGoBack()) {
 			return;
@@ -401,15 +414,14 @@ public class RepositoryBrowser extends AbstractSVNView implements ISelectionChan
 						if (newSelectedElement != null) {
 							treeViewer.setSelection(new StructuredSelection(newSelectedElement));
 						}
-					}
-					else {
+					} else {
 						this.goBack(view, node);
 					}
 				}
 			}
 		}
 	}
-	
+
 	protected void goDown(Object node) {
 		RepositoryTreeViewer treeViewer;
 		RepositoriesView view = RepositoriesView.instance();
@@ -421,7 +433,7 @@ public class RepositoryBrowser extends AbstractSVNView implements ISelectionChan
 		treeViewer.setExpandedState(node, true);
 		treeViewer.setSelection(new StructuredSelection(node));
 	}
-	
+
 	protected boolean isTopLevelNode(RepositoryTreeViewer tree, Object node) {
 		TreeItem[] items = tree.getIdenticalNodes(node, false);
 		if (items != null && items.length != 0 && items[0] != null) {
@@ -447,11 +459,11 @@ public class RepositoryBrowser extends AbstractSVNView implements ISelectionChan
 	protected boolean needsLinkWithEditorAndSelection() {
 		return false;
 	}
-	
+
 	protected Object getSelectedElement(ISelection selection) {
 		Object selectedElement = null;
 		if (selection instanceof IStructuredSelection) {
-			IStructuredSelection structured = (IStructuredSelection)selection;
+			IStructuredSelection structured = (IStructuredSelection) selection;
 			if (structured.size() == 1) {
 				selectedElement = structured.getFirstElement();
 			}

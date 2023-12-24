@@ -36,18 +36,19 @@ import org.eclipse.ui.PlatformUI;
  * @author Alexander Gurov
  */
 public class CheckoutAsFolderPage extends AbstractVerifiedWizardPage {
-	protected IRepositoryResource []repositoryResources;
+	protected IRepositoryResource[] repositoryResources;
+
 	protected SVNContainerSelectionGroup group;
+
 	protected IContainer targetFolder;
 
-	public CheckoutAsFolderPage(IRepositoryResource []repositoryResources) {
-		super(CheckoutAsFolderPage.class.getName(), 
-				SVNUIMessages.CheckoutAsFolderPage_Title, 
+	public CheckoutAsFolderPage(IRepositoryResource[] repositoryResources) {
+		super(CheckoutAsFolderPage.class.getName(), SVNUIMessages.CheckoutAsFolderPage_Title,
 				SVNTeamUIPlugin.instance().getImageDescriptor("icons/wizards/newconnect.gif")); //$NON-NLS-1$
 		this.setDescription(SVNUIMessages.CheckoutAsFolderPage_Description);
 		this.repositoryResources = repositoryResources;
 	}
-	
+
 	public IContainer getTargetFolder() {
 		return this.targetFolder;
 	}
@@ -58,22 +59,26 @@ public class CheckoutAsFolderPage extends AbstractVerifiedWizardPage {
 		composite.setLayout(layout);
 		GridData data = new GridData(GridData.FILL_BOTH);
 		composite.setLayoutData(data);
-		
+
 		this.setControl(composite);
-		
-    	Listener listener = new Listener() {
-            public void handleEvent(Event event) {
-            	IPath path = CheckoutAsFolderPage.this.group.getContainerFullPath();
-            	CheckoutAsFolderPage.this.targetFolder = (IContainer)ResourcesPlugin.getWorkspace().getRoot().findMember(path);
-            	CheckoutAsFolderPage.this.validateContent();
-            }
-        };
-        this.group = new SVNContainerSelectionGroup(composite, listener);
-        this.attachTo(this.group, new SVNContainerSelectionGroup.SVNContainerCheckOutSelectionVerifier());
-        
+
+		Listener listener = new Listener() {
+			public void handleEvent(Event event) {
+				IPath path = CheckoutAsFolderPage.this.group.getContainerFullPath();
+				CheckoutAsFolderPage.this.targetFolder = (IContainer) ResourcesPlugin.getWorkspace()
+						.getRoot()
+						.findMember(path);
+				CheckoutAsFolderPage.this.validateContent();
+			}
+		};
+		this.group = new SVNContainerSelectionGroup(composite, listener);
+		this.attachTo(this.group, new SVNContainerSelectionGroup.SVNContainerCheckOutSelectionVerifier());
+
 //		Setting context help
-        PlatformUI.getWorkbench().getHelpSystem().setHelp(composite, "org.eclipse.team.svn.help.checkoutAsAFolderContext"); //$NON-NLS-1$
-        
+		PlatformUI.getWorkbench()
+				.getHelpSystem()
+				.setHelp(composite, "org.eclipse.team.svn.help.checkoutAsAFolderContext"); //$NON-NLS-1$
+
 		return composite;
 	}
 

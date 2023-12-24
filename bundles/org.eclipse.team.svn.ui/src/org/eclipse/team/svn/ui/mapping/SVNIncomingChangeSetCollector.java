@@ -46,35 +46,36 @@ import org.eclipse.team.ui.synchronize.ISynchronizePageConfiguration;
 import org.eclipse.team.ui.synchronize.ISynchronizeParticipant;
 
 public class SVNIncomingChangeSetCollector extends ChangeSetManager {
-	
+
 	protected ISynchronizePageConfiguration configuration;
+
 	protected Subscriber subscriber;
-	
+
 	public SVNIncomingChangeSetCollector(ISynchronizePageConfiguration configuration, Subscriber subscriber) {
 		this.configuration = configuration;
 		this.subscriber = subscriber;
 	}
-	
+
 	protected void initializeSets() {
 		//do nothing
 	}
-	
+
 	public void add(IDiff[] diffs) {
 		if (diffs == null || diffs.length == 0) {
 			return;
 		}
-		
+
 		//format strings
 		String svnAuthor = SVNMessages.SVNInfo_Author;
 		String svnDate = SVNMessages.SVNInfo_Date;
 		String svnNoAuthor = SVNMessages.SVNInfo_NoAuthor;
 		String svnNoDate = SVNMessages.SVNInfo_NoDate;
 		//
-		
+
 		HashMap<Long, SVNIncomingChangeSet> sets = new HashMap<Long, SVNIncomingChangeSet>();
 		final Set<SVNIncomingChangeSet> added = new HashSet<SVNIncomingChangeSet>();
 		for (ChangeSet set : this.getSets()) {
-			SVNIncomingChangeSet svnSet = (SVNIncomingChangeSet)set;
+			SVNIncomingChangeSet svnSet = (SVNIncomingChangeSet) set;
 			sets.put(svnSet.getRevision(), svnSet);
 		}
 		try {
@@ -93,26 +94,29 @@ public class SVNIncomingChangeSetCollector extends ChangeSetManager {
 					set.setDate(new Date(resource.getLastCommitDate()));
 					set.setRevision(revision);
 					if (resource instanceof IResourceChange) {
-						set.setComment(((IResourceChange)resource).getComment());
+						set.setComment(((IResourceChange) resource).getComment());
 					}
 					updateName = true;
 					sets.put(revision, set);
 					added.add(set);
-				}
-				else if (set.getDate().getTime() == 0) {
+				} else if (set.getDate().getTime() == 0) {
 					updateName = true;
 					set.setDate(new Date(resource.getLastCommitDate()));
-				}
-				else if (set.getAuthor() == null) {
+				} else if (set.getAuthor() == null) {
 					updateName = true;
 					set.setAuthor(resource.getAuthor());
 				}
 				if (updateName) {
 					// rebuild name
-					String name = 
-						String.valueOf(revision) + " " +  //$NON-NLS-1$
-						(resource.getLastCommitDate() == 0 ? svnNoDate : BaseMessages.format(svnDate, new Object[] {DateFormatter.formatDate(set.getDate())})) + " " +  //$NON-NLS-1$
-						(resource.getAuthor() == null ? svnNoAuthor : BaseMessages.format(svnAuthor, new Object[] {resource.getAuthor()}));
+					String name = String.valueOf(revision) + " " + //$NON-NLS-1$
+							(resource.getLastCommitDate() == 0
+									? svnNoDate
+									: BaseMessages.format(svnDate,
+											new Object[] { DateFormatter.formatDate(set.getDate()) }))
+							+ " " + //$NON-NLS-1$
+							(resource.getAuthor() == null
+									? svnNoAuthor
+									: BaseMessages.format(svnAuthor, new Object[] { resource.getAuthor() }));
 					if (set.getComment() != null) {
 						String comment = set.getComment();
 						if (FileUtility.isWindows()) {
@@ -122,54 +126,53 @@ public class SVNIncomingChangeSetCollector extends ChangeSetManager {
 					}
 					set.setName(name);
 				}
-				
+
 				set.add(diff);
 			}
 			for (SVNIncomingChangeSet set : added) {
 				this.add(set);
 			}
-		}
-		catch (TeamException ex) {
+		} catch (TeamException ex) {
 			LoggedOperation.reportError(this.getClass().getName(), ex);
 		}
 	}
-	
-    public void handleChange(IDiffChangeEvent event) {
-        ArrayList<IPath> removals = new ArrayList<IPath>(Arrays.asList(event.getRemovals()));
-        ArrayList<IDiff> additions = new ArrayList<IDiff>(Arrays.asList(event.getAdditions()));
-        IDiff[] changed = event.getChanges();
-        for (int i = 0; i < changed.length; i++) {
-            IDiff diff = changed[i];
-            additions.add(diff);
-            removals.add(diff.getPath());
-        }
-        if (!removals.isEmpty()) {
-            this.remove(removals.toArray(new IPath[removals.size()]));
-        }
-        if (!additions.isEmpty()) {
-            this.add(additions.toArray(new IDiff[additions.size()]));
-        }
-    }
-    
-    protected void remove(IPath[] paths) {
-    	ChangeSet[] sets = this.getSets();
-        for (int i = 0; i < sets.length; i++) {
-        	DiffChangeSet set = (DiffChangeSet)sets[i];
-            set.remove(paths);
-        }
-    }
-	
+
+	public void handleChange(IDiffChangeEvent event) {
+		ArrayList<IPath> removals = new ArrayList<IPath>(Arrays.asList(event.getRemovals()));
+		ArrayList<IDiff> additions = new ArrayList<IDiff>(Arrays.asList(event.getAdditions()));
+		IDiff[] changed = event.getChanges();
+		for (int i = 0; i < changed.length; i++) {
+			IDiff diff = changed[i];
+			additions.add(diff);
+			removals.add(diff.getPath());
+		}
+		if (!removals.isEmpty()) {
+			this.remove(removals.toArray(new IPath[removals.size()]));
+		}
+		if (!additions.isEmpty()) {
+			this.add(additions.toArray(new IDiff[additions.size()]));
+		}
+	}
+
+	protected void remove(IPath[] paths) {
+		ChangeSet[] sets = this.getSets();
+		for (int i = 0; i < sets.length; i++) {
+			DiffChangeSet set = (DiffChangeSet) sets[i];
+			set.remove(paths);
+		}
+	}
+
 	public Subscriber getSubscriber() {
 		return this.subscriber;
 	}
-	
+
 	public ChangeSetCapability getChangeSetCapability() {
-        ISynchronizeParticipant participant = this.configuration.getParticipant();
-        if (participant instanceof IChangeSetProvider) {
-            IChangeSetProvider provider = (IChangeSetProvider)participant;
-            return provider.getChangeSetCapability();
-        }
-        return null;
-    }
+		ISynchronizeParticipant participant = this.configuration.getParticipant();
+		if (participant instanceof IChangeSetProvider) {
+			IChangeSetProvider provider = (IChangeSetProvider) participant;
+			return provider.getChangeSetCapability();
+		}
+		return null;
+	}
 
 }

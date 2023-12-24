@@ -37,14 +37,16 @@ public class LockActionHelper extends AbstractActionHelper {
 
 	public FastSyncInfoFilter getSyncInfoFilter() {
 		return new FastSyncInfoFilter() {
-            public boolean select(SyncInfo info) {
-                return super.select(info) && IStateFilter.SF_READY_TO_LOCK.accept(((AbstractSVNSyncInfo)info).getLocalResource());
-            }
-        };
+			public boolean select(SyncInfo info) {
+				return super.select(info)
+						&& IStateFilter.SF_READY_TO_LOCK.accept(((AbstractSVNSyncInfo) info).getLocalResource());
+			}
+		};
 	}
 
 	public IActionOperation getOperation() {
-		return LockProposeUtility.performLockAction(this.getSyncInfoSelector().getSelectedResources(), false, this.configuration.getSite().getShell());			
+		return LockProposeUtility.performLockAction(this.getSyncInfoSelector().getSelectedResources(), false,
+				this.configuration.getSite().getShell());
 	}
 
 }

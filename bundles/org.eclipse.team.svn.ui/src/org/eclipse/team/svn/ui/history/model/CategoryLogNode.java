@@ -29,7 +29,7 @@ import org.eclipse.team.svn.ui.history.data.SVNLocalFileRevision;
  */
 public class CategoryLogNode extends AbstractLogNode {
 	protected HistoryCategory category;
-	
+
 	public CategoryLogNode(RootHistoryCategory category) {
 		this(category, null);
 	}
@@ -45,22 +45,19 @@ public class CategoryLogNode extends AbstractLogNode {
 		}
 		return null;
 	}
-	
+
 	public ILogNode[] getChildren() {
-		Object []entries = this.category.getEntries();
-		ILogNode []children = new ILogNode[entries.length];
+		Object[] entries = this.category.getEntries();
+		ILogNode[] children = new ILogNode[entries.length];
 		for (int i = 0; i < entries.length; i++) {
 			if (entries[i] instanceof SVNLogEntry) {
-				children[i] = new SVNLogNode((SVNLogEntry)entries[i], this);
-			}
-			else if (entries[i] instanceof SVNLocalFileRevision) {
-				children[i] = new LocalLogNode((SVNLocalFileRevision)entries[i], this);
-			}
-			else if (entries[i] instanceof HistoryCategory) {
-				children[i] = new CategoryLogNode((HistoryCategory)entries[i], this);
-			}
-			else if (entries[i] instanceof String) {
-				children[i] = new PlainTextLogNode((String)entries[i], this);
+				children[i] = new SVNLogNode((SVNLogEntry) entries[i], this);
+			} else if (entries[i] instanceof SVNLocalFileRevision) {
+				children[i] = new LocalLogNode((SVNLocalFileRevision) entries[i], this);
+			} else if (entries[i] instanceof HistoryCategory) {
+				children[i] = new CategoryLogNode((HistoryCategory) entries[i], this);
+			} else if (entries[i] instanceof String) {
+				children[i] = new PlainTextLogNode((String) entries[i], this);
 			}
 		}
 		return children;
@@ -73,7 +70,7 @@ public class CategoryLogNode extends AbstractLogNode {
 	public boolean requiresBoldFont(long currentRevision) {
 		return true;
 	}
-	
+
 	public ImageDescriptor getImageDescriptor() {
 		return SVNTeamUIPlugin.instance().getImageDescriptor("icons/views/history/group_by_date.gif"); //$NON-NLS-1$
 	}
@@ -84,7 +81,7 @@ public class CategoryLogNode extends AbstractLogNode {
 		}
 		return ""; //$NON-NLS-1$
 	}
-	
+
 	public int getType() {
 		return ILogNode.TYPE_CATEGORY;
 	}
@@ -112,16 +109,16 @@ public class CategoryLogNode extends AbstractLogNode {
 	public long getTimeStamp() {
 		return 0;
 	}
-	
+
 	public int hashCode() {
 		return this.category.hashCode();
 	}
-	
+
 	public boolean equals(Object obj) {
 		if (obj instanceof CategoryLogNode) {
-			return this.category.equals(((CategoryLogNode)obj).category);
+			return this.category.equals(((CategoryLogNode) obj).category);
 		}
 		return false;
 	}
-	
+
 }

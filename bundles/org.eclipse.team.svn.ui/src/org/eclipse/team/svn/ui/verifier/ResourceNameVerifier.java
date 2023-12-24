@@ -23,23 +23,24 @@ import org.eclipse.team.svn.ui.SVNUIMessages;
  * @author Alexander Gurov
  */
 public class ResourceNameVerifier extends AbstractFormattedVerifier {
-    protected static String ERROR_MESSAGE;
-    
-    protected boolean allowMultipart;
-    
-    public ResourceNameVerifier(String fieldName, boolean allowMultipart) {
-        super(fieldName);
-        ResourceNameVerifier.ERROR_MESSAGE = SVNUIMessages.format(SVNUIMessages.Verifier_ResourceName, new String[] {AbstractFormattedVerifier.FIELD_NAME});
-        this.allowMultipart = allowMultipart;
-    }
+	protected static String ERROR_MESSAGE;
 
-    protected String getErrorMessageImpl(Control input) {
-        String fileName = this.getText(input);
-        if (fileName.length() != 0 && !this.isValidSegment(fileName)) {
-            return ResourceNameVerifier.ERROR_MESSAGE;
-        }
-        return null;
-    }
+	protected boolean allowMultipart;
+
+	public ResourceNameVerifier(String fieldName, boolean allowMultipart) {
+		super(fieldName);
+		ResourceNameVerifier.ERROR_MESSAGE = SVNUIMessages.format(SVNUIMessages.Verifier_ResourceName,
+				new String[] { AbstractFormattedVerifier.FIELD_NAME });
+		this.allowMultipart = allowMultipart;
+	}
+
+	protected String getErrorMessageImpl(Control input) {
+		String fileName = this.getText(input);
+		if (fileName.length() != 0 && !this.isValidSegment(fileName)) {
+			return ResourceNameVerifier.ERROR_MESSAGE;
+		}
+		return null;
+	}
 
 	public boolean isValidSegment(String segment) {
 		int size = segment.length();
@@ -48,8 +49,7 @@ public class ResourceNameVerifier extends AbstractFormattedVerifier {
 			char c = segment.charAt(i);
 			if (c == '?' || c == '*' || c == ':' || !this.allowMultipart && (c == '\\' || c == '/')) {
 				return false;
-			}
-			else if (c != '\\' && c != '/' && c != '.') {
+			} else if (c != '\\' && c != '/' && c != '.') {
 				nameCharactersFound = true;
 			}
 		}
@@ -57,7 +57,7 @@ public class ResourceNameVerifier extends AbstractFormattedVerifier {
 	}
 
 	protected String getWarningMessageImpl(Control input) {
-        return null;
-    }
+		return null;
+	}
 
 }

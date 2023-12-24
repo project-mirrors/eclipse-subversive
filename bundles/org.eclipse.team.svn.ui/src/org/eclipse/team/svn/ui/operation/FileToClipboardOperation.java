@@ -34,24 +34,26 @@ import org.eclipse.team.svn.ui.utility.UIMonitorUtility;
  */
 public class FileToClipboardOperation extends AbstractActionOperation {
 	protected String fileName;
+
 	protected boolean deleteFile;
+
 	protected String charset;
-	
+
 	public FileToClipboardOperation(String fileName) {
 		this(fileName, "UTF-8");
 	}
-	
+
 	public FileToClipboardOperation(String fileName, String charset) {
 		this(fileName, charset, true);
 	}
-	
+
 	public FileToClipboardOperation(String fileName, String charset, boolean deleteFile) {
 		super("Operation_FileToClipboard", SVNUIMessages.class); //$NON-NLS-1$
 		this.fileName = fileName;
 		this.deleteFile = deleteFile;
 		this.charset = charset;
 	}
-	
+
 	public int getOperationWeight() {
 		return 0;
 	}
@@ -61,14 +63,16 @@ public class FileToClipboardOperation extends AbstractActionOperation {
 		File tempFile = new File(this.fileName);
 		FileInputStream stream = new FileInputStream(tempFile);
 		try {
-			byte []buf = new byte[2048];
+			byte[] buf = new byte[2048];
 			int len = 0;
 			while ((len = stream.read(buf)) > 0) {
 				data.write(buf, 0, len);
 			}
-		}
-		finally {
-			try {stream.close();} catch (Exception ex) {}
+		} finally {
+			try {
+				stream.close();
+			} catch (Exception ex) {
+			}
 		}
 		if (this.deleteFile) {
 			tempFile.delete();
@@ -80,7 +84,7 @@ public class FileToClipboardOperation extends AbstractActionOperation {
 				public void run() {
 					TextTransfer plainTextTransfer = TextTransfer.getInstance();
 					Clipboard clipboard = new Clipboard(display);
-					clipboard.setContents(new String[] {text}, new Transfer[] {plainTextTransfer});
+					clipboard.setContents(new String[] { text }, new Transfer[] { plainTextTransfer });
 					clipboard.dispose();
 				}
 			});

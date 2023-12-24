@@ -23,5 +23,5 @@ import org.eclipse.team.svn.core.operation.IActionOperation;
  * @author Alexander Gurov
  */
 public interface IActionOperationProcessor {
-    public void doOperation(IActionOperation op, IProgressMonitor monitor);
+	public void doOperation(IActionOperation op, IProgressMonitor monitor);
 }

@@ -40,9 +40,9 @@ public class RestoreExternalsOperation extends AbstractWorkingCopyOperation impl
 
 	protected void runImpl(IProgressMonitor monitor) throws Exception {
 		final RestorePropertiesVisitor visitor = new RestorePropertiesVisitor();
-		
-		for (Iterator<?> it = this.freezeOp.getChanges().iterator(); it.hasNext() && !monitor.isCanceled(); ) {
-			final ResourceChange change = (ResourceChange)it.next();
+
+		for (Iterator<?> it = this.freezeOp.getChanges().iterator(); it.hasNext() && !monitor.isCanceled();) {
+			final ResourceChange change = (ResourceChange) it.next();
 			this.protectStep(new IUnprotectedOperation() {
 				public void run(IProgressMonitor monitor) throws Exception {
 					change.traverse(visitor, IResource.DEPTH_ZERO, RestoreExternalsOperation.this, monitor);
@@ -52,7 +52,7 @@ public class RestoreExternalsOperation extends AbstractWorkingCopyOperation impl
 	}
 
 	public void doOperation(IActionOperation op, IProgressMonitor monitor) {
-    	this.reportStatus(op.run(monitor).getStatus());
+		this.reportStatus(op.run(monitor).getStatus());
 	}
 
 }

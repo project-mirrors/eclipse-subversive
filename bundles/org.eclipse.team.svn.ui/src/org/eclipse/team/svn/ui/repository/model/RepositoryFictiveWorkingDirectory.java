@@ -26,13 +26,13 @@ import org.eclipse.ui.PlatformUI;
  */
 public class RepositoryFictiveWorkingDirectory extends RepositoryFictiveNode {
 	public static final String WORKING_DIR_LABEL = ".."; //$NON-NLS-1$
-	
+
 	protected Object associatedDirectory;
-	
+
 	public RepositoryFictiveWorkingDirectory(Object associatedDirectory) {
 		this.associatedDirectory = associatedDirectory;
 	}
-	
+
 	public Object[] getChildren(Object o) {
 		return null;
 	}
@@ -44,7 +44,7 @@ public class RepositoryFictiveWorkingDirectory extends RepositoryFictiveNode {
 	public String getLabel(Object o) {
 		return RepositoryFictiveWorkingDirectory.WORKING_DIR_LABEL;
 	}
-	
+
 	public Object getAssociatedDirectory() {
 		return this.associatedDirectory;
 	}

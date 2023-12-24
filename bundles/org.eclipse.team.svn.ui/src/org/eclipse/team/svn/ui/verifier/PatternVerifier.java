@@ -26,10 +26,11 @@ import org.eclipse.team.svn.ui.SVNUIMessages;
  * @author Sergiy Logvin
  */
 public class PatternVerifier extends AbstractFormattedVerifier {
-	protected IResource []resources;
+	protected IResource[] resources;
+
 	protected static String message;
 
-	public PatternVerifier(String fieldName, IResource []resources) {
+	public PatternVerifier(String fieldName, IResource[] resources) {
 		super(fieldName);
 		PatternVerifier.message = SVNUIMessages.Verifier_Pattern;
 		this.resources = resources;
@@ -40,8 +41,8 @@ public class PatternVerifier extends AbstractFormattedVerifier {
 		StringMatcher matcher = new StringMatcher(pattern, true, false);
 		for (int i = 0; i < this.resources.length; i++) {
 			if (!matcher.match(this.resources[i].getName())) {
-				return BaseMessages.format(PatternVerifier.message, new Object[] {this.resources[i].getName()});
-			}				
+				return BaseMessages.format(PatternVerifier.message, new Object[] { this.resources[i].getName() });
+			}
 		}
 		return null;
 	}

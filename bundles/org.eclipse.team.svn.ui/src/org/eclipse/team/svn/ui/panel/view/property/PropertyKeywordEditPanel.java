@@ -68,105 +68,127 @@ import org.eclipse.team.svn.ui.verifier.NonEmptyFieldVerifier;
  * @author Sergiy Logvin
  */
 public class PropertyKeywordEditPanel extends AbstractDialogPanel {
-	
+
 	protected CheckboxTableViewer checkboxViewer;
+
 	protected Button setRecursivelyCheckbox;
+
 	protected Button useMaskCheckbox;
+
 	protected Combo maskText;
-	
-	protected IResource []selectedResources;
-	protected IResource []alreadyWithProperties;
+
+	protected IResource[] selectedResources;
+
+	protected IResource[] alreadyWithProperties;
+
 	protected IPropertyProvider properties;
+
 	protected boolean recursionEnabled;
-	
+
 	protected boolean setRecursively;
+
 	protected String mask;
+
 	protected boolean useMask;
+
 	protected boolean computeStates;
-	
+
 	protected KeywordTableElement dateElement;
+
 	protected KeywordTableElement revisionElement;
+
 	protected KeywordTableElement lastChangedByElement;
+
 	protected KeywordTableElement headUrlElement;
+
 	protected KeywordTableElement idElement;
+
 	protected KeywordTableElement headerElement;
-	
+
 	protected UserInputHistory maskHistory;
 
-	public PropertyKeywordEditPanel(IResource []selection, IResourceProvider alreadyWithProperties, IPropertyProvider properties) {
+	public PropertyKeywordEditPanel(IResource[] selection, IResourceProvider alreadyWithProperties,
+			IPropertyProvider properties) {
 		super();
 		this.selectedResources = selection;
 		this.properties = properties;
-		this.alreadyWithProperties = alreadyWithProperties == null ? new IResource[0] : alreadyWithProperties.getResources();
-		this.recursionEnabled = FileUtility.checkForResourcesPresence(selection, new IStateFilter.AbstractStateFilter() {
-			protected boolean allowsRecursionImpl(ILocalResource local, IResource resource, String state, int mask) {
-				return false;
-			}
-			protected boolean acceptImpl(ILocalResource local, IResource resource, String state, int mask) {
-				return resource instanceof IContainer;
-			}
-		}, IResource.DEPTH_ZERO);
+		this.alreadyWithProperties = alreadyWithProperties == null
+				? new IResource[0]
+				: alreadyWithProperties.getResources();
+		this.recursionEnabled = FileUtility.checkForResourcesPresence(selection,
+				new IStateFilter.AbstractStateFilter() {
+					protected boolean allowsRecursionImpl(ILocalResource local, IResource resource, String state,
+							int mask) {
+						return false;
+					}
+
+					protected boolean acceptImpl(ILocalResource local, IResource resource, String state, int mask) {
+						return resource instanceof IContainer;
+					}
+				}, IResource.DEPTH_ZERO);
 		this.dialogTitle = SVNUIMessages.PropertyKeywordEditPanel_Title;
 		this.dialogDescription = SVNUIMessages.PropertyKeywordEditPanel_Description;
-		this.defaultMessage = this.alreadyWithProperties.length > 1? SVNUIMessages.PropertyKeywordEditPanel_Message_Single : SVNUIMessages.PropertyKeywordEditPanel_Message_Multi;
-		
+		this.defaultMessage = this.alreadyWithProperties.length > 1
+				? SVNUIMessages.PropertyKeywordEditPanel_Message_Single
+				: SVNUIMessages.PropertyKeywordEditPanel_Message_Multi;
+
 		this.initializeKeywordElements();
 	}
-	
+
 	public void createControlsImpl(Composite parent) {
 		Composite composite = new Composite(parent, SWT.NULL);
 		GridLayout layout = new GridLayout();
 		layout.marginHeight = layout.marginWidth = 0;
 		composite.setLayout(layout);
 		composite.setLayoutData(new GridData(GridData.FILL_BOTH));
-		   
+
 		this.checkboxViewer = CheckboxTableViewer.newCheckList(composite, SWT.BORDER | SWT.FULL_SELECTION);
 		GridData data = new GridData(GridData.FILL_BOTH);
 		this.checkboxViewer.getTable().setLayoutData(data);
-		   
+
 		TableLayout tlayout = new TableLayout();
 		this.checkboxViewer.getTable().setLayout(tlayout);
-		   
+
 		TableColumn column = new TableColumn(this.checkboxViewer.getTable(), SWT.LEFT);
 		column.setText(SVNUIMessages.PropertyKeywordEditPanel_Keyword);
 		tlayout.addColumnData(new ColumnWeightData(20, true));
-	       
+
 		column = new TableColumn(this.checkboxViewer.getTable(), SWT.LEFT);
 		column.setText(SVNUIMessages.PropertyKeywordEditPanel_Description1);
 		tlayout.addColumnData(new ColumnWeightData(50, true));
-		
+
 		column = new TableColumn(this.checkboxViewer.getTable(), SWT.LEFT);
 		column.setText(SVNUIMessages.PropertyKeywordEditPanel_Sample);
 		tlayout.addColumnData(new ColumnWeightData(30, true));
-		
-		KeywordTableElement[] elements = new KeywordTableElement[] {this.dateElement, this.revisionElement, this.lastChangedByElement, this.headUrlElement, this.idElement, this.headerElement};
-		
+
+		KeywordTableElement[] elements = new KeywordTableElement[] { this.dateElement, this.revisionElement,
+				this.lastChangedByElement, this.headUrlElement, this.idElement, this.headerElement };
+
 		this.checkboxViewer.setContentProvider(new ArrayStructuredContentProvider());
-		
+
 		this.checkboxViewer.addCheckStateListener(new ICheckStateListener() {
-			public void checkStateChanged(CheckStateChangedEvent event){
-				KeywordTableElement element = (KeywordTableElement)event.getElement();
-	    		   
+			public void checkStateChanged(CheckStateChangedEvent event) {
+				KeywordTableElement element = (KeywordTableElement) event.getElement();
+
 				if (element.getCurrentState() == KeywordTableElement.DESELECTED) {
 					element.setCurrentState(KeywordTableElement.SELECTED);
-				}
-				else if ((element.getCurrentState() == KeywordTableElement.SELECTED) &&
-						(element.getInitialState() == KeywordTableElement.MIXED)) {
+				} else if ((element.getCurrentState() == KeywordTableElement.SELECTED)
+						&& (element.getInitialState() == KeywordTableElement.MIXED)) {
 					element.setCurrentState(KeywordTableElement.MIXED);
-				}
-				else {
+				} else {
 					element.setCurrentState(KeywordTableElement.DESELECTED);
 				}
 				PropertyKeywordEditPanel.this.refreshCheckboxState(element);
 			}
 		});
-	       
+
 		this.checkboxViewer.setLabelProvider(new ITableLabelProvider() {
 			public Image getColumnImage(Object element, int columnIndex) {
 				return null;
 			}
+
 			public String getColumnText(Object element, int columnIndex) {
-				KeywordTableElement keyElement = (KeywordTableElement)element;
+				KeywordTableElement keyElement = (KeywordTableElement) element;
 				switch (columnIndex) {
 					case 0: {
 						return keyElement.getName();
@@ -182,39 +204,42 @@ public class PropertyKeywordEditPanel extends AbstractDialogPanel {
 					}
 				}
 			}
-			
+
 			public void addListener(ILabelProviderListener listener) {
 			}
+
 			public void dispose() {
 			}
+
 			public boolean isLabelProperty(Object element, String property) {
 				return false;
 			}
-			public void removeListener(ILabelProviderListener listener) {           
+
+			public void removeListener(ILabelProviderListener listener) {
 			}
 		});
-		
+
 		this.checkboxViewer.setInput(elements);
 		this.checkboxViewer.getTable().setHeaderVisible(true);
-		
+
 		this.addSelectionButtons(composite);
-		
+
 		if (this.recursionEnabled || this.selectedResources.length > 1) {
 			Label separator = new Label(composite, SWT.HORIZONTAL | SWT.SEPARATOR);
 			separator.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-			
+
 			separator = new Label(composite, SWT.HORIZONTAL | SWT.SEPARATOR);
 			separator.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 			separator.setVisible(false);
-			
-			Composite subComposite = new Composite (composite, SWT.NONE);
+
+			Composite subComposite = new Composite(composite, SWT.NONE);
 			layout = new GridLayout();
 			layout.marginHeight = layout.marginWidth = 0;
 			layout.numColumns = 2;
 			subComposite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 			subComposite.setLayout(layout);
-			
-			Composite maskComposite = new Composite (subComposite, SWT.NONE);
+
+			Composite maskComposite = new Composite(subComposite, SWT.NONE);
 			layout = new GridLayout();
 			layout.marginHeight = layout.marginWidth = 0;
 			layout.numColumns = 2;
@@ -227,8 +252,7 @@ public class PropertyKeywordEditPanel extends AbstractDialogPanel {
 			this.maskText.setItems(this.maskHistory.getHistory());
 			if (this.maskText.getItemCount() == 0) {
 				this.maskText.setText("*"); //$NON-NLS-1$
-			}
-			else {
+			} else {
 				this.maskText.select(0);
 			}
 			Listener maskTextListener = new Listener() {
@@ -239,65 +263,71 @@ public class PropertyKeywordEditPanel extends AbstractDialogPanel {
 			};
 			this.maskText.addListener(SWT.Selection, maskTextListener);
 			this.maskText.addListener(SWT.Modify, maskTextListener);
-			
-			this.attachTo(this.maskText,
-					new AbstractVerifierProxy(new NonEmptyFieldVerifier(SVNUIMessages.PropertyKeywordEditPanel_Mask_Verifier)) {
-						protected boolean isVerificationEnabled(Control input) {
-							return PropertyKeywordEditPanel.this.useMaskCheckbox.getSelection();
-						}
+
+			this.attachTo(this.maskText, new AbstractVerifierProxy(
+					new NonEmptyFieldVerifier(SVNUIMessages.PropertyKeywordEditPanel_Mask_Verifier)) {
+				protected boolean isVerificationEnabled(Control input) {
+					return PropertyKeywordEditPanel.this.useMaskCheckbox.getSelection();
+				}
 			});
 			data = new GridData();
 			data.widthHint = 170;
 			this.maskText.setLayoutData(data);
-			
+
 			this.maskText.setEnabled(false);
-			
+
 			this.useMaskCheckbox.addSelectionListener(new SelectionListener() {
 				public void widgetSelected(SelectionEvent e) {
-					PropertyKeywordEditPanel.this.maskText.setEnabled(PropertyKeywordEditPanel.this.useMaskCheckbox.getSelection());
+					PropertyKeywordEditPanel.this.maskText
+							.setEnabled(PropertyKeywordEditPanel.this.useMaskCheckbox.getSelection());
 					PropertyKeywordEditPanel.this.checkboxViewer.setAllGrayed(false);
 					PropertyKeywordEditPanel.this.changeMixedElementsToChecked();
 					PropertyKeywordEditPanel.this.validateContent();
 				}
+
 				public void widgetDefaultSelected(SelectionEvent e) {
 				}
 			});
-			
+
 			if (this.recursionEnabled) {
 				this.setRecursivelyCheckbox = new Button(subComposite, SWT.CHECK);
 				this.setRecursivelyCheckbox.setText(SVNUIMessages.PropertyKeywordEditPanel_Recursively);
-				this.setRecursivelyCheckbox.setLayoutData(new GridData(GridData.FILL_HORIZONTAL | GridData.HORIZONTAL_ALIGN_END));
+				this.setRecursivelyCheckbox
+						.setLayoutData(new GridData(GridData.FILL_HORIZONTAL | GridData.HORIZONTAL_ALIGN_END));
 				this.setRecursivelyCheckbox.setSelection(true);
 				this.setRecursivelyCheckbox.addSelectionListener(new SelectionListener() {
 					public void widgetSelected(SelectionEvent e) {
 						PropertyKeywordEditPanel.this.checkboxViewer.setAllGrayed(false);
 						PropertyKeywordEditPanel.this.changeMixedElementsToChecked();
 					}
+
 					public void widgetDefaultSelected(SelectionEvent e) {
 					}
 				});
 			}
 		}
-	       
-		for (int i = 0; i < elements.length;i++) {
+
+		for (int i = 0; i < elements.length; i++) {
 			this.refreshCheckboxState(elements[i]);
 		}
 	}
-	
+
 	public String getHelpId() {
-    	return "org.eclipse.team.svn.help.setKeysDialogContext"; //$NON-NLS-1$
-    }
-	
+		return "org.eclipse.team.svn.help.setKeysDialogContext"; //$NON-NLS-1$
+	}
+
 	public void performKeywordChanges() {
 		//if filtration by mask is enabled - remove all non-matching resources from the operable map
 		IStateFilter filter = IStateFilter.SF_EXCLUDE_PREREPLACED_AND_DELETED_FILES;
 		if (this.useMask) {
 			filter = new IStateFilter.AbstractStateFilter() {
 				private StringMatcher fileNameMatcher = new StringMatcher(PropertyKeywordEditPanel.this.mask);
-				
-				protected boolean allowsRecursionImpl(ILocalResource local, IResource resource, String state, int mask) {
+
+				protected boolean allowsRecursionImpl(ILocalResource local, IResource resource, String state,
+						int mask) {
 					return IStateFilter.SF_EXCLUDE_PREREPLACED_AND_DELETED.allowsRecursion(resource, state, mask);
 				}
+
 				protected boolean acceptImpl(ILocalResource local, IResource resource, String state, int mask) {
 					if (!IStateFilter.SF_EXCLUDE_PREREPLACED_AND_DELETED_FILES.accept(resource, state, mask)) {
 						return false;
@@ -306,16 +336,18 @@ public class PropertyKeywordEditPanel extends AbstractDialogPanel {
 				}
 			};
 		}
-		
+
 		IResourceProvider resourceProvider = new IResourceProvider() {
-			public IResource []getResources() {
+			public IResource[] getResources() {
 				return PropertyKeywordEditPanel.this.selectedResources;
 			}
 		};
-		
+
 		IPropertyProvider propertyProvider = new IPropertyProvider() {
-			public SVNProperty []getProperties(IResource resource) {
-				SVNProperty []retVal = PropertyKeywordEditPanel.this.properties == null ? null : PropertyKeywordEditPanel.this.properties.getProperties(resource);
+			public SVNProperty[] getProperties(IResource resource) {
+				SVNProperty[] retVal = PropertyKeywordEditPanel.this.properties == null
+						? null
+						: PropertyKeywordEditPanel.this.properties.getProperties(resource);
 				if (retVal == null) {
 					retVal = new SVNProperty[1];
 				}
@@ -325,80 +357,111 @@ public class PropertyKeywordEditPanel extends AbstractDialogPanel {
 				return retVal;
 			}
 		};
-		   
+
 		CompositeOperation composite = new CompositeOperation("Operation_SetKeywords", SVNUIMessages.class); //$NON-NLS-1$
-		composite.add(new SetMultiPropertiesOperation(resourceProvider, propertyProvider, filter, this.recursionEnabled && this.setRecursively ? IResource.DEPTH_INFINITE : IResource.DEPTH_ONE));
+		composite.add(new SetMultiPropertiesOperation(resourceProvider, propertyProvider, filter,
+				this.recursionEnabled && this.setRecursively ? IResource.DEPTH_INFINITE : IResource.DEPTH_ONE));
 		composite.add(new RefreshResourcesOperation(resourceProvider));
 		UIMonitorUtility.doTaskScheduledActive(composite);
 	}
-	
+
 	protected void configureProperty(SVNKeywordProperty keyProperty) {
-		keyProperty.setDateEnabled(this.dateElement.getCurrentState() == KeywordTableElement.SELECTED ? true : 
-			(this.dateElement.getCurrentState() == KeywordTableElement.DESELECTED ? false : keyProperty.isDateEnabled()));
-		
-		keyProperty.setRevisionEnabled(this.revisionElement.getCurrentState() == KeywordTableElement.SELECTED ? true :
-			(this.revisionElement.getCurrentState() == KeywordTableElement.DESELECTED ? false : keyProperty.isLastChangedByEnabled()));
-           
-		keyProperty.setLastChangedByEnabled(this.lastChangedByElement.getCurrentState() == KeywordTableElement.SELECTED ? true :
-			(this.lastChangedByElement.getCurrentState() == KeywordTableElement.DESELECTED ? false : keyProperty.isLastChangedByEnabled()));
-		
-		keyProperty.setHeadUrlEnabled(this.headUrlElement.getCurrentState() == KeywordTableElement.SELECTED ? true :
-			(this.headUrlElement.getCurrentState() == KeywordTableElement.DESELECTED ? false : keyProperty.isHeadUrlEnabled()));
-           
-		keyProperty.setIdEnabled(this.idElement.getCurrentState() == KeywordTableElement.SELECTED ? true :
-			(this.idElement.getCurrentState() == KeywordTableElement.DESELECTED ? false : keyProperty.isIdEnabled()));
-        
-		keyProperty.setHeaderEnabled(this.headerElement.getCurrentState() == KeywordTableElement.SELECTED ? true :
-			(this.headerElement.getCurrentState() == KeywordTableElement.DESELECTED ? false : keyProperty.isHeaderEnabled()));
+		keyProperty.setDateEnabled(this.dateElement.getCurrentState() == KeywordTableElement.SELECTED
+				? true
+				: (this.dateElement.getCurrentState() == KeywordTableElement.DESELECTED
+						? false
+						: keyProperty.isDateEnabled()));
+
+		keyProperty.setRevisionEnabled(this.revisionElement.getCurrentState() == KeywordTableElement.SELECTED
+				? true
+				: (this.revisionElement.getCurrentState() == KeywordTableElement.DESELECTED
+						? false
+						: keyProperty.isLastChangedByEnabled()));
+
+		keyProperty.setLastChangedByEnabled(this.lastChangedByElement.getCurrentState() == KeywordTableElement.SELECTED
+				? true
+				: (this.lastChangedByElement.getCurrentState() == KeywordTableElement.DESELECTED
+						? false
+						: keyProperty.isLastChangedByEnabled()));
+
+		keyProperty.setHeadUrlEnabled(this.headUrlElement.getCurrentState() == KeywordTableElement.SELECTED
+				? true
+				: (this.headUrlElement.getCurrentState() == KeywordTableElement.DESELECTED
+						? false
+						: keyProperty.isHeadUrlEnabled()));
+
+		keyProperty.setIdEnabled(this.idElement.getCurrentState() == KeywordTableElement.SELECTED
+				? true
+				: (this.idElement.getCurrentState() == KeywordTableElement.DESELECTED
+						? false
+						: keyProperty.isIdEnabled()));
+
+		keyProperty.setHeaderEnabled(this.headerElement.getCurrentState() == KeywordTableElement.SELECTED
+				? true
+				: (this.headerElement.getCurrentState() == KeywordTableElement.DESELECTED
+						? false
+						: keyProperty.isHeaderEnabled()));
 	}
-	
+
 	protected void applyCurrentKeywordValuesOnTableElement(KeywordTableElement tableElement, boolean propertyPresent) {
-		tableElement.setInitialState(tableElement.getInitialState() == KeywordTableElement.INITIAL ? (propertyPresent ? KeywordTableElement.SELECTED : KeywordTableElement.DESELECTED) :
-			(((propertyPresent && tableElement.getInitialState() == KeywordTableElement.DESELECTED) || (!propertyPresent && tableElement.getInitialState() == KeywordTableElement.SELECTED)) ? KeywordTableElement.MIXED : tableElement.getInitialState()));
+		tableElement.setInitialState(tableElement.getInitialState() == KeywordTableElement.INITIAL
+				? (propertyPresent ? KeywordTableElement.SELECTED : KeywordTableElement.DESELECTED)
+				: (((propertyPresent && tableElement.getInitialState() == KeywordTableElement.DESELECTED)
+						|| (!propertyPresent && tableElement.getInitialState() == KeywordTableElement.SELECTED))
+								? KeywordTableElement.MIXED
+								: tableElement.getInitialState()));
 
 		tableElement.setCurrentState(tableElement.getInitialState());
 	}
-	
+
 	protected void initializeKeywordElements() {
-		this.dateElement = new KeywordTableElement(SVNKeywordProperty.DATE_NAMES[0], SVNKeywordProperty.DATE_DESCR(), SVNKeywordProperty.DATE_SAMPLE, KeywordTableElement.INITIAL);
-		this.revisionElement = new KeywordTableElement(SVNKeywordProperty.REVISION_NAMES[0], SVNKeywordProperty.REVISION_DESCR(), SVNKeywordProperty.REVISION_SAMPLE, KeywordTableElement.INITIAL);
-		this.lastChangedByElement = new KeywordTableElement(SVNKeywordProperty.AUTHOR_NAMES[0], SVNKeywordProperty.AUTHOR_DESCR(), SVNKeywordProperty.AUTHOR_SAMPLE, KeywordTableElement.INITIAL);
-		this.headUrlElement = new KeywordTableElement(SVNKeywordProperty.HEAD_URL_NAMES[0], SVNKeywordProperty.HEAD_URL_DESCR(), SVNKeywordProperty.HEAD_URL_SAMPLE, KeywordTableElement.INITIAL);
-		this.idElement = new KeywordTableElement(SVNKeywordProperty.ID_NAMES[0], SVNKeywordProperty.ID_DESCR(), SVNKeywordProperty.ID_SAMPLE, KeywordTableElement.INITIAL);
-		this.headerElement = new KeywordTableElement(SVNKeywordProperty.HEADER_NAMES[0], SVNKeywordProperty.HEADER_DESCR(), SVNKeywordProperty.HEADER_SAMPLE, KeywordTableElement.INITIAL);
+		this.dateElement = new KeywordTableElement(SVNKeywordProperty.DATE_NAMES[0], SVNKeywordProperty.DATE_DESCR(),
+				SVNKeywordProperty.DATE_SAMPLE, KeywordTableElement.INITIAL);
+		this.revisionElement = new KeywordTableElement(SVNKeywordProperty.REVISION_NAMES[0],
+				SVNKeywordProperty.REVISION_DESCR(), SVNKeywordProperty.REVISION_SAMPLE, KeywordTableElement.INITIAL);
+		this.lastChangedByElement = new KeywordTableElement(SVNKeywordProperty.AUTHOR_NAMES[0],
+				SVNKeywordProperty.AUTHOR_DESCR(), SVNKeywordProperty.AUTHOR_SAMPLE, KeywordTableElement.INITIAL);
+		this.headUrlElement = new KeywordTableElement(SVNKeywordProperty.HEAD_URL_NAMES[0],
+				SVNKeywordProperty.HEAD_URL_DESCR(), SVNKeywordProperty.HEAD_URL_SAMPLE, KeywordTableElement.INITIAL);
+		this.idElement = new KeywordTableElement(SVNKeywordProperty.ID_NAMES[0], SVNKeywordProperty.ID_DESCR(),
+				SVNKeywordProperty.ID_SAMPLE, KeywordTableElement.INITIAL);
+		this.headerElement = new KeywordTableElement(SVNKeywordProperty.HEADER_NAMES[0],
+				SVNKeywordProperty.HEADER_DESCR(), SVNKeywordProperty.HEADER_SAMPLE, KeywordTableElement.INITIAL);
 
 		List<IResource> alreadyWithPropertiesList = Arrays.asList(this.alreadyWithProperties);
 		for (int i = 0; i < this.selectedResources.length; i++) {
 			SVNProperty[] data;
 			SVNKeywordProperty keywordPropertyValue = new SVNKeywordProperty(null);
-			if (alreadyWithPropertiesList.contains(this.selectedResources[i]) &&
-				this.properties != null &&
-				(data = this.properties.getProperties(this.selectedResources[i])) != null) {
+			if (alreadyWithPropertiesList.contains(this.selectedResources[i]) && this.properties != null
+					&& (data = this.properties.getProperties(this.selectedResources[i])) != null) {
 				keywordPropertyValue = new SVNKeywordProperty(data[0].value);
 			}
-	    	this.applyCurrentKeywordValuesOnTableElement(this.dateElement, keywordPropertyValue.isDateEnabled());
-	    	this.applyCurrentKeywordValuesOnTableElement(this.revisionElement, keywordPropertyValue.isRevisionEnabled());            
-	    	this.applyCurrentKeywordValuesOnTableElement(this.lastChangedByElement, keywordPropertyValue.isLastChangedByEnabled());
-	    	this.applyCurrentKeywordValuesOnTableElement(this.headUrlElement, keywordPropertyValue.isHeadUrlEnabled());
-	    	this.applyCurrentKeywordValuesOnTableElement(this.idElement, keywordPropertyValue.isIdEnabled());          
-	    	this.applyCurrentKeywordValuesOnTableElement(this.headerElement, keywordPropertyValue.isHeaderEnabled());          
+			this.applyCurrentKeywordValuesOnTableElement(this.dateElement, keywordPropertyValue.isDateEnabled());
+			this.applyCurrentKeywordValuesOnTableElement(this.revisionElement,
+					keywordPropertyValue.isRevisionEnabled());
+			this.applyCurrentKeywordValuesOnTableElement(this.lastChangedByElement,
+					keywordPropertyValue.isLastChangedByEnabled());
+			this.applyCurrentKeywordValuesOnTableElement(this.headUrlElement, keywordPropertyValue.isHeadUrlEnabled());
+			this.applyCurrentKeywordValuesOnTableElement(this.idElement, keywordPropertyValue.isIdEnabled());
+			this.applyCurrentKeywordValuesOnTableElement(this.headerElement, keywordPropertyValue.isHeaderEnabled());
 		}
 	}
-	      
+
 	protected void refreshCheckboxState(KeywordTableElement element) {
-		this.checkboxViewer.setChecked(element, element.getCurrentState() == KeywordTableElement.MIXED || element.getCurrentState() == KeywordTableElement.SELECTED);
+		this.checkboxViewer.setChecked(element, element.getCurrentState() == KeywordTableElement.MIXED
+				|| element.getCurrentState() == KeywordTableElement.SELECTED);
 		this.checkboxViewer.setGrayed(element, element.getCurrentState() == KeywordTableElement.MIXED);
 	}
-	
+
 	protected void changeMixedElementsToChecked() {
-		Object []elements = this.checkboxViewer.getCheckedElements();
+		Object[] elements = this.checkboxViewer.getCheckedElements();
 		for (int i = 0; i < elements.length; i++) {
-			((KeywordTableElement)elements[i]).setCurrentState(KeywordTableElement.SELECTED);
+			((KeywordTableElement) elements[i]).setCurrentState(KeywordTableElement.SELECTED);
 		}
 	}
-	   
+
 	protected void addSelectionButtons(Composite composite) {
-		   
+
 		Composite tComposite = new Composite(composite, SWT.RIGHT);
 		GridLayout gLayout = new GridLayout();
 		gLayout.numColumns = 2;
@@ -407,7 +470,7 @@ public class PropertyKeywordEditPanel extends AbstractDialogPanel {
 		GridData data = new GridData(GridData.HORIZONTAL_ALIGN_END | GridData.GRAB_HORIZONTAL);
 		data.grabExcessHorizontalSpace = true;
 		tComposite.setData(data);
-		   
+
 		Button selectButton = new Button(tComposite, SWT.PUSH);
 		selectButton.setText(SVNUIMessages.Button_SelectAll);
 		data = new GridData();
@@ -419,7 +482,7 @@ public class PropertyKeywordEditPanel extends AbstractDialogPanel {
 			}
 		};
 		selectButton.addSelectionListener(listener);
-		
+
 		Button deselectButton = new Button(tComposite, SWT.PUSH);
 		deselectButton.setText(SVNUIMessages.Button_ClearSelection);
 		data = new GridData();
@@ -428,37 +491,37 @@ public class PropertyKeywordEditPanel extends AbstractDialogPanel {
 		listener = new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				PropertyKeywordEditPanel.this.refreshKeywordElements(false);
-			   }
-		   };
-		   deselectButton.addSelectionListener(listener);
-	   }
-	   
-	   protected void refreshKeywordElements(boolean selected) {
-		   int state = selected ? KeywordTableElement.SELECTED : KeywordTableElement.DESELECTED;
-		   this.dateElement.setCurrentState(state);
-		   this.revisionElement.setCurrentState(state);
-		   this.lastChangedByElement.setCurrentState(state);
-		   this.headUrlElement.setCurrentState(state);
-		   this.idElement.setCurrentState(state);
-		   this.headerElement.setCurrentState(state);
-           this.checkboxViewer.setAllChecked(selected);
-           this.checkboxViewer.setAllGrayed(false);
-	   }
-	   
-	   protected void cancelChangesImpl() {
-	   }
-	   
-	   protected void saveChangesImpl() {
-		   this.useMask = this.useMaskCheckbox == null ? false : this.useMaskCheckbox.getSelection();
-		   this.mask = this.maskText == null ? "*" : this.maskText.getText().trim(); //$NON-NLS-1$
-		   this.setRecursively = this.setRecursivelyCheckbox == null ? false : this.setRecursivelyCheckbox.getSelection();
-		   if (this.useMask) {
-			   this.maskHistory.addLine(this.maskText.getText());
-		   }
-	   }
-	   
-	   public Point getPrefferedSizeImpl() {
-		   return new Point(670, SWT.DEFAULT);
-	   }
-		
+			}
+		};
+		deselectButton.addSelectionListener(listener);
+	}
+
+	protected void refreshKeywordElements(boolean selected) {
+		int state = selected ? KeywordTableElement.SELECTED : KeywordTableElement.DESELECTED;
+		this.dateElement.setCurrentState(state);
+		this.revisionElement.setCurrentState(state);
+		this.lastChangedByElement.setCurrentState(state);
+		this.headUrlElement.setCurrentState(state);
+		this.idElement.setCurrentState(state);
+		this.headerElement.setCurrentState(state);
+		this.checkboxViewer.setAllChecked(selected);
+		this.checkboxViewer.setAllGrayed(false);
+	}
+
+	protected void cancelChangesImpl() {
+	}
+
+	protected void saveChangesImpl() {
+		this.useMask = this.useMaskCheckbox == null ? false : this.useMaskCheckbox.getSelection();
+		this.mask = this.maskText == null ? "*" : this.maskText.getText().trim(); //$NON-NLS-1$
+		this.setRecursively = this.setRecursivelyCheckbox == null ? false : this.setRecursivelyCheckbox.getSelection();
+		if (this.useMask) {
+			this.maskHistory.addLine(this.maskText.getText());
+		}
+	}
+
+	public Point getPrefferedSizeImpl() {
+		return new Point(670, SWT.DEFAULT);
+	}
+
 }

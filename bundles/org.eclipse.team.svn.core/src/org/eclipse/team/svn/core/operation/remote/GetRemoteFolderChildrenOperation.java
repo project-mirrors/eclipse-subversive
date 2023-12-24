@@ -51,16 +51,21 @@ import org.eclipse.team.svn.core.utility.SVNUtility;
  */
 public class GetRemoteFolderChildrenOperation extends AbstractActionOperation {
 	protected IRepositoryContainer parent;
+
 	protected boolean handleExternals;
-	protected IRepositoryResource []children;
-	protected String []extNames;
+
+	protected IRepositoryResource[] children;
+
+	protected String[] extNames;
+
 	protected boolean caseInsensitive;
 
 	public GetRemoteFolderChildrenOperation(IRepositoryContainer parent, boolean handleExternals) {
 		this(parent, handleExternals, false);
 	}
 
-	public GetRemoteFolderChildrenOperation(IRepositoryContainer parent, boolean handleExternals, boolean caseInsensitive) {
+	public GetRemoteFolderChildrenOperation(IRepositoryContainer parent, boolean handleExternals,
+			boolean caseInsensitive) {
 		super("Operation_GetRemoteChildren", SVNMessages.class); //$NON-NLS-1$
 		this.parent = parent;
 		this.handleExternals = handleExternals;
@@ -70,62 +75,69 @@ public class GetRemoteFolderChildrenOperation extends AbstractActionOperation {
 	public IRepositoryResource[] getChildren() {
 		return this.children;
 	}
-	
+
 	public String getExternalsName(int idx) {
 		return this.extNames[idx];
 	}
 
 	protected void runImpl(IProgressMonitor monitor) throws Exception {
-		IRepositoryResource []tmp = this.parent.getChildren();
-		List<Object []> tmpSortableData = new ArrayList<Object []>(tmp.length);
+		IRepositoryResource[] tmp = this.parent.getChildren();
+		List<Object[]> tmpSortableData = new ArrayList<Object[]>(tmp.length);
 		for (int i = 0; i < tmp.length; i++) {
-			tmpSortableData.add(new Object[] {null, tmp[i]});
+			tmpSortableData.add(new Object[] { null, tmp[i] });
 		}
-		
+
 		// handle svn:externals, if present:
 		Information info = this.parent.getInfo();
 		if (info != null && info.hasProperties && this.handleExternals) {
 			IRepositoryLocation location = this.parent.getRepositoryLocation();
 			ISVNConnector proxy = location.acquireSVNProxy();
 			try {
-				SVNProperty data = proxy.getProperty(SVNUtility.getEntryRevisionReference(this.parent), BuiltIn.EXTERNALS, null, new SVNProgressMonitor(this, monitor, null));
+				SVNProperty data = proxy.getProperty(SVNUtility.getEntryRevisionReference(this.parent),
+						BuiltIn.EXTERNALS, null, new SVNProgressMonitor(this, monitor, null));
 				if (data != null) {
 					//Map externals;
 					try {
-						Map<String, SVNEntryRevisionReference> externals = SVNUtility.parseSVNExternalsProperty(data.value, this.parent);
-						
-						for (Iterator<Map.Entry<String, SVNEntryRevisionReference>> it = externals.entrySet().iterator(); it.hasNext();) {
+						Map<String, SVNEntryRevisionReference> externals = SVNUtility
+								.parseSVNExternalsProperty(data.value, this.parent);
+
+						for (Iterator<Map.Entry<String, SVNEntryRevisionReference>> it = externals.entrySet()
+								.iterator(); it.hasNext();) {
 							try {
 								Map.Entry<String, SVNEntryRevisionReference> entry = it.next();
 								String name = entry.getKey();
 								SVNEntryRevisionReference ref = entry.getValue();
-								IRepositoryResource repositoryResourtce = SVNRemoteStorage.instance().asRepositoryResource(location, ref, new SVNProgressMonitor(this, monitor, null));															
+								IRepositoryResource repositoryResourtce = SVNRemoteStorage.instance()
+										.asRepositoryResource(location, ref,
+												new SVNProgressMonitor(this, monitor, null));
 								if (repositoryResourtce != null) {
 									repositoryResourtce.setSelectedRevision(ref.revision);
 									repositoryResourtce.setPegRevision(ref.pegRevision);
-									tmpSortableData.add(new Object[] {name, repositoryResourtce});
+									tmpSortableData.add(new Object[] { name, repositoryResourtce });
 								}
 							} catch (Exception e) {
-								this.reportStatus(new Status(IStatus.WARNING, SVNTeamPlugin.NATURE_ID, IStatus.OK, this.getShortErrorMessage(e), e));
+								this.reportStatus(new Status(IStatus.WARNING, SVNTeamPlugin.NATURE_ID, IStatus.OK,
+										this.getShortErrorMessage(e), e));
 							}
 						}
-					}
-					catch (UnreportableException ex) {
-						this.reportStatus(new Status(IStatus.WARNING, SVNTeamPlugin.NATURE_ID, IStatus.OK, this.getShortErrorMessage(ex), ex));
+					} catch (UnreportableException ex) {
+						this.reportStatus(new Status(IStatus.WARNING, SVNTeamPlugin.NATURE_ID, IStatus.OK,
+								this.getShortErrorMessage(ex), ex));
 					}
 				}
 			} finally {
 				location.releaseSVNProxy(proxy);
 			}
 		}
-		Object [][]sortableData = tmpSortableData.toArray(new Object[tmpSortableData.size()][]);
+		Object[][] sortableData = tmpSortableData.toArray(new Object[tmpSortableData.size()][]);
 
-		Arrays.sort(sortableData, new Comparator<Object []>() {
+		Arrays.sort(sortableData, new Comparator<Object[]>() {
 			private NaturalComparator comparator = new NaturalComparator();
-			
-			public int compare(Object []firstArray, Object []secondArray) {
-				IRepositoryResource first = (IRepositoryResource)firstArray[1], second = (IRepositoryResource)secondArray[1];
-				String firstExtName = (String)firstArray[0], secondExtName = (String)secondArray[0];
+
+			public int compare(Object[] firstArray, Object[] secondArray) {
+				IRepositoryResource first = (IRepositoryResource) firstArray[1],
+						second = (IRepositoryResource) secondArray[1];
+				String firstExtName = (String) firstArray[0], secondExtName = (String) secondArray[0];
 				boolean firstContainer = first instanceof IRepositoryContainer;
 				boolean secondContainer = second instanceof IRepositoryContainer;
 				if (firstContainer && secondContainer) {
@@ -134,32 +146,39 @@ public class GetRemoteFolderChildrenOperation extends AbstractActionOperation {
 					//Externals should not be considered as IRepositoryRoot (see Bug 350143) and be sorted by name
 					boolean firstRoot = !firstExternal && first instanceof IRepositoryRoot;
 					boolean secondRoot = !secondExternal && second instanceof IRepositoryRoot;
-					return firstRoot == secondRoot ? (firstRoot ? this.compareRoots(((IRepositoryRoot)first).getKind(), ((IRepositoryRoot)second).getKind()) : this.compareNames(first, firstExtName, second, secondExtName)) : (firstRoot ? -1 : 1);
+					return firstRoot == secondRoot
+							? (firstRoot
+									? this.compareRoots(((IRepositoryRoot) first).getKind(),
+											((IRepositoryRoot) second).getKind())
+									: this.compareNames(first, firstExtName, second, secondExtName))
+							: (firstRoot ? -1 : 1);
 				}
-				return firstContainer == secondContainer ? this.compareNames(first, firstExtName, second, secondExtName) : (firstContainer ? -1 : 1);
+				return firstContainer == secondContainer
+						? this.compareNames(first, firstExtName, second, secondExtName)
+						: (firstContainer ? -1 : 1);
 			}
-			
-			private int compareNames(IRepositoryResource first, String firstExtName, IRepositoryResource second, String secondExtName) {
+
+			private int compareNames(IRepositoryResource first, String firstExtName, IRepositoryResource second,
+					String secondExtName) {
 				String firstName = firstExtName != null ? firstExtName : first.getName();
 				String secondName = secondExtName != null ? secondExtName : second.getName();
 				return this.comparator.compare(firstName, secondName);
 			}
-			
+
 			private int compareRoots(int firstKind, int secondKind) {
 				return firstKind < secondKind ? -1 : 1;
 			}
 		});
-		
+
 		this.children = new IRepositoryResource[sortableData.length];
 		this.extNames = new String[sortableData.length];
 		for (int i = 0; i < sortableData.length; i++) {
-			this.children[i] = (IRepositoryResource)sortableData[i][1];
-			this.extNames[i] = (String)sortableData[i][0];
+			this.children[i] = (IRepositoryResource) sortableData[i][1];
+			this.extNames[i] = (String) sortableData[i][0];
 		}
 	}
-	
-	private int compareStrings(String firstName, String secondName)
-	{
+
+	private int compareStrings(String firstName, String secondName) {
 		return this.caseInsensitive ? firstName.compareToIgnoreCase(secondName) : firstName.compareTo(secondName);
 	}
 
@@ -176,7 +195,7 @@ public class GetRemoteFolderChildrenOperation extends AbstractActionOperation {
 			if (o2.length() == 0) {
 				return 1;
 			}
-			
+
 			// from now we consider a 'part' a sequence of digits or non-digits 
 
 			// extract first part of o1
@@ -206,11 +225,9 @@ public class GetRemoteFolderChildrenOperation extends AbstractActionOperation {
 			if (o1IsDigit && o2IsDigit) {
 				if (o1Part.charAt(0) == '0' && o2Part.charAt(0) != '0') {
 					result = -1;
-				}
-				else if (o2Part.charAt(0) == '0' && o1Part.charAt(0) != '0') {
+				} else if (o2Part.charAt(0) == '0' && o1Part.charAt(0) != '0') {
 					result = 1;
-				}
-				else {
+				} else {
 					// if both parts are number, then numeric test
 					try {
 						int n1 = Integer.parseInt(o1Part);
@@ -221,16 +238,14 @@ public class GetRemoteFolderChildrenOperation extends AbstractActionOperation {
 							// leading zeros are relevant: more zeros first
 							result = o1Part.length() < o2Part.length() ? 1 : -1;
 						}
-					} 
-					catch (NumberFormatException nbe) {
+					} catch (NumberFormatException nbe) {
 						// should not enter here as we test for numeric parts
 					}
 				}
-			}
-			else {
+			} else {
 				result = GetRemoteFolderChildrenOperation.this.compareStrings(o1Part, o2Part);
 			}
-			
+
 			// if parts aren't equal return, otherwise continue test for the rest of the string
 			return result != 0 ? result : this.compare(o1.substring(o1i), o2.substring(o2i));
 		}

@@ -31,20 +31,20 @@ public class EditTreeConflictsActionHelper extends AbstractActionHelper {
 
 	public EditTreeConflictsActionHelper(IAction action, ISynchronizePageConfiguration configuration) {
 		super(action, configuration);
-	}	
+	}
 
 	public IActionOperation getOperation() {
 		AbstractSVNSyncInfo syncInfo = this.getSelectedSVNSyncInfo();
-	    if (syncInfo != null) {
-			ILocalResource local = syncInfo.getLocalResource();	
+		if (syncInfo != null) {
+			ILocalResource local = syncInfo.getLocalResource();
 			if (local.hasTreeConflict()) {
 				EditTreeConflictsPanel editConflictsPanel = new EditTreeConflictsPanel(local);
 				DefaultDialog dialog = new DefaultDialog(this.configuration.getSite().getShell(), editConflictsPanel);
 				if (dialog.open() == 0) {
-					return editConflictsPanel.getOperation();			
-				}		
+					return editConflictsPanel.getOperation();
+				}
 			}
-	    }
+		}
 		return null;
 	}
 }

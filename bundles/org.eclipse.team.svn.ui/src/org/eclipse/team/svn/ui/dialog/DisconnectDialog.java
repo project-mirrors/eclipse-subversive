@@ -34,21 +34,18 @@ import org.eclipse.team.svn.ui.SVNUIMessages;
  * @author Alexander Gurov
  */
 public class DisconnectDialog extends MessageDialog {
-	
+
 	protected boolean dropSVNFolders;
 
 	public DisconnectDialog(Shell parentShell, IProject[] projects) {
-		super(parentShell, 
-			SVNUIMessages.DisconnectDialog_Title, 
-			null, 
-			SVNUIMessages.format(SVNUIMessages.DisconnectDialog_Message, new String[] {FileUtility.getNamesListAsString(projects)}),
-			MessageDialog.QUESTION, 
-			new String[] {IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL}, 
-			0);
-		
+		super(parentShell, SVNUIMessages.DisconnectDialog_Title, null,
+				SVNUIMessages.format(SVNUIMessages.DisconnectDialog_Message,
+						new String[] { FileUtility.getNamesListAsString(projects) }),
+				MessageDialog.QUESTION, new String[] { IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL }, 0);
+
 		this.dropSVNFolders = false;
 	}
-	
+
 	protected Control createCustomArea(Composite parent) {
 		Composite composite = new Composite(parent, SWT.NONE);
 		composite.setLayout(new GridLayout());
@@ -60,24 +57,24 @@ public class DisconnectDialog extends MessageDialog {
 				DisconnectDialog.this.dropSVNFolders = button.getSelection();
 			}
 		});
-		
-		dropSVNFoldersButton.setText(SVNUIMessages.DisconnectDialog_Option_dropSVNMeta); 
+
+		dropSVNFoldersButton.setText(SVNUIMessages.DisconnectDialog_Option_dropSVNMeta);
 
 		Button leaveSVNFoldersButton = new Button(composite, SWT.RADIO);
 
-		leaveSVNFoldersButton.setText(SVNUIMessages.DisconnectDialog_Option_leaveSVNMeta); 
-		
+		leaveSVNFoldersButton.setText(SVNUIMessages.DisconnectDialog_Option_leaveSVNMeta);
+
 		// set initial state
 		dropSVNFoldersButton.setSelection(false);
 		leaveSVNFoldersButton.setSelection(true);
-		
+
 //		WorkbenchHelp.setHelp(composite, IHelpContextIds.DISCONNECT_ACTION);
-		
+
 		return composite;
 	}
 
 	public boolean dropSVNFolders() {
 		return this.dropSVNFolders;
 	}
-	
+
 }

@@ -30,17 +30,17 @@ public abstract class AbstractNonRecursiveTeamAction extends AbstractLocalTeamAc
 	public AbstractNonRecursiveTeamAction() {
 		super();
 	}
-	
+
 	protected IOperationWrapperFactory getOperationWrapperFactory() {
 		return new WorkspaceModifyOperationWrapperFactory();
 	}
 
-	public IResource []getSelectedResources() {
+	public IResource[] getSelectedResources() {
 		return super.getSelectedResources();
 	}
-	
-	public IResource []getSelectedResources(IStateFilter filter) {
+
+	public IResource[] getSelectedResources(IStateFilter filter) {
 		return FileUtility.getResourcesRecursive(this.getSelectedResources(), filter, IResource.DEPTH_ZERO);
 	}
-	
+
 }

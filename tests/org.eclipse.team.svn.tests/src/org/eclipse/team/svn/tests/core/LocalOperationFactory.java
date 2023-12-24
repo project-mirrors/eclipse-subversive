@@ -90,7 +90,9 @@ public class LocalOperationFactory {
 			// NIC quick fix for problematic 'bin' folder -> probably a real bug that needs
 			// to be addressed somewhere else ('bin' is added without any action)!?
 			IResource[] filteredRessources = Arrays.stream(scheduledForCommit)
-					.filter(r -> !r.getFullPath().toFile().getAbsolutePath()
+					.filter(r -> !r.getFullPath()
+							.toFile()
+							.getAbsolutePath()
 							.equals(TestUtil.getFirstProject().getFullPath().toFile().getAbsolutePath() + "/bin"))
 					.toArray(IResource[]::new);
 			return new CommitOperation(filteredRessources, "test commit", true, false);
@@ -205,9 +207,11 @@ public class LocalOperationFactory {
 	public Supplier<IActionOperation> createSwitchOperation() {
 		return () -> {
 			IResource project = TestUtil.getFirstProject();
-			IRepositoryResource switchDestination = TestUtil.getRepositoryLocation().asRepositoryContainer(
-					SVNUtility.getProposedBranchesLocation(TestUtil.getRepositoryLocation()) + "/" + project.getName(),
-					false);
+			IRepositoryResource switchDestination = TestUtil.getRepositoryLocation()
+					.asRepositoryContainer(
+							SVNUtility.getProposedBranchesLocation(TestUtil.getRepositoryLocation()) + "/"
+									+ project.getName(),
+							false);
 			return new SwitchOperation(new IResource[] { project }, new IRepositoryResource[] { switchDestination },
 					SVNDepth.INFINITY, false, true);
 		};

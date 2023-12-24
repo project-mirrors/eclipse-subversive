@@ -33,19 +33,27 @@ import org.eclipse.core.runtime.Platform;
  */
 public class SVNTask extends Task {
 	public static final String CMD_EXPORT = "export";
+
 	public static final String CMD_CAT = "cat";
-	
+
 	protected String command;
+
 	protected String url;
+
 	protected String pegRev;
+
 	protected String rev;
+
 	protected String dest;
+
 	protected String username;
+
 	protected String password;
+
 	protected boolean force;
-	
+
 	protected String SPACE_WRAP_CHAR = Platform.OS_WIN32.equals(Platform.getOS()) ? "\"" : "'";
-	
+
 	public void execute() throws BuildException {
 		String cmdLine = null;
 		FileOutputStream oStream = null;
@@ -60,28 +68,26 @@ public class SVNTask extends Task {
 			}
 			cmdLine += this.getCreadentialsPart();
 			cmdLine += " --non-interactive";
-			
+
 			File folder = new File(this.dest).getParentFile();
 			folder.mkdirs();
-			
+
 			try {
 				oStream = new FileOutputStream(this.dest);
-			}
-			catch (FileNotFoundException e) {
+			} catch (FileNotFoundException e) {
 				throw new BuildException(e);
 			}
-		}
-		else if (SVNTask.CMD_EXPORT.equals(this.command)) {
+		} else if (SVNTask.CMD_EXPORT.equals(this.command)) {
 			cmdLine = "svn export ";
-					    
+
 			if (this.force) {
 				cmdLine += " --force ";
 			}
-			
+
 			if (this.rev != null) {
 				cmdLine += " -r " + this.rev;
 			}
-			
+
 			cmdLine += " " + this.SPACE_WRAP_CHAR + this.url;
 			if (this.pegRev != null) {
 				cmdLine += "@" + this.pegRev;
@@ -91,20 +97,21 @@ public class SVNTask extends Task {
 			cmdLine += this.getCreadentialsPart();
 			cmdLine += " -q --non-interactive";
 		}
-		
+
 		if (cmdLine != null) {
 			try {
 				Execute exe = new Execute(new PumpStreamHandler(oStream == null ? System.out : oStream, System.err));
 				exe.setAntRun(this.getProject());
 				exe.setCommandline(new Commandline(cmdLine).getCommandline());
 				exe.execute();
-			}
-			catch (IOException e) {
+			} catch (IOException e) {
 				throw new BuildException(e);
-			}
-			finally {
+			} finally {
 				if (oStream != null) {
-					try {oStream.close();} catch (IOException ex) {}
+					try {
+						oStream.close();
+					} catch (IOException ex) {
+					}
 				}
 			}
 		}
@@ -125,7 +132,7 @@ public class SVNTask extends Task {
 	public boolean getForce() {
 		return this.force;
 	}
-	
+
 	public String getUrl() {
 		return this.url;
 	}
@@ -184,5 +191,5 @@ public class SVNTask extends Task {
 		}
 		return cmdLine;
 	}
-	
+
 }

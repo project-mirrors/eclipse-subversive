@@ -32,7 +32,7 @@ import org.eclipse.ui.IWorkbenchPage;
  */
 public class RemoteShowAnnotationOperation extends AbstractRepositoryOperation {
 	public RemoteShowAnnotationOperation(IRepositoryResource resource) {
-		super("Operation_ShowAnnotationRemote", SVNUIMessages.class, new IRepositoryResource[] {resource}); //$NON-NLS-1$
+		super("Operation_ShowAnnotationRemote", SVNUIMessages.class, new IRepositoryResource[] { resource }); //$NON-NLS-1$
 	}
 
 	public RemoteShowAnnotationOperation(IRepositoryResourceProvider provider) {
@@ -41,14 +41,16 @@ public class RemoteShowAnnotationOperation extends AbstractRepositoryOperation {
 
 	protected void runImpl(IProgressMonitor monitor) throws Exception {
 		UIMonitorUtility.getDisplay().syncExec(new Runnable() {
-			public void run() {				
-				ShowAnnotationPanel panel = new ShowAnnotationPanel(RemoteShowAnnotationOperation.this.operableData()[0]);
+			public void run() {
+				ShowAnnotationPanel panel = new ShowAnnotationPanel(
+						RemoteShowAnnotationOperation.this.operableData()[0]);
 				DefaultDialog dialog = new DefaultDialog(UIMonitorUtility.getShell(), panel);
 				if (dialog.open() == 0) {
 					IWorkbenchPage page = UIMonitorUtility.getActivePage();
 					if (page != null) {
-						new BuiltInAnnotate().open(page, RemoteShowAnnotationOperation.this.operableData()[0], null, panel.getRevisions());
-					}	
+						new BuiltInAnnotate().open(page, RemoteShowAnnotationOperation.this.operableData()[0], null,
+								panel.getRevisions());
+					}
 				}
 			}
 		});

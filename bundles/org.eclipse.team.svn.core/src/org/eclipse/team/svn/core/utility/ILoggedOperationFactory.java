@@ -28,12 +28,12 @@ public interface ILoggedOperationFactory {
 			return operation;
 		}
 	};
-	
+
 	public static final ILoggedOperationFactory DEFAULT = new ILoggedOperationFactory() {
 		public IActionOperation getLogged(IActionOperation operation) {
 			return new LoggedOperation(operation);
 		}
 	};
-	
+
 	public IActionOperation getLogged(IActionOperation operation);
 }

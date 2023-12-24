@@ -31,7 +31,7 @@ import org.eclipse.team.ui.synchronize.ISynchronizePageConfiguration;
 public class ShowOutgoingPropertiesModelAction extends AbstractSynchronizeLogicalModelAction {
 
 	protected ShowOutgoingPropertiesActionHelper actionHelper;
-	
+
 	public ShowOutgoingPropertiesModelAction(String text, ISynchronizePageConfiguration configuration) {
 		super(text, configuration);
 		this.actionHelper = new ShowOutgoingPropertiesActionHelper(this, configuration);
@@ -40,17 +40,17 @@ public class ShowOutgoingPropertiesModelAction extends AbstractSynchronizeLogica
 	protected boolean needsToSaveDirtyEditors() {
 		return false;
 	}
-	
+
 	protected boolean updateSelection(IStructuredSelection selection) {
 		if (super.updateSelection(selection)) {
-			if (selection.size() == 1) {	
+			if (selection.size() == 1) {
 				IResource resource = this.getSelectedResource();
 				return IStateFilter.SF_VERSIONED.accept(SVNRemoteStorage.instance().asLocalResource(resource));
-			}	
+			}
 		}
-	    return false;
+		return false;
 	}
-	
+
 	protected IActionOperation getOperation() {
 		return this.actionHelper.getOperation();
 	}

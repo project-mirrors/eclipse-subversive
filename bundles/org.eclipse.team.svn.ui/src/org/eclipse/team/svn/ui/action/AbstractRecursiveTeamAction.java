@@ -36,24 +36,24 @@ public abstract class AbstractRecursiveTeamAction extends AbstractNonRecursiveTe
 		super();
 	}
 
-	public IResource []getSelectedResourcesRecursive(IStateFilter filter) {
+	public IResource[] getSelectedResourcesRecursive(IStateFilter filter) {
 		return this.getSelectedResourcesRecursive(filter, IResource.DEPTH_INFINITE);
 	}
-	
-	public IResource []getSelectedResourcesRecursive(final IStateFilter filter, final int depth) {
-		final IResource [][]retVal = new IResource[][] {new IResource[0]};
+
+	public IResource[] getSelectedResourcesRecursive(final IStateFilter filter, final int depth) {
+		final IResource[][] retVal = new IResource[][] { new IResource[0] };
 		IActionOperation op = new AbstractActionOperation("Operation_CollectingResources", SVNUIMessages.class) { //$NON-NLS-1$
 			protected void runImpl(IProgressMonitor monitor) throws Exception {
-				retVal[0] = FileUtility.getResourcesRecursive(AbstractRecursiveTeamAction.this.getSelectedResources(), filter, depth, this, monitor);
+				retVal[0] = FileUtility.getResourcesRecursive(AbstractRecursiveTeamAction.this.getSelectedResources(),
+						filter, depth, this, monitor);
 			}
 		};
 		if (CoreExtensionsManager.instance().getOptionProvider().is(IOptionProvider.SVN_CACHE_ENABLED)) {
 			UIMonitorUtility.doTaskBusyDefault(op);
-		}
-		else {
+		} else {
 			UIMonitorUtility.doTaskNowDefault(this.getShell(), op, true);
 		}
 		return retVal[0];
 	}
-	
+
 }

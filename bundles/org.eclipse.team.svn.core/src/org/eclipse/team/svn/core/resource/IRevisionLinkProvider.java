@@ -21,9 +21,9 @@ package org.eclipse.team.svn.core.resource;
  */
 public interface IRevisionLinkProvider {
 	public class DefaultRevisionLinkProvider implements IRevisionLinkProvider {
-		protected IRevisionLink []links;
-		
-		public DefaultRevisionLinkProvider(IRevisionLink []links) {
+		protected IRevisionLink[] links;
+
+		public DefaultRevisionLinkProvider(IRevisionLink[] links) {
 			this.links = links;
 		}
 
@@ -31,6 +31,6 @@ public interface IRevisionLinkProvider {
 			return this.links;
 		}
 	}
-	
-	public IRevisionLink []getRevisionLinks();
+
+	public IRevisionLink[] getRevisionLinks();
 }

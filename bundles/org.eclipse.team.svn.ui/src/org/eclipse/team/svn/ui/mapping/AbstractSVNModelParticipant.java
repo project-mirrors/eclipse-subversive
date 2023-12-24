@@ -34,7 +34,7 @@ import org.eclipse.team.ui.synchronize.ModelSynchronizeParticipant;
 public abstract class AbstractSVNModelParticipant extends ModelSynchronizeParticipant {
 
 	protected ISynchronizePageConfiguration configuration;
-	
+
 	public AbstractSVNModelParticipant() {
 		super();
 	}
@@ -42,37 +42,39 @@ public abstract class AbstractSVNModelParticipant extends ModelSynchronizePartic
 	public AbstractSVNModelParticipant(SynchronizationContext context) {
 		super(context);
 	}
-	
+
 	protected void initializeConfiguration(ISynchronizePageConfiguration configuration) {
 		super.initializeConfiguration(configuration);
-		
+
 		this.configuration = configuration;
 
 		Collection<AbstractSynchronizeActionGroup> actionGroups = this.getActionGroups();
 		// menu groups should be configured before actionGroups is added
-		for (Iterator<AbstractSynchronizeActionGroup> it = actionGroups.iterator(); it.hasNext(); ) {
+		for (Iterator<AbstractSynchronizeActionGroup> it = actionGroups.iterator(); it.hasNext();) {
 			AbstractSynchronizeActionGroup actionGroup = it.next();
 			actionGroup.configureMenuGroups(configuration);
 		}
-		for (Iterator<AbstractSynchronizeActionGroup> it = actionGroups.iterator(); it.hasNext(); ) {
+		for (Iterator<AbstractSynchronizeActionGroup> it = actionGroups.iterator(); it.hasNext();) {
 			AbstractSynchronizeActionGroup actionGroup = it.next();
 			configuration.addActionContribution(actionGroup);
 		}
-				
+
 		configuration.addLabelDecorator(this.createLabelDecorator(configuration));
 
 		configuration.setSupportedModes(this.getSupportedModes());
 		configuration.setMode(this.getDefaultMode());
-	}	
-	
+	}
+
 	protected ILabelDecorator createLabelDecorator(ISynchronizePageConfiguration configuration) {
 		return new SynchronizeLabelDecorator(configuration);
 	}
-	
-    protected abstract int getSupportedModes();
-    protected abstract int getDefaultMode();
-    protected abstract Collection<AbstractSynchronizeActionGroup> getActionGroups();
-    
+
+	protected abstract int getSupportedModes();
+
+	protected abstract int getDefaultMode();
+
+	protected abstract Collection<AbstractSynchronizeActionGroup> getActionGroups();
+
 	/*
 	 * (non-Javadoc)
 	 * @see org.eclipse.team.ui.synchronize.ModelSynchronizeParticipant#getEnabledModelProviders() 
@@ -81,7 +83,7 @@ public abstract class AbstractSVNModelParticipant extends ModelSynchronizePartic
 	 * 
 	 */
 	public ModelProvider[] getEnabledModelProviders() {
-		ModelProvider[] enabledProviders =  super.getEnabledModelProviders();
+		ModelProvider[] enabledProviders = super.getEnabledModelProviders();
 		if (this instanceof IChangeSetProvider) {
 			for (int i = 0; i < enabledProviders.length; i++) {
 				ModelProvider provider = enabledProviders[i];

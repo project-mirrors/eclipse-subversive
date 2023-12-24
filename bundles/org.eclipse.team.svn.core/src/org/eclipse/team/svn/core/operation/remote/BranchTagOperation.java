@@ -40,23 +40,28 @@ import org.eclipse.team.svn.core.utility.SVNUtility;
  */
 public class BranchTagOperation extends AbstractRepositoryOperation implements IRevisionProvider {
 	protected String destinationUrl;
+
 	protected String message;
+
 	protected ArrayList<RevisionPair> revisionsPairs;
 
-	public BranchTagOperation(String operationName, Class<? extends NLS> messagesClass, IRepositoryResource []resources, IRepositoryResource destination, String message) {
+	public BranchTagOperation(String operationName, Class<? extends NLS> messagesClass, IRepositoryResource[] resources,
+			IRepositoryResource destination, String message) {
 		super("Operation_" + operationName, messagesClass, resources); //$NON-NLS-1$
 		this.destinationUrl = destination.getUrl();
 		this.message = message;
 	}
 
-	public RevisionPair []getRevisions() {
-		return this.revisionsPairs == null ? null : this.revisionsPairs.toArray(new RevisionPair[this.revisionsPairs.size()]);
+	public RevisionPair[] getRevisions() {
+		return this.revisionsPairs == null
+				? null
+				: this.revisionsPairs.toArray(new RevisionPair[this.revisionsPairs.size()]);
 	}
-	
+
 	protected void runImpl(IProgressMonitor monitor) throws Exception {
 		this.revisionsPairs = new ArrayList<RevisionPair>();
-		IRepositoryResource []resources = this.operableData();
-		
+		IRepositoryResource[] resources = this.operableData();
+
 		ProgressMonitorUtility.setTaskInfo(monitor, this, FileUtility.getNamesListAsString(resources));
 		final IRepositoryLocation location = resources[0].getRepositoryLocation();
 		final ISVNConnector proxy = location.acquireSVNProxy();
@@ -67,27 +72,36 @@ public class BranchTagOperation extends AbstractRepositoryOperation implements I
 
 				ISVNNotificationCallback notify = new ISVNNotificationCallback() {
 					public void notify(SVNNotification info) {
-						BranchTagOperation.this.revisionsPairs.add(new RevisionPair(info.revision, new String[] {url2}, location));
-						String message = SVNMessages.format(SVNMessages.Console_CommittedRevision, new String[] {String.valueOf(info.revision)});
+						BranchTagOperation.this.revisionsPairs
+								.add(new RevisionPair(info.revision, new String[] { url2 }, location));
+						String message = SVNMessages.format(SVNMessages.Console_CommittedRevision,
+								new String[] { String.valueOf(info.revision) });
 						BranchTagOperation.this.writeToConsole(IConsoleStream.LEVEL_OK, message);
 					}
 				};
 				SVNUtility.addSVNNotifyListener(proxy, notify);
-				
+
 				this.protectStep(new IUnprotectedOperation() {
 					public void run(IProgressMonitor monitor) throws Exception {
-						BranchTagOperation.this.writeToConsole(IConsoleStream.LEVEL_CMD, "svn copy \"" + current.getUrl() + "\" \"" + BranchTagOperation.this.destinationUrl + "\" -r " + current.getSelectedRevision() + " -m \"" + BranchTagOperation.this.message + "\"" + ISVNConnector.Options.asCommandLine(ISVNConnector.Options.INTERPRET_AS_CHILD) + FileUtility.getUsernameParam(current.getRepositoryLocation().getUsername()) + "\n"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
-						SVNEntryRevisionReference []src = new SVNEntryRevisionReference[] {new SVNEntryRevisionReference(SVNUtility.encodeURL(current.getUrl()), current.getPegRevision(), current.getSelectedRevision())};
-						proxy.copyRemote(src, url2, BranchTagOperation.this.message, ISVNConnector.Options.INTERPRET_AS_CHILD, null, ISVNConnector.NO_EXTERNALS_TO_PIN, new SVNProgressMonitor(BranchTagOperation.this, monitor, null));
+						BranchTagOperation.this.writeToConsole(IConsoleStream.LEVEL_CMD, "svn copy \"" //$NON-NLS-1$
+								+ current.getUrl() + "\" \"" + BranchTagOperation.this.destinationUrl + "\" -r " //$NON-NLS-1$//$NON-NLS-2$
+								+ current.getSelectedRevision() + " -m \"" + BranchTagOperation.this.message + "\"" //$NON-NLS-1$//$NON-NLS-2$
+								+ ISVNConnector.Options.asCommandLine(ISVNConnector.Options.INTERPRET_AS_CHILD)
+								+ FileUtility.getUsernameParam(current.getRepositoryLocation().getUsername()) + "\n"); //$NON-NLS-1$
+						SVNEntryRevisionReference[] src = new SVNEntryRevisionReference[] {
+								new SVNEntryRevisionReference(SVNUtility.encodeURL(current.getUrl()),
+										current.getPegRevision(), current.getSelectedRevision()) };
+						proxy.copyRemote(src, url2, BranchTagOperation.this.message,
+								ISVNConnector.Options.INTERPRET_AS_CHILD, null, ISVNConnector.NO_EXTERNALS_TO_PIN,
+								new SVNProgressMonitor(BranchTagOperation.this, monitor, null));
 					}
 				}, monitor, resources.length);
-				
+
 				SVNUtility.removeSVNNotifyListener(proxy, notify);
 			}
-		}
-		finally {
-		    location.releaseSVNProxy(proxy);
+		} finally {
+			location.releaseSVNProxy(proxy);
 		}
 	}
-	
+
 }

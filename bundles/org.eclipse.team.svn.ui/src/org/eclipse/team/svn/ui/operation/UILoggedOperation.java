@@ -49,47 +49,45 @@ import org.eclipse.team.svn.ui.utility.UIMonitorUtility;
  * @author Alexander Gurov
  */
 public class UILoggedOperation extends LoggedOperation {
-	protected static LinkedList<Object []> errorQueue = new LinkedList<Object []>();
-	
-    public UILoggedOperation(IActionOperation op) {
-        super(op);
-    }
-    
-    public static void reportError(String where, Throwable t) {
-		String errMessage = SVNMessages.format(SVNMessages.Operation_Error_LogHeader, new String[] {where});
-	    MultiStatus status = new MultiStatus(SVNTeamPlugin.NATURE_ID, IStatus.OK, errMessage, null);
-		Status st = 
-			new Status(
-					IStatus.ERROR, 
-					SVNTeamPlugin.NATURE_ID, 
-					IStatus.OK, 
-					status.getMessage() + ": " + t.getMessage(),  //$NON-NLS-1$
-					t);
+	protected static LinkedList<Object[]> errorQueue = new LinkedList<Object[]>();
+
+	public UILoggedOperation(IActionOperation op) {
+		super(op);
+	}
+
+	public static void reportError(String where, Throwable t) {
+		String errMessage = SVNMessages.format(SVNMessages.Operation_Error_LogHeader, new String[] { where });
+		MultiStatus status = new MultiStatus(SVNTeamPlugin.NATURE_ID, IStatus.OK, errMessage, null);
+		Status st = new Status(
+				IStatus.ERROR, SVNTeamPlugin.NATURE_ID, IStatus.OK, status.getMessage() + ": " + t.getMessage(), //$NON-NLS-1$
+				t);
 		status.merge(st);
 		UILoggedOperation.logError(st);
 		UILoggedOperation.showError(SVNTeamPlugin.NATURE_ID, where, st);
 	}
 
-    protected void handleError(IStatus errorStatus) {
-    	super.handleError(errorStatus);
-    	if (errorStatus.matches(IStatus.ERROR)) {
-    		UILoggedOperation.showError(SVNTeamPlugin.NATURE_ID, this.getOperationName(), errorStatus);
-    	}
-    }
-    
-    public static void showError(String pluginID, String operationName, IStatus errorStatus) {
-    	OperationErrorInfo errorInfo = UILoggedOperation.formatMessage(errorStatus, false);
-        if (errorInfo == null) {
-        	return;
-        }
+	protected void handleError(IStatus errorStatus) {
+		super.handleError(errorStatus);
+		if (errorStatus.matches(IStatus.ERROR)) {
+			UILoggedOperation.showError(SVNTeamPlugin.NATURE_ID, this.getOperationName(), errorStatus);
+		}
+	}
+
+	public static void showError(String pluginID, String operationName, IStatus errorStatus) {
+		OperationErrorInfo errorInfo = UILoggedOperation.formatMessage(errorStatus, false);
+		if (errorInfo == null) {
+			return;
+		}
 		synchronized (UILoggedOperation.errorQueue) {
-			UILoggedOperation.errorQueue.add(new Object[] {pluginID, operationName, errorStatus});
+			UILoggedOperation.errorQueue.add(new Object[] { pluginID, operationName, errorStatus });
 			if (UILoggedOperation.errorQueue.size() == 1) {
-		    	// release calling thread
+				// release calling thread
 				Job job = new Job("") { //$NON-NLS-1$
 					protected IStatus run(IProgressMonitor monitor) {
-		            	boolean showCheckBox = SVNTeamPreferences.getMailReporterBoolean(SVNTeamUIPlugin.instance().getPreferenceStore(), SVNTeamPreferences.MAILREPORTER_ENABLED_NAME);
-		            	
+						boolean showCheckBox = SVNTeamPreferences.getMailReporterBoolean(
+								SVNTeamUIPlugin.instance().getPreferenceStore(),
+								SVNTeamPreferences.MAILREPORTER_ENABLED_NAME);
+
 						while (!monitor.isCanceled()) {
 							String pluginID;
 							String operationName;
@@ -98,43 +96,42 @@ public class UILoggedOperation extends LoggedOperation {
 								if (UILoggedOperation.errorQueue.size() == 0) {
 									break;
 								}
-								Object []entry = UILoggedOperation.errorQueue.get(0);
-								pluginID = (String)entry[0];
-								operationName = (String)entry[1];
-								errorStatus = (IStatus)entry[2];
-								Iterator<Object []> it = UILoggedOperation.errorQueue.iterator();
+								Object[] entry = UILoggedOperation.errorQueue.get(0);
+								pluginID = (String) entry[0];
+								operationName = (String) entry[1];
+								errorStatus = (IStatus) entry[2];
+								Iterator<Object[]> it = UILoggedOperation.errorQueue.iterator();
 								// skip first entry
 								it.next();
-								for (; it.hasNext(); ) {
+								for (; it.hasNext();) {
 									entry = it.next();
 									// merge similar statuses
 									if (pluginID.equals(entry[0]) && operationName.equals(entry[1])) {
 										MultiStatus ms;
 										if (!(errorStatus instanceof MultiStatus)) {
-											errorStatus = ms = new MultiStatus(errorStatus.getPlugin(), errorStatus.getCode(), errorStatus.getMessage(), errorStatus.getException());
+											errorStatus = ms = new MultiStatus(errorStatus.getPlugin(),
+													errorStatus.getCode(), errorStatus.getMessage(),
+													errorStatus.getException());
+										} else {
+											ms = (MultiStatus) errorStatus;
 										}
-										else {
-											ms = (MultiStatus)errorStatus;
-										}
-										ms.addAll((IStatus)entry[2]);
+										ms.addAll((IStatus) entry[2]);
 										it.remove();
 									}
 								}
 							}
-							
-			            	boolean doNotShowAgain = UILoggedOperation.showErrorImpl(
-			            			pluginID, 
-			            			operationName, 
-			            			errorStatus, 
-			            			true, 
-			            			showCheckBox ? SVNUIMessages.UILoggedOperation_DontAskSend : null,
-			    					null);
-							
+
+							boolean doNotShowAgain = UILoggedOperation.showErrorImpl(
+									pluginID, operationName, errorStatus, true,
+									showCheckBox ? SVNUIMessages.UILoggedOperation_DontAskSend : null, null);
+
 							if (showCheckBox && doNotShowAgain) {
-				            	showCheckBox = !doNotShowAgain;
-								SVNTeamPreferences.setMailReporterBoolean(SVNTeamUIPlugin.instance().getPreferenceStore(), SVNTeamPreferences.MAILREPORTER_ENABLED_NAME, false);
+								showCheckBox = !doNotShowAgain;
+								SVNTeamPreferences.setMailReporterBoolean(
+										SVNTeamUIPlugin.instance().getPreferenceStore(),
+										SVNTeamPreferences.MAILREPORTER_ENABLED_NAME, false);
 							}
-			            	
+
 							synchronized (UILoggedOperation.errorQueue) {
 								UILoggedOperation.errorQueue.remove(0);
 							}
@@ -146,163 +143,174 @@ public class UILoggedOperation extends LoggedOperation {
 				job.schedule();
 			}
 		}
-    }
-    
-    protected static boolean showErrorImpl(final String pluginID, final String operationName, final IStatus errorStatus, boolean isReportingAllowed, final String optionName, final String originalReport) {
-    	final OperationErrorInfo errorInfo = UILoggedOperation.formatMessage(errorStatus, false);
-    	if (errorInfo == null) {
-    		// cancelled
-    		return !isReportingAllowed;
-    	}
-    	final ErrorCancelPanel []panel = new ErrorCancelPanel[1];
-    	final int []retCode = new int[1];
-    	final boolean isPlugInError = ReportPartsFactory.checkStatus(errorStatus, new ErrorReasonVisitor());
-    	final boolean sendReport = isPlugInError & isReportingAllowed & SVNTeamPreferences.getMailReporterBoolean(SVNTeamUIPlugin.instance().getPreferenceStore(), SVNTeamPreferences.MAILREPORTER_ENABLED_NAME);
+	}
+
+	protected static boolean showErrorImpl(final String pluginID, final String operationName, final IStatus errorStatus,
+			boolean isReportingAllowed, final String optionName, final String originalReport) {
+		final OperationErrorInfo errorInfo = UILoggedOperation.formatMessage(errorStatus, false);
+		if (errorInfo == null) {
+			// cancelled
+			return !isReportingAllowed;
+		}
+		final ErrorCancelPanel[] panel = new ErrorCancelPanel[1];
+		final int[] retCode = new int[1];
+		final boolean isPlugInError = ReportPartsFactory.checkStatus(errorStatus, new ErrorReasonVisitor());
+		final boolean sendReport = isPlugInError & isReportingAllowed & SVNTeamPreferences.getMailReporterBoolean(
+				SVNTeamUIPlugin.instance().getPreferenceStore(), SVNTeamPreferences.MAILREPORTER_ENABLED_NAME);
 		UIMonitorUtility.getDisplay().syncExec(new Runnable() {
-            public void run() {
-            	//For example, if there is an NPE in the JavaSVN code or in our code - add option "Send Report" to the ErrorDialog
-                //also interesting problems can be located before/after ClientCancelException, we shouldn't ignore that
-            	if (originalReport == null) {
-                    panel[0] = new ErrorCancelPanel(operationName, errorInfo.numberOfErrors, errorInfo.simpleMessage, errorInfo.advancedMessage, sendReport, isPlugInError, optionName, errorStatus, pluginID);
-            	}
-            	else {
-            		panel[0] = new ErrorCancelPanel(operationName, errorInfo.numberOfErrors, errorInfo.simpleMessage, errorInfo.advancedMessage, sendReport, isPlugInError, optionName, errorStatus, pluginID, originalReport);
-            	}
-                DefaultDialog dialog = new DefaultDialog(UIMonitorUtility.getShell(), panel[0]);
-                retCode[0] = dialog.open();
-            }
-        });
-        if (retCode[0] == 0 && sendReport) {
+			public void run() {
+				//For example, if there is an NPE in the JavaSVN code or in our code - add option "Send Report" to the ErrorDialog
+				//also interesting problems can be located before/after ClientCancelException, we shouldn't ignore that
+				if (originalReport == null) {
+					panel[0] = new ErrorCancelPanel(operationName, errorInfo.numberOfErrors, errorInfo.simpleMessage,
+							errorInfo.advancedMessage, sendReport, isPlugInError, optionName, errorStatus, pluginID);
+				} else {
+					panel[0] = new ErrorCancelPanel(operationName, errorInfo.numberOfErrors, errorInfo.simpleMessage,
+							errorInfo.advancedMessage, sendReport, isPlugInError, optionName, errorStatus, pluginID,
+							originalReport);
+				}
+				DefaultDialog dialog = new DefaultDialog(UIMonitorUtility.getShell(), panel[0]);
+				retCode[0] = dialog.open();
+			}
+		});
+		if (retCode[0] == 0 && sendReport) {
 			UILoggedOperation.sendReport(panel[0].getReporter());
 		}
 		return panel[0].doNotShowAgain();
-    }
-    
-    public static void sendReport(final IReporter reporter) {
+	}
+
+	public static void sendReport(final IReporter reporter) {
 		UIMonitorUtility.getDisplay().syncExec(new Runnable() {
-            public void run() {
-        		UIMonitorUtility.doTaskNow(UIMonitorUtility.getShell(), reporter, true, new DefaultOperationWrapperFactory() {
-        			protected IActionOperation wrappedOperation(IActionOperation operation) {
-        				return new LoggedOperation(operation);
-        			}
-        		});
-            }
-        });
-		if (reporter.getExecutionState() != IActionOperation.OK && 
-			SVNTeamPreferences.getMailReporterBoolean(SVNTeamUIPlugin.instance().getPreferenceStore(), SVNTeamPreferences.MAILREPORTER_ERRORS_ENABLED_NAME)) {
+			public void run() {
+				UIMonitorUtility.doTaskNow(UIMonitorUtility.getShell(), reporter, true,
+						new DefaultOperationWrapperFactory() {
+							protected IActionOperation wrappedOperation(IActionOperation operation) {
+								return new LoggedOperation(operation);
+							}
+						});
+			}
+		});
+		if (reporter.getExecutionState() != IActionOperation.OK && SVNTeamPreferences.getMailReporterBoolean(
+				SVNTeamUIPlugin.instance().getPreferenceStore(), SVNTeamPreferences.MAILREPORTER_ERRORS_ENABLED_NAME)) {
 			boolean doNotShowAgain = UILoggedOperation.showErrorImpl(
-					SVNTeamPlugin.NATURE_ID, 
-					SVNUIMessages.UILoggedOperation_SendReport_Error_Title, 
-					reporter.getStatus(), 
-					false, 
-					SVNUIMessages.UILoggedOperation_SendReport_Error_DontShow,
+					SVNTeamPlugin.NATURE_ID, SVNUIMessages.UILoggedOperation_SendReport_Error_Title,
+					reporter.getStatus(), false, SVNUIMessages.UILoggedOperation_SendReport_Error_DontShow,
 					reporter.buildReport());
 			if (doNotShowAgain) {
-				SVNTeamPreferences.setMailReporterBoolean(SVNTeamUIPlugin.instance().getPreferenceStore(), SVNTeamPreferences.MAILREPORTER_ERRORS_ENABLED_NAME, false);
+				SVNTeamPreferences.setMailReporterBoolean(SVNTeamUIPlugin.instance().getPreferenceStore(),
+						SVNTeamPreferences.MAILREPORTER_ERRORS_ENABLED_NAME, false);
 			}
 		}
-    }
-    
-    public static OperationErrorInfo formatMessage(IStatus status, boolean allowsCancelled) {
-        if (!status.isMultiStatus()) {
-        	Throwable ex = status.getException();
-        	if (!allowsCancelled && (ex instanceof SVNConnectorCancelException || ex instanceof ActivityCancelledException || ex instanceof OperationCanceledException) || 
-        		ex instanceof HiddenException) {
-        		return null;
-        	}
-        	String simpleMsg = UILoggedOperation.getSimpleMessage(status);
-        	if (ex instanceof SVNConnectorCancelException || 
-        		ex instanceof ActivityCancelledException || 
-        		ex instanceof OperationCanceledException || 
-        		ex instanceof SVNConnectorAuthenticationException) {
-        		return new OperationErrorInfo(simpleMsg, simpleMsg, ex, 1);
-        	}
-        	String advancedMsg = UILoggedOperation.getSingleStatusMessage(status);
-           	return new OperationErrorInfo(simpleMsg, advancedMsg, ex, 1);
-        }
-        
-        IStatus []children = status.getChildren();
-        String advanceMess = ""; //$NON-NLS-1$
-        String simpleMess = ""; //$NON-NLS-1$
-        for (int i = 0; i < children.length; i++) {
-            //don't report warning statuses
-        	if (children[i].getSeverity() == IStatus.WARNING) {
-        		continue;
-        	}
-            Throwable exception = children[i].getException();
-        	if (!allowsCancelled && (exception instanceof SVNConnectorCancelException || exception instanceof ActivityCancelledException || exception instanceof OperationCanceledException) || 
-        		exception instanceof HiddenException) {
-        		continue;
-        	}
-        	String simpleMsg = UILoggedOperation.getSimpleMessage(children[i]);
-        	String advancedMsg = UILoggedOperation.getSingleStatusMessage(children[i]);
-        	advanceMess += advanceMess.length() == 0 ? advancedMsg : ("\n\n" + advancedMsg); //$NON-NLS-1$
-    		simpleMess += simpleMess.length() == 0 ? simpleMsg : ("\n" + simpleMsg); //$NON-NLS-1$
-        	if (exception instanceof SVNConnectorCancelException || 
-        		exception instanceof ActivityCancelledException || 
-        		exception instanceof OperationCanceledException || 
-        		exception instanceof SVNConnectorAuthenticationException) {
-            	return new OperationErrorInfo(simpleMess, advanceMess, exception, i + 1);
-            }
-        }
-        
-        return advanceMess.length() == 0 && simpleMess.length() == 0 ? null : new OperationErrorInfo(simpleMess, advanceMess, null, children.length);
-    }
-    
-    protected static String getSimpleMessage(IStatus status) {
-    	if (status.getException() instanceof SVNConnectorCancelException ||
-    		status.getException() instanceof ActivityCancelledException ||
-    		status.getException() instanceof OperationCanceledException) {
-    		return SVNUIMessages.UILoggedOperation_Cancelled;
-    	}
-    	
-    	if (status.getException() instanceof SVNConnectorAuthenticationException) {
-    		return SVNUIMessages.UILoggedOperation_Authentication;
-    	}
-    	
-    	return status.getMessage();
-    }
-    
-    protected static String getSingleStatusMessage(IStatus status) {
-    	if (status.getException() == null) {
-    		if (status.getMessage() != null) {
-    			return status.getMessage();
-    		}
-    		return SVNUIMessages.UILoggedOperation_Unknown;
-    	}
-    	
-    	if (status.getException() instanceof SVNConnectorCancelException ||
-    		status.getException() instanceof ActivityCancelledException ||
-    		status.getException() instanceof OperationCanceledException) {
-    		return SVNUIMessages.UILoggedOperation_Cancelled;
-    	}
-    	
-    	if (status.getException().getMessage() == null) {
-    		return status.getException().getClass().getName();
-        }
-    	
-    	return status.getException().getMessage();
-    }
+	}
 
-    public static class OperationErrorInfo {
-    	public String simpleMessage;
-    	public String advancedMessage;
-    	public Throwable exception;
-    	public int numberOfErrors;
-    	
-    	public OperationErrorInfo(String simpleMessage, String advancedMessage, Throwable exception, int numberOfErrors) {
-    		this.simpleMessage = simpleMessage;
-    		this.advancedMessage = advancedMessage;
-    		this.exception = exception;
-    		this.numberOfErrors = numberOfErrors;
-    	}
-     }
-    
+	public static OperationErrorInfo formatMessage(IStatus status, boolean allowsCancelled) {
+		if (!status.isMultiStatus()) {
+			Throwable ex = status.getException();
+			if (!allowsCancelled && (ex instanceof SVNConnectorCancelException
+					|| ex instanceof ActivityCancelledException || ex instanceof OperationCanceledException)
+					|| ex instanceof HiddenException) {
+				return null;
+			}
+			String simpleMsg = UILoggedOperation.getSimpleMessage(status);
+			if (ex instanceof SVNConnectorCancelException || ex instanceof ActivityCancelledException
+					|| ex instanceof OperationCanceledException || ex instanceof SVNConnectorAuthenticationException) {
+				return new OperationErrorInfo(simpleMsg, simpleMsg, ex, 1);
+			}
+			String advancedMsg = UILoggedOperation.getSingleStatusMessage(status);
+			return new OperationErrorInfo(simpleMsg, advancedMsg, ex, 1);
+		}
+
+		IStatus[] children = status.getChildren();
+		String advanceMess = ""; //$NON-NLS-1$
+		String simpleMess = ""; //$NON-NLS-1$
+		for (int i = 0; i < children.length; i++) {
+			//don't report warning statuses
+			if (children[i].getSeverity() == IStatus.WARNING) {
+				continue;
+			}
+			Throwable exception = children[i].getException();
+			if (!allowsCancelled
+					&& (exception instanceof SVNConnectorCancelException
+							|| exception instanceof ActivityCancelledException
+							|| exception instanceof OperationCanceledException)
+					|| exception instanceof HiddenException) {
+				continue;
+			}
+			String simpleMsg = UILoggedOperation.getSimpleMessage(children[i]);
+			String advancedMsg = UILoggedOperation.getSingleStatusMessage(children[i]);
+			advanceMess += advanceMess.length() == 0 ? advancedMsg : ("\n\n" + advancedMsg); //$NON-NLS-1$
+			simpleMess += simpleMess.length() == 0 ? simpleMsg : ("\n" + simpleMsg); //$NON-NLS-1$
+			if (exception instanceof SVNConnectorCancelException || exception instanceof ActivityCancelledException
+					|| exception instanceof OperationCanceledException
+					|| exception instanceof SVNConnectorAuthenticationException) {
+				return new OperationErrorInfo(simpleMess, advanceMess, exception, i + 1);
+			}
+		}
+
+		return advanceMess.length() == 0 && simpleMess.length() == 0
+				? null
+				: new OperationErrorInfo(simpleMess, advanceMess, null, children.length);
+	}
+
+	protected static String getSimpleMessage(IStatus status) {
+		if (status.getException() instanceof SVNConnectorCancelException
+				|| status.getException() instanceof ActivityCancelledException
+				|| status.getException() instanceof OperationCanceledException) {
+			return SVNUIMessages.UILoggedOperation_Cancelled;
+		}
+
+		if (status.getException() instanceof SVNConnectorAuthenticationException) {
+			return SVNUIMessages.UILoggedOperation_Authentication;
+		}
+
+		return status.getMessage();
+	}
+
+	protected static String getSingleStatusMessage(IStatus status) {
+		if (status.getException() == null) {
+			if (status.getMessage() != null) {
+				return status.getMessage();
+			}
+			return SVNUIMessages.UILoggedOperation_Unknown;
+		}
+
+		if (status.getException() instanceof SVNConnectorCancelException
+				|| status.getException() instanceof ActivityCancelledException
+				|| status.getException() instanceof OperationCanceledException) {
+			return SVNUIMessages.UILoggedOperation_Cancelled;
+		}
+
+		if (status.getException().getMessage() == null) {
+			return status.getException().getClass().getName();
+		}
+
+		return status.getException().getMessage();
+	}
+
+	public static class OperationErrorInfo {
+		public String simpleMessage;
+
+		public String advancedMessage;
+
+		public Throwable exception;
+
+		public int numberOfErrors;
+
+		public OperationErrorInfo(String simpleMessage, String advancedMessage, Throwable exception,
+				int numberOfErrors) {
+			this.simpleMessage = simpleMessage;
+			this.advancedMessage = advancedMessage;
+			this.exception = exception;
+			this.numberOfErrors = numberOfErrors;
+		}
+	}
+
 	protected static class ErrorReasonVisitor implements ReportPartsFactory.IStatusVisitor {
 		public boolean visit(IStatus status) {
 			Throwable t = status.getException();
-			return !(t == null || t instanceof OperationCanceledException || t instanceof SVNConnectorException || t instanceof UnreportableException);
+			return !(t == null || t instanceof OperationCanceledException || t instanceof SVNConnectorException
+					|| t instanceof UnreportableException);
 		}
 	}
-	
+
 }

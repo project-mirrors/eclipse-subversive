@@ -25,14 +25,19 @@ import org.eclipse.team.svn.core.SVNMessages;
  */
 public class SubProgressMonitorWithInfo extends ProgressMonitorWrapper {
 	protected double currentProgress;
+
 	protected double unknownProgress;
+
 	protected long lastTime;
-	
+
 	protected double parentTicks;
+
 	protected double scale;
+
 	protected int totalWork;
+
 	protected String subTaskOp;
-	
+
 	public SubProgressMonitorWithInfo(IProgressMonitor monitor, double parentTicks) {
 		super(monitor);
 		this.parentTicks = parentTicks;
@@ -50,7 +55,7 @@ public class SubProgressMonitorWithInfo extends ProgressMonitorWrapper {
 		this.subTaskOp = null;
 		this.internalWorked(this.totalWork - this.currentProgress);
 	}
-	
+
 	public void internalWorked(double work) {
 		if (this.currentProgress + work > this.totalWork) {
 			work = this.totalWork - this.currentProgress;
@@ -60,28 +65,34 @@ public class SubProgressMonitorWithInfo extends ProgressMonitorWrapper {
 			super.internalWorked(work * this.scale);
 		}
 	}
-	
+
 	public void worked(int work) {
 		if (work == IProgressMonitor.UNKNOWN) {
 			double delta = (this.totalWork - this.currentProgress) / this.totalWork;
-			delta /= this.unknownProgress < 25 ? 0.5 : (this.unknownProgress < 50 ? 1 : (this.unknownProgress < 75 ? 2 : (this.unknownProgress < 85 ? 8 : (this.unknownProgress < 95 ? 25 : 100))));
+			delta /= this.unknownProgress < 25
+					? 0.5
+					: (this.unknownProgress < 50
+							? 1
+							: (this.unknownProgress < 75
+									? 2
+									: (this.unknownProgress < 85 ? 8 : (this.unknownProgress < 95 ? 25 : 100))));
 			this.unknownProgress += delta;
-			int offset = (int)(this.unknownProgress - this.currentProgress);
+			int offset = (int) (this.unknownProgress - this.currentProgress);
 			this.internalWorked(offset);
-		}
-		else {
+		} else {
 			this.internalWorked(work);
 		}
 	}
-	
+
 	public void unknownProgress(int current) {
 		this.worked(IProgressMonitor.UNKNOWN);
 	}
-	
+
 	public void subTask(String name) {
 		long time = System.currentTimeMillis();
 		// redraw four times per second or if operation was changed
-		boolean operationChanged = this.subTaskOp == null || !name.startsWith(this.subTaskOp) || name.charAt(this.subTaskOp.length()) != ':' || name.endsWith(SVNMessages.Progress_Done);
+		boolean operationChanged = this.subTaskOp == null || !name.startsWith(this.subTaskOp)
+				|| name.charAt(this.subTaskOp.length()) != ':' || name.endsWith(SVNMessages.Progress_Done);
 		if (this.lastTime == 0 || (time - this.lastTime) >= 250 || operationChanged) {
 			this.lastTime = time;
 			int idx = name.indexOf(':');
@@ -91,9 +102,9 @@ public class SubProgressMonitorWithInfo extends ProgressMonitorWrapper {
 			super.subTask(name);
 		}
 	}
-	
+
 	public int getCurrentProgress() {
-		return (int)this.currentProgress;
+		return (int) this.currentProgress;
 	}
-	
+
 }

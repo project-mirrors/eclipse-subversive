@@ -41,29 +41,38 @@ import org.eclipse.ui.PlatformUI;
  */
 public class PatchOptionsPage extends AbstractVerifiedWizardPage {
 	protected boolean recursive;
+
 	protected boolean ignoreDeleted;
+
 	protected boolean processBinary;
+
 	protected boolean processUnversioned;
+
 	protected boolean localMode;
+
 	protected boolean showIgnoreAncestry;
+
 	protected boolean ignoreAncestry;
+
 	protected int rootPoint;
+
 	protected boolean multiSelect;
-	
+
 	protected long diffOutputOptions;
-	
+
 	protected Button rootSelection;
+
 	protected Button rootProject;
+
 	protected Button rootWorkspace;
 
 	public PatchOptionsPage(boolean localMode) {
 		this(localMode, false);
 	}
-	
+
 	public PatchOptionsPage(boolean localMode, boolean showIgnoreAncestry) {
-		super(PatchOptionsPage.class.getName(), 
-			SVNUIMessages.PatchOptionsPage_Title, 
-			SVNTeamUIPlugin.instance().getImageDescriptor("icons/wizards/newconnect.gif")); //$NON-NLS-1$
+		super(PatchOptionsPage.class.getName(), SVNUIMessages.PatchOptionsPage_Title,
+				SVNTeamUIPlugin.instance().getImageDescriptor("icons/wizards/newconnect.gif")); //$NON-NLS-1$
 		this.setDescription(SVNUIMessages.PatchOptionsPage_Description);
 		this.localMode = localMode;
 		this.showIgnoreAncestry = showIgnoreAncestry;
@@ -81,11 +90,11 @@ public class PatchOptionsPage extends AbstractVerifiedWizardPage {
 		this.rootPoint = multiSelect ? CreatePatchOperation.WORKSPACE : CreatePatchOperation.PROJECT;
 		this.multiSelect = multiSelect;
 	}
-	
+
 	public int getRootPoint() {
 		return this.rootPoint;
 	}
-	
+
 	public boolean isIgnoreDeleted() {
 		return this.ignoreDeleted;
 	}
@@ -101,11 +110,11 @@ public class PatchOptionsPage extends AbstractVerifiedWizardPage {
 	public boolean isRecursive() {
 		return this.recursive;
 	}
-	
+
 	public boolean isIgnoreAncestry() {
 		return this.showIgnoreAncestry ? this.ignoreAncestry : true;
 	}
-	
+
 	public long getDiffOutputOptions() {
 		return this.diffOutputOptions;
 	}
@@ -113,7 +122,7 @@ public class PatchOptionsPage extends AbstractVerifiedWizardPage {
 	protected Composite createControlImpl(Composite parent) {
 		GridLayout layout = null;
 		GridData data = null;
-		
+
 		Composite composite = new Composite(parent, SWT.NONE);
 		layout = new GridLayout();
 		layout.marginWidth = 4;
@@ -121,56 +130,59 @@ public class PatchOptionsPage extends AbstractVerifiedWizardPage {
 		composite.setLayout(layout);
 		data = new GridData(GridData.FILL_BOTH);
 		composite.setLayoutData(data);
-		
+
 		Group options = new Group(composite, SWT.NONE);
 		options.setText(SVNUIMessages.PatchOptionsPage_Options);
 		layout = new GridLayout();
 		options.setLayout(layout);
 		data = new GridData(GridData.FILL_HORIZONTAL);
 		options.setLayoutData(data);
-		
+
 		Button recursiveButton = new Button(options, SWT.CHECK);
 		data = new GridData();
 		recursiveButton.setLayoutData(data);
 		recursiveButton.setText(SVNUIMessages.PatchOptionsPage_Recurse);
 		recursiveButton.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				PatchOptionsPage.this.recursive = ((Button)e.widget).getSelection();
+				PatchOptionsPage.this.recursive = ((Button) e.widget).getSelection();
 			}
 		});
 		recursiveButton.setSelection(this.recursive = true);
-		
+
 		Button processBinaryButton = new Button(options, SWT.CHECK);
 		data = new GridData();
 		processBinaryButton.setLayoutData(data);
 		processBinaryButton.setText(SVNUIMessages.PatchOptionsPage_Binary);
 		processBinaryButton.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				PatchOptionsPage.this.processBinary = ((Button)e.widget).getSelection();
+				PatchOptionsPage.this.processBinary = ((Button) e.widget).getSelection();
 				PatchOptionsPage.this.validateContent();
 			}
 		});
 		processBinaryButton.setSelection(this.processBinary = false);
-		AbstractVerifier verifier = new AbstractFormattedVerifier(SVNUIMessages.PatchOptionsPage_ProcessBinary_Verifier) {
-		    protected String getErrorMessageImpl(Control input) {
-		        return null;
-		    }
-		    protected String getWarningMessageImpl(Control input) {
-		    	if (((Button)input).getSelection()) {
-		            return SVNUIMessages.format(SVNUIMessages.PatchOptionsPage_ProcessBinary_Verifier_Warning, new String[] {AbstractFormattedVerifier.FIELD_NAME});
-		        }
-		        return null;
-		    }
+		AbstractVerifier verifier = new AbstractFormattedVerifier(
+				SVNUIMessages.PatchOptionsPage_ProcessBinary_Verifier) {
+			protected String getErrorMessageImpl(Control input) {
+				return null;
+			}
+
+			protected String getWarningMessageImpl(Control input) {
+				if (((Button) input).getSelection()) {
+					return SVNUIMessages.format(SVNUIMessages.PatchOptionsPage_ProcessBinary_Verifier_Warning,
+							new String[] { AbstractFormattedVerifier.FIELD_NAME });
+				}
+				return null;
+			}
 		};
 		this.attachTo(processBinaryButton, verifier);
-		
+
 		Button processDeletedButton = new Button(options, SWT.CHECK);
 		data = new GridData();
 		processDeletedButton.setLayoutData(data);
 		processDeletedButton.setText(SVNUIMessages.PatchOptionsPage_Deleted);
 		processDeletedButton.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				PatchOptionsPage.this.ignoreDeleted = !((Button)e.widget).getSelection();
+				PatchOptionsPage.this.ignoreDeleted = !((Button) e.widget).getSelection();
 			}
 		});
 		processDeletedButton.setSelection(!(this.ignoreDeleted = false));
@@ -182,12 +194,12 @@ public class PatchOptionsPage extends AbstractVerifiedWizardPage {
 			processUnversionedButton.setText(SVNUIMessages.PatchOptionsPage_New);
 			processUnversionedButton.addSelectionListener(new SelectionAdapter() {
 				public void widgetSelected(SelectionEvent e) {
-					PatchOptionsPage.this.processUnversioned = ((Button)e.widget).getSelection();
+					PatchOptionsPage.this.processUnversioned = ((Button) e.widget).getSelection();
 				}
 			});
 			processUnversionedButton.setSelection(this.processUnversioned = true);
 		}
-		
+
 		if (this.showIgnoreAncestry) {
 			final Button showIgnoreAncestryButton = new Button(options, SWT.CHECK);
 			data = new GridData();
@@ -200,104 +212,104 @@ public class PatchOptionsPage extends AbstractVerifiedWizardPage {
 			});
 			showIgnoreAncestryButton.setSelection(this.ignoreAncestry);
 		}
-		
-		if (CoreExtensionsManager.instance().getSVNConnectorFactory().getSVNAPIVersion() >= ISVNConnectorFactory.APICompatibility.SVNAPI_1_8_x) {
+
+		if (CoreExtensionsManager.instance()
+				.getSVNConnectorFactory()
+				.getSVNAPIVersion() >= ISVNConnectorFactory.APICompatibility.SVNAPI_1_8_x) {
 			Group outputOptions = new Group(composite, SWT.NONE);
 			outputOptions.setText(SVNUIMessages.PatchOptionsPage_DiffOutputOptions);
 			layout = new GridLayout();
 			outputOptions.setLayout(layout);
 			data = new GridData(GridData.FILL_HORIZONTAL);
 			outputOptions.setLayoutData(data);
-			
+
 			Button ignoreWhitespaceButton = new Button(outputOptions, SWT.CHECK);
 			data = new GridData();
 			ignoreWhitespaceButton.setLayoutData(data);
 			ignoreWhitespaceButton.setText(SVNUIMessages.PatchOptionsPage_IgnoreWhitespace);
 			ignoreWhitespaceButton.addSelectionListener(new SelectionAdapter() {
 				public void widgetSelected(SelectionEvent e) {
-					if (((Button)e.widget).getSelection()) {
+					if (((Button) e.widget).getSelection()) {
 						PatchOptionsPage.this.diffOutputOptions |= ISVNConnector.DiffOptions.IGNORE_WHITESPACE;
-					}
-					else {
+					} else {
 						PatchOptionsPage.this.diffOutputOptions &= ~ISVNConnector.DiffOptions.IGNORE_WHITESPACE;
 					}
 				}
 			});
-			ignoreWhitespaceButton.setSelection((this.diffOutputOptions & ISVNConnector.DiffOptions.IGNORE_WHITESPACE) != 0);
-			
+			ignoreWhitespaceButton
+					.setSelection((this.diffOutputOptions & ISVNConnector.DiffOptions.IGNORE_WHITESPACE) != 0);
+
 			Button ignoreSpaceChangeButton = new Button(outputOptions, SWT.CHECK);
 			data = new GridData();
 			ignoreSpaceChangeButton.setLayoutData(data);
 			ignoreSpaceChangeButton.setText(SVNUIMessages.PatchOptionsPage_IgnoreSpaceChange);
 			ignoreSpaceChangeButton.addSelectionListener(new SelectionAdapter() {
 				public void widgetSelected(SelectionEvent e) {
-					if (((Button)e.widget).getSelection()) {
+					if (((Button) e.widget).getSelection()) {
 						PatchOptionsPage.this.diffOutputOptions |= ISVNConnector.DiffOptions.IGNORE_SPACE_CHANGE;
-					}
-					else {
+					} else {
 						PatchOptionsPage.this.diffOutputOptions &= ~ISVNConnector.DiffOptions.IGNORE_SPACE_CHANGE;
 					}
 				}
 			});
-			ignoreSpaceChangeButton.setSelection((this.diffOutputOptions & ISVNConnector.DiffOptions.IGNORE_SPACE_CHANGE) != 0);
-			
+			ignoreSpaceChangeButton
+					.setSelection((this.diffOutputOptions & ISVNConnector.DiffOptions.IGNORE_SPACE_CHANGE) != 0);
+
 			Button ignoreEOLStyleButton = new Button(outputOptions, SWT.CHECK);
 			data = new GridData();
 			ignoreEOLStyleButton.setLayoutData(data);
 			ignoreEOLStyleButton.setText(SVNUIMessages.PatchOptionsPage_IgnoreEOLStyle);
 			ignoreEOLStyleButton.addSelectionListener(new SelectionAdapter() {
 				public void widgetSelected(SelectionEvent e) {
-					if (((Button)e.widget).getSelection()) {
+					if (((Button) e.widget).getSelection()) {
 						PatchOptionsPage.this.diffOutputOptions |= ISVNConnector.DiffOptions.IGNORE_EOL_STYLE;
-					}
-					else {
+					} else {
 						PatchOptionsPage.this.diffOutputOptions &= ~ISVNConnector.DiffOptions.IGNORE_EOL_STYLE;
 					}
 				}
 			});
-			ignoreEOLStyleButton.setSelection((this.diffOutputOptions & ISVNConnector.DiffOptions.IGNORE_EOL_STYLE) != 0);
-			
+			ignoreEOLStyleButton
+					.setSelection((this.diffOutputOptions & ISVNConnector.DiffOptions.IGNORE_EOL_STYLE) != 0);
+
 			Button showCFunctionButton = new Button(outputOptions, SWT.CHECK);
 			data = new GridData();
 			showCFunctionButton.setLayoutData(data);
 			showCFunctionButton.setText(SVNUIMessages.PatchOptionsPage_ShowCFunction);
 			showCFunctionButton.addSelectionListener(new SelectionAdapter() {
 				public void widgetSelected(SelectionEvent e) {
-					if (((Button)e.widget).getSelection()) {
+					if (((Button) e.widget).getSelection()) {
 						PatchOptionsPage.this.diffOutputOptions |= ISVNConnector.DiffOptions.SHOW_FUNCTION;
-					}
-					else {
+					} else {
 						PatchOptionsPage.this.diffOutputOptions &= ~ISVNConnector.DiffOptions.SHOW_FUNCTION;
 					}
 				}
 			});
 			showCFunctionButton.setSelection((this.diffOutputOptions & ISVNConnector.DiffOptions.SHOW_FUNCTION) != 0);
-			
+
 			Button useGITFormatButton = new Button(outputOptions, SWT.CHECK);
 			data = new GridData();
 			useGITFormatButton.setLayoutData(data);
 			useGITFormatButton.setText(SVNUIMessages.PatchOptionsPage_GITFormat);
 			useGITFormatButton.addSelectionListener(new SelectionAdapter() {
 				public void widgetSelected(SelectionEvent e) {
-					if (((Button)e.widget).getSelection()) {
+					if (((Button) e.widget).getSelection()) {
 						PatchOptionsPage.this.diffOutputOptions |= ISVNConnector.DiffOptions.GIT_FORMAT;
-					}
-					else {
+					} else {
 						PatchOptionsPage.this.diffOutputOptions &= ~ISVNConnector.DiffOptions.GIT_FORMAT;
 					}
 				}
 			});
 			useGITFormatButton.setSelection((this.diffOutputOptions & ISVNConnector.DiffOptions.GIT_FORMAT) != 0);
 		}
-		
-		if (this.localMode) { 
+
+		if (this.localMode) {
 			Group patchRoot = new Group(composite, SWT.NONE);
 			patchRoot.setText(SVNUIMessages.PatchOptionsPage_PatchRoot);
 			layout = new GridLayout();
 			patchRoot.setLayout(layout);
 			data = new GridData(GridData.FILL_HORIZONTAL);
 			patchRoot.setLayoutData(data);
-			
+
 			this.rootWorkspace = new Button(patchRoot, SWT.RADIO);
 			data = new GridData();
 			this.rootWorkspace.setLayoutData(data);
@@ -307,7 +319,7 @@ public class PatchOptionsPage extends AbstractVerifiedWizardPage {
 					PatchOptionsPage.this.rootPoint = CreatePatchOperation.WORKSPACE;
 				}
 			});
-			
+
 			this.rootProject = new Button(patchRoot, SWT.RADIO);
 			data = new GridData();
 			this.rootProject.setLayoutData(data);
@@ -317,7 +329,7 @@ public class PatchOptionsPage extends AbstractVerifiedWizardPage {
 					PatchOptionsPage.this.rootPoint = CreatePatchOperation.PROJECT;
 				}
 			});
-			
+
 			this.rootSelection = new Button(patchRoot, SWT.RADIO);
 			data = new GridData();
 			this.rootSelection.setLayoutData(data);
@@ -333,10 +345,10 @@ public class PatchOptionsPage extends AbstractVerifiedWizardPage {
 			this.rootSelection.setSelection(false);
 			this.rootSelection.setEnabled(!this.multiSelect);
 		}
-		
+
 //		Setting context help
-        PlatformUI.getWorkbench().getHelpSystem().setHelp(composite, "org.eclipse.team.svn.help.patchOptionsContext"); //$NON-NLS-1$
-		
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(composite, "org.eclipse.team.svn.help.patchOptionsContext"); //$NON-NLS-1$
+
 		return composite;
 	}
 

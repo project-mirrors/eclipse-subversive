@@ -91,19 +91,33 @@ import org.eclipse.ui.model.IWorkbenchAdapter;
  * @author Sergiy Logvin
  */
 public class ResourceSelectionComposite extends Composite {
-	protected static final ImageDescriptor ERROR_IMAGE_DESC = new OverlayedImageDescriptor(SVNTeamUIPlugin.instance().getImageDescriptor("icons/overlays/problem_underlay.gif") //$NON-NLS-1$
-			.createImage(), TeamImages.getImageDescriptor(ISharedImages.IMG_ERROR_OVR), new Point(9, 9), OverlayedImageDescriptor.RIGHT | OverlayedImageDescriptor.TOP);
+	protected static final ImageDescriptor ERROR_IMAGE_DESC = new OverlayedImageDescriptor(
+			SVNTeamUIPlugin.instance()
+					.getImageDescriptor("icons/overlays/problem_underlay.gif") //$NON-NLS-1$
+					.createImage(),
+			TeamImages.getImageDescriptor(ISharedImages.IMG_ERROR_OVR), new Point(9, 9),
+			OverlayedImageDescriptor.RIGHT | OverlayedImageDescriptor.TOP);
 
-	protected static final ImageDescriptor WARNING_IMAGE_DESC = new OverlayedImageDescriptor(SVNTeamUIPlugin.instance().getImageDescriptor("icons/overlays/problem_underlay.gif") //$NON-NLS-1$
-			.createImage(), TeamImages.getImageDescriptor(ISharedImages.IMG_WARNING_OVR), new Point(9, 9), OverlayedImageDescriptor.RIGHT | OverlayedImageDescriptor.TOP);
+	protected static final ImageDescriptor WARNING_IMAGE_DESC = new OverlayedImageDescriptor(
+			SVNTeamUIPlugin.instance()
+					.getImageDescriptor("icons/overlays/problem_underlay.gif") //$NON-NLS-1$
+					.createImage(),
+			TeamImages.getImageDescriptor(ISharedImages.IMG_WARNING_OVR), new Point(9, 9),
+			OverlayedImageDescriptor.RIGHT | OverlayedImageDescriptor.TOP);
 
-	protected static final ImageDescriptor EMPTY_IMAGE_DESC = new OverlayedImageDescriptor(SVNTeamUIPlugin.instance().getImageDescriptor("icons/overlays/problem_underlay.gif") //$NON-NLS-1$
-			.createImage(), SVNTeamUIPlugin.instance().getImageDescriptor("icons/overlays/empty_error.gif"), new Point(9, 9), OverlayedImageDescriptor.RIGHT //$NON-NLS-1$
-			| OverlayedImageDescriptor.TOP);
+	protected static final ImageDescriptor EMPTY_IMAGE_DESC = new OverlayedImageDescriptor(
+			SVNTeamUIPlugin.instance()
+					.getImageDescriptor("icons/overlays/problem_underlay.gif") //$NON-NLS-1$
+					.createImage(),
+			SVNTeamUIPlugin.instance().getImageDescriptor("icons/overlays/empty_error.gif"), new Point(9, 9), //$NON-NLS-1$
+			OverlayedImageDescriptor.RIGHT | OverlayedImageDescriptor.TOP);
 
-	protected static final ImageDescriptor SWITCHED_IMAGE_DESC = new OverlayedImageDescriptor(SVNTeamUIPlugin.instance().getImageDescriptor("icons/overlays/problem_underlay.gif") //$NON-NLS-1$
-			.createImage(), SVNTeamUIPlugin.instance().getImageDescriptor("icons/overlays/switched.gif"), new Point(9, 9), OverlayedImageDescriptor.RIGHT //$NON-NLS-1$
-			| OverlayedImageDescriptor.TOP);
+	protected static final ImageDescriptor SWITCHED_IMAGE_DESC = new OverlayedImageDescriptor(
+			SVNTeamUIPlugin.instance()
+					.getImageDescriptor("icons/overlays/problem_underlay.gif") //$NON-NLS-1$
+					.createImage(),
+			SVNTeamUIPlugin.instance().getImageDescriptor("icons/overlays/switched.gif"), new Point(9, 9), //$NON-NLS-1$
+			OverlayedImageDescriptor.RIGHT | OverlayedImageDescriptor.TOP);
 
 	protected static final int COLUMN_CHECKBOX = 0;
 
@@ -124,8 +138,9 @@ public class ResourceSelectionComposite extends Composite {
 	protected IResource[] selectedResources;
 
 	protected IResource[] notSelectedResources;
-	
+
 	protected HashMap<IResource, Button> treatAsEditButtons = new HashMap();
+
 	protected HashSet<IResource> treatAsEdit = new HashSet();
 
 	protected List selectionChangedListeners;
@@ -137,36 +152,44 @@ public class ResourceSelectionComposite extends Composite {
 	protected HashSet externalResources = new HashSet();
 
 	protected HashSet userSelectedResources = new HashSet();
+
 	protected Map<ImageDescriptor, Image> images;
 
 	protected Label lblSelectedResourcesNumber;
-	
+
 	protected boolean showCheckBoxesAndButtons;
+
 	protected boolean allowTreatAsEditsColumn;
 
-	public ResourceSelectionComposite(Composite parent, int style, IResource[] resources, boolean selectAll, boolean allowTreatAsEditColumn) {
+	public ResourceSelectionComposite(Composite parent, int style, IResource[] resources, boolean selectAll,
+			boolean allowTreatAsEditColumn) {
 		this(parent, style, resources, selectAll, null, allowTreatAsEditColumn);
 	}
 
-	public ResourceSelectionComposite(Composite parent, int style, IResource[] resources, boolean selectAll, boolean allowTreatAsEditColumn, boolean showCheckBoxesAndButtons) {
-		this(parent, style, resources, selectAll, null, allowTreatAsEditColumn , showCheckBoxesAndButtons);
+	public ResourceSelectionComposite(Composite parent, int style, IResource[] resources, boolean selectAll,
+			boolean allowTreatAsEditColumn, boolean showCheckBoxesAndButtons) {
+		this(parent, style, resources, selectAll, null, allowTreatAsEditColumn, showCheckBoxesAndButtons);
 	}
-		 
-	public ResourceSelectionComposite(Composite parent, int style, IResource[] resources, boolean selectAll, IResource[] userSelectedResources, boolean allowTreatAsEditColumn) {
+
+	public ResourceSelectionComposite(Composite parent, int style, IResource[] resources, boolean selectAll,
+			IResource[] userSelectedResources, boolean allowTreatAsEditColumn) {
 		this(parent, style, resources, selectAll, userSelectedResources, allowTreatAsEditColumn, true);
 	}
-		 	
-	public ResourceSelectionComposite(Composite parent, int style, IResource[] resources, boolean selectAll, IResource[] userSelectedResources, boolean allowTreatAsEditColumn, boolean showCheckBoxesAndButtons) {
+
+	public ResourceSelectionComposite(Composite parent, int style, IResource[] resources, boolean selectAll,
+			IResource[] userSelectedResources, boolean allowTreatAsEditColumn, boolean showCheckBoxesAndButtons) {
 		super(parent, style);
 		this.allowTreatAsEditsColumn = allowTreatAsEditColumn;
 		this.showCheckBoxesAndButtons = showCheckBoxesAndButtons;
 		this.selectedResources = this.resources = resources;
-		if (this.allowTreatAsEditsColumn && SVNTeamPreferences.getBehaviourBoolean(SVNTeamUIPlugin.instance().getPreferenceStore(), SVNTeamPreferences.BEHAVIOUR_TREAT_REPLACEMENT_AS_EDIT_NAME)) {
+		if (this.allowTreatAsEditsColumn
+				&& SVNTeamPreferences.getBehaviourBoolean(SVNTeamUIPlugin.instance().getPreferenceStore(),
+						SVNTeamPreferences.BEHAVIOUR_TREAT_REPLACEMENT_AS_EDIT_NAME)) {
 			for (IResource resource : resources) {
 				ILocalResource local = SVNRemoteStorage.instance().asLocalResource(resource);
 				if (IStateFilter.SF_PREREPLACEDREPLACED.accept(local)) {
 					this.treatAsEdit.add(resource);
-				}				
+				}
 			}
 		}
 		this.notSelectedResources = new IResource[0];
@@ -176,7 +199,8 @@ public class ResourceSelectionComposite extends Composite {
 		if (userSelectedResources != null) {
 			this.userSelectedResources.addAll(Arrays.asList(userSelectedResources));
 		}
-		IResource[] externals = FileUtility.getResourcesRecursive(this.resources, IStateFilter.SF_SWITCHED, IResource.DEPTH_ZERO);
+		IResource[] externals = FileUtility.getResourcesRecursive(this.resources, IStateFilter.SF_SWITCHED,
+				IResource.DEPTH_ZERO);
 		for (int i = 0; i < externals.length; i++) {
 			this.externalResources.add(externals[i]);
 		}
@@ -189,12 +213,12 @@ public class ResourceSelectionComposite extends Composite {
 		for (Button button : this.treatAsEditButtons.values()) {
 			button.dispose();
 		}
-    	for (Image img : this.images.values()) {
-    		img.dispose();
-    	}
+		for (Image img : this.images.values()) {
+			img.dispose();
+		}
 		super.dispose();
 	}
-	
+
 	public IResource[] getSelectedResources() {
 		return this.selectedResources;
 	}
@@ -202,9 +226,9 @@ public class ResourceSelectionComposite extends Composite {
 	public IResource[] getNotSelectedResources() {
 		return this.notSelectedResources;
 	}
-	
+
 	public IResource[] getTreatAsEdits() {
-		return (IResource [])this.treatAsEdit.toArray(new IResource[this.treatAsEdit.size()]);
+		return (IResource[]) this.treatAsEdit.toArray(new IResource[this.treatAsEdit.size()]);
 	}
 
 	public List getCurrentSelection() {
@@ -231,7 +255,7 @@ public class ResourceSelectionComposite extends Composite {
 		gridLayout.marginHeight = gridLayout.marginWidth = 0;
 		this.setLayout(gridLayout);
 
-		int style = SWT.H_SCROLL | SWT.V_SCROLL | SWT.FULL_SELECTION | SWT.MULTI  | SWT.BORDER;
+		int style = SWT.H_SCROLL | SWT.V_SCROLL | SWT.FULL_SELECTION | SWT.MULTI | SWT.BORDER;
 		Table table = new Table(this, this.showCheckBoxesAndButtons ? style | SWT.CHECK : style);
 		table.setHeaderVisible(true);
 		table.setLinesVisible(true);
@@ -286,13 +310,15 @@ public class ResourceSelectionComposite extends Composite {
 		// adding comparator and selection default sorting column and direction
 		this.tableViewer.setComparator(comparator);
 		comparator.setColumnNumber(ResourceSelectionComposite.COLUMN_STATUS);
-		this.tableViewer.getTable().setSortColumn(this.tableViewer.getTable().getColumn(ResourceSelectionComposite.COLUMN_STATUS));
+		this.tableViewer.getTable()
+				.setSortColumn(this.tableViewer.getTable().getColumn(ResourceSelectionComposite.COLUMN_STATUS));
 		this.tableViewer.getTable().setSortDirection(SWT.UP);
 
 		this.tableViewer.setLabelProvider(new ITableLabelProvider() {
 			public Image getColumnImage(Object element, int columnIndex) {
 				if (columnIndex == ResourceSelectionComposite.COLUMN_NAME && element instanceof IAdaptable) {
-					IWorkbenchAdapter adapter = (IWorkbenchAdapter) ((IAdaptable) element).getAdapter(IWorkbenchAdapter.class);
+					IWorkbenchAdapter adapter = (IWorkbenchAdapter) ((IAdaptable) element)
+							.getAdapter(IWorkbenchAdapter.class);
 					if (adapter == null) {
 						return null;
 					}
@@ -305,17 +331,19 @@ public class ResourceSelectionComposite extends Composite {
 					boolean hasError = false;
 					try {
 						IResource currentResource = (IResource) element;
-						IMarker[] markers = currentResource.findMarkers(IMarker.PROBLEM, true, IResource.DEPTH_INFINITE);
+						IMarker[] markers = currentResource.findMarkers(IMarker.PROBLEM, true,
+								IResource.DEPTH_INFINITE);
 						// Errors always with highest priority. So, other severities should be ignored.
 						for (int i = 0; i < markers.length && !hasError; i++) {
-							Integer severity = markers[i] != null ? (Integer) markers[i].getAttribute(IMarker.SEVERITY) : null;
+							Integer severity = markers[i] != null
+									? (Integer) markers[i].getAttribute(IMarker.SEVERITY)
+									: null;
 							if (severity != null) {
 								hasWarning |= severity.intValue() == IMarker.SEVERITY_WARNING;
 								hasError |= severity.intValue() == IMarker.SEVERITY_ERROR;
 							}
 						}
-					}
-					catch (CoreException e) {
+					} catch (CoreException e) {
 						// Markers are inaccessible: do not decorate resource icon
 					}
 
@@ -325,22 +353,20 @@ public class ResourceSelectionComposite extends Composite {
 					}
 					OverlayedImageDescriptor desc = null;
 					if (hasError) {
-						desc = new OverlayedImageDescriptor(image, ResourceSelectionComposite.ERROR_IMAGE_DESC, new Point(16, 16), OverlayedImageDescriptor.BOTTOM
-								| OverlayedImageDescriptor.LEFT);
-					}
-					else if (hasWarning) {
-						desc = new OverlayedImageDescriptor(image, ResourceSelectionComposite.WARNING_IMAGE_DESC, new Point(16, 16), OverlayedImageDescriptor.BOTTOM
-								| OverlayedImageDescriptor.LEFT);
-					}
-					else {
-						desc = new OverlayedImageDescriptor(image, ResourceSelectionComposite.EMPTY_IMAGE_DESC, new Point(16, 16), OverlayedImageDescriptor.BOTTOM
-								| OverlayedImageDescriptor.LEFT);
+						desc = new OverlayedImageDescriptor(image, ResourceSelectionComposite.ERROR_IMAGE_DESC,
+								new Point(16, 16), OverlayedImageDescriptor.BOTTOM | OverlayedImageDescriptor.LEFT);
+					} else if (hasWarning) {
+						desc = new OverlayedImageDescriptor(image, ResourceSelectionComposite.WARNING_IMAGE_DESC,
+								new Point(16, 16), OverlayedImageDescriptor.BOTTOM | OverlayedImageDescriptor.LEFT);
+					} else {
+						desc = new OverlayedImageDescriptor(image, ResourceSelectionComposite.EMPTY_IMAGE_DESC,
+								new Point(16, 16), OverlayedImageDescriptor.BOTTOM | OverlayedImageDescriptor.LEFT);
 					}
 					image = this.createImage(desc);
 
 					if (ResourceSelectionComposite.this.externalResources.contains(element)) {
-						desc = new OverlayedImageDescriptor(image, ResourceSelectionComposite.SWITCHED_IMAGE_DESC, new Point(16, 16), OverlayedImageDescriptor.BOTTOM
-								| OverlayedImageDescriptor.RIGHT);
+						desc = new OverlayedImageDescriptor(image, ResourceSelectionComposite.SWITCHED_IMAGE_DESC,
+								new Point(16, 16), OverlayedImageDescriptor.BOTTOM | OverlayedImageDescriptor.RIGHT);
 					}
 					image = this.createImage(desc);
 
@@ -366,7 +392,7 @@ public class ResourceSelectionComposite extends Composite {
 					String path = resource.getFullPath().toString();
 					return path.startsWith("/") ? path.substring(1) : path; //$NON-NLS-1$
 				}
-				ILocalResource local = SVNRemoteStorage.instance().asLocalResource(resource);				
+				ILocalResource local = SVNRemoteStorage.instance().asLocalResource(resource);
 				if (columnIndex == ResourceSelectionComposite.COLUMN_STATUS) {
 					return ResourceSelectionComposite.this.contentStatusAsString(local);
 				} else if (columnIndex == ResourceSelectionComposite.COLUMN_PROPSTATUS) {
@@ -388,34 +414,35 @@ public class ResourceSelectionComposite extends Composite {
 			public void removeListener(ILabelProviderListener listener) {
 			}
 		});
-		
+
 		if (this.allowTreatAsEditsColumn) {
 			// the order is important otherwise the common label provider overrides this one
 			TableViewerColumn cbColumn = new TableViewerColumn(this.tableViewer, treatAsEdit);
 			cbColumn.setLabelProvider(new ColumnLabelProvider() {
 				public void update(ViewerCell cell) {
-					IResource resource = (IResource)cell.getElement();
+					IResource resource = (IResource) cell.getElement();
 					ILocalResource local = SVNRemoteStorage.instance().asLocalResource(resource);
 					if (IStateFilter.SF_PREREPLACEDREPLACED.accept(local)) {
-						TableItem item = (TableItem)cell.getItem();
+						TableItem item = (TableItem) cell.getItem();
 						Button button;
 						if (ResourceSelectionComposite.this.treatAsEditButtons.containsKey(cell.getElement())) {
 							button = ResourceSelectionComposite.this.treatAsEditButtons.get(cell.getElement());
-						}
-						else {
-							button = new Button((Composite)cell.getViewerRow().getControl(), SWT.CHECK);
+						} else {
+							button = new Button((Composite) cell.getViewerRow().getControl(), SWT.CHECK);
 							button.setData(resource);
 							button.setSelection(ResourceSelectionComposite.this.treatAsEdit.contains(resource));
 							button.setBackground(cell.getBackground());
 							button.addSelectionListener(new SelectionAdapter() {
 								public void widgetSelected(SelectionEvent e) {
-									if (((Button)e.getSource()).getSelection()) {
-										ResourceSelectionComposite.this.treatAsEdit.add((IResource)((Button)e.getSource()).getData());
+									if (((Button) e.getSource()).getSelection()) {
+										ResourceSelectionComposite.this.treatAsEdit
+												.add((IResource) ((Button) e.getSource()).getData());
+									} else {
+										ResourceSelectionComposite.this.treatAsEdit
+												.remove((IResource) ((Button) e.getSource()).getData());
 									}
-									else {
-										ResourceSelectionComposite.this.treatAsEdit.remove((IResource)((Button)e.getSource()).getData());
-									}
-									ResourceSelectionComposite.this.getTableViewer().refresh(((Button)e.getSource()).getData());
+									ResourceSelectionComposite.this.getTableViewer()
+											.refresh(((Button) e.getSource()).getData());
 								}
 							});
 							ResourceSelectionComposite.this.treatAsEditButtons.put(resource, button);
@@ -443,33 +470,40 @@ public class ResourceSelectionComposite extends Composite {
 				IStructuredSelection selection = (IStructuredSelection) event.getSelection();
 				final IResource resource = (IResource) selection.getFirstElement();
 				IResource[] resources = { resource };
-				if (selection.size() == 1 && FileUtility.checkForResourcesPresence(resources, IStateFilter.SF_ANY_CHANGE, IResource.DEPTH_ZERO)) {
+				if (selection.size() == 1 && FileUtility.checkForResourcesPresence(resources,
+						IStateFilter.SF_ANY_CHANGE, IResource.DEPTH_ZERO)) {
 					UIMonitorUtility.getDisplay().syncExec(new Runnable() {
 						public void run() {
 							ILocalResource local = SVNRemoteStorage.instance().asLocalResource(resource);
 							if (!IStateFilter.SF_INTERNAL_INVALID.accept(local)) {
-								IRepositoryResource remote = local.isCopied() ? SVNUtility.getCopiedFrom(resource) : SVNRemoteStorage.instance().asRepositoryResource(resource);
-								remote.setSelectedRevision(CompareResourcesOperation.getRemoteResourceRevisionForCompare(resource));
-								UIMonitorUtility.doTaskScheduledDefault(new CompareResourcesOperation(local, remote, true, true));
+								IRepositoryResource remote = local.isCopied()
+										? SVNUtility.getCopiedFrom(resource)
+										: SVNRemoteStorage.instance().asRepositoryResource(resource);
+								remote.setSelectedRevision(
+										CompareResourcesOperation.getRemoteResourceRevisionForCompare(resource));
+								UIMonitorUtility.doTaskScheduledDefault(
+										new CompareResourcesOperation(local, remote, true, true));
 							}
 						}
 					});
 				}
 			}
 		});
-					
+
 		if (!this.showCheckBoxesAndButtons) {
 			return;
-		}	
-		
+		}
+
 		this.tableViewer.addSelectionChangedListener(this.selectionListener = new ISelectionChangedListener() {
 			public void selectionChanged(SelectionChangedEvent event) {
 				ResourceSelectionComposite.this.updateSelectedResources();
 
-				ResourceSelectionComposite.this.fireResourcesSelectionChanged(new ResourceSelectionChangedEvent(ResourceSelectionComposite.this.selectedResources));
+				ResourceSelectionComposite.this.fireResourcesSelectionChanged(
+						new ResourceSelectionChangedEvent(ResourceSelectionComposite.this.selectedResources));
 
 				int selectedNumber = ResourceSelectionComposite.this.selectedResources.length;
-				ResourceSelectionComposite.this.lblSelectedResourcesNumber.setText(ResourceSelectionComposite.this.resourceNumberToString(selectedNumber));
+				ResourceSelectionComposite.this.lblSelectedResourcesNumber
+						.setText(ResourceSelectionComposite.this.resourceNumberToString(selectedNumber));
 			}
 		});
 
@@ -491,7 +525,8 @@ public class ResourceSelectionComposite extends Composite {
 				ResourceSelectionComposite.this.tableViewer.setAllChecked(true);
 				Object[] elements = ResourceSelectionComposite.this.tableViewer.getCheckedElements();
 				ResourceSelectionComposite.this.selectionListener.selectionChanged(null);
-				ResourceSelectionComposite.this.fireResourcesSelectionChanged(new ResourceSelectionChangedEvent(Arrays.asList(elements).toArray(new IResource[elements.length])));
+				ResourceSelectionComposite.this.fireResourcesSelectionChanged(new ResourceSelectionChangedEvent(
+						Arrays.asList(elements).toArray(new IResource[elements.length])));
 			}
 		};
 		selectButton.addSelectionListener(listener);
@@ -503,13 +538,13 @@ public class ResourceSelectionComposite extends Composite {
 		deselectButton.setLayoutData(data);
 		listener = new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				TableItem []items = ResourceSelectionComposite.this.tableViewer.getTable().getSelection();
-				for (TableItem item : items)
-				{
+				TableItem[] items = ResourceSelectionComposite.this.tableViewer.getTable().getSelection();
+				for (TableItem item : items) {
 					ResourceSelectionComposite.this.tableViewer.setChecked(item.getData(), false);
 				}
 				ResourceSelectionComposite.this.selectionListener.selectionChanged(null);
-				ResourceSelectionComposite.this.fireResourcesSelectionChanged(new ResourceSelectionChangedEvent(new IResource[0]));
+				ResourceSelectionComposite.this
+						.fireResourcesSelectionChanged(new ResourceSelectionChangedEvent(new IResource[0]));
 			}
 		};
 		deselectButton.addSelectionListener(listener);
@@ -523,7 +558,8 @@ public class ResourceSelectionComposite extends Composite {
 			public void widgetSelected(SelectionEvent e) {
 				ResourceSelectionComposite.this.tableViewer.setAllChecked(false);
 				ResourceSelectionComposite.this.selectionListener.selectionChanged(null);
-				ResourceSelectionComposite.this.fireResourcesSelectionChanged(new ResourceSelectionChangedEvent(new IResource[0]));
+				ResourceSelectionComposite.this
+						.fireResourcesSelectionChanged(new ResourceSelectionChangedEvent(new IResource[0]));
 			}
 		};
 		deselectButton.addSelectionListener(listener);
@@ -543,36 +579,40 @@ public class ResourceSelectionComposite extends Composite {
 	}
 
 	protected String resourceNumberToString(int value) {
-		return SVNUIMessages.format(SVNUIMessages.ResourceSelectionComposite_Info, new String[] { String.valueOf(value), String.valueOf(this.resources.length) });
+		return SVNUIMessages.format(SVNUIMessages.ResourceSelectionComposite_Info,
+				new String[] { String.valueOf(value), String.valueOf(this.resources.length) });
 	}
 
-	protected String contentStatusAsString(ILocalResource local) {				
+	protected String contentStatusAsString(ILocalResource local) {
 		String status = ""; //$NON-NLS-1$
 		if (!IStateFilter.ST_NORMAL.equals(local.getTextStatus())) {
-			status = SVNUtility.getStatusText(this.treatAsEdit.contains(local.getResource()) ? IStateFilter.ST_MODIFIED : local.getTextStatus());			
+			status = SVNUtility.getStatusText(
+					this.treatAsEdit.contains(local.getResource()) ? IStateFilter.ST_MODIFIED : local.getTextStatus());
 			if (local.isCopied()) {
 				status += " (+)"; //$NON-NLS-1$
 			}
 		}
-		if (local.hasTreeConflict() && local.getTreeConflictDescriptor().conflictKind == SVNConflictDescriptor.Kind.CONTENT) {
+		if (local.hasTreeConflict()
+				&& local.getTreeConflictDescriptor().conflictKind == SVNConflictDescriptor.Kind.CONTENT) {
 			if (!"".equals(status)) { //$NON-NLS-1$
 				status += ", "; //$NON-NLS-1$
 			}
-			status += SVNMessages.TreeConflicting;			
+			status += SVNMessages.TreeConflicting;
 		}
 		return status;
 	}
-	
-	protected String propertiesStatusAsString(ILocalResource local) {				
-		String status = "";	 //$NON-NLS-1$
+
+	protected String propertiesStatusAsString(ILocalResource local) {
+		String status = ""; //$NON-NLS-1$
 		if (IStateFilter.SF_HAS_PROPERTIES_CHANGES.accept(local)) {
 			status = SVNUtility.getStatusText(local.getPropStatus());
 		}
-		if (local.hasTreeConflict() && local.getTreeConflictDescriptor().conflictKind == SVNConflictDescriptor.Kind.PROPERTIES) {
+		if (local.hasTreeConflict()
+				&& local.getTreeConflictDescriptor().conflictKind == SVNConflictDescriptor.Kind.PROPERTIES) {
 			if (!"".equals(status)) { //$NON-NLS-1$
 				status += ", "; //$NON-NLS-1$
 			}
-			status += SVNMessages.TreeConflicting;			
+			status += SVNMessages.TreeConflicting;
 		}
 		return status;
 	}
@@ -595,19 +635,22 @@ public class ResourceSelectionComposite extends Composite {
 
 	public void refreshSelection() {
 		IPreferenceStore store = SVNTeamUIPlugin.instance().getPreferenceStore();
-		boolean isSelectNewResources = SVNTeamPreferences.getBehaviourBoolean(store, SVNTeamPreferences.BEHAVIOUR_COMMIT_SELECT_NEW_RESOURCES_NAME);
-		boolean isSelectMissingResources = !SVNTeamPreferences.getBehaviourBoolean(store, SVNTeamPreferences.BEHAVIOUR_DO_NOT_SELECT_MISSING_RESOURCES_NAME);
+		boolean isSelectNewResources = SVNTeamPreferences.getBehaviourBoolean(store,
+				SVNTeamPreferences.BEHAVIOUR_COMMIT_SELECT_NEW_RESOURCES_NAME);
+		boolean isSelectMissingResources = !SVNTeamPreferences.getBehaviourBoolean(store,
+				SVNTeamPreferences.BEHAVIOUR_DO_NOT_SELECT_MISSING_RESOURCES_NAME);
 		if (this.deselectNewl && (!isSelectNewResources || !isSelectMissingResources)) {
 			Object[] elements = this.tableViewer.getCheckedElements();
 			for (int i = 0; i < elements.length; i++) {
 				ILocalResource local = SVNRemoteStorage.instance().asLocalResource((IResource) elements[i]);
-				if (!isSelectNewResources && local.getStatus() == IStateFilter.ST_NEW || 
-					!isSelectMissingResources && local.getStatus() == IStateFilter.ST_MISSING) {
+				if (!isSelectNewResources && local.getStatus() == IStateFilter.ST_NEW
+						|| !isSelectMissingResources && local.getStatus() == IStateFilter.ST_MISSING) {
 					this.tableViewer.setChecked(elements[i], false);
 				}
 			}
 			elements = this.tableViewer.getCheckedElements();
-			this.fireResourcesSelectionChanged(new ResourceSelectionChangedEvent(Arrays.asList(elements).toArray(new IResource[elements.length])));
+			this.fireResourcesSelectionChanged(
+					new ResourceSelectionChangedEvent(Arrays.asList(elements).toArray(new IResource[elements.length])));
 			this.selectionListener.selectionChanged(null);
 		}
 	}
@@ -643,7 +686,8 @@ public class ResourceSelectionComposite extends Composite {
 
 		while ((resource = resource.getParent()) != null) {
 			ILocalResource localResource = SVNRemoteStorage.instance().asLocalResource(resource);
-			if (IStateFilter.SF_INTERNAL_INVALID.accept(localResource) || (localResource.getChangeMask() & ILocalResource.IS_SWITCHED) == 0) {
+			if (IStateFilter.SF_INTERNAL_INVALID.accept(localResource)
+					|| (localResource.getChangeMask() & ILocalResource.IS_SWITCHED) == 0) {
 				break;
 			}
 			if (this.userSelectedResources.contains(resource)) {
@@ -706,8 +750,7 @@ public class ResourceSelectionComposite extends Composite {
 			boolean cnd2 = rowData2 instanceof IContainer;
 			if (cnd1 && !cnd2) {
 				return -1;
-			}
-			else if (cnd2 && !cnd1) {
+			} else if (cnd2 && !cnd1) {
 				return 1;
 			}
 			String path1 = rowData1.getFullPath().toString();

@@ -26,35 +26,37 @@ import org.eclipse.team.svn.core.resource.IRepositoryLocation;
 public class RevisonPropertyChangeEvent {
 
 	public static final int SET = 0;
+
 	public static final int REMOVED = 1;
-	
+
 	protected int action;
+
 	protected SVNRevision revision;
+
 	protected SVNProperty property;
+
 	protected IRepositoryLocation location;
-	
-	public RevisonPropertyChangeEvent(int action,
-								SVNRevision revision,
-								IRepositoryLocation location,
-								SVNProperty property){
+
+	public RevisonPropertyChangeEvent(int action, SVNRevision revision, IRepositoryLocation location,
+			SVNProperty property) {
 		this.revision = revision;
 		this.property = property;
 		this.action = action;
 		this.location = location;
 	}
-	
+
 	public int getAction() {
 		return this.action;
 	}
-	
+
 	public SVNRevision getRevision() {
 		return this.revision;
 	}
-	
+
 	public SVNProperty getProperty() {
 		return this.property;
 	}
-	
+
 	public IRepositoryLocation getLocation() {
 		return this.location;
 	}

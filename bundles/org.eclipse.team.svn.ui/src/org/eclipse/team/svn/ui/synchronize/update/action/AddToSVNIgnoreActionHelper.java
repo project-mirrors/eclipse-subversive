@@ -44,19 +44,21 @@ import org.eclipse.team.ui.synchronize.ISynchronizePageConfiguration;
  * @author Igor Burilo
  */
 public class AddToSVNIgnoreActionHelper extends AbstractActionHelper {
-	
+
 	protected static IStateFilter SF_NEW_AND_PARENT_VERSIONED = new IStateFilter.AbstractStateFilter() {
-        protected boolean acceptImpl(ILocalResource local, IResource resource, String state, int mask) {
-            if (state == IStateFilter.ST_NEW) {
-    			return IStateFilter.SF_VERSIONED.accept(SVNRemoteStorage.instance().asLocalResource(resource.getParent()));
-            }
-            return false;
-        }
+		protected boolean acceptImpl(ILocalResource local, IResource resource, String state, int mask) {
+			if (state == IStateFilter.ST_NEW) {
+				return IStateFilter.SF_VERSIONED
+						.accept(SVNRemoteStorage.instance().asLocalResource(resource.getParent()));
+			}
+			return false;
+		}
+
 		protected boolean allowsRecursionImpl(ILocalResource local, IResource resource, String state, int mask) {
 			return true;
 		}
-    };
-    
+	};
+
 	public AddToSVNIgnoreActionHelper(IAction action, ISynchronizePageConfiguration configuration) {
 		super(action, configuration);
 	}
@@ -64,26 +66,26 @@ public class AddToSVNIgnoreActionHelper extends AbstractActionHelper {
 	public FastSyncInfoFilter getSyncInfoFilter() {
 		return new FastSyncInfoFilter() {
 			public boolean select(SyncInfo info) {
-				UpdateSyncInfo sync = (UpdateSyncInfo)info;
+				UpdateSyncInfo sync = (UpdateSyncInfo) info;
 				return AddToSVNIgnoreActionHelper.SF_NEW_AND_PARENT_VERSIONED.accept(sync.getLocalResource());
 			}
 		};
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.team.svn.ui.synchronize.action.AbstractActionHelper#getOperation()
 	 */
 	public IActionOperation getOperation() {
 		//FIXME add unversioned parents if required
-		IResource []resources = FileUtility.shrinkChildNodes(this.getSyncInfoSelector().getSelectedResources());
-		IResource []operableParents = FileUtility.getOperableParents(resources, IStateFilter.SF_UNVERSIONED);
+		IResource[] resources = FileUtility.shrinkChildNodes(this.getSyncInfoSelector().getSelectedResources());
+		IResource[] operableParents = FileUtility.getOperableParents(resources, IStateFilter.SF_UNVERSIONED);
 		if (operableParents.length > 0) {
-		    final AddToSVNPanel panel = new AddToSVNPanel(operableParents);
+			final AddToSVNPanel panel = new AddToSVNPanel(operableParents);
 			final DefaultDialog dialog1 = new DefaultDialog(this.configuration.getSite().getShell(), panel);
-		    if (dialog1.open() != 0) {
-		        return null;
-		    }
-		    operableParents = panel.getSelectedResources();
+			if (dialog1.open() != 0) {
+				return null;
+			}
+			operableParents = panel.getSelectedResources();
 		}
 
 		IgnoreMethodPanel panel = new IgnoreMethodPanel(resources);
@@ -91,9 +93,10 @@ public class AddToSVNIgnoreActionHelper extends AbstractActionHelper {
 		if (dialog.open() != 0) {
 			return null;
 		}
-		
-		AddToSVNIgnoreOperation mainOp = new AddToSVNIgnoreOperation(resources, panel.getIgnoreType(), panel.getIgnorePattern());
-		
+
+		AddToSVNIgnoreOperation mainOp = new AddToSVNIgnoreOperation(resources, panel.getIgnoreType(),
+				panel.getIgnorePattern());
+
 		CompositeOperation op = new CompositeOperation(mainOp.getId(), mainOp.getMessagesClass());
 
 		if (operableParents.length > 0) {
@@ -106,8 +109,9 @@ public class AddToSVNIgnoreActionHelper extends AbstractActionHelper {
 		for (int i = 0; i < resources.length; i++) {
 			tmp.add(resources[i].getParent());
 		}
-		IResource []resourcesAndParents = tmp.toArray(new IResource[tmp.size()]);
-		op.add(new RefreshResourcesOperation(resourcesAndParents, IResource.DEPTH_INFINITE, RefreshResourcesOperation.REFRESH_ALL));
+		IResource[] resourcesAndParents = tmp.toArray(new IResource[tmp.size()]);
+		op.add(new RefreshResourcesOperation(resourcesAndParents, IResource.DEPTH_INFINITE,
+				RefreshResourcesOperation.REFRESH_ALL));
 
 		return op;
 	}

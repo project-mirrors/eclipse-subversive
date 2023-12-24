@@ -22,19 +22,14 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 
 /**
- * The implementation of the <code>IPath</code> interface adapted for
- * working with SVN URLs.
- * It should be used instead of {@link Path} when you need to manipulate with URLs.
- *  
- * {@link Path} implementation will not work for particular cases when it's used
- * not on Windows, the reason is that not on Windows it collapses slashes in such a way
- * that URLs become invalid. 
- * E.g. after calling toString method for http://localhost/repos it will
- * produce http:/localhost/repos, note to one slash after http.
- * Current implementation fixes this problem when you work with URL, 
- * see special parameter in constructor which tells whether to treat provided
- * path string as URL or not. 
- 
+ * The implementation of the <code>IPath</code> interface adapted for working with SVN URLs. It should be used instead of {@link Path} when
+ * you need to manipulate with URLs.
+ * 
+ * {@link Path} implementation will not work for particular cases when it's used not on Windows, the reason is that not on Windows it
+ * collapses slashes in such a way that URLs become invalid. E.g. after calling toString method for http://localhost/repos it will produce
+ * http:/localhost/repos, note to one slash after http. Current implementation fixes this problem when you work with URL, see special
+ * parameter in constructor which tells whether to treat provided path string as URL or not.
+ * 
  * This class is copied from {@link Path}.
  * 
  * @author Igor Burilo
@@ -42,7 +37,9 @@ import org.eclipse.core.runtime.Path;
 public class PathForURL implements IPath, Cloneable {
 	/** masks for separator values */
 	private static final int HAS_LEADING = 1;
+
 	private static final int IS_UNC = 2;
+
 	private static final int HAS_TRAILING = 4;
 
 	private static final int ALL_SEPARATORS = HAS_LEADING | IS_UNC | HAS_TRAILING;
@@ -81,17 +78,13 @@ public class PathForURL implements IPath, Cloneable {
 	/** flags indicating separators (has leading, is UNC, has trailing) */
 	private int separators;
 
-	/** 
-	 * Constructs a new path from the given string path.
-	 * The string path must represent a valid file system path
-	 * on the local file system. 
-	 * The path is canonicalized and double slashes are removed
-	 * except at the beginning. (to handle UNC paths). All forward
-	 * slashes ('/') are treated as segment delimiters, and any
-	 * segment and device delimiters for the local file system are
-	 * also respected.
+	/**
+	 * Constructs a new path from the given string path. The string path must represent a valid file system path on the local file system.
+	 * The path is canonicalized and double slashes are removed except at the beginning. (to handle UNC paths). All forward slashes ('/')
+	 * are treated as segment delimiters, and any segment and device delimiters for the local file system are also respected.
 	 *
-	 * @param pathString the portable string path
+	 * @param pathString
+	 *            the portable string path
 	 * @see IPath#toPortableString()
 	 * @since 3.1
 	 */
@@ -99,12 +92,12 @@ public class PathForURL implements IPath, Cloneable {
 		return new PathForURL(pathString, false);
 	}
 
-	/** 
-	 * Constructs a new path from the given path string.
-	 * The path string must have been produced by a previous
-	 * call to <code>IPath.toPortableString</code>.
+	/**
+	 * Constructs a new path from the given path string. The path string must have been produced by a previous call to
+	 * <code>IPath.toPortableString</code>.
 	 *
-	 * @param pathString the portable path string
+	 * @param pathString
+	 *            the portable path string
 	 * @see IPath#toPortableString()
 	 * @since 3.1
 	 */
@@ -142,22 +135,20 @@ public class PathForURL implements IPath, Cloneable {
 		// not allowed
 	}
 
-	/** 
-	 * Constructs a new path from the given string path.
-	 * The string path must represent a valid file system path
-	 * on the local file system. 
-	 * The path is canonicalized and double slashes are removed
-	 * except at the beginning. (to handle UNC paths). All forward
-	 * slashes ('/') are treated as segment delimiters, and any
-	 * segment and device delimiters for the local file system are
-	 * also respected (such as colon (':') and backslash ('\') on some file systems).
+	/**
+	 * Constructs a new path from the given string path. The string path must represent a valid file system path on the local file system.
+	 * The path is canonicalized and double slashes are removed except at the beginning. (to handle UNC paths). All forward slashes ('/')
+	 * are treated as segment delimiters, and any segment and device delimiters for the local file system are also respected (such as colon
+	 * (':') and backslash ('\') on some file systems).
 	 *
-	 * @param fullPath the string path
-	 * @param isSVNUrl flag which tells whether to treat provided path as URL or not
+	 * @param fullPath
+	 *            the string path
+	 * @param isSVNUrl
+	 *            flag which tells whether to treat provided path as URL or not
 	 * @see #isValidPath(String)
 	 */
 	public PathForURL(String fullPath, boolean isSVNUrl) {
-		String devicePart = null;					
+		String devicePart = null;
 		if (isSVNUrl) {
 			//convert backslash to forward slash
 			fullPath = fullPath.indexOf('\\') == -1 ? fullPath : fullPath.replace('\\', SEPARATOR);
@@ -168,8 +159,7 @@ public class PathForURL implements IPath, Cloneable {
 				devicePart = fullPath.substring(0, i + 3);
 				fullPath = fullPath.substring(i + 3, fullPath.length());
 			}
-		}
-		else if (WINDOWS) {
+		} else if (WINDOWS) {
 			//convert backslash to forward slash
 			fullPath = fullPath.indexOf('\\') == -1 ? fullPath : fullPath.replace('\\', SEPARATOR);
 			//extract device
@@ -184,17 +174,15 @@ public class PathForURL implements IPath, Cloneable {
 		initialize(devicePart, fullPath);
 	}
 
-	/** 
-	 * Constructs a new path from the given device id and string path.
-	 * The given string path must be valid.
-	 * The path is canonicalized and double slashes are removed except
-	 * at the beginning (to handle UNC paths). All forward
-	 * slashes ('/') are treated as segment delimiters, and any
-	 * segment delimiters for the local file system are
-	 * also respected (such as backslash ('\') on some file systems).
+	/**
+	 * Constructs a new path from the given device id and string path. The given string path must be valid. The path is canonicalized and
+	 * double slashes are removed except at the beginning (to handle UNC paths). All forward slashes ('/') are treated as segment
+	 * delimiters, and any segment delimiters for the local file system are also respected (such as backslash ('\') on some file systems).
 	 *
-	 * @param device the device id
-	 * @param path the string path
+	 * @param device
+	 *            the device id
+	 * @param path
+	 *            the string path
 	 * @see #isValidPath(String)
 	 * @see #setDevice(String)
 	 */
@@ -266,7 +254,8 @@ public class PathForURL implements IPath, Cloneable {
 			newSegments[myLen + i] = tail.segment(i);
 		}
 		//use my leading separators and the tail's trailing separator
-		PathForURL result = new PathForURL(device, newSegments, (separators & (HAS_LEADING | IS_UNC)) | (tail.hasTrailingSeparator() ? HAS_TRAILING : 0));
+		PathForURL result = new PathForURL(device, newSegments,
+				(separators & (HAS_LEADING | IS_UNC)) | (tail.hasTrailingSeparator() ? HAS_TRAILING : 0));
 		String tailFirstSegment = newSegments[myLen];
 		if (tailFirstSegment.equals("..") || tailFirstSegment.equals(".")) { //$NON-NLS-1$ //$NON-NLS-2$
 			result.canonicalize();
@@ -303,10 +292,9 @@ public class PathForURL implements IPath, Cloneable {
 	/**
 	 * Destructively converts this path to its canonical form.
 	 * <p>
-	 * In its canonical form, a path does not have any
-	 * "." segments, and parent references ("..") are collapsed
-	 * where possible.
+	 * In its canonical form, a path does not have any "." segments, and parent references ("..") are collapsed where possible.
 	 * </p>
+	 * 
 	 * @return true if the path was modified, and false otherwise.
 	 */
 	private boolean canonicalize() {
@@ -377,8 +365,7 @@ public class PathForURL implements IPath, Cloneable {
 	}
 
 	/**
-	 * Removes duplicate slashes from the given path, with the exception
-	 * of leading double slash which represents a UNC path.
+	 * Removes duplicate slashes from the given path, with the exception of leading double slash which represents a UNC path.
 	 */
 	private String collapseSlashes(String path) {
 		int length = path.length();
@@ -514,8 +501,8 @@ public class PathForURL implements IPath, Cloneable {
 	}
 
 	/**
-	 * Returns the platform-neutral encoding of the given segment onto
-	 * the given string buffer. This escapes literal colon characters with double colons.
+	 * Returns the platform-neutral encoding of the given segment onto the given string buffer. This escapes literal colon characters with
+	 * double colons.
 	 */
 	private void encodeSegment(String string, StringBuffer buf) {
 		int len = string.length();
@@ -761,6 +748,7 @@ public class PathForURL implements IPath, Cloneable {
 
 	/**
 	 * {@inheritDoc}
+	 * 
 	 * @since org.eclipse.equinox.common 3.5
 	 */
 	public IPath makeRelativeTo(IPath base) {
@@ -903,7 +891,8 @@ public class PathForURL implements IPath, Cloneable {
 	 */
 	public IPath setDevice(String value) {
 		if (value != null) {
-			Assert.isTrue(value.indexOf(IPath.DEVICE_SEPARATOR) == (value.length() - 1), "Last character should be the device separator"); //$NON-NLS-1$
+			Assert.isTrue(value.indexOf(IPath.DEVICE_SEPARATOR) == (value.length() - 1),
+					"Last character should be the device separator"); //$NON-NLS-1$
 		}
 		//return the receiver if the device is the same
 		if (value == device || (value != null && value.equals(device)))

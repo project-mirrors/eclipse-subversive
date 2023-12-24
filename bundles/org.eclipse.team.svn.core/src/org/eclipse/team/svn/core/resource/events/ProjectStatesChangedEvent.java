@@ -27,36 +27,41 @@ import org.eclipse.core.resources.IResource;
  */
 public class ProjectStatesChangedEvent extends ResourceStatesChangedEvent {
 	public static final int ST_POST_SHARED = 0;
+
 	public static final int ST_POST_DISCONNECTED = 1;
+
 	public static final int ST_PRE_SHARED = 2;
+
 	public static final int ST_PRE_DISCONNECTED = 3;
+
 	// POST_CLOSE/POST_DELETE events are not provided by Eclipse Platform
 	public static final int ST_PRE_CLOSED = 4;
+
 	public static final int ST_PRE_DELETED = 5;
-	
+
 	public final int newState;
 
-	public ProjectStatesChangedEvent(IProject []projects, int newState) {
+	public ProjectStatesChangedEvent(IProject[] projects, int newState) {
 		super(projects, IResource.DEPTH_ZERO, ResourceStatesChangedEvent.CHANGED_NODES);
 		this.newState = newState;
 	}
 
 	@Override
 	public boolean canMerge(ResourceStatesChangedEvent e) {
-		if (e instanceof ProjectStatesChangedEvent) {			
-			return super.canMerge(e) && this.newState == ((ProjectStatesChangedEvent)e).newState;
+		if (e instanceof ProjectStatesChangedEvent) {
+			return super.canMerge(e) && this.newState == ((ProjectStatesChangedEvent) e).newState;
 		}
 		return false;
 	}
-	
+
 	@Override
 	public ProjectStatesChangedEvent merge(ResourceStatesChangedEvent event) {
-		IProject [] arr = new IProject[this.resources.length + event.resources.length];
+		IProject[] arr = new IProject[this.resources.length + event.resources.length];
 		System.arraycopy(this.resources, 0, arr, 0, this.resources.length);
 		System.arraycopy(event.resources, 0, arr, this.resources.length, event.resources.length);
 		return new ProjectStatesChangedEvent(arr, this.newState);
 	}
-	
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;

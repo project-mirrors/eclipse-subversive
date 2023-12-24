@@ -42,9 +42,10 @@ import org.eclipse.team.svn.core.utility.SVNUtility;
  */
 public class MoveOperation extends AbstractFileOperation {
 	protected File localTo;
+
 	protected boolean forceNonSVN;
-	
-	public MoveOperation(File []files, File localTo, boolean forceNonSVN) {
+
+	public MoveOperation(File[] files, File localTo, boolean forceNonSVN) {
 		super("Operation_MoveFile", SVNMessages.class, files); //$NON-NLS-1$
 		this.localTo = localTo;
 		this.forceNonSVN = forceNonSVN;
@@ -60,16 +61,16 @@ public class MoveOperation extends AbstractFileOperation {
 		ISchedulingRule parentRule = super.getSchedulingRule();
 		return MultiRule.combine(new LockingRule(this.localTo), parentRule);
 	}
-	
+
 	protected void runImpl(IProgressMonitor monitor) throws Exception {
-		File []files = this.operableData();
+		File[] files = this.operableData();
 		// allows moving of child and parent resources at the same time
 		FileUtility.reorder(files, false);
-		
+
 		IRepositoryResource remoteTo = SVNFileStorage.instance().asRepositoryResource(this.localTo, true);
 		IRepositoryLocation location = remoteTo == null ? null : remoteTo.getRepositoryLocation();
 		final ISVNConnector proxy = location == null ? null : location.acquireSVNProxy();
-		
+
 		for (int i = 0; i < files.length && !monitor.isCanceled(); i++) {
 			final File current = files[i];
 			this.protectStep(new IUnprotectedOperation() {
@@ -78,18 +79,18 @@ public class MoveOperation extends AbstractFileOperation {
 					File checked = MoveOperation.this.getRenameTo(current);
 					if (remote == null) {
 						MoveOperation.this.nonSVNMove(checked, current, monitor);
-					}
-					else if (proxy == null || MoveOperation.this.forceNonSVN) {
+					} else if (proxy == null || MoveOperation.this.forceNonSVN) {
 						MoveOperation.this.nonSVNCopy(current, monitor);
-						ProgressMonitorUtility.doTaskExternal(new DeleteOperation(new File[] {current}), monitor);
-					}
-					else {
-						proxy.moveLocal(new String[] {current.getAbsolutePath()}, checked.getAbsolutePath(), ISVNConnector.Options.FORCE | ISVNConnector.Options.ALLOW_MIXED_REVISIONS, new SVNProgressMonitor(MoveOperation.this, monitor, null));
+						ProgressMonitorUtility.doTaskExternal(new DeleteOperation(new File[] { current }), monitor);
+					} else {
+						proxy.moveLocal(new String[] { current.getAbsolutePath() }, checked.getAbsolutePath(),
+								ISVNConnector.Options.FORCE | ISVNConnector.Options.ALLOW_MIXED_REVISIONS,
+								new SVNProgressMonitor(MoveOperation.this, monitor, null));
 					}
 				}
 			}, monitor, files.length);
 		}
-		
+
 		if (location != null) {
 			location.releaseSVNProxy(proxy);
 		}
@@ -99,11 +100,11 @@ public class MoveOperation extends AbstractFileOperation {
 		File checked = new File(this.localTo.getAbsolutePath() + "/" + what.getName()); //$NON-NLS-1$
 		if (checked.exists()) {
 			String message = this.getNationalizedString("Error_AlreadyExists"); //$NON-NLS-1$
-			throw new UnreportableException(BaseMessages.format(message, new Object[] {checked.getAbsolutePath()}));
+			throw new UnreportableException(BaseMessages.format(message, new Object[] { checked.getAbsolutePath() }));
 		}
 		return checked;
 	}
-	
+
 	protected void nonSVNMove(File renameTo, File what, IProgressMonitor monitor) throws Exception {
 		if (!what.renameTo(renameTo)) {
 			this.nonSVNCopy(what, monitor);
@@ -118,5 +119,5 @@ public class MoveOperation extends AbstractFileOperation {
 			}
 		}, monitor);
 	}
-	
+
 }

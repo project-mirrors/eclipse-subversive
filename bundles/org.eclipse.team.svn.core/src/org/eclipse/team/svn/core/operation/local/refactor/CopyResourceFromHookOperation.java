@@ -32,16 +32,17 @@ import org.eclipse.team.svn.core.utility.SVNUtility;
 /**
  * Copy only work files without SVN meta information operation implementation
  * 
- * We can't call IResource API to make copying because of restrictions of caller context
- * so we use file system methods.
+ * We can't call IResource API to make copying because of restrictions of caller context so we use file system methods.
  * 
  * @author Igor Burilo
  */
 public class CopyResourceFromHookOperation extends AbstractActionOperation {
 	protected IResource source;
+
 	protected IResource destination;
+
 	protected int options;
-	
+
 	public CopyResourceFromHookOperation(IResource source, IResource destination, int options) {
 		super("Operation_CopyResourceFromHook", SVNMessages.class); //$NON-NLS-1$
 		this.source = source;
@@ -52,26 +53,29 @@ public class CopyResourceFromHookOperation extends AbstractActionOperation {
 	public ISchedulingRule getSchedulingRule() {
 		return SVNResourceRuleFactory.INSTANCE.copyRule(this.source, this.destination);
 	}
-	
+
 	protected String getShortErrorMessage(Throwable t) {
-		return BaseMessages.format(super.getShortErrorMessage(t), new Object[] {this.source.getName(), this.destination.toString()});
+		return BaseMessages.format(super.getShortErrorMessage(t),
+				new Object[] { this.source.getName(), this.destination.toString() });
 	}
-		
+
 	@Override
-	protected void runImpl(IProgressMonitor monitor) throws Exception {		
+	protected void runImpl(IProgressMonitor monitor) throws Exception {
 		//If we copy folder, then copy it to its parent
 		IResource toResource = this.destination;
 		if (toResource instanceof IContainer) {
 			toResource = toResource.getParent();
-			if (toResource == null) {			
-				String errMessage = SVNMessages.formatErrorString("Error_NoParent", new String[] {this.destination.getFullPath().toString()}); //$NON-NLS-1$
+			if (toResource == null) {
+				String errMessage = SVNMessages.formatErrorString("Error_NoParent", //$NON-NLS-1$
+						new String[] { this.destination.getFullPath().toString() });
 				throw new UnreportableException(errMessage);
 			}
-		}			
-		FileUtility.copyAll(new File(FileUtility.getWorkingCopyPath(toResource)), new File(FileUtility.getWorkingCopyPath(this.source)), this.options, new FileFilter() {
-			public boolean accept(File pathname) {
-				return !pathname.getName().equals(SVNUtility.getSVNFolderName());
-			}
-		}, monitor);									
+		}
+		FileUtility.copyAll(new File(FileUtility.getWorkingCopyPath(toResource)),
+				new File(FileUtility.getWorkingCopyPath(this.source)), this.options, new FileFilter() {
+					public boolean accept(File pathname) {
+						return !pathname.getName().equals(SVNUtility.getSVNFolderName());
+					}
+				}, monitor);
 	}
 }

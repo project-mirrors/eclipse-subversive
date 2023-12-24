@@ -37,23 +37,22 @@ public class SynchronizeAction extends AbstractWorkingCopyAction {
 	}
 
 	public void runImpl(IAction action) {
-		IWorkingSet []sets = this.getSelectedWorkingSets();
+		IWorkingSet[] sets = this.getSelectedWorkingSets();
 		ShowUpdateViewOperation op;
-		
+
 		if (ModelHelper.isShowModelSync()) {
-			ResourceMapping[] resourcesMapping = getSelectedResourceMappings(SVNTeamPlugin.NATURE_ID);			 
-			op = new ShowUpdateViewOperation(resourcesMapping, this.getTargetPart());	
+			ResourceMapping[] resourcesMapping = getSelectedResourceMappings(SVNTeamPlugin.NATURE_ID);
+			op = new ShowUpdateViewOperation(resourcesMapping, this.getTargetPart());
 		} else if (sets != null && sets.length > 0) {
 			op = new ShowUpdateViewOperation(new WorkingSetScope(sets), this.getTargetPart());
-		}
-		else {
-			IResource []resources = this.getSelectedResources(IStateFilter.SF_VERSIONED);
+		} else {
+			IResource[] resources = this.getSelectedResources(IStateFilter.SF_VERSIONED);
 			op = new ShowUpdateViewOperation(resources, this.getTargetPart());
 		}
 
 		this.runScheduled(op);
 	}
-	
+
 	public boolean isEnabled() {
 		return this.checkForResourcesPresence(IStateFilter.SF_VERSIONED);
 	}
@@ -61,9 +60,9 @@ public class SynchronizeAction extends AbstractWorkingCopyAction {
 	protected boolean needsToSaveDirtyEditors() {
 		return true;
 	}
-	
-	protected IWorkingSet []getSelectedWorkingSets() {
-		return (IWorkingSet [])this.getAdaptedSelection(IWorkingSet.class);
+
+	protected IWorkingSet[] getSelectedWorkingSets() {
+		return (IWorkingSet[]) this.getAdaptedSelection(IWorkingSet.class);
 	}
-	
+
 }

@@ -16,8 +16,7 @@ package org.eclipse.team.svn.core.discovery.model;
 import org.eclipse.team.svn.core.SVNMessages;
 
 /**
- * A means of specifying that a feature must be present in order for the connectorDescriptor to be presented to the
- * user.
+ * A means of specifying that a feature must be present in order for the connectorDescriptor to be presented to the user.
  * 
  * @author David Green
  * @author Igor Burilo
@@ -45,8 +44,7 @@ public class FeatureFilter {
 	}
 
 	/**
-	 * A version specifier, specified in the same manner as version dependencies are specified in an OSGi manifest. For
-	 * example: "[3.0,4.0)"
+	 * A version specifier, specified in the same manner as version dependencies are specified in an OSGi manifest. For example: "[3.0,4.0)"
 	 */
 	public String getVersion() {
 		return version;

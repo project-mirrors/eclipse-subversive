@@ -38,15 +38,15 @@ public class AddRepositoryLocationOperation extends AbstractActionOperation {
 	public ISchedulingRule getSchedulingRule() {
 		return null;
 	}
-	
+
 	protected void runImpl(IProgressMonitor monitor) throws Exception {
 		SVNRemoteStorage.instance().addRepositoryLocation(this.location);
 		//try to fetch repository root URL and UUID
 		this.location.getRepositoryRootUrl();
 	}
-	
+
 	protected String getShortErrorMessage(Throwable t) {
-		return BaseMessages.format(super.getShortErrorMessage(t), new Object[] {this.location.getUrl()});
+		return BaseMessages.format(super.getShortErrorMessage(t), new Object[] { this.location.getUrl() });
 	}
 
 }

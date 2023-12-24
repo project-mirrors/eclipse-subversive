@@ -27,35 +27,40 @@ import org.eclipse.core.resources.IResource;
  */
 public class UnresolvedConflictDetectorHelper implements IUnresolvedConflictDetector {
 
-    protected Set<IResource> processed;
-    protected Set<IResource> unprocessed;
+	protected Set<IResource> processed;
+
+	protected Set<IResource> unprocessed;
+
 	protected boolean hasUnresolvedConflict;
+
 	protected String conflictMessage;
-	
+
 	public void setUnresolvedConflict(boolean hasUnresolvedConflict) {
 		this.hasUnresolvedConflict = hasUnresolvedConflict;
 	}
-	
-	public boolean hasUnresolvedConflicts() {
-        return this.hasUnresolvedConflict;
-    }
-    
-    public String getMessage() {
-    	return this.conflictMessage;
-    }
-    
-    public IResource []getUnprocessed() {
-		return this.unprocessed == null ? new IResource[0] : this.unprocessed.toArray(new IResource[this.unprocessed.size()]);
-    }
 
-	public IResource []getProcessed() {
+	public boolean hasUnresolvedConflicts() {
+		return this.hasUnresolvedConflict;
+	}
+
+	public String getMessage() {
+		return this.conflictMessage;
+	}
+
+	public IResource[] getUnprocessed() {
+		return this.unprocessed == null
+				? new IResource[0]
+				: this.unprocessed.toArray(new IResource[this.unprocessed.size()]);
+	}
+
+	public IResource[] getProcessed() {
 		return this.processed == null ? new IResource[0] : this.processed.toArray(new IResource[this.processed.size()]);
 	}
-	
-	protected void defineInitialResourceSet(IResource []resources) {
-        this.hasUnresolvedConflict = false;
-        this.unprocessed = new HashSet<IResource>();
-        this.processed = new HashSet<IResource>();
+
+	protected void defineInitialResourceSet(IResource[] resources) {
+		this.hasUnresolvedConflict = false;
+		this.unprocessed = new HashSet<IResource>();
+		this.processed = new HashSet<IResource>();
 		this.processed.addAll(Arrays.asList(resources));
 	}
 
@@ -65,10 +70,10 @@ public class UnresolvedConflictDetectorHelper implements IUnresolvedConflictDete
 
 	public void setConflictMessage(String message) {
 		this.conflictMessage = message;
-		
+
 	}
-	
+
 	public void removeProcessed(IResource resource) {
-		this.unprocessed.remove(resource);		
+		this.unprocessed.remove(resource);
 	}
 }

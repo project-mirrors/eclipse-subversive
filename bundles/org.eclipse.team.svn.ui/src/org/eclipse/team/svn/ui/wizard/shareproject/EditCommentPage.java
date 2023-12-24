@@ -39,73 +39,77 @@ import org.eclipse.ui.PlatformUI;
  */
 public class EditCommentPage extends AbstractVerifiedWizardPage {
 	protected String commitComment;
+
 	protected IRepositoryLocation location;
+
 	protected CommentComposite commentComposite;
+
 	protected IResourceProvider provider;
+
 	protected boolean showCommitDialog;
 
 	public EditCommentPage(IResourceProvider provider) {
-		super(EditCommentPage.class.getName(), 
-				SVNUIMessages.EditCommentPage_Title, 
+		super(EditCommentPage.class.getName(), SVNUIMessages.EditCommentPage_Title,
 				SVNTeamUIPlugin.instance().getImageDescriptor("icons/wizards/newconnect.gif")); //$NON-NLS-1$
 		this.setDescription(SVNUIMessages.EditCommentPage_Description);
 		this.provider = provider;
 	}
-	
+
 	public boolean isShowCommitDialog() {
 		return this.showCommitDialog;
 	}
-	
+
 	public String getCommitComment() {
 		this.commentComposite.saveChanges();
 		return this.commentComposite.getMessage();
 	}
-	
+
 	public void setSelectedRepositoryLocation(IRepositoryLocation location) {
 		this.location = location;
 	}
-	
+
 	public void setDefaultCommitMessage() {
 		this.commitComment = ""; //$NON-NLS-1$
-		IProject []projects = this.getProjects();
+		IProject[] projects = this.getProjects();
 		for (int i = 0; i < projects.length; i++) {
 			String commentPart = ShareProjectOperation.getDefaultComment(projects[i], this.location.getRoot());
 			this.commitComment += this.commitComment.length() == 0 ? commentPart : ("\n" + commentPart); //$NON-NLS-1$
 		}
 		this.commentComposite.setMessage(this.commitComment);
 	}
-	
-	protected IProject []getProjects() {
-		return (IProject [])this.provider.getResources();
+
+	protected IProject[] getProjects() {
+		return (IProject[]) this.provider.getResources();
 	}
 
 	protected Composite createControlImpl(Composite parent) {
 		Composite composite = new Composite(parent, SWT.NONE);
 		composite.setLayout(new GridLayout());
 		composite.setLayoutData(new GridData(GridData.FILL_BOTH));
-		
+
 		this.commentComposite = new CommentComposite(composite, this.commitComment, this, null, null);
 		GridData data = new GridData(GridData.FILL_BOTH);
 		this.commentComposite.setLayoutData(data);
-		
-		Label separator = new Label (composite, SWT.SEPARATOR | SWT.HORIZONTAL);
+
+		Label separator = new Label(composite, SWT.SEPARATOR | SWT.HORIZONTAL);
 		separator.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		separator.setVisible(false);
-		
+
 		Button showComment = new Button(composite, SWT.CHECK);
 		showComment.setText(SVNUIMessages.EditCommentPage_LaunchCommit);
 		showComment.setSelection(this.showCommitDialog = true);
 		showComment.addSelectionListener(new SelectionListener() {
 			public void widgetSelected(SelectionEvent e) {
-				EditCommentPage.this.showCommitDialog = ((Button)e.widget).getSelection();
+				EditCommentPage.this.showCommitDialog = ((Button) e.widget).getSelection();
 			}
+
 			public void widgetDefaultSelected(SelectionEvent e) {
 			}
 		});
-		
+
 //		Setting context help
-        PlatformUI.getWorkbench().getHelpSystem().setHelp(composite, "org.eclipse.team.svn.help.editCommentContext"); //$NON-NLS-1$
-		
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(composite, "org.eclipse.team.svn.help.editCommentContext"); //$NON-NLS-1$
+
 		return composite;
 	}
 

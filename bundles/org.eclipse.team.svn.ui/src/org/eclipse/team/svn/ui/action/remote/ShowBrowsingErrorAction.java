@@ -32,23 +32,25 @@ import org.eclipse.team.svn.ui.repository.model.RepositoryError;
  * @author Sergiy Logvin
  */
 public class ShowBrowsingErrorAction extends AbstractRepositoryTeamAction {
-	
+
 	public ShowBrowsingErrorAction() {
 		super();
 	}
-	
+
 	public void runImpl(IAction action) {
 		Object selectedElement = this.getSelection().getFirstElement();
-		OperationErrorInfo errorInfo =  UILoggedOperation.formatMessage(((RepositoryError)selectedElement).getErrorStatus(), true);
+		OperationErrorInfo errorInfo = UILoggedOperation
+				.formatMessage(((RepositoryError) selectedElement).getErrorStatus(), true);
 		ErrorCancelPanel panel;
-        if (errorInfo.exception instanceof SVNConnectorCancelException || 
-        	errorInfo.exception instanceof ActivityCancelledException ||
-        	errorInfo.exception instanceof OperationCanceledException) {
-        	panel = new ErrorCancelPanel(SVNUIMessages.ShowBrowsingErrorAction_Dialog_Title, errorInfo.simpleMessage, errorInfo.advancedMessage, false, null);
-        } 
-        else {
-        	panel = new ErrorCancelPanel(SVNUIMessages.ShowBrowsingErrorAction_Dialog_Title, errorInfo.numberOfErrors, errorInfo.simpleMessage, errorInfo.advancedMessage, false, false, null);
-        }
+		if (errorInfo.exception instanceof SVNConnectorCancelException
+				|| errorInfo.exception instanceof ActivityCancelledException
+				|| errorInfo.exception instanceof OperationCanceledException) {
+			panel = new ErrorCancelPanel(SVNUIMessages.ShowBrowsingErrorAction_Dialog_Title, errorInfo.simpleMessage,
+					errorInfo.advancedMessage, false, null);
+		} else {
+			panel = new ErrorCancelPanel(SVNUIMessages.ShowBrowsingErrorAction_Dialog_Title, errorInfo.numberOfErrors,
+					errorInfo.simpleMessage, errorInfo.advancedMessage, false, false, null);
+		}
 		DefaultDialog dialog = new DefaultDialog(this.getShell(), panel);
 		dialog.open();
 	}
@@ -56,5 +58,5 @@ public class ShowBrowsingErrorAction extends AbstractRepositoryTeamAction {
 	public boolean isEnabled() {
 		return true;
 	}
-	
+
 }

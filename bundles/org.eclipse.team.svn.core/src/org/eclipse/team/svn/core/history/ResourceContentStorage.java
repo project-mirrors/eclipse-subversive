@@ -39,40 +39,42 @@ import org.eclipse.team.svn.core.utility.SVNUtility;
  * @author Alexander Gurov
  */
 public class ResourceContentStorage implements IEncodedStorage {
-    protected AbstractGetFileContentOperation op;
-    protected String charSet;
+	protected AbstractGetFileContentOperation op;
+
+	protected String charSet;
+
 	protected IRepositoryResource remote;
-	
+
 	public ResourceContentStorage(IRepositoryResource remote) {
 		this.remote = remote;
 	}
-    
+
 	public InputStream getContents() {
 		this.fetchContents(null);
 		return this.op.getContent();
 	}
 
 	public synchronized void fetchContents(IProgressMonitor monitor) {
-	    if (this.op == null) {
+		if (this.op == null) {
 			this.op = this.getLoadContentOperation();
-	        CompositeOperation composite = new CompositeOperation(this.op.getId(), this.op.getMessagesClass());
-	        composite.add(this.op);
-	        composite.add(new AbstractActionOperation("Operation_DetectCharset", SVNMessages.class) { //$NON-NLS-1$
-                protected void runImpl(IProgressMonitor monitor) throws Exception {
-                    ResourceContentStorage.this.detectCharset(ResourceContentStorage.this.op.getContent());
-                }
-	        }, new IActionOperation[] {this.op});
-	        if (monitor == null) {
+			CompositeOperation composite = new CompositeOperation(this.op.getId(), this.op.getMessagesClass());
+			composite.add(this.op);
+			composite.add(new AbstractActionOperation("Operation_DetectCharset", SVNMessages.class) { //$NON-NLS-1$
+				protected void runImpl(IProgressMonitor monitor) throws Exception {
+					ResourceContentStorage.this.detectCharset(ResourceContentStorage.this.op.getContent());
+				}
+			}, new IActionOperation[] { this.op });
+			if (monitor == null) {
 				monitor = new NullProgressMonitor();
-	        }
-        	ProgressMonitorUtility.doTaskExternalDefault(composite, monitor);
-	    }
+			}
+			ProgressMonitorUtility.doTaskExternalDefault(composite, monitor);
+		}
 	}
 
 	public IPath getFullPath() {
 		return SVNUtility.createPathForSVNUrl(this.remote.getUrl());
 	}
-	
+
 	public IPath getTemporaryPath() {
 		this.fetchContents(null);
 		return new Path(this.op.getTemporaryPath());
@@ -91,33 +93,36 @@ public class ResourceContentStorage implements IEncodedStorage {
 	}
 
 	public String getCharset() {
-	    return this.charSet;
+		return this.charSet;
 	}
-	
+
 	public IRepositoryResource getRepositoryResource() {
 		return this.remote;
 	}
-	
+
 	public boolean equals(Object obj) {
 		if (obj == null || !(obj instanceof ResourceContentStorage)) {
 			return false;
 		}
-		IRepositoryResource other = ((ResourceContentStorage)obj).getRepositoryResource();
+		IRepositoryResource other = ((ResourceContentStorage) obj).getRepositoryResource();
 		return this.remote.equals(other);
 	}
-	
+
 	protected AbstractGetFileContentOperation getLoadContentOperation() {
-	    return new GetFileContentOperation(this.remote);
+		return new GetFileContentOperation(this.remote);
 	}
-	
+
 	protected void detectCharset(InputStream stream) throws Exception {
 		try {
-			IContentDescription description = Platform.getContentTypeManager().getDescriptionFor(stream, this.getName(), IContentDescription.ALL);
-            this.charSet = description == null ? null : description.getCharset();
-		} 
-		finally {
-			try {stream.close();} catch (Exception ex) {}
+			IContentDescription description = Platform.getContentTypeManager()
+					.getDescriptionFor(stream, this.getName(), IContentDescription.ALL);
+			this.charSet = description == null ? null : description.getCharset();
+		} finally {
+			try {
+				stream.close();
+			} catch (Exception ex) {
+			}
 		}
 	}
-	
+
 }

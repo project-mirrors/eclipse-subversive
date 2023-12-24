@@ -27,8 +27,9 @@ import org.eclipse.team.svn.core.extension.CoreExtensionsManager;
  */
 public class DefaultErrorHandlingFacility implements IErrorHandlingFacility {
 	protected List<IResolutionHelper> helpers;
+
 	private boolean extensionsFetched;
-	
+
 	public DefaultErrorHandlingFacility() {
 		this.helpers = new ArrayList<IResolutionHelper>();
 		this.extensionsFetched = false;
@@ -45,7 +46,7 @@ public class DefaultErrorHandlingFacility implements IErrorHandlingFacility {
 	}
 
 	public boolean acquireResolution(ErrorDescription description) {
-		IResolutionHelper []helpers = this.getHelpers();
+		IResolutionHelper[] helpers = this.getHelpers();
 		for (int i = 0; i < helpers.length; i++) {
 			if (helpers[i].acquireResolution(description)) {
 				return true;
@@ -54,12 +55,12 @@ public class DefaultErrorHandlingFacility implements IErrorHandlingFacility {
 		return false;
 	}
 
-	protected synchronized IResolutionHelper []getHelpers() {
+	protected synchronized IResolutionHelper[] getHelpers() {
 		if (!this.extensionsFetched) {
 			this.helpers.addAll(Arrays.asList(CoreExtensionsManager.instance().getResolutionHelpers()));
 			this.extensionsFetched = true;
 		}
 		return this.helpers.toArray(new IResolutionHelper[this.helpers.size()]);
 	}
-	
+
 }

@@ -46,15 +46,15 @@ public class LoggedOperation implements IActionOperation {
 		}
 		return this.op;
 	}
-	
+
 	public int getOperationWeight() {
 		return IActionOperation.DEFAULT_WEIGHT;
 	}
-	
+
 	public IConsoleStream getConsoleStream() {
 		return this.op.getConsoleStream();
 	}
-	
+
 	public void setConsoleStream(IConsoleStream stream) {
 		this.op.setConsoleStream(stream);
 	}
@@ -62,72 +62,69 @@ public class LoggedOperation implements IActionOperation {
 	public ISchedulingRule getSchedulingRule() {
 		return this.op.getSchedulingRule();
 	}
-	
+
 	public String getOperationName() {
 		return this.op.getOperationName();
 	}
-	
+
 	public String getId() {
 		return this.op.getId();
 	}
-	
+
 	public Class<? extends NLS> getMessagesClass() {
 		return this.op.getMessagesClass();
 	}
-	
+
 	public final IStatus getStatus() {
 		return this.op.getStatus();
 	}
-	
+
 	public int getExecutionState() {
 		return this.op.getExecutionState();
 	}
-	
+
 	public void reportStatus(int severity, String message, Throwable t) {
 		this.op.reportStatus(severity, message, t);
 	}
 
 	public static void reportError(String where, Throwable t) {
-		String errMessage = SVNMessages.format(SVNMessages.Operation_Error_LogHeader, new String[] {where});
-	    MultiStatus status = new MultiStatus(SVNTeamPlugin.NATURE_ID, IStatus.OK, errMessage, null);
-		Status st = 
-			new Status(
-					IStatus.ERROR, 
-					SVNTeamPlugin.NATURE_ID, 
-					IStatus.OK, 
-					status.getMessage() + ": " + t.getMessage(),  //$NON-NLS-1$
-					t);
+		String errMessage = SVNMessages.format(SVNMessages.Operation_Error_LogHeader, new String[] { where });
+		MultiStatus status = new MultiStatus(SVNTeamPlugin.NATURE_ID, IStatus.OK, errMessage, null);
+		Status st = new Status(
+				IStatus.ERROR, SVNTeamPlugin.NATURE_ID, IStatus.OK, status.getMessage() + ": " + t.getMessage(), //$NON-NLS-1$
+				t);
 		status.merge(st);
 		LoggedOperation.logError(status);
 	}
-	
+
 	protected void handleError(IStatus errorStatus) {
 		if (!errorStatus.isMultiStatus()) {
 			Throwable ex = errorStatus.getException();
-			if (!(ex instanceof SVNConnectorCancelException) && !(ex instanceof ActivityCancelledException) && !(ex instanceof OperationCanceledException)) {
+			if (!(ex instanceof SVNConnectorCancelException) && !(ex instanceof ActivityCancelledException)
+					&& !(ex instanceof OperationCanceledException)) {
 				LoggedOperation.logError(errorStatus);
 			}
 			return;
-        }
-		
-		IStatus []children = errorStatus.getChildren();
-		ArrayList <IStatus>statusesWithoutCancel = new ArrayList<IStatus>(); 
-        for (int i = 0; i < children.length; i++) {
-            Throwable exception = children[i].getException();
-        	if (!(exception instanceof SVNConnectorCancelException) && !(exception instanceof ActivityCancelledException) && !(exception instanceof OperationCanceledException)) {
-        		statusesWithoutCancel.add(children[i]);
-            }
-        }
-        if (statusesWithoutCancel.size() > 0) {
-		    IStatus newStatus = new MultiStatus(errorStatus.getPlugin(), 
-		    		errorStatus.getCode(), 
-		    		statusesWithoutCancel.toArray(new IStatus[statusesWithoutCancel.size()]),
-		    		errorStatus.getMessage(),
-		    		errorStatus.getException());
-		    LoggedOperation.logError(newStatus);
-        }
+		}
+
+		IStatus[] children = errorStatus.getChildren();
+		ArrayList<IStatus> statusesWithoutCancel = new ArrayList<IStatus>();
+		for (int i = 0; i < children.length; i++) {
+			Throwable exception = children[i].getException();
+			if (!(exception instanceof SVNConnectorCancelException)
+					&& !(exception instanceof ActivityCancelledException)
+					&& !(exception instanceof OperationCanceledException)) {
+				statusesWithoutCancel.add(children[i]);
+			}
+		}
+		if (statusesWithoutCancel.size() > 0) {
+			IStatus newStatus = new MultiStatus(errorStatus.getPlugin(), errorStatus.getCode(),
+					statusesWithoutCancel.toArray(new IStatus[statusesWithoutCancel.size()]), errorStatus.getMessage(),
+					errorStatus.getException());
+			LoggedOperation.logError(newStatus);
+		}
 	}
-	
+
 	protected static void logError(IStatus errorStatus) {
 		SVNTeamPlugin.instance().getLog().log(errorStatus);
 	}

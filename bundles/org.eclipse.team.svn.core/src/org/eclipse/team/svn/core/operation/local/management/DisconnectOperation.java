@@ -33,10 +33,11 @@ import org.eclipse.team.svn.core.utility.FileUtility;
  * @author Alexander Gurov
  */
 public class DisconnectOperation extends AbstractActionOperation {
-	protected IProject []projects;
+	protected IProject[] projects;
+
 	protected boolean dropSVNFolders;
 
-	public DisconnectOperation(IProject []projects, boolean dropSVNFolders) {
+	public DisconnectOperation(IProject[] projects, boolean dropSVNFolders) {
 		super("Operation_Disconnect", SVNMessages.class); //$NON-NLS-1$
 		this.projects = projects;
 		this.dropSVNFolders = dropSVNFolders;
@@ -49,11 +50,11 @@ public class DisconnectOperation extends AbstractActionOperation {
 		}
 		return new MultiRule(rules.toArray(new ISchedulingRule[rules.size()]));
 	}
-	
+
 	protected void runImpl(IProgressMonitor monitor) throws Exception {
 		for (int i = 0; i < this.projects.length; i++) {
 			final IProject current = this.projects[i];
-			
+
 			this.protectStep(new IUnprotectedOperation() {
 				public void run(IProgressMonitor monitor) throws Exception {
 					if (RepositoryProvider.isShared(current)) { // it seems sometimes projects could be unmapped prior to running this code, for example by an outside activity (see bug #403385)
@@ -66,5 +67,5 @@ public class DisconnectOperation extends AbstractActionOperation {
 			}, monitor, this.projects.length);
 		}
 	}
-	
+
 }

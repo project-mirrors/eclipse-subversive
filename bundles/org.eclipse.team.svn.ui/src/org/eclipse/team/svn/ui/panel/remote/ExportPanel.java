@@ -42,41 +42,47 @@ import org.eclipse.team.svn.ui.verifier.ExistingResourceVerifier;
  */
 public class ExportPanel extends AbstractDialogPanel {
 	protected Text locationField;
+
 	protected String location;
+
 	protected RevisionComposite revisionComposite;
+
 	protected IRepositoryResource selectedResource;
+
 	protected DepthSelectionComposite depthSelector;
-	
+
 	public ExportPanel(IRepositoryResource baseResource) {
 		super();
 		this.dialogTitle = SVNUIMessages.ExportPanel_Title;
 		this.dialogDescription = SVNUIMessages.ExportPanel_Description;
 		this.defaultMessage = SVNUIMessages.ExportPanel_Message;
 		this.selectedResource = baseResource;
-	}	
-	
-	public SVNRevision getSelectedRevision() {
-		return this.revisionComposite != null ? this.revisionComposite.getSelectedRevision() : SVNRevision.INVALID_REVISION;
 	}
-	
+
+	public SVNRevision getSelectedRevision() {
+		return this.revisionComposite != null
+				? this.revisionComposite.getSelectedRevision()
+				: SVNRevision.INVALID_REVISION;
+	}
+
 	protected void saveChangesImpl() {
 		this.location = this.locationField.getText();
 	}
 
-    protected void cancelChangesImpl() {
-    }
-    
-    public SVNDepth getDepth(){
-    	if (this.depthSelector == null) {
-    		return SVNDepth.INFINITY;
-    	}
-    	return this.depthSelector.getDepth();
-    }
-    
+	protected void cancelChangesImpl() {
+	}
+
+	public SVNDepth getDepth() {
+		if (this.depthSelector == null) {
+			return SVNDepth.INFINITY;
+		}
+		return this.depthSelector.getDepth();
+	}
+
 	public void createControlsImpl(Composite parent) {
 		GridLayout layout = null;
 		GridData data = null;
-		
+
 		Composite folderComposite = new Composite(parent, SWT.NULL);
 		layout = new GridLayout();
 		layout.numColumns = 3;
@@ -84,17 +90,17 @@ public class ExportPanel extends AbstractDialogPanel {
 		folderComposite.setLayout(layout);
 		data = new GridData(GridData.FILL_HORIZONTAL);
 		folderComposite.setLayoutData(data);
-		
+
 		Label label = new Label(folderComposite, SWT.NONE);
 		data = new GridData();
 		label.setLayoutData(data);
 		label.setText(SVNUIMessages.ExportPanel_Folder);
-		
-		this.locationField = new Text(folderComposite,  SWT.SINGLE | SWT.BORDER);
+
+		this.locationField = new Text(folderComposite, SWT.SINGLE | SWT.BORDER);
 		data = new GridData(GridData.FILL_HORIZONTAL);
 		this.locationField.setLayoutData(data);
 		this.attachTo(this.locationField, new ExistingResourceVerifier(label.getText(), false));
-		
+
 		Button browseButton = new Button(folderComposite, SWT.PUSH);
 		browseButton.setText(SVNUIMessages.Button_Browse);
 		data = new GridData();
@@ -111,29 +117,29 @@ public class ExportPanel extends AbstractDialogPanel {
 				}
 			}
 		});
-		
+
 		if (this.selectedResource != null) {
 			this.revisionComposite = new RevisionComposite(parent, this, false, null, SVNRevision.HEAD, false);
 			data = new GridData(GridData.FILL_HORIZONTAL);
 			this.revisionComposite.setLayoutData(data);
 			this.revisionComposite.setSelectedResource(this.selectedResource);
 		}
-		
+
 		if (this.selectedResource instanceof IRepositoryContainer || this.selectedResource == null) {
 			Label separator = new Label(parent, SWT.HORIZONTAL | SWT.SEPARATOR);
 			separator.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 			separator.setVisible(false);
-			
+
 			this.depthSelector = new DepthSelectionComposite(parent, SWT.NONE, false);
 			data = new GridData(GridData.FILL_HORIZONTAL);
 			this.depthSelector.setLayoutData(data);
 		}
 	}
-	
+
 	public String getHelpId() {
-    	return "org.eclipse.team.svn.help.remote_exportDialogContext"; //$NON-NLS-1$
+		return "org.eclipse.team.svn.help.remote_exportDialogContext"; //$NON-NLS-1$
 	}
-	
+
 	public String getLocation() {
 		return this.location;
 	}

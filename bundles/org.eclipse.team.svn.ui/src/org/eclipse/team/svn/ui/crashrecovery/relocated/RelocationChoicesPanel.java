@@ -26,27 +26,31 @@ import org.eclipse.team.svn.ui.SVNUIMessages;
 import org.eclipse.team.svn.ui.panel.AbstractDialogPanel;
 
 /**
- * Allows user to select how plug-in should process project relocation. There are two choices:
- * 1) Change repository location URL and relocate all related projects if it is required
- * 2) Run 'Share Project' wizard in order to select a new repository location for the project
+ * Allows user to select how plug-in should process project relocation. There are two choices: 1) Change repository location URL and
+ * relocate all related projects if it is required 2) Run 'Share Project' wizard in order to select a new repository location for the
+ * project
  * 
  * @author Alexander Gurov
  */
 public class RelocationChoicesPanel extends AbstractDialogPanel {
 	public static final int DISCONNECT_PROJECT = -1;
+
 	public static final int RELOCATE_THE_PROJECT_BACK = 0;
+
 	public static final int RELOCATE_REST_OF_PROJECTS = 1;
+
 	public static final int SHARE_WITH_ANOTHER_LOCATION = 2;
-	
+
 	protected int recoveryAction;
 
 	public RelocationChoicesPanel(IProject project) {
 		super();
 		this.dialogTitle = SVNUIMessages.RelocationChoicesPanel_Title;
-		this.dialogDescription = SVNUIMessages.format(SVNUIMessages.RelocationChoicesPanel_Description, new String[] {project.getName()});
+		this.dialogDescription = SVNUIMessages.format(SVNUIMessages.RelocationChoicesPanel_Description,
+				new String[] { project.getName() });
 		this.defaultMessage = SVNUIMessages.RelocationChoicesPanel_Message;
 	}
-	
+
 	public int getRecoveryAction() {
 		return this.recoveryAction;
 	}
@@ -54,7 +58,7 @@ public class RelocationChoicesPanel extends AbstractDialogPanel {
 	protected void createControlsImpl(Composite parent) {
 		GridLayout layout = null;
 		GridData data = null;
-		
+
 		Composite composite = new Composite(parent, SWT.NONE);
 		layout = new GridLayout();
 		layout.numColumns = 1;
@@ -62,7 +66,7 @@ public class RelocationChoicesPanel extends AbstractDialogPanel {
 		composite.setLayout(layout);
 		data = new GridData(GridData.FILL_BOTH);
 		composite.setLayoutData(data);
-		
+
 		Button relocateOthers = new Button(composite, SWT.RADIO);
 		data = new GridData(GridData.FILL_HORIZONTAL);
 		relocateOthers.setLayoutData(data);
@@ -71,12 +75,12 @@ public class RelocationChoicesPanel extends AbstractDialogPanel {
 		this.recoveryAction = RelocationChoicesPanel.RELOCATE_REST_OF_PROJECTS;
 		relocateOthers.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				if (((Button)e.widget).getSelection()) {
+				if (((Button) e.widget).getSelection()) {
 					RelocationChoicesPanel.this.recoveryAction = RelocationChoicesPanel.RELOCATE_REST_OF_PROJECTS;
 				}
 			}
 		});
-		
+
 		Button relocateBack = new Button(composite, SWT.RADIO);
 		data = new GridData(GridData.FILL_HORIZONTAL);
 		relocateBack.setLayoutData(data);
@@ -84,12 +88,12 @@ public class RelocationChoicesPanel extends AbstractDialogPanel {
 		relocateBack.setSelection(false);
 		relocateBack.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				if (((Button)e.widget).getSelection()) {
+				if (((Button) e.widget).getSelection()) {
 					RelocationChoicesPanel.this.recoveryAction = RelocationChoicesPanel.RELOCATE_THE_PROJECT_BACK;
 				}
 			}
 		});
-		
+
 		Button runShareWizard = new Button(composite, SWT.RADIO);
 		data = new GridData(GridData.FILL_HORIZONTAL);
 		runShareWizard.setLayoutData(data);
@@ -97,13 +101,13 @@ public class RelocationChoicesPanel extends AbstractDialogPanel {
 		runShareWizard.setSelection(false);
 		runShareWizard.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				if (((Button)e.widget).getSelection()) {
+				if (((Button) e.widget).getSelection()) {
 					RelocationChoicesPanel.this.recoveryAction = RelocationChoicesPanel.SHARE_WITH_ANOTHER_LOCATION;
 				}
 			}
 		});
 	}
-	
+
 	protected void cancelChangesImpl() {
 		this.recoveryAction = RelocationChoicesPanel.DISCONNECT_PROJECT;
 	}

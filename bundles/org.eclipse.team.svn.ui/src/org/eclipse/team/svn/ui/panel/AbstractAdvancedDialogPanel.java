@@ -22,26 +22,27 @@ import org.eclipse.jface.dialogs.IDialogConstants;
  * @author Sergiy Logvin
  */
 public abstract class AbstractAdvancedDialogPanel extends AbstractDialogPanel {
-	protected String []buttonNamesEx;
-	
+	protected String[] buttonNamesEx;
+
 	public AbstractAdvancedDialogPanel() {
-        this(new String[] {IDialogConstants.OK_LABEL, IDialogConstants.CANCEL_LABEL}, new String[] {IDialogConstants.SHOW_DETAILS_LABEL});
-    }
+		this(new String[] { IDialogConstants.OK_LABEL, IDialogConstants.CANCEL_LABEL },
+				new String[] { IDialogConstants.SHOW_DETAILS_LABEL });
+	}
 
-    public AbstractAdvancedDialogPanel(String []buttonNames, String []buttonNamesEx) {
-        super(buttonNames);
-        this.buttonNamesEx = buttonNamesEx;
-    }
-        
-    public String []getButtonNamesEx() {
-        return this.buttonNamesEx;
-    }
+	public AbstractAdvancedDialogPanel(String[] buttonNames, String[] buttonNamesEx) {
+		super(buttonNames);
+		this.buttonNamesEx = buttonNamesEx;
+	}
 
-    public void extendedButtonPressed(int idx) {
-    	if (idx == 0) {
-    		this.showDetails();
-    	}
-    }
-    
-    protected abstract void showDetails();
+	public String[] getButtonNamesEx() {
+		return this.buttonNamesEx;
+	}
+
+	public void extendedButtonPressed(int idx) {
+		if (idx == 0) {
+			this.showDetails();
+		}
+	}
+
+	protected abstract void showDetails();
 }

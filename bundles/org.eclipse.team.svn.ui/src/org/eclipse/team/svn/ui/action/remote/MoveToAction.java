@@ -32,20 +32,22 @@ public class MoveToAction extends AbstractCopyMoveAction {
 	public MoveToAction() {
 		super("MoveToAction");
 	}
-	
-	protected AbstractCopyMoveResourcesOperation makeCopyOperation(IRepositoryResource destination, IRepositoryResource[] selected, String message, String name) {
+
+	protected AbstractCopyMoveResourcesOperation makeCopyOperation(IRepositoryResource destination,
+			IRepositoryResource[] selected, String message, String name) {
 		return new MoveResourcesOperation(destination, selected, message, name);
 	}
 
-	protected RefreshRemoteResourcesOperation makeRefreshOperation(IRepositoryResource destination, IRepositoryResource[] selected) {
-		IRepositoryResource []toRefresh = new IRepositoryResource[selected.length + 1];
+	protected RefreshRemoteResourcesOperation makeRefreshOperation(IRepositoryResource destination,
+			IRepositoryResource[] selected) {
+		IRepositoryResource[] toRefresh = new IRepositoryResource[selected.length + 1];
 		System.arraycopy(selected, 0, toRefresh, 0, selected.length);
 		toRefresh[selected.length] = destination;
 		return new RefreshRemoteResourcesOperation(SVNUtility.getCommonParents(toRefresh));
 	}
 
 	public boolean isEnabled() {
-		IRepositoryResource []resources = this.getSelectedRepositoryResources();
+		IRepositoryResource[] resources = this.getSelectedRepositoryResources();
 		if (resources.length == 0) {
 			return false;
 		}
@@ -53,10 +55,10 @@ public class MoveToAction extends AbstractCopyMoveAction {
 		IRepositoryLocation first = resources[0].getRepositoryLocation();
 		for (int i = 0; i < resources.length; i++) {
 			IRepositoryLocation location = resources[i].getRepositoryLocation();
-			if (first != location || 
-				resources[i].getSelectedRevision().getKind() != Kind.HEAD || 
-				resources[i] instanceof IRepositoryRoot && 
-				(((IRepositoryRoot)resources[i]).getKind() == IRepositoryRoot.KIND_ROOT || ((IRepositoryRoot)resources[i]).getKind() == IRepositoryRoot.KIND_LOCATION_ROOT)) {
+			if (first != location || resources[i].getSelectedRevision().getKind() != Kind.HEAD
+					|| resources[i] instanceof IRepositoryRoot && (((IRepositoryRoot) resources[i])
+							.getKind() == IRepositoryRoot.KIND_ROOT
+							|| ((IRepositoryRoot) resources[i]).getKind() == IRepositoryRoot.KIND_LOCATION_ROOT)) {
 				return false;
 			}
 		}

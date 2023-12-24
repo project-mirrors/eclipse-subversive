@@ -30,8 +30,7 @@ import org.eclipse.ui.console.PatternMatchEvent;
 import org.eclipse.ui.console.TextConsole;
 
 /**
- * Listen to SVN console. Finds lines that contains local resources paths.
- * Adds hyperlinks to local resources. 
+ * Listen to SVN console. Finds lines that contains local resources paths. Adds hyperlinks to local resources.
  *
  * @author Alexey Mikoyan
  *
@@ -40,15 +39,16 @@ import org.eclipse.ui.console.TextConsole;
 public class LocalPathMatcher implements IPatternMatchListenerDelegate, IPropertyChangeListener {
 
 	protected Pattern pattern;
-	
+
 	protected TextConsole console;
+
 	protected boolean enabled;
-	
+
 	public void createPattern() {
 		String regExp = "(?:\\s|\")(?:[A-Z]\\:)?(?:[\\\\/][^\\\\/\\:\\?\\*\r\n\"]+)+"; //$NON-NLS-1$
 		this.pattern = Pattern.compile(regExp);
 	}
-	
+
 	public void connect(TextConsole console) {
 		this.console = console;
 		this.createPattern();
@@ -61,7 +61,7 @@ public class LocalPathMatcher implements IPatternMatchListenerDelegate, IPropert
 			this.loadPreferences();
 		}
 	}
-	
+
 	public void disconnect() {
 		this.console = null;
 		SVNTeamUIPlugin.instance().getPreferenceStore().removePropertyChangeListener(this);
@@ -73,20 +73,20 @@ public class LocalPathMatcher implements IPatternMatchListenerDelegate, IPropert
 		}
 		UIMonitorUtility.doTaskBusyDefault(new AddConsoleHyperlinkOperation(event));
 	}
-	
+
 	protected void loadPreferences() {
 		IPreferenceStore store = SVNTeamUIPlugin.instance().getPreferenceStore();
 		this.enabled = SVNTeamPreferences.getConsoleBoolean(store, SVNTeamPreferences.CONSOLE_HYPERLINKS_ENABLED_NAME);
 	}
-	
+
 	protected class AddConsoleHyperlinkOperation extends AbstractActionOperation {
 		protected PatternMatchEvent event;
-		
+
 		public AddConsoleHyperlinkOperation(PatternMatchEvent event) {
 			super("Operation_AddConsoleHyperlink", SVNUIMessages.class); //$NON-NLS-1$
 			this.event = event;
 		}
-		
+
 		protected void runImpl(IProgressMonitor monitor) throws Exception {
 			int offset = this.event.getOffset();
 			int length = this.event.getLength();
@@ -94,14 +94,16 @@ public class LocalPathMatcher implements IPatternMatchListenerDelegate, IPropert
 			if (path == null) {
 				return;
 			}
-			
-	    	Matcher matcher = LocalPathMatcher.this.pattern.matcher(path);
-	    	if (matcher.find(0)) {
+
+			Matcher matcher = LocalPathMatcher.this.pattern.matcher(path);
+			if (matcher.find(0)) {
 				String link = matcher.group(matcher.groupCount()).trim();
-				LocalPathMatcher.this.console.addHyperlink(new LocalFileHyperlink(link), offset + matcher.start(matcher.groupCount()) + 1, matcher.group(matcher.groupCount()).length() - 1);
-	    	}
+				LocalPathMatcher.this.console.addHyperlink(new LocalFileHyperlink(link),
+						offset + matcher.start(matcher.groupCount()) + 1,
+						matcher.group(matcher.groupCount()).length() - 1);
+			}
 		}
-		
+
 	}
 
 }

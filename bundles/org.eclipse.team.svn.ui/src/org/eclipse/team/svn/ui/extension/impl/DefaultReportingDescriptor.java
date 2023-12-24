@@ -27,7 +27,7 @@ public class DefaultReportingDescriptor implements IReportingDescriptor {
 	public String getEmailTo() {
 		return "subversive-bugs@polarion.org"; //$NON-NLS-1$
 	}
-	
+
 	public String getEmailFrom() {
 		return "subversive-bugs@polarion.org"; //$NON-NLS-1$
 	}
@@ -38,7 +38,7 @@ public class DefaultReportingDescriptor implements IReportingDescriptor {
 
 	public String getPort() {
 		return "25"; //$NON-NLS-1$
-	}	
+	}
 
 	public String getProductName() {
 		return "Subversive"; //$NON-NLS-1$
@@ -51,7 +51,7 @@ public class DefaultReportingDescriptor implements IReportingDescriptor {
 	public String getTrackerUrl() {
 		return "https://bugs.eclipse.org/bugs"; //$NON-NLS-1$
 	}
-	
+
 	public boolean isTrackerSupportsHTML() {
 		return false;
 	}

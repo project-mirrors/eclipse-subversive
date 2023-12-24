@@ -34,10 +34,10 @@ public class ShareProjectsAction extends AbstractLocalTeamAction {
 	public ShareProjectsAction() {
 		super();
 	}
-	
+
 	public void runImpl(IAction action) {
-		IProject []projects = this.getProjectsToShare();
-		
+		IProject[] projects = this.getProjectsToShare();
+
 		ShareProjectWizard wizard = new ShareProjectWizard();
 		wizard.init(projects);
 		WizardDialog dialog = new WizardDialog(this.getShell(), wizard);
@@ -45,9 +45,9 @@ public class ShareProjectsAction extends AbstractLocalTeamAction {
 		dialog.open();
 	}
 
-	protected IProject []getProjectsToShare() {
+	protected IProject[] getProjectsToShare() {
 		HashSet<IProject> projects = new HashSet<IProject>(Arrays.asList(this.getSelectedProjects()));
-		for (Iterator<IProject> it = projects.iterator(); it.hasNext(); ) {
+		for (Iterator<IProject> it = projects.iterator(); it.hasNext();) {
 			IProject project = it.next();
 			if (!project.isAccessible() || RepositoryProvider.getProvider(project) != null) {
 				it.remove();
@@ -55,9 +55,9 @@ public class ShareProjectsAction extends AbstractLocalTeamAction {
 		}
 		return projects.toArray(new IProject[projects.size()]);
 	}
-	
+
 	public boolean isEnabled() {
-		IProject []projects = this.getSelectedProjects();
+		IProject[] projects = this.getSelectedProjects();
 		for (int i = 0; i < projects.length; i++) {
 			if (projects[i].isAccessible() && RepositoryProvider.getProvider(projects[i]) == null) {
 				return true;

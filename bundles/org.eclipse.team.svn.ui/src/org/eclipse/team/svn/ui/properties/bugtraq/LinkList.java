@@ -29,7 +29,7 @@ public class LinkList {
 	public LinkList() {
 		super();
 	}
-	
+
 	public List<LinkPlacement> getLinks() {
 		return this.links;
 	}
@@ -42,7 +42,7 @@ public class LinkList {
 		}
 		return false;
 	}
-	
+
 	public LinkPlacement getLinkAt(int offset) {
 		for (LinkPlacement link : this.links) {
 			if (link.existAtOffset(offset)) {
@@ -51,32 +51,40 @@ public class LinkList {
 		}
 		return null;
 	}
-	
+
 	public static class LinkPlacement {
 		protected int start;
+
 		protected int end;
+
 		protected String linkText;
-		
+
 		public LinkPlacement(int start, int end, String message) {
-			this.linkText =  message.substring(start, end);
+			this.linkText = message.substring(start, end);
 			this.start = start;
 			this.end = end;
-		}	
+		}
+
 		protected boolean existAtOffset(int offset) {
 			return (this.start <= offset) && (offset < this.end);
 		}
+
 		public int getStart() {
 			return this.start;
 		}
+
 		public void setStart(int start) {
 			this.start = start;
 		}
+
 		public int getEnd() {
 			return this.end;
 		}
+
 		public void setEnd(int end) {
 			this.end = end;
 		}
+
 		public String getURL() {
 			return this.linkText;
 		}

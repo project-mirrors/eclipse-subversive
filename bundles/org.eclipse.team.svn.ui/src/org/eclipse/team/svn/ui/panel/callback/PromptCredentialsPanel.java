@@ -55,119 +55,133 @@ import org.eclipse.team.svn.ui.utility.UIMonitorUtility;
  * @author Alexander Gurov
  */
 public class PromptCredentialsPanel extends AbstractDialogPanel {
-    public static ISVNCredentialsPrompt DEFAULT_PROMPT = new DefaultPrompt();
+	public static ISVNCredentialsPrompt DEFAULT_PROMPT = new DefaultPrompt();
 
-    protected String selectedRealm;
-    
-    protected CredentialsComposite credentialsComposite;
+	protected String selectedRealm;
+
+	protected CredentialsComposite credentialsComposite;
+
 	protected String username;
+
 	protected String password;
+
 	protected String host;
+
 	protected boolean savePassword;
-	
+
 	protected SSHComposite compositeSSH;
+
 	protected SSLComposite compositeSSL;
+
 	protected ProxyComposite proxyComposite;
-	
+
 	protected SSHSettings sshSettings;
+
 	protected SSLSettings sslSettings;
 
 	protected String rootLocationName;
-	
-	protected int connectionType;
-	
-	public PromptCredentialsPanel() {
-        this("", SVNRepositoryLocation.DEFAULT_CONNECTION); //$NON-NLS-1$
-    }
-    
-    public PromptCredentialsPanel(String forWhat, int connectionType) {
-        super();
-        this.dialogTitle = SVNUIMessages.PromptCredentialsPanel_Title;
-        this.dialogDescription = SVNUIMessages.PromptCredentialsPanel_Description;
-        this.rootLocationName = SVNUIMessages.PromptCredentialsPanel_LocationRealm;
-        this.defaultMessage = forWhat;
-        this.host = SVNTeamPlugin.instance().getProxyService().getProxyData(
-        		forWhat.split(":")[0].equals("https") ? IProxyData.HTTPS_PROXY_TYPE : IProxyData.HTTP_PROXY_TYPE).getHost(); //$NON-NLS-1$ //$NON-NLS-2$
-        this.connectionType = connectionType;
-        this.selectedRealm = this.connectionType != SVNRepositoryLocation.PROXY_CONNECTION ? forWhat : this.rootLocationName;
 
-        this.sslSettings = new SSLSettings();
-        this.sslSettings.setAuthenticationEnabled(true);
-        this.sshSettings = new SSHSettings();
-        this.sshSettings.setUseKeyFile(true);
-        this.savePassword = false;
+	protected int connectionType;
+
+	public PromptCredentialsPanel() {
+		this("", SVNRepositoryLocation.DEFAULT_CONNECTION); //$NON-NLS-1$
+	}
+
+	public PromptCredentialsPanel(String forWhat, int connectionType) {
+		super();
+		this.dialogTitle = SVNUIMessages.PromptCredentialsPanel_Title;
+		this.dialogDescription = SVNUIMessages.PromptCredentialsPanel_Description;
+		this.rootLocationName = SVNUIMessages.PromptCredentialsPanel_LocationRealm;
+		this.defaultMessage = forWhat;
+		this.host = SVNTeamPlugin.instance()
+				.getProxyService()
+				.getProxyData(
+						forWhat.split(":")[0].equals("https") //$NON-NLS-1$//$NON-NLS-2$
+								? IProxyData.HTTPS_PROXY_TYPE
+								: IProxyData.HTTP_PROXY_TYPE)
+				.getHost();
+		this.connectionType = connectionType;
+		this.selectedRealm = this.connectionType != SVNRepositoryLocation.PROXY_CONNECTION
+				? forWhat
+				: this.rootLocationName;
+
+		this.sslSettings = new SSLSettings();
+		this.sslSettings.setAuthenticationEnabled(true);
+		this.sshSettings = new SSHSettings();
+		this.sshSettings.setUseKeyFile(true);
+		this.savePassword = false;
 		this.username = null;
 		this.password = null;
-    }
+	}
 
 	public String getRealmToSave() {
 		return this.selectedRealm == this.rootLocationName ? ISVNCredentialsPrompt.ROOT_LOCATION : this.selectedRealm;
 	}
-	
+
 	public void setUsername(String username) {
 		this.username = username;
 	}
-	
+
 	public String getUsername() {
 		return this.username;
 	}
-	
+
 	public void setPassword(String password) {
 		this.password = password;
 	}
-	
+
 	public String getPassword() {
 		return this.password;
 	}
-	
+
 	public void setSavePasswordEnabled(boolean savePassword) {
 		this.savePassword = savePassword;
 	}
-	
+
 	public boolean isSavePasswordEnabled() {
 		return this.savePassword;
 	}
-	
+
 	public String getSSHPassphrase() {
 		return this.sshSettings.getPassPhrase();
 	}
-	
+
 	public void setSSHPassphrase(String passphrase) {
 		this.sshSettings.setPassPhrase(passphrase);
 	}
-	
+
 	public boolean isSSHPassphraseSaved() {
 		return this.sshSettings.isPassPhraseSaved();
 	}
-	
+
 	public void setSSHPassphraseSaved(boolean passphraseSaved) {
 		this.sshSettings.setPassPhraseSaved(passphraseSaved);
 	}
-	
+
 	public String getSSHPrivateKeyFile() {
 		return this.sshSettings.getPrivateKeyPath();
 	}
-	
+
 	public void setSSHPrivateKeyFile(String privateKeyFile) {
 		this.sshSettings.setPrivateKeyPath(privateKeyFile);
 	}
-	
+
 	public int getSSHPort() {
 		return this.sshSettings.getPort();
 	}
-	
+
 	public void setSSHPort(int sshPort) {
 		this.sshSettings.setPort(sshPort);
-	} 
-	
+	}
+
 	public boolean isSSHPublicKeySelected() {
 		return this.sshSettings.isUseKeyFile();
 	}
-	
+
 	public void setSSHPublicKeySelected(boolean publicKeySelected) {
 		this.sshSettings.setUseKeyFile(publicKeySelected);
 	};
-	
+
 	public boolean isSSLAuthenticationEnabled() {
 		return this.sslSettings.isAuthenticationEnabled();
 	}
@@ -175,7 +189,7 @@ public class PromptCredentialsPanel extends AbstractDialogPanel {
 	public void setSSLAuthenticationEnabled(boolean sslAuthenticationEnabled) {
 		this.sslSettings.setAuthenticationEnabled(sslAuthenticationEnabled);
 	}
-	
+
 	public String getSSLCertificatePath() {
 		return this.sslSettings.getCertificatePath();
 	}
@@ -199,31 +213,32 @@ public class PromptCredentialsPanel extends AbstractDialogPanel {
 	public void setSSLPassphraseSaved(boolean sslPassphraseSaved) {
 		this.sslSettings.setPassPhraseSaved(sslPassphraseSaved);
 	}
-    
-    public void createControlsImpl(Composite parent) {
+
+	public void createControlsImpl(Composite parent) {
 		GridLayout layout = null;
 		GridData data = null;
-		
+
 		TabFolder tabFolder = new TabFolder(parent, SWT.NONE);
 		tabFolder.setLayout(new TabFolderLayout());
-		tabFolder.setLayoutData(new GridData(GridData.FILL_BOTH));		
-		
+		tabFolder.setLayoutData(new GridData(GridData.FILL_BOTH));
+
 		Composite composite = new Composite(tabFolder, SWT.NONE);
 		layout = new GridLayout();
 		layout.marginHeight = 3;
 		composite.setLayout(layout);
 		data = new GridData(GridData.FILL_BOTH);
 		composite.setLayoutData(data);
-		composite.setVisible(this.connectionType != SVNRepositoryLocation.PROXY_CONNECTION && this.connectionType != SVNRepositoryLocation.SSL_CONNECTION);
-		
+		composite.setVisible(this.connectionType != SVNRepositoryLocation.PROXY_CONNECTION
+				&& this.connectionType != SVNRepositoryLocation.SSL_CONNECTION);
+
 		this.createGeneral(composite);
-		
+
 		if (this.connectionType != SVNRepositoryLocation.PROXY_CONNECTION) {
 			if (this.connectionType != SVNRepositoryLocation.SSL_CONNECTION) {
 				TabItem tabItem = new TabItem(tabFolder, SWT.NONE);
 				tabItem.setText(SVNUIMessages.PromptCredentialsPanel_Tab_General);
 				tabItem.setControl(composite);
-				
+
 				if (this.connectionType == SVNRepositoryLocation.SSH_CONNECTION) {
 					tabItem = new TabItem(tabFolder, SWT.NONE);
 					tabItem.setText(SVNUIMessages.PromptCredentialsPanel_Tab_SSHSettings);
@@ -232,11 +247,10 @@ public class PromptCredentialsPanel extends AbstractDialogPanel {
 					this.compositeSSH.initialize();
 					tabItem.setControl(this.compositeSSH);
 					if (this.isSSHPublicKeySelected()) {
-						tabFolder.setSelection(new TabItem[] {tabItem});
+						tabFolder.setSelection(new TabItem[] { tabItem });
 					}
 				}
-			}
-			else {
+			} else {
 				TabItem tabItem = new TabItem(tabFolder, SWT.NONE);
 				tabItem.setText(SVNUIMessages.PromptCredentialsPanel_Tab_SSLSettings);
 				this.compositeSSL = new SSLComposite(tabFolder, SWT.NONE, this, true);
@@ -244,19 +258,19 @@ public class PromptCredentialsPanel extends AbstractDialogPanel {
 				this.compositeSSL.initialize();
 				tabItem.setControl(this.compositeSSL);
 			}
-		}
-		else {
+		} else {
 			TabItem tabItem = new TabItem(tabFolder, SWT.NONE);
 			tabItem.setText(SVNUIMessages.PromptCredentialsPanel_Tab_ProxySettings);
 			this.proxyComposite = new ProxyComposite(tabFolder, SWT.NONE, this, true);
-			SVNCachedProxyCredentialsManager proxyCredentialsManager = SVNRemoteStorage.instance().getProxyCredentialsManager();
-   			this.proxyComposite.setUsername(proxyCredentialsManager.getUsername());
-   			this.proxyComposite.setPassword(proxyCredentialsManager.getPassword());
-   			this.proxyComposite.setHost(this.host);
+			SVNCachedProxyCredentialsManager proxyCredentialsManager = SVNRemoteStorage.instance()
+					.getProxyCredentialsManager();
+			this.proxyComposite.setUsername(proxyCredentialsManager.getUsername());
+			this.proxyComposite.setPassword(proxyCredentialsManager.getPassword());
+			this.proxyComposite.setHost(this.host);
 			this.proxyComposite.initialize();
 			tabItem.setControl(this.proxyComposite);
 		}
-		
+
 		if (this.connectionType != SVNRepositoryLocation.PROXY_CONNECTION) {
 			composite = new Composite(parent, SWT.NONE);
 			layout = new GridLayout();
@@ -266,16 +280,16 @@ public class PromptCredentialsPanel extends AbstractDialogPanel {
 			composite.setLayout(layout);
 			data = new GridData(GridData.FILL_HORIZONTAL);
 			composite.setLayoutData(data);
-			
+
 			Label label = new Label(composite, SWT.NONE);
 			data = new GridData();
 			label.setLayoutData(data);
 			label.setText(SVNUIMessages.PromptCredentialsPanel_ApplyTo);
-			
+
 			final Combo combo = new Combo(composite, SWT.BORDER | SWT.READ_ONLY);
 			data = new GridData(GridData.FILL_HORIZONTAL);
 			combo.setLayoutData(data);
-			combo.setItems(new String[] {this.selectedRealm, this.rootLocationName});
+			combo.setItems(new String[] { this.selectedRealm, this.rootLocationName });
 			combo.select(0);
 			combo.addSelectionListener(new SelectionAdapter() {
 				public void widgetSelected(SelectionEvent e) {
@@ -283,120 +297,150 @@ public class PromptCredentialsPanel extends AbstractDialogPanel {
 				}
 			});
 		}
-    }
+	}
 
-    public void postInit() {
+	public void postInit() {
 		if (this.connectionType == SVNRepositoryLocation.SSH_CONNECTION) {
 			this.compositeSSH.resetChanges();
 		}
 		if (this.connectionType == SVNRepositoryLocation.SSL_CONNECTION) {
 			this.compositeSSL.resetChanges();
 		}
-    	super.postInit();
-    }
-    
-    protected void createGeneral(Composite parent) {
+		super.postInit();
+	}
+
+	protected void createGeneral(Composite parent) {
 		this.credentialsComposite = new CredentialsComposite(parent, SWT.NONE);
-		
+
 		this.credentialsComposite.setUsernameInput(this.username);
 		this.credentialsComposite.setPasswordInput(this.password);
 		this.credentialsComposite.setPasswordSaved(this.savePassword);
-		
+
 		this.credentialsComposite.initialize();
-    }
-    
-    protected void saveChangesImpl() {
-    	if (this.connectionType != SVNRepositoryLocation.PROXY_CONNECTION) {
-    		this.username = this.credentialsComposite.getUsername().getText().trim();
-    		this.password = this.credentialsComposite.getPassword().getText().trim();
-    		this.savePassword = this.credentialsComposite.getSavePassword().getSelection();
-    	
-    		if (this.connectionType == SVNRepositoryLocation.SSH_CONNECTION) {
-    			this.compositeSSH.saveChanges();
-    		}
-		
+	}
+
+	protected void saveChangesImpl() {
+		if (this.connectionType != SVNRepositoryLocation.PROXY_CONNECTION) {
+			this.username = this.credentialsComposite.getUsername().getText().trim();
+			this.password = this.credentialsComposite.getPassword().getText().trim();
+			this.savePassword = this.credentialsComposite.getSavePassword().getSelection();
+
+			if (this.connectionType == SVNRepositoryLocation.SSH_CONNECTION) {
+				this.compositeSSH.saveChanges();
+			}
+
 			if (this.connectionType == SVNRepositoryLocation.SSL_CONNECTION) {
 				this.compositeSSL.saveChanges();
 			}
-    	} 
-    	else {
-    		this.proxyComposite.saveChanges();
-    		SVNCachedProxyCredentialsManager proxyCredentialsManager = SVNRemoteStorage.instance().getProxyCredentialsManager();
+		} else {
+			this.proxyComposite.saveChanges();
+			SVNCachedProxyCredentialsManager proxyCredentialsManager = SVNRemoteStorage.instance()
+					.getProxyCredentialsManager();
 			proxyCredentialsManager.setUsername(this.proxyComposite.getUsername());
 			proxyCredentialsManager.setPassword(this.proxyComposite.getPassword());
 		}
-    }
+	}
 
-    protected void cancelChangesImpl() {
-    }
+	protected void cancelChangesImpl() {
+	}
 
-    protected static class DefaultPrompt implements ISVNCredentialsPrompt {
-        protected String realmToSave;
-    	protected String username;
-    	protected String password;
+	protected static class DefaultPrompt implements ISVNCredentialsPrompt {
+		protected String realmToSave;
+
+		protected String username;
+
+		protected String password;
+
 		protected boolean saveCredentials;
+
 		protected boolean sslAuthenticationEnabled;
+
 		protected boolean sslSavePassphrase;
-    	protected String sslClientCertPassword;
+
+		protected String sslClientCertPassword;
+
 		protected String sslClientCertPath;
+
 		protected boolean sshPublicKeySelected;
+
 		protected String sshPrivateKeyPath;
+
 		protected String sshPrivateKeyPassphrase;
+
 		protected boolean sshPrivateKeyPassphraseSaved;
+
 		protected int sshPort;
+
 		protected boolean proxyEnabled;
+
 		protected String proxyHost;
+
 		protected int proxyPort;
+
 		protected boolean proxyAuthenticationEnabled;
+
 		protected String proxyUsername;
+
 		protected String proxyPassword;
+
 		protected boolean proxySavePassword;
-		
+
 		public String getRealmToSave() {
 			return this.realmToSave;
 		}
-		
-        public boolean prompt(Object context, String realm) {
-            return this.showPanel((IRepositoryLocation)context, SVNRepositoryLocation.DEFAULT_CONNECTION, realm);
-        }
-        
-		public boolean promptSSL(Object context, String realm) {
-			return this.showPanel((IRepositoryLocation)context, SVNRepositoryLocation.SSL_CONNECTION, realm);
+
+		public boolean prompt(Object context, String realm) {
+			return this.showPanel((IRepositoryLocation) context, SVNRepositoryLocation.DEFAULT_CONNECTION, realm);
 		}
 
-	    public boolean promptSSH(Object context, String realm) {
-	    	return this.showPanel((IRepositoryLocation)context, SVNRepositoryLocation.SSH_CONNECTION, realm);
-	    }
-	    
-		public boolean promptProxy(Object context) {
-			return this.showPanel((IRepositoryLocation)context, SVNRepositoryLocation.PROXY_CONNECTION, ((IRepositoryLocation)context).getUrlAsIs());
-		}	
-	    
-		public Answer askTrustSSLServer(final Object context, final SSLServerCertificateFailures failures, final SSLServerCertificateInfo info, final boolean allowPermanently) {
-            final int []retVal = new int[1];
-            UIMonitorUtility.getDisplay().syncExec(new Runnable() {
-                public void run() {
-                    AskTrustSSLServerPanel panel = new AskTrustSSLServerPanel(((IRepositoryLocation)context).getUrlAsIs(), failures, info, allowPermanently);
-                    DefaultDialog dlg = new DefaultDialog(UIMonitorUtility.getShell(), panel);
-                	retVal[0] = dlg.open();
-	            }
-	        });
-			return retVal[0] == 0 ? ISVNCredentialsPrompt.Answer.ACCEPT_TEMPORARY : (retVal[0] == 2 ? ISVNCredentialsPrompt.Answer.REJECT : (retVal[0] == 1 ? (allowPermanently ? ISVNCredentialsPrompt.Answer.ACCEPT_PERMANENTLY : ISVNCredentialsPrompt.Answer.REJECT) : ISVNCredentialsPrompt.Answer.REJECT));
+		public boolean promptSSL(Object context, String realm) {
+			return this.showPanel((IRepositoryLocation) context, SVNRepositoryLocation.SSL_CONNECTION, realm);
 		}
-        
-        public String getUsername() {
-            return this.username;
-        }
-        
-        public String getPassword() {
-            return this.password;
-        }
-        
-        public boolean isSaveCredentialsEnabled() {
-            return this.saveCredentials;
-        }
-        
-        public boolean isSSLAuthenticationEnabled() {
+
+		public boolean promptSSH(Object context, String realm) {
+			return this.showPanel((IRepositoryLocation) context, SVNRepositoryLocation.SSH_CONNECTION, realm);
+		}
+
+		public boolean promptProxy(Object context) {
+			return this.showPanel((IRepositoryLocation) context, SVNRepositoryLocation.PROXY_CONNECTION,
+					((IRepositoryLocation) context).getUrlAsIs());
+		}
+
+		public Answer askTrustSSLServer(final Object context, final SSLServerCertificateFailures failures,
+				final SSLServerCertificateInfo info, final boolean allowPermanently) {
+			final int[] retVal = new int[1];
+			UIMonitorUtility.getDisplay().syncExec(new Runnable() {
+				public void run() {
+					AskTrustSSLServerPanel panel = new AskTrustSSLServerPanel(
+							((IRepositoryLocation) context).getUrlAsIs(), failures, info, allowPermanently);
+					DefaultDialog dlg = new DefaultDialog(UIMonitorUtility.getShell(), panel);
+					retVal[0] = dlg.open();
+				}
+			});
+			return retVal[0] == 0
+					? ISVNCredentialsPrompt.Answer.ACCEPT_TEMPORARY
+					: (retVal[0] == 2
+							? ISVNCredentialsPrompt.Answer.REJECT
+							: (retVal[0] == 1
+									? (allowPermanently
+											? ISVNCredentialsPrompt.Answer.ACCEPT_PERMANENTLY
+											: ISVNCredentialsPrompt.Answer.REJECT)
+									: ISVNCredentialsPrompt.Answer.REJECT));
+		}
+
+		public String getUsername() {
+			return this.username;
+		}
+
+		public String getPassword() {
+			return this.password;
+		}
+
+		public boolean isSaveCredentialsEnabled() {
+			return this.saveCredentials;
+		}
+
+		public boolean isSSLAuthenticationEnabled() {
 			return this.sslAuthenticationEnabled;
 		}
 
@@ -412,26 +456,26 @@ public class PromptCredentialsPanel extends AbstractDialogPanel {
 			return this.sslClientCertPassword;
 		}
 
-	    public String getSSHPrivateKeyPath() {
-	    	return this.sshPublicKeySelected ? this.sshPrivateKeyPath : null;
-	    }
-	    
-	    public String getSSHPrivateKeyPassphrase() {
-	    	return this.sshPublicKeySelected ? this.sshPrivateKeyPassphrase : null;
-	    }
-	    
-	    public int getSSHPort() {
-	    	return this.sshPort;
-	    }
-	    
+		public String getSSHPrivateKeyPath() {
+			return this.sshPublicKeySelected ? this.sshPrivateKeyPath : null;
+		}
+
+		public String getSSHPrivateKeyPassphrase() {
+			return this.sshPublicKeySelected ? this.sshPrivateKeyPassphrase : null;
+		}
+
+		public int getSSHPort() {
+			return this.sshPort;
+		}
+
 		public boolean isSSHPublicKeySelected() {
 			return this.sshPublicKeySelected;
 		}
-		
+
 		public boolean isSSHPrivateKeyPassphraseSaved() {
 			return this.sshPrivateKeyPassphraseSaved;
 		}
-		
+
 		public String getProxyHost() {
 			return this.proxyHost;
 		}
@@ -447,11 +491,11 @@ public class PromptCredentialsPanel extends AbstractDialogPanel {
 		public String getProxyPassword() {
 			return this.proxyPassword;
 		}
-		
+
 		public boolean isProxyEnabled() {
 			return this.proxyEnabled;
 		}
-		
+
 		public boolean isProxyAuthenticationEnabled() {
 			return this.proxyAuthenticationEnabled;
 		}
@@ -459,91 +503,90 @@ public class PromptCredentialsPanel extends AbstractDialogPanel {
 		public boolean isSaveProxyPassword() {
 			return this.proxySavePassword;
 		}
-	    
-	    protected boolean showPanel(IRepositoryLocation inputLocation, final int connectionType, final String realm) {
-	    	final IRepositoryLocation location = inputLocation.getLocationForRealm(realm) != null ? inputLocation.getLocationForRealm(realm) : inputLocation;
-            final int []retVal = new int[1];
-            final SSLSettings settings = location.getSSLSettings();
-            
-            UIMonitorUtility.getDisplay().syncExec(new Runnable() {
-                public void run() {
-                    PromptCredentialsPanel panel = new PromptCredentialsPanel(realm, connectionType);
-                    DefaultDialog dialog = new DefaultDialog(UIMonitorUtility.getShell(), panel);
-                    if (connectionType != SVNRepositoryLocation.PROXY_CONNECTION) {
-                    	 panel.setUsername(location.getUsername());
-                         panel.setPassword(location.getPassword());
-                         panel.setSavePasswordEnabled(location.isPasswordSaved());
-                         if (connectionType == SVNRepositoryLocation.SSH_CONNECTION) {
-                         	SSHSettings settings = location.getSSHSettings();
-                         	panel.setSSHPublicKeySelected(settings.isUseKeyFile());
-                         	panel.setSSHPrivateKeyFile(settings.getPrivateKeyPath());
-                         	panel.setSSHPassphrase(settings.getPassPhrase());
-                         	panel.setSSHPassphraseSaved(settings.isPassPhraseSaved());
-                         	panel.setSSHPort(settings.getPort());
-                         } else if (connectionType == SVNRepositoryLocation.SSL_CONNECTION) {
-                         	panel.setSSLAuthenticationEnabled(settings.isAuthenticationEnabled());
-                         	panel.setSSLCertificatePath(settings.getCertificatePath());
-                         	panel.setSSLPassphrase(settings.getPassPhrase());
-                         	panel.setSSLPassphraseSaved(settings.isPassPhraseSaved());
-                         }
-                    } 
-                    if ((retVal[0] = dialog.open()) == 0) {
-                    	DefaultPrompt.this.realmToSave = panel.getRealmToSave();
-                    	if (connectionType != SVNRepositoryLocation.PROXY_CONNECTION) {
-                    		DefaultPrompt.this.username = panel.getUsername();
-                    		DefaultPrompt.this.password = panel.getPassword();
-                    		DefaultPrompt.this.saveCredentials = panel.isSavePasswordEnabled();
-                    		
-                    		if (connectionType == SVNRepositoryLocation.SSH_CONNECTION) {
-                            	DefaultPrompt.this.sshPublicKeySelected = panel.isSSHPublicKeySelected();
-                            	DefaultPrompt.this.sshPrivateKeyPath = panel.getSSHPrivateKeyFile();
-                            	DefaultPrompt.this.sshPrivateKeyPassphrase = panel.getSSHPassphrase();
-                            	DefaultPrompt.this.sshPort = panel.getSSHPort();
-                            	DefaultPrompt.this.sshPrivateKeyPassphraseSaved = panel.isSSHPassphraseSaved();
-                            }
-                            if (connectionType == SVNRepositoryLocation.SSL_CONNECTION) {
-                            	DefaultPrompt.this.sslAuthenticationEnabled = panel.isSSLAuthenticationEnabled();
-                            	DefaultPrompt.this.sslClientCertPath = panel.getSSLCertificatePath();
-                            	DefaultPrompt.this.sslClientCertPassword = panel.getSSLPassphrase();
-                            	DefaultPrompt.this.sslSavePassphrase = panel.isSSLPassphraseSaved();
-                            }
-                    	} 
-                    	else {
-                    		IProxyService proxyService = SVNTeamPlugin.instance().getProxyService();
-                    		String proxyType;
-                    		SVNCachedProxyCredentialsManager proxyCredentialsManager = SVNRemoteStorage.instance().getProxyCredentialsManager();
-                    		String protocol = "http"; //$NON-NLS-1$
-                    		try {
-                    			protocol = SVNUtility.getSVNUrl(location.getUrlAsIs()).getProtocol();
-                    		}
-                    		catch (MalformedURLException ex) {
-                    			//ignore
-                    		}
-                    		if (protocol != null && protocol.equals("https")) { //$NON-NLS-1$
-                    			proxyType = IProxyData.HTTPS_PROXY_TYPE;
-                    		}
-                    		else {
-                    			proxyType = IProxyData.HTTP_PROXY_TYPE;
-                    		}
-                    		IProxyData proxyData = proxyService.getProxyData(proxyType);
-                            DefaultPrompt.this.proxyHost = proxyData.getHost();
-                            DefaultPrompt.this.proxyPort = proxyData.getPort();
-                            DefaultPrompt.this.proxyAuthenticationEnabled = proxyData.isRequiresAuthentication();
-                            DefaultPrompt.this.proxyUsername = proxyCredentialsManager.getUsername();
-                            DefaultPrompt.this.proxyPassword = proxyCredentialsManager.getPassword();
-                            DefaultPrompt.this.proxySavePassword = true;
-                        }
-                    }
-                    else {
-                        DefaultPrompt.this.username = null;
-                        DefaultPrompt.this.password = null;
-                        DefaultPrompt.this.saveCredentials = false;
-                    }
-                }
-            });
-            return retVal[0] == 0;
-	    }
-	    
-    }
+
+		protected boolean showPanel(IRepositoryLocation inputLocation, final int connectionType, final String realm) {
+			final IRepositoryLocation location = inputLocation.getLocationForRealm(realm) != null
+					? inputLocation.getLocationForRealm(realm)
+					: inputLocation;
+			final int[] retVal = new int[1];
+			final SSLSettings settings = location.getSSLSettings();
+
+			UIMonitorUtility.getDisplay().syncExec(new Runnable() {
+				public void run() {
+					PromptCredentialsPanel panel = new PromptCredentialsPanel(realm, connectionType);
+					DefaultDialog dialog = new DefaultDialog(UIMonitorUtility.getShell(), panel);
+					if (connectionType != SVNRepositoryLocation.PROXY_CONNECTION) {
+						panel.setUsername(location.getUsername());
+						panel.setPassword(location.getPassword());
+						panel.setSavePasswordEnabled(location.isPasswordSaved());
+						if (connectionType == SVNRepositoryLocation.SSH_CONNECTION) {
+							SSHSettings settings = location.getSSHSettings();
+							panel.setSSHPublicKeySelected(settings.isUseKeyFile());
+							panel.setSSHPrivateKeyFile(settings.getPrivateKeyPath());
+							panel.setSSHPassphrase(settings.getPassPhrase());
+							panel.setSSHPassphraseSaved(settings.isPassPhraseSaved());
+							panel.setSSHPort(settings.getPort());
+						} else if (connectionType == SVNRepositoryLocation.SSL_CONNECTION) {
+							panel.setSSLAuthenticationEnabled(settings.isAuthenticationEnabled());
+							panel.setSSLCertificatePath(settings.getCertificatePath());
+							panel.setSSLPassphrase(settings.getPassPhrase());
+							panel.setSSLPassphraseSaved(settings.isPassPhraseSaved());
+						}
+					}
+					if ((retVal[0] = dialog.open()) == 0) {
+						DefaultPrompt.this.realmToSave = panel.getRealmToSave();
+						if (connectionType != SVNRepositoryLocation.PROXY_CONNECTION) {
+							DefaultPrompt.this.username = panel.getUsername();
+							DefaultPrompt.this.password = panel.getPassword();
+							DefaultPrompt.this.saveCredentials = panel.isSavePasswordEnabled();
+
+							if (connectionType == SVNRepositoryLocation.SSH_CONNECTION) {
+								DefaultPrompt.this.sshPublicKeySelected = panel.isSSHPublicKeySelected();
+								DefaultPrompt.this.sshPrivateKeyPath = panel.getSSHPrivateKeyFile();
+								DefaultPrompt.this.sshPrivateKeyPassphrase = panel.getSSHPassphrase();
+								DefaultPrompt.this.sshPort = panel.getSSHPort();
+								DefaultPrompt.this.sshPrivateKeyPassphraseSaved = panel.isSSHPassphraseSaved();
+							}
+							if (connectionType == SVNRepositoryLocation.SSL_CONNECTION) {
+								DefaultPrompt.this.sslAuthenticationEnabled = panel.isSSLAuthenticationEnabled();
+								DefaultPrompt.this.sslClientCertPath = panel.getSSLCertificatePath();
+								DefaultPrompt.this.sslClientCertPassword = panel.getSSLPassphrase();
+								DefaultPrompt.this.sslSavePassphrase = panel.isSSLPassphraseSaved();
+							}
+						} else {
+							IProxyService proxyService = SVNTeamPlugin.instance().getProxyService();
+							String proxyType;
+							SVNCachedProxyCredentialsManager proxyCredentialsManager = SVNRemoteStorage.instance()
+									.getProxyCredentialsManager();
+							String protocol = "http"; //$NON-NLS-1$
+							try {
+								protocol = SVNUtility.getSVNUrl(location.getUrlAsIs()).getProtocol();
+							} catch (MalformedURLException ex) {
+								//ignore
+							}
+							if (protocol != null && protocol.equals("https")) { //$NON-NLS-1$
+								proxyType = IProxyData.HTTPS_PROXY_TYPE;
+							} else {
+								proxyType = IProxyData.HTTP_PROXY_TYPE;
+							}
+							IProxyData proxyData = proxyService.getProxyData(proxyType);
+							DefaultPrompt.this.proxyHost = proxyData.getHost();
+							DefaultPrompt.this.proxyPort = proxyData.getPort();
+							DefaultPrompt.this.proxyAuthenticationEnabled = proxyData.isRequiresAuthentication();
+							DefaultPrompt.this.proxyUsername = proxyCredentialsManager.getUsername();
+							DefaultPrompt.this.proxyPassword = proxyCredentialsManager.getPassword();
+							DefaultPrompt.this.proxySavePassword = true;
+						}
+					} else {
+						DefaultPrompt.this.username = null;
+						DefaultPrompt.this.password = null;
+						DefaultPrompt.this.saveCredentials = false;
+					}
+				}
+			});
+			return retVal[0] == 0;
+		}
+
+	}
 
 }

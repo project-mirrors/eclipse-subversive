@@ -27,7 +27,8 @@ import org.eclipse.team.svn.ui.SVNUIMessages;
  *
  */
 public class MultiLinePropertyVerifier extends AbstractFormattedVerifier {
-    protected static String ERROR_MESSAGE_INVALID_FORMAT = "Field '" + AbstractFormattedVerifier.FIELD_NAME + "' contains malformed property in line ";
+	protected static String ERROR_MESSAGE_INVALID_FORMAT = "Field '" + AbstractFormattedVerifier.FIELD_NAME
+			+ "' contains malformed property in line ";
 
 	public MultiLinePropertyVerifier(String fieldName) {
 		super(fieldName);
@@ -40,48 +41,49 @@ public class MultiLinePropertyVerifier extends AbstractFormattedVerifier {
 			if (properties[i].length() == 0) {
 				continue;
 			}
-			
+
 			String retVal = this.validateProperty(properties[i], i);
 			if (retVal != null) {
 				return retVal;
 			}
 		}
-		
+
 		return null;
 	}
 
 	protected String getWarningMessageImpl(Control input) {
 		return null;
 	}
-	
+
 	protected String validateProperty(String property, int line) {
 		Pattern pattern;
-		
+
 		String[] propNameValue = property.split("=", 2); //$NON-NLS-1$
-		
+
 		if (propNameValue.length == 0 || propNameValue[0].length() == 0) {
 			return this.formatMainMessage(line) + " " + SVNUIMessages.Verifier_MultiLineProperty_NameIsEmpty; //$NON-NLS-1$
 		}
-		
-        pattern = Pattern.compile("[a-zA-Z:_].*"); //$NON-NLS-1$
-        if (!pattern.matcher(propNameValue[0]).matches()) {
-        	return this.formatMainMessage(line) + " " + SVNUIMessages.Verifier_MultiLineProperty_NotALetter; //$NON-NLS-1$
-        }
-        
-        pattern = Pattern.compile("[a-zA-Z0-9:\\-_\\.]+"); //$NON-NLS-1$
-        if (!pattern.matcher(propNameValue[0]).matches()) {
-        	return this.formatMainMessage(line) + " " + SVNUIMessages.Verifier_MultiLineProperty_InvalidNameChar; //$NON-NLS-1$
-        }
-		
-    	if (propNameValue.length < 2 || propNameValue[1].length() == 0) {
-        	return this.formatMainMessage(line) + " " + SVNUIMessages.Verifier_MultiLineProperty_EmptyValue; //$NON-NLS-1$
-    	}
+
+		pattern = Pattern.compile("[a-zA-Z:_].*"); //$NON-NLS-1$
+		if (!pattern.matcher(propNameValue[0]).matches()) {
+			return this.formatMainMessage(line) + " " + SVNUIMessages.Verifier_MultiLineProperty_NotALetter; //$NON-NLS-1$
+		}
+
+		pattern = Pattern.compile("[a-zA-Z0-9:\\-_\\.]+"); //$NON-NLS-1$
+		if (!pattern.matcher(propNameValue[0]).matches()) {
+			return this.formatMainMessage(line) + " " + SVNUIMessages.Verifier_MultiLineProperty_InvalidNameChar; //$NON-NLS-1$
+		}
+
+		if (propNameValue.length < 2 || propNameValue[1].length() == 0) {
+			return this.formatMainMessage(line) + " " + SVNUIMessages.Verifier_MultiLineProperty_EmptyValue; //$NON-NLS-1$
+		}
 
 		return null;
 	}
 
 	protected String formatMainMessage(int line) {
-		return BaseMessages.format(MultiLinePropertyVerifier.ERROR_MESSAGE_INVALID_FORMAT, new Object[] {AbstractFormattedVerifier.FIELD_NAME, String.valueOf(line + 1)});
+		return BaseMessages.format(MultiLinePropertyVerifier.ERROR_MESSAGE_INVALID_FORMAT,
+				new Object[] { AbstractFormattedVerifier.FIELD_NAME, String.valueOf(line + 1) });
 	}
-	
+
 }

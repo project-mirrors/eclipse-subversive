@@ -57,25 +57,25 @@ public class OverrideAndUpdateAction extends AbstractSynchronizeModelAction {
 	}
 
 	protected FastSyncInfoFilter getSyncInfoFilter() {
-		return new FastSyncInfoFilter.SyncInfoDirectionFilter(new int[] {SyncInfo.CONFLICTING, SyncInfo.INCOMING}) {			
+		return new FastSyncInfoFilter.SyncInfoDirectionFilter(new int[] { SyncInfo.CONFLICTING, SyncInfo.INCOMING }) {
 			public boolean select(SyncInfo info) {
 				if (super.select(info) && info instanceof IMergeSyncInfo) {
 					//check if there's a tree conflict
 					ILocalResource local = ((AbstractSVNSyncInfo) info).getLocalResource();
 					if (IStateFilter.SF_TREE_CONFLICTING.accept(local)) {
 						IResourceChange resourceChange = ((IMergeSyncInfo) info).getRemoteResource();
-						return resourceChange != null && IStateFilter.ST_DELETED != resourceChange.getStatus(); 
+						return resourceChange != null && IStateFilter.ST_DELETED != resourceChange.getStatus();
 					} else {
 						return true;
 					}
 				}
 				return false;
-            }
+			}
 		};
 	}
-	
+
 	protected IActionOperation getOperation(ISynchronizePageConfiguration configuration, IDiffElement[] elements) {
-		AbstractSVNSyncInfo []infos = this.getSVNSyncInfos();
+		AbstractSVNSyncInfo[] infos = this.getSVNSyncInfos();
 		HashMap<String, String> remote2local = new HashMap<String, String>();
 		ArrayList<IRepositoryResource> remoteSet = new ArrayList<IRepositoryResource>();
 		ArrayList<IResource> localSet = new ArrayList<IResource>();
@@ -87,28 +87,34 @@ public class OverrideAndUpdateAction extends AbstractSynchronizeModelAction {
 				if (resourceChange != null) {
 					IRepositoryResource remote = resourceChange.getOriginator();
 					remoteSet.add(remote);
-					remote2local.put(SVNUtility.encodeURL(remote.getUrl()), FileUtility.getWorkingCopyPath(resource));						
+					remote2local.put(SVNUtility.encodeURL(remote.getUrl()), FileUtility.getWorkingCopyPath(resource));
 				}
 			}
 		}
-		
+
 		if (!remote2local.isEmpty()) {
-			IResource []resources = localSet.toArray(new IResource[localSet.size()]);
-			boolean ignoreExternals = SVNTeamPreferences.getBehaviourBoolean(SVNTeamUIPlugin.instance().getPreferenceStore(), SVNTeamPreferences.BEHAVIOUR_IGNORE_EXTERNALS_NAME);
-			GetRemoteContentsOperation mainOp = new GetRemoteContentsOperation(resources, remoteSet.toArray(new IRepositoryResource[remoteSet.size()]), remote2local, ignoreExternals);
+			IResource[] resources = localSet.toArray(new IResource[localSet.size()]);
+			boolean ignoreExternals = SVNTeamPreferences.getBehaviourBoolean(
+					SVNTeamUIPlugin.instance().getPreferenceStore(),
+					SVNTeamPreferences.BEHAVIOUR_IGNORE_EXTERNALS_NAME);
+			GetRemoteContentsOperation mainOp = new GetRemoteContentsOperation(resources,
+					remoteSet.toArray(new IRepositoryResource[remoteSet.size()]), remote2local, ignoreExternals);
 			CompositeOperation op = new CompositeOperation(mainOp.getId(), mainOp.getMessagesClass());
 			SaveProjectMetaOperation saveOp = new SaveProjectMetaOperation(resources);
 			op.add(saveOp);
-			IResource []conflicting = FileUtility.getResourcesRecursive(resources, IStateFilter.SF_CONFLICTING, IResource.DEPTH_ZERO);
+			IResource[] conflicting = FileUtility.getResourcesRecursive(resources, IStateFilter.SF_CONFLICTING,
+					IResource.DEPTH_ZERO);
 			if (conflicting.length > 0) {
-				op.add(new MarkResolvedOperation(conflicting, SVNConflictResolution.Choice.CHOOSE_LOCAL_FULL, SVNDepth.INFINITY));
+				op.add(new MarkResolvedOperation(conflicting, SVNConflictResolution.Choice.CHOOSE_LOCAL_FULL,
+						SVNDepth.INFINITY));
 			}
 			op.add(mainOp);
 			op.add(new RestoreProjectMetaOperation(saveOp));
-			op.add(new RefreshResourcesOperation(conflicting.length > 0 ? FileUtility.getParents(resources, false) : resources));
+			op.add(new RefreshResourcesOperation(
+					conflicting.length > 0 ? FileUtility.getParents(resources, false) : resources));
 			op.add(new ClearMergeStatusesOperation(resources));
 			return op;
-		}		
+		}
 		return null;
 	}
 

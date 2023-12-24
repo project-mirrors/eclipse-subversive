@@ -32,35 +32,36 @@ import org.eclipse.team.ui.synchronize.ISynchronizeScope;
  * @author Alexander Gurov
  */
 public class SynchronizeWizard extends AbstractSVNWizard {
-			  
+
 	protected GlobalRefreshElementSelectionPage selection;
 
 	public SynchronizeWizard() {
 		super();
 		this.setWindowTitle(SVNUIMessages.SynchronizeWizard_Title);
 	}
-	
+
 	public void addPages() {
 		if (ModelHelper.isShowModelSync()) {
 			this.selection = new ModelElementSelectionPage(UpdateSubscriber.instance().roots());
 		} else {
 			this.selection = new GlobalRefreshResourceSelectionPage(UpdateSubscriber.instance().roots());
 		}
-		this.selection.setImageDescriptor(SVNTeamUIPlugin.instance().getImageDescriptor("icons/wizards/newconnect.gif")); //$NON-NLS-1$
+		this.selection
+				.setImageDescriptor(SVNTeamUIPlugin.instance().getImageDescriptor("icons/wizards/newconnect.gif")); //$NON-NLS-1$
 		this.addPage(this.selection);
 	}
 
 	public boolean performFinish() {
 		ShowUpdateViewOperation op;
 		if (ModelHelper.isShowModelSync()) {
-			ResourceMapping[] mappings =  ((ModelElementSelectionPage) this.selection).getSelectedMappings();
-			op = new ShowUpdateViewOperation(mappings, null);	
+			ResourceMapping[] mappings = ((ModelElementSelectionPage) this.selection).getSelectedMappings();
+			op = new ShowUpdateViewOperation(mappings, null);
 		} else {
-			ISynchronizeScope scope = ((GlobalRefreshResourceSelectionPage) this.selection).getSynchronizeScope();  
-			op = new ShowUpdateViewOperation(scope, null);	
+			ISynchronizeScope scope = ((GlobalRefreshResourceSelectionPage) this.selection).getSynchronizeScope();
+			op = new ShowUpdateViewOperation(scope, null);
 		}
 		UIMonitorUtility.doTaskBusyDefault(op);
-		
+
 		return true;
 	}
 

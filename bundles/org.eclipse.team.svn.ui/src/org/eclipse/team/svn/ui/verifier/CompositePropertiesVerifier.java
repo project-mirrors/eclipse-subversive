@@ -25,15 +25,16 @@ import org.eclipse.swt.widgets.Control;
  * @author Alexei Goncharov
  */
 public class CompositePropertiesVerifier extends AbstractVerifier {
-	
+
 	private HashMap<String, AbstractFormattedVerifier> verifiers;
+
 	private Combo propNameCombo;
-		
+
 	public CompositePropertiesVerifier(Combo propNameCombo, HashMap<String, AbstractFormattedVerifier> verifierParam) {
 		this.verifiers = verifierParam;
 		this.propNameCombo = propNameCombo;
 	}
-	
+
 	public boolean verify(Control input) {
 		AbstractFormattedVerifier current = this.verifiers.get(this.propNameCombo.getText());
 		if (current == null) {
@@ -47,13 +48,12 @@ public class CompositePropertiesVerifier extends AbstractVerifier {
 		msg = current.getWarningMessage(input);
 		if (msg != null) {
 			this.fireWarning(msg);
-		}
-		else {
+		} else {
 			this.fireOk();
 		}
 		return true;
 	}
-	
+
 	protected String getErrorMessage(Control input) {
 		return null;
 	}

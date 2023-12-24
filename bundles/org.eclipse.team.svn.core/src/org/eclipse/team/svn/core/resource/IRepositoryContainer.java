@@ -16,7 +16,6 @@ package org.eclipse.team.svn.core.resource;
 
 import org.eclipse.team.svn.core.connector.SVNConnectorException;
 
-
 /**
  * Any remote container
  * 
@@ -25,7 +24,7 @@ import org.eclipse.team.svn.core.connector.SVNConnectorException;
 public interface IRepositoryContainer extends IRepositoryResource {
 
 	public boolean isChildrenCached();
-	
-	public IRepositoryResource []getChildren() throws SVNConnectorException;
+
+	public IRepositoryResource[] getChildren() throws SVNConnectorException;
 
 }

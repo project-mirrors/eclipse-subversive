@@ -34,7 +34,7 @@ import org.eclipse.team.ui.synchronize.ISynchronizePageConfiguration;
 public class ComparePropertiesModelAction extends AbstractSynchronizeLogicalModelAction {
 
 	protected ComparePropertiesActionHelper actionHelper;
-	
+
 	public ComparePropertiesModelAction(String text, ISynchronizePageConfiguration configuration) {
 		super(text, configuration);
 		this.actionHelper = new ComparePropertiesActionHelper(this, configuration);
@@ -43,11 +43,11 @@ public class ComparePropertiesModelAction extends AbstractSynchronizeLogicalMode
 	protected boolean needsToSaveDirtyEditors() {
 		return false;
 	}
-	
+
 	protected IActionOperation getOperation() {
 		return this.actionHelper.getOperation();
 	}
-	
+
 	protected boolean updateSelection(IStructuredSelection selection) {
 		super.updateSelection(selection);
 		if (selection.size() == 1) {
@@ -63,7 +63,7 @@ public class ComparePropertiesModelAction extends AbstractSynchronizeLogicalMode
 						|| incoming.getResource() instanceof IContainer);
 			}
 		}
-		return false;		
+		return false;
 	}
 
 }

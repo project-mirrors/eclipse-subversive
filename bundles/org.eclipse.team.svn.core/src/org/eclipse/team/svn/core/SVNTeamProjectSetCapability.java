@@ -36,39 +36,38 @@ import org.eclipse.team.svn.core.operation.remote.management.SaveRepositoryLocat
 import org.eclipse.team.svn.core.utility.ProgressMonitorUtility;
 
 /**
- * Class that implements serializing and deserializing of references to the SVN based
- * projects
+ * Class that implements serializing and deserializing of references to the SVN based projects
  * 
  * @author Alexander Gurov
  */
-public class SVNTeamProjectSetCapability extends ProjectSetCapability {	
+public class SVNTeamProjectSetCapability extends ProjectSetCapability {
 
 	private static final Pattern SINGLE_SCHEME_URL_PATTERN = Pattern.compile("^.*:(\\w[\\w+-_]*://.*)$"); //$NON-NLS-1$
-	
+
 	public SVNTeamProjectSetCapability() {
 		super();
 	}
 
-	public String[] asReference(IProject []projects, ProjectSetSerializationContext context, IProgressMonitor monitor) throws TeamException {
+	public String[] asReference(IProject[] projects, ProjectSetSerializationContext context, IProgressMonitor monitor)
+			throws TeamException {
 		monitor.beginTask(SVNMessages.Operation_ExportProjectSet, projects.length);
 		try {
-			String []result = new String[projects.length];
+			String[] result = new String[projects.length];
 			for (int i = 0; i < projects.length; i++) {
 				result[i] = SVNTeamProjectSetCapability.DEFAULT_HANDLER.asReference(projects[i]);
 				monitor.worked(1);
 			}
 			return result;
-		}
-		finally {
+		} finally {
 			monitor.done();
 		}
 	}
-	
+
 	public String asReference(URI uri, String projectName) {
 		String resourceUrl = SVNTeamProjectSetCapability.getSingleSchemeUrl(uri);
 		return SVNTeamProjectSetCapability.DEFAULT_HANDLER.asReference(resourceUrl, projectName);
 	}
-	
+
 	/**
 	 * remove everything before the final scheme part, e.g.: {@code scm:svn:http://xyz -> http://xyz}
 	 */
@@ -76,8 +75,9 @@ public class SVNTeamProjectSetCapability extends ProjectSetCapability {
 		Matcher m = SVNTeamProjectSetCapability.SINGLE_SCHEME_URL_PATTERN.matcher(uri.toString());
 		return m.replaceAll("$1"); //$NON-NLS-1$
 	}
-	
-	public IProject[] addToWorkspace(String []referenceStrings, ProjectSetSerializationContext context, IProgressMonitor monitor) throws TeamException {
+
+	public IProject[] addToWorkspace(String[] referenceStrings, ProjectSetSerializationContext context,
+			IProgressMonitor monitor) throws TeamException {
 		if (referenceStrings.length == 0) {
 			return new IProject[0];
 		}
@@ -85,7 +85,7 @@ public class SVNTeamProjectSetCapability extends ProjectSetCapability {
 		if (handler == null) {
 			return new IProject[0];
 		}
-		
+
 		IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
 		Map<IProject, String> project2reference = new HashMap<IProject, String>();
 		for (int i = 0; i < referenceStrings.length; i++) {
@@ -94,15 +94,15 @@ public class SVNTeamProjectSetCapability extends ProjectSetCapability {
 				project2reference.put(root.getProject(name), referenceStrings[i]);
 			}
 		}
-		
+
 		Set<IProject> allProjects = project2reference.keySet();
-		IProject []projects = this.confirmOverwrite(context, allProjects.toArray(new IProject[allProjects.size()]));
+		IProject[] projects = this.confirmOverwrite(context, allProjects.toArray(new IProject[allProjects.size()]));
 
 		if (projects != null && projects.length > 0) {
 			final CompositeOperation op = new CompositeOperation("Operation_ImportProjectSet", SVNMessages.class); //$NON-NLS-1$
-			
+
 			op.add(new SaveRepositoryLocationsOperation());
-			
+
 			ArrayList<IProject> retVal = new ArrayList<IProject>();
 			for (int i = 0; i < projects.length; i++) {
 				String fullReference = project2reference.get(projects[i]);
@@ -112,20 +112,21 @@ public class SVNTeamProjectSetCapability extends ProjectSetCapability {
 				}
 			}
 			projects = retVal.toArray(new IProject[retVal.size()]);
-			
+
 			op.add(new RefreshResourcesOperation(projects));
 			SVNTeamPlugin.instance().getOptionProvider().addProjectSetCapabilityProcessing(op);
 
 			// already in WorkspaceModifyOperation context
 			ProgressMonitorUtility.doTaskExternal(op, monitor);
 		}
-		
+
 		return projects;
 	}
-		
+
 	protected static IProjectSetHandler DEFAULT_HANDLER = new DefaultProjectSetHandler();
+
 	protected static IProjectSetHandler SUBCLIPSE_HANDLER = new SubclipseProjectSetHandler();
-	
+
 	public static IProjectSetHandler getProjectSetHandler(String referenceString) {
 		if (DEFAULT_HANDLER.accept(referenceString)) {
 			return DEFAULT_HANDLER;
@@ -134,5 +135,5 @@ public class SVNTeamProjectSetCapability extends ProjectSetCapability {
 		}
 		return null;
 	}
-	
+
 }

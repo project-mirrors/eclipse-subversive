@@ -50,78 +50,92 @@ import org.eclipse.ui.PlatformUI;
  */
 public class CheckoutMethodSelectionPage extends AbstractVerifiedWizardPage {
 	protected static final int USE_NEW_PROJECT_WIZARD = 0;
+
 	protected static final int FIND_PROJECTS = 1;
+
 	protected static final int CHECKOUT_AS_PROJECT = 2;
+
 	protected static final int CHECKOUT_AS_FOLDER = 3;
-	
+
 	protected String defaultName;
+
 	protected Button selectLocationButton;
+
 	protected Text nameField;
+
 	protected RevisionComposite revisionComposite;
+
 	protected DepthSelectionComposite depthSelector;
 
 	protected String projectName;
+
 	protected int checkoutType;
+
 	protected IRepositoryResource resource;
-	
-	public CheckoutMethodSelectionPage(String defaultName, boolean newProjectSelectionEnabled, IRepositoryResource resource) {
-		super(CheckoutMethodSelectionPage.class.getName(), 
-			SVNUIMessages.CheckoutMethodSelectionPage_Title, 
-			SVNTeamUIPlugin.instance().getImageDescriptor("icons/wizards/newconnect.gif")); //$NON-NLS-1$
-		
+
+	public CheckoutMethodSelectionPage(String defaultName, boolean newProjectSelectionEnabled,
+			IRepositoryResource resource) {
+		super(CheckoutMethodSelectionPage.class.getName(), SVNUIMessages.CheckoutMethodSelectionPage_Title,
+				SVNTeamUIPlugin.instance().getImageDescriptor("icons/wizards/newconnect.gif")); //$NON-NLS-1$
+
 		this.setDescription(SVNUIMessages.CheckoutMethodSelectionPage_Description);
-		
+
 		this.projectName = this.defaultName = defaultName;
-		this.checkoutType = newProjectSelectionEnabled ? CheckoutMethodSelectionPage.USE_NEW_PROJECT_WIZARD : CheckoutMethodSelectionPage.CHECKOUT_AS_PROJECT;
+		this.checkoutType = newProjectSelectionEnabled
+				? CheckoutMethodSelectionPage.USE_NEW_PROJECT_WIZARD
+				: CheckoutMethodSelectionPage.CHECKOUT_AS_PROJECT;
 		this.resource = resource;
 	}
-	
+
 	public String getProjectName() {
 		return this.projectName;
 	}
-	
+
 	public boolean isUseNewProjectWizard() {
 		return this.checkoutType == CheckoutMethodSelectionPage.USE_NEW_PROJECT_WIZARD;
 	}
-	
+
 	public boolean isFindProjectsSelected() {
 		return this.checkoutType == CheckoutMethodSelectionPage.FIND_PROJECTS;
 	}
-	
+
 	public boolean isCheckoutAsFolderSelected() {
 		return this.checkoutType == CheckoutMethodSelectionPage.CHECKOUT_AS_FOLDER;
 	}
-	
+
 	public SVNDepth getdepth() {
 		return this.depthSelector.getDepth();
 	}
-	
+
 	public SVNRevision getSelectedRevision() {
 		return this.revisionComposite.getSelectedRevision();
 	}
-	
+
 	protected Composite createControlImpl(Composite parent) {
 		Composite composite = new Composite(parent, SWT.NONE);
 		this.initializeDialogUnits(composite);
-		
+
 		// GridLayout
 		GridLayout layout = new GridLayout();
 		composite.setLayout(layout);
-		
+
 		// GridData
 		GridData data = new GridData(GridData.FILL_BOTH);
 		composite.setLayoutData(data);
-		
+
 		this.setControl(composite);
-		
+
 		Label description = new Label(composite, SWT.WRAP);
 		data = new GridData(GridData.FILL_HORIZONTAL);
 		data.widthHint = IDialogConstants.ENTRY_FIELD_WIDTH;
-		data.heightHint = this.convertHeightInCharsToPixels(this.checkoutType == CheckoutMethodSelectionPage.USE_NEW_PROJECT_WIZARD ? 1 : 2);
+		data.heightHint = this.convertHeightInCharsToPixels(
+				this.checkoutType == CheckoutMethodSelectionPage.USE_NEW_PROJECT_WIZARD ? 1 : 2);
 		description.setLayoutData(data);
-		String message = SVNUIMessages.format(SVNUIMessages.CheckoutMethodSelectionPage_HintHead, new String[] {this.defaultName});
-		description.setText(message + (this.checkoutType != CheckoutMethodSelectionPage.USE_NEW_PROJECT_WIZARD ?
-				" " + SVNUIMessages.CheckoutMethodSelectionPage_HintTail : "")); //$NON-NLS-1$ //$NON-NLS-2$
+		String message = SVNUIMessages.format(SVNUIMessages.CheckoutMethodSelectionPage_HintHead,
+				new String[] { this.defaultName });
+		description.setText(message + (this.checkoutType != CheckoutMethodSelectionPage.USE_NEW_PROJECT_WIZARD
+				? " " + SVNUIMessages.CheckoutMethodSelectionPage_HintTail //$NON-NLS-1$
+				: "")); //$NON-NLS-1$
 		this.projectName = this.defaultName = FileUtility.formatResourceName(this.defaultName);
 
 		Button useNewProjectWizardButton = new Button(composite, SWT.RADIO);
@@ -132,10 +146,10 @@ public class CheckoutMethodSelectionPage extends AbstractVerifiedWizardPage {
 				CheckoutMethodSelectionPage.this.selectionChanged(CheckoutMethodSelectionPage.USE_NEW_PROJECT_WIZARD);
 			}
 		});
-		useNewProjectWizardButton.setText(SVNUIMessages.CheckoutMethodSelectionPage_NewWizard); 
+		useNewProjectWizardButton.setText(SVNUIMessages.CheckoutMethodSelectionPage_NewWizard);
 		useNewProjectWizardButton.setSelection(this.checkoutType == CheckoutMethodSelectionPage.USE_NEW_PROJECT_WIZARD);
 		useNewProjectWizardButton.setEnabled(this.checkoutType == CheckoutMethodSelectionPage.USE_NEW_PROJECT_WIZARD);
-		
+
 		Button findProjectsButton = new Button(composite, SWT.RADIO);
 		data = new GridData(GridData.FILL_HORIZONTAL);
 		findProjectsButton.setLayoutData(data);
@@ -144,10 +158,10 @@ public class CheckoutMethodSelectionPage extends AbstractVerifiedWizardPage {
 				CheckoutMethodSelectionPage.this.selectionChanged(CheckoutMethodSelectionPage.FIND_PROJECTS);
 			}
 		});
-		findProjectsButton.setText(SVNUIMessages.CheckoutMethodSelectionPage_Find); 
-		findProjectsButton.setEnabled(this.checkoutType == CheckoutMethodSelectionPage.USE_NEW_PROJECT_WIZARD ||
-				ExtensionsManager.getInstance().getCurrentCheckoutFactory().findProjectsOptionEnabled());
-		
+		findProjectsButton.setText(SVNUIMessages.CheckoutMethodSelectionPage_Find);
+		findProjectsButton.setEnabled(this.checkoutType == CheckoutMethodSelectionPage.USE_NEW_PROJECT_WIZARD
+				|| ExtensionsManager.getInstance().getCurrentCheckoutFactory().findProjectsOptionEnabled());
+
 		Button checkoutAsFolder = new Button(composite, SWT.RADIO);
 		data = new GridData(GridData.FILL_HORIZONTAL);
 		checkoutAsFolder.setLayoutData(data);
@@ -157,7 +171,7 @@ public class CheckoutMethodSelectionPage extends AbstractVerifiedWizardPage {
 			}
 		});
 		checkoutAsFolder.setText(SVNUIMessages.CheckoutMethodSelectionPage_Folder);
-		
+
 		this.selectLocationButton = new Button(composite, SWT.RADIO);
 		data = new GridData(GridData.FILL_HORIZONTAL);
 		this.selectLocationButton.setLayoutData(data);
@@ -166,9 +180,9 @@ public class CheckoutMethodSelectionPage extends AbstractVerifiedWizardPage {
 				CheckoutMethodSelectionPage.this.selectionChanged(CheckoutMethodSelectionPage.CHECKOUT_AS_PROJECT);
 			}
 		});
-		this.selectLocationButton.setText(SVNUIMessages.CheckoutMethodSelectionPage_Project); 
+		this.selectLocationButton.setText(SVNUIMessages.CheckoutMethodSelectionPage_Project);
 		this.selectLocationButton.setSelection(this.checkoutType != CheckoutMethodSelectionPage.USE_NEW_PROJECT_WIZARD);
-		
+
 		this.nameField = new Text(composite, SWT.SINGLE | SWT.BORDER);
 		data = new GridData(GridData.FILL_HORIZONTAL);
 		this.nameField.setLayoutData(data);
@@ -189,33 +203,37 @@ public class CheckoutMethodSelectionPage extends AbstractVerifiedWizardPage {
 				return CheckoutMethodSelectionPage.this.selectLocationButton.getSelection();
 			}
 		});
-		
+
 		Label separator = new Label(composite, SWT.SEPARATOR | SWT.HORIZONTAL);
 		data = new GridData(GridData.FILL_HORIZONTAL);
 		data.horizontalSpan = 2;
 		data.verticalIndent = 5;
-		separator.setLayoutData(data);		
-		
+		separator.setLayoutData(data);
+
 		data = new GridData(GridData.FILL_HORIZONTAL);
 		this.depthSelector = new DepthSelectionComposite(composite, SWT.NONE, false);
-		this.depthSelector.setLayoutData(data);			
+		this.depthSelector.setLayoutData(data);
 
-		this.revisionComposite = new RevisionComposite(composite, this, false, new String[]{SVNUIMessages.RevisionComposite_Revision, SVNUIMessages.RevisionComposite_HeadRevision}, SVNRevision.HEAD, false);
+		this.revisionComposite = new RevisionComposite(composite, this, false,
+				new String[] { SVNUIMessages.RevisionComposite_Revision, SVNUIMessages.RevisionComposite_HeadRevision },
+				SVNRevision.HEAD, false);
 		data = new GridData(GridData.FILL_HORIZONTAL);
 		this.revisionComposite.setLayoutData(data);
 		this.revisionComposite.setSelectedResource(this.resource);
-		
+
 //		Setting context help
-		PlatformUI.getWorkbench().getHelpSystem().setHelp(composite, "org.eclipse.team.svn.help.checkoutMethodSelectionContext"); //$NON-NLS-1$
-		
+		PlatformUI.getWorkbench()
+				.getHelpSystem()
+				.setHelp(composite, "org.eclipse.team.svn.help.checkoutMethodSelectionContext"); //$NON-NLS-1$
+
 		return composite;
 	}
 
 	protected void selectionChanged(int newSelection) {
 		this.checkoutType = newSelection;
 		switch (this.checkoutType) {
-			case CheckoutMethodSelectionPage.USE_NEW_PROJECT_WIZARD: 
-			case CheckoutMethodSelectionPage.FIND_PROJECTS: 
+			case CheckoutMethodSelectionPage.USE_NEW_PROJECT_WIZARD:
+			case CheckoutMethodSelectionPage.FIND_PROJECTS:
 			case CheckoutMethodSelectionPage.CHECKOUT_AS_FOLDER: {
 				this.projectName = this.defaultName;
 				this.nameField.setEnabled(false);
@@ -229,5 +247,5 @@ public class CheckoutMethodSelectionPage extends AbstractVerifiedWizardPage {
 		}
 		this.validateContent();
 	}
-	
+
 }

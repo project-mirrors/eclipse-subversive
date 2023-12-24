@@ -40,89 +40,98 @@ public class SVNContainerSelectionGroup extends ContainerSelectionGroup {
 	public SVNContainerSelectionGroup(Composite parent, Listener listener) {
 		super(parent, listener, false, "", false); //$NON-NLS-1$
 	}
-	
-	public void createContents(String message, int heightHint, int widthHint) {
-        GridLayout layout = new GridLayout();
-        layout.marginWidth = 0;
-        setLayout(layout);
-        setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-        createTreeViewer(heightHint);
-        Dialog.applyDialogFont(this);
-    }
-	
-	public void createContents(String message, int heightHint) {
-        GridLayout layout = new GridLayout();
-        layout.marginWidth = 0;
-        setLayout(layout);
-        setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-        createTreeViewer(heightHint);
-        Dialog.applyDialogFont(this);
-    }
-	
-    public static class SVNContainerSelectionVerifier extends AbstractFormattedVerifier {
-    	protected static String ERROR_MESSAGE;
-    	protected static String DESTINATION_IS_DETACHED_FROM_SVN;
-    	protected static String DESTINATION_DIRECTORY_IS_DELETED;
-    	protected static String DESTINATION_DIRECTORY_IS_OBSTRUCTED;
-    	
-    	public SVNContainerSelectionVerifier() {
-            super(""); //$NON-NLS-1$
-            
-            SVNContainerSelectionVerifier.ERROR_MESSAGE = SVNUIMessages.SVNContainerSelectionGroup_Verifier_NotSelected;
-            SVNContainerSelectionVerifier.DESTINATION_IS_DETACHED_FROM_SVN = SVNUIMessages.SVNContainerSelectionGroup_Verifier_NonSVN;
-            SVNContainerSelectionVerifier.DESTINATION_DIRECTORY_IS_DELETED = SVNUIMessages.SVNContainerSelectionGroup_Verifier_Deleted;
-            SVNContainerSelectionVerifier.DESTINATION_DIRECTORY_IS_OBSTRUCTED = SVNUIMessages.SVNContainerSelectionGroup_Verifier_Obstructed;
-        }
-    	
-        protected String getErrorMessageImpl(Control input) {
-        	SVNContainerSelectionGroup control = (SVNContainerSelectionGroup)input;
-        	if (control.getContainerFullPath() == null) {
-            	return SVNContainerSelectionVerifier.ERROR_MESSAGE;	
-            }
-        	IResource destinationRoot = ResourcesPlugin.getWorkspace().getRoot().findMember(control.getContainerFullPath());
-    		ILocalResource localDest = SVNRemoteStorage.instance().asLocalResource(destinationRoot);
-    		if (IStateFilter.SF_INTERNAL_INVALID.accept(localDest)) {
-    			return this.isNonSVNCheckDisabled() ? SVNContainerSelectionVerifier.DESTINATION_IS_DETACHED_FROM_SVN : null;
-    		}
-        	if (IStateFilter.SF_DELETED.accept(localDest)) {
-        		return SVNContainerSelectionVerifier.DESTINATION_DIRECTORY_IS_DELETED;
-        	}
-        	if (IStateFilter.SF_OBSTRUCTED.accept(localDest)) {
-        		return SVNContainerSelectionVerifier.DESTINATION_DIRECTORY_IS_OBSTRUCTED;
-        	}
-            return null;
-        }
-        
-        protected String getWarningMessageImpl(Control input) {
-        	return null;
-        }
-        
-        protected boolean isNonSVNCheckDisabled() {
-        	return true;
-        }
-    }
-    
-    public static class SVNContainerCheckOutSelectionVerifier extends SVNContainerSelectionVerifier {
 
-    	protected static String WARNING_MESSAGE;
-    	
-    	public SVNContainerCheckOutSelectionVerifier() { 
-            super();
-            SVNContainerCheckOutSelectionVerifier.WARNING_MESSAGE = SVNUIMessages.SVNContainerSelectionGroup_Verifier_NonSVNWarning;
-        }
-    	
-    	protected String getWarningMessageImpl(Control input) {
-    		SVNContainerSelectionGroup control = (SVNContainerSelectionGroup)input;
-    		IResource destinationRoot = ResourcesPlugin.getWorkspace().getRoot().findMember(control.getContainerFullPath());
-    		if (!FileUtility.isConnected(destinationRoot)) {
-    			return SVNContainerCheckOutSelectionVerifier.WARNING_MESSAGE;
-    		}
-    		return null;
-    	}
-    	
-    	protected boolean isNonSVNCheckDisabled() {
-        	return false;
-        }
-    }
-	    
+	public void createContents(String message, int heightHint, int widthHint) {
+		GridLayout layout = new GridLayout();
+		layout.marginWidth = 0;
+		setLayout(layout);
+		setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		createTreeViewer(heightHint);
+		Dialog.applyDialogFont(this);
+	}
+
+	public void createContents(String message, int heightHint) {
+		GridLayout layout = new GridLayout();
+		layout.marginWidth = 0;
+		setLayout(layout);
+		setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		createTreeViewer(heightHint);
+		Dialog.applyDialogFont(this);
+	}
+
+	public static class SVNContainerSelectionVerifier extends AbstractFormattedVerifier {
+		protected static String ERROR_MESSAGE;
+
+		protected static String DESTINATION_IS_DETACHED_FROM_SVN;
+
+		protected static String DESTINATION_DIRECTORY_IS_DELETED;
+
+		protected static String DESTINATION_DIRECTORY_IS_OBSTRUCTED;
+
+		public SVNContainerSelectionVerifier() {
+			super(""); //$NON-NLS-1$
+
+			SVNContainerSelectionVerifier.ERROR_MESSAGE = SVNUIMessages.SVNContainerSelectionGroup_Verifier_NotSelected;
+			SVNContainerSelectionVerifier.DESTINATION_IS_DETACHED_FROM_SVN = SVNUIMessages.SVNContainerSelectionGroup_Verifier_NonSVN;
+			SVNContainerSelectionVerifier.DESTINATION_DIRECTORY_IS_DELETED = SVNUIMessages.SVNContainerSelectionGroup_Verifier_Deleted;
+			SVNContainerSelectionVerifier.DESTINATION_DIRECTORY_IS_OBSTRUCTED = SVNUIMessages.SVNContainerSelectionGroup_Verifier_Obstructed;
+		}
+
+		protected String getErrorMessageImpl(Control input) {
+			SVNContainerSelectionGroup control = (SVNContainerSelectionGroup) input;
+			if (control.getContainerFullPath() == null) {
+				return SVNContainerSelectionVerifier.ERROR_MESSAGE;
+			}
+			IResource destinationRoot = ResourcesPlugin.getWorkspace()
+					.getRoot()
+					.findMember(control.getContainerFullPath());
+			ILocalResource localDest = SVNRemoteStorage.instance().asLocalResource(destinationRoot);
+			if (IStateFilter.SF_INTERNAL_INVALID.accept(localDest)) {
+				return this.isNonSVNCheckDisabled()
+						? SVNContainerSelectionVerifier.DESTINATION_IS_DETACHED_FROM_SVN
+						: null;
+			}
+			if (IStateFilter.SF_DELETED.accept(localDest)) {
+				return SVNContainerSelectionVerifier.DESTINATION_DIRECTORY_IS_DELETED;
+			}
+			if (IStateFilter.SF_OBSTRUCTED.accept(localDest)) {
+				return SVNContainerSelectionVerifier.DESTINATION_DIRECTORY_IS_OBSTRUCTED;
+			}
+			return null;
+		}
+
+		protected String getWarningMessageImpl(Control input) {
+			return null;
+		}
+
+		protected boolean isNonSVNCheckDisabled() {
+			return true;
+		}
+	}
+
+	public static class SVNContainerCheckOutSelectionVerifier extends SVNContainerSelectionVerifier {
+
+		protected static String WARNING_MESSAGE;
+
+		public SVNContainerCheckOutSelectionVerifier() {
+			super();
+			SVNContainerCheckOutSelectionVerifier.WARNING_MESSAGE = SVNUIMessages.SVNContainerSelectionGroup_Verifier_NonSVNWarning;
+		}
+
+		protected String getWarningMessageImpl(Control input) {
+			SVNContainerSelectionGroup control = (SVNContainerSelectionGroup) input;
+			IResource destinationRoot = ResourcesPlugin.getWorkspace()
+					.getRoot()
+					.findMember(control.getContainerFullPath());
+			if (!FileUtility.isConnected(destinationRoot)) {
+				return SVNContainerCheckOutSelectionVerifier.WARNING_MESSAGE;
+			}
+			return null;
+		}
+
+		protected boolean isNonSVNCheckDisabled() {
+			return false;
+		}
+	}
+
 }

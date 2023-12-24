@@ -31,21 +31,24 @@ import org.eclipse.team.svn.core.utility.FileUtility;
  */
 public class RemoveNonVersionedVisitor implements IResourceChangeVisitor {
 	protected boolean addedAlso;
-	
+
 	public RemoveNonVersionedVisitor(boolean addedAlso) {
 		this.addedAlso = addedAlso;
 	}
 
-	public void postVisit(ResourceChange change, IActionOperationProcessor processor, IProgressMonitor monitor) throws Exception {
+	public void postVisit(ResourceChange change, IActionOperationProcessor processor, IProgressMonitor monitor)
+			throws Exception {
 
 	}
 
-	public void preVisit(ResourceChange change, IActionOperationProcessor processor, IProgressMonitor monitor) throws Exception {
+	public void preVisit(ResourceChange change, IActionOperationProcessor processor, IProgressMonitor monitor)
+			throws Exception {
 		ILocalResource local = change.getLocal();
 		//don't delete ignored resources
-		if (IStateFilter.SF_UNVERSIONED.accept(local) && !IStateFilter.SF_IGNORED.accept(local) || this.addedAlso && local.getStatus() == IStateFilter.ST_ADDED) {
-	    	File real = new File(FileUtility.getWorkingCopyPath(local.getResource()));
-	    	FileUtility.deleteRecursive(real);
+		if (IStateFilter.SF_UNVERSIONED.accept(local) && !IStateFilter.SF_IGNORED.accept(local)
+				|| this.addedAlso && local.getStatus() == IStateFilter.ST_ADDED) {
+			File real = new File(FileUtility.getWorkingCopyPath(local.getResource()));
+			FileUtility.deleteRecursive(real);
 		}
 	}
 

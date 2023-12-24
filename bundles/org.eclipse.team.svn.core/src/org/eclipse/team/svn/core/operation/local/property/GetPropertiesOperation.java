@@ -39,28 +39,33 @@ import org.eclipse.team.svn.core.utility.SVNUtility;
  * @author Sergiy Logvin
  */
 public class GetPropertiesOperation extends AbstractActionOperation implements IResourcePropertyProvider {
-	protected SVNProperty []properties;
+	protected SVNProperty[] properties;
+
 	protected IResource resource;
+
 	protected SVNRevision revision;
-	
+
 	public GetPropertiesOperation(IResource resource) {
-		this(resource, IStateFilter.SF_DELETED.accept(SVNRemoteStorage.instance().asLocalResource(resource)) ? SVNRevision.BASE : SVNRevision.WORKING);
+		this(resource,
+				IStateFilter.SF_DELETED.accept(SVNRemoteStorage.instance().asLocalResource(resource))
+						? SVNRevision.BASE
+						: SVNRevision.WORKING);
 	}
-	
+
 	public GetPropertiesOperation(IResource resource, SVNRevision revision) {
 		super("Operation_GetProperties", SVNMessages.class); //$NON-NLS-1$
 		this.resource = resource;
 		this.revision = revision;
 	}
-	
-	public SVNProperty []getProperties() {
+
+	public SVNProperty[] getProperties() {
 		return this.properties;
 	}
-	
+
 	public boolean isEditAllowed() {
 		return true;
 	}
-	
+
 	public void refresh() {
 		this.run(new NullProgressMonitor());
 	}
@@ -79,15 +84,16 @@ public class GetPropertiesOperation extends AbstractActionOperation implements I
 		ISVNConnector proxy = location.acquireSVNProxy();
 		try {
 //			this.writeToConsole(IConsoleStream.LEVEL_CMD, "svn proplist \"" + local.getWorkingCopyPath() + "\"\n");
-			this.properties = SVNUtility.properties(proxy, new SVNEntryRevisionReference(FileUtility.getWorkingCopyPath(this.resource), null, this.revision), ISVNConnector.Options.NONE, new SVNProgressMonitor(this, monitor, null));
-		}
-		finally {
-		    location.releaseSVNProxy(proxy);
+			this.properties = SVNUtility.properties(proxy,
+					new SVNEntryRevisionReference(FileUtility.getWorkingCopyPath(this.resource), null, this.revision),
+					ISVNConnector.Options.NONE, new SVNProgressMonitor(this, monitor, null));
+		} finally {
+			location.releaseSVNProxy(proxy);
 		}
 	}
-	
+
 	protected String getShortErrorMessage(Throwable t) {
-		return BaseMessages.format(super.getShortErrorMessage(t), new Object[] {this.resource.getName()});
+		return BaseMessages.format(super.getShortErrorMessage(t), new Object[] { this.resource.getName() });
 	}
-	
+
 }

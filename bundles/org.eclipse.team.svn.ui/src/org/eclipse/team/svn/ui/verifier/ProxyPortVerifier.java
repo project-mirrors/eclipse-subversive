@@ -23,35 +23,36 @@ import org.eclipse.team.svn.ui.SVNUIMessages;
  * @author Sergiy Logvin
  */
 public class ProxyPortVerifier extends AbstractFormattedVerifier {
-    protected static String ERROR_RANGE;
-    protected static String ERROR_NAN;
+	protected static String ERROR_RANGE;
 
-    public ProxyPortVerifier(String fieldName) {
-        super(fieldName);
-        ProxyPortVerifier.ERROR_RANGE = SVNUIMessages.format(SVNUIMessages.Verifier_ProxyPort_Range, new String[] {AbstractFormattedVerifier.FIELD_NAME});
-        ProxyPortVerifier.ERROR_NAN = SVNUIMessages.format(SVNUIMessages.Verifier_ProxyPort_NaN, new String[] {AbstractFormattedVerifier.FIELD_NAME});
-    }
+	protected static String ERROR_NAN;
 
-    protected String getErrorMessageImpl(Control hostField) {
-    	String portString = this.getText(hostField);
-    	if (portString.trim().length() == 0) {
-            return null;
-        }        
-        try {
-        	int port = new Integer(portString).intValue();
-        	if (port < 0 || port > 65535) {
-        		return ProxyPortVerifier.ERROR_RANGE;
-        	}
-        }
-        catch (IllegalArgumentException ex) {
-            return ProxyPortVerifier.ERROR_NAN;
-        }
-        return null;
-    }
+	public ProxyPortVerifier(String fieldName) {
+		super(fieldName);
+		ProxyPortVerifier.ERROR_RANGE = SVNUIMessages.format(SVNUIMessages.Verifier_ProxyPort_Range,
+				new String[] { AbstractFormattedVerifier.FIELD_NAME });
+		ProxyPortVerifier.ERROR_NAN = SVNUIMessages.format(SVNUIMessages.Verifier_ProxyPort_NaN,
+				new String[] { AbstractFormattedVerifier.FIELD_NAME });
+	}
 
-    protected String getWarningMessageImpl(Control input) {
-        return null;
-    }
+	protected String getErrorMessageImpl(Control hostField) {
+		String portString = this.getText(hostField);
+		if (portString.trim().length() == 0) {
+			return null;
+		}
+		try {
+			int port = new Integer(portString).intValue();
+			if (port < 0 || port > 65535) {
+				return ProxyPortVerifier.ERROR_RANGE;
+			}
+		} catch (IllegalArgumentException ex) {
+			return ProxyPortVerifier.ERROR_NAN;
+		}
+		return null;
+	}
+
+	protected String getWarningMessageImpl(Control input) {
+		return null;
+	}
 
 }
-

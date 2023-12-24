@@ -37,15 +37,19 @@ import org.eclipse.team.svn.core.utility.FileUtility;
  */
 public class ExportOperation extends AbstractWorkingCopyOperation {
 	protected SVNRevision revision;
+
 	protected String path;
+
 	protected long options;
-	
+
 	public ExportOperation(IResource[] resources, String path, SVNRevision revision, boolean ignoreExternals) {
-		this(resources, path, revision, ISVNConnector.Options.FORCE | (ignoreExternals ? ISVNConnector.Options.IGNORE_EXTERNALS : ISVNConnector.Options.NONE));
+		this(resources, path, revision, ISVNConnector.Options.FORCE
+				| (ignoreExternals ? ISVNConnector.Options.IGNORE_EXTERNALS : ISVNConnector.Options.NONE));
 	}
 
 	public ExportOperation(IResourceProvider provider, String path, SVNRevision revision, boolean ignoreExternals) {
-		this(provider, path, revision, ISVNConnector.Options.FORCE | (ignoreExternals ? ISVNConnector.Options.IGNORE_EXTERNALS : ISVNConnector.Options.NONE));
+		this(provider, path, revision, ISVNConnector.Options.FORCE
+				| (ignoreExternals ? ISVNConnector.Options.IGNORE_EXTERNALS : ISVNConnector.Options.NONE));
 	}
 
 	public ExportOperation(IResource[] resources, String path, SVNRevision revision, long options) {
@@ -63,27 +67,34 @@ public class ExportOperation extends AbstractWorkingCopyOperation {
 	}
 
 	protected void runImpl(IProgressMonitor monitor) throws Exception {
-		IResource []resources = this.operableData();
+		IResource[] resources = this.operableData();
 		for (int i = 0; i < resources.length && !monitor.isCanceled(); i++) {
 			final IResource current = resources[i];
 			final IRepositoryLocation location = SVNRemoteStorage.instance().getRepositoryLocation(current);
 			final ISVNConnector proxy = location.acquireSVNProxy();
-			
+
 			this.protectStep(new IUnprotectedOperation() {
 				public void run(IProgressMonitor monitor) throws Exception {
 					String wcPath = FileUtility.getWorkingCopyPath(current);
 					String targetPath = ExportOperation.this.path + "/" + current.getName(); //$NON-NLS-1$
-					ExportOperation.this.writeToConsole(IConsoleStream.LEVEL_CMD, "svn export \"" + wcPath + "\" -r " + ExportOperation.this.revision.toString() + ISVNConnector.Options.asCommandLine(ExportOperation.this.options) + " \"" + FileUtility.normalizePath(targetPath) + "\" " + FileUtility.getUsernameParam(location.getUsername()) + "\n"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-					proxy.exportTo(new SVNEntryRevisionReference(wcPath, null, ExportOperation.this.revision), targetPath, null, SVNDepth.INFINITY, ExportOperation.this.options, new SVNProgressMonitor(ExportOperation.this, monitor, null));
+					ExportOperation.this.writeToConsole(IConsoleStream.LEVEL_CMD,
+							"svn export \"" + wcPath + "\" -r " + ExportOperation.this.revision.toString() //$NON-NLS-1$//$NON-NLS-2$
+									+ ISVNConnector.Options.asCommandLine(ExportOperation.this.options) + " \"" //$NON-NLS-1$
+									+ FileUtility.normalizePath(targetPath) + "\" " //$NON-NLS-1$
+									+ FileUtility.getUsernameParam(location.getUsername()) + "\n");
+					proxy.exportTo(new SVNEntryRevisionReference(wcPath, null, ExportOperation.this.revision),
+							targetPath, null, SVNDepth.INFINITY, ExportOperation.this.options,
+							new SVNProgressMonitor(ExportOperation.this, monitor, null));
 				}
 			}, monitor, resources.length);
-			
+
 			location.releaseSVNProxy(proxy);
 		}
 	}
 
 	protected String getShortErrorMessage(Throwable t) {
-		return BaseMessages.format(super.getShortErrorMessage(t), new Object[] {FileUtility.getNamesListAsString(this.operableData())});
+		return BaseMessages.format(super.getShortErrorMessage(t),
+				new Object[] { FileUtility.getNamesListAsString(this.operableData()) });
 	}
-	
+
 }

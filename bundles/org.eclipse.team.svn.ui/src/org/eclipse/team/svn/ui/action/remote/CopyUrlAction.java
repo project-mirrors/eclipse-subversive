@@ -32,7 +32,7 @@ import org.eclipse.team.svn.ui.action.AbstractRepositoryTeamAction;
  * @author Sergiy Logvin
  */
 public class CopyUrlAction extends AbstractRepositoryTeamAction {
-	
+
 	protected String url;
 
 	public CopyUrlAction() {
@@ -45,29 +45,26 @@ public class CopyUrlAction extends AbstractRepositoryTeamAction {
 				Clipboard clipboard = new Clipboard(CopyUrlAction.this.getShell().getDisplay());
 				try {
 					clipboard.setContents(
-						new Object[] {CopyUrlAction.this.url}, 
-						new Transfer[] {TextTransfer.getInstance()});
-				}
-				finally {
+							new Object[] { CopyUrlAction.this.url }, new Transfer[] { TextTransfer.getInstance() });
+				} finally {
 					clipboard.dispose();
 				}
 			}
 		};
 		this.runBusy(op);
 	}
-	
+
 	public boolean isEnabled() {
-		IRepositoryResource []resources = this.getSelectedRepositoryResources();
-		IRepositoryLocation []locations = this.getSelectedRepositoryLocations();
+		IRepositoryResource[] resources = this.getSelectedRepositoryResources();
+		IRepositoryLocation[] locations = this.getSelectedRepositoryLocations();
 		if (resources.length == 0 && locations.length == 1) {
 			this.url = locations[0].getUrl();
 			return true;
-		}
-		else if (resources.length == 1) {
+		} else if (resources.length == 1) {
 			this.url = resources[0].getUrl();
 			return true;
 		}
-		
+
 		return false;
 	}
 

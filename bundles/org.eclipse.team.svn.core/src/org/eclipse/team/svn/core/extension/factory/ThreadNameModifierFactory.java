@@ -52,7 +52,7 @@ public class ThreadNameModifierFactory implements ISVNConnectorFactory {
 	public int getSupportedFeatures() {
 		return this.factory.getSupportedFeatures();
 	}
-	
+
 	public int getSVNAPIVersion() {
 		return this.factory.getSVNAPIVersion();
 	}

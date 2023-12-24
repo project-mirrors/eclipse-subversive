@@ -18,21 +18,27 @@ package org.eclipse.team.svn.ui.properties.bugtraq;
 import org.eclipse.team.svn.core.utility.PatternProvider;
 
 /**
- * The model which represents bugtraq properties 
+ * The model which represents bugtraq properties
  * 
  * @author Sergiy Logvin
  */
 public class BugtraqModel {
 	public static final String BUG_ID = "%BUGID%"; //$NON-NLS-1$
-	
+
 	protected String url;
+
 	protected String label;
+
 	protected String message;
+
 	protected String[] logregex;
+
 	protected boolean warnIfNoIssue;
+
 	protected boolean append = true;
+
 	protected boolean number = true;
-	
+
 	public boolean isAppend() {
 		return this.append;
 	}
@@ -88,14 +94,14 @@ public class BugtraqModel {
 	public void setLogregex(String logregex) {
 		this.logregex = logregex.split("\r\n|\r|\n"); //$NON-NLS-1$
 	}
-	
+
 	public boolean isDoubleLogRegexp() {
 		if (this.logregex != null) {
 			return (this.logregex.length == 2);
 		}
 		return false;
 	}
-	
+
 	public String getResultingURL(LinkList.LinkPlacement issue) {
 		if (this.url != null && issue != null && this.url.indexOf(BugtraqModel.BUG_ID) != -1) {
 			return PatternProvider.replaceAll(this.url, BugtraqModel.BUG_ID, issue.getURL());

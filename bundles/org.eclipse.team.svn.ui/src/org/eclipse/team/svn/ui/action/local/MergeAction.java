@@ -48,64 +48,67 @@ public class MergeAction extends AbstractNonRecursiveTeamAction {
 	}
 
 	public void runImpl(IAction action) {
-	    IResource []resources = this.getSelectedResources(IStateFilter.SF_EXCLUDE_DELETED);
-		
-		if (!OperationErrorDialog.isAcceptableAtOnce(resources, SVNUIMessages.MergeAction_MergeError, this.getShell())) {
+		IResource[] resources = this.getSelectedResources(IStateFilter.SF_EXCLUDE_DELETED);
+
+		if (!OperationErrorDialog.isAcceptableAtOnce(resources, SVNUIMessages.MergeAction_MergeError,
+				this.getShell())) {
 			return;
 		}
-	    
+
 		IRepositoryResource remote = SVNRemoteStorage.instance().asRepositoryResource(resources[0]);
 		long revision = SVNRemoteStorage.instance().asLocalResourceAccessible(resources[0]).getRevision();
-		
+
 		if (resources.length > 1) {
 			revision = SVNRevision.INVALID_REVISION_NUMBER;
 			remote = remote.getRoot();
 		}
 
 		MergePanel panel = new MergePanel(resources, remote, revision);
-	    AdvancedDialog dialog = new AdvancedDialog(this.getShell(), panel);
-	    if (dialog.open() == 0) {
+		AdvancedDialog dialog = new AdvancedDialog(this.getShell(), panel);
+		if (dialog.open() == 0) {
 			// 2URL mode requires peg as revision
-			IRepositoryResourceProvider firstSet = new IRepositoryResourceProvider.DefaultRepositoryResourceProvider(panel.getFirstSelection());
+			IRepositoryResourceProvider firstSet = new IRepositoryResourceProvider.DefaultRepositoryResourceProvider(
+					panel.getFirstSelection());
 			IRepositoryResourceProvider secondSet = null;
 			if (panel.getMode() == MergePanel.MODE_2URL) {
-				secondSet = new IRepositoryResourceProvider.DefaultRepositoryResourceProvider(panel.getSecondSelection());
+				secondSet = new IRepositoryResourceProvider.DefaultRepositoryResourceProvider(
+						panel.getSecondSelection());
 			}
-			
+
 			IActionOperation mergeOp = null;
-	    	if (SVNTeamPreferences.getMergeBoolean(SVNTeamUIPlugin.instance().getPreferenceStore(), SVNTeamPreferences.MERGE_USE_JAVAHL_NAME) /*|| panel.getMode() == MergePanel.MODE_REINTEGRATE*/) {
-		    	JavaHLMergeOperation mainOp = null;
+			if (SVNTeamPreferences.getMergeBoolean(SVNTeamUIPlugin.instance().getPreferenceStore(),
+					SVNTeamPreferences.MERGE_USE_JAVAHL_NAME) /*|| panel.getMode() == MergePanel.MODE_REINTEGRATE*/) {
+				JavaHLMergeOperation mainOp = null;
 				if (panel.getMode() == MergePanel.MODE_2URL) {
-					mainOp = new JavaHLMergeOperation(resources, firstSet, secondSet, false, panel.getIgnoreAncestry(), panel.getDepth()); 
-				}
-				else if (panel.getMode() == MergePanel.MODE_1URL) {
-					mainOp = new JavaHLMergeOperation(resources, firstSet, panel.getSelectedRevisions(), false, panel.getIgnoreAncestry(), panel.getDepth());
-				}
-				else {
+					mainOp = new JavaHLMergeOperation(resources, firstSet, secondSet, false, panel.getIgnoreAncestry(),
+							panel.getDepth());
+				} else if (panel.getMode() == MergePanel.MODE_1URL) {
+					mainOp = new JavaHLMergeOperation(resources, firstSet, panel.getSelectedRevisions(), false,
+							panel.getIgnoreAncestry(), panel.getDepth());
+				} else {
 					mainOp = new JavaHLMergeOperation(resources, firstSet, false);
 				}
 				mainOp.setRecordOnly(panel.getRecordOnly());
-		    	CompositeOperation op = new CompositeOperation(mainOp.getId(), mainOp.getMessagesClass());
-	    		SaveProjectMetaOperation saveOp = new SaveProjectMetaOperation(resources);
-	    		op.add(saveOp);
-		    	op.add(mainOp);
-	    		op.add(new RestoreProjectMetaOperation(saveOp));
-		    	op.add(new RefreshResourcesOperation(resources));
-		    	mergeOp = op;		    	
-	    	}
-	    	else if (panel.getMode() == MergePanel.MODE_2URL) {
-				mergeOp = new ShowMergeViewOperation(resources, firstSet, secondSet, panel.getIgnoreAncestry(), panel.getDepth(), this.getTargetPart());
-				((ShowMergeViewOperation)mergeOp).setRecordOnly(panel.getRecordOnly());
-			}
-			else if (panel.getMode() == MergePanel.MODE_1URL) {
-				mergeOp = new ShowMergeViewOperation(resources, firstSet, panel.getSelectedRevisions(), panel.getIgnoreAncestry(), panel.getDepth(), this.getTargetPart());
-				((ShowMergeViewOperation)mergeOp).setRecordOnly(panel.getRecordOnly());
-			}
-			else {
+				CompositeOperation op = new CompositeOperation(mainOp.getId(), mainOp.getMessagesClass());
+				SaveProjectMetaOperation saveOp = new SaveProjectMetaOperation(resources);
+				op.add(saveOp);
+				op.add(mainOp);
+				op.add(new RestoreProjectMetaOperation(saveOp));
+				op.add(new RefreshResourcesOperation(resources));
+				mergeOp = op;
+			} else if (panel.getMode() == MergePanel.MODE_2URL) {
+				mergeOp = new ShowMergeViewOperation(resources, firstSet, secondSet, panel.getIgnoreAncestry(),
+						panel.getDepth(), this.getTargetPart());
+				((ShowMergeViewOperation) mergeOp).setRecordOnly(panel.getRecordOnly());
+			} else if (panel.getMode() == MergePanel.MODE_1URL) {
+				mergeOp = new ShowMergeViewOperation(resources, firstSet, panel.getSelectedRevisions(),
+						panel.getIgnoreAncestry(), panel.getDepth(), this.getTargetPart());
+				((ShowMergeViewOperation) mergeOp).setRecordOnly(panel.getRecordOnly());
+			} else {
 				mergeOp = new ShowMergeViewOperation(resources, firstSet, this.getTargetPart());
 			}
-	    	this.runScheduled(mergeOp);
-	    }
+			this.runScheduled(mergeOp);
+		}
 	}
 
 	public boolean isEnabled() {
@@ -115,5 +118,5 @@ public class MergeAction extends AbstractNonRecursiveTeamAction {
 	protected boolean needsToSaveDirtyEditors() {
 		return true;
 	}
-	
+
 }

@@ -33,27 +33,33 @@ public class OpenFileWithExternalAction extends AbstractRepositoryTeamAction {
 	}
 
 	public void runImpl(IAction action) {
-		IRepositoryResource []resources = this.getSelectedRepositoryResources();
-		this.runScheduled(new OpenRemoteFileOperation(new IRepositoryFile[] {(IRepositoryFile)resources[0]}, OpenRemoteFileOperation.OPEN_EXTERNAL));
+		IRepositoryResource[] resources = this.getSelectedRepositoryResources();
+		this.runScheduled(new OpenRemoteFileOperation(new IRepositoryFile[] { (IRepositoryFile) resources[0] },
+				OpenRemoteFileOperation.OPEN_EXTERNAL));
 	}
-	
+
 	public void selectionChanged(IAction action, ISelection selection) {
 		super.selectionChanged(action, selection);
 		if (this.isEnabled()) {
-			IRepositoryResource []resources = this.getSelectedRepositoryResources();
-			action.setImageDescriptor(SVNTeamUIPlugin.instance().getWorkbench().getEditorRegistry().getSystemExternalEditorImageDescriptor(resources[0].getName()));
-		}
-		else {
+			IRepositoryResource[] resources = this.getSelectedRepositoryResources();
+			action.setImageDescriptor(SVNTeamUIPlugin.instance()
+					.getWorkbench()
+					.getEditorRegistry()
+					.getSystemExternalEditorImageDescriptor(resources[0].getName()));
+		} else {
 			action.setImageDescriptor(null);
 		}
 	}
-	
+
 	public boolean isEnabled() {
-		IRepositoryResource []resources = this.getSelectedRepositoryResources();
+		IRepositoryResource[] resources = this.getSelectedRepositoryResources();
 		if (resources.length != 1 || !(resources[0] instanceof IRepositoryFile)) {
 			return false;
 		}
-		return SVNTeamUIPlugin.instance().getWorkbench().getEditorRegistry().isSystemExternalEditorAvailable(resources[0].getName());
+		return SVNTeamUIPlugin.instance()
+				.getWorkbench()
+				.getEditorRegistry()
+				.isSystemExternalEditorAvailable(resources[0].getName());
 	}
 
 }

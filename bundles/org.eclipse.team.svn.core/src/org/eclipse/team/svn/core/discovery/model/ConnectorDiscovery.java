@@ -76,7 +76,7 @@ public class ConnectorDiscovery {
 	public ConnectorDiscovery() {
 		Dictionary<Object, Object> props = System.getProperties();
 		for (Enumeration iterator = props.keys(); iterator.hasMoreElements();) {
-			String key = (String)iterator.nextElement();
+			String key = (String) iterator.nextElement();
 			environment.put(key, props.get(key));
 		}
 	}
@@ -89,8 +89,8 @@ public class ConnectorDiscovery {
 	}
 
 	/**
-	 * Initialize this by performing discovery. Discovery may take a long time as it involves network access.
-	 * PRECONDITION: must add at least one {@link #getDiscoveryStrategies() discovery strategy} prior to calling.
+	 * Initialize this by performing discovery. Discovery may take a long time as it involves network access. PRECONDITION: must add at
+	 * least one {@link #getDiscoveryStrategies() discovery strategy} prior to calling.
 	 */
 	public void performDiscovery(IProgressMonitor monitor) throws CoreException {
 		if (discoveryStrategies.isEmpty()) {
@@ -108,8 +108,8 @@ public class ConnectorDiscovery {
 			for (AbstractDiscoveryStrategy discoveryStrategy : discoveryStrategies) {
 				discoveryStrategy.setCategories(categories);
 				discoveryStrategy.setConnectors(connectors);
-				discoveryStrategy.performDiscovery(new SubProgressMonitor(monitor, discoveryTicks
-						/ discoveryStrategies.size()));
+				discoveryStrategy
+						.performDiscovery(new SubProgressMonitor(monitor, discoveryTicks / discoveryStrategies.size()));
 			}
 
 			filterDescriptors();
@@ -150,16 +150,16 @@ public class ConnectorDiscovery {
 	}
 
 	/**
-	 * The environment used to resolve {@link ConnectorDescriptor#getPlatformFilter() platform filters}. Defaults to the
-	 * current environment.
+	 * The environment used to resolve {@link ConnectorDescriptor#getPlatformFilter() platform filters}. Defaults to the current
+	 * environment.
 	 */
 	public Dictionary getEnvironment() {
 		return environment;
 	}
 
 	/**
-	 * The environment used to resolve {@link ConnectorDescriptor#getPlatformFilter() platform filters}. Defaults to the
-	 * current environment.
+	 * The environment used to resolve {@link ConnectorDescriptor#getPlatformFilter() platform filters}. Defaults to the current
+	 * environment.
 	 */
 	public void setEnvironment(Dictionary environment) {
 		if (environment == null) {
@@ -189,16 +189,16 @@ public class ConnectorDiscovery {
 	}
 
 	/**
-	 * <em>not for general use: public for testing purposes only</em> A map of installed features to their version. Used
-	 * to resolve {@link ConnectorDescriptor#getFeatureFilter() feature filters}.
+	 * <em>not for general use: public for testing purposes only</em> A map of installed features to their version. Used to resolve
+	 * {@link ConnectorDescriptor#getFeatureFilter() feature filters}.
 	 */
 	public Map<String, Version> getFeatureToVersion() {
 		return featureToVersion;
 	}
 
 	/**
-	 * <em>not for general use: public for testing purposes only</em> A map of installed features to their version. Used
-	 * to resolve {@link ConnectorDescriptor#getFeatureFilter() feature filters}.
+	 * <em>not for general use: public for testing purposes only</em> A map of installed features to their version. Used to resolve
+	 * {@link ConnectorDescriptor#getFeatureFilter() feature filters}.
 	 */
 	public void setFeatureToVersion(Map<String, Version> featureToVersion) {
 		this.featureToVersion = featureToVersion;
@@ -210,9 +210,9 @@ public class ConnectorDiscovery {
 			DiscoveryCategory previous = idToCategory.put(category.getId(), category);
 			if (previous != null) {
 				String errMessage = SVNMessages.format(
-						SVNMessages.ConnectorDiscovery_duplicate_category_id, new Object[] { category.getId(),
-								category.getSource().getId(), previous.getSource().getId() });
-				LoggedOperation.reportError(this.getClass().getName(), new Exception(errMessage));			
+						SVNMessages.ConnectorDiscovery_duplicate_category_id,
+						new Object[] { category.getId(), category.getSource().getId(), previous.getSource().getId() });
+				LoggedOperation.reportError(this.getClass().getName(), new Exception(errMessage));
 			}
 		}
 
@@ -223,8 +223,9 @@ public class ConnectorDiscovery {
 				connector.setCategory(category);
 			} else {
 				String errMessage = SVNMessages.format(
-						SVNMessages.ConnectorDiscovery_bundle_references_unknown_category, new Object[] {
-								connector.getCategoryId(), connector.getInstallableUnits(), connector.getSource().getId() });
+						SVNMessages.ConnectorDiscovery_bundle_references_unknown_category,
+						new Object[] { connector.getCategoryId(), connector.getInstallableUnits(),
+								connector.getSource().getId() });
 				LoggedOperation.reportError(this.getClass().getName(), new Exception(errMessage));
 			}
 		}
@@ -242,9 +243,10 @@ public class ConnectorDiscovery {
 					match = filter.match(environment);
 				} catch (InvalidSyntaxException e) {
 					String errMessage = SVNMessages.format(
-							SVNMessages.ConnectorDiscovery_illegal_filter_syntax, new Object[] {
-									connector.getPlatformFilter(), connector.getInstallableUnits(), connector.getSource().getId() });
-					LoggedOperation.reportError(this.getClass().getName(), new Exception(errMessage, e));					
+							SVNMessages.ConnectorDiscovery_illegal_filter_syntax,
+							new Object[] { connector.getPlatformFilter(), connector.getInstallableUnits(),
+									connector.getSource().getId() });
+					LoggedOperation.reportError(this.getClass().getName(), new Exception(errMessage, e));
 				}
 				if (!match) {
 					connectors.remove(connector);
@@ -340,7 +342,7 @@ public class ConnectorDiscovery {
 							if (e.getCause() instanceof OperationCanceledException) {
 								monitor.setCanceled(true);
 								return;
-							}												
+							}
 							LoggedOperation.reportError(this.getClass().getName(), e.getCause());
 						}
 						monitor.worked(1);
@@ -366,7 +368,8 @@ public class ConnectorDiscovery {
 
 		public VerifyUpdateSiteJob call() throws Exception {
 			URL baseUrl = new URL(this.url);
-			URL[] locations = new URL[] { new URL(baseUrl, "content.jar"), new URL(baseUrl, "content.xml"), new URL(baseUrl, "site.xml") }; //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
+			URL[] locations = new URL[] { new URL(baseUrl, "content.jar"), new URL(baseUrl, "content.xml"), //$NON-NLS-1$//$NON-NLS-2$
+					new URL(baseUrl, "site.xml") }; //$NON-NLS-1$
 			ok = WebUtil.verifyAvailability(locations, true, new NullProgressMonitor());
 			return this;
 		}
@@ -381,7 +384,8 @@ public class ConnectorDiscovery {
 				}
 
 				public void handleException(Throwable exception) {
-					String errMessage = SVNMessages.ConnectorDiscovery_exception_disposing + strategy.getClass().getName();
+					String errMessage = SVNMessages.ConnectorDiscovery_exception_disposing
+							+ strategy.getClass().getName();
 					LoggedOperation.reportError(this.getClass().getName(), new Exception(errMessage, exception));
 				}
 			});

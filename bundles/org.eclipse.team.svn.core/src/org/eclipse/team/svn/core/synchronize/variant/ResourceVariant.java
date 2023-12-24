@@ -35,13 +35,13 @@ import org.eclipse.team.svn.core.utility.SVNUtility;
 public abstract class ResourceVariant extends CachedResourceVariant {
 
 	protected ILocalResource local;
-	
+
 	public ResourceVariant(ILocalResource local) {
 		super();
-		
+
 		this.local = local;
 	}
-	
+
 	public ILocalResource getResource() {
 		return this.local;
 	}
@@ -59,35 +59,37 @@ public abstract class ResourceVariant extends CachedResourceVariant {
 		return this.local.getName();
 	}
 
-	public byte []asBytes() {
+	public byte[] asBytes() {
 		return this.getContentIdentifier().getBytes();
 	}
 
 	public String getStatus() {
 		return this.local.getStatus();
 	}
-	
+
 	public String getContentIdentifier() {
-	    long revision = this.local.getRevision();
-	    if (revision == SVNRevision.INVALID_REVISION_NUMBER && (IStateFilter.SF_ONREPOSITORY.accept(this.local) || this.local.isCopied())) {
-			SVNEntryInfo []st = SVNUtility.info(new SVNEntryRevisionReference(FileUtility.getWorkingCopyPath(this.local.getResource())));
+		long revision = this.local.getRevision();
+		if (revision == SVNRevision.INVALID_REVISION_NUMBER
+				&& (IStateFilter.SF_ONREPOSITORY.accept(this.local) || this.local.isCopied())) {
+			SVNEntryInfo[] st = SVNUtility
+					.info(new SVNEntryRevisionReference(FileUtility.getWorkingCopyPath(this.local.getResource())));
 			if (st != null && st.length > 0) {
 				revision = this.local.isCopied() ? st[0].copyFromRevision : st[0].lastChangedRevision;
 			}
-	    }
-	    if (revision == SVNRevision.INVALID_REVISION_NUMBER) {
-		    if (this.isNotOnRepository()) {
-		        return SVNMessages.ResourceVariant_unversioned;
-		    }
-		    if (IStateFilter.SF_DELETED.accept(this.local)) {
-		    	return SVNMessages.ResourceVariant_deleted;
-		    }
-	    }
-		return String.valueOf(revision); 
+		}
+		if (revision == SVNRevision.INVALID_REVISION_NUMBER) {
+			if (this.isNotOnRepository()) {
+				return SVNMessages.ResourceVariant_unversioned;
+			}
+			if (IStateFilter.SF_DELETED.accept(this.local)) {
+				return SVNMessages.ResourceVariant_deleted;
+			}
+		}
+		return String.valueOf(revision);
 	}
 
-    protected boolean isNotOnRepository() {
-        return IStateFilter.SF_UNVERSIONED.accept(this.local);
-    }
-    
+	protected boolean isNotOnRepository() {
+		return IStateFilter.SF_UNVERSIONED.accept(this.local);
+	}
+
 }

@@ -41,21 +41,22 @@ public class ShowOutgoingAnnotationModelAction extends AbstractSynchronizeLogica
 	protected boolean needsToSaveDirtyEditors() {
 		return false;
 	}
-	
+
 	protected boolean updateSelection(IStructuredSelection selection) {
 		if (super.updateSelection(selection)) {
-			if (selection.size() == 1) {						
+			if (selection.size() == 1) {
 				IResource resource = this.getSelectedResource();
 				ILocalResource local = SVNRemoteStorage.instance().asLocalResource(resource);
 				// null for change set nodes
 				return local instanceof ILocalFile && IStateFilter.SF_ONREPOSITORY.accept(local);
-			}	
+			}
 		}
-	    return false;
+		return false;
 	}
-	
+
 	protected IActionOperation getOperation() {
-		return new BuiltInAnnotate().getAnnotateOperation(UIMonitorUtility.getActivePage(), (IFile)this.getSelectedResource(), UIMonitorUtility.getShell());
+		return new BuiltInAnnotate().getAnnotateOperation(UIMonitorUtility.getActivePage(),
+				(IFile) this.getSelectedResource(), UIMonitorUtility.getShell());
 	}
 
 }

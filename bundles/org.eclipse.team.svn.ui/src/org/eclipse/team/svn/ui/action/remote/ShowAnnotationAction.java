@@ -28,7 +28,7 @@ public class ShowAnnotationAction extends AbstractRepositoryTeamAction {
 	public ShowAnnotationAction() {
 		super();
 	}
-	
+
 	public void runImpl(IAction action) {
 		this.runScheduled(new RemoteShowAnnotationOperation(this.getSelectedRepositoryResources()[0]));
 	}

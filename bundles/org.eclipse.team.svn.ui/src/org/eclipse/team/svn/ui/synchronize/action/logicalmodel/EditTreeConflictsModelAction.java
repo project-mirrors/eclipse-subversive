@@ -30,12 +30,12 @@ import org.eclipse.team.ui.synchronize.ISynchronizePageConfiguration;
 public class EditTreeConflictsModelAction extends AbstractSynchronizeLogicalModelAction {
 
 	protected EditTreeConflictsActionHelper actionHelper;
-	
+
 	public EditTreeConflictsModelAction(String text, ISynchronizePageConfiguration configuration) {
 		super(text, configuration);
 		this.actionHelper = new EditTreeConflictsActionHelper(this, configuration);
 	}
-	
+
 	protected boolean updateSelection(IStructuredSelection selection) {
 		if (super.updateSelection(selection) && selection.size() == 1) {
 			AbstractSVNSyncInfo syncInfo = this.getSelectedSVNSyncInfo();
@@ -45,8 +45,8 @@ public class EditTreeConflictsModelAction extends AbstractSynchronizeLogicalMode
 		}
 		return false;
 	}
-	
-	protected IActionOperation getOperation() {		
+
+	protected IActionOperation getOperation() {
 		return this.actionHelper.getOperation();
 	}
 

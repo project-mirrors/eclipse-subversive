@@ -40,26 +40,32 @@ public class CompareWithLatestRevisionPaneAction extends AbstractSynchronizeMode
 	public CompareWithLatestRevisionPaneAction(String text, ISynchronizePageConfiguration configuration) {
 		super(text, configuration);
 	}
-	
+
 	protected IActionOperation getOperation(ISynchronizePageConfiguration configuration, IDiffElement[] elements) {
 		IResource resource = this.getAllSelectedResources()[0];
 		ILocalResource local = SVNRemoteStorage.instance().asLocalResource(resource);
 		if (!IStateFilter.SF_INTERNAL_INVALID.accept(local)) {
-			IRepositoryResource remote = local.isCopied() ? SVNUtility.getCopiedFrom(resource) : SVNRemoteStorage.instance().asRepositoryResource(resource);
+			IRepositoryResource remote = local.isCopied()
+					? SVNUtility.getCopiedFrom(resource)
+					: SVNRemoteStorage.instance().asRepositoryResource(resource);
 			remote.setSelectedRevision(SVNRevision.HEAD);
 			CompareResourcesOperation op = new CompareResourcesOperation(local, remote, false, true);
-			return op;			
+			return op;
 		}
 		return null;
-	}    	
-	
+	}
+
 	protected boolean updateSelection(IStructuredSelection selection) {
 		if (super.updateSelection(selection)) {
 			if (selection.size() == 1) {
 				IResource[] selectedResources = this.getAllSelectedResources();
-				return (CoreExtensionsManager.instance().getSVNConnectorFactory().getSVNAPIVersion() >= ISVNConnectorFactory.APICompatibility.SVNAPI_1_5_x || 
-						selectedResources[0].getType() == IResource.FILE) && FileUtility.checkForResourcesPresenceRecursive(selectedResources, CompareWithWorkingCopyAction.COMPARE_FILTER);					
-			}	
+				return (CoreExtensionsManager.instance()
+						.getSVNConnectorFactory()
+						.getSVNAPIVersion() >= ISVNConnectorFactory.APICompatibility.SVNAPI_1_5_x
+						|| selectedResources[0].getType() == IResource.FILE)
+						&& FileUtility.checkForResourcesPresenceRecursive(selectedResources,
+								CompareWithWorkingCopyAction.COMPARE_FILTER);
+			}
 		}
 		return false;
 	}

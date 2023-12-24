@@ -29,31 +29,35 @@ import org.eclipse.team.svn.ui.preferences.SVNTeamPreferences;
  */
 public class CompareWithBranchTagAction extends CompareAction {
 	protected int type;
-	
+
 	public CompareWithBranchTagAction(int type) {
 		super();
 		this.type = type;
 	}
-	
+
 	public boolean isEnabled() {
 		if (super.isEnabled()) {
-	        IRepositoryResource first = this.getSelectedRepositoryResources()[0];
-			return first.getRepositoryLocation().isStructureEnabled() && SVNTeamPreferences.getRepositoryBoolean(SVNTeamUIPlugin.instance().getPreferenceStore(), SVNTeamPreferences.BRANCH_TAG_CONSIDER_STRUCTURE_NAME);
+			IRepositoryResource first = this.getSelectedRepositoryResources()[0];
+			return first.getRepositoryLocation().isStructureEnabled()
+					&& SVNTeamPreferences.getRepositoryBoolean(SVNTeamUIPlugin.instance().getPreferenceStore(),
+							SVNTeamPreferences.BRANCH_TAG_CONSIDER_STRUCTURE_NAME);
 		}
 		return false;
 	}
 
 	public void runImpl(IAction action) {
-        IRepositoryResource first = this.getSelectedRepositoryResources()[0];                
+		IRepositoryResource first = this.getSelectedRepositoryResources()[0];
 		boolean considerStructure = BranchTagSelectionComposite.considerStructure(first);
-		IRepositoryResource[] branchTagResources = considerStructure ? BranchTagSelectionComposite.calculateBranchTagResources(first, this.type) : new IRepositoryResource[0];
+		IRepositoryResource[] branchTagResources = considerStructure
+				? BranchTagSelectionComposite.calculateBranchTagResources(first, this.type)
+				: new IRepositoryResource[0];
 		if (!(considerStructure && branchTagResources.length == 0)) {
-    		CompareBranchTagPanel panel = new CompareBranchTagPanel(first, this.type, branchTagResources);
-    		DefaultDialog dlg = new DefaultDialog(this.getShell(), panel);
-    		if (dlg.open() == 0 && panel.getResourceToCompareWith() != null){
-    			this.doCompare(first, panel.getResourceToCompareWith(), panel.getDiffOptions());
-    		}	
-        }
+			CompareBranchTagPanel panel = new CompareBranchTagPanel(first, this.type, branchTagResources);
+			DefaultDialog dlg = new DefaultDialog(this.getShell(), panel);
+			if (dlg.open() == 0 && panel.getResourceToCompareWith() != null) {
+				this.doCompare(first, panel.getResourceToCompareWith(), panel.getDiffOptions());
+			}
+		}
 	}
 
 }

@@ -14,10 +14,10 @@
 
 package org.eclipse.team.svn.ui.extension.factory;
 
-
 /**
- * Generic dialog for standard and commit office implementation.
- * This interface is not intended to be used in classes in team svn, except DefaultDialog.
+ * Generic dialog for standard and commit office implementation. This interface is not intended to be used in classes in team svn, except
+ * DefaultDialog.
+ * 
  * @see org.eclipse.team.svn.ui.dialog.DefaultDialog
  * 
  * @todo Later this interface should be used as a child interface of {@link org.eclipse.team.svn.ui.panel.IDialogPanel}
@@ -30,12 +30,12 @@ public interface ICommitDialog {
 	 * @return message Message for commit
 	 */
 	public String getMessage();
-	
-	
+
 	/**
-	 * return code from dialog.open  
+	 * return code from dialog.open
+	 * 
 	 * @return code
 	 */
 	public int open();
-	
+
 }

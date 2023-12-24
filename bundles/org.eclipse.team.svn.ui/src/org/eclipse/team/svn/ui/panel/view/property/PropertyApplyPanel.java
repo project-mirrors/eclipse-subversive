@@ -27,35 +27,42 @@ import org.eclipse.team.svn.ui.properties.ResourcePropertyEditPanel;
  * @author Sergiy Logvin
  */
 public class PropertyApplyPanel extends AbstractDialogPanel {
-	
+
 	protected ApplyPropertyMethodComposite applyComposite;
-	
+
 	public PropertyApplyPanel(boolean oneProperty) {
 		super();
-		this.dialogTitle = oneProperty ? SVNUIMessages.PropertyApplyPanel_Title_Single : SVNUIMessages.PropertyApplyPanel_Title_Multi;
-		this.dialogDescription = oneProperty ? SVNUIMessages.PropertyApplyPanel_Description_Single : SVNUIMessages.PropertyApplyPanel_Description_Multi;
-		this.defaultMessage = oneProperty ? SVNUIMessages.PropertyApplyPanel_Message_Single : SVNUIMessages.PropertyApplyPanel_Message_Multi;
+		this.dialogTitle = oneProperty
+				? SVNUIMessages.PropertyApplyPanel_Title_Single
+				: SVNUIMessages.PropertyApplyPanel_Title_Multi;
+		this.dialogDescription = oneProperty
+				? SVNUIMessages.PropertyApplyPanel_Description_Single
+				: SVNUIMessages.PropertyApplyPanel_Description_Multi;
+		this.defaultMessage = oneProperty
+				? SVNUIMessages.PropertyApplyPanel_Message_Single
+				: SVNUIMessages.PropertyApplyPanel_Message_Multi;
 	}
-	
+
 	public int getApplyMethod() {
 		return this.applyComposite.getApplyMethod();
 	}
-	
+
 	public boolean useMask() {
 		return this.applyComposite.useMask();
 	}
-	
+
 	public String getFilterMask() {
 		return this.applyComposite.getFilterMask();
 	}
-	
+
 	public void createControlsImpl(Composite parent) {
-		this.applyComposite = new ApplyPropertyMethodComposite(parent, SWT.NONE, this, ResourcePropertyEditPanel.MIXED_RESOURCES);
+		this.applyComposite = new ApplyPropertyMethodComposite(parent, SWT.NONE, this,
+				ResourcePropertyEditPanel.MIXED_RESOURCES);
 	}
-	
+
 	protected void cancelChangesImpl() {
 	}
-	
+
 	protected void saveChangesImpl() {
 		this.applyComposite.saveChanges();
 	}

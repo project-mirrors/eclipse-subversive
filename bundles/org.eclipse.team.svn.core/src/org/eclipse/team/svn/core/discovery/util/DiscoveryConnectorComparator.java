@@ -20,7 +20,6 @@ import org.eclipse.team.svn.core.discovery.model.ConnectorCategory;
 import org.eclipse.team.svn.core.discovery.model.DiscoveryConnector;
 import org.eclipse.team.svn.core.discovery.model.Group;
 
-
 /**
  * a comparator that orders connectors by group and alphabetically by their name
  * 
@@ -77,7 +76,7 @@ public class DiscoveryConnectorComparator implements Comparator<DiscoveryConnect
 				i = g1 - g2;
 			}
 		} else {
-			i = o1.getName().compareToIgnoreCase(o2.getName());			
+			i = o1.getName().compareToIgnoreCase(o2.getName());
 		}
 		return i;
 	}

@@ -27,15 +27,17 @@ import org.eclipse.team.svn.core.resource.IRepositoryRoot;
  */
 public class BranchPanel extends AbstractBranchTagPanel {
 
-	public BranchPanel(IRepositoryRoot branchTo, boolean showStartsWith, Set existingNames, IRepositoryResource[] selectedRemoteResources) {
+	public BranchPanel(IRepositoryRoot branchTo, boolean showStartsWith, Set existingNames,
+			IRepositoryResource[] selectedRemoteResources) {
 		this(branchTo, showStartsWith, existingNames, new IResource[0], selectedRemoteResources);
-    }
-	
-	public BranchPanel(IRepositoryRoot branchTo, boolean showStartsWith, Set existingNames, IResource[] resources, IRepositoryResource[] selectedRemoteResources) {
+	}
+
+	public BranchPanel(IRepositoryRoot branchTo, boolean showStartsWith, Set existingNames, IResource[] resources,
+			IRepositoryResource[] selectedRemoteResources) {
 		super(branchTo, showStartsWith, existingNames, "BranchPanel", "branch", resources, selectedRemoteResources);
 	}
-	
+
 	public String getHelpId() {
-    	return "org.eclipse.team.svn.help.branchDialogContext"; //$NON-NLS-1$
-    }
+		return "org.eclipse.team.svn.help.branchDialogContext"; //$NON-NLS-1$
+	}
 }

@@ -24,5 +24,5 @@ import org.eclipse.team.svn.core.resource.IResourceProvider;
  * @author Alexander Gurov
  */
 public interface IShareProjectWrapper extends IActionOperation, IResourceProvider {
-	public IProject []getProjects();
+	public IProject[] getProjects();
 }

@@ -35,23 +35,25 @@ public class DefaultShareProjectFactory implements IShareProjectFactory {
 		return new SelectProjectNamePage();
 	}
 
-	public ShareProjectOperation getShareProjectOperation(IProject []projects, IRepositoryLocation location, SelectProjectNamePage page, String commitComment) {
-		return new ShareProjectOperation(projects, location, page.getSelectedNames(), page.getRootProjectName(), page.getLayoutType(), page.isManagementFoldersEnabled(), commitComment);
+	public ShareProjectOperation getShareProjectOperation(IProject[] projects, IRepositoryLocation location,
+			SelectProjectNamePage page, String commitComment) {
+		return new ShareProjectOperation(projects, location, page.getSelectedNames(), page.getRootProjectName(),
+				page.getLayoutType(), page.isManagementFoldersEnabled(), commitComment);
 	}
 
-	public boolean disallowFinishOnAddRepositoryLocation(IProject []projects) {
+	public boolean disallowFinishOnAddRepositoryLocation(IProject[] projects) {
 		return false;
 	}
 
-	public boolean disallowFinishOnCommitComment(IProject []projects) {
+	public boolean disallowFinishOnCommitComment(IProject[] projects) {
 		return false;
 	}
 
-	public boolean disallowFinishOnAlreadyConnected(IProject []projects) {
+	public boolean disallowFinishOnAlreadyConnected(IProject[] projects) {
 		return false;
 	}
 
-	public boolean disallowFinishOnSelectRepositoryLocation(IProject []projects) {
+	public boolean disallowFinishOnSelectRepositoryLocation(IProject[] projects) {
 		return false;
 	}
 

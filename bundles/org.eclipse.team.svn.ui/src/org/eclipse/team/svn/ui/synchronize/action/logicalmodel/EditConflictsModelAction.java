@@ -28,7 +28,7 @@ import org.eclipse.team.ui.synchronize.ISynchronizePageConfiguration;
 public class EditConflictsModelAction extends AbstractSynchronizeLogicalModelAction {
 
 	protected EditConflictsActionHelper actionHelper;
-	
+
 	public EditConflictsModelAction(String text, ISynchronizePageConfiguration configuration) {
 		super(text, configuration);
 		this.actionHelper = new EditConflictsActionHelper(this, configuration);
@@ -37,7 +37,7 @@ public class EditConflictsModelAction extends AbstractSynchronizeLogicalModelAct
 	protected FastSyncInfoFilter getSyncInfoFilter() {
 		return this.actionHelper.getSyncInfoFilter();
 	}
-	
+
 	protected IActionOperation getOperation() {
 		return this.actionHelper.getOperation();
 	}

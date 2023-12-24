@@ -20,16 +20,16 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.team.svn.ui.SVNUIMessages;
 
 /**
- * Date Format Verifier. Check if the text is a good date and time pattern 
- * based on {@link SimpleDateFormat}.
+ * Date Format Verifier. Check if the text is a good date and time pattern based on {@link SimpleDateFormat}.
+ * 
  * @author Thomas Champagne
  */
 public class DateFormatVerifier extends AbstractFormattedVerifier {
-    
-    public DateFormatVerifier(String fieldName) {
-        super(fieldName);
-    }
-	
+
+	public DateFormatVerifier(String fieldName) {
+		super(fieldName);
+	}
+
 	@Override
 	protected String getErrorMessageImpl(Control input) {
 		try {
@@ -39,6 +39,7 @@ public class DateFormatVerifier extends AbstractFormattedVerifier {
 		}
 		return null;
 	}
+
 	/**
 	 * There isn't warning message.
 	 */

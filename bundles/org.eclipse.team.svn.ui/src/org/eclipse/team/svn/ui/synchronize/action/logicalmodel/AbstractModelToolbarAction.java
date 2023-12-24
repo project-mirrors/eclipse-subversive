@@ -32,11 +32,12 @@ import org.eclipse.team.ui.synchronize.ISynchronizePageConfiguration;
  * 
  * @author Igor Burilo
  */
-public abstract class AbstractModelToolbarAction extends AbstractSynchronizeLogicalModelAction implements IDiffChangeListener {
+public abstract class AbstractModelToolbarAction extends AbstractSynchronizeLogicalModelAction
+		implements IDiffChangeListener {
 
 	public AbstractModelToolbarAction(String text, ISynchronizePageConfiguration configuration) {
 		super(text, configuration);
-		
+
 		//listen to diff tree changes and make enablement
 		final IDiffTree tree = this.getSynchronizationContext().getDiffTree();
 		tree.addDiffChangeListener(this);
@@ -52,7 +53,7 @@ public abstract class AbstractModelToolbarAction extends AbstractSynchronizeLogi
 	 * @see org.eclipse.team.core.diff.IDiffChangeListener#diffsChanged(org.eclipse.team.core.diff.IDiffChangeEvent, org.eclipse.core.runtime.IProgressMonitor)
 	 */
 	public void diffsChanged(IDiffChangeEvent event, IProgressMonitor monitor) {
-		updateEnablement();		
+		updateEnablement();
 	}
 
 	/* (non-Javadoc)
@@ -61,7 +62,7 @@ public abstract class AbstractModelToolbarAction extends AbstractSynchronizeLogi
 	public void propertyChanged(IDiffTree tree, int property, IPath[] paths) {
 		// Do nothing				
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.team.internal.ui.mapping.ModelProviderAction#isEnabledForSelection(org.eclipse.jface.viewers.IStructuredSelection)
 	 */
@@ -69,15 +70,16 @@ public abstract class AbstractModelToolbarAction extends AbstractSynchronizeLogi
 		// Enablement has nothing to do with selection
 		return isEnabled();
 	}
-	
+
 	public void updateEnablement() {
 		setEnabled(this.getFilteredResources().length > 0);
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.team.internal.ui.mapping.ResourceModelParticipantAction#getResourceTraversals(org.eclipse.jface.viewers.IStructuredSelection, org.eclipse.core.runtime.IProgressMonitor)
 	 */
-	protected ResourceTraversal[] getResourceTraversals(IStructuredSelection selection, IProgressMonitor monitor) throws CoreException {
+	protected ResourceTraversal[] getResourceTraversals(IStructuredSelection selection, IProgressMonitor monitor)
+			throws CoreException {
 		return this.getSynchronizationContext().getScope().getTraversals();
 	}
 

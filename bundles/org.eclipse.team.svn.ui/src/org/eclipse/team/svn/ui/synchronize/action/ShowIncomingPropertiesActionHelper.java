@@ -33,7 +33,7 @@ import org.eclipse.ui.PlatformUI;
 public class ShowIncomingPropertiesActionHelper extends AbstractActionHelper {
 
 	public ShowIncomingPropertiesActionHelper(IAction action, ISynchronizePageConfiguration configuration) {
-		super(action, configuration);		
+		super(action, configuration);
 	}
 
 	public IActionOperation getOperation() {
@@ -41,10 +41,11 @@ public class ShowIncomingPropertiesActionHelper extends AbstractActionHelper {
 		if (info == null) {
 			return null;
 		}
-		IResourceChange change = (IResourceChange)info.getRemoteChangeResource();
-	    IRepositoryResource remote = change.getOriginator();
+		IResourceChange change = (IResourceChange) info.getRemoteChangeResource();
+		IRepositoryResource remote = change.getOriginator();
 		IResourcePropertyProvider provider = new GetRemotePropertiesOperation(remote);
-		ShowPropertiesOperation op = new ShowPropertiesOperation(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage(), remote, provider);
+		ShowPropertiesOperation op = new ShowPropertiesOperation(
+				PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage(), remote, provider);
 		return op;
 	}
 

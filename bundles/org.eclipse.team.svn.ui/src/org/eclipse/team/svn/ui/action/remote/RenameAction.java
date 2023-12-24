@@ -42,31 +42,33 @@ public class RenameAction extends AbstractRepositoryTeamAction {
 	}
 
 	public void runImpl(IAction action) {
-		IRepositoryResource []resources = this.getSelectedRepositoryResources();
+		IRepositoryResource[] resources = this.getSelectedRepositoryResources();
 		RenameResourcePanel panel = new RenameResourcePanel(resources[0].getName());
 		DefaultDialog dialog = new DefaultDialog(this.getShell(), panel);
-		
+
 		if (dialog.open() == 0) {
-			RenameResourceOperation mainOp = new RenameResourceOperation(resources[0], panel.getResourceName(), panel.getMessage());
-			
+			RenameResourceOperation mainOp = new RenameResourceOperation(resources[0], panel.getResourceName(),
+					panel.getMessage());
+
 			CompositeOperation op = new CompositeOperation(mainOp.getId(), mainOp.getMessagesClass());
-			
+
 			op.add(mainOp);
 			op.add(new RefreshRemoteResourcesOperation(SVNUtility.getCommonParents(resources)));
-			op.add(new SetRevisionAuthorNameOperation(mainOp, Options.FORCE), new IActionOperation[] {mainOp});
-			
+			op.add(new SetRevisionAuthorNameOperation(mainOp, Options.FORCE), new IActionOperation[] { mainOp });
+
 			this.runScheduled(op);
 		}
 	}
-	
+
 	public boolean isEnabled() {
-		IRepositoryResource []resources = this.getSelectedRepositoryResources();
+		IRepositoryResource[] resources = this.getSelectedRepositoryResources();
 		for (int i = 0; i < resources.length; i++) {
 			IRepositoryLocation location = resources[i].getRepositoryLocation();
-			if (resources[i].getUrl().equals(location.getRoot().getUrl()) ||
-				resources[i].getSelectedRevision().getKind() != Kind.HEAD ||
-				resources[i] instanceof IRepositoryRoot && 
-				(((IRepositoryRoot)resources[i]).getKind() == IRepositoryRoot.KIND_ROOT || ((IRepositoryRoot)resources[i]).getKind() == IRepositoryRoot.KIND_LOCATION_ROOT)) {
+			if (resources[i].getUrl().equals(location.getRoot().getUrl())
+					|| resources[i].getSelectedRevision().getKind() != Kind.HEAD
+					|| resources[i] instanceof IRepositoryRoot && (((IRepositoryRoot) resources[i])
+							.getKind() == IRepositoryRoot.KIND_ROOT
+							|| ((IRepositoryRoot) resources[i]).getKind() == IRepositoryRoot.KIND_LOCATION_ROOT)) {
 				return false;
 			}
 		}

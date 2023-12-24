@@ -43,36 +43,42 @@ import org.eclipse.team.svn.core.utility.SVNUtility;
  * 
  * @author Sergiy Logvin
  */
-public class GetMultiPropertiesOperation extends AbstractActionOperation implements IResourceProvider, IPropertyProvider {
-	protected IResource []resources;
-	protected HashMap<IResource, SVNProperty []> properties;
+public class GetMultiPropertiesOperation extends AbstractActionOperation
+		implements IResourceProvider, IPropertyProvider {
+	protected IResource[] resources;
+
+	protected HashMap<IResource, SVNProperty[]> properties;
+
 	protected String propertyName;
+
 	protected int depth;
+
 	protected IStateFilter filter;
-	
+
 	/**
-	 * @param resources the resources for which the properties are requested 
-	 * @param propertyName the name of a property which value is requested. 
-	 * 		If null then all the properties will be computed for the resources.
+	 * @param resources
+	 *            the resources for which the properties are requested
+	 * @param propertyName
+	 *            the name of a property which value is requested. If null then all the properties will be computed for the resources.
 	 */
-	public GetMultiPropertiesOperation(IResource []resources, int depth, IStateFilter filter, String propertyName) {
+	public GetMultiPropertiesOperation(IResource[] resources, int depth, IStateFilter filter, String propertyName) {
 		super("Operation_GetMultiProperties", SVNMessages.class); //$NON-NLS-1$
 		this.resources = resources;
 		this.propertyName = propertyName;
 		this.filter = filter != null ? filter : IStateFilter.SF_VERSIONED;
-		this.properties = new HashMap<IResource, SVNProperty []>();
+		this.properties = new HashMap<IResource, SVNProperty[]>();
 		this.depth = depth;
 	}
-	
-	public IResource []getResources() {
+
+	public IResource[] getResources() {
 		Set<IResource> resources = this.properties.keySet();
 		return resources.toArray(new IResource[resources.size()]);
 	}
-	
-	public SVNProperty []getProperties(IResource resource) {
+
+	public SVNProperty[] getProperties(IResource resource) {
 		return this.properties.get(resource);
 	}
-	
+
 	protected void runImpl(IProgressMonitor monitor) throws Exception {
 		for (int i = 0; i < this.resources.length && !monitor.isCanceled(); i++) {
 			final IResource current = this.resources[i];
@@ -95,8 +101,7 @@ public class GetMultiPropertiesOperation extends AbstractActionOperation impleme
 						}, GetMultiPropertiesOperation.this.depth);
 					}
 				}, monitor, this.resources.length);
-			}
-			finally {
+			} finally {
 				location.releaseSVNProxy(proxy);
 			}
 		}
@@ -108,13 +113,18 @@ public class GetMultiPropertiesOperation extends AbstractActionOperation impleme
 			public void run(IProgressMonitor monitor) throws Exception {
 				String wcPath = FileUtility.getWorkingCopyPath(current);
 				if (GetMultiPropertiesOperation.this.propertyName != null) {
-					SVNProperty data = proxy.getProperty(new SVNEntryRevisionReference(wcPath, null, SVNRevision.WORKING), GetMultiPropertiesOperation.this.propertyName, null, new SVNProgressMonitor(GetMultiPropertiesOperation.this, monitor, null));
+					SVNProperty data = proxy.getProperty(
+							new SVNEntryRevisionReference(wcPath, null, SVNRevision.WORKING),
+							GetMultiPropertiesOperation.this.propertyName, null,
+							new SVNProgressMonitor(GetMultiPropertiesOperation.this, monitor, null));
 					if (data != null) {
-						GetMultiPropertiesOperation.this.properties.put(current, new SVNProperty[] {data});
+						GetMultiPropertiesOperation.this.properties.put(current, new SVNProperty[] { data });
 					}
-				}
-				else {
-					SVNProperty []data = SVNUtility.properties(proxy, new SVNEntryRevisionReference(wcPath, null, SVNRevision.WORKING), ISVNConnector.Options.NONE, new SVNProgressMonitor(GetMultiPropertiesOperation.this, monitor, null));
+				} else {
+					SVNProperty[] data = SVNUtility.properties(proxy,
+							new SVNEntryRevisionReference(wcPath, null, SVNRevision.WORKING),
+							ISVNConnector.Options.NONE,
+							new SVNProgressMonitor(GetMultiPropertiesOperation.this, monitor, null));
 					if (data != null && data.length != 0) {
 						GetMultiPropertiesOperation.this.properties.put(current, data);
 					}
@@ -122,5 +132,5 @@ public class GetMultiPropertiesOperation extends AbstractActionOperation impleme
 			}
 		}, monitor, 1);
 	}
-	
+
 }

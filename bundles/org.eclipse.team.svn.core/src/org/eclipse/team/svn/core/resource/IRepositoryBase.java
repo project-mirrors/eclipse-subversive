@@ -23,6 +23,7 @@ import org.eclipse.core.runtime.IAdaptable;
  */
 public interface IRepositoryBase extends IAdaptable {
 	public String getName();
+
 	public String getUrl();
-	
+
 }

@@ -37,22 +37,23 @@ public class NewRepositoryAction extends TeamAction {
 		DefaultDialog dialog = new DefaultDialog(this.getShell(), addRepositoryPanel);
 		if (dialog.open() == 0) {
 			IActionOperation op = addRepositoryPanel.getOperationToPeform();
-			if (op != null) {				
-				UIMonitorUtility.doTaskScheduledActive(op);						
-			}						
+			if (op != null) {
+				UIMonitorUtility.doTaskScheduledActive(op);
+			}
 		}
 	}
-	
+
 	public boolean isEnabled() {
 		return true;
 	}
-	
-	protected void execute(IAction action) throws InvocationTargetException, InterruptedException {		
+
+	protected void execute(IAction action) throws InvocationTargetException, InterruptedException {
 		// compatibility with 3.3
 	}
-	
+
 	public static boolean checkEnablement() {
-		return (CoreExtensionsManager.instance().getSVNConnectorFactory().getSupportedFeatures() & ISVNConnectorFactory.OptionalFeatures.CREATE_REPOSITORY) != 0;
+		return (CoreExtensionsManager.instance().getSVNConnectorFactory().getSupportedFeatures()
+				& ISVNConnectorFactory.OptionalFeatures.CREATE_REPOSITORY) != 0;
 	}
 
 }

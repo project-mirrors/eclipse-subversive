@@ -25,10 +25,12 @@ import org.eclipse.team.svn.core.resource.IRepositoryResource;
  * @author Alexander Gurov
  */
 public class MergeSet1URL extends AbstractMergeSetURL {
-    public final IRepositoryResource []from;
-    public final SVNRevisionRange []revisions;
+	public final IRepositoryResource[] from;
 
-	public MergeSet1URL(IResource[] to, IRepositoryResource []from, SVNRevisionRange []revisions, boolean ignoreAncestry, boolean recordOnly, SVNDepth depth) {
+	public final SVNRevisionRange[] revisions;
+
+	public MergeSet1URL(IResource[] to, IRepositoryResource[] from, SVNRevisionRange[] revisions,
+			boolean ignoreAncestry, boolean recordOnly, SVNDepth depth) {
 		super(to, ignoreAncestry, recordOnly, depth);
 		this.from = from;
 		this.revisions = revisions;

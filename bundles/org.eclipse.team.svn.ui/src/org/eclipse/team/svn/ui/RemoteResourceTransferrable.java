@@ -23,15 +23,18 @@ import org.eclipse.team.svn.core.resource.IRepositoryResource;
  */
 public class RemoteResourceTransferrable {
 	public static final int OP_NONE = 0xff;
+
 	public static final int OP_COPY = 0;
+
 	public static final int OP_CUT = 1;
-	
-	public final IRepositoryResource []resources;
+
+	public final IRepositoryResource[] resources;
+
 	public final int operation;
 
-	public RemoteResourceTransferrable(IRepositoryResource []resources, int operation) {
+	public RemoteResourceTransferrable(IRepositoryResource[] resources, int operation) {
 		this.resources = resources;
 		this.operation = operation;
 	}
-	
+
 }

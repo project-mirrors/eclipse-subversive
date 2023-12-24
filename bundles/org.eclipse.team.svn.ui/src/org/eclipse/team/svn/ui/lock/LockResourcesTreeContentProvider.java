@@ -26,15 +26,15 @@ import org.eclipse.jface.viewers.Viewer;
  * @author Igor Burilo
  */
 public class LockResourcesTreeContentProvider implements ITreeContentProvider {
-	
+
 	protected LockResource root;
-	
+
 	public void initialize(LockResource root) {
 		this.root = root;
 	}
-	
+
 	public Object[] getChildren(Object parentElement) {
-		List<LockResource> res = new ArrayList<LockResource>();		
+		List<LockResource> res = new ArrayList<LockResource>();
 		LockResource node = (LockResource) parentElement;
 		LockResource[] children = node.getChildren();
 		for (LockResource child : children) {
@@ -44,32 +44,32 @@ public class LockResourcesTreeContentProvider implements ITreeContentProvider {
 		}
 		return res.toArray(new LockResource[0]);
 	}
-	
+
 	public boolean hasChildren(Object element) {
 		LockResource node = (LockResource) element;
 		LockResource[] children = node.getChildren();
 		for (LockResource child : children) {
 			if (!child.isFile()) {
 				return true;
-			} 
+			}
 		}
 		return false;
 	}
-	
+
 	public Object getParent(Object element) {
-		return ((LockResource)element).getParent();
+		return ((LockResource) element).getParent();
 	}
 
 	public Object[] getElements(Object inputElement) {
-		return new Object[] {this.root};
+		return new Object[] { this.root };
 	}
 
 	public void dispose() {
-		
+
 	}
 
 	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
-		
+
 	}
 
 }

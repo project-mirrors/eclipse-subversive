@@ -16,13 +16,12 @@ package org.eclipse.team.svn.core.connector;
 
 import java.io.File;
 
-
 /**
  * The conflict description container
  * 
- * The JavaHL API's is the only way to interact between SVN and Java-based tools. At the same time JavaHL connector library
- * is not EPL compatible and we won't to pin plug-in with concrete connector implementation. So, the only way to do this is
- * providing our own connector interface which will be covered by concrete connector implementation.
+ * The JavaHL API's is the only way to interact between SVN and Java-based tools. At the same time JavaHL connector library is not EPL
+ * compatible and we won't to pin plug-in with concrete connector implementation. So, the only way to do this is providing our own connector
+ * interface which will be covered by concrete connector implementation.
  * 
  * @author Alexander Gurov
  */
@@ -43,9 +42,9 @@ public class SVNConflictDescriptor {
 		 * @since 1.7 Tree structure conflict
 		 */
 		TREE(2);
-		
+
 		public final int id;
-		
+
 		private Kind(int id) {
 			this.id = id;
 		}
@@ -71,9 +70,9 @@ public class SVNConflictDescriptor {
 		 * Replacing entry
 		 */
 		REPLACE(3);
-		
+
 		public final int id;
-		
+
 		public static Action fromId(int id) {
 			for (Action kind : values()) {
 				if (kind.id == id) {
@@ -82,7 +81,7 @@ public class SVNConflictDescriptor {
 			}
 			throw new IllegalArgumentException("Invalid action kind: " + id); //$NON-NLS-1$
 		}
-		
+
 		private Action(int id) {
 			this.id = id;
 		}
@@ -112,29 +111,33 @@ public class SVNConflictDescriptor {
 		 * The unversioned entry at the path in the working copy.
 		 */
 		UNVERSIONED(4),
-	    /**
-         * Object is already added or schedule-add.
-         * @since 1.6
-         */
-        ADDED(5),
-	    /**
-         * Object is already replaced.
-         * @since 1.7
-         */
-        REPLACED(6),
-	    /**
-         * Object is moved away.
-         * @since 1.8
-         */
-        MOVED_AWAY(7),
-	    /**
-         * Object is moved here.
-         * @since 1.8
-         */
-        MOVED_HERE(8);
-		
+		/**
+		 * Object is already added or schedule-add.
+		 * 
+		 * @since 1.6
+		 */
+		ADDED(5),
+		/**
+		 * Object is already replaced.
+		 * 
+		 * @since 1.7
+		 */
+		REPLACED(6),
+		/**
+		 * Object is moved away.
+		 * 
+		 * @since 1.8
+		 */
+		MOVED_AWAY(7),
+		/**
+		 * Object is moved here.
+		 * 
+		 * @since 1.8
+		 */
+		MOVED_HERE(8);
+
 		public final int id;
-		
+
 		public static Reason fromId(int id) {
 			for (Reason kind : values()) {
 				if (kind.id == id) {
@@ -143,32 +146,32 @@ public class SVNConflictDescriptor {
 			}
 			throw new IllegalArgumentException("Invalid reason kind: " + id); //$NON-NLS-1$
 		}
-		
+
 		private Reason(int id) {
 			this.id = id;
 		}
 	}
 
 	public enum Operation {
-	    /**
-	     * none
-	     */
-	    NONE(0),
-	    /**
-	     * update
-	     */
-	    UPDATE(1),
-	    /**
-	     * switch 
-	     */	   
-	    SWITCHED(2),
-	    /**
-	     * merge 
-	     */
-	    MERGE(3);
-		
+		/**
+		 * none
+		 */
+		NONE(0),
+		/**
+		 * update
+		 */
+		UPDATE(1),
+		/**
+		 * switch
+		 */
+		SWITCHED(2),
+		/**
+		 * merge
+		 */
+		MERGE(3);
+
 		public final int id;
-		
+
 		public static Operation fromId(int id) {
 			for (Operation kind : values()) {
 				if (kind.id == id) {
@@ -177,12 +180,12 @@ public class SVNConflictDescriptor {
 			}
 			throw new IllegalArgumentException("Invalid operation kind: " + id); //$NON-NLS-1$
 		}
-		
+
 		private Operation(int id) {
 			this.id = id;
 		}
 	}
-	
+
 	/**
 	 * The conflicted entry path.
 	 */
@@ -244,21 +247,21 @@ public class SVNConflictDescriptor {
 	public final String mergedPath;
 
 	/**
-     * @see Operation
-     */
+	 * @see Operation
+	 */
 	public final Operation operation;
-	
-    public final SVNConflictVersion srcLeftVersion;
-    
-    public final SVNConflictVersion srcRightVersion;
-	
-    // Information about property conflicts. New in 1.9
+
+	public final SVNConflictVersion srcLeftVersion;
+
+	public final SVNConflictVersion srcRightVersion;
+
+	// Information about property conflicts. New in 1.9
 //    private String propRejectAbspath;
 //    private byte[] propValueBase;
 //    private byte[] propValueWorking;
 //    private byte[] propValueIncomingOld;
 //    private byte[] propValueIncomingNew;
-    
+
 	/**
 	 * The {@link SVNConflictDescriptor} instance could be initialized only once because all fields are final
 	 * 
@@ -289,8 +292,10 @@ public class SVNConflictDescriptor {
 	 * @param srcLeftVersion
 	 * @param srcRightVersion
 	 */
-	public SVNConflictDescriptor(String path, Kind conflictKind, SVNEntry.Kind nodeKind, String propertyName, boolean isBinary, String mimeType, Action action, Reason reason, Operation operation, 
-			String basePath, String remotePath, String localPath, String mergedPath, SVNConflictVersion srcLeftVersion, SVNConflictVersion srcRightVersion) {
+	public SVNConflictDescriptor(String path, Kind conflictKind, SVNEntry.Kind nodeKind, String propertyName,
+			boolean isBinary, String mimeType, Action action, Reason reason, Operation operation, String basePath,
+			String remotePath, String localPath, String mergedPath, SVNConflictVersion srcLeftVersion,
+			SVNConflictVersion srcRightVersion) {
 		this.path = path;
 		this.conflictKind = conflictKind;
 		this.nodeKind = nodeKind;
@@ -300,47 +305,37 @@ public class SVNConflictDescriptor {
 		this.action = action;
 		this.reason = reason;
 		this.operation = operation;
-		if (this.path != null && basePath != null && !basePath.startsWith(this.path))
-		{
+		if (this.path != null && basePath != null && !basePath.startsWith(this.path)) {
 			this.basePath = new File(this.path).getParent() + File.separator + basePath;
-		}
-		else
-		{
+		} else {
 			this.basePath = basePath;
 		}
-		if (this.path != null && remotePath != null && !remotePath.startsWith(this.path))
-		{
+		if (this.path != null && remotePath != null && !remotePath.startsWith(this.path)) {
 			this.remotePath = new File(this.path).getParent() + File.separator + remotePath;
-		}
-		else
-		{
+		} else {
 			this.remotePath = remotePath;
 		}
-		if (this.path != null && localPath != null && !localPath.startsWith(this.path))
-		{
+		if (this.path != null && localPath != null && !localPath.startsWith(this.path)) {
 			this.localPath = new File(this.path).getParent() + File.separator + localPath;
-		}
-		else
-		{
+		} else {
 			this.localPath = localPath;
 		}
-		if (this.path != null && mergedPath != null && !mergedPath.startsWith(this.path))
-		{
+		if (this.path != null && mergedPath != null && !mergedPath.startsWith(this.path)) {
 			this.mergedPath = new File(this.path).getParent() + File.separator + mergedPath;
-		}
-		else
-		{
+		} else {
 			this.mergedPath = mergedPath;
 		}
 		this.srcLeftVersion = srcLeftVersion;
 		this.srcRightVersion = srcRightVersion;
 	}
-	
+
 	/*
 	 * Constructor for creating tree conflict descriptor
 	 */
-	public SVNConflictDescriptor(String path, Action action, Reason reason, Operation operation, SVNConflictVersion srcLeftVersion, SVNConflictVersion srcRightVersion) {		
-		this(path, Kind.CONTENT, SVNEntry.Kind.NONE, null, false, null, action, reason, operation, null, null, null, null, srcLeftVersion, srcRightVersion);
+	public SVNConflictDescriptor(String path, Action action, Reason reason, Operation operation,
+			SVNConflictVersion srcLeftVersion, SVNConflictVersion srcRightVersion) {
+		this(path, Kind.CONTENT, SVNEntry.Kind.NONE, null, false, null, action, reason, operation, null, null, null,
+				null, srcLeftVersion, srcRightVersion);
 	}
-	
+
 }

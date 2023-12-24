@@ -46,35 +46,38 @@ import org.eclipse.team.ui.synchronize.ResourceScope;
  */
 public class OverrideResourcesPanel extends AbstractResourceSelectionPanel {
 	public static final int MSG_COMMIT = 0;
+
 	public static final int MSG_UPDATE = 1;
-	
-	protected IResource [] affectedResource;
+
+	protected IResource[] affectedResource;
 
 	protected IResourceStatesListener resourceStatesListener;
+
 	protected boolean allowTreatAsEditColumn;
-	
-	protected static final String []MESSAGES = new String[] {
-		"OverrideResourcesPanel_Description_Commit", //$NON-NLS-1$
-		"OverrideResourcesPanel_Description_Update" //$NON-NLS-1$
+
+	protected static final String[] MESSAGES = new String[] { "OverrideResourcesPanel_Description_Commit", //$NON-NLS-1$
+			"OverrideResourcesPanel_Description_Update" //$NON-NLS-1$
 	};
-	
+
 	public OverrideResourcesPanel(IResource[] resources, IResource[] userSelectedResources, int msgId) {
-		this(resources, userSelectedResources, msgId, new IResource [] {});
+		this(resources, userSelectedResources, msgId, new IResource[] {});
 	}
 
-	
-    public OverrideResourcesPanel(IResource[] resources, IResource[] userSelectedResources, int msgId, IResource [] affectedResources) {
-        super(resources, userSelectedResources, new String[] {IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL});
-        this.allowTreatAsEditColumn = msgId == OverrideResourcesPanel.MSG_COMMIT;
-        this.dialogTitle = SVNUIMessages.OverrideResourcesPanel_Title;
-        this.dialogDescription = SVNUIMessages.getString(OverrideResourcesPanel.MESSAGES[msgId]);
-        boolean isParticipantPane = this.paneParticipantHelper.isParticipantPane();
-        this.defaultMessage = isParticipantPane ? SVNUIMessages.OverrideResourcesPanel_Pane_Message : SVNUIMessages.OverrideResourcesPanel_Message;
-        this.affectedResource = affectedResources; 
-    }
-		
+	public OverrideResourcesPanel(IResource[] resources, IResource[] userSelectedResources, int msgId,
+			IResource[] affectedResources) {
+		super(resources, userSelectedResources, new String[] { IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL });
+		this.allowTreatAsEditColumn = msgId == OverrideResourcesPanel.MSG_COMMIT;
+		this.dialogTitle = SVNUIMessages.OverrideResourcesPanel_Title;
+		this.dialogDescription = SVNUIMessages.getString(OverrideResourcesPanel.MESSAGES[msgId]);
+		boolean isParticipantPane = this.paneParticipantHelper.isParticipantPane();
+		this.defaultMessage = isParticipantPane
+				? SVNUIMessages.OverrideResourcesPanel_Pane_Message
+				: SVNUIMessages.OverrideResourcesPanel_Message;
+		this.affectedResource = affectedResources;
+	}
+
 	protected String getDialogID() {
-	   	return super.getDialogID() + (this.affectedResource.length > 0 ? "Affected" : ""); 
+		return super.getDialogID() + (this.affectedResource.length > 0 ? "Affected" : "");
 	}
 
 	public void createControlsImpl(Composite parent) {
@@ -93,7 +96,8 @@ public class OverrideResourcesPanel extends AbstractResourceSelectionPanel {
 		description.setLayoutData(data);
 		data = new GridData(GridData.FILL_BOTH);
 		data.heightHint = 100;
-		ResourceSelectionComposite affectedResourcesComposite = new ResourceSelectionComposite(parent, SWT.NONE, this.affectedResource, false, this.allowTreatAsEditColumn, false);
+		ResourceSelectionComposite affectedResourcesComposite = new ResourceSelectionComposite(parent, SWT.NONE,
+				this.affectedResource, false, this.allowTreatAsEditColumn, false);
 		affectedResourcesComposite.setLayoutData(data);
 		this.attachTo(affectedResourcesComposite, new AbstractVerifier() {
 			protected String getErrorMessage(Control input) {
@@ -105,19 +109,22 @@ public class OverrideResourcesPanel extends AbstractResourceSelectionPanel {
 			}
 		});
 	}
-	
+
 	protected void updateResources(ResourceStatesChangedEvent event) {
 		HashSet<IResource> allResources = new HashSet<IResource>(Arrays.asList(this.resources));
-		
+
 		HashSet<IResource> toDeleteSet = new HashSet<IResource>();
-		toDeleteSet.addAll(Arrays.asList(FileUtility.getResourcesRecursive(event.resources, IStateFilter.SF_NOTMODIFIED, IResource.DEPTH_ZERO)));
-		toDeleteSet.addAll(Arrays.asList(FileUtility.getResourcesRecursive(event.resources, IStateFilter.SF_NOTEXISTS, IResource.DEPTH_ZERO)));
-		toDeleteSet.addAll(Arrays.asList(FileUtility.getResourcesRecursive(event.resources, IStateFilter.SF_IGNORED, IResource.DEPTH_ZERO)));
-		
+		toDeleteSet.addAll(Arrays.asList(
+				FileUtility.getResourcesRecursive(event.resources, IStateFilter.SF_NOTMODIFIED, IResource.DEPTH_ZERO)));
+		toDeleteSet.addAll(Arrays.asList(
+				FileUtility.getResourcesRecursive(event.resources, IStateFilter.SF_NOTEXISTS, IResource.DEPTH_ZERO)));
+		toDeleteSet.addAll(Arrays.asList(
+				FileUtility.getResourcesRecursive(event.resources, IStateFilter.SF_IGNORED, IResource.DEPTH_ZERO)));
+
 		allResources.removeAll(toDeleteSet);
-		
+
 		final IResource[] newResources = allResources.toArray(new IResource[allResources.size()]);
-		
+
 		if (!this.paneParticipantHelper.isParticipantPane()) {
 			UIMonitorUtility.getDisplay().syncExec(new Runnable() {
 				public void run() {
@@ -127,40 +134,43 @@ public class OverrideResourcesPanel extends AbstractResourceSelectionPanel {
 						OverrideResourcesPanel.this.selectionComposite.fireSelectionChanged();
 					}
 				}
-			});	
+			});
 		}
-		
+
 		this.resources = newResources;
-	}	
-	
+	}
+
 	public void postInit() {
-	   	super.postInit();
-	   	this.validateContent();
-	   	
-	   	this.resourceStatesListener = new IResourceStatesListener() {
+		super.postInit();
+		this.validateContent();
+
+		this.resourceStatesListener = new IResourceStatesListener() {
 			public void resourcesStateChanged(ResourceStatesChangedEvent event) {
 				OverrideResourcesPanel.this.updateResources(event);
 			}
 		};
-		SVNRemoteStorage.instance().addResourceStatesListener(ResourceStatesChangedEvent.class, OverrideResourcesPanel.this.resourceStatesListener);
+		SVNRemoteStorage.instance()
+				.addResourceStatesListener(ResourceStatesChangedEvent.class,
+						OverrideResourcesPanel.this.resourceStatesListener);
 	}
-    
+
 	public void dispose() {
-    	super.dispose();
-    	
-    	SVNRemoteStorage.instance().removeResourceStatesListener(ResourceStatesChangedEvent.class, this.resourceStatesListener);	    	    	
-    }
-	
-    public String getHelpId() {
-    	return "org.eclipse.team.svn.help.overrideDialogContext"; //$NON-NLS-1$
-    }
-	
+		super.dispose();
+
+		SVNRemoteStorage.instance()
+				.removeResourceStatesListener(ResourceStatesChangedEvent.class, this.resourceStatesListener);
+	}
+
+	public String getHelpId() {
+		return "org.eclipse.team.svn.help.overrideDialogContext"; //$NON-NLS-1$
+	}
+
 	protected BasePaneParticipant createPaneParticipant() {
 		return new BasePaneParticipant(new ResourceScope(this.resources), this) {
 			protected Collection<AbstractSynchronizeActionGroup> getActionGroups() {
 				Collection<AbstractSynchronizeActionGroup> actionGroups = new ArrayList<AbstractSynchronizeActionGroup>();
 				actionGroups.add(new BasePaneActionGroup(this.validationManager));
-		    	return actionGroups;
+				return actionGroups;
 			}
 		};
 	}

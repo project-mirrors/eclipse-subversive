@@ -38,27 +38,32 @@ import org.eclipse.team.svn.core.utility.SVNUtility;
  */
 public class ImportOperation extends AbstractRepositoryOperation implements IRevisionProvider {
 	protected String path;
+
 	protected String message;
+
 	protected SVNDepth depth;
-	protected RevisionPair []revisionPair;
+
+	protected RevisionPair[] revisionPair;
+
 	protected ISVNImportFilterCallback filter;
-	
+
 	public ImportOperation(IRepositoryResource resource, String path, String message, SVNDepth depth) {
 		this(resource, path, message, depth, null);
 	}
-	
-	public ImportOperation(IRepositoryResource resource, String path, String message, SVNDepth depth, ISVNImportFilterCallback filter) {
-		super("Operation_Import", SVNMessages.class, new IRepositoryResource[] {resource}); //$NON-NLS-1$
+
+	public ImportOperation(IRepositoryResource resource, String path, String message, SVNDepth depth,
+			ISVNImportFilterCallback filter) {
+		super("Operation_Import", SVNMessages.class, new IRepositoryResource[] { resource }); //$NON-NLS-1$
 		this.path = path;
 		this.message = message;
 		this.depth = depth;
 		this.filter = filter;
 	}
-	
-	public RevisionPair []getRevisions() {
+
+	public RevisionPair[] getRevisions() {
 		return this.revisionPair;
 	}
-	
+
 	protected void runImpl(IProgressMonitor monitor) throws Exception {
 		final IRepositoryResource resource = this.operableData()[0];
 		final IRepositoryLocation location = resource.getRepositoryLocation();
@@ -67,26 +72,32 @@ public class ImportOperation extends AbstractRepositoryOperation implements IRev
 		ISVNNotificationCallback notify = new ISVNNotificationCallback() {
 			public void notify(SVNNotification info) {
 				if (info.revision != SVNRevision.INVALID_REVISION_NUMBER) {
-					String []path = new String[] {resource.getUrl()};
+					String[] path = new String[] { resource.getUrl() };
 					ImportOperation.this.revisionPair[0] = new RevisionPair(info.revision, path, location);
-					String message = SVNMessages.format(SVNMessages.Console_CommittedRevision, new String[] {String.valueOf(info.revision)});
+					String message = SVNMessages.format(SVNMessages.Console_CommittedRevision,
+							new String[] { String.valueOf(info.revision) });
 					ImportOperation.this.writeToConsole(IConsoleStream.LEVEL_OK, message);
 				}
 			}
 		};
 		try {
 			SVNUtility.addSVNNotifyListener(proxy, notify);
-			this.writeToConsole(IConsoleStream.LEVEL_CMD, "svn import \"" + FileUtility.normalizePath(this.path) + "\" \"" + SVNUtility.getDepthArg(this.depth, ISVNConnector.Options.NONE) + ISVNConnector.Options.asCommandLine(ISVNConnector.Options.INCLUDE_IGNORED | ISVNConnector.Options.IGNORE_UNKNOWN_NODE_TYPES) + " -m \"" + this.message + "\"" + FileUtility.getUsernameParam(location.getUsername()) + "\n"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
-			proxy.importTo(this.path, SVNUtility.encodeURL(resource.getUrl()), this.message, this.depth, ISVNConnector.Options.INCLUDE_IGNORED | ISVNConnector.Options.IGNORE_UNKNOWN_NODE_TYPES, null, filter, new SVNProgressMonitor(this, monitor, null));
-		}
-		finally {
+			this.writeToConsole(IConsoleStream.LEVEL_CMD, "svn import \"" + FileUtility.normalizePath(this.path) //$NON-NLS-1$
+					+ "\" \"" + SVNUtility.getDepthArg(this.depth, ISVNConnector.Options.NONE) //$NON-NLS-1$
+					+ ISVNConnector.Options.asCommandLine(
+							ISVNConnector.Options.INCLUDE_IGNORED | ISVNConnector.Options.IGNORE_UNKNOWN_NODE_TYPES)
+					+ " -m \"" + this.message + "\"" + FileUtility.getUsernameParam(location.getUsername()) + "\n"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			proxy.importTo(this.path, SVNUtility.encodeURL(resource.getUrl()), this.message, this.depth,
+					ISVNConnector.Options.INCLUDE_IGNORED | ISVNConnector.Options.IGNORE_UNKNOWN_NODE_TYPES, null,
+					filter, new SVNProgressMonitor(this, monitor, null));
+		} finally {
 			SVNUtility.removeSVNNotifyListener(proxy, notify);
 			location.releaseSVNProxy(proxy);
 		}
 	}
-	
+
 	protected String getShortErrorMessage(Throwable t) {
-		return BaseMessages.format(super.getShortErrorMessage(t), new Object[] {this.operableData()[0].getUrl()});
+		return BaseMessages.format(super.getShortErrorMessage(t), new Object[] { this.operableData()[0].getUrl() });
 	}
 
 }

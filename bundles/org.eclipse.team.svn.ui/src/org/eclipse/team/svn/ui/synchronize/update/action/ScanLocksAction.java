@@ -38,7 +38,7 @@ import org.eclipse.ui.PartInitException;
 public class ScanLocksAction extends AbstractSynchronizeModelAction {
 
 	public ScanLocksAction(String text, ISynchronizePageConfiguration configuration) {
-		super(text, configuration);		
+		super(text, configuration);
 	}
 
 	protected boolean needsToSaveDirtyEditors() {
@@ -48,29 +48,29 @@ public class ScanLocksAction extends AbstractSynchronizeModelAction {
 	protected boolean updateSelection(IStructuredSelection selection) {
 		super.updateSelection(selection);
 		if (selection.size() == 1) {
-			ISynchronizeModelElement element = (ISynchronizeModelElement)selection.getFirstElement();
+			ISynchronizeModelElement element = (ISynchronizeModelElement) selection.getFirstElement();
 			ILocalResource local = SVNRemoteStorage.instance().asLocalResource(element.getResource());
 			if (local != null) {
-				return IStateFilter.SF_ONREPOSITORY.accept(local);	
-			}			
+				return IStateFilter.SF_ONREPOSITORY.accept(local);
+			}
 		}
-	    return false;
+		return false;
 	}
-	
+
 	protected IActionOperation getOperation(ISynchronizePageConfiguration configuration, IDiffElement[] elements) {
-		IResource resource = this.getSelectedResource();				
+		IResource resource = this.getSelectedResource();
 		IWorkbenchPage page = UIMonitorUtility.getActivePage();
-		if (page != null) { 
+		if (page != null) {
 			try {
 				LocksView view = (LocksView) page.showView(LocksView.VIEW_ID);
 				if (view != null) {
 					view.setResourceWithoutActionExecution(resource);
 					IActionOperation op = view.getUpdateViewOperation();
-					return op;		
-				}	
+					return op;
+				}
 			} catch (PartInitException pe) {
 				LoggedOperation.reportError(ScanLocksAction.class.getName(), pe);
-			}		
+			}
 		}
 		return null;
 	}

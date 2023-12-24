@@ -21,22 +21,23 @@ import org.eclipse.ui.model.IWorkbenchAdapter;
 import org.eclipse.ui.model.WorkbenchContentProvider;
 
 /**
- * Repository content provider 
+ * Repository content provider
  * 
  * @author Alexander Gurov
  */
 public class RepositoryContentProvider extends WorkbenchContentProvider {
 	protected RepositoryTreeViewer repositoryTree;
+
 	protected IRepositoryContentFilter filter;
 
 	public RepositoryContentProvider(RepositoryTreeViewer repositoryTree) {
 		this.repositoryTree = repositoryTree;
 	}
-	
+
 	public IRepositoryContentFilter getFilter() {
 		return this.filter;
 	}
-	
+
 	public void setFilter(IRepositoryContentFilter filter) {
 		this.filter = filter;
 	}
@@ -44,24 +45,24 @@ public class RepositoryContentProvider extends WorkbenchContentProvider {
 	public boolean hasChildren(Object element) {
 		IWorkbenchAdapter adapter = this.getAdapter(element);
 		if (adapter instanceof IParentTreeNode) {
-			return ((IParentTreeNode)adapter).hasChildren();
+			return ((IParentTreeNode) adapter).hasChildren();
 		}
 		return false;
 	}
-	
-	public Object []getChildren(Object parentElement) {
+
+	public Object[] getChildren(Object parentElement) {
 		IWorkbenchAdapter adapter = this.getAdapter(parentElement);
 		if (adapter instanceof IParentTreeNode) {
 			if (adapter instanceof IResourceTreeNode) {
-				((IResourceTreeNode)adapter).setViewer(this.repositoryTree);
+				((IResourceTreeNode) adapter).setViewer(this.repositoryTree);
 			}
 			ArrayList<Object> filtered = new ArrayList<Object>();
-			Object []children = adapter.getChildren(parentElement);
+			Object[] children = adapter.getChildren(parentElement);
 			if (children != null) {
 				for (int i = 0; i < children.length; i++) {
 					if (this.filter == null || this.filter.accept(children[i])) {
 						if (children[i] instanceof IResourceTreeNode) {
-							((IResourceTreeNode)children[i]).setViewer(this.repositoryTree);
+							((IResourceTreeNode) children[i]).setViewer(this.repositoryTree);
 						}
 						filtered.add(children[i]);
 					}
@@ -71,5 +72,5 @@ public class RepositoryContentProvider extends WorkbenchContentProvider {
 		}
 		return new Object[0];
 	}
-	
+
 }

@@ -41,25 +41,33 @@ public class LockResource implements IAdaptable {
 	public enum LockStatusEnum {
 		NONE, LOCALLY_LOCKED, OTHER_LOCKED, BROKEN, STOLEN
 	}
-	
+
 	protected final boolean isFile;
-	protected final LockStatusEnum lockStatus;	
+
+	protected final LockStatusEnum lockStatus;
+
 	protected String name;
+
 	protected final String owner;
+
 	protected final Date creationDate;
+
 	protected final String comment;
-	
-	protected LockResource parent;	
-	protected Set<LockResource> children; 
-	
+
+	protected LockResource parent;
+
+	protected Set<LockResource> children;
+
 	protected String url;
+
 	protected String fullFileSystemPath;
-	
+
 	public interface ILockResourceVisitor {
 		public void visit(LockResource lockResource);
 	}
-	
-	public LockResource(String name, String owner, boolean isFile, LockStatusEnum lockStatus, Date creationDate, String comment, String fullFileSystemPath, String url) {
+
+	public LockResource(String name, String owner, boolean isFile, LockStatusEnum lockStatus, Date creationDate,
+			String comment, String fullFileSystemPath, String url) {
 		this.name = name;
 		this.owner = owner;
 		this.isFile = isFile;
@@ -67,16 +75,16 @@ public class LockResource implements IAdaptable {
 		this.creationDate = creationDate;
 		this.comment = comment;
 		this.fullFileSystemPath = fullFileSystemPath;
-		this.url = url;		
+		this.url = url;
 		if (!this.isFile) {
 			this.children = new HashSet<LockResource>();
-		}					
+		}
 	}
-	
+
 //	public boolean hasChildren() {
 //		return !this.isFile && !this.children.isEmpty();		
 //	}
-	
+
 	public void addChild(LockResource lockResource) {
 		if (!this.isFile) {
 			if (this.children.add(lockResource)) {
@@ -84,7 +92,7 @@ public class LockResource implements IAdaptable {
 			}
 		}
 	}
-	
+
 	public void addChildren(LockResource[] lockResources) {
 		if (!this.isFile) {
 			for (LockResource lockResource : lockResources) {
@@ -92,19 +100,19 @@ public class LockResource implements IAdaptable {
 			}
 		}
 	}
-	
+
 	public LockResource[] getChildren() {
-		return this.isFile ? new  LockResource[0] : this.children.toArray(new LockResource[0]);
+		return this.isFile ? new LockResource[0] : this.children.toArray(new LockResource[0]);
 	}
-	
+
 	public void removeChild(LockResource lockResource) {
 		if (!this.isFile) {
 			if (this.children.remove(lockResource)) {
 				lockResource.parent = null;
 			}
-		} 
+		}
 	}
-	
+
 	public LockResource getChildByName(String childName) {
 		if (this.isFile) {
 			return null;
@@ -116,23 +124,23 @@ public class LockResource implements IAdaptable {
 		}
 		return null;
 	}
-	
+
 	public boolean isFile() {
 		return this.isFile;
 	}
-	
+
 	/*
 	 * path to resource relative to root.
 	 * Includes also resource name  
 	 */
 	public String getPath() {
-		return this.isRoot() ? this.name  : (this.parent.getPath() + "/" + this.name); //$NON-NLS-1$
+		return this.isRoot() ? this.name : (this.parent.getPath() + "/" + this.name); //$NON-NLS-1$
 	}
-	
+
 	public boolean isRoot() {
 		return this.parent == null;
 	}
-		
+
 	public LockStatusEnum getLockStatus() {
 		return this.lockStatus;
 	}
@@ -140,7 +148,7 @@ public class LockResource implements IAdaptable {
 	public void setName(String name) {
 		this.name = name;
 	}
-	
+
 	public String getName() {
 		return name;
 	}
@@ -152,11 +160,11 @@ public class LockResource implements IAdaptable {
 	public Date getCreationDate() {
 		return creationDate;
 	}
-	
+
 	public LockResource getParent() {
 		return parent;
 	}
-	
+
 	public String getComment() {
 		return this.comment;
 	}
@@ -164,22 +172,22 @@ public class LockResource implements IAdaptable {
 	public String getFullFileSystemPath() {
 		return this.fullFileSystemPath;
 	}
-	
+
 	public String getUrl() {
 		return this.url;
 	}
-	
+
 	public String toString() {
 		return this.getPath();
 	}
 
 	public void accept(ILockResourceVisitor visitor) {
-		visitor.visit(this);		
+		visitor.visit(this);
 	}
-	
+
 	public LockResource[] getAllChildFiles() {
 		final List<LockResource> res = new ArrayList<LockResource>();
-		this.accept(new ILockResourceVisitor() {			
+		this.accept(new ILockResourceVisitor() {
 			public void visit(LockResource lockResource) {
 				if (lockResource.isFile()) {
 					res.add(lockResource);
@@ -193,29 +201,32 @@ public class LockResource implements IAdaptable {
 		});
 		return res.toArray(new LockResource[0]);
 	}
-	
+
 	//only for DEBUG
 	public void showResourcesTree() {
 		this.accept(new ILockResourceVisitor() {
 			protected int indent;
+
 			public void visit(LockResource lockResource) {
-				String str = this.getStrIndent() + "Name: " + lockResource.getName() + ", path: " + lockResource.getPath(); //$NON-NLS-1$ //$NON-NLS-2$
+				String str = this.getStrIndent() + "Name: " + lockResource.getName() + ", path: " //$NON-NLS-1$//$NON-NLS-2$
+						+ lockResource.getPath();
 				if (lockResource.isFile()) {
-					str += ", lock status: " + lockResource.getLockStatus().toString();  //$NON-NLS-1$
+					str += ", lock status: " + lockResource.getLockStatus().toString(); //$NON-NLS-1$
 				}
-				System.out.println(str);				
+				System.out.println(str);
 				LockResource[] children = lockResource.getChildren();
 				for (LockResource child : children) {
-					this.indent ++;
+					this.indent++;
 					this.visit(child);
-					this.indent --;
+					this.indent--;
 				}
-			}	
+			}
+
 			protected String getStrIndent() {
 				StringBuffer res = new StringBuffer();
-				for (int i = 0; i < this.indent; i ++) {
+				for (int i = 0; i < this.indent; i++) {
 					res.append("\t"); //$NON-NLS-1$
-				} 				
+				}
 				return res.toString();
 			}
 		});
@@ -227,23 +238,26 @@ public class LockResource implements IAdaptable {
 	public Object getAdapter(Class adapter) {
 		if (this.isFile() && this.fullFileSystemPath != null) {
 			IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
-			IContainer parent = (IContainer)root.findMember(this.parent.getPath());
-			IFile file = parent.getFile(new Path(this.name));			
+			IContainer parent = (IContainer) root.findMember(this.parent.getPath());
+			IFile file = parent.getFile(new Path(this.name));
 			if (adapter == IResource.class) {
 				return file;
 			} else if (adapter == IRepositoryResource.class && file != null && this.url != null) {
-				return SVNRemoteStorage.instance().asRepositoryResource(SVNRemoteStorage.instance().getRepositoryLocation(file), this.url, true);
-			} 
-		}		
+				return SVNRemoteStorage.instance()
+						.asRepositoryResource(SVNRemoteStorage.instance().getRepositoryLocation(file), this.url, true);
+			}
+		}
 		return null;
 	}
-	
+
 	/**
-	 * @param resourcesToProcess	resources for which lock info should be returned
-	 * @param locked	locked only if true, unlocked only if false
+	 * @param resourcesToProcess
+	 *            resources for which lock info should be returned
+	 * @param locked
+	 *            locked only if true, unlocked only if false
 	 * @return
 	 */
-	public static LockResource []getLockResources(IResource[] resourcesToProcess, boolean locked) {
+	public static LockResource[] getLockResources(IResource[] resourcesToProcess, boolean locked) {
 		List<LockResource> res = new ArrayList<LockResource>();
 		for (IResource resource : resourcesToProcess) {
 			if (resource.getParent() != null) {
@@ -255,10 +269,11 @@ public class LockResource implements IAdaptable {
 					}
 					LockResource lr;
 					if (local.isLocked()) {
-						lr = new LockResource(resource.getName(), null, true, LockStatusEnum.LOCALLY_LOCKED, null, null, FileUtility.getWorkingCopyPath(resource), null);
+						lr = new LockResource(resource.getName(), null, true, LockStatusEnum.LOCALLY_LOCKED, null, null,
+								FileUtility.getWorkingCopyPath(resource), null);
 					} else {
 						lr = createNotLockedFile(resource.getName(), FileUtility.getWorkingCopyPath(resource));
-					}	
+					}
 					LockResource directory = createDirectory(parentPath);
 					directory.addChild(lr);
 					res.add(lr);
@@ -269,9 +284,9 @@ public class LockResource implements IAdaptable {
 	}
 
 	public static LockResource createDirectory(String directoryName) {
-		return new LockResource(directoryName, null, false, LockStatusEnum.NONE, null, null, null, null);		
+		return new LockResource(directoryName, null, false, LockStatusEnum.NONE, null, null, null, null);
 	}
-	
+
 	public static LockResource createNotLockedFile(String fileName, String fullFileSystemPath) {
 		return new LockResource(fileName, null, true, LockStatusEnum.NONE, null, null, fullFileSystemPath, null);
 	}

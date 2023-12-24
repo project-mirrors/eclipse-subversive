@@ -21,7 +21,7 @@ import org.eclipse.team.svn.core.resource.IRepositoryResource;
 import org.eclipse.team.svn.ui.SVNTeamUIPlugin;
 
 /**
- * BRANCH'es node representation 
+ * BRANCH'es node representation
  * 
  * @author Alexander Gurov
  */
@@ -31,19 +31,21 @@ public class RepositoryBranches extends RepositoryFolder {
 	}
 
 	protected ImageDescriptor getImageDescriptorImpl() {
-		return this.isExternals() ? super.getImageDescriptorImpl() : SVNTeamUIPlugin.instance().getImageDescriptor("icons/objects/branches.gif"); //$NON-NLS-1$
+		return this.isExternals()
+				? super.getImageDescriptorImpl()
+				: SVNTeamUIPlugin.instance().getImageDescriptor("icons/objects/branches.gif"); //$NON-NLS-1$
 	}
-	
+
 	public RGB getForeground(Object element) {
 		return RepositoryResource.STRUCTURE_DEFINED_NODES_FOREGROUND;
 	}
-	
+
 	public RGB getBackground(Object element) {
-    	return RepositoryResource.STRUCTURE_DEFINED_NODES_BACKGROUND;
-    }
-    
-    public FontData getFont(Object element) {
-    	return RepositoryResource.STRUCTURE_DEFINED_NODES_FONT.getFontData()[0];
-    }
+		return RepositoryResource.STRUCTURE_DEFINED_NODES_BACKGROUND;
+	}
+
+	public FontData getFont(Object element) {
+		return RepositoryResource.STRUCTURE_DEFINED_NODES_FONT.getFontData()[0];
+	}
 
 }

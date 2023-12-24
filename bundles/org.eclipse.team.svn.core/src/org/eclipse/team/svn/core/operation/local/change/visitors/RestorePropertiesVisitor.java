@@ -33,25 +33,29 @@ import org.eclipse.team.svn.core.resource.ILocalResource;
  */
 public class RestorePropertiesVisitor implements IResourceChangeVisitor {
 
-	public void preVisit(ResourceChange change, IActionOperationProcessor processor, IProgressMonitor monitor) throws Exception {
+	public void preVisit(ResourceChange change, IActionOperationProcessor processor, IProgressMonitor monitor)
+			throws Exception {
 	}
 
-	public void postVisit(ResourceChange change, IActionOperationProcessor processor, IProgressMonitor monitor) throws Exception {
+	public void postVisit(ResourceChange change, IActionOperationProcessor processor, IProgressMonitor monitor)
+			throws Exception {
 		ILocalResource local = change.getLocal();
-    	if (IStateFilter.SF_VERSIONED.accept(local)) {
+		if (IStateFilter.SF_VERSIONED.accept(local)) {
 			//remove remote properties
 			GetPropertiesOperation getProp = new GetPropertiesOperation(local.getResource());
 			processor.doOperation(getProp, monitor);
-			SVNProperty []remoteProperties = getProp.getProperties();
+			SVNProperty[] remoteProperties = getProp.getProperties();
 			if (remoteProperties != null && remoteProperties.length > 0) {
-				RemovePropertiesOperation removeProp = new RemovePropertiesOperation(new IResource[] {local.getResource()}, remoteProperties, false);
+				RemovePropertiesOperation removeProp = new RemovePropertiesOperation(
+						new IResource[] { local.getResource() }, remoteProperties, false);
 				processor.doOperation(removeProp, monitor);
 			}
 			//add local properties
 			if (change.getProperties() != null && change.getProperties().length > 0) {
-		    	processor.doOperation(new SetPropertiesOperation(new IResource[] {local.getResource()}, change.getProperties(), false), monitor);	
-		    }
-    	}
+				processor.doOperation(new SetPropertiesOperation(new IResource[] { local.getResource() },
+						change.getProperties(), false), monitor);
+			}
+		}
 	}
 
 }

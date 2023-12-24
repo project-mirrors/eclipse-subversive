@@ -45,17 +45,23 @@ import org.eclipse.ui.model.IWorkbenchAdapter;
  * @author Sergiy Logvin
  */
 public class ResourceListPanel extends AbstractDialogPanel {
-	protected IResource []resources;
+	protected IResource[] resources;
+
 	protected TableViewer tableViewer;
+
 	protected boolean showLocalNames;
+
 	protected String helpId;
+
 	protected Map<ImageDescriptor, Image> images;
-	
-	public ResourceListPanel(IResource []resources, String dialogTitle, String dialogDescription, String defaultMessage, String[] buttons) {
+
+	public ResourceListPanel(IResource[] resources, String dialogTitle, String dialogDescription, String defaultMessage,
+			String[] buttons) {
 		this(resources, dialogTitle, dialogDescription, defaultMessage, buttons, null);
 	}
-    
-	public ResourceListPanel(IResource []resources, String dialogTitle, String dialogDescription, String defaultMessage, String[] buttons, String helpId) {
+
+	public ResourceListPanel(IResource[] resources, String dialogTitle, String dialogDescription, String defaultMessage,
+			String[] buttons, String helpId) {
 		super(buttons);
 		this.dialogTitle = dialogTitle;
 		this.dialogDescription = dialogDescription;
@@ -63,7 +69,7 @@ public class ResourceListPanel extends AbstractDialogPanel {
 		this.resources = resources;
 		this.images = new HashMap<ImageDescriptor, Image>();
 	}
-    
+
 	public boolean isShowLocalNames() {
 		return this.showLocalNames;
 	}
@@ -71,41 +77,42 @@ public class ResourceListPanel extends AbstractDialogPanel {
 	public void setShowLocalNames(boolean showLocalNames) {
 		this.showLocalNames = showLocalNames;
 	}
-	
-    public String getHelpId() {
-    	return this.helpId;
-    }
-    
-    public void dispose() {
-    	for (Image img : this.images.values()) {
-    		img.dispose();
-    	}
-    	super.dispose();
-    }
-    
-    public void createControlsImpl(Composite parent) {
+
+	public String getHelpId() {
+		return this.helpId;
+	}
+
+	public void dispose() {
+		for (Image img : this.images.values()) {
+			img.dispose();
+		}
+		super.dispose();
+	}
+
+	public void createControlsImpl(Composite parent) {
 		Table table = new Table(parent, SWT.V_SCROLL | SWT.FULL_SELECTION | SWT.SINGLE | SWT.BORDER);
 		TableLayout layout = new TableLayout();
 		table.setLayout(layout);
-		
+
 		this.tableViewer = new TableViewer(table);
 		GridData data = new GridData(GridData.FILL_BOTH);
 		data.heightHint = 120;
 		this.tableViewer.getTable().setLayoutData(data);
-		
+
 		final TableColumn col = new TableColumn(table, SWT.NONE);
 		col.setResizable(true);
 		layout.addColumnData(new ColumnWeightData(100, true));
-		
+
 		this.tableViewer.getTable().addControlListener(new ControlAdapter() {
 			public void controlResized(ControlEvent e) {
 				col.setWidth(ResourceListPanel.this.tableViewer.getTable().getClientArea().width);
 			}
 		});
-		
+
 		this.tableViewer.setLabelProvider(new ITableLabelProvider() {
 			public Image getColumnImage(Object element, int columnIndex) {
-				IWorkbenchAdapter adapter = (IWorkbenchAdapter)((IAdaptable)element).getAdapter(IWorkbenchAdapter.class);
+				IWorkbenchAdapter adapter = (IWorkbenchAdapter) ((IAdaptable) element)
+						.getAdapter(IWorkbenchAdapter.class);
 				if (adapter == null) {
 					return null;
 				}
@@ -122,7 +129,7 @@ public class ResourceListPanel extends AbstractDialogPanel {
 			}
 
 			public String getColumnText(Object element, int columnIndex) {
-				IResource resource = (IResource)element;
+				IResource resource = (IResource) element;
 				if (ResourceListPanel.this.showLocalNames) {
 					return resource.getFullPath().toString().substring(1);
 				}
@@ -132,24 +139,27 @@ public class ResourceListPanel extends AbstractDialogPanel {
 
 			public void addListener(ILabelProviderListener listener) {
 			}
+
 			public void dispose() {
 			}
+
 			public boolean isLabelProperty(Object element, String property) {
 				return false;
 			}
+
 			public void removeListener(ILabelProviderListener listener) {
 			}
 		});
-		
-		this.tableViewer.setContentProvider(new ArrayStructuredContentProvider());
-		
-		this.tableViewer.setInput(this.resources);
-    }
-    
-    protected void saveChangesImpl() {
-    }
 
-    protected void cancelChangesImpl() {
-    }
+		this.tableViewer.setContentProvider(new ArrayStructuredContentProvider());
+
+		this.tableViewer.setInput(this.resources);
+	}
+
+	protected void saveChangesImpl() {
+	}
+
+	protected void cancelChangesImpl() {
+	}
 
 }

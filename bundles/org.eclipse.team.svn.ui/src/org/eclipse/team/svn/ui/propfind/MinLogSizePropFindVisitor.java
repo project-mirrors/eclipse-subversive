@@ -23,11 +23,11 @@ import org.eclipse.team.svn.core.connector.SVNProperty;
  */
 public class MinLogSizePropFindVisitor implements IPropFindVisitor {
 	protected int minLogSize;
-	
+
 	public MinLogSizePropFindVisitor() {
 		this.minLogSize = 0;
 	}
-	
+
 	public boolean visit(SVNProperty propertyParam) {
 		if (propertyParam.name.equals("tsvn:logminsize")) { //$NON-NLS-1$
 			try {
@@ -35,14 +35,13 @@ public class MinLogSizePropFindVisitor implements IPropFindVisitor {
 				if (this.minLogSize < currMinSize) {
 					this.minLogSize = currMinSize;
 				}
-			}
-			catch (NumberFormatException ex) {
+			} catch (NumberFormatException ex) {
 				//we ignore the exception
 			}
 		}
 		return true;
 	}
-	
+
 	public int getMinLogSize() {
 		return this.minLogSize;
 	}

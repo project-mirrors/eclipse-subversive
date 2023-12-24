@@ -28,12 +28,12 @@ import org.eclipse.team.ui.synchronize.ISynchronizePageConfiguration;
 public class ExtractIncomingToModelAction extends AbstractSynchronizeLogicalModelAction {
 
 	protected ExtractIncomingToActionHelper actionHelper;
-	
+
 	public ExtractIncomingToModelAction(String text, ISynchronizePageConfiguration configuration) {
 		super(text, configuration);
 		this.actionHelper = new ExtractIncomingToActionHelper(this, configuration);
 	}
-	
+
 	protected boolean needsToSaveDirtyEditors() {
 		return false;
 	}
@@ -41,7 +41,7 @@ public class ExtractIncomingToModelAction extends AbstractSynchronizeLogicalMode
 	protected FastSyncInfoFilter getSyncInfoFilter() {
 		return this.actionHelper.getSyncInfoFilter();
 	}
-	
+
 	protected IActionOperation getOperation() {
 		return this.actionHelper.getOperation();
 	}

@@ -29,33 +29,43 @@ import org.eclipse.team.svn.core.resource.IRepositoryResource;
  * @author Alexander Gurov
  */
 public class SVNFolderChange extends SVNLocalFolder implements IFolderChange {
-    protected SVNRevision pegRevision;
+	protected SVNRevision pegRevision;
+
 	protected IRepositoryResource originator;
+
 	protected String comment;
+
 	protected ICommentProvider provider;
 
-	public SVNFolderChange(IResource resource, long revision, String textStatus, String propStatus, int changeMask, String author, long lastCommitDate, SVNConflictDescriptor treeConflictDescriptor, SVNRevision pegRevision, String comment) {
-		super(resource, revision, revision, textStatus, propStatus, changeMask, author, lastCommitDate, treeConflictDescriptor);
+	public SVNFolderChange(IResource resource, long revision, String textStatus, String propStatus, int changeMask,
+			String author, long lastCommitDate, SVNConflictDescriptor treeConflictDescriptor, SVNRevision pegRevision,
+			String comment) {
+		super(resource, revision, revision, textStatus, propStatus, changeMask, author, lastCommitDate,
+				treeConflictDescriptor);
 		this.comment = comment;
 		this.pegRevision = pegRevision;
 	}
-	
-	public void treatAsReplacement()
-	{
+
+	public void treatAsReplacement() {
 		this.textStatus = IStateFilter.ST_REPLACED;
 	}
-	
+
 	public SVNRevision getPegRevision() {
-		return this.pegRevision == null ? (this.revision != SVNRevision.INVALID_REVISION_NUMBER ? SVNRevision.fromNumber(this.revision) : SVNRevision.INVALID_REVISION) : this.pegRevision;
+		return this.pegRevision == null
+				? (this.revision != SVNRevision.INVALID_REVISION_NUMBER
+						? SVNRevision.fromNumber(this.revision)
+						: SVNRevision.INVALID_REVISION)
+				: this.pegRevision;
 	}
-	
+
 	public void setPegRevision(SVNRevision pegRevision) {
 		this.pegRevision = pegRevision;
 	}
 
-	public ILocalResource []getChildren() {
+	public ILocalResource[] getChildren() {
 		return new ILocalResource[0];
 	}
+
 	public IRepositoryResource getOriginator() {
 		if (this.originator == null && this.getRevision() != SVNRevision.INVALID_REVISION_NUMBER) {
 			IRepositoryResource remote = SVNRemoteStorage.instance().asRepositoryResource(this.resource);
@@ -69,11 +79,15 @@ public class SVNFolderChange extends SVNLocalFolder implements IFolderChange {
 	public void setOriginator(IRepositoryResource originator) {
 		this.originator = originator;
 	}
-	
+
 	public synchronized String getComment() {
 		if (this.comment == null && this.provider != null) {
 			long rev = this.getRevision();
-			this.comment = this.provider.getComment(this.getResource(), rev == SVNRevision.INVALID_REVISION_NUMBER ? SVNRevision.INVALID_REVISION : SVNRevision.fromNumber(rev), this.getPegRevision());
+			this.comment = this.provider.getComment(this.getResource(),
+					rev == SVNRevision.INVALID_REVISION_NUMBER
+							? SVNRevision.INVALID_REVISION
+							: SVNRevision.fromNumber(rev),
+					this.getPegRevision());
 			this.provider = null;
 		}
 		return this.comment;
@@ -82,5 +96,5 @@ public class SVNFolderChange extends SVNLocalFolder implements IFolderChange {
 	public void setCommentProvider(ICommentProvider provider) {
 		this.provider = provider;
 	}
-	
+
 }

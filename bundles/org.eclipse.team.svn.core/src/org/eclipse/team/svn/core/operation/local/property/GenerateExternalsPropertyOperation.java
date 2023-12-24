@@ -33,25 +33,30 @@ import org.eclipse.team.svn.core.utility.SVNUtility;
 public class GenerateExternalsPropertyOperation extends AbstractActionOperation implements IResourcePropertyProvider {
 
 	protected IResource resource;
+
 	protected String url;
+
 	protected SVNRevision revision;
+
 	protected String localPath;
+
 	protected boolean isPriorToSVN15Format;
-	
+
 	protected SVNProperty property;
-	
-	public GenerateExternalsPropertyOperation(IResource resource, String url, SVNRevision revision, String localPath, boolean isPriorToSVN15Format) {		
+
+	public GenerateExternalsPropertyOperation(IResource resource, String url, SVNRevision revision, String localPath,
+			boolean isPriorToSVN15Format) {
 		super("Operation_GenerateExternalsProperty", SVNMessages.class); //$NON-NLS-1$
 		this.resource = resource;
 		this.url = url;
 		this.revision = revision;
-		this.localPath= localPath;
+		this.localPath = localPath;
 		this.isPriorToSVN15Format = isPriorToSVN15Format;
 	}
-	
+
 	protected void runImpl(IProgressMonitor monitor) throws Exception {
 		this.preprocessInputParameters();
-		
+
 		StringBuffer value = new StringBuffer();
 		if (this.isPriorToSVN15Format) {
 			//local -r 10 url								
@@ -67,18 +72,18 @@ public class GenerateExternalsPropertyOperation extends AbstractActionOperation 
 			}
 			value.append(this.url);
 			value.append(" ").append(this.localPath); //$NON-NLS-1$
-		}			
+		}
 		this.property = new SVNProperty(SVNProperty.BuiltIn.EXTERNALS, value.toString());
 	}
-	
-	protected void preprocessInputParameters() {		
+
+	protected void preprocessInputParameters() {
 		this.url = SVNUtility.encodeURL(this.url);
-		
+
 		if (this.localPath.contains(" ")) { //$NON-NLS-1$
 			this.localPath = "\"" + this.localPath + "\""; //$NON-NLS-1$ //$NON-NLS-2$
-		}		
+		}
 	}
-	
+
 	protected String getStrRevision() {
 //		if (this.revision.getKind() == SVNRevision.Kind.DATE) {
 //			//Example: 2006-02-17 15:30 +0230				
@@ -89,15 +94,15 @@ public class GenerateExternalsPropertyOperation extends AbstractActionOperation 
 			long number = ((SVNRevision.Number) this.revision).getNumber();
 			if (number != -1) {
 				return String.valueOf(number);
-			}				
+			}
 		}
 		return null;
 	}
 
 	public SVNProperty[] getProperties() {
-		return new SVNProperty[]{this.property};
-	}		
-	
+		return new SVNProperty[] { this.property };
+	}
+
 	public IResource getLocal() {
 		return this.resource;
 	}
@@ -110,6 +115,6 @@ public class GenerateExternalsPropertyOperation extends AbstractActionOperation 
 		return false;
 	}
 
-	public void refresh() {						
-	}		
+	public void refresh() {
+	}
 }

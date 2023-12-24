@@ -25,42 +25,44 @@ import org.eclipse.team.svn.core.resource.ILocalResource;
  * @author Alexander Gurov
  */
 public class FolderChange extends ResourceChange {
-    protected ResourceChange []children;
+	protected ResourceChange[] children;
 
-    public FolderChange(ResourceChange parent, ILocalFolder local, boolean needsTemporary) {
-        super(parent, local, needsTemporary);
-        if (needsTemporary) {
-            this.tmp.mkdir();
-        }
-        ILocalResource []tmpChildren = local.getChildren();
-        this.children = new ResourceChange[tmpChildren.length];
-        for (int i = 0; i < tmpChildren.length; i++) {
-            this.children[i] = ResourceChange.wrapLocalResource(this, tmpChildren[i], needsTemporary);
-        }
-    }
+	public FolderChange(ResourceChange parent, ILocalFolder local, boolean needsTemporary) {
+		super(parent, local, needsTemporary);
+		if (needsTemporary) {
+			this.tmp.mkdir();
+		}
+		ILocalResource[] tmpChildren = local.getChildren();
+		this.children = new ResourceChange[tmpChildren.length];
+		for (int i = 0; i < tmpChildren.length; i++) {
+			this.children[i] = ResourceChange.wrapLocalResource(this, tmpChildren[i], needsTemporary);
+		}
+	}
 
-    public ResourceChange []getChildren() {
-        return this.children;
-    }
+	public ResourceChange[] getChildren() {
+		return this.children;
+	}
 
-    protected void preTraverse(IResourceChangeVisitor visitor, int depth, IActionOperationProcessor processor, IProgressMonitor monitor) throws Exception {
-    	if (depth != IResource.DEPTH_ZERO) {
-    		int nextDepth = depth == IResource.DEPTH_ONE ? IResource.DEPTH_ZERO : IResource.DEPTH_INFINITE;
-        	for (int i = 0; i < this.children.length && !monitor.isCanceled(); i++) {
-        		this.children[i].preTraverse(visitor, nextDepth, processor, monitor);
-        	}
-    	}
-    	visitor.preVisit(this, processor, monitor);
-    }
-    
-    protected void postTraverse(IResourceChangeVisitor visitor, int depth, IActionOperationProcessor processor, IProgressMonitor monitor) throws Exception {
-    	visitor.postVisit(this, processor, monitor);
-    	if (depth != IResource.DEPTH_ZERO) {
-    		int nextDepth = depth == IResource.DEPTH_ONE ? IResource.DEPTH_ZERO : IResource.DEPTH_INFINITE;
-        	for (int i = 0; i < this.children.length && !monitor.isCanceled(); i++) {
-        		this.children[i].postTraverse(visitor, nextDepth, processor, monitor);
-        	}
-    	}
-    }
-    
+	protected void preTraverse(IResourceChangeVisitor visitor, int depth, IActionOperationProcessor processor,
+			IProgressMonitor monitor) throws Exception {
+		if (depth != IResource.DEPTH_ZERO) {
+			int nextDepth = depth == IResource.DEPTH_ONE ? IResource.DEPTH_ZERO : IResource.DEPTH_INFINITE;
+			for (int i = 0; i < this.children.length && !monitor.isCanceled(); i++) {
+				this.children[i].preTraverse(visitor, nextDepth, processor, monitor);
+			}
+		}
+		visitor.preVisit(this, processor, monitor);
+	}
+
+	protected void postTraverse(IResourceChangeVisitor visitor, int depth, IActionOperationProcessor processor,
+			IProgressMonitor monitor) throws Exception {
+		visitor.postVisit(this, processor, monitor);
+		if (depth != IResource.DEPTH_ZERO) {
+			int nextDepth = depth == IResource.DEPTH_ONE ? IResource.DEPTH_ZERO : IResource.DEPTH_INFINITE;
+			for (int i = 0; i < this.children.length && !monitor.isCanceled(); i++) {
+				this.children[i].postTraverse(visitor, nextDepth, processor, monitor);
+			}
+		}
+	}
+
 }

@@ -42,6 +42,7 @@ public class TestUtil {
 	}
 
 	public static String nameOfProject1;
+
 	public static String nameOfProject2;
 
 	private static Object lockObject = new Object();

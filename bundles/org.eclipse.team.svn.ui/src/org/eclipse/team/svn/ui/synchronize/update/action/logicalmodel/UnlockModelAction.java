@@ -28,20 +28,20 @@ import org.eclipse.team.ui.synchronize.ISynchronizePageConfiguration;
 public class UnlockModelAction extends AbstractSynchronizeLogicalModelAction {
 
 	protected UnlockActionHelper actionHelper;
-	
+
 	public UnlockModelAction(String text, ISynchronizePageConfiguration configuration) {
 		super(text, configuration);
 		this.actionHelper = new UnlockActionHelper(this, configuration);
 	}
-	
+
 	protected boolean needsToSaveDirtyEditors() {
 		return false;
 	}
-	
+
 	protected FastSyncInfoFilter getSyncInfoFilter() {
 		return this.actionHelper.getSyncInfoFilter();
 	}
-	
+
 	protected IActionOperation getOperation() {
 		return this.actionHelper.getOperation();
 	}

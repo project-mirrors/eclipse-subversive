@@ -45,17 +45,17 @@ public class DeleteAction extends AbstractRepositoryTeamAction {
 	public DeleteAction() {
 		super();
 	}
-	
+
 	public void runImpl(IAction action) {
-	    CommentPanel commentPanel = new CommentPanel(SVNUIMessages.DeleteAction_Comment_Title);
+		CommentPanel commentPanel = new CommentPanel(SVNUIMessages.DeleteAction_Comment_Title);
 		DefaultDialog dialog = new DefaultDialog(this.getShell(), commentPanel);
 		if (dialog.open() == 0) {
-			IRepositoryResource []resources = this.getSelectedRepositoryResources();
-			IRepositoryResource []commonParents = SVNUtility.getCommonParents(resources);
-			
+			IRepositoryResource[] resources = this.getSelectedRepositoryResources();
+			IRepositoryResource[] commonParents = SVNUtility.getCommonParents(resources);
+
 			DeleteResourcesOperation mainOp = new DeleteResourcesOperation(resources, commentPanel.getMessage());
 			CompositeOperation op = new CompositeOperation(mainOp.getId(), mainOp.getMessagesClass());
-			
+
 			op.add(mainOp);
 			op.add(new RefreshRemoteResourcesOperation(commonParents));
 			op.add(new AbstractActionOperation("", SVNUIMessages.class) { //$NON-NLS-1$
@@ -66,7 +66,7 @@ public class DeleteAction extends AbstractRepositoryTeamAction {
 							if (view == null) {
 								return;
 							}
-							
+
 							view.getRepositoryTree().fireEmptySelectionEvent();
 						}
 					});
@@ -76,20 +76,21 @@ public class DeleteAction extends AbstractRepositoryTeamAction {
 					return null;
 				}
 			});
-			op.add(new SetRevisionAuthorNameOperation(mainOp, Options.FORCE), new IActionOperation[] {mainOp});
-			
+			op.add(new SetRevisionAuthorNameOperation(mainOp, Options.FORCE), new IActionOperation[] { mainOp });
+
 			this.runScheduled(op);
-		}		
+		}
 	}
 
 	public boolean isEnabled() {
-		IRepositoryResource []resources = this.getSelectedRepositoryResources();
+		IRepositoryResource[] resources = this.getSelectedRepositoryResources();
 		for (int i = 0; i < resources.length; i++) {
 			IRepositoryLocation location = resources[i].getRepositoryLocation();
-			if (resources[i].getUrl().equals(location.getRoot().getUrl()) ||
-				resources[i].getSelectedRevision().getKind() != Kind.HEAD ||
-				resources[i] instanceof IRepositoryRoot && 
-				(((IRepositoryRoot)resources[i]).getKind() == IRepositoryRoot.KIND_ROOT || ((IRepositoryRoot)resources[i]).getKind() == IRepositoryRoot.KIND_LOCATION_ROOT)) {
+			if (resources[i].getUrl().equals(location.getRoot().getUrl())
+					|| resources[i].getSelectedRevision().getKind() != Kind.HEAD
+					|| resources[i] instanceof IRepositoryRoot && (((IRepositoryRoot) resources[i])
+							.getKind() == IRepositoryRoot.KIND_ROOT
+							|| ((IRepositoryRoot) resources[i]).getKind() == IRepositoryRoot.KIND_LOCATION_ROOT)) {
 				return false;
 			}
 		}

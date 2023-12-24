@@ -43,9 +43,10 @@ import org.eclipse.team.svn.core.utility.SVNUtility;
  */
 public class LockOperation extends AbstractWorkingCopyOperation {
 	protected String message;
+
 	protected long options;
 
-	public LockOperation(IResource []resources, String message, boolean force) {
+	public LockOperation(IResource[] resources, String message, boolean force) {
 		this(resources, message, force ? ISVNConnector.Options.FORCE : ISVNConnector.Options.NONE);
 	}
 
@@ -53,7 +54,7 @@ public class LockOperation extends AbstractWorkingCopyOperation {
 		this(provider, message, force ? ISVNConnector.Options.FORCE : ISVNConnector.Options.NONE);
 	}
 
-	public LockOperation(IResource []resources, String message, long options) {
+	public LockOperation(IResource[] resources, String message, long options) {
 		super("Operation_Lock", SVNMessages.class, resources); //$NON-NLS-1$
 		this.message = message;
 		this.options = options & ISVNConnector.CommandMasks.LOCK;
@@ -65,30 +66,33 @@ public class LockOperation extends AbstractWorkingCopyOperation {
 		this.options = options & ISVNConnector.CommandMasks.LOCK;
 	}
 
-    protected void runImpl(final IProgressMonitor monitor) throws Exception {
-		IResource []resources = this.operableData();
-		
-		final List<SVNNotification> problems = new ArrayList<SVNNotification>(); 
+	protected void runImpl(final IProgressMonitor monitor) throws Exception {
+		IResource[] resources = this.operableData();
+
+		final List<SVNNotification> problems = new ArrayList<SVNNotification>();
 		Map<?, ?> wc2Resources = SVNUtility.splitWorkingCopies(resources);
-		for (Iterator<?> it = wc2Resources.entrySet().iterator(); it.hasNext() && !monitor.isCanceled(); ) {
-			Map.Entry entry = (Map.Entry)it.next();
-			final IRepositoryLocation location = SVNRemoteStorage.instance().getRepositoryLocation((IProject)entry.getKey());
-			final String []paths = FileUtility.asPathArray(((List<?>)entry.getValue()).toArray(new IResource[0]));
-			
+		for (Iterator<?> it = wc2Resources.entrySet().iterator(); it.hasNext() && !monitor.isCanceled();) {
+			Map.Entry entry = (Map.Entry) it.next();
+			final IRepositoryLocation location = SVNRemoteStorage.instance()
+					.getRepositoryLocation((IProject) entry.getKey());
+			final String[] paths = FileUtility.asPathArray(((List<?>) entry.getValue()).toArray(new IResource[0]));
+
 			this.complexWriteToConsole(new Runnable() {
 				public void run() {
-					LockOperation.this.writeToConsole(IConsoleStream.LEVEL_CMD, "svn lock" + ISVNConnector.Options.asCommandLine(LockOperation.this.options)); //$NON-NLS-1$
+					LockOperation.this.writeToConsole(IConsoleStream.LEVEL_CMD,
+							"svn lock" + ISVNConnector.Options.asCommandLine(LockOperation.this.options)); //$NON-NLS-1$
 					for (int i = 0; i < paths.length && !monitor.isCanceled(); i++) {
 						LockOperation.this.writeToConsole(IConsoleStream.LEVEL_CMD, " \"" + paths[i] + "\""); //$NON-NLS-1$ //$NON-NLS-2$
 					}
-					LockOperation.this.writeToConsole(IConsoleStream.LEVEL_CMD, " -m \"" + LockOperation.this.message + "\"" + FileUtility.getUsernameParam(location.getUsername()) + "\n"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					LockOperation.this.writeToConsole(IConsoleStream.LEVEL_CMD, " -m \"" + LockOperation.this.message //$NON-NLS-1$
+							+ "\"" + FileUtility.getUsernameParam(location.getUsername()) + "\n"); //$NON-NLS-1$ //$NON-NLS-2$
 				}
 			});
-			
+
 			final ISVNConnector proxy = location.acquireSVNProxy();
 			this.protectStep(new IUnprotectedOperation() {
 				public void run(IProgressMonitor monitor) throws Exception {
-					
+
 					/*
 					 * Lock operation errors are handled in different way than other errors.
 					 * No exception is thrown in case certain file couldn't be locked,
@@ -99,16 +103,17 @@ public class LockOperation extends AbstractWorkingCopyOperation {
 					 * files and LOCK_FAILED for those that wasn't locked. 
 					 */
 					ISVNNotificationCallback listener = new ISVNNotificationCallback() {
-						public void notify(SVNNotification info) {					
-							if (SVNNotification.PerformedAction.FAILED_LOCK == info.action) {									
-								problems.add(info);				
-							}					
-						}						
+						public void notify(SVNNotification info) {
+							if (SVNNotification.PerformedAction.FAILED_LOCK == info.action) {
+								problems.add(info);
+							}
+						}
 					};
-					
-					SVNUtility.addSVNNotifyListener(proxy, listener);					
+
+					SVNUtility.addSVNNotifyListener(proxy, listener);
 					try {
-						proxy.lock(paths, LockOperation.this.message, LockOperation.this.options, new SVNProgressMonitor(LockOperation.this, monitor, null));	
+						proxy.lock(paths, LockOperation.this.message, LockOperation.this.options,
+								new SVNProgressMonitor(LockOperation.this, monitor, null));
 					} finally {
 						SVNUtility.removeSVNNotifyListener(proxy, listener);
 					}
@@ -116,7 +121,7 @@ public class LockOperation extends AbstractWorkingCopyOperation {
 			}, monitor, wc2Resources.size());
 			location.releaseSVNProxy(proxy);
 		}
-		
+
 		//check problems
 		if (!problems.isEmpty()) {
 			StringBuffer res = new StringBuffer();
@@ -130,6 +135,6 @@ public class LockOperation extends AbstractWorkingCopyOperation {
 			}
 			throw new UnreportableException(res.toString());
 		}
-    }
+	}
 
 }

@@ -32,26 +32,26 @@ public class BreakLockAction extends AbstractRepositoryTeamAction {
 	public BreakLockAction() {
 		super();
 	}
-	
+
 	public void runImpl(IAction action) {
-		IRepositoryResource []resources = this.getSelectedRepositoryResources();
-		
+		IRepositoryResource[] resources = this.getSelectedRepositoryResources();
+
 		BreakLockOperation mainOp = new BreakLockOperation(resources);
 		CompositeOperation op = new CompositeOperation(mainOp.getId(), mainOp.getMessagesClass());
 		op.add(mainOp);
 		op.add(new RefreshRemoteResourcesOperation(resources));
-		
+
 		this.runScheduled(op);
 	}
 
 	public boolean isEnabled() {
-		IRepositoryResource []resources = this.getSelectedRepositoryResources();
+		IRepositoryResource[] resources = this.getSelectedRepositoryResources();
 		if (resources.length == 0) {
 			return false;
 		}
 		for (int i = 0; i < resources.length; i++) {
-			if (!(resources[i] instanceof IRepositoryFile) || 
-				!(resources[i].getInfo() != null && resources[i].getInfo().lock != null)) {
+			if (!(resources[i] instanceof IRepositoryFile)
+					|| !(resources[i].getInfo() != null && resources[i].getInfo().lock != null)) {
 				return false;
 			}
 		}

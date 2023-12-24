@@ -24,9 +24,9 @@ import org.eclipse.team.svn.core.operation.IActionOperation;
  */
 public interface IReporter extends IActionOperation {
 	public IReportingDescriptor getReportingDescriptor();
-	
+
 	public boolean isCustomEditorSupported();
-	
+
 	public void setSummary(String summary);
 
 	public void setUserComment(String userComment);
@@ -36,8 +36,8 @@ public interface IReporter extends IActionOperation {
 	public void setUserEMail(String userEMail);
 
 	public void setProblemStatus(IStatus problemStatus);
-	
+
 	public String buildReport();
-	
+
 	public String buildSubject();
 }

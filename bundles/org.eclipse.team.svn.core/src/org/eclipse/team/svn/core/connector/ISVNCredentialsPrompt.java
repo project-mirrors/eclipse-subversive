@@ -20,9 +20,9 @@ import org.eclipse.team.svn.core.connector.ssl.SSLServerCertificateInfo;
 /**
  * Interface that provide ability to ask user about repository credentials
  * 
- * The JavaHL API's is the only way to interact between SVN and Java-based tools. At the same time JavaHL connector library
- * is not EPL compatible and we won't to pin plug-in with concrete connector implementation. So, the only way to do this is
- * providing our own connector interface which will be covered by concrete connector implementation.
+ * The JavaHL API's is the only way to interact between SVN and Java-based tools. At the same time JavaHL connector library is not EPL
+ * compatible and we won't to pin plug-in with concrete connector implementation. So, the only way to do this is providing our own connector
+ * interface which will be covered by concrete connector implementation.
  * 
  * @author Alexander Gurov
  */
@@ -124,7 +124,8 @@ public interface ISVNCredentialsPrompt {
 			return null;
 		}
 
-		public Answer askTrustSSLServer(Object context, SSLServerCertificateFailures failures, SSLServerCertificateInfo info, boolean allowPermanently) {
+		public Answer askTrustSSLServer(Object context, SSLServerCertificateFailures failures,
+				SSLServerCertificateInfo info, boolean allowPermanently) {
 			return Answer.ACCEPT_TEMPORARY;
 		}
 	};
@@ -142,9 +143,9 @@ public interface ISVNCredentialsPrompt {
 		 * Accept the connection to the server <i>permanently</i>.
 		 */
 		ACCEPT_PERMANENTLY(2);
-		
+
 		public final int id;
-		
+
 		private Answer(int id) {
 			this.id = id;
 		}
@@ -160,7 +161,8 @@ public interface ISVNCredentialsPrompt {
 
 	public boolean promptProxy(Object context);
 
-	public Answer askTrustSSLServer(Object context, SSLServerCertificateFailures failures, SSLServerCertificateInfo info, boolean allowPermanently);
+	public Answer askTrustSSLServer(Object context, SSLServerCertificateFailures failures,
+			SSLServerCertificateInfo info, boolean allowPermanently);
 
 	public String getSSHPrivateKeyPath();
 

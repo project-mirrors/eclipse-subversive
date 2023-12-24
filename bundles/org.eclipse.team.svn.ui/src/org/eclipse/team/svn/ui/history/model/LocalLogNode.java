@@ -31,19 +31,19 @@ import org.eclipse.team.svn.ui.utility.DateFormatter;
  */
 public class LocalLogNode extends AbstractLogNode {
 	protected SVNLocalFileRevision entry;
-	
+
 	public LocalLogNode(SVNLocalFileRevision entry, ILogNode parent) {
 		super(parent);
 		this.entry = entry;
 	}
-	
+
 	public Object getAdapter(Class adapter) {
 		if (adapter.equals(IFileRevision.class)) {
 			return this.entry;
 		}
 		return null;
 	}
-	
+
 	public ILogNode[] getChildren() {
 		return null;
 	}
@@ -55,11 +55,11 @@ public class LocalLogNode extends AbstractLogNode {
 	public boolean requiresBoldFont(long currentRevision) {
 		return this.entry.isCurrentState();
 	}
-	
+
 	public ImageDescriptor getImageDescriptor() {
 		return SVNTeamUIPlugin.instance().getImageDescriptor("icons/views/history/local_rev.gif"); //$NON-NLS-1$
 	}
-	
+
 	public String getLabel(int columnIndex, int labelType, long currentRevision) {
 		switch (columnIndex) {
 			case ILogNode.COLUMN_DATE: {
@@ -68,7 +68,8 @@ public class LocalLogNode extends AbstractLogNode {
 			case ILogNode.COLUMN_REVISION: {
 				if (this.entry.isCurrentState()) {
 					if (currentRevision != SVNRevision.INVALID_REVISION_NUMBER) {
-						return SVNUIMessages.format(SVNUIMessages.LogMessagesComposite_CurrentRevision, new String [] {String.valueOf(currentRevision)});
+						return SVNUIMessages.format(SVNUIMessages.LogMessagesComposite_CurrentRevision,
+								new String[] { String.valueOf(currentRevision) });
 					}
 					return "*"; //$NON-NLS-1$
 				}
@@ -78,8 +79,7 @@ public class LocalLogNode extends AbstractLogNode {
 				String retVal = this.entry.getComment();
 				if (labelType == ILogNode.LABEL_TRIM) {
 					return FileUtility.formatMultilineText(retVal);
-				}
-				else if (labelType == ILogNode.LABEL_FLAT) {
+				} else if (labelType == ILogNode.LABEL_FLAT) {
 					return AbstractLogNode.flattenMultiLineText(retVal, " "); //$NON-NLS-1$
 				}
 				return retVal;
@@ -87,7 +87,7 @@ public class LocalLogNode extends AbstractLogNode {
 		}
 		return ""; //$NON-NLS-1$
 	}
-	
+
 	public int getType() {
 		return ILogNode.TYPE_LOCAL;
 	}
@@ -95,7 +95,7 @@ public class LocalLogNode extends AbstractLogNode {
 	public boolean hasChildren() {
 		return false;
 	}
-	
+
 	public String getAuthor() {
 		return ""; //$NON-NLS-1$
 	}
@@ -115,16 +115,16 @@ public class LocalLogNode extends AbstractLogNode {
 	public long getTimeStamp() {
 		return this.entry.getTimestamp();
 	}
-	
+
 	public int hashCode() {
 		return this.entry.hashCode();
 	}
-	
+
 	public boolean equals(Object obj) {
 		if (obj instanceof LocalLogNode) {
-			return this.entry.equals(((LocalLogNode)obj).entry);
+			return this.entry.equals(((LocalLogNode) obj).entry);
 		}
 		return false;
 	}
-	
+
 }

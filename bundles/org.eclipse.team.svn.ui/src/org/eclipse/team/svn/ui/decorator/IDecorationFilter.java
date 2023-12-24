@@ -24,7 +24,9 @@ import org.eclipse.core.resources.IResource;
 public interface IDecorationFilter {
 	/**
 	 * Returns <code>false</code> if resource should not be decorated
-	 * @param resource resource which is about to be decorated
+	 * 
+	 * @param resource
+	 *            resource which is about to be decorated
 	 * @return <code>false</code> if resource should not be decorated, <code>true</code> otherwise
 	 */
 	public boolean isAcceptable(IResource resource);

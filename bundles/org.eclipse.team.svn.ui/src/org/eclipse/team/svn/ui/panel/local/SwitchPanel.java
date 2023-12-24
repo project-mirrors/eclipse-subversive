@@ -31,47 +31,51 @@ import org.eclipse.team.svn.ui.panel.common.AbstractRepositoryResourceSelectionP
  * @author Alexander Gurov
  */
 public class SwitchPanel extends AbstractRepositoryResourceSelectionPanel {
-	
+
 	protected boolean containFolders;
+
 	protected DepthSelectionComposite depthSelector;
-	
-    public SwitchPanel(IRepositoryResource baseResource, long currentRevision, boolean containFolders) {    	
-    	super(baseResource, currentRevision, SVNUIMessages.SwitchPanel_Title, SVNUIMessages.SwitchPanel_Description, "SwitchPanel_URL_HISTORY_NAME", SVNUIMessages.SwitchPanel_Selection_Title, SVNUIMessages.SwitchPanel_Selection_Description, RepositoryResourceSelectionComposite.TEXT_BASE); //$NON-NLS-1$
-    	this.defaultMessage = SVNUIMessages.SwitchPanel_Message;
-    	this.containFolders = containFolders;
-    }
-    
-    public void createControlsImpl(Composite parent) {
-    	super.createControlsImpl(parent);
-    	if (this.containFolders) {
+
+	public SwitchPanel(IRepositoryResource baseResource, long currentRevision, boolean containFolders) {
+		super(baseResource, currentRevision, SVNUIMessages.SwitchPanel_Title, SVNUIMessages.SwitchPanel_Description,
+				"SwitchPanel_URL_HISTORY_NAME", SVNUIMessages.SwitchPanel_Selection_Title, //$NON-NLS-1$
+				SVNUIMessages.SwitchPanel_Selection_Description, RepositoryResourceSelectionComposite.TEXT_BASE);
+		this.defaultMessage = SVNUIMessages.SwitchPanel_Message;
+		this.containFolders = containFolders;
+	}
+
+	public void createControlsImpl(Composite parent) {
+		super.createControlsImpl(parent);
+		if (this.containFolders) {
 			Label separator = new Label(parent, SWT.HORIZONTAL | SWT.SEPARATOR);
 			separator.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 			separator.setVisible(false);
-			
-			boolean canShowUpdateDepthPath = false;
-    		this.depthSelector = new DepthSelectionComposite(parent, SWT.NONE, true, true, canShowUpdateDepthPath, this.selectedResource, this);
 
-    		GridData data = new GridData(GridData.FILL_HORIZONTAL);
-    		this.depthSelector.setLayoutData(data);
-    	}
-    }
-    
-    public SVNDepth getDepth() {
-    	if (this.depthSelector == null) {
-    		return SVNDepth.INFINITY;
-    	}
-    	return this.depthSelector.getDepth();
-    }
-    
-    public boolean isStickyDepth() {
-    	if (this.depthSelector == null) {
-    		return false;
-    	}
-    	return this.depthSelector.isStickyDepth(); 
-    }
-    
+			boolean canShowUpdateDepthPath = false;
+			this.depthSelector = new DepthSelectionComposite(parent, SWT.NONE, true, true, canShowUpdateDepthPath,
+					this.selectedResource, this);
+
+			GridData data = new GridData(GridData.FILL_HORIZONTAL);
+			this.depthSelector.setLayoutData(data);
+		}
+	}
+
+	public SVNDepth getDepth() {
+		if (this.depthSelector == null) {
+			return SVNDepth.INFINITY;
+		}
+		return this.depthSelector.getDepth();
+	}
+
+	public boolean isStickyDepth() {
+		if (this.depthSelector == null) {
+			return false;
+		}
+		return this.depthSelector.isStickyDepth();
+	}
+
 	public String getHelpId() {
-    	return "org.eclipse.team.svn.help.switchDialogContext"; //$NON-NLS-1$
+		return "org.eclipse.team.svn.help.switchDialogContext"; //$NON-NLS-1$
 	}
 
 }

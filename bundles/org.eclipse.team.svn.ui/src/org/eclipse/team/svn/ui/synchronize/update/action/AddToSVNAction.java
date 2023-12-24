@@ -26,9 +26,9 @@ import org.eclipse.team.ui.synchronize.ISynchronizePageConfiguration;
  * @author Alexander Gurov
  */
 public class AddToSVNAction extends AbstractSynchronizeModelAction {
-	
+
 	protected AddToSVNModelActionHelper actionHelper;
-	
+
 	public AddToSVNAction(String text, ISynchronizePageConfiguration configuration) {
 		super(text, configuration);
 		this.actionHelper = new AddToSVNModelActionHelper(this, configuration);
@@ -39,7 +39,7 @@ public class AddToSVNAction extends AbstractSynchronizeModelAction {
 	}
 
 	protected IActionOperation getOperation(ISynchronizePageConfiguration configuration, IDiffElement[] elements) {
-		return this.actionHelper.getOperation();		
+		return this.actionHelper.getOperation();
 	}
 
 }

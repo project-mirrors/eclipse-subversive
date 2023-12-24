@@ -21,7 +21,7 @@ import org.eclipse.team.internal.core.subscribers.ActiveChangeSetManager;
 import org.eclipse.team.svn.core.SVNTeamPlugin;
 
 /**
- * Provides access to SVN ActiveChangeSet's 
+ * Provides access to SVN ActiveChangeSet's
  * 
  * @author Alexander Gurov
  */
@@ -29,9 +29,9 @@ public class SVNActiveChangeSetProvider extends AbstractActiveChangeSetProvider 
 	public ActiveChangeSetManager getActiveChangeSetManager() {
 		return SVNTeamPlugin.instance().getModelChangeSetManager();
 	}
-	
+
 	public IContextChangeSet createChangeSet(ITask task) {
 		return new SVNContextChangeSet(task, getActiveChangeSetManager());
 	}
-	
+
 }

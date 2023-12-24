@@ -56,18 +56,18 @@ public class DiscardRepositoryLocationAction extends AbstractRepositoryTeamActio
 	public DiscardRepositoryLocationAction() {
 		super();
 	}
-	
+
 	public void runImpl(IAction action) {
-		IRepositoryLocation []locations = this.getSelectedRepositoryLocations();
+		IRepositoryLocation[] locations = this.getSelectedRepositoryLocations();
 		List<IRepositoryLocation> selection = Arrays.asList(locations);
 		List<IRepositoryLocation> operateLocations = new ArrayList<IRepositoryLocation>(Arrays.asList(locations));
 		ArrayList<IProject> connectedProjects = new ArrayList<IProject>();
 		HashSet<IRepositoryLocation> connectedLocations = new HashSet<IRepositoryLocation>();
-		IProject []projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
+		IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
 		for (int i = 0; i < projects.length; i++) {
 			RepositoryProvider tmp = RepositoryProvider.getProvider(projects[i]);
 			if (tmp != null && SVNTeamPlugin.NATURE_ID.equals(tmp.getID())) {
-				SVNTeamProvider provider = (SVNTeamProvider)tmp;
+				SVNTeamProvider provider = (SVNTeamProvider) tmp;
 				if (selection.contains(provider.getRepositoryLocation())) {
 					connectedProjects.add(projects[i]);
 					connectedLocations.add(provider.getRepositoryLocation());
@@ -75,10 +75,11 @@ public class DiscardRepositoryLocationAction extends AbstractRepositoryTeamActio
 				}
 			}
 		}
-		
+
 		if (operateLocations.size() > 0) {
 			locations = operateLocations.toArray(new IRepositoryLocation[operateLocations.size()]);
-			DiscardConfirmationDialog dialog = new DiscardConfirmationDialog(this.getShell(), locations.length == 1, DiscardConfirmationDialog.MSG_LOCATION);
+			DiscardConfirmationDialog dialog = new DiscardConfirmationDialog(this.getShell(), locations.length == 1,
+					DiscardConfirmationDialog.MSG_LOCATION);
 			if (dialog.open() == 0) {
 				this.doDiscard(locations, null);
 			}
@@ -89,23 +90,24 @@ public class DiscardRepositoryLocationAction extends AbstractRepositoryTeamActio
 				IRepositoryLocation location = iter.next();
 				locationsList.add(location.getLabel());
 			}
-			IProject []tmp = connectedProjects.toArray(new IProject[connectedProjects.size()]);
-			DiscardLocationFailurePanel panel = new DiscardLocationFailurePanel(locationsList.toArray(new String[locationsList.size()]), tmp);
+			IProject[] tmp = connectedProjects.toArray(new IProject[connectedProjects.size()]);
+			DiscardLocationFailurePanel panel = new DiscardLocationFailurePanel(
+					locationsList.toArray(new String[locationsList.size()]), tmp);
 			int retVal = new DefaultDialog(this.getShell(), panel).open();
 			if (retVal == 0 || retVal == 1) {
 				DisconnectOperation disconnectOp = new DisconnectOperation(tmp, false);
 				CompositeOperation op = new CompositeOperation(disconnectOp.getId(), disconnectOp.getMessagesClass());
 				op.add(new NotifyProjectStatesChangedOperation(tmp, ProjectStatesChangedEvent.ST_PRE_DISCONNECTED));
 				op.add(disconnectOp);
-				
+
 				if (retVal == 0) {
-					op.add(new RefreshResourcesOperation(tmp, IResource.DEPTH_INFINITE, RefreshResourcesOperation.REFRESH_ALL));
-				}
-				else {
+					op.add(new RefreshResourcesOperation(tmp, IResource.DEPTH_INFINITE,
+							RefreshResourcesOperation.REFRESH_ALL));
+				} else {
 					op.add(new NotifyProjectStatesChangedOperation(tmp, ProjectStatesChangedEvent.ST_PRE_DELETED));
 					op.add(new AbstractWorkingCopyOperation("Operation_DeleteProjects", SVNUIMessages.class, tmp) { //$NON-NLS-1$
 						protected void runImpl(IProgressMonitor monitor) throws Exception {
-							IProject []projects = (IProject [])this.operableData();
+							IProject[] projects = (IProject[]) this.operableData();
 							for (int i = 0; i < projects.length && !monitor.isCanceled(); i++) {
 								final IProject current = projects[i];
 								this.protectStep(new IUnprotectedOperation() {
@@ -121,22 +123,21 @@ public class DiscardRepositoryLocationAction extends AbstractRepositoryTeamActio
 			}
 		}
 	}
-	
-	protected void doDiscard(IRepositoryLocation []locations, IActionOperation disconnectOp) {
+
+	protected void doDiscard(IRepositoryLocation[] locations, IActionOperation disconnectOp) {
 		DiscardRepositoryLocationsOperation mainOp = new DiscardRepositoryLocationsOperation(locations);
-		
+
 		CompositeOperation op = new CompositeOperation(mainOp.getId(), mainOp.getMessagesClass());
-		
+
 		if (disconnectOp != null) {
 			op.add(disconnectOp);
-			op.add(mainOp, new IActionOperation[] {disconnectOp});
-		}
-		else {
+			op.add(mainOp, new IActionOperation[] { disconnectOp });
+		} else {
 			op.add(mainOp);
 		}
 		op.add(new SaveRepositoryLocationsOperation());
 		op.add(new RefreshRepositoryLocationsOperation(false));
-		
+
 		this.runScheduled(op);
 	}
 

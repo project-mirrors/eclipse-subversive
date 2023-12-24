@@ -53,116 +53,120 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.ide.IDE;
 
 public abstract class AbstractSynchronizeLogicalModelAction extends ResourceModelParticipantAction {
-	
+
 	/**
 	 * Provides set of resources filtered by FastSyncInfoFilter(s)
 	 */
 	protected IResourceSelector syncInfoSelector;
-	
-    public AbstractSynchronizeLogicalModelAction(String text, ISynchronizePageConfiguration configuration) {
+
+	public AbstractSynchronizeLogicalModelAction(String text, ISynchronizePageConfiguration configuration) {
 		super(text, configuration);
 		this.setEnabled(false);
-		this.setToolTipText(text);		
+		this.setToolTipText(text);
 		this.createSyncInfoSelector();
 		//this.createTreeNodeSelector();
 	}
-    
-    protected boolean isEnabledForSelection(IStructuredSelection selection) {
-    	return this.getFilteredResources().length > 0;
-    }
-    
+
+	protected boolean isEnabledForSelection(IStructuredSelection selection) {
+		return this.getFilteredResources().length > 0;
+	}
+
 	protected ResourceMappingContext getResourceMappingContext() {
 		return new SVNSynchronizationResourceMappingContext(this.getSynchronizationContext());
 	}
-	
-    protected void createSyncInfoSelector() {
+
+	protected void createSyncInfoSelector() {
 		this.syncInfoSelector = new IResourceSelector() {
-			public IResource []getSelectedResources() {
-			    return this.getSelectedResources(new ISyncStateFilter.StateFilterWrapper(IStateFilter.SF_ALL, false));
+			public IResource[] getSelectedResources() {
+				return this.getSelectedResources(new ISyncStateFilter.StateFilterWrapper(IStateFilter.SF_ALL, false));
 			}
-			
-	        public IResource[] getSelectedResources(IStateFilter filter) {
-	            if (filter instanceof ISyncStateFilter) {
-	    			return this.getSelectedResources((ISyncStateFilter)filter);
-	            }
+
+			public IResource[] getSelectedResources(IStateFilter filter) {
+				if (filter instanceof ISyncStateFilter) {
+					return this.getSelectedResources((ISyncStateFilter) filter);
+				}
 				return this.getSelectedResources(new ISyncStateFilter.StateFilterWrapper(filter, false));
-	        }
-			
-			public IResource []getSelectedResourcesRecursive(IStateFilter filter) {
+			}
+
+			public IResource[] getSelectedResourcesRecursive(IStateFilter filter) {
 				return this.getSelectedResources(filter);
 			}
-			
-			public IResource []getSelectedResourcesRecursive(IStateFilter filter, int depth) {
+
+			public IResource[] getSelectedResourcesRecursive(IStateFilter filter, int depth) {
 				return this.getSelectedResources(filter);
 			}
-			
-			private IResource []getSelectedResources(ISyncStateFilter filter) {				
+
+			private IResource[] getSelectedResources(ISyncStateFilter filter) {
 				HashSet<IResource> retVal = new HashSet<IResource>();
 				try {
-					IResource [] filtered = AbstractSynchronizeLogicalModelAction.this.getFilteredResources();
-				    for (int i = 0; i < filtered.length; i++) {
-				    	AbstractSVNSyncInfo info = (AbstractSVNSyncInfo)UpdateSubscriber.instance().getSyncInfo(filtered[i]);
-				    	if (info == null) {
-				    		continue;
-				    	}
-				        ILocalResource local = info.getLocalResource();
-				        ILocalResource remote = info.getRemoteChangeResource();
-				        if (remote instanceof IResourceChange && filter.acceptRemote(remote.getResource(), remote.getStatus(), remote.getChangeMask()) || filter.accept(local)) {
-				            retVal.add(local.getResource());
-				        }
-				    }
-				    IResource [] filteredResources = retVal.toArray(new IResource[retVal.size()]);
-				    /*
-				     * filteredResources variable contains now only changed resources. 
-				     * But for some operations we need also to include all tree.
-				     * Example:
-				     * 	Project-1/
-				     * 		src/
-				     * 			com.polarion/
-				     * 				> ClassA.java
-				     * 
-				     * Here we have changed only ClassA.java and we have it as a resulted selected resource.
-				     * But some operations require all changes tree, i.e. we need to 
-				     * include also Project-1, src, com.polarion in the result.
-				     * 
-				     * In order to indicate that operation needs all tree ISyncStateFilter.acceptGroupNodes method
-				     * should return true.
-				     * 
-				     * In order to return all tree it, we process here parents of changed resources
-				     */
-				    if (filter.acceptGroupNodes()) {
-				    	ArrayList<IResource> allSelected = new ArrayList<IResource>(Arrays.asList(AbstractSynchronizeLogicalModelAction.this.getAllSelectedResources()));
-				    	for (IResource filteredResource : filteredResources) {
-				    		ArrayList<IResource> parents = new ArrayList<IResource>();
-				    		IResource parent = filteredResource.getParent();
-				    		while (parent != null) {
-				    			//As there can be unversioned externals in Sync View, don't process them
-				    			AbstractSVNSyncInfo info = (AbstractSVNSyncInfo)UpdateSubscriber.instance().getSyncInfo(parent);
-				    			if (info != null) {
-							        ILocalResource local = info.getLocalResource();
-						    		if (!IStateFilter.SF_UNVERSIONED_EXTERNAL.accept(local)) {
-						    			parents.add(parent);
-						    		}
-				    			}
-				    			if (allSelected.contains(parent)) {
-				    				retVal.addAll(parents);
-				    				break;
-				    			}
-				    			parent = parent.getParent();
-				    		}
-				    	}
-				    }
+					IResource[] filtered = AbstractSynchronizeLogicalModelAction.this.getFilteredResources();
+					for (int i = 0; i < filtered.length; i++) {
+						AbstractSVNSyncInfo info = (AbstractSVNSyncInfo) UpdateSubscriber.instance()
+								.getSyncInfo(filtered[i]);
+						if (info == null) {
+							continue;
+						}
+						ILocalResource local = info.getLocalResource();
+						ILocalResource remote = info.getRemoteChangeResource();
+						if (remote instanceof IResourceChange
+								&& filter.acceptRemote(remote.getResource(), remote.getStatus(), remote.getChangeMask())
+								|| filter.accept(local)) {
+							retVal.add(local.getResource());
+						}
+					}
+					IResource[] filteredResources = retVal.toArray(new IResource[retVal.size()]);
+					/*
+					 * filteredResources variable contains now only changed resources. 
+					 * But for some operations we need also to include all tree.
+					 * Example:
+					 * 	Project-1/
+					 * 		src/
+					 * 			com.polarion/
+					 * 				> ClassA.java
+					 * 
+					 * Here we have changed only ClassA.java and we have it as a resulted selected resource.
+					 * But some operations require all changes tree, i.e. we need to 
+					 * include also Project-1, src, com.polarion in the result.
+					 * 
+					 * In order to indicate that operation needs all tree ISyncStateFilter.acceptGroupNodes method
+					 * should return true.
+					 * 
+					 * In order to return all tree it, we process here parents of changed resources
+					 */
+					if (filter.acceptGroupNodes()) {
+						ArrayList<IResource> allSelected = new ArrayList<IResource>(
+								Arrays.asList(AbstractSynchronizeLogicalModelAction.this.getAllSelectedResources()));
+						for (IResource filteredResource : filteredResources) {
+							ArrayList<IResource> parents = new ArrayList<IResource>();
+							IResource parent = filteredResource.getParent();
+							while (parent != null) {
+								//As there can be unversioned externals in Sync View, don't process them
+								AbstractSVNSyncInfo info = (AbstractSVNSyncInfo) UpdateSubscriber.instance()
+										.getSyncInfo(parent);
+								if (info != null) {
+									ILocalResource local = info.getLocalResource();
+									if (!IStateFilter.SF_UNVERSIONED_EXTERNAL.accept(local)) {
+										parents.add(parent);
+									}
+								}
+								if (allSelected.contains(parent)) {
+									retVal.addAll(parents);
+									break;
+								}
+								parent = parent.getParent();
+							}
+						}
+					}
+				} catch (Exception ex) {
+					LoggedOperation.reportError(this.getClass().getName(), ex);
 				}
-			    catch (Exception ex) {
-			    	LoggedOperation.reportError(this.getClass().getName(), ex);
-			    }
 				return retVal.toArray(new IResource[retVal.size()]);
 			}
 		};
 	}
-    
-    //TODO seems like it is not needed for model content
-    /*protected void createTreeNodeSelector() {
+
+	//TODO seems like it is not needed for model content
+	/*protected void createTreeNodeSelector() {
 		this.treeNodeSelector = new IResourceSelector() {
 			public IResource[] getSelectedResources() {
 			    return this.getSelectedResources(new ISyncStateFilter.StateFilterWrapper(IStateFilter.SF_ALL, true));
@@ -216,35 +220,37 @@ public abstract class AbstractSynchronizeLogicalModelAction extends ResourceMode
 			}
 		};
 	}*/
-    
-    /*
-     * Can be overridden in subclasses
-     */
-    protected FastSyncInfoFilter getSyncInfoFilter() {
-    	return new FastSyncInfoFilter();
-    }
-    
-    public AbstractSVNSyncInfo[] getSVNSyncInfos() {
-    	List<AbstractSVNSyncInfo> filtered = new ArrayList<AbstractSVNSyncInfo>();
-    	try {
-    		for (IResource resource : this.getFilteredResources()) {
-    			AbstractSVNSyncInfo syncInfo = (AbstractSVNSyncInfo) UpdateSubscriber.instance().getSyncInfo(resource);
-    			if (syncInfo != null) {
-    				filtered.add(syncInfo);
-    			}
-    		}    		
-    	} catch (TeamException te) {
-    		LoggedOperation.reportError(this.getClass().getName(), te);
-    	}
+
+	/*
+	 * Can be overridden in subclasses
+	 */
+	protected FastSyncInfoFilter getSyncInfoFilter() {
+		return new FastSyncInfoFilter();
+	}
+
+	public AbstractSVNSyncInfo[] getSVNSyncInfos() {
+		List<AbstractSVNSyncInfo> filtered = new ArrayList<AbstractSVNSyncInfo>();
+		try {
+			for (IResource resource : this.getFilteredResources()) {
+				AbstractSVNSyncInfo syncInfo = (AbstractSVNSyncInfo) UpdateSubscriber.instance().getSyncInfo(resource);
+				if (syncInfo != null) {
+					filtered.add(syncInfo);
+				}
+			}
+		} catch (TeamException te) {
+			LoggedOperation.reportError(this.getClass().getName(), te);
+		}
 
 		return filtered.toArray(new AbstractSVNSyncInfo[filtered.size()]);
-    }
-    
-    protected IResource [] getFilteredResources() {
+	}
+
+	protected IResource[] getFilteredResources() {
 		final HashSet<IResource> filtered = new HashSet<IResource>();
 		try {
-			final IResourceDiffTree diffTree = AbstractSynchronizeLogicalModelAction.this.getSynchronizationContext().getDiffTree();
-			IDiff [] affectedDiffs = diffTree.getDiffs(this.getResourceTraversals(this.getStructuredSelection(), new NullProgressMonitor()));
+			final IResourceDiffTree diffTree = AbstractSynchronizeLogicalModelAction.this.getSynchronizationContext()
+					.getDiffTree();
+			IDiff[] affectedDiffs = diffTree
+					.getDiffs(this.getResourceTraversals(this.getStructuredSelection(), new NullProgressMonitor()));
 			for (IDiff currentDiff : affectedDiffs) {
 				IResource resource = ResourceDiffTree.getResourceFor(currentDiff);
 				SyncInfo info = UpdateSubscriber.instance().getSyncInfo(resource);
@@ -252,63 +258,60 @@ public abstract class AbstractSynchronizeLogicalModelAction extends ResourceMode
 					filtered.add(resource);
 				}
 			}
-		}
-		catch (Exception ex) {
+		} catch (Exception ex) {
 			LoggedOperation.reportError(this.getClass().getName(), ex);
 		}
 		return filtered.toArray(new IResource[filtered.size()]);
-    }
-    
-    public IResource [] getAllSelectedResources() {
-    	IStructuredSelection selection = this.getStructuredSelection();
-    	ArrayList<IResource> retVal = new ArrayList<IResource>();
-    	for (Iterator<?> it = selection.iterator(); it.hasNext(); ) {
-    		Object adapter = Platform.getAdapterManager().getAdapter(it.next(), IResource.class);
-    		if (adapter == null) {
-    			continue;
-    		}
-    		retVal.add((IResource)adapter);
-    	}
-    	return retVal.toArray(new IResource[retVal.size()]);
-    } 
-    
-    public IResource getSelectedResource() {
-		IStructuredSelection selection = this.getStructuredSelection();
-    	for (Iterator<?> it = selection.iterator(); it.hasNext(); ) {
-    		Object adapter = Platform.getAdapterManager().getAdapter(it.next(), IResource.class);
-    		if (adapter != null) {
-    			return (IResource)adapter;
-    		}
-    	}
-    	return null;
 	}
-	
+
+	public IResource[] getAllSelectedResources() {
+		IStructuredSelection selection = this.getStructuredSelection();
+		ArrayList<IResource> retVal = new ArrayList<IResource>();
+		for (Iterator<?> it = selection.iterator(); it.hasNext();) {
+			Object adapter = Platform.getAdapterManager().getAdapter(it.next(), IResource.class);
+			if (adapter == null) {
+				continue;
+			}
+			retVal.add((IResource) adapter);
+		}
+		return retVal.toArray(new IResource[retVal.size()]);
+	}
+
+	public IResource getSelectedResource() {
+		IStructuredSelection selection = this.getStructuredSelection();
+		for (Iterator<?> it = selection.iterator(); it.hasNext();) {
+			Object adapter = Platform.getAdapterManager().getAdapter(it.next(), IResource.class);
+			if (adapter != null) {
+				return (IResource) adapter;
+			}
+		}
+		return null;
+	}
+
 	public AbstractSVNSyncInfo getSelectedSVNSyncInfo() {
 		IResource resource = this.getSelectedResource();
 		try {
-			return resource == null ? null : (AbstractSVNSyncInfo)UpdateSubscriber.instance().getSyncInfo(resource);
-		}
-		catch (TeamException ex) {
+			return resource == null ? null : (AbstractSVNSyncInfo) UpdateSubscriber.instance().getSyncInfo(resource);
+		} catch (TeamException ex) {
 			LoggedOperation.reportError(this.getClass().getName(), ex);
 		}
 		return null;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.action.Action#run()
 	 */
 	public void run() {
-		if(needsToSaveDirtyEditors()) {
-			if(!saveAllEditors(confirmSaveOfDirtyEditor())) {
+		if (needsToSaveDirtyEditors()) {
+			if (!saveAllEditors(confirmSaveOfDirtyEditor())) {
 				return;
 			}
 		}
 		runOperation();
 	}
-	
+
 	/**
-	 * Returns whether the user should be prompted to save dirty editors. The
-	 * default is <code>true</code>.
+	 * Returns whether the user should be prompted to save dirty editors. The default is <code>true</code>.
 	 * 
 	 * @return whether the user should be prompted to save dirty editors
 	 * 
@@ -317,10 +320,9 @@ public abstract class AbstractSynchronizeLogicalModelAction extends ResourceMode
 	protected boolean confirmSaveOfDirtyEditor() {
 		return true;
 	}
-	
+
 	/**
-	 * Return whether dirty editor should be saved before this action is run.
-	 * Default is <code>true</code>.
+	 * Return whether dirty editor should be saved before this action is run. Default is <code>true</code>.
 	 * 
 	 * @return whether dirty editor should be saved before this action is run
 	 * 
@@ -329,14 +331,14 @@ public abstract class AbstractSynchronizeLogicalModelAction extends ResourceMode
 	protected boolean needsToSaveDirtyEditors() {
 		return true;
 	}
-	
+
 	/**
-	 * Save all dirty editors in the workbench that are open on files that may
-	 * be affected by this operation. Opens a dialog to prompt the user if
-	 * <code>confirm</code> is true. Return true if successful. Return false
-	 * if the user has canceled the command. Must be called from the UI thread.
+	 * Save all dirty editors in the workbench that are open on files that may be affected by this operation. Opens a dialog to prompt the
+	 * user if <code>confirm</code> is true. Return true if successful. Return false if the user has canceled the command. Must be called
+	 * from the UI thread.
 	 * 
-	 * @param confirm prompt the user if true
+	 * @param confirm
+	 *            prompt the user if true
 	 * @return boolean false if the operation was canceled.
 	 * 
 	 * @see SynchronizeModelAction.saveAllEditors
@@ -345,7 +347,7 @@ public abstract class AbstractSynchronizeLogicalModelAction extends ResourceMode
 		IResource[] resources = this.getFilteredResources();
 		return IDE.saveAllEditors(Utils.getResources(resources), confirm);
 	}
-	
+
 	protected void runOperation() {
 		final IActionOperation op = AbstractSynchronizeLogicalModelAction.this.getOperation();
 		if (op == null) {
@@ -355,25 +357,24 @@ public abstract class AbstractSynchronizeLogicalModelAction extends ResourceMode
 			public void run() {
 				try {
 					PlatformUI.getWorkbench().getProgressService().run(true, true, new IRunnableWithProgress() {
-						public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-								ProgressMonitorUtility.doTaskExternal(op, monitor);	
-							}
-						});
-				}
-				catch (InvocationTargetException ex) {
+						public void run(IProgressMonitor monitor)
+								throws InvocationTargetException, InterruptedException {
+							ProgressMonitorUtility.doTaskExternal(op, monitor);
+						}
+					});
+				} catch (InvocationTargetException ex) {
 					UILoggedOperation.reportError(op.getOperationName(), ex);
-				}
-				catch (InterruptedException ex) {
+				} catch (InterruptedException ex) {
 					LoggedOperation.reportError(AbstractSynchronizeLogicalModelAction.this.getClass().getName(), ex);
 				}
 			}
 		});
-	}	
+	}
 
 	public IResourceSelector getSyncInfoSelector() {
 		return this.syncInfoSelector;
 	}
-	
+
 	protected abstract IActionOperation getOperation();
-	 
+
 }

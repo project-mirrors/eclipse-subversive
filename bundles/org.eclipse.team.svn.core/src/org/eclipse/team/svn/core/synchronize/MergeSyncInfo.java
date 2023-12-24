@@ -25,22 +25,26 @@ import org.eclipse.team.svn.core.resource.IResourceChange;
 /**
  * Merge sync info: ignores outgoing changes
  * 
- * It's used to present sync info for skipped by merge resources, e.g.
- * skipped resources can be considered as tree conflicts (which appeared in SVN 1.6)
- * but in previous SVN versions. As tree conflicts were not correctly treated in previous
- * to SVN 1.6 version, we should somehow show them to user.
+ * It's used to present sync info for skipped by merge resources, e.g. skipped resources can be considered as tree conflicts (which appeared
+ * in SVN 1.6) but in previous SVN versions. As tree conflicts were not correctly treated in previous to SVN 1.6 version, we should somehow
+ * show them to user.
  * 
  * @author Alexander Gurov
  */
 public class MergeSyncInfo extends AbstractSVNSyncInfo implements IMergeSyncInfo {
-	
+
 	protected IResourceChange baseStatus;
-	
-	public MergeSyncInfo(ILocalResource local, IResourceChange base, IResourceChange remote, IResourceVariantComparator comparator) {
-		super(local, base == null ? AbstractSVNSyncInfo.makeBaseVariant(local) : AbstractSVNSyncInfo.makeRemoteVariant(local, base), AbstractSVNSyncInfo.makeRemoteVariant(local, remote), comparator, remote);
+
+	public MergeSyncInfo(ILocalResource local, IResourceChange base, IResourceChange remote,
+			IResourceVariantComparator comparator) {
+		super(local,
+				base == null
+						? AbstractSVNSyncInfo.makeBaseVariant(local)
+						: AbstractSVNSyncInfo.makeRemoteVariant(local, base),
+				AbstractSVNSyncInfo.makeRemoteVariant(local, remote), comparator, remote);
 		this.baseStatus = base;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.team.core.synchronize.SyncInfo#calculateKind()
 	 */
@@ -48,11 +52,13 @@ public class MergeSyncInfo extends AbstractSVNSyncInfo implements IMergeSyncInfo
 	protected int calculateKind() throws TeamException {
 		String localKind = this.local == null ? IStateFilter.ST_NOTEXISTS : this.local.getStatus();
 		int localMask = this.local == null ? 0 : this.local.getChangeMask();
-		String remoteKind = this.remoteStatus == null ? (this.isNonVersioned(localKind, localMask) ? IStateFilter.ST_NOTEXISTS : IStateFilter.ST_NORMAL) : this.remoteStatus.getStatus();
+		String remoteKind = this.remoteStatus == null
+				? (this.isNonVersioned(localKind, localMask) ? IStateFilter.ST_NOTEXISTS : IStateFilter.ST_NORMAL)
+				: this.remoteStatus.getStatus();
 		int remoteMask = this.remoteStatus == null ? 0 : this.remoteStatus.getChangeMask();
 
 		if (this.isLinked(localKind, localMask)) {
-        	// Corresponding resource at remote site can produce a change
+			// Corresponding resource at remote site can produce a change
 			if (this.isAdded(remoteKind, remoteMask)) {
 				this.localKind = SyncInfo.OUTGOING | SyncInfo.ADDITION;
 				this.remoteKind = SyncInfo.INCOMING | SyncInfo.ADDITION;
@@ -71,17 +77,17 @@ public class MergeSyncInfo extends AbstractSVNSyncInfo implements IMergeSyncInfo
 			return SyncInfo.IN_SYNC;
 		}
 
-	    if (this.isTreeConflicted(localKind, localMask)) {
+		if (this.isTreeConflicted(localKind, localMask)) {
 			this.localKind = SyncInfo.OUTGOING | SyncInfo.CHANGE;
 			this.remoteKind = SyncInfo.INCOMING | SyncInfo.CHANGE;
-	    	return SyncInfo.CONFLICTING | SyncInfo.CHANGE;
-	    }
-	    if (this.isTreeConflicted(remoteKind, remoteMask)) {
+			return SyncInfo.CONFLICTING | SyncInfo.CHANGE;
+		}
+		if (this.isTreeConflicted(remoteKind, remoteMask)) {
 			this.localKind = SyncInfo.OUTGOING | SyncInfo.CHANGE;
 			this.remoteKind = SyncInfo.INCOMING | SyncInfo.CHANGE;
-	    	return SyncInfo.CONFLICTING | SyncInfo.CHANGE;
-	    }
-		
+			return SyncInfo.CONFLICTING | SyncInfo.CHANGE;
+		}
+
 		if (this.isAdded(remoteKind, remoteMask)) {
 			this.remoteKind = SyncInfo.INCOMING | SyncInfo.ADDITION;
 			if (this.isNotExists(localKind, localMask) || this.isDeleted(localKind, localMask)) {
@@ -145,5 +151,5 @@ public class MergeSyncInfo extends AbstractSVNSyncInfo implements IMergeSyncInfo
 	public IResourceChange getRemoteResource() {
 		return this.remoteStatus;
 	}
-	
+
 }

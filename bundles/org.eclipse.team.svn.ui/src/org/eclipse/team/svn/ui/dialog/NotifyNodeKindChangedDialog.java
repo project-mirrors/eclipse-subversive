@@ -31,28 +31,25 @@ import org.eclipse.team.svn.ui.SVNUIMessages;
  */
 public class NotifyNodeKindChangedDialog extends MessageDialog {
 
-    public NotifyNodeKindChangedDialog(Shell parentShell, IResource []resources) {
-		super(parentShell, 
-			SVNUIMessages.NotifyNodeKindChangedDialog_Title, 
-			null, 
-			SVNUIMessages.format(SVNUIMessages.NotifyNodeKindChangedDialog_Message, new String[] {NotifyNodeKindChangedDialog.enumerateParents(resources)}),
-			MessageDialog.WARNING, 
-			new String[] {IDialogConstants.OK_LABEL}, 
-			0);
-    }
-    
-    protected static String enumerateParents(IResource []resources) {
-        HashSet<IContainer> parents = new HashSet<IContainer>();
-        for (int i = 0; i < resources.length; i++) {
-            parents.add(resources[i].getParent());
-        }
-        resources = parents.toArray(new IResource[parents.size()]);
-        FileUtility.reorder(resources, true);
-        String retVal = ""; //$NON-NLS-1$
-        for (int i = 0; i < resources.length; i++) {
-            retVal += "'" + resources[i].getFullPath().toString() + "'\n"; //$NON-NLS-1$ //$NON-NLS-2$
-        }
-        return retVal;
-    }
-    
+	public NotifyNodeKindChangedDialog(Shell parentShell, IResource[] resources) {
+		super(parentShell, SVNUIMessages.NotifyNodeKindChangedDialog_Title, null,
+				SVNUIMessages.format(SVNUIMessages.NotifyNodeKindChangedDialog_Message,
+						new String[] { NotifyNodeKindChangedDialog.enumerateParents(resources) }),
+				MessageDialog.WARNING, new String[] { IDialogConstants.OK_LABEL }, 0);
+	}
+
+	protected static String enumerateParents(IResource[] resources) {
+		HashSet<IContainer> parents = new HashSet<IContainer>();
+		for (int i = 0; i < resources.length; i++) {
+			parents.add(resources[i].getParent());
+		}
+		resources = parents.toArray(new IResource[parents.size()]);
+		FileUtility.reorder(resources, true);
+		String retVal = ""; //$NON-NLS-1$
+		for (int i = 0; i < resources.length; i++) {
+			retVal += "'" + resources[i].getFullPath().toString() + "'\n"; //$NON-NLS-1$ //$NON-NLS-2$
+		}
+		return retVal;
+	}
+
 }

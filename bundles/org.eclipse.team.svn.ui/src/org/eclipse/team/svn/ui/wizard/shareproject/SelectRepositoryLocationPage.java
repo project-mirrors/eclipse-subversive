@@ -54,132 +54,139 @@ import org.eclipse.ui.PlatformUI;
  */
 public class SelectRepositoryLocationPage extends AbstractVerifiedWizardPage {
 	protected boolean useExistingLocation;
+
 	protected IRepositoryLocation location;
+
 	protected TableViewer repositoriesView;
-	protected IRepositoryLocation []repositories;
+
+	protected IRepositoryLocation[] repositories;
+
 	protected boolean importProject;
 
-	public SelectRepositoryLocationPage(IRepositoryLocation []repositories) {
+	public SelectRepositoryLocationPage(IRepositoryLocation[] repositories) {
 		this(repositories, false);
 	}
-	
-	public SelectRepositoryLocationPage(IRepositoryLocation []repositories, boolean importProject) {
+
+	public SelectRepositoryLocationPage(IRepositoryLocation[] repositories, boolean importProject) {
 		super(
-				SelectRepositoryLocationPage.class.getName(), 
-				SVNUIMessages.getString("SelectRepositoryLocationPage_Title" + SelectRepositoryLocationPage.getNationalizationSuffix(importProject)),  //$NON-NLS-1$
-				SVNTeamUIPlugin.instance().getImageDescriptor("icons/wizards/newconnect.gif")); //$NON-NLS-1$
-			
-			this.setDescription(SVNUIMessages.SelectRepositoryLocationPage_Description);
-			this.repositories = repositories;
-			this.useExistingLocation = true;
-			this.location = this.repositories[0];
-			this.importProject = importProject;
+				SelectRepositoryLocationPage.class.getName(),
+				SVNUIMessages.getString("SelectRepositoryLocationPage_Title" //$NON-NLS-1$
+						+ SelectRepositoryLocationPage.getNationalizationSuffix(importProject)), SVNTeamUIPlugin.instance().getImageDescriptor("icons/wizards/newconnect.gif")); //$NON-NLS-1$
+
+		this.setDescription(SVNUIMessages.SelectRepositoryLocationPage_Description);
+		this.repositories = repositories;
+		this.useExistingLocation = true;
+		this.location = this.repositories[0];
+		this.importProject = importProject;
 	}
 
 	protected Composite createControlImpl(Composite parent) {
 		GridLayout layout = null;
 		GridData data = null;
 		this.initializeDialogUnits(parent);
-		
+
 		Composite composite = new Composite(parent, SWT.NONE);
 		layout = new GridLayout();
 		composite.setLayout(layout);
 		data = new GridData(GridData.FILL_BOTH);
 		composite.setLayoutData(data);
-		
+
 		Label description = new Label(composite, SWT.WRAP);
 		data = new GridData(GridData.FILL_HORIZONTAL);
 		data.widthHint = IDialogConstants.ENTRY_FIELD_WIDTH;
 		data.heightHint = this.convertHeightInCharsToPixels(2);
 		description.setLayoutData(data);
-		description.setText(SVNUIMessages.getString("SelectRepositoryLocationPage_Hint" + SelectRepositoryLocationPage.getNationalizationSuffix(this.importProject))); //$NON-NLS-1$
-		
+		description.setText(SVNUIMessages.getString("SelectRepositoryLocationPage_Hint" //$NON-NLS-1$
+				+ SelectRepositoryLocationPage.getNationalizationSuffix(this.importProject)));
+
 		Button addLocationButton = new Button(composite, SWT.RADIO);
 		data = new GridData(GridData.FILL_HORIZONTAL);
-		addLocationButton.setText(SVNUIMessages.SelectRepositoryLocationPage_AddLocation); 
+		addLocationButton.setText(SVNUIMessages.SelectRepositoryLocationPage_AddLocation);
 		addLocationButton.setSelection(false);
-		
+
 		Button useExistingLocationButton = new Button(composite, SWT.RADIO);
 		data = new GridData(GridData.FILL_HORIZONTAL);
 		useExistingLocationButton.setLayoutData(data);
 		useExistingLocationButton.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				Button button = (Button)e.widget;
-				SelectRepositoryLocationPage.this.repositoriesView.getTable().setEnabled(
-					SelectRepositoryLocationPage.this.useExistingLocation = button.getSelection());
+				Button button = (Button) e.widget;
+				SelectRepositoryLocationPage.this.repositoriesView.getTable()
+						.setEnabled(
+								SelectRepositoryLocationPage.this.useExistingLocation = button.getSelection());
 				SelectRepositoryLocationPage.this.setPageComplete(true);
 			}
 		});
-		useExistingLocationButton.setText(SVNUIMessages.SelectRepositoryLocationPage_UseLocation); 
+		useExistingLocationButton.setText(SVNUIMessages.SelectRepositoryLocationPage_UseLocation);
 		useExistingLocationButton.setSelection(true);
-		
-		this.repositoriesView = SelectRepositoryLocationPage.createRepositoriesListTable(composite, this.repositories);		
-							
+
+		this.repositoriesView = SelectRepositoryLocationPage.createRepositoriesListTable(composite, this.repositories);
+
 		this.repositoriesView.addDoubleClickListener(new IDoubleClickListener() {
 			public void doubleClick(DoubleClickEvent event) {
 				IWizard wizard = SelectRepositoryLocationPage.this.getWizard();
 				IWizardPage nextPage = wizard.getNextPage(SelectRepositoryLocationPage.this);
 				if (nextPage != null) {
-					wizard.getContainer().showPage(nextPage);	
-				}				
-			}			
+					wizard.getContainer().showPage(nextPage);
+				}
+			}
 		});
-					
+
 		this.repositoriesView.addSelectionChangedListener(new ISelectionChangedListener() {
 			public void selectionChanged(SelectionChangedEvent event) {
-				IStructuredSelection selection = (IStructuredSelection)SelectRepositoryLocationPage.this.repositoriesView.getSelection();
-				SelectRepositoryLocationPage.this.location = (IRepositoryLocation)selection.getFirstElement();
+				IStructuredSelection selection = (IStructuredSelection) SelectRepositoryLocationPage.this.repositoriesView
+						.getSelection();
+				SelectRepositoryLocationPage.this.location = (IRepositoryLocation) selection.getFirstElement();
 				SelectRepositoryLocationPage.this.setPageComplete(true);
 			}
 		});
-				
-		IStructuredSelection selection = (IStructuredSelection)this.repositoriesView.getSelection();
-		this.location = (IRepositoryLocation)selection.getFirstElement();
-		
+
+		IStructuredSelection selection = (IStructuredSelection) this.repositoriesView.getSelection();
+		this.location = (IRepositoryLocation) selection.getFirstElement();
+
 		//Setting context help
-        PlatformUI.getWorkbench().getHelpSystem().setHelp(composite, "org.eclipse.team.svn.help.reposLocationContext"); //$NON-NLS-1$
-		
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(composite, "org.eclipse.team.svn.help.reposLocationContext"); //$NON-NLS-1$
+
 		return composite;
 	}
 
 	public boolean useExistingLocation() {
 		return this.useExistingLocation;
 	}
-	
+
 	public IRepositoryLocation getRepositoryLocation() {
 		return this.useExistingLocation() ? this.location : null;
 	}
-	
+
 	protected static String getNationalizationSuffix(boolean importProject) {
 		return "_" + (importProject ? "Import" : "Share"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	}
-	
-	public static TableViewer createRepositoriesListTable(Composite parent, IRepositoryLocation []repositories) {
+
+	public static TableViewer createRepositoriesListTable(Composite parent, IRepositoryLocation[] repositories) {
 		Table table = new Table(parent, SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER | SWT.SINGLE | SWT.FULL_SELECTION);
 		GridData data = new GridData(GridData.FILL_BOTH);
 		data.heightHint = 200;
 		table.setLayoutData(data);
 		table.setHeaderVisible(true);
 		table.setLinesVisible(true);
-		
+
 		TableLayout tLayout = new TableLayout();
 		tLayout.addColumnData(new ColumnWeightData(30, true));
 		tLayout.addColumnData(new ColumnWeightData(70, true));
 		table.setLayout(tLayout);
 
-		TableViewer repositoriesView = new TableViewer(table);							
-				
+		TableViewer repositoriesView = new TableViewer(table);
+
 		ColumnedViewerComparator comparator = new ColumnedViewerComparator(repositoriesView) {
 			public int compareImpl(Viewer viewer, Object row1, Object row2) {
-				IRepositoryLocation location1 = (IRepositoryLocation)row1;
-            	IRepositoryLocation location2 = (IRepositoryLocation)row2;
-            	if (this.column == 0) {
-            		return ColumnedViewerComparator.compare(location1.getLabel(), location2.getLabel());
-            	}
-        		return ColumnedViewerComparator.compare(location1.getUrl(), location2.getUrl());
+				IRepositoryLocation location1 = (IRepositoryLocation) row1;
+				IRepositoryLocation location2 = (IRepositoryLocation) row2;
+				if (this.column == 0) {
+					return ColumnedViewerComparator.compare(location1.getLabel(), location2.getLabel());
+				}
+				return ColumnedViewerComparator.compare(location1.getUrl(), location2.getUrl());
 			}
 		};
-		
+
 		TableColumn col = new TableColumn(table, SWT.LEFT);
 		col.setResizable(true);
 		col.setText("Label");
@@ -189,37 +196,42 @@ public class SelectRepositoryLocationPage extends AbstractVerifiedWizardPage {
 		col.setResizable(true);
 		col.setText("URL");
 		col.addSelectionListener(comparator);
-		
+
 		repositoriesView.setComparator(comparator);
 		repositoriesView.getTable().setSortDirection(SWT.UP);
 		repositoriesView.getTable().setSortColumn(repositoriesView.getTable().getColumn(0));
-						
+
 		repositoriesView.setContentProvider(new ArrayStructuredContentProvider());
 		repositoriesView.setLabelProvider(new ITableLabelProvider() {
 			public Image getColumnImage(Object element, int columnIndex) {
 				return null;
 			}
+
 			public String getColumnText(Object element, int columnIndex) {
-				IRepositoryLocation location = (IRepositoryLocation)element;
+				IRepositoryLocation location = (IRepositoryLocation) element;
 				if (columnIndex == 0) {
 					return location.getLabel();
 				}
 				return location.getUrlAsIs();
 			}
+
 			public void addListener(ILabelProviderListener listener) {
 			}
+
 			public void dispose() {
 			}
+
 			public boolean isLabelProperty(Object element, String property) {
 				return true;
 			}
+
 			public void removeListener(ILabelProviderListener listener) {
 			}
 		});
-		
+
 		repositoriesView.setInput(repositories);
 		repositoriesView.getTable().select(0);
-		
+
 		return repositoriesView;
 	}
 

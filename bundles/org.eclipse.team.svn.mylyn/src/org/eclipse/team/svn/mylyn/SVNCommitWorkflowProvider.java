@@ -43,34 +43,43 @@ public class SVNCommitWorkflowProvider /*extends AbstractCommitWorkflowProvider*
 	public boolean hasOutgoingChanges(IResource[] resources) {
 		return FileUtility.checkForResourcesPresence(resources, CommitAction.SF_ANY_CHANGE, IResource.DEPTH_ZERO);
 	}
-	
+
 	public void commit(final IResource[] resources) {
 		CommitActionUtility commitUtility = new CommitActionUtility(new IResourceSelector() {
-			public IResource []getSelectedResources() {
+			public IResource[] getSelectedResources() {
 				return resources;
 			}
-			public IResource []getSelectedResourcesRecursive(IStateFilter filter) {
+
+			public IResource[] getSelectedResourcesRecursive(IStateFilter filter) {
 				return this.getSelectedResources(filter);
 			}
-			public IResource []getSelectedResourcesRecursive(IStateFilter filter, int depth) {
+
+			public IResource[] getSelectedResourcesRecursive(IStateFilter filter, int depth) {
 				return this.getSelectedResources(filter);
 			}
-			public IResource []getSelectedResources(IStateFilter filter) {
+
+			public IResource[] getSelectedResources(IStateFilter filter) {
 				return FileUtility.getResourcesRecursive(this.getSelectedResources(), filter, IResource.DEPTH_ZERO);
 			}
-		});	
-	    String proposedComment = ModelHelper.isShowModelSync() ? SVNModelParticipantChangeSetCapability.getProposedComment(commitUtility.getAllResources()) : SVNChangeSetCapability.getProposedComment(commitUtility.getAllResources());
-        CommitPanel commitPanel = new CommitPanel(commitUtility.getAllResources(), CommitPanel.MSG_COMMIT, proposedComment);
-        Shell shell = UIMonitorUtility.getShell();
-        ICommitDialog commitDialog = ExtensionsManager.getInstance().getCurrentCommitFactory().getCommitDialog(shell, commitUtility.getAllResourcesSet(), commitPanel);
-		
+		});
+		String proposedComment = ModelHelper.isShowModelSync()
+				? SVNModelParticipantChangeSetCapability.getProposedComment(commitUtility.getAllResources())
+				: SVNChangeSetCapability.getProposedComment(commitUtility.getAllResources());
+		CommitPanel commitPanel = new CommitPanel(commitUtility.getAllResources(), CommitPanel.MSG_COMMIT,
+				proposedComment);
+		Shell shell = UIMonitorUtility.getShell();
+		ICommitDialog commitDialog = ExtensionsManager.getInstance()
+				.getCurrentCommitFactory()
+				.getCommitDialog(shell, commitUtility.getAllResourcesSet(), commitPanel);
+
 		if (commitDialog.open() == 0) {
-			IResource []selectedResources = commitPanel.getSelectedResources();
+			IResource[] selectedResources = commitPanel.getSelectedResources();
 			IWorkbenchWindow window = SVNTeamUIPlugin.instance().getWorkbench().getActiveWorkbenchWindow();
 			IWorkbenchPart part = window == null ? null : window.getPartService().getActivePart();
-			CompositeOperation op = commitUtility.getCompositeCommitOperation(selectedResources, commitPanel.getTreatAsEdits(), commitDialog.getMessage(), commitPanel.getKeepLocks(), shell, part);
+			CompositeOperation op = commitUtility.getCompositeCommitOperation(selectedResources,
+					commitPanel.getTreatAsEdits(), commitDialog.getMessage(), commitPanel.getKeepLocks(), shell, part);
 			UIMonitorUtility.doTaskScheduledActive(op);
 		}
 	}
-	
+
 }

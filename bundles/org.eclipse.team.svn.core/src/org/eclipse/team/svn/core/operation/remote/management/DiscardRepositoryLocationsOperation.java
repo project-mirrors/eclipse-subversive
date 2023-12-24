@@ -27,13 +27,13 @@ import org.eclipse.team.svn.core.svnstorage.SVNRemoteStorage;
  * @author Alexander Gurov
  */
 public class DiscardRepositoryLocationsOperation extends AbstractActionOperation {
-	protected IRepositoryLocation []locations;
-	
-	public DiscardRepositoryLocationsOperation(IRepositoryLocation []locations) {
+	protected IRepositoryLocation[] locations;
+
+	public DiscardRepositoryLocationsOperation(IRepositoryLocation[] locations) {
 		super("Operation_DiscardRepositoryLocation", SVNMessages.class); //$NON-NLS-1$
 		this.locations = locations;
 	}
-	
+
 	public int getOperationWeight() {
 		return 0;
 	}

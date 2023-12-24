@@ -69,31 +69,48 @@ import org.eclipse.team.ui.synchronize.ResourceScope;
  */
 public abstract class AbstractBranchTagPanel extends AbstractDialogPanel {
 	protected Button startWithCheck;
+
 	protected Button freezeExternalsCheck;
+
 	protected Combo destinationCombo;
+
 	protected Combo branchingModeCombo;
+
 	protected UserInputHistory resourceNameHistory;
+
 	protected CommentComposite comment;
+
 	protected String destinationUrl;
-	
+
 	protected IRepositoryRoot root;
+
 	protected String nationalizationId;
+
 	protected boolean startsWith;
+
 	protected boolean freezeExternals;
+
 	protected Set existingNodesNamesSet;
+
 	protected boolean considerStructure;
+
 	protected String historyName;
+
 	protected int creationMode;
-	
+
 	protected ResourceSelectionComposite resourceSelection;
+
 	protected IResource[] newResources;
+
 	protected boolean disableSwitch;
 
 	//used for revision selection for repository resources
-	protected IRepositoryResource[] selectedRemoteResources;	
+	protected IRepositoryResource[] selectedRemoteResources;
+
 	protected RevisionComposite revisionComposite;
-	
+
 	protected PaneParticipantHelper paneParticipantHelper;
+
 	/*
 	 * As participant pane is not always present, we need to use this flag 
 	 * (instead of paneParticipantHelper.isParticipantPane()) 
@@ -101,22 +118,27 @@ public abstract class AbstractBranchTagPanel extends AbstractDialogPanel {
 	 * (E.g. participant pane is not present if there are no new resources)
 	 */
 	protected boolean hasParticipantPane;
-	
-	public AbstractBranchTagPanel(IRepositoryRoot root, boolean showStartsWith, Set existingNames, String nationalizationId, String historyName, IRepositoryResource[] selectedRemoteResources) {
-		this(root, showStartsWith, existingNames, nationalizationId, historyName, new IResource[0], selectedRemoteResources);
+
+	public AbstractBranchTagPanel(IRepositoryRoot root, boolean showStartsWith, Set existingNames,
+			String nationalizationId, String historyName, IRepositoryResource[] selectedRemoteResources) {
+		this(root, showStartsWith, existingNames, nationalizationId, historyName, new IResource[0],
+				selectedRemoteResources);
 	}
-	
-	public AbstractBranchTagPanel(IRepositoryRoot root, boolean showStartsWith, Set existingNames, String nationalizationId, String historyName, IResource[] resources, IRepositoryResource[] selectedRemoteResources) {
+
+	public AbstractBranchTagPanel(IRepositoryRoot root, boolean showStartsWith, Set existingNames,
+			String nationalizationId, String historyName, IResource[] resources,
+			IRepositoryResource[] selectedRemoteResources) {
 		super();
 		this.nationalizationId = nationalizationId;
 		this.historyName = historyName;
 		this.selectedRemoteResources = selectedRemoteResources;
-		
+
 		this.newResources = FileUtility.getResourcesRecursive(resources, IStateFilter.SF_NEW, IResource.DEPTH_INFINITE);
 		this.disableSwitch = FileUtility.checkForResourcesPresence(resources, new IStateFilter.AbstractStateFilter() {
 			protected boolean acceptImpl(ILocalResource local, IResource resource, String state, int mask) {
 				return state == IStateFilter.ST_ADDED;
 			}
+
 			protected boolean allowsRecursionImpl(ILocalResource local, IResource resource, String state, int mask) {
 				return true;
 			}
@@ -124,10 +146,10 @@ public abstract class AbstractBranchTagPanel extends AbstractDialogPanel {
 
 		this.dialogTitle = SVNUIMessages.getString(this.nationalizationId + "_Title"); //$NON-NLS-1$
 		this.dialogDescription = SVNUIMessages.getString(this.nationalizationId + "_Description"); //$NON-NLS-1$
-		if (SVNTeamPreferences.getRepositoryBoolean(SVNTeamUIPlugin.instance().getPreferenceStore(), SVNTeamPreferences.BRANCH_TAG_CONSIDER_STRUCTURE_NAME)) {
+		if (SVNTeamPreferences.getRepositoryBoolean(SVNTeamUIPlugin.instance().getPreferenceStore(),
+				SVNTeamPreferences.BRANCH_TAG_CONSIDER_STRUCTURE_NAME)) {
 			this.defaultMessage = SVNUIMessages.getString(this.nationalizationId + "_MessageAuto"); //$NON-NLS-1$
-		}
-		else {
+		} else {
 			this.defaultMessage = SVNUIMessages.getString(this.nationalizationId + "_Message"); //$NON-NLS-1$
 		}
 		if (!showStartsWith) {
@@ -138,33 +160,36 @@ public abstract class AbstractBranchTagPanel extends AbstractDialogPanel {
 		this.root = root;
 		this.startsWith = showStartsWith;
 		this.considerStructure = root.getRepositoryLocation().isStructureEnabled()
-				&& SVNTeamPreferences.getRepositoryBoolean(SVNTeamUIPlugin.instance().getPreferenceStore(), SVNTeamPreferences.BRANCH_TAG_CONSIDER_STRUCTURE_NAME);
-		
+				&& SVNTeamPreferences.getRepositoryBoolean(SVNTeamUIPlugin.instance().getPreferenceStore(),
+						SVNTeamPreferences.BRANCH_TAG_CONSIDER_STRUCTURE_NAME);
+
 		this.paneParticipantHelper = new PaneParticipantHelper();
 	}
-	
+
 	public SVNRevision getRevisionForRemoteResources() {
 		return this.revisionComposite != null ? this.revisionComposite.getSelectedRevision() : null;
 	}
-	
+
 	public IResource[] getSelectedResources() {
-		if (this.hasParticipantPane) {			
+		if (this.hasParticipantPane) {
 			return this.paneParticipantHelper.getSelectedResources();
 		} else {
-			return this.resourceSelection == null ? new IResource[0] : this.resourceSelection.getSelectedResources();			
-		}		
+			return this.resourceSelection == null ? new IResource[0] : this.resourceSelection.getSelectedResources();
+		}
 	}
 
 	public IResource[] getNotSelectedResources() {
-		if (this.hasParticipantPane) {    		
+		if (this.hasParticipantPane) {
 			return this.paneParticipantHelper.getNotSelectedResources();
-    	} else {
-    		return this.resourceSelection == null ? new IResource[0] : this.resourceSelection.getNotSelectedResources();
-    	}
+		} else {
+			return this.resourceSelection == null ? new IResource[0] : this.resourceSelection.getNotSelectedResources();
+		}
 	}
 
 	public IResource[] getTreatAsEdits() {
-		return this.paneParticipantHelper.isParticipantPane() ? new IResource[0] : this.resourceSelection.getTreatAsEdits();
+		return this.paneParticipantHelper.isParticipantPane()
+				? new IResource[0]
+				: this.resourceSelection.getTreatAsEdits();
 	}
 
 	public boolean isFreezeExternals() {
@@ -174,7 +199,7 @@ public abstract class AbstractBranchTagPanel extends AbstractDialogPanel {
 	public String getMessage() {
 		return this.comment.getMessage();
 	}
-	
+
 	public int getCreationMode() {
 		return this.creationMode;
 	}
@@ -212,9 +237,10 @@ public abstract class AbstractBranchTagPanel extends AbstractDialogPanel {
 		if (this.startsWith) {
 			select = new Group(parent, SWT.NULL);
 			layout.numColumns = 2;
-			((Group) select).setText(this.considerStructure ? substitutionUppercase : SVNUIMessages.getString(this.nationalizationId + "_Location_Group")); //$NON-NLS-1$
-		}
-		else {
+			((Group) select).setText(this.considerStructure
+					? substitutionUppercase
+					: SVNUIMessages.getString(this.nationalizationId + "_Location_Group")); //$NON-NLS-1$
+		} else {
 			select = new Composite(parent, SWT.NONE);
 			layout.marginHeight = 0;
 			layout.marginWidth = 0;
@@ -227,7 +253,9 @@ public abstract class AbstractBranchTagPanel extends AbstractDialogPanel {
 			Label description = new Label(select, SWT.NONE);
 			data = new GridData();
 			description.setLayoutData(data);
-			description.setText(this.considerStructure ? substitutionUppercase : SVNUIMessages.getString(this.nationalizationId + "_Location_Field")); //$NON-NLS-1$
+			description.setText(this.considerStructure
+					? substitutionUppercase
+					: SVNUIMessages.getString(this.nationalizationId + "_Location_Field")); //$NON-NLS-1$
 		}
 		this.createTopPart(select, substitutionUppercase);
 
@@ -261,22 +289,27 @@ public abstract class AbstractBranchTagPanel extends AbstractDialogPanel {
 		IRepositoryResource selectedRemoteResource = this.root;
 		if (this.selectedRemoteResources.length == 1) {
 			selectedRemoteResource = this.selectedRemoteResources[0];
-		} else if (this.selectedRemoteResources.length > 1) {			
-			selectedRemoteResource = this.selectedRemoteResources[0].getRoot();			
-		} else if (this.root.getKind() != IRepositoryRoot.KIND_LOCATION_ROOT && this.root.getKind() != IRepositoryRoot.KIND_ROOT) {
+		} else if (this.selectedRemoteResources.length > 1) {
+			selectedRemoteResource = this.selectedRemoteResources[0].getRoot();
+		} else if (this.root.getKind() != IRepositoryRoot.KIND_LOCATION_ROOT
+				&& this.root.getKind() != IRepositoryRoot.KIND_ROOT) {
 			selectedRemoteResource = this.root.getParent();
 			selectedRemoteResource.setPegRevision(this.root.getPegRevision());
 			selectedRemoteResource.setSelectedRevision(this.root.getSelectedRevision());
 		}
-		this.revisionComposite = new RevisionComposite(parent, this, false, new String[]{SVNUIMessages.RevisionComposite_Revision, SVNUIMessages.RevisionComposite_HeadRevision}, SVNRevision.HEAD, false);
+		this.revisionComposite = new RevisionComposite(parent, this, false,
+				new String[] { SVNUIMessages.RevisionComposite_Revision, SVNUIMessages.RevisionComposite_HeadRevision },
+				SVNRevision.HEAD, false);
 		layout = new GridLayout();
 		layout.marginHeight = layout.marginWidth = 0;
-		data = new GridData(GridData.FILL_HORIZONTAL);		
+		data = new GridData(GridData.FILL_HORIZONTAL);
 		this.revisionComposite.setLayout(layout);
-		this.revisionComposite.setLayoutData(data);			
+		this.revisionComposite.setLayoutData(data);
 		this.revisionComposite.setSelectedResource(selectedRemoteResource);
 		if (this.startsWith) {
-			this.revisionComposite.setEnabled(SVNTeamPreferences.getDialogInt(SVNTeamUIPlugin.instance().getPreferenceStore(), SVNTeamPreferences.BRANCH_TAG_CREATION_MODE) == SVNTeamPreferences.CREATION_MODE_REPOSITORY);
+			this.revisionComposite.setEnabled(SVNTeamPreferences.getDialogInt(
+					SVNTeamUIPlugin.instance().getPreferenceStore(),
+					SVNTeamPreferences.BRANCH_TAG_CREATION_MODE) == SVNTeamPreferences.CREATION_MODE_REPOSITORY);
 		}
 
 		SashForm splitter = new SashForm(parent, SWT.VERTICAL);
@@ -301,38 +334,37 @@ public abstract class AbstractBranchTagPanel extends AbstractDialogPanel {
 			if (this.paneParticipantHelper.isParticipantPane()) {
 				this.hasParticipantPane = true;
 				this.paneParticipantHelper.init(this.createPaneParticipant());
-				this.createPaneControls(splitter);				
+				this.createPaneControls(splitter);
 			} else {
 				this.createResourceSelectionCompositeControls(splitter);
-			}	
+			}
 			splitter.setWeights(new int[] { 1, 1 });
-		}
-		else {
+		} else {
 			splitter.setWeights(new int[] { 1 });
 		}
 	}
-	
-	protected void createPaneControls(Composite parent) {		
+
+	protected void createPaneControls(Composite parent) {
 		Control paneControl = this.paneParticipantHelper.createChangesPage(parent);
-		GridData data = new GridData(GridData.FILL_BOTH);		
-        paneControl.setLayoutData(data);      
-        
-        this.paneParticipantHelper.initListeners();        
-                                          
-        //add validator to pane
-        this.attachTo(paneControl, new PanelPaneVerifier(this.paneParticipantHelper));            
+		GridData data = new GridData(GridData.FILL_BOTH);
+		paneControl.setLayoutData(data);
+
+		this.paneParticipantHelper.initListeners();
+
+		//add validator to pane
+		this.attachTo(paneControl, new PanelPaneVerifier(this.paneParticipantHelper));
 	}
-	
+
 	protected BasePaneParticipant createPaneParticipant() {
 		return new BasePaneParticipant(new ResourceScope(this.newResources), this) {
 			protected Collection<AbstractSynchronizeActionGroup> getActionGroups() {
 				Collection<AbstractSynchronizeActionGroup> actionGroups = new ArrayList<AbstractSynchronizeActionGroup>();
 				actionGroups.add(new BasePaneActionGroup(this.validationManager));
-		    	return actionGroups;
+				return actionGroups;
 			}
-		};	
+		};
 	}
-	
+
 	protected void createResourceSelectionCompositeControls(Composite parent) {
 		this.resourceSelection = new ResourceSelectionComposite(parent, SWT.NONE, this.newResources, true, true);
 		GridData data = new GridData(GridData.FILL_BOTH);
@@ -344,18 +376,21 @@ public abstract class AbstractBranchTagPanel extends AbstractDialogPanel {
 		});
 		this.attachTo(this.resourceSelection, new AbstractVerifier() {
 			protected String getWarningMessage(Control input) {
-				IResource []resources = AbstractBranchTagPanel.this.resourceSelection.getSelectedResources();
-				if ((resources != null && resources.length != 0 || AbstractBranchTagPanel.this.disableSwitch) && AbstractBranchTagPanel.this.startWithCheck.getSelection()) {
-					return AbstractBranchTagPanel.this.defaultMessage + " " + SVNUIMessages.getString(AbstractBranchTagPanel.this.nationalizationId + "_Warning"); //$NON-NLS-1$ //$NON-NLS-2$
+				IResource[] resources = AbstractBranchTagPanel.this.resourceSelection.getSelectedResources();
+				if ((resources != null && resources.length != 0 || AbstractBranchTagPanel.this.disableSwitch)
+						&& AbstractBranchTagPanel.this.startWithCheck.getSelection()) {
+					return AbstractBranchTagPanel.this.defaultMessage + " " //$NON-NLS-1$
+							+ SVNUIMessages.getString(AbstractBranchTagPanel.this.nationalizationId + "_Warning"); //$NON-NLS-1$
 				}
 				return null;
 			}
+
 			protected String getErrorMessage(Control input) {
 				return null;
 			}
-		});		
+		});
 	}
-	
+
 	protected Composite createTopPart(Composite select, final String substitutionUppercase) {
 		this.destinationUrl = this.root.getUrl();
 
@@ -374,18 +409,18 @@ public abstract class AbstractBranchTagPanel extends AbstractDialogPanel {
 			data = new GridData(GridData.FILL_HORIZONTAL);
 			data.horizontalSpan = 2;
 			this.branchingModeCombo.setLayoutData(data);
-			this.branchingModeCombo.setItems(new String[] {
-				SVNUIMessages.AbstractBranchTagPanel_CreationMode_AsIs,
-				SVNUIMessages.AbstractBranchTagPanel_CreationMode_CheckRevision,
-				SVNUIMessages.AbstractBranchTagPanel_CreationMode_DoUpdate,
-				SVNUIMessages.AbstractBranchTagPanel_CreationMode_Repository
-			});
+			this.branchingModeCombo.setItems(new String[] { SVNUIMessages.AbstractBranchTagPanel_CreationMode_AsIs,
+					SVNUIMessages.AbstractBranchTagPanel_CreationMode_CheckRevision,
+					SVNUIMessages.AbstractBranchTagPanel_CreationMode_DoUpdate,
+					SVNUIMessages.AbstractBranchTagPanel_CreationMode_Repository });
 			this.branchingModeCombo.addSelectionListener(new SelectionAdapter() {
 				public void widgetSelected(SelectionEvent e) {
-					AbstractBranchTagPanel.this.creationModeChanged(AbstractBranchTagPanel.this.branchingModeCombo.getSelectionIndex());
+					AbstractBranchTagPanel.this
+							.creationModeChanged(AbstractBranchTagPanel.this.branchingModeCombo.getSelectionIndex());
 				}
 			});
-			this.branchingModeCombo.select(this.creationMode = SVNTeamPreferences.getDialogInt(SVNTeamUIPlugin.instance().getPreferenceStore(), SVNTeamPreferences.BRANCH_TAG_CREATION_MODE));
+			this.branchingModeCombo.select(this.creationMode = SVNTeamPreferences.getDialogInt(
+					SVNTeamUIPlugin.instance().getPreferenceStore(), SVNTeamPreferences.BRANCH_TAG_CREATION_MODE));
 		}
 
 		CompositeVerifier verifier = new CompositeVerifier();
@@ -400,19 +435,24 @@ public abstract class AbstractBranchTagPanel extends AbstractDialogPanel {
 				protected String getErrorMessage(Control input) {
 					String url = AbstractBranchTagPanel.this.root.getRepositoryLocation().getUrl();
 					if (!AbstractBranchTagPanel.this.destinationCombo.getText().startsWith(url)) {
-						return SVNUIMessages.format(SVNUIMessages.getString(AbstractBranchTagPanel.this.nationalizationId + "_Location_Verifier_DoesNotCorresponds"), new String[] {AbstractBranchTagPanel.this.destinationCombo.getText(), url}); //$NON-NLS-1$
+						return SVNUIMessages.format(
+								SVNUIMessages.getString(AbstractBranchTagPanel.this.nationalizationId
+										+ "_Location_Verifier_DoesNotCorresponds"), //$NON-NLS-1$
+								new String[] { AbstractBranchTagPanel.this.destinationCombo.getText(), url });
 					}
 					if (AbstractBranchTagPanel.this.startsWith) {
-						if (!AbstractBranchTagPanel.this.destinationCombo.getText().startsWith(AbstractBranchTagPanel.this.root.getUrl())) {
+						if (!AbstractBranchTagPanel.this.destinationCombo.getText()
+								.startsWith(AbstractBranchTagPanel.this.root.getUrl())) {
 							AbstractBranchTagPanel.this.startWithCheck.setSelection(false);
 							AbstractBranchTagPanel.this.startWithCheck.setEnabled(false);
-						}
-						else {
+						} else {
 							AbstractBranchTagPanel.this.startWithCheck.setEnabled(true);
 						}
 					}
-					if (AbstractBranchTagPanel.this.root.getUrl().equals(SVNUtility.normalizeURL(AbstractBranchTagPanel.this.destinationCombo.getText()))) {
-						return SVNUIMessages.getString(AbstractBranchTagPanel.this.nationalizationId + "_Location_Verifier_NoTagName"); //$NON-NLS-1$
+					if (AbstractBranchTagPanel.this.root.getUrl()
+							.equals(SVNUtility.normalizeURL(AbstractBranchTagPanel.this.destinationCombo.getText()))) {
+						return SVNUIMessages.getString(
+								AbstractBranchTagPanel.this.nationalizationId + "_Location_Verifier_NoTagName"); //$NON-NLS-1$
 					}
 					return null;
 				}
@@ -426,9 +466,7 @@ public abstract class AbstractBranchTagPanel extends AbstractDialogPanel {
 					RepositoryTreePanel panel = new RepositoryTreePanel(SVNUIMessages.getString(
 							AbstractBranchTagPanel.this.nationalizationId + "_SelectionProposal"), //$NON-NLS-1$
 							SVNUIMessages.RepositoryBrowsingPanel_Description,
-							SVNUIMessages.RepositoryBrowsingPanel_Message,
-							null,
-							true,
+							SVNUIMessages.RepositoryBrowsingPanel_Message, null, true,
 							AbstractBranchTagPanel.this.root.getRepositoryLocation(), false);
 					DefaultDialog browser = new DefaultDialog(AbstractBranchTagPanel.this.manager.getShell(), panel);
 					if (browser.open() == 0) {
@@ -440,8 +478,7 @@ public abstract class AbstractBranchTagPanel extends AbstractDialogPanel {
 					}
 				}
 			});
-		}
-		else {
+		} else {
 			this.resourceNameHistory = new UserInputHistory(this.historyName + "Name"); //$NON-NLS-1$
 
 			String name = SVNUIMessages.getString(this.nationalizationId + "_NodeName_Verifier"); //$NON-NLS-1$
@@ -461,11 +498,14 @@ public abstract class AbstractBranchTagPanel extends AbstractDialogPanel {
 				protected String getErrorMessage(Control input) {
 					return null;
 				}
-				
+
 				protected String getWarningMessage(Control input) {
 					String name = AbstractBranchTagPanel.this.destinationCombo.getText();
-					if (AbstractBranchTagPanel.this.existingNodesNamesSet != null && AbstractBranchTagPanel.this.existingNodesNamesSet.contains(name)) {
-						return SVNUIMessages.format(SVNUIMessages.getString(AbstractBranchTagPanel.this.nationalizationId + "_NodeName_Verifier_Error_Exists"), new String[] {name}); //$NON-NLS-1$
+					if (AbstractBranchTagPanel.this.existingNodesNamesSet != null
+							&& AbstractBranchTagPanel.this.existingNodesNamesSet.contains(name)) {
+						return SVNUIMessages.format(SVNUIMessages.getString(
+								AbstractBranchTagPanel.this.nationalizationId + "_NodeName_Verifier_Error_Exists"), //$NON-NLS-1$
+								new String[] { name });
 					}
 					return null;
 				}
@@ -475,15 +515,14 @@ public abstract class AbstractBranchTagPanel extends AbstractDialogPanel {
 					RepositoryTreePanel panel = new RepositoryTreePanel(SVNUIMessages.getString(
 							AbstractBranchTagPanel.this.nationalizationId + "_SelectionProposal"), //$NON-NLS-1$
 							SVNUIMessages.RepositoryBrowsingPanel_Description,
-							SVNUIMessages.RepositoryBrowsingPanel_Message,
-							null,
-							true,
+							SVNUIMessages.RepositoryBrowsingPanel_Message, null, true,
 							AbstractBranchTagPanel.this.root.getRoot(), false);
 					DefaultDialog browser = new DefaultDialog(AbstractBranchTagPanel.this.manager.getShell(), panel);
 					if (browser.open() == 0) {
 						IRepositoryResource selected = panel.getSelectedResource();
 						if (selected != null) {
-							AbstractBranchTagPanel.this.destinationCombo.setText(selected.getUrl().substring(AbstractBranchTagPanel.this.root.getUrl().length() + 1));
+							AbstractBranchTagPanel.this.destinationCombo.setText(selected.getUrl()
+									.substring(AbstractBranchTagPanel.this.root.getUrl().length() + 1));
 						}
 						AbstractBranchTagPanel.this.validateContent();
 					}
@@ -497,7 +536,7 @@ public abstract class AbstractBranchTagPanel extends AbstractDialogPanel {
 
 		return select;
 	}
-	
+
 	protected void creationModeChanged(int creationMode) {
 		if (creationMode == SVNTeamPreferences.CREATION_MODE_REPOSITORY) {
 			this.freezeExternalsCheck.setSelection(false);
@@ -510,8 +549,7 @@ public abstract class AbstractBranchTagPanel extends AbstractDialogPanel {
 		if (!this.considerStructure) {
 			this.destinationUrl = this.destinationCombo.getText();
 			this.resourceNameHistory.addLine(this.destinationUrl);
-		}
-		else {
+		} else {
 			this.destinationUrl = this.destinationUrl + "/" + this.destinationCombo.getText(); //$NON-NLS-1$
 			this.resourceNameHistory.addLine(this.destinationCombo.getText());
 		}
@@ -520,9 +558,10 @@ public abstract class AbstractBranchTagPanel extends AbstractDialogPanel {
 		if (this.startWithCheck != null) {
 			this.startsWith = this.startWithCheck.getSelection();
 			this.freezeExternals = this.freezeExternalsCheck.getSelection();
-			SVNTeamPreferences.setDialogInt(SVNTeamUIPlugin.instance().getPreferenceStore(), SVNTeamPreferences.BRANCH_TAG_CREATION_MODE, this.creationMode = this.branchingModeCombo.getSelectionIndex());
-		}
-		else {
+			SVNTeamPreferences.setDialogInt(SVNTeamUIPlugin.instance().getPreferenceStore(),
+					SVNTeamPreferences.BRANCH_TAG_CREATION_MODE,
+					this.creationMode = this.branchingModeCombo.getSelectionIndex());
+		} else {
 			this.startsWith = false;
 			this.freezeExternals = false;
 		}
@@ -534,33 +573,34 @@ public abstract class AbstractBranchTagPanel extends AbstractDialogPanel {
 
 	public void dispose() {
 		super.dispose();
-    	if (this.hasParticipantPane) {
-    		this.paneParticipantHelper.dispose();
-    	}  	
-	}	
-	
+		if (this.hasParticipantPane) {
+			this.paneParticipantHelper.dispose();
+		}
+	}
+
 	/*
 	 * Pane validator
 	 */
 	protected class PanelPaneVerifier extends PaneVerifier {
-		
+
 		public PanelPaneVerifier(PaneParticipantHelper paneParticipantHelper) {
 			super(paneParticipantHelper);
 		}
 
-		protected String getErrorMessage(Control input) {			
+		protected String getErrorMessage(Control input) {
 			return null;
 		}
-		
+
 		protected String getWarningMessage(Control input) {
 			IResource[] resourcesToProcess = this.paneParticipantHelper.getSelectedResources();
-			
-			if ((resourcesToProcess.length == 0 || AbstractBranchTagPanel.this.disableSwitch) && AbstractBranchTagPanel.this.startWithCheck.getSelection()) {
-				return AbstractBranchTagPanel.this.defaultMessage + " " + SVNUIMessages.getString(AbstractBranchTagPanel.this.nationalizationId + "_Warning"); //$NON-NLS-1$ //$NON-NLS-2$
+
+			if ((resourcesToProcess.length == 0 || AbstractBranchTagPanel.this.disableSwitch)
+					&& AbstractBranchTagPanel.this.startWithCheck.getSelection()) {
+				return AbstractBranchTagPanel.this.defaultMessage + " " //$NON-NLS-1$
+						+ SVNUIMessages.getString(AbstractBranchTagPanel.this.nationalizationId + "_Warning"); //$NON-NLS-1$
 			}
 			return null;
-		}	
-	}	
-	
-	
+		}
+	}
+
 }

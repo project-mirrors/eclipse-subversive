@@ -39,10 +39,11 @@ import org.eclipse.team.svn.core.operation.AbstractActionOperation;
  */
 public class InitExtractLogOperation extends AbstractActionOperation {
 	public static final String COMPLETE_LOG_NAME = "/changes.log"; //$NON-NLS-1$
-	
+
 	protected HashMap<String, List<String>> extractParticipants;
+
 	protected String logPath;
-	
+
 	public InitExtractLogOperation(String logPath) {
 		super("Operation_InitExtractLog", SVNMessages.class); //$NON-NLS-1$
 		this.logPath = logPath;
@@ -50,7 +51,8 @@ public class InitExtractLogOperation extends AbstractActionOperation {
 	}
 
 	protected void runImpl(IProgressMonitor monitor) throws Exception {
-		DateFormat formatter = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM, Locale.getDefault());
+		DateFormat formatter = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM,
+				Locale.getDefault());
 		String date = formatter.format(new Date());
 		this.logImpl(""); //$NON-NLS-1$
 		this.logImpl(date);
@@ -58,17 +60,19 @@ public class InitExtractLogOperation extends AbstractActionOperation {
 	}
 
 	public void log(String participant, String status) {
-		String toPut = status.equals(IStateFilter.ST_NEW) ? IStateFilter.ST_ADDED : (status.equals(IStateFilter.ST_REPLACED) ? IStateFilter.ST_MODIFIED : status);
+		String toPut = status.equals(IStateFilter.ST_NEW)
+				? IStateFilter.ST_ADDED
+				: (status.equals(IStateFilter.ST_REPLACED) ? IStateFilter.ST_MODIFIED : status);
 		if (this.extractParticipants.get(toPut) == null) {
 			this.extractParticipants.put(toPut, new ArrayList<String>());
 		}
 		this.extractParticipants.get(toPut).add(participant);
 	}
-	
+
 	public void flushLog() {
 		HashMap<String, List<String>> sortedParticipants = new HashMap<String, List<String>>();
 		for (String status : this.extractParticipants.keySet()) {
-			String [] participants = this.extractParticipants.get(status).toArray(new String [0]);
+			String[] participants = this.extractParticipants.get(status).toArray(new String[0]);
 			Arrays.sort(participants);
 			ArrayList<String> participantsToLog = new ArrayList<String>();
 			for (int i = 0; i < participants.length; i++) {
@@ -83,48 +87,42 @@ public class InitExtractLogOperation extends AbstractActionOperation {
 					if (!parentIsAlreadyLogged) {
 						participantsToLog.add(participants[i]);
 					}
-				}
-				else if (i + 1 >= participants.length || !participants[i + 1].startsWith(participants[i] + "\\")) { //$NON-NLS-1$
+				} else if (i + 1 >= participants.length || !participants[i + 1].startsWith(participants[i] + "\\")) { //$NON-NLS-1$
 					participantsToLog.add(participants[i]);
 				}
 			}
 			sortedParticipants.put(status, participantsToLog);
 		}
-		
+
 		//Sorting statuses
-		List<String> statusesList = Arrays.asList(sortedParticipants.keySet().toArray(new String [this.extractParticipants.keySet().size()]));
+		List<String> statusesList = Arrays
+				.asList(sortedParticipants.keySet().toArray(new String[this.extractParticipants.keySet().size()]));
 		Collections.sort(statusesList, new Comparator<String>() {
 
 			public int compare(String o1, String o2) {
-				if (o1.equals(IStateFilter.ST_MODIFIED))
-				{
+				if (o1.equals(IStateFilter.ST_MODIFIED)) {
 					return -1;
 				}
-				if (o2.equals(IStateFilter.ST_MODIFIED))
-				{
+				if (o2.equals(IStateFilter.ST_MODIFIED)) {
 					return 1;
 				}
-				if (o1.equals(IStateFilter.ST_ADDED))
-				{
+				if (o1.equals(IStateFilter.ST_ADDED)) {
 					return -1;
 				}
-				if (o2.equals(IStateFilter.ST_ADDED))
-				{
+				if (o2.equals(IStateFilter.ST_ADDED)) {
 					return 1;
 				}
-				if (o1.equals(IStateFilter.ST_NEW))
-				{
+				if (o1.equals(IStateFilter.ST_NEW)) {
 					return -1;
 				}
-				if (o2.equals(IStateFilter.ST_NEW))
-				{
+				if (o2.equals(IStateFilter.ST_NEW)) {
 					return 1;
 				}
 				return 0;
 			}
-			
+
 		});
-		
+
 		for (String status : statusesList) {
 			for (String participant : sortedParticipants.get(status)) {
 				this.logImpl(SVNMessages.getString("Console_Status_" + status) + " " + participant); //$NON-NLS-1$ //$NON-NLS-2$
@@ -140,13 +138,14 @@ public class InitExtractLogOperation extends AbstractActionOperation {
 			writer = new FileWriter(this.logPath + InitExtractLogOperation.COMPLETE_LOG_NAME, true);
 			writer.write(line);
 			writer.write(System.getProperty("line.separator")); //$NON-NLS-1$
-		}
-		catch (IOException ex) {
+		} catch (IOException ex) {
 			//ignore
-		}
-		finally {
+		} finally {
 			if (writer != null) {
-				try {writer.close();} catch (Exception ex) {}
+				try {
+					writer.close();
+				} catch (Exception ex) {
+				}
 			}
 		}
 	}

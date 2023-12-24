@@ -33,33 +33,33 @@ import org.eclipse.ui.dialogs.PreferencesUtil;
  * @author Sergiy Logvin
  */
 public class SecurityWarningComposite extends Composite {
-	
+
 	public SecurityWarningComposite(Composite parent) {
 		super(parent, SWT.NONE);
 		this.init();
 	}
-	
+
 	protected void init() {
 		GridLayout layout = new GridLayout();
 		layout.numColumns = 1;
 		layout.marginHeight = layout.marginWidth = 0;
 		this.setLayout(layout);
 		this.setLayoutData(new GridData(GridData.FILL_BOTH));
-		
+
 		Link link = new Link(this, SWT.WRAP);
 		link.setText(SVNUIMessages.SecurityWarningComposite_Message);
 		link.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				String pageId = "org.eclipse.equinox.security.ui.storage"; //$NON-NLS-1$
-				PreferencesUtil.createPreferenceDialogOn(null, pageId, new String[] {pageId}, null).open();
+				PreferencesUtil.createPreferenceDialogOn(null, pageId, new String[] { pageId }, null).open();
 			}
 		});
-				
+
 		GridData data = new GridData(GridData.FILL_HORIZONTAL | GridData.VERTICAL_ALIGN_CENTER);
 		data.widthHint = IDialogConstants.ENTRY_FIELD_WIDTH;
 		Dialog.applyDialogFont(link);
 		data.heightHint = DefaultDialog.convertHeightInCharsToPixels(link, 2);
 		link.setLayoutData(data);
-    }
-	
+	}
+
 }

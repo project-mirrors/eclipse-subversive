@@ -26,22 +26,22 @@ import org.eclipse.team.ui.synchronize.ISynchronizePageConfiguration;
  * @author Igor Burilo
  */
 public class RevertModelAction extends AbstractSynchronizeLogicalModelAction {
-	
+
 	protected RevertActionHelper actionHelper;
-	
+
 	public RevertModelAction(String text, ISynchronizePageConfiguration configuration) {
 		super(text, configuration);
 		this.actionHelper = new RevertActionHelper(this, configuration);
 	}
-	
+
 	protected boolean needsToSaveDirtyEditors() {
 		return false;
 	}
-	
+
 	protected FastSyncInfoFilter getSyncInfoFilter() {
 		return this.actionHelper.getSyncInfoFilter();
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.team.svn.ui.synchronize.action.AbstractSynchronizeLogicalModelAction#getOperation()
 	 */

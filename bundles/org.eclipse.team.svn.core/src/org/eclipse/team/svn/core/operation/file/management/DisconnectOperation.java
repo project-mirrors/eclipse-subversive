@@ -29,7 +29,7 @@ import org.eclipse.team.svn.core.utility.SVNUtility;
  * @author Alexander Gurov
  */
 public class DisconnectOperation extends AbstractFileOperation {
-	public DisconnectOperation(File []files) {
+	public DisconnectOperation(File[] files) {
 		super("Operation_DisconnectFile", SVNMessages.class, files); //$NON-NLS-1$
 	}
 
@@ -41,7 +41,7 @@ public class DisconnectOperation extends AbstractFileOperation {
 		this.disconnect(this.operableData(), monitor);
 	}
 
-	protected void disconnect(File []files, IProgressMonitor monitor) {
+	protected void disconnect(File[] files, IProgressMonitor monitor) {
 		files = FileUtility.shrinkChildNodes(files, true);
 		for (int i = 0; i < files.length && !monitor.isCanceled(); i++) {
 			File meta = new File(files[i].getAbsolutePath() + "/" + SVNUtility.getSVNFolderName()); //$NON-NLS-1$
@@ -51,5 +51,5 @@ public class DisconnectOperation extends AbstractFileOperation {
 			}
 		}
 	}
-	
+
 }

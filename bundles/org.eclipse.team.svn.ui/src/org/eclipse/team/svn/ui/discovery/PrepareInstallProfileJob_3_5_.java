@@ -64,10 +64,9 @@ import org.eclipse.team.svn.core.discovery.model.ConnectorDescriptor;
 /**
  * Install job for Eclipse 3.5
  * 
- * A job that configures a p2 {@link #getInstallAction() install action} for installing one or more
- * {@link ConnectorDescriptor connectors}. The bulk of the installation work is done by p2; this class just sets up the
- * p2 repository metadata and selects the appropriate features to install. After running the job the
- * {@link #getInstallAction() install action} must be run to perform the installation.
+ * A job that configures a p2 {@link #getInstallAction() install action} for installing one or more {@link ConnectorDescriptor connectors}.
+ * The bulk of the installation work is done by p2; this class just sets up the p2 repository metadata and selects the appropriate features
+ * to install. After running the job the {@link #getInstallAction() install action} must be run to perform the installation.
  * 
  * @author David Green
  * @author Igor Burilo
@@ -87,13 +86,13 @@ public class PrepareInstallProfileJob_3_5_ implements IConnectorsInstallJob {
 //	private InstallAction installAction;
 
 	public PrepareInstallProfileJob_3_5_() {
-		
+
 	}
 
 	public void setInstallableConnectors(List<ConnectorDescriptor> installableConnectors) {
 //		this.installableConnectors = installableConnectors;
 	}
-	
+
 	public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 //		try {
 //			if (this.installableConnectors == null || this.installableConnectors.isEmpty()) {

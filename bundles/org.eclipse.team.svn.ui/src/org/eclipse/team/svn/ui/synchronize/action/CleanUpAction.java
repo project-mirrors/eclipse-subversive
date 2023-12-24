@@ -28,9 +28,9 @@ import org.eclipse.team.ui.synchronize.ISynchronizePageConfiguration;
  * @author Alexei Goncharov
  */
 public class CleanUpAction extends AbstractSynchronizeModelAction {
-	
+
 	protected CleanUpActionHelper actionHelper;
-	
+
 	public CleanUpAction(String text, ISynchronizePageConfiguration configuration) {
 		super(text, configuration);
 		this.actionHelper = new CleanUpActionHelper(this, configuration);
@@ -39,19 +39,20 @@ public class CleanUpAction extends AbstractSynchronizeModelAction {
 	protected boolean needsToSaveDirtyEditors() {
 		return false;
 	}
-	
+
 	protected boolean updateSelection(IStructuredSelection selection) {
 		super.updateSelection(selection);
-		
+
 		IResource[] selectedResources = this.getAllSelectedResources();
-		if (FileUtility.checkForResourcesPresence(selectedResources, IStateFilter.SF_VERSIONED_FOLDERS, IResource.DEPTH_ZERO)) {
+		if (FileUtility.checkForResourcesPresence(selectedResources, IStateFilter.SF_VERSIONED_FOLDERS,
+				IResource.DEPTH_ZERO)) {
 			return true;
 		}
-	    return false;
+		return false;
 	}
-	
+
 	protected IActionOperation getOperation(ISynchronizePageConfiguration configuration, IDiffElement[] elements) {
 		return this.actionHelper.getOperation();
 	}
-	
+
 }

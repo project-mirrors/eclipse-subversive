@@ -39,16 +39,18 @@ public class CreatePatchFileModelAction extends AbstractSynchronizeLogicalModelA
 	}
 
 	protected FastSyncInfoFilter getSyncInfoFilter() {
-		return new FastSyncInfoFilter.SyncInfoDirectionFilter(new int[] {SyncInfo.OUTGOING, SyncInfo.CONFLICTING}) {
-            public boolean select(SyncInfo info) {
-            	ILocalResource local = ((AbstractSVNSyncInfo)info).getLocalResource();
-                return super.select(info) && (IStateFilter.SF_VERSIONED.accept(local) || IStateFilter.SF_ANY_CHANGE.accept(local) && local.getResource().exists());
-            }
-        };
+		return new FastSyncInfoFilter.SyncInfoDirectionFilter(new int[] { SyncInfo.OUTGOING, SyncInfo.CONFLICTING }) {
+			public boolean select(SyncInfo info) {
+				ILocalResource local = ((AbstractSVNSyncInfo) info).getLocalResource();
+				return super.select(info) && (IStateFilter.SF_VERSIONED.accept(local)
+						|| IStateFilter.SF_ANY_CHANGE.accept(local) && local.getResource().exists());
+			}
+		};
 	}
-	
+
 	protected IActionOperation getOperation() {
-		IResource []resources = FileUtility.shrinkChildNodes(this.syncInfoSelector.getSelectedResources(new ISyncStateFilter.StateFilterWrapper(IStateFilter.SF_ANY_CHANGE, true)));
+		IResource[] resources = FileUtility.shrinkChildNodes(this.syncInfoSelector
+				.getSelectedResources(new ISyncStateFilter.StateFilterWrapper(IStateFilter.SF_ANY_CHANGE, true)));
 		return CreatePatchAction.getCreatePatchOperation(resources, this.getConfiguration().getSite().getShell());
 	}
 

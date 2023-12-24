@@ -38,21 +38,22 @@ import org.eclipse.team.svn.ui.panel.AbstractDialogPanel;
  */
 public class PreviewPanel extends AbstractDialogPanel {
 	protected String report;
+
 	protected Font font;
 
 	public PreviewPanel(String title, String description, String message, String report) {
 		this(title, description, message, report, null);
 	}
-	
+
 	public PreviewPanel(String title, String description, String message, String report, Font font) {
-		super(new String[] {IDialogConstants.OK_LABEL});
+		super(new String[] { IDialogConstants.OK_LABEL });
 		this.dialogTitle = title;
 		this.dialogDescription = description;
 		this.defaultMessage = message;
 		this.report = report;
 		this.font = font;
 	}
-	
+
 	public void createControlsImpl(Composite parent) {
 		Composite composite = new Composite(parent, SWT.NONE);
 		GridLayout layout = new GridLayout();
@@ -63,20 +64,21 @@ public class PreviewPanel extends AbstractDialogPanel {
 		data.widthHint = prefferedSize.x;
 		data.heightHint = prefferedSize.y;
 		composite.setLayoutData(data);
-		
+
 		this.report = PatternProvider.replaceAll(this.report, "<br>", "\n"); //$NON-NLS-1$ //$NON-NLS-2$
 		this.report = PatternProvider.replaceAll(this.report, "&lt;", "<"); //$NON-NLS-1$ //$NON-NLS-2$
 		this.report = PatternProvider.replaceAll(this.report, "&gt;", ">"); //$NON-NLS-1$ //$NON-NLS-2$
-		StyledText styledText = new StyledText(composite, SWT.H_SCROLL | SWT.V_SCROLL | SWT.MULTI | SWT.BORDER | SWT.WRAP);
-		
+		StyledText styledText = new StyledText(composite,
+				SWT.H_SCROLL | SWT.V_SCROLL | SWT.MULTI | SWT.BORDER | SWT.WRAP);
+
 		if (this.font != null) {
 			styledText.setFont(this.font);
 		}
-		
+
 		List<StyleRange> styledRanges = new ArrayList<StyleRange>();
 		styledRanges = this.getStyleRanges();
 		styledText.setText(this.report);
-		styledText.setStyleRanges(styledRanges.toArray(new StyleRange[styledRanges.size()]));		
+		styledText.setStyleRanges(styledRanges.toArray(new StyleRange[styledRanges.size()]));
 		styledText.setEditable(false);
 		styledText.setLayoutData(data);
 	}
@@ -87,19 +89,19 @@ public class PreviewPanel extends AbstractDialogPanel {
 			this.font.dispose();
 		}
 	}
-	
+
 	protected void saveChangesImpl() {
 	}
-	
+
 	protected void cancelChangesImpl() {
 	}
-	
+
 	protected List<StyleRange> getStyleRanges() {
 		List<StyleRange> styledRanges = new ArrayList<StyleRange>();
-		
+
 		Stack<StyleRange> boldEntries = new Stack<StyleRange>();
 		Stack<StyleRange> italicEntries = new Stack<StyleRange>();
-		
+
 		for (int i = 0; i < this.report.length(); i++) {
 			if (this.report.charAt(i) == '<' && i < this.report.length() - 2) {
 				if (this.report.charAt(i + 2) == '>') {
@@ -109,14 +111,12 @@ public class PreviewPanel extends AbstractDialogPanel {
 						range.fontStyle = SWT.BOLD;
 						boldEntries.push(range);
 						this.report = this.report.substring(0, i) + this.report.substring(i + 3);
-					}
-					else if (this.report.charAt(i + 1) == 'i') {
+					} else if (this.report.charAt(i + 1) == 'i') {
 						range.fontStyle = SWT.ITALIC;
 						italicEntries.push(range);
 						this.report = this.report.substring(0, i) + this.report.substring(i + 3);
 					}
-				}
-				else if (this.report.charAt(i + 1) == '/') {
+				} else if (this.report.charAt(i + 1) == '/') {
 					if (i < this.report.length() - 3 && this.report.charAt(i + 3) == '>') {
 						if (this.report.charAt(i + 2) == 'b') {
 							if (boldEntries.size() > 0) {
@@ -125,8 +125,7 @@ public class PreviewPanel extends AbstractDialogPanel {
 								styledRanges.add(range);
 								this.report = this.report.substring(0, i) + this.report.substring(i + 4);
 							}
-						}
-						else if (this.report.charAt(i + 2) == 'i') {
+						} else if (this.report.charAt(i + 2) == 'i') {
 							if (italicEntries.size() > 0) {
 								StyleRange range = italicEntries.pop();
 								range.length = i - range.start;
@@ -138,12 +137,12 @@ public class PreviewPanel extends AbstractDialogPanel {
 				}
 			}
 		}
-		
+
 		return styledRanges;
 	}
-	
+
 	public Point getPrefferedSizeImpl() {
 		return new Point(640, 300);
 	}
-	
+
 }

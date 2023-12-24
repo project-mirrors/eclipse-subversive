@@ -57,21 +57,24 @@ import org.eclipse.team.svn.ui.verifier.ExistingResourceVerifier;
  */
 public class CreateFilePanel extends AbstractDialogPanel {
 	protected Text locationField;
+
 	protected String location;
+
 	protected CommentComposite comment;
-	protected String []fileNames;
-	
+
+	protected String[] fileNames;
+
 	public CreateFilePanel(String importToUrl) {
 		super();
 		this.dialogTitle = SVNUIMessages.CreateFilePanel_Title;
 		this.dialogDescription = SVNUIMessages.CreateFilePanel_Description;
-		this.defaultMessage = SVNUIMessages.format(SVNUIMessages.CreateFilePanel_Message, new String[] {importToUrl});
-    }
-	
+		this.defaultMessage = SVNUIMessages.format(SVNUIMessages.CreateFilePanel_Message, new String[] { importToUrl });
+	}
+
 	public void createControlsImpl(Composite parent) {
 		GridLayout layout = null;
 		GridData data = null;
-		
+
 		Composite fileGroup = new Composite(parent, SWT.NULL);
 		layout = new GridLayout();
 		layout.numColumns = 3;
@@ -80,24 +83,25 @@ public class CreateFilePanel extends AbstractDialogPanel {
 		fileGroup.setLayout(layout);
 		data = new GridData(GridData.FILL_HORIZONTAL);
 		fileGroup.setLayoutData(data);
-		
+
 		Label fileLabel = new Label(fileGroup, SWT.NONE);
 		data = new GridData();
 		fileLabel.setLayoutData(data);
 		fileLabel.setText(SVNUIMessages.CreateFilePanel_FilePath);
-		
-		this.locationField = new Text(fileGroup,  SWT.SINGLE | SWT.BORDER);
+
+		this.locationField = new Text(fileGroup, SWT.SINGLE | SWT.BORDER);
 		data = new GridData(GridData.FILL_HORIZONTAL);
 		this.locationField.setLayoutData(data);
 		this.locationField.addModifyListener(new ModifyListener() {
 			public void modifyText(ModifyEvent e) {
-				String text = CreateFilePanel.this.locationField.getText(); 
+				String text = CreateFilePanel.this.locationField.getText();
 				if (text.indexOf("\"") == -1) { //$NON-NLS-1$
 					CreateFilePanel.this.location = new Path(text).removeLastSegments(1).toString();
 				}
 			}
 		});
-		this.attachTo(this.locationField, new ExistingResourceMultiVerifier(SVNUIMessages.CreateFilePanel_FilePath_Verifier));
+		this.attachTo(this.locationField,
+				new ExistingResourceMultiVerifier(SVNUIMessages.CreateFilePanel_FilePath_Verifier));
 		Button browseButton = new Button(fileGroup, SWT.PUSH);
 		browseButton.setText(SVNUIMessages.Button_Browse);
 		data = new GridData();
@@ -109,56 +113,54 @@ public class CreateFilePanel extends AbstractDialogPanel {
 				fileDialog.setText(SVNUIMessages.CreateFilePanel_ImportFile);
 				String path = fileDialog.open();
 				if (path != null) {
-					String []fileNames = fileDialog.getFileNames();
+					String[] fileNames = fileDialog.getFileNames();
 					CreateFilePanel.this.location = new Path(path).removeLastSegments(1).toString();
 					CreateFilePanel.this.fileNames = fileNames;
 					if (fileNames.length > 1) {
 						String text = ""; //$NON-NLS-1$
 						for (int i = 0; i < fileNames.length; i++) {
-							text += text.length() > 0 ? " \"" + fileNames[i] + "\"": "\"" + fileNames[i] + "\"";  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+							text += text.length() > 0 ? " \"" + fileNames[i] + "\"" : "\"" + fileNames[i] + "\""; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 						}
 						CreateFilePanel.this.locationField.setText(text);
-					}
-					else {
+					} else {
 						CreateFilePanel.this.locationField.setText(path);
 					}
 				}
 			}
 		});
-						
+
 		Group group = new Group(parent, SWT.NULL);
 		group.setLayout(new GridLayout());
 		data = new GridData(GridData.FILL_BOTH);
 		group.setLayoutData(data);
 		group.setText(SVNUIMessages.CreateFilePanel_Comment);
-		
+
 		this.comment = new CommentComposite(group, this);
 		data = new GridData(GridData.FILL_BOTH);
 		this.comment.setLayoutData(data);
-    }
-	
-    public Point getPrefferedSizeImpl() {
-    	return new Point(525, SWT.DEFAULT);
-    }
-    
+	}
+
+	public Point getPrefferedSizeImpl() {
+		return new Point(525, SWT.DEFAULT);
+	}
+
 	public void postInit() {
 		super.postInit();
 		this.comment.postInit(this.manager);
 	}
-		
+
 	protected void saveChangesImpl() {
 		this.comment.saveChanges();
 		String text = CreateFilePanel.this.locationField.getText();
 		if (text.indexOf("\"") > -1) { //$NON-NLS-1$
 			this.fileNames = this.parseFileNames(text);
-		}	
-		else {
+		} else {
 			Path path = new Path(text);
 			this.location = path.removeLastSegments(1).toString();
-			this.fileNames = new String[] {path.lastSegment()};
+			this.fileNames = new String[] { path.lastSegment() };
 		}
 	}
-	
+
 	protected String[] parseFileNames(String text) {
 		Reader r = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(text.getBytes())));
 		final StreamTokenizer tokenizer = new StreamTokenizer(r);
@@ -166,51 +168,57 @@ public class CreateFilePanel extends AbstractDialogPanel {
 		tokenizer.quoteChar('\"');
 		tokenizer.whitespaceChars(32, 32);
 		final Set<String> fileNames = new HashSet<String>();
-		
+
 		new AbstractActionOperation("Operation_ParseFile", SVNUIMessages.class) { //$NON-NLS-1$
 			protected void runImpl(IProgressMonitor monitor) throws Exception {
 				while (tokenizer.nextToken() != StreamTokenizer.TT_EOF) {
 					fileNames.add(tokenizer.sval);
 				}
 			}
+
 			public ISchedulingRule getSchedulingRule() {
 				return null;
 			}
 		}.run(new NullProgressMonitor());
-		
+
 		return fileNames.toArray(new String[fileNames.size()]);
 	}
-	
+
 	public String getHelpId() {
-    	return "org.eclipse.team.svn.help.remote_createFileDialogContext"; //$NON-NLS-1$
+		return "org.eclipse.team.svn.help.remote_createFileDialogContext"; //$NON-NLS-1$
 	}
 
-    protected void cancelChangesImpl() {
-    	this.comment.cancelChanges();
-    }
-    
-    public String getLocation() {
-    	return this.location;
-    }
-    
-    public String []getFileNames() {
+	protected void cancelChangesImpl() {
+		this.comment.cancelChanges();
+	}
+
+	public String getLocation() {
+		return this.location;
+	}
+
+	public String[] getFileNames() {
 		return this.fileNames;
-    }
-    
-    public String getMessage() {
-    	return this.comment.getMessage();
-    }
-   
-    protected class ExistingResourceMultiVerifier extends ExistingResourceVerifier {
-    	protected String ERROR_MESSAGE_DOES_NOT_EXIST_MULTIPLE;
-    	protected String ERROR_MESSAGE_IS_NOT_A_FILE_MULTIPLE;
+	}
+
+	public String getMessage() {
+		return this.comment.getMessage();
+	}
+
+	protected class ExistingResourceMultiVerifier extends ExistingResourceVerifier {
+		protected String ERROR_MESSAGE_DOES_NOT_EXIST_MULTIPLE;
+
+		protected String ERROR_MESSAGE_IS_NOT_A_FILE_MULTIPLE;
 
 		public ExistingResourceMultiVerifier(String fieldName) {
 			super(fieldName, true);
-	    	this.ERROR_MESSAGE_DOES_NOT_EXIST_MULTIPLE = SVNUIMessages.format(SVNUIMessages.CreateFilePanel_FilePath_Verifier_Error_Exists, new String[] {AbstractFormattedVerifier.FIELD_NAME});
-	    	this.ERROR_MESSAGE_IS_NOT_A_FILE_MULTIPLE = SVNUIMessages.format(SVNUIMessages.CreateFilePanel_FilePath_Verifier_Error_NotAFile, new String[] {AbstractFormattedVerifier.FIELD_NAME});
+			this.ERROR_MESSAGE_DOES_NOT_EXIST_MULTIPLE = SVNUIMessages.format(
+					SVNUIMessages.CreateFilePanel_FilePath_Verifier_Error_Exists,
+					new String[] { AbstractFormattedVerifier.FIELD_NAME });
+			this.ERROR_MESSAGE_IS_NOT_A_FILE_MULTIPLE = SVNUIMessages.format(
+					SVNUIMessages.CreateFilePanel_FilePath_Verifier_Error_NotAFile,
+					new String[] { AbstractFormattedVerifier.FIELD_NAME });
 		}
-    	
+
 		protected String getErrorMessageImpl(Control input) {
 			if (CreateFilePanel.this.location == null) {
 				return ExistingResourceVerifier.ERROR_MESSAGE_DOES_NOT_EXIST;
@@ -218,8 +226,8 @@ public class CreateFilePanel extends AbstractDialogPanel {
 			boolean existAll = true;
 			boolean allFiles = true;
 			String text = this.getText(input);
-		    if (text.indexOf("\"") > -1) { //$NON-NLS-1$
-		        String []fileNames = CreateFilePanel.this.parseFileNames(text);
+			if (text.indexOf("\"") > -1) { //$NON-NLS-1$
+				String[] fileNames = CreateFilePanel.this.parseFileNames(text);
 				for (int i = 0; i < fileNames.length; i++) {
 					if (fileNames[i] == null || fileNames[i].trim().length() == 0) {
 						existAll = false;
@@ -235,17 +243,15 @@ public class CreateFilePanel extends AbstractDialogPanel {
 				}
 				if (!existAll) {
 					return this.ERROR_MESSAGE_DOES_NOT_EXIST_MULTIPLE;
-				}
-				else if (!allFiles) {
+				} else if (!allFiles) {
 					return this.ERROR_MESSAGE_IS_NOT_A_FILE_MULTIPLE;
 				}
-			}
-			else {
+			} else {
 				return super.getErrorMessageImpl(input);
 			}
 			return null;
 		}
-		
-    }
-    
+
+	}
+
 }

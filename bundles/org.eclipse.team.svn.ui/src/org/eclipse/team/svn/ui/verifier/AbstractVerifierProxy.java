@@ -48,7 +48,7 @@ public abstract class AbstractVerifierProxy extends AbstractVerifier {
 		}
 		return true;
 	}
-	
+
 	protected abstract boolean isVerificationEnabled(Control input);
 
 	protected String getErrorMessage(Control input) {

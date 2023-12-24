@@ -43,165 +43,181 @@ import org.eclipse.team.svn.ui.verifier.IValidationManager;
  * 
  * @author Alexei Goncharov
  */
-public class DepthSelectionComposite extends Composite {	
-	
+public class DepthSelectionComposite extends Composite {
+
 	//getting strings for options
 	protected final static String empty = SVNUIMessages.RecurseDepthSelector_Empty;
+
 	protected final static String files = SVNUIMessages.RecurseDepthSelector_Files;
+
 	protected final static String immediates = SVNUIMessages.RecurseDepthSelector_Immediates;
+
 	protected final static String infinity = SVNUIMessages.RecurseDepthSelector_Infinity;
+
 	protected final static String exclude = SVNUIMessages.RecurseDepthSelector_Exclude;
+
 	protected final static String unknown = SVNUIMessages.RecurseDepthSelector_Unknown;
-			
+
 	protected boolean useWorkingCopyDepth;
-			
-	protected boolean supportSetDepth;	
+
+	protected boolean supportSetDepth;
+
 	//if there were selected several resources to update then there's not sense to allow to specify path
 	protected boolean isShowUpdateDepthPath;
+
 	protected IRepositoryResource resource;
+
 	protected IValidationManager validationManager;
-		
+
 	//output
 	protected SVNDepth depth;
+
 	protected boolean isStickyDepth;
+
 	protected String updatePath;
-	
+
 	protected Combo depthSelector;
+
 	protected Button updateDepthButton;
+
 	protected Text pathInput;
+
 	protected Button browseButton;
-	protected RepositoryResourceSelectionComposite selectionComposite;	
-	
+
+	protected RepositoryResourceSelectionComposite selectionComposite;
+
 	protected boolean svn15compatible;
+
 	protected boolean svn16compatible;
-	
+
 	public DepthSelectionComposite(Composite parent, int style, boolean useWorkingCopyDepth) {
 		this(parent, style, useWorkingCopyDepth, false, false, null, null);
 	}
-	
-	public DepthSelectionComposite(Composite parent, int style, boolean useWorkingCopyDepth, boolean supportSetDepth, boolean canShowUpdateDepthPath, IRepositoryResource resource, IValidationManager validationManager) {
-		super(parent, style);
-		
-		this.svn15compatible = CoreExtensionsManager.instance().getSVNConnectorFactory().getSVNAPIVersion() >= ISVNConnectorFactory.APICompatibility.SVNAPI_1_5_x;
-		this.svn16compatible = CoreExtensionsManager.instance().getSVNConnectorFactory().getSVNAPIVersion() >= ISVNConnectorFactory.APICompatibility.SVNAPI_1_6_x;
 
-		this.supportSetDepth = supportSetDepth && this.svn15compatible;		
-		this.isStickyDepth = false;		
+	public DepthSelectionComposite(Composite parent, int style, boolean useWorkingCopyDepth, boolean supportSetDepth,
+			boolean canShowUpdateDepthPath, IRepositoryResource resource, IValidationManager validationManager) {
+		super(parent, style);
+
+		this.svn15compatible = CoreExtensionsManager.instance()
+				.getSVNConnectorFactory()
+				.getSVNAPIVersion() >= ISVNConnectorFactory.APICompatibility.SVNAPI_1_5_x;
+		this.svn16compatible = CoreExtensionsManager.instance()
+				.getSVNConnectorFactory()
+				.getSVNAPIVersion() >= ISVNConnectorFactory.APICompatibility.SVNAPI_1_6_x;
+
+		this.supportSetDepth = supportSetDepth && this.svn15compatible;
+		this.isStickyDepth = false;
 		this.isShowUpdateDepthPath = this.supportSetDepth && canShowUpdateDepthPath;
 		this.resource = resource;
 		this.validationManager = validationManager;
-		
+
 		if (useWorkingCopyDepth && this.svn15compatible) {
 			this.useWorkingCopyDepth = true;
 			this.depth = this.isStickyDepth ? SVNDepth.INFINITY : SVNDepth.UNKNOWN;
 		} else {
 			this.useWorkingCopyDepth = false;
-			this.depth = SVNDepth.INFINITY;			
+			this.depth = SVNDepth.INFINITY;
 		}
-		
+
 		this.createControls();
 	}
-	
-	protected void createControls() {		
+
+	protected void createControls() {
 		GridLayout layout = new GridLayout();
 		layout.marginHeight = layout.marginWidth = 0;
 		this.setLayout(layout);
-		
+
 		Composite parent;
 		if (this.isShowUpdateDepthPath) {
 			Group group = new Group(this, SWT.NONE);
 			layout = new GridLayout();
 			layout.numColumns = 3;
-			group.setLayout(layout);	
-			GridData data = new GridData(GridData.FILL_HORIZONTAL);		
+			group.setLayout(layout);
+			GridData data = new GridData(GridData.FILL_HORIZONTAL);
 			group.setLayoutData(data);
 			group.setText(SVNUIMessages.DepthSelectionComposite_DepthGroup);
-			
+
 			parent = group;
 		} else {
 			layout = new GridLayout();
 			layout.marginHeight = layout.marginWidth = 0;
 			layout.numColumns = this.supportSetDepth ? 3 : 2;
 			this.setLayout(layout);
-			
+
 			parent = this;
 		}
-								
+
 		Label label = new Label(parent, SWT.NONE);
 		label.setText(SVNUIMessages.RecurseDepthSelector_Label);
 		GridData data = new GridData();
-		label.setLayoutData(data);			
-		
-		this.depthSelector = new Combo(parent, SWT.READ_ONLY);		
-		this.depthSelector.setText(infinity);		
+		label.setLayoutData(data);
+
+		this.depthSelector = new Combo(parent, SWT.READ_ONLY);
+		this.depthSelector.setText(infinity);
 		data = new GridData(GridData.FILL_HORIZONTAL);
 		this.depthSelector.setLayoutData(data);
 		this.depthSelector.setVisibleItemCount(6);
-		
+
 		if (this.supportSetDepth) {
 			this.updateDepthButton = new Button(parent, SWT.CHECK);
 			this.updateDepthButton.setLayoutData(new GridData());
 			this.updateDepthButton.setText(SVNUIMessages.DepthSelectionComposite_UpdateDepth);
 			this.updateDepthButton.addListener(SWT.Selection, new Listener() {
 				public void handleEvent(Event event) {
-					DepthSelectionComposite.this.refreshStickyDepth();					
+					DepthSelectionComposite.this.refreshStickyDepth();
 				}
 			});
 		}
-		
+
 		if (this.isShowUpdateDepthPath) {
 			Label pathLabel = new Label(parent, SWT.NONE);
 			pathLabel.setLayoutData(new GridData());
 			pathLabel.setText(SVNUIMessages.DepthSelectionComposite_PathLabel);
-			
+
 			this.pathInput = new Text(parent, SWT.BORDER | SWT.SINGLE);
 			data = new GridData(GridData.FILL_HORIZONTAL);
-			this.pathInput.setLayoutData(data);						
+			this.pathInput.setLayoutData(data);
 			this.pathInput.addModifyListener(new ModifyListener() {
 				public void modifyText(ModifyEvent e) {
 					DepthSelectionComposite.this.updatePath = DepthSelectionComposite.this.pathInput.getText();
-				}			
-			});			
-						
-			this.browseButton = new Button(parent, SWT.PUSH);			
+				}
+			});
+
+			this.browseButton = new Button(parent, SWT.PUSH);
 			this.browseButton.setText(SVNUIMessages.Button_Browse);
 			data = new GridData();
 			data.widthHint = DefaultDialog.computeButtonWidth(this.browseButton);
 			this.browseButton.setLayoutData(data);
-						
+
 			this.browseButton.addListener(SWT.Selection, new Listener() {
 				public void handleEvent(Event event) {
 					DepthSelectionComposite.this.showPathSelectionPanel();
-				}				
+				}
 			});
 		}
-		
+
 		this.depthSelector.addSelectionListener(new SelectionListener() {
 			public void widgetDefaultSelected(SelectionEvent e) {
 			}
-			
+
 			public void widgetSelected(SelectionEvent e) {
-				if (((Combo)e.widget).getItem(((Combo)e.widget).getSelectionIndex()).equals(infinity)) {
+				if (((Combo) e.widget).getItem(((Combo) e.widget).getSelectionIndex()).equals(infinity)) {
 					DepthSelectionComposite.this.depth = SVNDepth.INFINITY;
-				}
-				else if(((Combo)e.widget).getItem(((Combo)e.widget).getSelectionIndex()).equals(immediates)) {
+				} else if (((Combo) e.widget).getItem(((Combo) e.widget).getSelectionIndex()).equals(immediates)) {
 					DepthSelectionComposite.this.depth = SVNDepth.IMMEDIATES;
-				}
-				else if(((Combo)e.widget).getItem(((Combo)e.widget).getSelectionIndex()).equals(files)) {
+				} else if (((Combo) e.widget).getItem(((Combo) e.widget).getSelectionIndex()).equals(files)) {
 					DepthSelectionComposite.this.depth = SVNDepth.FILES;
-				}
-				else if (((Combo)e.widget).getItem(((Combo)e.widget).getSelectionIndex()).equals(DepthSelectionComposite.unknown)){
+				} else if (((Combo) e.widget).getItem(((Combo) e.widget).getSelectionIndex())
+						.equals(DepthSelectionComposite.unknown)) {
 					DepthSelectionComposite.this.depth = SVNDepth.UNKNOWN;
-				}
-				else if (((Combo)e.widget).getItem(((Combo)e.widget).getSelectionIndex()).equals(exclude)){
+				} else if (((Combo) e.widget).getItem(((Combo) e.widget).getSelectionIndex()).equals(exclude)) {
 					DepthSelectionComposite.this.depth = SVNDepth.EXCLUDE;
-				}
-				else {
+				} else {
 					DepthSelectionComposite.this.depth = SVNDepth.EMPTY;
 				}
-			}			
+			}
 		});
-		
+
 		//init values
 		if (this.svn15compatible) {
 			this.depthSelector.add(empty);
@@ -210,37 +226,37 @@ public class DepthSelectionComposite extends Composite {
 		if (this.svn15compatible) {
 			this.depthSelector.add(immediates);
 		}
-		this.depthSelector.add(infinity);											
-		
+		this.depthSelector.add(infinity);
+
 		if (this.supportSetDepth) {
 			this.updateDepthButton.setSelection(this.isStickyDepth);
 			this.refreshStickyDepth();
 		} else if (this.useWorkingCopyDepth) {
 			this.depthSelector.add(unknown);
 		}
-		
+
 		//set depth
-		this.setDepthComboValue();		
+		this.setDepthComboValue();
 	}
-	
+
 	protected void setDepthComboValue() {
 		String strDepth;
 		switch (this.depth) {
 			case INFINITY:
 				strDepth = infinity;
-			break;
+				break;
 			case IMMEDIATES:
 				strDepth = immediates;
-			break;
+				break;
 			case FILES:
 				strDepth = files;
-			break;
+				break;
 			case UNKNOWN:
 				strDepth = unknown;
-			break;
+				break;
 			case EXCLUDE:
 				strDepth = exclude;
-			break;
+				break;
 			default:
 				strDepth = empty;
 		}
@@ -250,19 +266,19 @@ public class DepthSelectionComposite extends Composite {
 		}
 		this.depthSelector.select(index);
 	}
-	
+
 	protected void refreshStickyDepth() {
 		this.isStickyDepth = this.updateDepthButton.getSelection();
-		
+
 		if (this.isShowUpdateDepthPath) {
 			this.pathInput.setEnabled(this.isStickyDepth);
-			this.browseButton.setEnabled(this.isStickyDepth);	
+			this.browseButton.setEnabled(this.isStickyDepth);
 		}
-		
+
 		//add or remove 'exclude'
 		if (this.svn16compatible) {
 			if (this.isStickyDepth) {
-				this.depthSelector.add(exclude);	
+				this.depthSelector.add(exclude);
 			} else {
 				int index = this.depthSelector.indexOf(exclude);
 				if (index != -1) {
@@ -272,9 +288,9 @@ public class DepthSelectionComposite extends Composite {
 						this.depthSelector.select(0);
 					}
 				}
-			}			
+			}
 		}
-		
+
 		//add or remove 'working copy'
 		if (this.useWorkingCopyDepth) {
 			if (this.isStickyDepth) {
@@ -288,34 +304,33 @@ public class DepthSelectionComposite extends Composite {
 				}
 			} else {
 				this.depthSelector.add(unknown);
-			}	
+			}
 		}
 	}
-	
+
 	protected void showPathSelectionPanel() {
 		RepositoryTreePanel panel = new RepositoryTreePanel(
-	        	SVNUIMessages.RepositoryResourceSelectionComposite_Select_Title, 
+				SVNUIMessages.RepositoryResourceSelectionComposite_Select_Title,
 				SVNUIMessages.DepthSelectionComposite_RepositoryPanelDescription,
-				SVNUIMessages.DepthSelectionComposite_RepositoryPanelMessage,
-				new IRepositoryResource[0], 
-				false, this.resource, false);			
+				SVNUIMessages.DepthSelectionComposite_RepositoryPanelMessage, new IRepositoryResource[0], false,
+				this.resource, false);
 		DefaultDialog browser = new DefaultDialog(this.getShell(), panel);
 		if (browser.open() == 0) {
 			IRepositoryResource selected = panel.getSelectedResource();
 			if (selected != null) {
 				this.pathInput.setText(selected.getName());
-			}			
-		}			
+			}
+		}
 	}
-	
+
 	public SVNDepth getDepth() {
 		return this.depth;
 	}
-	
+
 	public boolean isStickyDepth() {
 		return this.isStickyDepth;
 	}
-	
+
 	public String getUpdatePath() {
 		return this.updatePath != null ? this.updatePath.trim() : null;
 	}

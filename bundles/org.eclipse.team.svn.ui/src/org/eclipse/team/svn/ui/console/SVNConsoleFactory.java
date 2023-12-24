@@ -19,33 +19,32 @@ import org.eclipse.ui.console.IConsoleFactory;
 import org.eclipse.ui.console.IConsoleManager;
 
 /**
- * Console factory is used to show the console from the Console view "Open Console"
- * drop-down action. This factory is registered via the org.eclipse.ui.console.consoleFactory 
- * extension point. 
+ * Console factory is used to show the console from the Console view "Open Console" drop-down action. This factory is registered via the
+ * org.eclipse.ui.console.consoleFactory extension point.
  * 
  * @author Igor Burilo
  */
 public class SVNConsoleFactory implements IConsoleFactory {
 	private static SVNConsole console = null;
 
-	public void openConsole() {		
+	public void openConsole() {
 		SVNConsoleFactory.showConsole();
 	}
-	
-    public synchronized static SVNConsole getConsole() {
-    	if (SVNConsoleFactory.console == null) {
-    		SVNConsoleFactory.console = new SVNConsole();
-    	}
-    	return SVNConsoleFactory.console;
-    }
-	
-    public synchronized static void destroyConsole() {
-    	if (SVNConsoleFactory.console != null) {
-    		ConsolePlugin.getDefault().getConsoleManager().removeConsoles(new IConsole[] {SVNConsoleFactory.console});
-    		SVNConsoleFactory.console = null;
-    	}
-    }
-	
+
+	public synchronized static SVNConsole getConsole() {
+		if (SVNConsoleFactory.console == null) {
+			SVNConsoleFactory.console = new SVNConsole();
+		}
+		return SVNConsoleFactory.console;
+	}
+
+	public synchronized static void destroyConsole() {
+		if (SVNConsoleFactory.console != null) {
+			ConsolePlugin.getDefault().getConsoleManager().removeConsoles(new IConsole[] { SVNConsoleFactory.console });
+			SVNConsoleFactory.console = null;
+		}
+	}
+
 	public static void showConsole() {
 		SVNConsole console = SVNConsoleFactory.getConsole();
 		IConsoleManager manager = ConsolePlugin.getDefault().getConsoleManager();
@@ -57,7 +56,7 @@ public class SVNConsoleFactory implements IConsoleFactory {
 			}
 		}
 		if (!exists) {
-			manager.addConsoles(new IConsole[] {console});
+			manager.addConsoles(new IConsole[] { console });
 		}
 		manager.showConsoleView(console);
 	}

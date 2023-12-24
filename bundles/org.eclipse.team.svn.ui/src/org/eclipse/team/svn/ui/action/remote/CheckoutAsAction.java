@@ -30,24 +30,26 @@ public class CheckoutAsAction extends AbstractRepositoryModifyWorkspaceAction {
 	public CheckoutAsAction() {
 		super();
 	}
-	
+
 	public void runImpl(IAction action) {
-		IRepositoryResource []selectedResources = this.getSelectedRepositoryResources();
-		IRepositoryLocation []locations = this.getSelectedRepositoryLocations();
+		IRepositoryResource[] selectedResources = this.getSelectedRepositoryResources();
+		IRepositoryLocation[] locations = this.getSelectedRepositoryLocations();
 		if (selectedResources.length == 0) {
 			selectedResources = new IRepositoryResource[locations.length];
 			for (int i = 0; i < locations.length; i++) {
 				selectedResources[i] = locations[i].getRoot();
 			}
 		}
-		
+
 		CheckoutAsWizard checkoutWizard = new CheckoutAsWizard(selectedResources);
 		WizardDialog dialog = new WizardDialog(this.getShell(), checkoutWizard);
 		dialog.create();
-		dialog.getShell().setSize(Math.max(CheckoutAsWizard.SIZING_WIZARD_WIDTH, dialog.getShell().getSize().x), CheckoutAsWizard.SIZING_WIZARD_HEIGHT);
+		dialog.getShell()
+				.setSize(Math.max(CheckoutAsWizard.SIZING_WIZARD_WIDTH, dialog.getShell().getSize().x),
+						CheckoutAsWizard.SIZING_WIZARD_HEIGHT);
 		dialog.open();
 	}
-	
+
 	public boolean isEnabled() {
 		return true;
 	}

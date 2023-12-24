@@ -32,20 +32,19 @@ public class CleanupWorkingCopyHelper implements IResolutionHelper {
 
 	public boolean acquireResolution(ErrorDescription description) {
 		if (description.code == ErrorDescription.WORKING_COPY_REQUIRES_CLEANUP) {
-			final IProject project = (IProject)description.context;
+			final IProject project = (IProject) description.context;
 			ISVNConnector proxy = CoreExtensionsManager.instance().getSVNConnectorFactory().createConnector();
 			try {
-				proxy.cleanup(FileUtility.getWorkingCopyPath(project), ISVNConnector.Options.INCLUDE_EXTERNALS, new SVNNullProgressMonitor());
+				proxy.cleanup(FileUtility.getWorkingCopyPath(project), ISVNConnector.Options.INCLUDE_EXTERNALS,
+						new SVNNullProgressMonitor());
 				return true;
-			}		
-			catch (SVNConnectorException ex) {
+			} catch (SVNConnectorException ex) {
 				// do nothing
-			}
-			finally {
+			} finally {
 				proxy.dispose();
 			}
 		}
 		return false;
 	}
-	
+
 }

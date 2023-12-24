@@ -54,14 +54,12 @@ import org.eclipse.team.svn.core.discovery.model.ConnectorDescriptor;
 import org.eclipse.team.svn.ui.SVNUIMessages;
 import org.eclipse.team.svn.ui.utility.UIMonitorUtility;
 
-
 /**
  * Install job for Eclipse 3.6
  * 
- * A job that configures a p2 {@link #getInstallAction() install action} for installing one or more
- * {@link ConnectorDescriptor connectors}. The bulk of the installation work is done by p2; this class just sets up the
- * p2 repository meta-data and selects the appropriate features to install. After running the job the
- * {@link #getInstallAction() install action} must be run to perform the installation.
+ * A job that configures a p2 {@link #getInstallAction() install action} for installing one or more {@link ConnectorDescriptor connectors}.
+ * The bulk of the installation work is done by p2; this class just sets up the p2 repository meta-data and selects the appropriate features
+ * to install. After running the job the {@link #getInstallAction() install action} must be run to perform the installation.
  * 
  * @author David Green
  * @author Steffen Pingel
@@ -77,7 +75,7 @@ public class PrepareInstallProfileJob_3_6 implements IConnectorsInstallJob {
 
 	private Set<URI> repositoryLocations;
 
-	public PrepareInstallProfileJob_3_6() {		
+	public PrepareInstallProfileJob_3_6() {
 		this.provisioningUI = ProvisioningUI.getDefaultUI();
 	}
 
@@ -87,11 +85,11 @@ public class PrepareInstallProfileJob_3_6 implements IConnectorsInstallJob {
 		}
 		this.installableConnectors = new ArrayList<ConnectorDescriptor>(installableConnectors);
 	}
-	
+
 	public void run(IProgressMonitor progressMonitor) throws InvocationTargetException, InterruptedException {
 		try {
-			SubMonitor monitor = SubMonitor.convert(progressMonitor, SVNUIMessages.InstallConnectorsJob_task_configuring,
-					100);
+			SubMonitor monitor = SubMonitor.convert(progressMonitor,
+					SVNUIMessages.InstallConnectorsJob_task_configuring, 100);
 			try {
 				final IInstallableUnit[] ius = computeInstallableUnits(monitor.newChild(50));
 
@@ -124,10 +122,10 @@ public class PrepareInstallProfileJob_3_6 implements IConnectorsInstallJob {
 	}
 
 	private InstallOperation resolve(IProgressMonitor monitor, final IInstallableUnit[] ius, URI[] repositories)
-			throws CoreException {		
+			throws CoreException {
 		final InstallOperation installOperation = provisioningUI.getInstallOperation(Arrays.asList(ius), repositories);
-		IStatus operationStatus = installOperation.resolveModal(new SubProgressMonitor(monitor,
-				installableConnectors.size()));
+		IStatus operationStatus = installOperation
+				.resolveModal(new SubProgressMonitor(monitor, installableConnectors.size()));
 		if (operationStatus.getSeverity() > IStatus.WARNING) {
 			throw new CoreException(operationStatus);
 		}
@@ -180,9 +178,8 @@ public class PrepareInstallProfileJob_3_6 implements IConnectorsInstallJob {
 	}
 
 	/**
-	 * Verifies that we found what we were looking for: it's possible that we have connector descriptors that are no
-	 * longer available on their respective sites. In that case we must inform the user. Unfortunately this is the
-	 * earliest point at which we can know.
+	 * Verifies that we found what we were looking for: it's possible that we have connector descriptors that are no longer available on
+	 * their respective sites. In that case we must inform the user. Unfortunately this is the earliest point at which we can know.
 	 */
 	private void checkForUnavailable(final List<IInstallableUnit> installableUnits) throws CoreException {
 		// at least one selected connector could not be found in a repository
@@ -214,8 +211,8 @@ public class PrepareInstallProfileJob_3_6 implements IConnectorsInstallJob {
 				if (detailedMessage.length() > 0) {
 					detailedMessage += SVNUIMessages.InstallConnectorsJob_commaSeparator;
 				}
-				detailedMessage += NLS.bind(SVNUIMessages.PrepareInstallProfileJob_notFoundDescriptorDetail, new Object[] {
-						descriptor.getName(), unavailableIds.toString(), descriptor.getSiteUrl() });
+				detailedMessage += NLS.bind(SVNUIMessages.PrepareInstallProfileJob_notFoundDescriptorDetail,
+						new Object[] { descriptor.getName(), unavailableIds.toString(), descriptor.getSiteUrl() });
 			}
 		}
 
@@ -227,7 +224,8 @@ public class PrepareInstallProfileJob_3_6 implements IConnectorsInstallJob {
 				public void run() {
 					okayToProceed[0] = MessageDialog.openQuestion(UIMonitorUtility.getShell(),
 							SVNUIMessages.InstallConnectorsJob_questionProceed, NLS.bind(
-									SVNUIMessages.InstallConnectorsJob_questionProceed_long, new Object[] { finalMessage }));
+									SVNUIMessages.InstallConnectorsJob_questionProceed_long,
+									new Object[] { finalMessage }));
 				}
 			});
 			if (!okayToProceed[0]) {
@@ -238,9 +236,8 @@ public class PrepareInstallProfileJob_3_6 implements IConnectorsInstallJob {
 	}
 
 	/**
-	 * Filters those installable units that have a duplicate in the list with a higher version number. it's possible
-	 * that some repositories will host multiple versions of a particular feature. we assume that the user wants the
-	 * highest version.
+	 * Filters those installable units that have a duplicate in the list with a higher version number. it's possible that some repositories
+	 * will host multiple versions of a particular feature. we assume that the user wants the highest version.
 	 */
 	private void removeOldVersions(final List<IInstallableUnit> installableUnits) {
 		Map<String, Version> symbolicNameToVersion = new HashMap<String, Version>();
@@ -261,10 +258,9 @@ public class PrepareInstallProfileJob_3_6 implements IConnectorsInstallJob {
 	}
 
 	/**
-	 * Perform a query to get the installable units. This causes p2 to determine what features are available in each
-	 * repository. We select installable units by matching both the feature id and the repository; it is possible though
-	 * unlikely that the same feature id is available from more than one of the selected repositories, and we must
-	 * ensure that the user gets the one that they asked for.
+	 * Perform a query to get the installable units. This causes p2 to determine what features are available in each repository. We select
+	 * installable units by matching both the feature id and the repository; it is possible though unlikely that the same feature id is
+	 * available from more than one of the selected repositories, and we must ensure that the user gets the one that they asked for.
 	 */
 	private List<IInstallableUnit> queryInstallableUnits(SubMonitor monitor, List<IMetadataRepository> repositories)
 			throws URISyntaxException {
@@ -289,8 +285,8 @@ public class PrepareInstallProfileJob_3_6 implements IConnectorsInstallJob {
 		return installableUnits;
 	}
 
-	private List<IMetadataRepository> addRepositories(SubMonitor monitor) throws MalformedURLException,
-			URISyntaxException, ProvisionException {
+	private List<IMetadataRepository> addRepositories(SubMonitor monitor)
+			throws MalformedURLException, URISyntaxException, ProvisionException {
 		// tell p2 that it's okay to use these repositories
 		ProvisioningSession session = ProvisioningUI.getDefaultUI().getSession();
 		RepositoryTracker repositoryTracker = ProvisioningUI.getDefaultUI().getRepositoryTracker();
@@ -311,8 +307,9 @@ public class PrepareInstallProfileJob_3_6 implements IConnectorsInstallJob {
 		// fetch meta-data for these repositories
 		ArrayList<IMetadataRepository> repositories = new ArrayList<IMetadataRepository>();
 		monitor.setWorkRemaining(repositories.size());
-		IMetadataRepositoryManager manager = (IMetadataRepositoryManager) session.getProvisioningAgent().getService(
-				IMetadataRepositoryManager.SERVICE_NAME);
+		IMetadataRepositoryManager manager = (IMetadataRepositoryManager) session.getProvisioningAgent()
+				.getService(
+						IMetadataRepositoryManager.SERVICE_NAME);
 		for (URI uri : repositoryLocations) {
 			checkCancelled(monitor);
 			IMetadataRepository repository = manager.loadRepository(uri, monitor.newChild(1));
@@ -335,7 +332,7 @@ public class PrepareInstallProfileJob_3_6 implements IConnectorsInstallJob {
 		}
 		return installableUnitIdsThisRepository;
 	}
-	
+
 	private Set<String> getFeatureIds(ConnectorDescriptor descriptor) {
 		Set<String> featureIds = new HashSet<String>();
 		for (String id : descriptor.getInstallableUnits()) {

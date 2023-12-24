@@ -24,9 +24,9 @@ import java.util.Set;
 /**
  * The merge information container
  * 
- * The JavaHL API's is the only way to interact between SVN and Java-based tools. At the same time JavaHL connector
- * library is not EPL compatible and we won't to pin plug-in with concrete connector implementation. So, the only way to
- * do this is providing our own connector interface which will be covered by concrete connector implementation.
+ * The JavaHL API's is the only way to interact between SVN and Java-based tools. At the same time JavaHL connector library is not EPL
+ * compatible and we won't to pin plug-in with concrete connector implementation. So, the only way to do this is providing our own connector
+ * interface which will be covered by concrete connector implementation.
  * 
  * @author Alexander Gurov
  */
@@ -43,16 +43,17 @@ public class SVNMergeInfo {
 		 * Exists, but uninteresting
 		 */
 		MERGED(1);
-		
+
 		public final int id;
-		
+
 		private LogKind(int id) {
 			this.id = id;
 		}
 	}
-	
+
 	/**
 	 * The three ways to request mergeinfo affecting a given path
+	 * 
 	 * @since 1.9
 	 */
 	public enum Inheritance {
@@ -61,25 +62,23 @@ public class SVNMergeInfo {
 		 */
 		EXPLICIT(0),
 		/**
-		 * Explicit mergeinfo, or if that doesn't exist, the inherited
-         * mergeinfo from a target's nearest (path-wise, not history-wise)
-         * ancestor
+		 * Explicit mergeinfo, or if that doesn't exist, the inherited mergeinfo from a target's nearest (path-wise, not history-wise)
+		 * ancestor
 		 */
 		INHERITED(1),
 		/**
-		 * Mergeinfo inherited from a target's nearest (path-wise,
-         * not history-wise) ancestor, regardless of whether target
-         * has explicit mergeinfo
+		 * Mergeinfo inherited from a target's nearest (path-wise, not history-wise) ancestor, regardless of whether target has explicit
+		 * mergeinfo
 		 */
 		NEAREST_ANCESTOR(2);
-		
+
 		public final int id;
-		
+
 		private Inheritance(int id) {
 			this.id = id;
 		}
 	}
-	
+
 	private Map<String, List<SVNRevisionRange>> mergeSources;
 
 	public SVNMergeInfo() {
@@ -98,12 +97,12 @@ public class SVNMergeInfo {
 		List<SVNRevisionRange> revisions = this.getRevisionList(mergeSrc);
 		revisions.addAll(Arrays.asList(ranges));
 	}
-	
+
 	/*
-    public void addRevisions(String mergeSrc, RevisionRangeList ranges)
-    {
-        addRevisions(mergeSrc, ranges.getRanges());
-    }
+	public void addRevisions(String mergeSrc, RevisionRangeList ranges)
+	{
+	    addRevisions(mergeSrc, ranges.getRanges());
+	}
 	 */
 
 	/**
@@ -140,63 +139,65 @@ public class SVNMergeInfo {
 		List<SVNRevisionRange> revisions = this.mergeSources.get(mergeSrc);
 		return revisions == null ? null : revisions.toArray(new SVNRevisionRange[revisions.size()]);
 	}
+
+	/**
+	 * Like {@link #getReivsionRange}, but returns a {@link RevisionRangeList}.
+	 * 
+	 * @since 1.9
+	 */
+	/*public RevisionRangeList getRevisionRangeList(String mergeSrc)
+	{
+	    return new RevisionRangeList(getRevisionRange(mergeSrc));
+	}*/
+
+	/**
+	 * Parse the <code>svn:mergeinfo</code> property to populate the merge source URLs and revision ranges of this instance.
+	 * 
+	 * @param mergeinfo
+	 *            <code>svn:mergeinfo</code> property value.
+	 */
+	/*public void loadFromMergeinfoProperty(String mergeinfo)
+	{
+	    if (mergeinfo == null)
+	        return;
+	    StringTokenizer st = new StringTokenizer(mergeinfo, "\n");
+	    while (st.hasMoreTokens())
+	    {
+	        parseMergeinfoLine(st.nextToken());
+	    }
+	}
 	
-    /**
-     * Like {@link #getReivsionRange}, but returns a {@link RevisionRangeList}.
-     * @since 1.9
-     */
-    /*public RevisionRangeList getRevisionRangeList(String mergeSrc)
-    {
-        return new RevisionRangeList(getRevisionRange(mergeSrc));
-    }*/
+	private void parseMergeinfoLine(String line)
+	{
+	    int colon = line.indexOf(':');
+	    if (colon > 0)
+	    {
+	        String pathElement = line.substring(0, colon);
+	        String revisions = line.substring(colon + 1);
+	        parseRevisions(pathElement, revisions);
+	    }
+	}
 	
-    /**
-     * Parse the <code>svn:mergeinfo</code> property to populate the
-     * merge source URLs and revision ranges of this instance.
-     * @param mergeinfo <code>svn:mergeinfo</code> property value.
-     */
-    /*public void loadFromMergeinfoProperty(String mergeinfo)
-    {
-        if (mergeinfo == null)
-            return;
-        StringTokenizer st = new StringTokenizer(mergeinfo, "\n");
-        while (st.hasMoreTokens())
-        {
-            parseMergeinfoLine(st.nextToken());
-        }
-    }
-    
-    private void parseMergeinfoLine(String line)
-    {
-        int colon = line.indexOf(':');
-        if (colon > 0)
-        {
-            String pathElement = line.substring(0, colon);
-            String revisions = line.substring(colon + 1);
-            parseRevisions(pathElement, revisions);
-        }
-    }
-    
-    private void parseRevisions(String path, String revisions)
-    {
-        List<RevisionRange> rangeList = this.getRevisions(path);
-        StringTokenizer st = new StringTokenizer(revisions, ",");
-        while (st.hasMoreTokens())
-        {
-            String revisionElement = st.nextToken();
-            RevisionRange range = new RevisionRange(revisionElement);
-            if (rangeList == null)
-                rangeList = new ArrayList<RevisionRange>();
-            rangeList.add(range);
-        }
-        if (rangeList != null)
-            setRevisionList(path, rangeList);
-    }
-    private void setRevisionList(String mergeSrc, List<RevisionRange> range)
-    {
-        mergeSources.put(mergeSrc, range);
-    }
-    */
+	private void parseRevisions(String path, String revisions)
+	{
+	    List<RevisionRange> rangeList = this.getRevisions(path);
+	    StringTokenizer st = new StringTokenizer(revisions, ",");
+	    while (st.hasMoreTokens())
+	    {
+	        String revisionElement = st.nextToken();
+	        RevisionRange range = new RevisionRange(revisionElement);
+	        if (rangeList == null)
+	            rangeList = new ArrayList<RevisionRange>();
+	        rangeList.add(range);
+	    }
+	    if (rangeList != null)
+	        setRevisionList(path, rangeList);
+	}
+	private void setRevisionList(String mergeSrc, List<RevisionRange> range)
+	{
+	    mergeSources.put(mergeSrc, range);
+	}
+	*/
 
 	protected List<SVNRevisionRange> getRevisionList(String mergeSrc) {
 		List<SVNRevisionRange> revisions = this.mergeSources.get(mergeSrc);

@@ -110,9 +110,12 @@ class OverviewToolTip extends GradientToolTip {
 		final int containerWidthHintWithImage = 650;
 		final int containerWidthHintWithoutImage = 500;
 
-		GridDataFactory.fillDefaults().grab(true, true).hint(
-				image == null ? containerWidthHintWithoutImage : containerWidthHintWithImage, SWT.DEFAULT).applyTo(
-				container);
+		GridDataFactory.fillDefaults()
+				.grab(true, true)
+				.hint(
+						image == null ? containerWidthHintWithoutImage : containerWidthHintWithImage, SWT.DEFAULT)
+				.applyTo(
+						container);
 
 		GridLayoutFactory.fillDefaults().numColumns(2).margins(5, 5).spacing(3, 0).applyTo(container);
 
@@ -140,26 +143,34 @@ class OverviewToolTip extends GradientToolTip {
 			final Composite imageContainer = new Composite(container, SWT.BORDER);
 			GridLayoutFactory.fillDefaults().applyTo(imageContainer);
 
-			GridDataFactory.fillDefaults().grab(false, false).align(SWT.CENTER, SWT.BEGINNING).hint(
-					widthHint + (borderWidth * 2), heightHint).applyTo(imageContainer);
+			GridDataFactory.fillDefaults()
+					.grab(false, false)
+					.align(SWT.CENTER, SWT.BEGINNING)
+					.hint(
+							widthHint + (borderWidth * 2), heightHint)
+					.applyTo(imageContainer);
 
 			Label imageLabel = new Label(imageContainer, SWT.NULL);
-			GridDataFactory.fillDefaults().hint(widthHint, fixedImageHeight).indent(borderWidth, borderWidth).applyTo(
-					imageLabel);
+			GridDataFactory.fillDefaults()
+					.hint(widthHint, fixedImageHeight)
+					.indent(borderWidth, borderWidth)
+					.applyTo(
+							imageLabel);
 			imageLabel.setImage(image);
 			imageLabel.setBackground(null);
 			imageLabel.setSize(widthHint, fixedImageHeight);
 
 			// creates a border
 			imageContainer.setBackground(colorBlack);
-		}			
-		
+		}
+
 		if (hasLearnMoreLink) {
 			Link link = new Link(summaryContainer, SWT.NULL);
 			GridDataFactory.fillDefaults().grab(false, false).align(SWT.BEGINNING, SWT.CENTER).applyTo(link);
 			link.setText(SVNUIMessages.ConnectorDescriptorToolTip_detailsLink);
 			link.setBackground(null);
-			link.setToolTipText(SVNUIMessages.format(SVNUIMessages.ConnectorDescriptorToolTip_detailsLink_tooltip, overview.getUrl()));
+			link.setToolTipText(SVNUIMessages.format(SVNUIMessages.ConnectorDescriptorToolTip_detailsLink_tooltip,
+					overview.getUrl()));
 			link.addSelectionListener(new SelectionListener() {
 				public void widgetSelected(SelectionEvent e) {
 					WorkbenchUtil.openUrl(overview.getUrl(), IWorkbenchBrowserSupport.AS_EXTERNAL);
@@ -170,7 +181,7 @@ class OverviewToolTip extends GradientToolTip {
 				}
 			});
 		}
-		
+
 		if (image == null) {
 			// prevent overviews with no image from providing unlimited text.
 			Point optimalSize = summaryContainer.computeSize(SWT.DEFAULT, SWT.DEFAULT, true);

@@ -42,8 +42,8 @@ public class BundleDiscoveryStrategy extends AbstractDiscoveryStrategy {
 		IExtensionPoint extensionPoint = getExtensionRegistry().getExtensionPoint(
 				ConnectorDiscoveryExtensionReader.EXTENSION_POINT_ID);
 		IExtension[] extensions = extensionPoint.getExtensions();
-		monitor.beginTask(SVNMessages.BundleDiscoveryStrategy_task_loading_local_extensions, extensions.length == 0 ? 1
-				: extensions.length);
+		monitor.beginTask(SVNMessages.BundleDiscoveryStrategy_task_loading_local_extensions,
+				extensions.length == 0 ? 1 : extensions.length);
 		try {
 			if (extensions.length > 0) {
 				processExtensions(new SubProgressMonitor(monitor, extensions.length), extensions);
@@ -54,8 +54,8 @@ public class BundleDiscoveryStrategy extends AbstractDiscoveryStrategy {
 	}
 
 	protected void processExtensions(IProgressMonitor monitor, IExtension[] extensions) {
-		monitor.beginTask(SVNMessages.BundleDiscoveryStrategy_task_processing_extensions, extensions.length == 0 ? 1
-				: extensions.length);
+		monitor.beginTask(SVNMessages.BundleDiscoveryStrategy_task_processing_extensions,
+				extensions.length == 0 ? 1 : extensions.length);
 		try {
 			ConnectorDiscoveryExtensionReader extensionReader = new ConnectorDiscoveryExtensionReader();
 
@@ -78,10 +78,11 @@ public class BundleDiscoveryStrategy extends AbstractDiscoveryStrategy {
 							category.setSource(discoverySource);
 							categories.add(category);
 						} else {
-							throw new ValidationException(SVNMessages.format(SVNMessages.BundleDiscoveryStrategy_unexpected_element, element.getName()));
+							throw new ValidationException(SVNMessages
+									.format(SVNMessages.BundleDiscoveryStrategy_unexpected_element, element.getName()));
 						}
 					} catch (ValidationException e) {
-						LoggedOperation.reportError(this.getClass().getName(), e);						
+						LoggedOperation.reportError(this.getClass().getName(), e);
 					}
 				}
 				monitor.worked(1);

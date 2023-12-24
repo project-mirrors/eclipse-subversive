@@ -20,7 +20,6 @@ import org.eclipse.swt.graphics.RGB;
 import org.eclipse.ui.model.IWorkbenchAdapter;
 import org.eclipse.ui.model.IWorkbenchAdapter2;
 
-
 /**
  * Fictive repository tree node (errors, pending etc.)
  * 
@@ -37,19 +36,19 @@ public abstract class RepositoryFictiveNode implements IWorkbenchAdapter, IWorkb
 		}
 		return null;
 	}
-	
-    public RGB getBackground(Object element) {
-    	// do not change default background color
-    	return null;
-    }
-    
-    public RGB getForeground(Object element) {
-    	return null;
-    }
-    
-    public FontData getFont(Object element) {
-    	// do not change default font
-    	return null;
-    }
-    
+
+	public RGB getBackground(Object element) {
+		// do not change default background color
+		return null;
+	}
+
+	public RGB getForeground(Object element) {
+		return null;
+	}
+
+	public FontData getFont(Object element) {
+		// do not change default font
+		return null;
+	}
+
 }

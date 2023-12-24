@@ -37,29 +37,29 @@ public class CreateFolderAction extends AbstractRepositoryTeamAction {
 	public CreateFolderAction() {
 		super();
 	}
-	
+
 	public void runImpl(IAction action) {
-	    CreateFolderPanel panel = new CreateFolderPanel();
+		CreateFolderPanel panel = new CreateFolderPanel();
 		DefaultDialog dialog = new DefaultDialog(this.getShell(), panel);
-				
+
 		if (dialog.open() == 0) {
-			IRepositoryResource []resources = this.getSelectedRepositoryResources();
+			IRepositoryResource[] resources = this.getSelectedRepositoryResources();
 			String folder = panel.getResourceName();
 			String message = panel.getMessage();
 
 			CreateFolderOperation mainOp = new CreateFolderOperation(resources[0], folder, message);
 			CompositeOperation op = new CompositeOperation(mainOp.getId(), mainOp.getMessagesClass());
-			
+
 			op.add(mainOp);
 			op.add(new RefreshRemoteResourcesOperation(resources));
-			op.add(new SetRevisionAuthorNameOperation(mainOp, Options.FORCE), new IActionOperation[] {mainOp});
-			
+			op.add(new SetRevisionAuthorNameOperation(mainOp, Options.FORCE), new IActionOperation[] { mainOp });
+
 			this.runScheduled(op);
 		}
 	}
 
 	public boolean isEnabled() {
-		IRepositoryResource []resources = this.getSelectedRepositoryResources();
+		IRepositoryResource[] resources = this.getSelectedRepositoryResources();
 		return resources.length == 1 && resources[0].getSelectedRevision().getKind() == Kind.HEAD;
 	}
 

@@ -28,26 +28,35 @@ import org.eclipse.team.svn.core.resource.IRepositoryResource;
  * @author Alexander Gurov
  */
 public class SVNFileChange extends SVNLocalFile implements IFileChange {
-    protected SVNRevision pegRevision;
+	protected SVNRevision pegRevision;
+
 	protected IRepositoryResource originator;
+
 	protected String comment;
+
 	protected ICommentProvider provider;
 
-	public SVNFileChange(IResource resource, long revision, String textStatus, String propStatus, int changeMask, String author, long lastCommitDate, SVNConflictDescriptor treeConflictDescriptor, SVNRevision pegRevision, String comment) {
-		super(resource, revision, revision, textStatus, propStatus, changeMask, author, lastCommitDate, treeConflictDescriptor);
+	public SVNFileChange(IResource resource, long revision, String textStatus, String propStatus, int changeMask,
+			String author, long lastCommitDate, SVNConflictDescriptor treeConflictDescriptor, SVNRevision pegRevision,
+			String comment) {
+		super(resource, revision, revision, textStatus, propStatus, changeMask, author, lastCommitDate,
+				treeConflictDescriptor);
 		this.comment = comment;
 		this.pegRevision = pegRevision;
 	}
-	
-	public void treatAsReplacement()
-	{
+
+	public void treatAsReplacement() {
 		this.textStatus = IStateFilter.ST_REPLACED;
 	}
-	
+
 	public SVNRevision getPegRevision() {
-		return this.pegRevision == null ? (this.revision != SVNRevision.INVALID_REVISION_NUMBER ? SVNRevision.fromNumber(this.revision) : SVNRevision.INVALID_REVISION) : this.pegRevision;
+		return this.pegRevision == null
+				? (this.revision != SVNRevision.INVALID_REVISION_NUMBER
+						? SVNRevision.fromNumber(this.revision)
+						: SVNRevision.INVALID_REVISION)
+				: this.pegRevision;
 	}
-	
+
 	public void setPegRevision(SVNRevision pegRevision) {
 		this.pegRevision = pegRevision;
 	}
@@ -69,7 +78,11 @@ public class SVNFileChange extends SVNLocalFile implements IFileChange {
 	public synchronized String getComment() {
 		if (this.comment == null && this.provider != null) {
 			long rev = this.getRevision();
-			this.comment = this.provider.getComment(this.getResource(), rev == SVNRevision.INVALID_REVISION_NUMBER ? SVNRevision.INVALID_REVISION : SVNRevision.fromNumber(rev), this.getPegRevision());
+			this.comment = this.provider.getComment(this.getResource(),
+					rev == SVNRevision.INVALID_REVISION_NUMBER
+							? SVNRevision.INVALID_REVISION
+							: SVNRevision.fromNumber(rev),
+					this.getPegRevision());
 			this.provider = null;
 		}
 		return this.comment;
@@ -78,5 +91,5 @@ public class SVNFileChange extends SVNLocalFile implements IFileChange {
 	public void setCommentProvider(ICommentProvider provider) {
 		this.provider = provider;
 	}
-	
+
 }

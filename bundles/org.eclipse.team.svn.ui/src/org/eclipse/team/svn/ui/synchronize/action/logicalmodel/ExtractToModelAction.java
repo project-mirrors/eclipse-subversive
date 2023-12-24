@@ -24,8 +24,7 @@ import org.eclipse.team.svn.ui.synchronize.action.ExtractToActionHelper;
 import org.eclipse.team.ui.synchronize.ISynchronizePageConfiguration;
 
 /**
- * Extract To logical model action for Synchronize View (both incoming and outgoing - 
- * the conflicting resources are ignored)
+ * Extract To logical model action for Synchronize View (both incoming and outgoing - the conflicting resources are ignored)
  * 
  * @author Igor Burilo
  *
@@ -33,7 +32,7 @@ import org.eclipse.team.ui.synchronize.ISynchronizePageConfiguration;
 public class ExtractToModelAction extends AbstractSynchronizeLogicalModelAction {
 
 	protected ExtractToActionHelper actionHelper;
-	
+
 	public ExtractToModelAction(String text, ISynchronizePageConfiguration configuration) {
 		super(text, configuration);
 		this.actionHelper = new ExtractToActionHelper(this, configuration);
@@ -42,10 +41,10 @@ public class ExtractToModelAction extends AbstractSynchronizeLogicalModelAction 
 	protected FastSyncInfoFilter getSyncInfoFilter() {
 		return this.actionHelper.getSyncInfoFilter();
 	}
-	
+
 	protected boolean updateSelection(IStructuredSelection selection) {
 		super.updateSelection(selection);
-		AbstractSVNSyncInfo [] infos = this.getSVNSyncInfos();
+		AbstractSVNSyncInfo[] infos = this.getSVNSyncInfos();
 		for (int i = 0; i < infos.length; i++) {
 			if (SyncInfo.getDirection(infos[i].getKind()) == SyncInfo.CONFLICTING) {
 				return false;
@@ -53,7 +52,7 @@ public class ExtractToModelAction extends AbstractSynchronizeLogicalModelAction 
 		}
 		return infos.length > 0;
 	}
-	
+
 	protected IActionOperation getOperation() {
 		return this.actionHelper.getOperation();
 	}

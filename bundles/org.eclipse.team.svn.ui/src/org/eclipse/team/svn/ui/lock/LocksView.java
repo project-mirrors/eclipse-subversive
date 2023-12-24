@@ -14,7 +14,6 @@
 
 package org.eclipse.team.svn.ui.lock;
 
-
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.action.Action;
@@ -52,88 +51,93 @@ import org.eclipse.ui.PlatformUI;
 public class LocksView extends AbstractSVNView {
 
 	public static final String VIEW_ID = LocksView.class.getName();
-	
+
 	protected LocksComposite locksComposite;
-	
+
 	protected Action linkWithEditorAction;
+
 	protected Action linkWithEditorDropDownAction;
-	
+
 	public LocksView() {
 		super(SVNUIMessages.LocksView_SVNLocks);
-	}	
-	
+	}
+
 	public void createPartControl(Composite parent) {
 		super.createPartControl(parent);
-		
-	    this.isLinkWithEditorEnabled = SVNTeamPreferences.getPropertiesBoolean(SVNTeamUIPlugin.instance().getPreferenceStore(), SVNTeamPreferences.LOCKS_LINK_WITH_EDITOR_NAME);	    		 
-			
-		this.locksComposite = new LocksComposite(parent); 
-		this.locksComposite.setLayoutData(new GridData(GridData.FILL_BOTH));		
+
+		this.isLinkWithEditorEnabled = SVNTeamPreferences.getPropertiesBoolean(
+				SVNTeamUIPlugin.instance().getPreferenceStore(), SVNTeamPreferences.LOCKS_LINK_WITH_EDITOR_NAME);
+
+		this.locksComposite = new LocksComposite(parent);
+		this.locksComposite.setLayoutData(new GridData(GridData.FILL_BOTH));
 		this.refresh();
-		
+
 		this.createActionBars();
 
-        //Setting context help
-	    PlatformUI.getWorkbench().getHelpSystem().setHelp(parent, "org.eclipse.team.svn.help.locksViewContext"); //$NON-NLS-1$
+		//Setting context help
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(parent, "org.eclipse.team.svn.help.locksViewContext"); //$NON-NLS-1$
 	}
-	
+
 	protected void createActionBars() {
 		//drop-down menu
-        IActionBars actionBars = this.getViewSite().getActionBars();	    
-	    IMenuManager actionBarsMenu = actionBars.getMenuManager();
-	    
-	    this.linkWithEditorDropDownAction = new Action(SVNUIMessages.SVNView_LinkWith_Label, Action.AS_CHECK_BOX) {
-	    	public void run() {
-	    		LocksView.this.linkWithEditor();
-	    		LocksView.this.linkWithEditorAction.setChecked(LocksView.this.isLinkWithEditorEnabled);
-	    	}
-	    };
-	    this.linkWithEditorDropDownAction.setChecked(this.isLinkWithEditorEnabled);
-	    
-	    actionBarsMenu.add(this.linkWithEditorDropDownAction);
+		IActionBars actionBars = this.getViewSite().getActionBars();
+		IMenuManager actionBarsMenu = actionBars.getMenuManager();
 
-	    IToolBarManager tbm = actionBars.getToolBarManager();
-        tbm.removeAll();
-        Action action = new Action(SVNUIMessages.SVNView_Refresh_Label) {
-        	public void run() {
-        		LocksView.this.refresh();
-	    	}
-        };
-        action.setImageDescriptor(SVNTeamUIPlugin.instance().getImageDescriptor("icons/common/refresh.gif")); //$NON-NLS-1$
-        tbm.add(action);        
-        tbm.add(this.getLinkWithEditorAction());
-        
-        tbm.update(true);
-        
-        this.getSite().getPage().addSelectionListener(this.selectionListener);
+		this.linkWithEditorDropDownAction = new Action(SVNUIMessages.SVNView_LinkWith_Label, Action.AS_CHECK_BOX) {
+			public void run() {
+				LocksView.this.linkWithEditor();
+				LocksView.this.linkWithEditorAction.setChecked(LocksView.this.isLinkWithEditorEnabled);
+			}
+		};
+		this.linkWithEditorDropDownAction.setChecked(this.isLinkWithEditorEnabled);
+
+		actionBarsMenu.add(this.linkWithEditorDropDownAction);
+
+		IToolBarManager tbm = actionBars.getToolBarManager();
+		tbm.removeAll();
+		Action action = new Action(SVNUIMessages.SVNView_Refresh_Label) {
+			public void run() {
+				LocksView.this.refresh();
+			}
+		};
+		action.setImageDescriptor(SVNTeamUIPlugin.instance().getImageDescriptor("icons/common/refresh.gif")); //$NON-NLS-1$
+		tbm.add(action);
+		tbm.add(this.getLinkWithEditorAction());
+
+		tbm.update(true);
+
+		this.getSite().getPage().addSelectionListener(this.selectionListener);
 	}
-	
+
 	protected Action getLinkWithEditorAction() {
 		this.linkWithEditorAction = new Action(SVNUIMessages.SVNView_LinkWith_Label, IAction.AS_CHECK_BOX) {
-	        public void run() {
-	            LocksView.this.linkWithEditor();
-	            LocksView.this.linkWithEditorDropDownAction.setChecked(LocksView.this.isLinkWithEditorEnabled);
-	        }
-	    };
-	    this.linkWithEditorAction.setToolTipText(SVNUIMessages.SVNView_LinkWith_ToolTip);
-	    this.linkWithEditorAction.setDisabledImageDescriptor(SVNTeamUIPlugin.instance().getImageDescriptor("icons/views/history/link_with_disabled.gif")); //$NON-NLS-1$
-	    this.linkWithEditorAction.setImageDescriptor(SVNTeamUIPlugin.instance().getImageDescriptor("icons/views/history/link_with.gif")); //$NON-NLS-1$	    
-	    
-	    this.linkWithEditorAction.setChecked(this.isLinkWithEditorEnabled);
-	    
-	    return this.linkWithEditorAction;
+			public void run() {
+				LocksView.this.linkWithEditor();
+				LocksView.this.linkWithEditorDropDownAction.setChecked(LocksView.this.isLinkWithEditorEnabled);
+			}
+		};
+		this.linkWithEditorAction.setToolTipText(SVNUIMessages.SVNView_LinkWith_ToolTip);
+		this.linkWithEditorAction.setDisabledImageDescriptor(
+				SVNTeamUIPlugin.instance().getImageDescriptor("icons/views/history/link_with_disabled.gif")); //$NON-NLS-1$
+		this.linkWithEditorAction
+				.setImageDescriptor(SVNTeamUIPlugin.instance().getImageDescriptor("icons/views/history/link_with.gif")); //$NON-NLS-1$	    
+
+		this.linkWithEditorAction.setChecked(this.isLinkWithEditorEnabled);
+
+		return this.linkWithEditorAction;
 	}
-	
+
 	protected void linkWithEditor() {
 		this.isLinkWithEditorEnabled = !this.isLinkWithEditorEnabled;
-        IPreferenceStore store = SVNTeamUIPlugin.instance().getPreferenceStore();
-        SVNTeamPreferences.setPropertiesBoolean(store, SVNTeamPreferences.LOCKS_LINK_WITH_EDITOR_NAME, this.isLinkWithEditorEnabled);
-        if (this.isLinkWithEditorEnabled) {
-        	this.editorActivated(this.getSite().getPage().getActiveEditor());
+		IPreferenceStore store = SVNTeamUIPlugin.instance().getPreferenceStore();
+		SVNTeamPreferences.setPropertiesBoolean(store, SVNTeamPreferences.LOCKS_LINK_WITH_EDITOR_NAME,
+				this.isLinkWithEditorEnabled);
+		if (this.isLinkWithEditorEnabled) {
+			this.editorActivated(this.getSite().getPage().getActiveEditor());
 		}
 	}
-	
-	protected void updateViewInput(IResource resource) {		
+
+	protected void updateViewInput(IResource resource) {
 		ILocalResource local = SVNRemoteStorage.instance().asLocalResource(resource);
 		if (IStateFilter.SF_VERSIONED.accept(local)) {
 			if (resource.equals(this.wcResource)) {
@@ -142,25 +146,25 @@ public class LocksView extends AbstractSVNView {
 			this.setResource(resource);
 		}
 	}
-	
+
 	public void setResourceWithoutActionExecution(IResource resource) {
 		this.wcResource = resource;
 		this.locksComposite.setResource(resource);
 	}
-	
+
 	public void setResource(IResource resource) {
 		this.setResourceWithoutActionExecution(resource);
 		this.refresh();
 	}
-	
+
 	public IActionOperation getUpdateViewOperation() {
 		CompositeOperation op = null;
 		if (this.wcResource != null) {
-			ScanLocksOperation mainOp = new ScanLocksOperation(new IResource[]{this.wcResource});
+			ScanLocksOperation mainOp = new ScanLocksOperation(new IResource[] { this.wcResource });
 			op = new CompositeOperation(mainOp.getId(), mainOp.getMessagesClass());
-			
+
 			op.add(new AbstractActionOperation("", SVNUIMessages.class) { //$NON-NLS-1$
-				protected void runImpl(IProgressMonitor monitor) throws Exception {										
+				protected void runImpl(IProgressMonitor monitor) throws Exception {
 					//set pending
 					LocksView.this.locksComposite.setPending(true);
 					LocksView.this.getSite().getShell().getDisplay().syncExec(new Runnable() {
@@ -171,7 +175,7 @@ public class LocksView extends AbstractSVNView {
 					});
 				}
 			});
-			
+
 			op.add(mainOp);
 			/*
 			 * As we don't want that scan locks operation to write in console, pass console stream as null.
@@ -179,12 +183,13 @@ public class LocksView extends AbstractSVNView {
 			 * so we disable it.
 			 */
 			mainOp.setConsoleStream(null);
-			
-			final CreateLockResourcesHierarchyOperation createHierarchyOp = new CreateLockResourcesHierarchyOperation(mainOp);
-			op.add(createHierarchyOp, new IActionOperation[]{mainOp});
-			
+
+			final CreateLockResourcesHierarchyOperation createHierarchyOp = new CreateLockResourcesHierarchyOperation(
+					mainOp);
+			op.add(createHierarchyOp, new IActionOperation[] { mainOp });
+
 			//update composite
-			op.add(new AbstractActionOperation("", SVNUIMessages.class) {				 //$NON-NLS-1$
+			op.add(new AbstractActionOperation("", SVNUIMessages.class) { //$NON-NLS-1$
 				protected void runImpl(IProgressMonitor monitor) throws Exception {
 					LocksView.this.locksComposite.setRootLockResource(createHierarchyOp.getLockResourceRoot());
 					UIMonitorUtility.getDisplay().syncExec(new Runnable() {
@@ -194,38 +199,38 @@ public class LocksView extends AbstractSVNView {
 						}
 					});
 				}
-			}, new IActionOperation[]{createHierarchyOp});									
+			}, new IActionOperation[] { createHierarchyOp });
 		}
 		return op;
 	}
-	
+
 	public void refresh() {
 		IActionOperation op = this.getUpdateViewOperation();
 		if (op != null) {
-			ProgressMonitorUtility.doTaskScheduled(op, false);	
+			ProgressMonitorUtility.doTaskScheduled(op, false);
 		}
 	}
-	
+
 	protected void disconnectView() {
 		this.locksComposite.disconnectComposite();
 		this.wcResource = null;
 	}
-	
+
 	protected boolean needsLinkWithEditorAndSelection() {
 		return true;
 	}
 
 	public void setFocus() {
-		
+
 	}
-	
+
 	public static LocksView instance() {
-		final LocksView []view = new LocksView[1];
+		final LocksView[] view = new LocksView[1];
 		UIMonitorUtility.getDisplay().syncExec(new Runnable() {
 			public void run() {
 				IWorkbenchWindow window = SVNTeamUIPlugin.instance().getWorkbench().getActiveWorkbenchWindow();
 				if (window != null && window.getActivePage() != null) {
-					view[0] = (LocksView)window.getActivePage().findView(LocksView.VIEW_ID);
+					view[0] = (LocksView) window.getActivePage().findView(LocksView.VIEW_ID);
 				}
 			}
 		});

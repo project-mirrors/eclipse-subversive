@@ -31,7 +31,7 @@ import org.eclipse.team.svn.ui.utility.LockProposeUtility;
 import org.eclipse.team.svn.ui.utility.UIMonitorUtility;
 
 /**
- * SVN file modification validator 
+ * SVN file modification validator
  * 
  * @author Sergiy Logvin
  */
@@ -39,10 +39,11 @@ public class SVNTeamModificationValidator extends FileModificationValidator {
 	public IStatus validateEdit(IFile[] files, final FileModificationValidationContext context) {
 		if (FileUtility.isConnected(files[0])) {
 			final IResource[] needsLockResources = this.getNeedsLockResources(files);
-			if (needsLockResources.length > 0)
-			{
-				final IStatus []retVal = new IStatus[1];
-				final Shell shell = context.getShell() == null ? UIMonitorUtility.getShell() : (Shell)context.getShell();
+			if (needsLockResources.length > 0) {
+				final IStatus[] retVal = new IStatus[1];
+				final Shell shell = context.getShell() == null
+						? UIMonitorUtility.getShell()
+						: (Shell) context.getShell();
 				shell.getDisplay().syncExec(new Runnable() {
 					public void run() {
 						retVal[0] = LockProposeUtility.proposeLock(needsLockResources, shell, true);
@@ -53,14 +54,15 @@ public class SVNTeamModificationValidator extends FileModificationValidator {
 		}
 		return Status.OK_STATUS;
 	}
-	
+
 	public IStatus validateSave(IFile file) {
 		return Status.OK_STATUS;
 	}
-	
-	protected IResource[] getNeedsLockResources(IResource []files) {
+
+	protected IResource[] getNeedsLockResources(IResource[] files) {
 		List<IResource> returnResources = new ArrayList<IResource>();
-		IResource[] needsLockResources = FileUtility.getResourcesRecursive(files, IStateFilter.SF_NEEDS_LOCK, IResource.DEPTH_ZERO);
+		IResource[] needsLockResources = FileUtility.getResourcesRecursive(files, IStateFilter.SF_NEEDS_LOCK,
+				IResource.DEPTH_ZERO);
 		for (int i = 0; i < needsLockResources.length; i++) {
 			if (!SVNRemoteStorage.instance().asLocalResource(needsLockResources[i]).isLocked()) {
 				returnResources.add(needsLockResources[i]);

@@ -27,16 +27,19 @@ import org.eclipse.team.svn.ui.preferences.SVNTeamPropsPreferencePage;
  * @author Alexander Gurov
  */
 public class CustomPropertySet extends PredefinedPropertySet {
-	
+
 	protected void init() {
-		this.registerProperty(new PredefinedProperty(SVNUIMessages.AbstractPropertyEditPanel_custom_description, PredefinedProperty.TYPE_GROUP | PredefinedProperty.TYPE_COMMON));
-		PredefinedProperty []customProps = SVNTeamPropsPreferencePage.loadCustomProperties(SVNTeamPreferences.getCustomPropertiesList(SVNTeamUIPlugin.instance().getPreferenceStore(), SVNTeamPreferences.CUSTOM_PROPERTIES_LIST_NAME));
+		this.registerProperty(new PredefinedProperty(SVNUIMessages.AbstractPropertyEditPanel_custom_description,
+				PredefinedProperty.TYPE_GROUP | PredefinedProperty.TYPE_COMMON));
+		PredefinedProperty[] customProps = SVNTeamPropsPreferencePage.loadCustomProperties(
+				SVNTeamPreferences.getCustomPropertiesList(SVNTeamUIPlugin.instance().getPreferenceStore(),
+						SVNTeamPreferences.CUSTOM_PROPERTIES_LIST_NAME));
 		if (customProps.length > 0) {
 			this.registerProperties(customProps);
-		}
-		else {
-			this.registerProperty(new PredefinedProperty("    " + SVNUIMessages.AbstractPropertyEditPanel_custom_hint, PredefinedProperty.TYPE_GROUP | PredefinedProperty.TYPE_COMMON)); //$NON-NLS-1$
+		} else {
+			this.registerProperty(new PredefinedProperty("    " + SVNUIMessages.AbstractPropertyEditPanel_custom_hint, //$NON-NLS-1$
+					PredefinedProperty.TYPE_GROUP | PredefinedProperty.TYPE_COMMON));
 		}
 	}
-	
+
 }

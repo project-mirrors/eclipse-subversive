@@ -35,17 +35,19 @@ public class SetKeywordsAction extends AbstractSynchronizeModelAction {
 	protected boolean needsToSaveDirtyEditors() {
 		return false;
 	}
-	
+
 	protected FastSyncInfoFilter getSyncInfoFilter() {
 		return new FastSyncInfoFilter() {
-            public boolean select(SyncInfo info) {
-                return super.select(info) && IStateFilter.SF_VERSIONED_FILES.accept(((AbstractSVNSyncInfo)info).getLocalResource());
-            }
-        };
+			public boolean select(SyncInfo info) {
+				return super.select(info)
+						&& IStateFilter.SF_VERSIONED_FILES.accept(((AbstractSVNSyncInfo) info).getLocalResource());
+			}
+		};
 	}
-	
+
 	protected IActionOperation getOperation(ISynchronizePageConfiguration configuration, IDiffElement[] elements) {
-		org.eclipse.team.svn.ui.action.local.SetKeywordsAction.doSetKeywords(SetKeywordsAction.this.syncInfoSelector.getSelectedResources());
+		org.eclipse.team.svn.ui.action.local.SetKeywordsAction
+				.doSetKeywords(SetKeywordsAction.this.syncInfoSelector.getSelectedResources());
 		return null;
 	}
 

@@ -49,6 +49,7 @@ public class ParameterizedWorkflowTest {
 
 	@Parameter
 	public ActionOperationWorkflow workflow;
+
 	private RemoteTestRepositoryManager repoManager;
 
 	@Parameters()

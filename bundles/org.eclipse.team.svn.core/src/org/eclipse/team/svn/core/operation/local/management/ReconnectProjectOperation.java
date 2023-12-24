@@ -38,33 +38,34 @@ import org.eclipse.team.svn.core.utility.SVNUtility;
 public class ReconnectProjectOperation extends AbstractWorkingCopyOperation {
 	protected IRepositoryLocation location;
 
-	public ReconnectProjectOperation(IProject []projects, IRepositoryLocation location) {
+	public ReconnectProjectOperation(IProject[] projects, IRepositoryLocation location) {
 		super("Operation_Reconnect", SVNMessages.class, projects); //$NON-NLS-1$
 		this.location = location;
 	}
-	
+
 	public ReconnectProjectOperation(IResourceProvider provider, IRepositoryLocation location) {
 		super("Operation_Reconnect", SVNMessages.class, provider); //$NON-NLS-1$
 		this.location = location;
 	}
-	
+
 	public ISchedulingRule getSchedulingRule() {
 		// reconnect always requires root as scheduling rule
 		return ResourcesPlugin.getWorkspace().getRoot();
 	}
-	
+
 	protected void runImpl(IProgressMonitor monitor) throws Exception {
-		IResource []resources = this.operableData();
-		
+		IResource[] resources = this.operableData();
+
 		for (int i = 0; i < resources.length && !monitor.isCanceled(); i++) {
-			final IProject project = (IProject)resources[i];
+			final IProject project = (IProject) resources[i];
 			this.protectStep(new IUnprotectedOperation() {
 				public void run(IProgressMonitor monitor) throws Exception {
 					SVNChangeStatus st = SVNUtility.getSVNInfoForNotConnected(project);
 					if (st == null) {
 						throw new UnreportableException(SVNMessages.getErrorString("Error_NonSVNPath")); //$NON-NLS-1$
 					}
-					IRepositoryContainer remote = ReconnectProjectOperation.this.location.asRepositoryContainer(SVNUtility.decodeURL(st.url), false);
+					IRepositoryContainer remote = ReconnectProjectOperation.this.location
+							.asRepositoryContainer(SVNUtility.decodeURL(st.url), false);
 					SVNTeamProjectMapper.map(project, remote);
 				}
 			}, monitor, resources.length);

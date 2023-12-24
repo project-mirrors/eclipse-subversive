@@ -40,56 +40,66 @@ import org.eclipse.team.svn.core.utility.SVNUtility;
  */
 public class DeleteResourcesOperation extends AbstractRepositoryOperation implements IRevisionProvider {
 	protected String message;
+
 	protected ArrayList<RevisionPair> revisionsPairs;
-	
-	public DeleteResourcesOperation(IRepositoryResource []resources, String message) {
+
+	public DeleteResourcesOperation(IRepositoryResource[] resources, String message) {
 		super("Operation_DeleteRemote", SVNMessages.class, resources); //$NON-NLS-1$
 		this.message = message;
 	}
 
 	protected void runImpl(final IProgressMonitor monitor) throws Exception {
 		this.revisionsPairs = new ArrayList<RevisionPair>();
-		IRepositoryResource []resources = SVNUtility.shrinkChildNodes(this.operableData());
-		
+		IRepositoryResource[] resources = SVNUtility.shrinkChildNodes(this.operableData());
+
 		Map<?, ?> repository2Resources = SVNUtility.splitRepositoryLocations(resources);
-		
-		for (Iterator<?> it = repository2Resources.entrySet().iterator(); it.hasNext() && !monitor.isCanceled(); ) {
-			Map.Entry entry = (Map.Entry)it.next();
-			final IRepositoryLocation location = (IRepositoryLocation)entry.getKey();
-			final String []paths = SVNUtility.asURLArray(((List<?>)entry.getValue()).toArray(new IRepositoryResource[0]), true);
-			
+
+		for (Iterator<?> it = repository2Resources.entrySet().iterator(); it.hasNext() && !monitor.isCanceled();) {
+			Map.Entry entry = (Map.Entry) it.next();
+			final IRepositoryLocation location = (IRepositoryLocation) entry.getKey();
+			final String[] paths = SVNUtility
+					.asURLArray(((List<?>) entry.getValue()).toArray(new IRepositoryResource[0]), true);
+
 			this.complexWriteToConsole(new Runnable() {
 				public void run() {
-					DeleteResourcesOperation.this.writeToConsole(IConsoleStream.LEVEL_CMD, "svn delete" + ISVNConnector.Options.asCommandLine(ISVNConnector.Options.FORCE)); //$NON-NLS-1$
+					DeleteResourcesOperation.this.writeToConsole(IConsoleStream.LEVEL_CMD,
+							"svn delete" + ISVNConnector.Options.asCommandLine(ISVNConnector.Options.FORCE)); //$NON-NLS-1$
 					for (int i = 0; i < paths.length && !monitor.isCanceled(); i++) {
-						DeleteResourcesOperation.this.writeToConsole(IConsoleStream.LEVEL_CMD, " \"" + SVNUtility.decodeURL(paths[i]) + "\""); //$NON-NLS-1$ //$NON-NLS-2$
+						DeleteResourcesOperation.this.writeToConsole(IConsoleStream.LEVEL_CMD,
+								" \"" + SVNUtility.decodeURL(paths[i]) + "\""); //$NON-NLS-1$ //$NON-NLS-2$
 					}
-					DeleteResourcesOperation.this.writeToConsole(IConsoleStream.LEVEL_CMD, " -m \"" + DeleteResourcesOperation.this.message + "\"" + FileUtility.getUsernameParam(location.getUsername()) + "\n"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					DeleteResourcesOperation.this.writeToConsole(IConsoleStream.LEVEL_CMD,
+							" -m \"" + DeleteResourcesOperation.this.message + "\"" //$NON-NLS-1$//$NON-NLS-2$
+									+ FileUtility.getUsernameParam(location.getUsername()) + "\n"); //$NON-NLS-1$
 				}
 			});
-			
+
 			final ISVNConnector proxy = location.acquireSVNProxy();
 			ISVNNotificationCallback notify = new ISVNNotificationCallback() {
 				public void notify(SVNNotification info) {
 					DeleteResourcesOperation.this.revisionsPairs.add(new RevisionPair(info.revision, paths, location));
-					String message = SVNMessages.format(SVNMessages.Console_CommittedRevision, new String[] {String.valueOf(info.revision)});
+					String message = SVNMessages.format(SVNMessages.Console_CommittedRevision,
+							new String[] { String.valueOf(info.revision) });
 					DeleteResourcesOperation.this.writeToConsole(IConsoleStream.LEVEL_OK, message);
 				}
 			};
 			SVNUtility.addSVNNotifyListener(proxy, notify);
 			this.protectStep(new IUnprotectedOperation() {
 				public void run(IProgressMonitor monitor) throws Exception {
-					proxy.removeRemote(paths, DeleteResourcesOperation.this.message, ISVNConnector.Options.FORCE, null, new SVNProgressMonitor(DeleteResourcesOperation.this, monitor, null));
+					proxy.removeRemote(paths, DeleteResourcesOperation.this.message, ISVNConnector.Options.FORCE, null,
+							new SVNProgressMonitor(DeleteResourcesOperation.this, monitor, null));
 				}
 			}, monitor, repository2Resources.size());
 			SVNUtility.removeSVNNotifyListener(proxy, notify);
-			
+
 			location.releaseSVNProxy(proxy);
 		}
 	}
-	
+
 	public RevisionPair[] getRevisions() {
-	 	return this.revisionsPairs == null ? null : this.revisionsPairs.toArray(new RevisionPair [this.revisionsPairs.size()]);
+		return this.revisionsPairs == null
+				? null
+				: this.revisionsPairs.toArray(new RevisionPair[this.revisionsPairs.size()]);
 	}
-	
+
 }

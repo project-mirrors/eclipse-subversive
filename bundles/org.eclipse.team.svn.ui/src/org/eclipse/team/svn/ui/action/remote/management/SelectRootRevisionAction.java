@@ -29,12 +29,12 @@ public class SelectRootRevisionAction extends SelectResourceRevisionAction {
 	}
 
 	public void runImpl(IAction action) {
-		RepositoryRevisions root = ((RepositoryRevisions [])this.getAdaptedSelection(RepositoryRevisions.class))[0];
-		this.runImpl(new IRepositoryResource[] {root.getRepositoryLocation().getRoot()});
+		RepositoryRevisions root = ((RepositoryRevisions[]) this.getAdaptedSelection(RepositoryRevisions.class))[0];
+		this.runImpl(new IRepositoryResource[] { root.getRepositoryLocation().getRoot() });
 	}
-	
+
 	public boolean isEnabled() {
 		return true;
 	}
-	
+
 }

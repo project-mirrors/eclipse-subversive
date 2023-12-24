@@ -39,16 +39,18 @@ import org.eclipse.team.svn.core.utility.SVNUtility;
  * @author Alexander Gurov
  */
 public class CreateFolderOperation extends AbstractRepositoryOperation implements IRevisionProvider {
-	protected String []names;
+	protected String[] names;
+
 	protected String comment;
-	protected RevisionPair []revisionPair;
+
+	protected RevisionPair[] revisionPair;
 
 	public CreateFolderOperation(IRepositoryResource parent, String name, String comment) {
-		this(parent, new String[] {name}, comment);
+		this(parent, new String[] { name }, comment);
 	}
 
-	public CreateFolderOperation(IRepositoryResource parent, String []names, String comment) {
-		super("Operation_CreateFolder", SVNMessages.class, new IRepositoryResource[] {parent}); //$NON-NLS-1$
+	public CreateFolderOperation(IRepositoryResource parent, String[] names, String comment) {
+		super("Operation_CreateFolder", SVNMessages.class, new IRepositoryResource[] { parent }); //$NON-NLS-1$
 		this.names = names;
 		this.comment = comment;
 	}
@@ -58,55 +60,58 @@ public class CreateFolderOperation extends AbstractRepositoryOperation implement
 		IRepositoryResource parent = this.operableData()[0];
 		final IRepositoryLocation location = parent.getRepositoryLocation();
 		ProgressMonitorUtility.setTaskInfo(monitor, this, parent.getUrl() + "/" + this.names[0]); //$NON-NLS-1$
-		
+
 		Set<IRepositoryResource> fullSet = new HashSet<IRepositoryResource>();
 		for (int i = 0; i < this.names.length; i++) {
 			fullSet.addAll(Arrays.asList(SVNUtility.makeResourceSet(parent, this.names[i], false)));
 		}
-		IRepositoryResource []toBeCreated = fullSet.toArray(new IRepositoryResource[fullSet.size()]);
-		
-		final String []childUrls = SVNUtility.asURLArray(toBeCreated, true);
+		IRepositoryResource[] toBeCreated = fullSet.toArray(new IRepositoryResource[fullSet.size()]);
+
+		final String[] childUrls = SVNUtility.asURLArray(toBeCreated, true);
 		Arrays.sort(childUrls);
-		
+
 		ISVNNotificationCallback notify = new ISVNNotificationCallback() {
 			public void notify(SVNNotification info) {
-				String [] path = childUrls;
+				String[] path = childUrls;
 				CreateFolderOperation.this.revisionPair[0] = new RevisionPair(info.revision, path, location);
-				String message = SVNMessages.format(SVNMessages.Console_CommittedRevision, new String[] {String.valueOf(info.revision)});
+				String message = SVNMessages.format(SVNMessages.Console_CommittedRevision,
+						new String[] { String.valueOf(info.revision) });
 				CreateFolderOperation.this.writeToConsole(IConsoleStream.LEVEL_OK, message);
 			}
 		};
-		
+
 		this.complexWriteToConsole(new Runnable() {
 			public void run() {
 				CreateFolderOperation.this.writeToConsole(IConsoleStream.LEVEL_CMD, "svn mkdir"); //$NON-NLS-1$
 				for (int i = 0; i < childUrls.length && !monitor.isCanceled(); i++) {
-					CreateFolderOperation.this.writeToConsole(IConsoleStream.LEVEL_CMD, " \"" + SVNUtility.decodeURL(childUrls[i]) + "\""); //$NON-NLS-1$ //$NON-NLS-2$
+					CreateFolderOperation.this.writeToConsole(IConsoleStream.LEVEL_CMD,
+							" \"" + SVNUtility.decodeURL(childUrls[i]) + "\""); //$NON-NLS-1$ //$NON-NLS-2$
 				}
-				CreateFolderOperation.this.writeToConsole(IConsoleStream.LEVEL_CMD, " -m \"" + CreateFolderOperation.this.comment + "\"" + FileUtility.getUsernameParam(location.getUsername()) + "\n"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				CreateFolderOperation.this.writeToConsole(IConsoleStream.LEVEL_CMD,
+						" -m \"" + CreateFolderOperation.this.comment + "\"" //$NON-NLS-1$//$NON-NLS-2$
+								+ FileUtility.getUsernameParam(location.getUsername()) + "\n"); //$NON-NLS-1$
 			}
 		});
-		
+
 		ISVNConnector proxy = location.acquireSVNProxy();
 		try {
 			SVNUtility.addSVNNotifyListener(proxy, notify);
-			proxy.mkdir(childUrls, this.comment, ISVNConnector.Options.NONE, null, new SVNProgressMonitor(this, monitor, null));
-		}
-		finally {
+			proxy.mkdir(childUrls, this.comment, ISVNConnector.Options.NONE, null,
+					new SVNProgressMonitor(this, monitor, null));
+		} finally {
 			SVNUtility.removeSVNNotifyListener(proxy, notify);
-		    parent.getRepositoryLocation().releaseSVNProxy(proxy);
+			parent.getRepositoryLocation().releaseSVNProxy(proxy);
 		}
-		
+
 		ProgressMonitorUtility.progress(monitor, 1, 1);
 	}
-	
-	public RevisionPair []getRevisions() {
+
+	public RevisionPair[] getRevisions() {
 		return this.revisionPair;
 	}
-	
-	
+
 	protected String getShortErrorMessage(Throwable t) {
-		return BaseMessages.format(super.getShortErrorMessage(t), new Object[] {this.name});
+		return BaseMessages.format(super.getShortErrorMessage(t), new Object[] { this.name });
 	}
-	
+
 }

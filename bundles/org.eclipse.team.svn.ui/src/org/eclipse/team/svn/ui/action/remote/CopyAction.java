@@ -34,14 +34,12 @@ public class CopyAction extends AbstractRepositoryTeamAction {
 
 	public void runImpl(IAction action) {
 		this.runBusy(new PrepareRemoteResourcesTransferrableOperation(
-			this.getSelectedRepositoryResources(),
-			RemoteResourceTransferrable.OP_COPY, 
-			this.getShell().getDisplay()
+				this.getSelectedRepositoryResources(), RemoteResourceTransferrable.OP_COPY, this.getShell().getDisplay()
 		));
 	}
-	
+
 	public boolean isEnabled() {
-		IRepositoryResource []resources = this.getSelectedRepositoryResources();
+		IRepositoryResource[] resources = this.getSelectedRepositoryResources();
 		if (resources.length == 0) {
 			return false;
 		}

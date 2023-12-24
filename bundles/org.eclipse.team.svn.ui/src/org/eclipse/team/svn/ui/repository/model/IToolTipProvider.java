@@ -15,8 +15,7 @@
 package org.eclipse.team.svn.ui.repository.model;
 
 /**
- * Implementors of this interface will provide interested parts with
- * tooltip message
+ * Implementors of this interface will provide interested parts with tooltip message
  *
  * @author Alexey Mikoyan
  *

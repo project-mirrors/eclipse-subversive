@@ -47,57 +47,58 @@ public class SelectResourceRevisionAction extends AbstractRepositoryTeamAction {
 	}
 
 	public void runImpl(IAction action) {
-		IRepositoryResource []resources = this.getSelectedRepositoryResources();
+		IRepositoryResource[] resources = this.getSelectedRepositoryResources();
 		this.runImpl(resources);
 	}
-	
-	protected void runImpl(IRepositoryResource []resources) {
+
+	protected void runImpl(IRepositoryResource[] resources) {
 		IActionOperation op = SelectResourceRevisionAction.getAddRevisionLinkOperation(resources, this.getShell());
 		if (op != null) {
 			this.runScheduled(op);
 		}
 	}
-	
-	public static IActionOperation getAddRevisionLinkOperation(IRepositoryResource []resources, Shell shell) {
+
+	public static IActionOperation getAddRevisionLinkOperation(IRepositoryResource[] resources, Shell shell) {
 		SVNRevision selectedRevision = null;
 		final String comment[] = new String[1];
-				 
+
 		InputRevisionPanel panel = new InputRevisionPanel(resources.length == 1 ? resources[0] : null, false, null);
 		DefaultDialog dialog = new DefaultDialog(shell, panel);
-		if (dialog.open() == Dialog.OK) {			
-			comment[0] = panel.getRevisionComment();			
+		if (dialog.open() == Dialog.OK) {
+			comment[0] = panel.getRevisionComment();
 			if (resources.length == 1) {
 				selectedRevision = panel.getSelectedRevision();
 				resources[0] = SVNUtility.copyOf(resources[0]);
-				resources[0].setSelectedRevision(selectedRevision);	
-			}			
-									
+				resources[0].setSelectedRevision(selectedRevision);
+			}
+
 			final LocateResourceURLInHistoryOperation locateOp = new LocateResourceURLInHistoryOperation(resources);
 			AbstractActionOperation mainOp = new AddRevisionLinkOperation(new IRevisionLinkProvider() {
 				public IRevisionLink[] getRevisionLinks() {
 					IRepositoryResource[] resources = locateOp.getRepositoryResources();
 					IRevisionLink[] links = new IRevisionLink[resources.length];
-					for (int i = 0; i < resources.length; i ++) {
+					for (int i = 0; i < resources.length; i++) {
 						links[i] = SVNUtility.createRevisionLink(resources[i]);
 						links[i].setComment(comment[0]);
-					} 							
+					}
 					return links;
 				}
 			}, selectedRevision);
 			CompositeOperation op = new CompositeOperation(mainOp.getId(), mainOp.getMessagesClass());
 			op.add(locateOp);
-			op.add(mainOp, new IActionOperation[] {locateOp});
+			op.add(mainOp, new IActionOperation[] { locateOp });
 			op.add(new SaveRepositoryLocationsOperation());
 			HashSet<IRepositoryLocation> locations = new HashSet<IRepositoryLocation>();
 			for (IRepositoryResource resource : resources) {
 				locations.add(resource.getRepositoryLocation());
 			}
-			op.add(new RefreshRepositoryLocationsOperation(locations.toArray(new IRepositoryLocation[locations.size()]), true));
+			op.add(new RefreshRepositoryLocationsOperation(locations.toArray(new IRepositoryLocation[locations.size()]),
+					true));
 			return op;
 		}
 		return null;
 	}
-	
+
 	public boolean isEnabled() {
 		return this.getSelectedRepositoryResources().length > 0;
 	}

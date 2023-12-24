@@ -23,14 +23,14 @@ import org.eclipse.team.svn.core.utility.StringMatcher;
  * @author Alexei Goncharov
  */
 public class CommentLogEntryFilter implements ILogEntryFilter {
-	
+
 	protected String commentToAccept;
-	
+
 	public CommentLogEntryFilter() {
 		this(null);
 	}
-	
-	public CommentLogEntryFilter (String commentToAccept) {
+
+	public CommentLogEntryFilter(String commentToAccept) {
 		this.commentToAccept = commentToAccept;
 	}
 
@@ -46,7 +46,7 @@ public class CommentLogEntryFilter implements ILogEntryFilter {
 	public void setCommentToAccept(String commentToAccept) {
 		this.commentToAccept = commentToAccept;
 	}
-	
+
 	public String getCommentToAccept() {
 		return this.commentToAccept;
 	}

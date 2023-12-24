@@ -28,9 +28,11 @@ public class RefreshRepositoryLocationAction extends AbstractRepositoryTeamActio
 	public RefreshRepositoryLocationAction() {
 		super();
 	}
-	
+
 	public void runImpl(IAction action) {
-		this.runBusy(this.getSelection().isEmpty() ? new RefreshRepositoryLocationsOperation(true) : new RefreshRepositoryLocationsOperation(this.getSelectedRepositoryLocations(), true));
+		this.runBusy(this.getSelection().isEmpty()
+				? new RefreshRepositoryLocationsOperation(true)
+				: new RefreshRepositoryLocationsOperation(this.getSelectedRepositoryLocations(), true));
 	}
 
 	public boolean isEnabled() {

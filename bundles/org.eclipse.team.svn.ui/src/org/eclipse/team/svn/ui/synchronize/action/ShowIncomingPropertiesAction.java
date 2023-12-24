@@ -34,30 +34,34 @@ import org.eclipse.team.ui.synchronize.ISynchronizePageConfiguration;
 public class ShowIncomingPropertiesAction extends AbstractSynchronizeModelAction {
 
 	protected ShowIncomingPropertiesActionHelper actionHelper;
-	
+
 	public ShowIncomingPropertiesAction(String text, ISynchronizePageConfiguration configuration) {
 		super(text, configuration);
 		this.actionHelper = new ShowIncomingPropertiesActionHelper(this, configuration);
 	}
 
-	public ShowIncomingPropertiesAction(String text, ISynchronizePageConfiguration configuration, ISelectionProvider selectionProvider) {
+	public ShowIncomingPropertiesAction(String text, ISynchronizePageConfiguration configuration,
+			ISelectionProvider selectionProvider) {
 		super(text, configuration, selectionProvider);
 		this.actionHelper = new ShowIncomingPropertiesActionHelper(this, configuration);
 	}
-	
+
 	protected boolean needsToSaveDirtyEditors() {
 		return false;
 	}
-	
+
 	protected boolean updateSelection(IStructuredSelection selection) {
 		super.updateSelection(selection);
 		if (selection.size() == 1 && selection.getFirstElement() instanceof SyncInfoModelElement) {
-			ISynchronizeModelElement element = (ISynchronizeModelElement)selection.getFirstElement();
+			ISynchronizeModelElement element = (ISynchronizeModelElement) selection.getFirstElement();
 			if (element instanceof SyncInfoModelElement) {
-				AbstractSVNSyncInfo syncInfo = (AbstractSVNSyncInfo)((SyncInfoModelElement)selection.getFirstElement()).getSyncInfo();
+				AbstractSVNSyncInfo syncInfo = (AbstractSVNSyncInfo) ((SyncInfoModelElement) selection
+						.getFirstElement()).getSyncInfo();
 				ILocalResource incoming = syncInfo.getRemoteChangeResource();
 				if (incoming instanceof IResourceChange) {
-					return IStateFilter.SF_TREE_CONFLICTING.accept(incoming) ? IStateFilter.SF_TREE_CONFLICTING_REPOSITORY_EXIST.accept(incoming) : IStateFilter.ST_DELETED != incoming.getStatus();
+					return IStateFilter.SF_TREE_CONFLICTING.accept(incoming)
+							? IStateFilter.SF_TREE_CONFLICTING_REPOSITORY_EXIST.accept(incoming)
+							: IStateFilter.ST_DELETED != incoming.getStatus();
 				}
 			}
 		}

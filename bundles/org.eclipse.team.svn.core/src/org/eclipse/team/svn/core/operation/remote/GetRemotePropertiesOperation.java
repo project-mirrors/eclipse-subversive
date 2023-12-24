@@ -33,26 +33,26 @@ import org.eclipse.team.svn.core.utility.SVNUtility;
  * @author Alexander Gurov
  */
 public class GetRemotePropertiesOperation extends AbstractRepositoryOperation implements IResourcePropertyProvider {
-	protected SVNProperty []properties;
+	protected SVNProperty[] properties;
 
 	public GetRemotePropertiesOperation(IRepositoryResource resource) {
-		super("Operation_GetRevisionProperties", SVNMessages.class, new IRepositoryResource[] {resource}); //$NON-NLS-1$
+		super("Operation_GetRevisionProperties", SVNMessages.class, new IRepositoryResource[] { resource }); //$NON-NLS-1$
 	}
-	
+
 	public GetRemotePropertiesOperation(IRepositoryResourceProvider provider) {
 		super("Operation_GetRevisionProperties", SVNMessages.class, provider); //$NON-NLS-1$
 	}
 
-	public SVNProperty []getProperties() {
+	public SVNProperty[] getProperties() {
 		return this.properties;
 	}
-	
+
 	public boolean isEditAllowed() {
 		return false;
 	}
-	
+
 	public void refresh() {
-		
+
 	}
 
 	public IResource getLocal() {
@@ -62,7 +62,7 @@ public class GetRemotePropertiesOperation extends AbstractRepositoryOperation im
 	public IRepositoryResource getRemote() {
 		return this.operableData()[0];
 	}
-	
+
 	protected void runImpl(IProgressMonitor monitor) throws Exception {
 		IRepositoryResource resource = this.operableData()[0];
 		this.properties = null;
@@ -70,15 +70,15 @@ public class GetRemotePropertiesOperation extends AbstractRepositoryOperation im
 		ISVNConnector proxy = location.acquireSVNProxy();
 		try {
 //			this.writeToConsole(IConsoleStream.LEVEL_CMD, "svn proplist " + url + "@" + resource.getPegRevision() + " --revprop -r " + resource.getSelectedRevision() + " --username \"" + location.getUsername() + "\"\n");
-			this.properties = SVNUtility.properties(proxy, SVNUtility.getEntryRevisionReference(resource), ISVNConnector.Options.NONE, new SVNProgressMonitor(this, monitor, null));
-		}
-		finally {
+			this.properties = SVNUtility.properties(proxy, SVNUtility.getEntryRevisionReference(resource),
+					ISVNConnector.Options.NONE, new SVNProgressMonitor(this, monitor, null));
+		} finally {
 			location.releaseSVNProxy(proxy);
 		}
 	}
 
 	protected String getShortErrorMessage(Throwable t) {
-		return BaseMessages.format(super.getShortErrorMessage(t), new Object[] {this.operableData()[0].getUrl()});
+		return BaseMessages.format(super.getShortErrorMessage(t), new Object[] { this.operableData()[0].getUrl() });
 	}
 
 }

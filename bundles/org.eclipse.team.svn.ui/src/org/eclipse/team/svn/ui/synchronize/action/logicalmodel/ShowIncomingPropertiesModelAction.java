@@ -31,9 +31,9 @@ import org.eclipse.team.ui.synchronize.ISynchronizePageConfiguration;
  * @author Igor Burilo
  */
 public class ShowIncomingPropertiesModelAction extends AbstractSynchronizeLogicalModelAction {
-	
+
 	protected ShowIncomingPropertiesActionHelper actionHelper;
-	
+
 	public ShowIncomingPropertiesModelAction(String text, ISynchronizePageConfiguration configuration) {
 		super(text, configuration);
 		this.actionHelper = new ShowIncomingPropertiesActionHelper(this, configuration);
@@ -42,7 +42,7 @@ public class ShowIncomingPropertiesModelAction extends AbstractSynchronizeLogica
 	protected boolean needsToSaveDirtyEditors() {
 		return false;
 	}
-	
+
 	protected boolean updateSelection(IStructuredSelection selection) {
 		if (super.updateSelection(selection)) {
 			if (selection.size() == 1) {
@@ -50,14 +50,16 @@ public class ShowIncomingPropertiesModelAction extends AbstractSynchronizeLogica
 				if (syncInfo != null && syncInfo.getKind() != SyncInfo.IN_SYNC) {
 					ILocalResource incoming = syncInfo.getRemoteChangeResource();
 					if (incoming instanceof IResourceChange) {
-						return IStateFilter.SF_TREE_CONFLICTING.accept(incoming) ? IStateFilter.SF_TREE_CONFLICTING_REPOSITORY_EXIST.accept(incoming) : IStateFilter.ST_DELETED != incoming.getStatus();
+						return IStateFilter.SF_TREE_CONFLICTING.accept(incoming)
+								? IStateFilter.SF_TREE_CONFLICTING_REPOSITORY_EXIST.accept(incoming)
+								: IStateFilter.ST_DELETED != incoming.getStatus();
 					}
-				}					
-			}	
+				}
+			}
 		}
 		return false;
 	}
-	
+
 	protected IActionOperation getOperation() {
 		return this.actionHelper.getOperation();
 	}

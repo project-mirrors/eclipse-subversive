@@ -41,22 +41,23 @@ public class SetKeywordsAction extends AbstractWorkingCopyAction {
 	public SetKeywordsAction() {
 		super();
 	}
-	
+
 	public void runImpl(IAction action) {
 		SetKeywordsAction.doSetKeywords(this.getSelectedResources(IStateFilter.SF_VERSIONED));
 	}
-	
-	public static void doSetKeywords(final IResource []resources) {
-		if (!SVNTeamPreferences.getBehaviourBoolean(SVNTeamUIPlugin.instance().getPreferenceStore(), SVNTeamPreferences.BEHAVIOUR_COMPUTE_KEYWORDS_NAME)) {
+
+	public static void doSetKeywords(final IResource[] resources) {
+		if (!SVNTeamPreferences.getBehaviourBoolean(SVNTeamUIPlugin.instance().getPreferenceStore(),
+				SVNTeamPreferences.BEHAVIOUR_COMPUTE_KEYWORDS_NAME)) {
 			SetKeywordsAction.askUser(resources, new IResourceProvider() {
 				public IResource[] getResources() {
 					return resources;
 				}
 			}, null);
-		}
-		else {
+		} else {
 			CompositeOperation composite = new CompositeOperation("Operation_SetKeywordsProperty", SVNUIMessages.class); //$NON-NLS-1$
-			final GetMultiPropertiesOperation getKeywordsOp = new GetMultiPropertiesOperation(resources, IResource.DEPTH_INFINITE, IStateFilter.SF_EXCLUDE_PREREPLACED_AND_DELETED_FILES, BuiltIn.KEYWORDS);
+			final GetMultiPropertiesOperation getKeywordsOp = new GetMultiPropertiesOperation(resources,
+					IResource.DEPTH_INFINITE, IStateFilter.SF_EXCLUDE_PREREPLACED_AND_DELETED_FILES, BuiltIn.KEYWORDS);
 			composite.add(getKeywordsOp);
 			composite.add(new AbstractActionOperation(composite.getId(), composite.getMessagesClass()) {
 				protected void runImpl(final IProgressMonitor monitor) throws Exception {
@@ -68,9 +69,11 @@ public class SetKeywordsAction extends AbstractWorkingCopyAction {
 			UIMonitorUtility.doTaskScheduledActive(composite);
 		}
 	}
-	
-	protected static void askUser(IResource []resources, IResourceProvider resourceProvider, IPropertyProvider propertyProvider) {
-		final PropertyKeywordEditPanel panel = new PropertyKeywordEditPanel(resources, resourceProvider, propertyProvider);
+
+	protected static void askUser(IResource[] resources, IResourceProvider resourceProvider,
+			IPropertyProvider propertyProvider) {
+		final PropertyKeywordEditPanel panel = new PropertyKeywordEditPanel(resources, resourceProvider,
+				propertyProvider);
 		UIMonitorUtility.getDisplay().syncExec(new Runnable() {
 			public void run() {
 				DefaultDialog dialog = new DefaultDialog(UIMonitorUtility.getShell(), panel);

@@ -32,26 +32,28 @@ import org.eclipse.team.ui.synchronize.ISynchronizePageConfiguration;
 public class EditTreeConflictsAction extends AbstractSynchronizeModelAction {
 
 	protected EditTreeConflictsActionHelper actionHelper;
-	
+
 	public EditTreeConflictsAction(String text, ISynchronizePageConfiguration configuration) {
 		super(text, configuration);
 		this.actionHelper = new EditTreeConflictsActionHelper(this, configuration);
 	}
-	
+
 	protected boolean updateSelection(IStructuredSelection selection) {
 		if (super.updateSelection(selection) && selection.size() == 1) {
 			if (selection.getFirstElement() instanceof SyncInfoModelElement) {
-				AbstractSVNSyncInfo syncInfo = (AbstractSVNSyncInfo)((SyncInfoModelElement)selection.getFirstElement()).getSyncInfo();
+				AbstractSVNSyncInfo syncInfo = (AbstractSVNSyncInfo) ((SyncInfoModelElement) selection
+						.getFirstElement()).getSyncInfo();
 				return IStateFilter.SF_TREE_CONFLICTING.accept(syncInfo.getLocalResource());
-			}			
+			}
 			if (selection.getFirstElement() instanceof ISynchronizeModelElement) {
-				ISynchronizeModelElement element = (ISynchronizeModelElement)selection.getFirstElement();
-				return IStateFilter.SF_TREE_CONFLICTING.accept(SVNRemoteStorage.instance().asLocalResource(element.getResource()));
-			}	
-		}		
+				ISynchronizeModelElement element = (ISynchronizeModelElement) selection.getFirstElement();
+				return IStateFilter.SF_TREE_CONFLICTING
+						.accept(SVNRemoteStorage.instance().asLocalResource(element.getResource()));
+			}
+		}
 		return false;
 	}
-	
+
 	protected IActionOperation getOperation(ISynchronizePageConfiguration configuration, IDiffElement[] elements) {
 		return this.actionHelper.getOperation();
 	}

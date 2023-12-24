@@ -30,21 +30,23 @@ import org.eclipse.team.ui.synchronize.ISynchronizePageConfiguration;
  * @author Igor Burilo
  */
 public class UnlockActionHelper extends AbstractActionHelper {
-	
+
 	public UnlockActionHelper(IAction action, ISynchronizePageConfiguration configuration) {
 		super(action, configuration);
 	}
-	
+
 	public FastSyncInfoFilter getSyncInfoFilter() {
 		return new FastSyncInfoFilter() {
-            public boolean select(SyncInfo info) {
-                return super.select(info) && IStateFilter.SF_LOCKED.accept(((AbstractSVNSyncInfo)info).getLocalResource());
-            }
-        };
+			public boolean select(SyncInfo info) {
+				return super.select(info)
+						&& IStateFilter.SF_LOCKED.accept(((AbstractSVNSyncInfo) info).getLocalResource());
+			}
+		};
 	}
-	
-	public IActionOperation getOperation() {		
-		return LockProposeUtility.performUnlockAction(this.getSyncInfoSelector().getSelectedResources(), this.configuration.getSite().getShell());			
+
+	public IActionOperation getOperation() {
+		return LockProposeUtility.performUnlockAction(this.getSyncInfoSelector().getSelectedResources(),
+				this.configuration.getSite().getShell());
 	}
 
 }

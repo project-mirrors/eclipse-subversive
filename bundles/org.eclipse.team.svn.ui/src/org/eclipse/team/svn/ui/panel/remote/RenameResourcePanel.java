@@ -17,28 +17,27 @@ package org.eclipse.team.svn.ui.panel.remote;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.team.svn.ui.SVNUIMessages;
 
-
 /**
  * Rename remote resource panel
  * 
  * @author Alexander Gurov
  */
 public class RenameResourcePanel extends AbstractGetResourceNamePanel {
-    public RenameResourcePanel(String originalName) {
-        super(SVNUIMessages.RenameResourcePanel_Title, true);
-        this.dialogDescription = SVNUIMessages.RenameResourcePanel_Description;
-        this.disallowedName = originalName;
-    }
-
-    public void createControlsImpl(Composite parent) {
-    	super.createControlsImpl(parent);
-    	
-    	this.text.setText(this.disallowedName);
-    	this.text.selectAll();
-    }
-    
-	public String getHelpId() {
-    	return "org.eclipse.team.svn.help.renameDialogContext"; //$NON-NLS-1$
+	public RenameResourcePanel(String originalName) {
+		super(SVNUIMessages.RenameResourcePanel_Title, true);
+		this.dialogDescription = SVNUIMessages.RenameResourcePanel_Description;
+		this.disallowedName = originalName;
 	}
-    
+
+	public void createControlsImpl(Composite parent) {
+		super.createControlsImpl(parent);
+
+		this.text.setText(this.disallowedName);
+		this.text.selectAll();
+	}
+
+	public String getHelpId() {
+		return "org.eclipse.team.svn.help.renameDialogContext"; //$NON-NLS-1$
+	}
+
 }

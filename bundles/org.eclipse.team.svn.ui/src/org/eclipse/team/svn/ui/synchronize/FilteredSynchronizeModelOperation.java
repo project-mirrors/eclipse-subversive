@@ -24,30 +24,30 @@ import org.eclipse.team.ui.synchronize.ISynchronizePageConfiguration;
 import org.eclipse.team.ui.synchronize.SynchronizeModelOperation;
 
 /**
- * Synchronize model operation wrapper to provide a probability of running the operations
- * by our code.
+ * Synchronize model operation wrapper to provide a probability of running the operations by our code.
  * 
  * @author Igor Burilo
  */
 public class FilteredSynchronizeModelOperation extends SynchronizeModelOperation {
 
 	protected IActionOperation executable;
-	
-	public FilteredSynchronizeModelOperation(ISynchronizePageConfiguration configuration, IDiffElement[] elements, IActionOperation executable) {
+
+	public FilteredSynchronizeModelOperation(ISynchronizePageConfiguration configuration, IDiffElement[] elements,
+			IActionOperation executable) {
 		super(configuration, elements);
 		this.executable = executable;
 	}
 
 	public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 		if (this.executable != null) {
-		    ProgressMonitorUtility.doTaskExternal(this.executable, monitor);
+			ProgressMonitorUtility.doTaskExternal(this.executable, monitor);
 		}
 	}
-	
+
 	protected boolean canRunAsJob() {
 		return true;
 	}
-	
+
 	protected String getJobName() {
 		return this.executable == null ? super.getJobName() : this.executable.getOperationName();
 	}

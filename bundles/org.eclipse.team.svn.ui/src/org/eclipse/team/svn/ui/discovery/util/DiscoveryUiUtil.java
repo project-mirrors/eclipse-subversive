@@ -56,7 +56,8 @@ public abstract class DiscoveryUiUtil {
 		}
 	}
 
-	public static void displayStatus(Shell shell, final String title, final IStatus status, boolean showLinkToErrorLog) {
+	public static void displayStatus(Shell shell, final String title, final IStatus status,
+			boolean showLinkToErrorLog) {
 		if (shell == null) {
 			shell = UIMonitorUtility.getShell();
 		}
@@ -65,17 +66,17 @@ public abstract class DiscoveryUiUtil {
 			message += SVNUIMessages.DiscoveryUi_seeErrorLog;
 		}
 		switch (status.getSeverity()) {
-		case IStatus.CANCEL:
-		case IStatus.INFO:
-			createDialog(shell, title, message, MessageDialog.INFORMATION).open();
-			break;
-		case IStatus.WARNING:
-			createDialog(shell, title, message, MessageDialog.WARNING).open();
-			break;
-		case IStatus.ERROR:
-		default:
-			createDialog(shell, title, message, MessageDialog.ERROR).open();
-			break;
+			case IStatus.CANCEL:
+			case IStatus.INFO:
+				createDialog(shell, title, message, MessageDialog.INFORMATION).open();
+				break;
+			case IStatus.WARNING:
+				createDialog(shell, title, message, MessageDialog.WARNING).open();
+				break;
+			case IStatus.ERROR:
+			default:
+				createDialog(shell, title, message, MessageDialog.ERROR).open();
+				break;
 		}
 
 	}

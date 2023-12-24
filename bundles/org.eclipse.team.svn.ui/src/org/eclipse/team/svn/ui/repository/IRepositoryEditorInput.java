@@ -25,6 +25,7 @@ import org.eclipse.ui.IStorageEditorInput;
  * @author Alexander Gurov
  */
 public interface IRepositoryEditorInput extends IStorageEditorInput, IPathEditorInput {
-    public IRepositoryResource getRepositoryResource();
+	public IRepositoryResource getRepositoryResource();
+
 	public void fetchContents(IProgressMonitor monitor);
 }

@@ -26,49 +26,53 @@ import org.eclipse.team.svn.ui.panel.local.UpdateToRevisionPanel;
 import org.eclipse.team.svn.ui.utility.UnacceptableOperationNotificator;
 
 /**
- * Team services menu update to revision action implementation
- * Allows to specify revision and depth for update
+ * Team services menu update to revision action implementation Allows to specify revision and depth for update
  * 
  * @author Igor Burilo
  */
 public class UpdateToRevisionAction extends AbstractRecursiveTeamAction {
-	
-	public void runImpl(IAction action) {		
-		IResource []resources = UnacceptableOperationNotificator.shrinkResourcesWithNotOnRespositoryParents(this.getShell(), this.getSelectedResources(IStateFilter.SF_ONREPOSITORY));
+
+	public void runImpl(IAction action) {
+		IResource[] resources = UnacceptableOperationNotificator.shrinkResourcesWithNotOnRespositoryParents(
+				this.getShell(), this.getSelectedResources(IStateFilter.SF_ONREPOSITORY));
 		if (resources == null || resources.length == 0) {
 			return;
 		}
-		
+
 		if (this.checkForResourcesPresenceRecursive(IStateFilter.SF_REVERTABLE)) {
-			IResource []missing = this.getSelectedResourcesRecursive(UpdateAction.SF_MISSING_RESOURCES);
+			IResource[] missing = this.getSelectedResourcesRecursive(UpdateAction.SF_MISSING_RESOURCES);
 			if (missing.length > 0 && !UpdateAction.updateMissing(this.getShell(), missing)) {
 				return;
 			}
 		}
-		
+
 		//get revision and depth
 		IResource resourceForRevisionSelection;
 		if (resources.length > 1) {
 			//at first try to shrink
 			IResource[] shrinkedResources = FileUtility.shrinkChildNodes(resources);
-			resourceForRevisionSelection = shrinkedResources.length > 1 ?  shrinkedResources[0].getProject() : shrinkedResources[0];
+			resourceForRevisionSelection = shrinkedResources.length > 1
+					? shrinkedResources[0].getProject()
+					: shrinkedResources[0];
 		} else {
 			resourceForRevisionSelection = resources[0];
 		}
-		
-		boolean canShowUpdateDepthPath = resources.length == 1;		
-		IRepositoryResource repositoryResource = SVNRemoteStorage.instance().asRepositoryResource(resourceForRevisionSelection);		
+
+		boolean canShowUpdateDepthPath = resources.length == 1;
+		IRepositoryResource repositoryResource = SVNRemoteStorage.instance()
+				.asRepositoryResource(resourceForRevisionSelection);
 		UpdateToRevisionPanel panel = new UpdateToRevisionPanel(repositoryResource, canShowUpdateDepthPath);
 		DefaultDialog dialog = new DefaultDialog(this.getShell(), panel);
 		if (dialog.open() == 0) {
-			this.runScheduled(UpdateAction.getUpdateOperation(resources, panel.getRevision(), panel.getDepth(), panel.isStickyDepth(), panel.getUpdateDepthPath()));
-		}				
+			this.runScheduled(UpdateAction.getUpdateOperation(resources, panel.getRevision(), panel.getDepth(),
+					panel.isStickyDepth(), panel.getUpdateDepthPath()));
+		}
 	}
-	
+
 	public boolean isEnabled() {
 		return this.checkForResourcesPresence(IStateFilter.SF_ONREPOSITORY);
 	}
-	
+
 	protected boolean needsToSaveDirtyEditors() {
 		return true;
 	}

@@ -26,26 +26,27 @@ import org.eclipse.team.svn.ui.SVNTeamUIPlugin;
 import org.eclipse.team.svn.ui.preferences.SVNTeamPreferences;
 
 /**
- * All repositories node representation 
+ * All repositories node representation
  * 
  * @author Alexander Gurov
  */
 public class RepositoriesRoot extends RepositoryFictiveNode implements IParentTreeNode, IDataTreeNode {
-	protected RepositoryLocation []children;
+	protected RepositoryLocation[] children;
+
 	protected boolean softRefresh;
 
 	public Object getData() {
 		return null;
 	}
-	
+
 	public void refresh() {
 		this.children = null;
 	}
-	
+
 	public void softRefresh() {
 		this.softRefresh = true;
 	}
-	
+
 	public String getLabel(Object o) {
 		return null;
 	}
@@ -53,8 +54,8 @@ public class RepositoriesRoot extends RepositoryFictiveNode implements IParentTr
 	public boolean hasChildren() {
 		return true;
 	}
-	
-	public Object []getChildren(Object o) {
+
+	public Object[] getChildren(Object o) {
 		if (this.children == null || this.softRefresh) {
 			HashMap<IRepositoryLocation, RepositoryLocation> oldLocations = new HashMap<IRepositoryLocation, RepositoryLocation>();
 			if (this.children != null) {
@@ -62,12 +63,13 @@ public class RepositoriesRoot extends RepositoryFictiveNode implements IParentTr
 					oldLocations.put(this.children[i].getRepositoryLocation(), this.children[i]);
 				}
 			}
-			
-			IRepositoryLocation []locations = SVNRemoteStorage.instance().getRepositoryLocations();
+
+			IRepositoryLocation[] locations = SVNRemoteStorage.instance().getRepositoryLocations();
 			Arrays.sort(locations, new Comparator<IRepositoryLocation>() {
 				public int compare(IRepositoryLocation first, IRepositoryLocation second) {
 					IPreferenceStore store = SVNTeamUIPlugin.instance().getPreferenceStore();
-					if (SVNTeamPreferences.getBehaviourBoolean(store, SVNTeamPreferences.BEHAVIOUR_CASE_INSENSITIVE_TABLE_SORTING_NAME)) {
+					if (SVNTeamPreferences.getBehaviourBoolean(store,
+							SVNTeamPreferences.BEHAVIOUR_CASE_INSENSITIVE_TABLE_SORTING_NAME)) {
 						return first.getLabel().compareToIgnoreCase(second.getLabel());
 					}
 					return first.getLabel().compareTo(second.getLabel());

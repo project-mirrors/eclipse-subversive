@@ -25,12 +25,13 @@ import org.eclipse.team.svn.ui.wizard.createpatch.SelectRepositoryResourcePage;
  */
 public class CreatePatchRemoteWizard extends CreatePatchWizard {
 	protected SelectRepositoryResourcePage urlSelectionPage;
+
 	protected IRepositoryResource targetResource;
 
 	public CreatePatchRemoteWizard(IRepositoryResource targetResource) {
 		this(targetResource, false);
 	}
-	
+
 	public CreatePatchRemoteWizard(IRepositoryResource targetResource, boolean showIgnoreAncestry) {
 		super(targetResource.getName(), null, showIgnoreAncestry);
 		this.targetResource = targetResource;
@@ -39,18 +40,18 @@ public class CreatePatchRemoteWizard extends CreatePatchWizard {
 	public IRepositoryResource getSelectedResource() {
 		return this.urlSelectionPage.getSelectedResource();
 	}
-	
+
 	public boolean canFinish() {
 		IWizardPage currentPage = this.getContainer().getCurrentPage();
 		if (currentPage instanceof SelectRepositoryResourcePage) {
 			return false;
-		}		
+		}
 		return super.canFinish();
 	}
-	
+
 	public void addPages() {
 		this.addPage(this.urlSelectionPage = new SelectRepositoryResourcePage(this.targetResource));
 		super.addPages();
 	}
-	
+
 }

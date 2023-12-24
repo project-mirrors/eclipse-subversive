@@ -77,28 +77,37 @@ import org.eclipse.ui.model.WorkbenchLabelProvider;
  */
 public class SelectPatchFilePage extends AbstractVerifiedWizardPage {
 	protected Text fileNameField;
-	protected Text wsPathField;
-	protected Button browseButton;
-	protected Button browseWSButton;
-	protected Combo charsetField;
-	
-	protected String proposedName;
-	
-	protected String charset;
-	protected String fileName;
-	protected IFile file;
-	protected int writeMode;
-	
-	protected CheckboxTreeViewer changeViewer;
-	protected IResource []roots;
-	protected Object []initialSelection;
-	protected Object []realSelection;
 
-	public SelectPatchFilePage(String proposedName, IResource []roots) {
+	protected Text wsPathField;
+
+	protected Button browseButton;
+
+	protected Button browseWSButton;
+
+	protected Combo charsetField;
+
+	protected String proposedName;
+
+	protected String charset;
+
+	protected String fileName;
+
+	protected IFile file;
+
+	protected int writeMode;
+
+	protected CheckboxTreeViewer changeViewer;
+
+	protected IResource[] roots;
+
+	protected Object[] initialSelection;
+
+	protected Object[] realSelection;
+
+	public SelectPatchFilePage(String proposedName, IResource[] roots) {
 		super(
-			SelectPatchFilePage.class.getName(), 
-			SVNUIMessages.SelectPatchFilePage_Title, 
-			SVNTeamUIPlugin.instance().getImageDescriptor("icons/wizards/newconnect.gif")); //$NON-NLS-1$
+				SelectPatchFilePage.class.getName(), SVNUIMessages.SelectPatchFilePage_Title,
+				SVNTeamUIPlugin.instance().getImageDescriptor("icons/wizards/newconnect.gif")); //$NON-NLS-1$
 		this.setDescription(SVNUIMessages.SelectPatchFilePage_Description);
 		this.proposedName = proposedName + ".patch"; //$NON-NLS-1$
 		this.writeMode = CreatePatchWizard.WRITE_TO_CLIPBOARD;
@@ -128,16 +137,15 @@ public class SelectPatchFilePage extends AbstractVerifiedWizardPage {
 			File tmp = File.createTempFile("patch", "tmp"); //$NON-NLS-1$ //$NON-NLS-2$
 			tmp.delete();
 			SelectPatchFilePage.this.fileName = tmp.getAbsolutePath();
-		} 
-		catch (IOException e) {
+		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
 	}
-	
+
 	public String getCharset() {
 		return this.charset;
 	}
-	
+
 	public boolean isRecursive() {
 		if (this.initialSelection == null) {
 			return true;
@@ -146,19 +154,19 @@ public class SelectPatchFilePage extends AbstractVerifiedWizardPage {
 		result.removeAll(Arrays.asList(this.realSelection));
 		return result.isEmpty();
 	}
-	
-	public IResource []getSelection() {
+
+	public IResource[] getSelection() {
 		return Arrays.asList(this.realSelection).toArray(new IResource[this.realSelection.length]);
 	}
 
 	public IFile getFile() {
 		return this.file;
 	}
-	
+
 	public String getFileName() {
 		return this.fileName;
 	}
-	
+
 	public int getWriteMode() {
 		return this.writeMode;
 	}
@@ -166,15 +174,15 @@ public class SelectPatchFilePage extends AbstractVerifiedWizardPage {
 	protected Composite createControlImpl(Composite parent) {
 		GridLayout layout = null;
 		GridData data = null;
-		
+
 		Composite composite = new Composite(parent, SWT.NONE);
 		layout = new GridLayout();
 		composite.setLayout(layout);
 		data = new GridData(GridData.FILL_BOTH);
 		composite.setLayoutData(data);
-		
+
 		Composite saveTo = composite;
-		
+
 		if (this.roots != null) {
 			Group saveToImpl = new Group(composite, SWT.NONE);
 			layout = new GridLayout();
@@ -184,14 +192,14 @@ public class SelectPatchFilePage extends AbstractVerifiedWizardPage {
 			saveToImpl.setText(SVNUIMessages.SelectPatchFilePage_SaveTo);
 			saveTo = saveToImpl;
 		}
-		
+
 		Button saveToClipboard = new Button(saveTo, SWT.RADIO);
 		saveToClipboard.setText(SVNUIMessages.SelectPatchFilePage_SaveToClipboard);
 		data = new GridData(GridData.FILL_HORIZONTAL);
 		saveToClipboard.setLayoutData(data);
 		saveToClipboard.addListener(SWT.Selection, new Listener() {
 			public void handleEvent(Event event) {
-				Button button = (Button)event.widget;
+				Button button = (Button) event.widget;
 				if (button.getSelection()) {
 					SelectPatchFilePage.this.fileNameField.setEnabled(false);
 					SelectPatchFilePage.this.browseButton.setEnabled(false);
@@ -199,8 +207,7 @@ public class SelectPatchFilePage extends AbstractVerifiedWizardPage {
 					SelectPatchFilePage.this.charsetField.setEnabled(true);
 					try {
 						SelectPatchFilePage.this.fileName = File.createTempFile("patch", ".tmp").getAbsolutePath(); //$NON-NLS-1$ //$NON-NLS-2$
-					} 
-					catch (IOException e) {
+					} catch (IOException e) {
 						throw new RuntimeException(e);
 					}
 					SelectPatchFilePage.this.writeMode = CreatePatchWizard.WRITE_TO_CLIPBOARD;
@@ -213,7 +220,9 @@ public class SelectPatchFilePage extends AbstractVerifiedWizardPage {
 		data = new GridData(GridData.FILL_HORIZONTAL);
 		this.charsetField.setLayoutData(data);
 		String sysEnc = System.getProperty("file.encoding"); //$NON-NLS-1$
-		String []comboItems = "UTF-8".equalsIgnoreCase(sysEnc) ? new String[] {sysEnc} :  new String[] {sysEnc, "UTF-8"}; //$NON-NLS-1$ //$NON-NLS-2$
+		String[] comboItems = "UTF-8".equalsIgnoreCase(sysEnc) //$NON-NLS-1$
+				? new String[] { sysEnc }
+				: new String[] { sysEnc, "UTF-8" }; //$NON-NLS-1$
 		this.charset = comboItems[0];
 		this.charsetField.setItems(comboItems);
 		this.charsetField.select(0);
@@ -228,14 +237,14 @@ public class SelectPatchFilePage extends AbstractVerifiedWizardPage {
 				SelectPatchFilePage.this.charset = SelectPatchFilePage.this.charsetField.getText();
 			}
 		});
-		
+
 		final Button saveOnFileSystem = new Button(saveTo, SWT.RADIO);
 		saveOnFileSystem.setText(SVNUIMessages.SelectPatchFilePage_SaveInFS);
 		data = new GridData(GridData.FILL_HORIZONTAL);
 		saveOnFileSystem.setLayoutData(data);
 		saveOnFileSystem.addListener(SWT.Selection, new Listener() {
 			public void handleEvent(Event event) {
-				Button button = (Button)event.widget;
+				Button button = (Button) event.widget;
 				if (button.getSelection()) {
 					SelectPatchFilePage.this.fileNameField.setEnabled(true);
 					SelectPatchFilePage.this.browseButton.setEnabled(true);
@@ -256,7 +265,7 @@ public class SelectPatchFilePage extends AbstractVerifiedWizardPage {
 		fsComposite.setLayout(layout);
 		data = new GridData(GridData.FILL_HORIZONTAL);
 		fsComposite.setLayoutData(data);
-		
+
 		this.fileNameField = new Text(fsComposite, SWT.BORDER | SWT.SINGLE);
 		data = new GridData(GridData.FILL_HORIZONTAL);
 		this.fileNameField.setLayoutData(data);
@@ -270,16 +279,18 @@ public class SelectPatchFilePage extends AbstractVerifiedWizardPage {
 		cVerifier.add(new NonEmptyFieldVerifier(name));
 		cVerifier.add(new ResourcePathVerifier(name));
 		cVerifier.add(new AbstractFormattedVerifier(name) {
-		    protected String getErrorMessageImpl(Control input) {
-		        return null;
-		    }
-		    protected String getWarningMessageImpl(Control input) {
-		        String text = this.getText(input);
-		        if (new File(text).exists()) {
-		            return SVNUIMessages.format(SVNUIMessages.SelectPatchFilePage_SaveInFS_Verifier_Warning, new String[] {AbstractFormattedVerifier.FIELD_NAME});
-		        }
-		        return null;
-		    }
+			protected String getErrorMessageImpl(Control input) {
+				return null;
+			}
+
+			protected String getWarningMessageImpl(Control input) {
+				String text = this.getText(input);
+				if (new File(text).exists()) {
+					return SVNUIMessages.format(SVNUIMessages.SelectPatchFilePage_SaveInFS_Verifier_Warning,
+							new String[] { AbstractFormattedVerifier.FIELD_NAME });
+				}
+				return null;
+			}
 		});
 		this.attachTo(this.fileNameField, new AbstractVerifierProxy(cVerifier) {
 			protected boolean isVerificationEnabled(Control input) {
@@ -297,35 +308,37 @@ public class SelectPatchFilePage extends AbstractVerifiedWizardPage {
 				FileDialog dlg = new FileDialog(SelectPatchFilePage.this.getShell(), SWT.PRIMARY_MODAL | SWT.SAVE);
 				dlg.setText(SVNUIMessages.SelectPatchFilePage_SavePatchAs);
 				dlg.setFileName(SelectPatchFilePage.this.proposedName);
-				dlg.setFilterExtensions(new String[] {"*.patch", "*.*"}); //$NON-NLS-1$ //$NON-NLS-2$
+				dlg.setFilterExtensions(new String[] { "*.patch", "*.*" }); //$NON-NLS-1$ //$NON-NLS-2$
 				String file = dlg.open();
 				if (file != null) {
 					SelectPatchFilePage.this.fileName = file;
 					SelectPatchFilePage.this.fileNameField.setText(file);
 					SelectPatchFilePage.this.validateContent();
-				}			
+				}
 			}
-		});			
-		
+		});
+
 		final Button saveInWorkspace = new Button(saveTo, SWT.RADIO);
 		data = new GridData(GridData.FILL_HORIZONTAL);
 		saveInWorkspace.setLayoutData(data);
 		saveInWorkspace.setText(SVNUIMessages.SelectPatchFilePage_SaveInWS);
 		saveInWorkspace.addListener(SWT.Selection, new Listener() {
 			public void handleEvent(Event event) {
-				Button button = (Button)event.widget;
+				Button button = (Button) event.widget;
 				if (button.getSelection()) {
 					SelectPatchFilePage.this.fileNameField.setEnabled(false);
 					SelectPatchFilePage.this.browseButton.setEnabled(false);
 					SelectPatchFilePage.this.browseWSButton.setEnabled(true);
 					SelectPatchFilePage.this.charsetField.setEnabled(false);
-					SelectPatchFilePage.this.fileName = SelectPatchFilePage.this.file == null ? null : FileUtility.getWorkingCopyPath(SelectPatchFilePage.this.file);
+					SelectPatchFilePage.this.fileName = SelectPatchFilePage.this.file == null
+							? null
+							: FileUtility.getWorkingCopyPath(SelectPatchFilePage.this.file);
 					SelectPatchFilePage.this.writeMode = CreatePatchWizard.WRITE_TO_WORKSPACE_FILE;
 					SelectPatchFilePage.this.validateContent();
 				}
 			}
 		});
-		
+
 		Composite wsComposite = new Composite(saveTo, SWT.NONE);
 		layout = new GridLayout();
 		layout.numColumns = 2;
@@ -334,7 +347,7 @@ public class SelectPatchFilePage extends AbstractVerifiedWizardPage {
 		wsComposite.setLayout(layout);
 		data = new GridData(GridData.FILL_HORIZONTAL);
 		wsComposite.setLayoutData(data);
-		
+
 		this.wsPathField = new Text(wsComposite, SWT.BORDER | SWT.SINGLE | SWT.READ_ONLY);
 		data = new GridData(GridData.FILL_HORIZONTAL);
 		this.wsPathField.setLayoutData(data);
@@ -342,15 +355,17 @@ public class SelectPatchFilePage extends AbstractVerifiedWizardPage {
 		name = SVNUIMessages.SelectPatchFilePage_SaveInWS_Verifier;
 		cVerifier.add(new NonEmptyFieldVerifier(name));
 		cVerifier.add(new AbstractFormattedVerifier(name) {
-		    protected String getErrorMessageImpl(Control input) {
-		        return null;
-		    }
-		    protected String getWarningMessageImpl(Control input) {
-		        if (SelectPatchFilePage.this.file != null && SelectPatchFilePage.this.file.isAccessible()) {
-		            return SVNUIMessages.format(SVNUIMessages.SelectPatchFilePage_SaveInWS_Verifier_Warning, new String[] {AbstractFormattedVerifier.FIELD_NAME});
-		        }
-		        return null;
-		    }
+			protected String getErrorMessageImpl(Control input) {
+				return null;
+			}
+
+			protected String getWarningMessageImpl(Control input) {
+				if (SelectPatchFilePage.this.file != null && SelectPatchFilePage.this.file.isAccessible()) {
+					return SVNUIMessages.format(SVNUIMessages.SelectPatchFilePage_SaveInWS_Verifier_Warning,
+							new String[] { AbstractFormattedVerifier.FIELD_NAME });
+				}
+				return null;
+			}
 		});
 		this.attachTo(this.wsPathField, new AbstractVerifierProxy(cVerifier) {
 			protected boolean isVerificationEnabled(Control input) {
@@ -365,24 +380,28 @@ public class SelectPatchFilePage extends AbstractVerifiedWizardPage {
 		this.browseWSButton.setLayoutData(data);
 		this.browseWSButton.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				IProject proposedDestination = SelectPatchFilePage.this.roots.length > 0 ? SelectPatchFilePage.this.roots[0].getProject() : null;
-				SavePatchInWorkspacePanel panel = new SavePatchInWorkspacePanel(SelectPatchFilePage.this.proposedName, proposedDestination);
+				IProject proposedDestination = SelectPatchFilePage.this.roots.length > 0
+						? SelectPatchFilePage.this.roots[0].getProject()
+						: null;
+				SavePatchInWorkspacePanel panel = new SavePatchInWorkspacePanel(SelectPatchFilePage.this.proposedName,
+						proposedDestination);
 				DefaultDialog dlg = new DefaultDialog(SelectPatchFilePage.this.getShell(), panel);
 				if (dlg.open() == 0) {
 					SelectPatchFilePage.this.file = panel.getFile();
 					SelectPatchFilePage.this.fileName = FileUtility.getWorkingCopyPath(SelectPatchFilePage.this.file);
-					SelectPatchFilePage.this.wsPathField.setText(SelectPatchFilePage.this.file.getFullPath().toString());
+					SelectPatchFilePage.this.wsPathField
+							.setText(SelectPatchFilePage.this.file.getFullPath().toString());
 					SelectPatchFilePage.this.validateContent();
-				}			
+				}
 			}
-		});			
-		
+		});
+
 		if (this.roots != null) {
 			Label label = new Label(composite, SWT.NONE);
 			data = new GridData();
 			label.setLayoutData(data);
 			label.setText(SVNUIMessages.SelectPatchFilePage_Changes);
-			
+
 			this.changeViewer = new CheckboxTreeViewer(composite, SWT.BORDER);
 			data = new GridData(GridData.FILL_BOTH);
 			data.heightHint = 200;
@@ -392,23 +411,22 @@ public class SelectPatchFilePage extends AbstractVerifiedWizardPage {
 				public Object[] getChildren(Object element) {
 					if (element instanceof IProject || element instanceof IFolder) {
 						try {
-							Object[] result = SVNRemoteStorage.instance().getRegisteredChildren((IContainer)element);
+							Object[] result = SVNRemoteStorage.instance().getRegisteredChildren((IContainer) element);
 							return result != null ? result : new Object[0];
-						}
-						catch (Exception e) {
+						} catch (Exception e) {
 							// do nothing
 						}
 					}
 					Object[] result = super.getChildren(element);
 					return result != null ? result : new Object[0];
 				}
-			}); 
+			});
 			this.changeViewer.setLabelProvider(new WorkbenchLabelProvider());
 			this.changeViewer.addCheckStateListener(new ICheckStateListener() {
 				public void checkStateChanged(CheckStateChangedEvent event) {
 					SelectPatchFilePage.this.changeViewer.getControl().setRedraw(false);
-					
-					IResource resource = (IResource)event.getElement();
+
+					IResource resource = (IResource) event.getElement();
 					HashSet grayed = new HashSet();
 					grayed.addAll(Arrays.asList(SelectPatchFilePage.this.changeViewer.getGrayedElements()));
 					if (event.getChecked()) {
@@ -416,7 +434,7 @@ public class SelectPatchFilePage extends AbstractVerifiedWizardPage {
 							SelectPatchFilePage.this.changeViewer.setSubtreeChecked(resource, true);
 							IPath path = resource.getFullPath();
 							for (int i = 0; i < SelectPatchFilePage.this.initialSelection.length; i++) {
-								IResource current = (IResource)SelectPatchFilePage.this.initialSelection[i];
+								IResource current = (IResource) SelectPatchFilePage.this.initialSelection[i];
 								if (path.isPrefixOf(current.getFullPath())) {
 									grayed.remove(current);
 								}
@@ -426,7 +444,7 @@ public class SelectPatchFilePage extends AbstractVerifiedWizardPage {
 							boolean hasUnchecked = false;
 							IPath path = resource.getFullPath();
 							for (int i = 0; i < SelectPatchFilePage.this.initialSelection.length; i++) {
-								IResource current = (IResource)SelectPatchFilePage.this.initialSelection[i];
+								IResource current = (IResource) SelectPatchFilePage.this.initialSelection[i];
 								if (path.isPrefixOf(current.getFullPath()) && !current.equals(resource)) {
 									hasUnchecked |= !SelectPatchFilePage.this.changeViewer.getChecked(current);
 								}
@@ -436,8 +454,7 @@ public class SelectPatchFilePage extends AbstractVerifiedWizardPage {
 								SelectPatchFilePage.this.changeViewer.setChecked(resource, true);
 							}
 						}
-					}
-					else {
+					} else {
 						if (resource.getType() != IResource.FILE) {
 							SelectPatchFilePage.this.changeViewer.setSubtreeChecked(resource, false);
 						}
@@ -445,19 +462,20 @@ public class SelectPatchFilePage extends AbstractVerifiedWizardPage {
 					}
 					SelectPatchFilePage.this.changeViewer.setGrayedElements(grayed.toArray());
 					SelectPatchFilePage.this.realSelection = SelectPatchFilePage.this.changeViewer.getCheckedElements();
-					
+
 					SelectPatchFilePage.this.changeViewer.getControl().setRedraw(true);
 				}
 			});
 			this.changeViewer.addFilter(new ViewerFilter() {
 				public boolean select(Viewer viewer, Object parentElement, Object element) {
 					if (element instanceof IResource) {
-						IResource resource = (IResource)element;
+						IResource resource = (IResource) element;
 						IPath resourcePath = resource.getFullPath();
 						for (int i = 0; i < SelectPatchFilePage.this.roots.length; i++) {
 							IPath rootPath = SelectPatchFilePage.this.roots[i].getFullPath();
-							if ((rootPath.isPrefixOf(resourcePath) || resourcePath.isPrefixOf(rootPath)) && 
-								FileUtility.checkForResourcesPresenceRecursive(new IResource[] {resource}, IStateFilter.SF_ANY_CHANGE)) {
+							if ((rootPath.isPrefixOf(resourcePath) || resourcePath.isPrefixOf(rootPath))
+									&& FileUtility.checkForResourcesPresenceRecursive(new IResource[] { resource },
+											IStateFilter.SF_ANY_CHANGE)) {
 								return true;
 							}
 						}
@@ -467,7 +485,7 @@ public class SelectPatchFilePage extends AbstractVerifiedWizardPage {
 			});
 			this.changeViewer.setInput(ResourcesPlugin.getWorkspace().getRoot());
 			this.changeViewer.expandAll();
-			TreeItem []items = this.changeViewer.getTree().getItems();
+			TreeItem[] items = this.changeViewer.getTree().getItems();
 			for (int i = 0; i < items.length; i++) {
 				this.changeViewer.setSubtreeChecked(items[i].getData(), true);
 			}
@@ -478,10 +496,10 @@ public class SelectPatchFilePage extends AbstractVerifiedWizardPage {
 		this.browseButton.setEnabled(false);
 		this.browseWSButton.setEnabled(false);
 		saveToClipboard.setSelection(true);
-		
+
 //		Setting context help
-        PlatformUI.getWorkbench().getHelpSystem().setHelp(composite, "org.eclipse.team.svn.help.patchFileContext"); //$NON-NLS-1$
-		
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(composite, "org.eclipse.team.svn.help.patchFileContext"); //$NON-NLS-1$
+
 		return composite;
 	}
 

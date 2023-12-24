@@ -28,8 +28,8 @@ import org.eclipse.team.internal.core.subscribers.ChangeSet;
 public class SVNChangeSetResourceMapping extends ResourceMapping {
 
 	protected ChangeSet changeSet;
-	
-	public SVNChangeSetResourceMapping(ChangeSet changeSet ) {
+
+	public SVNChangeSetResourceMapping(ChangeSet changeSet) {
 		this.changeSet = changeSet;
 	}
 
@@ -50,11 +50,12 @@ public class SVNChangeSetResourceMapping extends ResourceMapping {
 		return projects.toArray(new IProject[projects.size()]);
 	}
 
-	public ResourceTraversal[] getTraversals(ResourceMappingContext context, IProgressMonitor monitor) throws CoreException {
+	public ResourceTraversal[] getTraversals(ResourceMappingContext context, IProgressMonitor monitor)
+			throws CoreException {
 		IResource[] resources = this.changeSet.getResources();
 		if (resources.length == 0) {
 			return new ResourceTraversal[0];
 		}
-		return new ResourceTraversal[] {new ResourceTraversal(resources, IResource.DEPTH_ZERO, IResource.NONE)};
+		return new ResourceTraversal[] { new ResourceTraversal(resources, IResource.DEPTH_ZERO, IResource.NONE) };
 	}
 }

@@ -38,42 +38,49 @@ import org.eclipse.team.svn.ui.preferences.SVNTeamPreferences;
  */
 public class FilterManager implements IPropertyChangeListener, IResourceStatesListener {
 	private static FilterManager instance = null;
+
 	protected Map filters2condition;
+
 	protected Map recursiveFilters2condition;
-	
+
 	protected MapChecker flatChecker;
+
 	protected MapChecker recursiveChecker;
-	
+
 	protected boolean dirty;
-	
+
 	public static synchronized FilterManager instance() {
 		if (FilterManager.instance == null) {
 			FilterManager.instance = new FilterManager();
 		}
 		return FilterManager.instance;
 	}
-	
+
 	public void propertyChange(PropertyChangeEvent event) {
-		if (event.getProperty().equals(SVNTeamPreferences.fullDecorationName(SVNTeamPreferences.DECORATION_PRECISE_ENABLEMENTS_NAME)) ||
-			event.getProperty().equals(SVNTeamPreferences.fullCoreName(SVNTeamPreferences.CORE_SVNCONNECTOR_NAME))) {
+		if (event.getProperty()
+				.equals(SVNTeamPreferences.fullDecorationName(SVNTeamPreferences.DECORATION_PRECISE_ENABLEMENTS_NAME))
+				|| event.getProperty()
+						.equals(SVNTeamPreferences.fullCoreName(SVNTeamPreferences.CORE_SVNCONNECTOR_NAME))) {
 			this.clear();
 		}
 	}
-	
+
 	public void resourcesStateChanged(ResourceStatesChangedEvent event) {
 		this.clear();
 	}
-	
+
 	public void clear() {
 		this.dirty = true;
 	}
-	
-	public boolean checkForResourcesPresenceRecursive(IResource []selectedResources, IStateFilter stateFilter) {
+
+	public boolean checkForResourcesPresenceRecursive(IResource[] selectedResources, IStateFilter stateFilter) {
 		return this.checkForResourcesPresence(selectedResources, stateFilter, true);
 	}
-	
-	public boolean checkForResourcesPresence(IResource []selectedResources, IStateFilter stateFilter, boolean recursive) {
-		boolean computeDeep = SVNTeamPreferences.getDecorationBoolean(SVNTeamUIPlugin.instance().getPreferenceStore(), SVNTeamPreferences.DECORATION_PRECISE_ENABLEMENTS_NAME);
+
+	public boolean checkForResourcesPresence(IResource[] selectedResources, IStateFilter stateFilter,
+			boolean recursive) {
+		boolean computeDeep = SVNTeamPreferences.getDecorationBoolean(SVNTeamUIPlugin.instance().getPreferenceStore(),
+				SVNTeamPreferences.DECORATION_PRECISE_ENABLEMENTS_NAME);
 		selectedResources = this.connectedToSVN(selectedResources);
 		if (this.dirty) {
 			this.dirty = false;
@@ -85,29 +92,29 @@ public class FilterManager implements IPropertyChangeListener, IResourceStatesLi
 			if (computeDeep) {
 				if (this.recursiveFilters2condition.size() > 0) {
 					this.recursiveChecker.clearFilters();
-					FileUtility.checkForResourcesPresence(selectedResources, this.recursiveChecker, IResource.DEPTH_INFINITE);
+					FileUtility.checkForResourcesPresence(selectedResources, this.recursiveChecker,
+							IResource.DEPTH_INFINITE);
 					this.recursiveChecker.checkDisallowed();
 				}
-			}
-			else {
+			} else {
 				this.recursiveChecker.setAllTo(Boolean.TRUE);
 			}
 		}
 		Map filtersMap = recursive ? this.recursiveFilters2condition : this.filters2condition;
-		Boolean retVal = (Boolean)filtersMap.get(stateFilter);
+		Boolean retVal = (Boolean) filtersMap.get(stateFilter);
 		if (retVal == null) {
 			if (!computeDeep && recursive) {
 				filtersMap.put(stateFilter, retVal = Boolean.TRUE);
-			}
-			else {
-				boolean containsResources = FileUtility.checkForResourcesPresence(selectedResources, stateFilter, recursive ? IResource.DEPTH_INFINITE : IResource.DEPTH_ZERO);
+			} else {
+				boolean containsResources = FileUtility.checkForResourcesPresence(selectedResources, stateFilter,
+						recursive ? IResource.DEPTH_INFINITE : IResource.DEPTH_ZERO);
 				filtersMap.put(stateFilter, retVal = Boolean.valueOf(containsResources));
 			}
 		}
 		return retVal.booleanValue();
 	}
-	
-	protected IResource []connectedToSVN(IResource []selectedResources) {
+
+	protected IResource[] connectedToSVN(IResource[] selectedResources) {
 		ArrayList<IResource> retVal = new ArrayList<IResource>(selectedResources.length);
 		for (int i = 0; i < selectedResources.length; i++) {
 			if (FileUtility.isConnected(selectedResources[i])) {
@@ -116,11 +123,11 @@ public class FilterManager implements IPropertyChangeListener, IResourceStatesLi
 		}
 		return retVal.toArray(new IResource[retVal.size()]);
 	}
-	
+
 	private FilterManager() {
 		this.filters2condition = new HashMap();
 		this.recursiveFilters2condition = new HashMap();
-		
+
 		this.flatChecker = new MapChecker(this.filters2condition);
 		this.recursiveChecker = new MapChecker(this.recursiveFilters2condition);
 		SVNTeamUIPlugin.instance().getPreferenceStore().addPropertyChangeListener(this);
@@ -129,29 +136,29 @@ public class FilterManager implements IPropertyChangeListener, IResourceStatesLi
 
 	protected static class MapChecker extends IStateFilter.AbstractStateFilter {
 		protected Map filterMap;
-		
+
 		public MapChecker(Map filterMap) {
 			this.filterMap = filterMap;
 		}
-		
+
 		public void clearFilters() {
-			for (Iterator it = this.filterMap.keySet().iterator(); it.hasNext(); ) {
+			for (Iterator it = this.filterMap.keySet().iterator(); it.hasNext();) {
 				this.filterMap.put(it.next(), null);
 			}
 		}
-		
+
 		public void setAllTo(Boolean value) {
-			for (Iterator it = this.filterMap.keySet().iterator(); it.hasNext(); ) {
+			for (Iterator it = this.filterMap.keySet().iterator(); it.hasNext();) {
 				this.filterMap.put(it.next(), value);
 			}
 		}
-		
+
 		protected boolean acceptImpl(ILocalResource local, IResource resource, String state, int mask) {
 			boolean retVal = true;
-			for (Iterator it = this.filterMap.entrySet().iterator(); it.hasNext(); ) {
-				Map.Entry entry = (Map.Entry)it.next();
+			for (Iterator it = this.filterMap.entrySet().iterator(); it.hasNext();) {
+				Map.Entry entry = (Map.Entry) it.next();
 				if (entry.getValue() == null) {
-					IStateFilter filter = (IStateFilter)entry.getKey();
+					IStateFilter filter = (IStateFilter) entry.getKey();
 					boolean value = local == null ? filter.accept(resource, state, mask) : filter.accept(local);
 					retVal &= value;
 					if (value) {
@@ -161,10 +168,10 @@ public class FilterManager implements IPropertyChangeListener, IResourceStatesLi
 			}
 			return retVal;
 		}
-		
+
 		public void checkDisallowed() {
-			for (Iterator it = this.filterMap.entrySet().iterator(); it.hasNext(); ) {
-				Map.Entry entry = (Map.Entry)it.next();
+			for (Iterator it = this.filterMap.entrySet().iterator(); it.hasNext();) {
+				Map.Entry entry = (Map.Entry) it.next();
 				if (entry.getValue() == null) {
 					this.filterMap.put(entry.getKey(), Boolean.FALSE);
 				}
@@ -176,5 +183,5 @@ public class FilterManager implements IPropertyChangeListener, IResourceStatesLi
 		}
 
 	}
-	
+
 }

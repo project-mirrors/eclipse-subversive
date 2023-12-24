@@ -35,7 +35,10 @@ import org.junit.Test;
 public class UIMonitorUtilityTest {
 	@Test
 	public void testDoTaskScheduledAsTeamWorkspaceModify() {
-		IWorkbenchPart part = TestPlugin.instance().getWorkbench().getActiveWorkbenchWindow().getPartService()
+		IWorkbenchPart part = TestPlugin.instance()
+				.getWorkbench()
+				.getActiveWorkbenchWindow()
+				.getPartService()
 				.getActivePart();
 		UIMonitorUtility.doTaskScheduled(part, new TestFailureOperation(),
 				new WorkspaceModifyOperationWrapperFactory() {
@@ -48,7 +51,10 @@ public class UIMonitorUtilityTest {
 
 	@Test
 	public void testDoTaskScheduledAsTeamDefault() {
-		IWorkbenchPart part = TestPlugin.instance().getWorkbench().getActiveWorkbenchWindow().getPartService()
+		IWorkbenchPart part = TestPlugin.instance()
+				.getWorkbench()
+				.getActiveWorkbenchWindow()
+				.getPartService()
 				.getActivePart();
 		UIMonitorUtility.doTaskScheduled(part, new TestFailureOperation(), new DefaultOperationWrapperFactory() {
 			@Override

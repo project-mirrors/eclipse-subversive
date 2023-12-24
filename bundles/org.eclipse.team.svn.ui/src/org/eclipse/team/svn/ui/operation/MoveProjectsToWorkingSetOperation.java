@@ -35,8 +35,8 @@ import org.eclipse.ui.IWorkingSetManager;
  */
 public class MoveProjectsToWorkingSetOperation extends AbstractWorkingCopyOperation {
 	protected String workingSetName;
-	
-	public MoveProjectsToWorkingSetOperation(IResource []projects, String workingSetName) {
+
+	public MoveProjectsToWorkingSetOperation(IResource[] projects, String workingSetName) {
 		super("Operation_MoveToWorkingSet", SVNUIMessages.class, projects); //$NON-NLS-1$
 		this.workingSetName = workingSetName;
 	}
@@ -45,16 +45,16 @@ public class MoveProjectsToWorkingSetOperation extends AbstractWorkingCopyOperat
 		super("Operation_MoveToWorkingSet", SVNUIMessages.class, provider); //$NON-NLS-1$
 		this.workingSetName = workingSetName;
 	}
-	
+
 	public int getOperationWeight() {
 		return 0;
 	}
 
 	protected void runImpl(IProgressMonitor monitor) throws Exception {
-		IResource []projects = this.operableData();
-		IWorkingSet wSet = null; 
+		IResource[] projects = this.operableData();
+		IWorkingSet wSet = null;
 		IWorkingSetManager workingSetManager = SVNTeamUIPlugin.instance().getWorkbench().getWorkingSetManager();
-		IWorkingSet []workingSets = workingSetManager.getWorkingSets();
+		IWorkingSet[] workingSets = workingSetManager.getWorkingSets();
 		for (int i = 0; i < workingSets.length; i++) {
 			if (workingSets[i].getName().equals(this.workingSetName)) {
 				wSet = workingSets[i];

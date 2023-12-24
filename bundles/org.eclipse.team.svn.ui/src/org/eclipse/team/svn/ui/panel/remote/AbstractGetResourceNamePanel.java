@@ -41,18 +41,24 @@ import org.eclipse.team.svn.ui.verifier.ResourceNameVerifier;
  */
 public abstract class AbstractGetResourceNamePanel extends AbstractDialogPanel {
 	protected String resourceName;
+
 	protected String disallowedName;
+
 	protected Text text;
+
 	protected CommentComposite comment;
+
 	protected boolean allowMultipart;
 
-    public AbstractGetResourceNamePanel(String title, boolean allowMultipart) {
-        super();
-        this.dialogTitle = title;
-        this.allowMultipart = allowMultipart;
-        this.defaultMessage = allowMultipart ? SVNUIMessages.AbstractGetResourceNamePanel_Message_MultiPart : SVNUIMessages.AbstractGetResourceNamePanel_Message_Simple;
-        this.resourceName = ""; //$NON-NLS-1$
-    }
+	public AbstractGetResourceNamePanel(String title, boolean allowMultipart) {
+		super();
+		this.dialogTitle = title;
+		this.allowMultipart = allowMultipart;
+		this.defaultMessage = allowMultipart
+				? SVNUIMessages.AbstractGetResourceNamePanel_Message_MultiPart
+				: SVNUIMessages.AbstractGetResourceNamePanel_Message_Simple;
+		this.resourceName = ""; //$NON-NLS-1$
+	}
 
 	public String getResourceName() {
 		return this.resourceName.trim();
@@ -61,22 +67,22 @@ public abstract class AbstractGetResourceNamePanel extends AbstractDialogPanel {
 	public String getMessage() {
 		return this.comment.getMessage();
 	}
-    
-    public void createControlsImpl(Composite parent) {
-        GridData data = null;
-        GridLayout layout = null;
 
-        Composite nameComposite = new Composite(parent, SWT.NONE);
-        layout = new GridLayout();
-        layout.numColumns = 2;
-        layout.marginWidth = 0;
-        layout.marginHeight = 0;
-        nameComposite.setLayout(layout);
-        data = new GridData(GridData.FILL_HORIZONTAL);        
-        nameComposite.setLayoutData(data);
-        
-        Label nameLabel = new Label(nameComposite, SWT.NONE);
-        nameLabel.setText(SVNUIMessages.AbstractGetResourceNamePanel_Name);
+	public void createControlsImpl(Composite parent) {
+		GridData data = null;
+		GridLayout layout = null;
+
+		Composite nameComposite = new Composite(parent, SWT.NONE);
+		layout = new GridLayout();
+		layout.numColumns = 2;
+		layout.marginWidth = 0;
+		layout.marginHeight = 0;
+		nameComposite.setLayout(layout);
+		data = new GridData(GridData.FILL_HORIZONTAL);
+		nameComposite.setLayoutData(data);
+
+		Label nameLabel = new Label(nameComposite, SWT.NONE);
+		nameLabel.setText(SVNUIMessages.AbstractGetResourceNamePanel_Name);
 		this.text = new Text(nameComposite, SWT.SINGLE | SWT.BORDER);
 		data = new GridData(GridData.FILL_HORIZONTAL);
 		this.text.setLayoutData(data);
@@ -88,15 +94,16 @@ public abstract class AbstractGetResourceNamePanel extends AbstractDialogPanel {
 		verifier.add(new AbsolutePathVerifier(name));
 		verifier.add(new AbstractFormattedVerifier(name) {
 			private String msg = SVNUIMessages.AbstractGetResourceNamePanel_Name_Verifier_Error;
-			
+
 			protected String getErrorMessageImpl(Control input) {
 				String text = this.getText(input);
-				if (AbstractGetResourceNamePanel.this.disallowedName != null &&
-					AbstractGetResourceNamePanel.this.disallowedName.equals(text)) {
-					return BaseMessages.format(this.msg, new Object[] {AbstractFormattedVerifier.FIELD_NAME, text});
+				if (AbstractGetResourceNamePanel.this.disallowedName != null
+						&& AbstractGetResourceNamePanel.this.disallowedName.equals(text)) {
+					return BaseMessages.format(this.msg, new Object[] { AbstractFormattedVerifier.FIELD_NAME, text });
 				}
 				return null;
 			}
+
 			protected String getWarningMessageImpl(Control input) {
 				return null;
 			};
@@ -108,32 +115,32 @@ public abstract class AbstractGetResourceNamePanel extends AbstractDialogPanel {
 		data = new GridData(GridData.FILL_BOTH);
 		group.setLayoutData(data);
 		group.setText(SVNUIMessages.AbstractGetResourceNamePanel_Comment);
-		
-        this.comment = new CommentComposite(group, this);
+
+		this.comment = new CommentComposite(group, this);
 		data = new GridData(GridData.FILL_BOTH);
 		this.comment.setLayoutData(data);
-    }
-    
-    public Point getPrefferedSizeImpl() {
-    	return new Point(525, SWT.DEFAULT);
-    }
-    
-    public void postInit() {
-    	super.postInit();
-    	this.comment.postInit(this.manager);
-    }
-    
-    protected void saveChangesImpl() {
-        this.resourceName = this.text.getText();
-        this.comment.saveChanges();
-    }
+	}
 
-    protected void cancelChangesImpl() {
-    	this.comment.cancelChanges();
-    }
+	public Point getPrefferedSizeImpl() {
+		return new Point(525, SWT.DEFAULT);
+	}
 
-    protected AbstractVerifier createNonEmptyNameFieldVerifier() {
-    	return new NonEmptyFieldVerifier(SVNUIMessages.AbstractGetResourceNamePanel_Name_Verifier);
-    }
-    
+	public void postInit() {
+		super.postInit();
+		this.comment.postInit(this.manager);
+	}
+
+	protected void saveChangesImpl() {
+		this.resourceName = this.text.getText();
+		this.comment.saveChanges();
+	}
+
+	protected void cancelChangesImpl() {
+		this.comment.cancelChanges();
+	}
+
+	protected AbstractVerifier createNonEmptyNameFieldVerifier() {
+		return new NonEmptyFieldVerifier(SVNUIMessages.AbstractGetResourceNamePanel_Name_Verifier);
+	}
+
 }

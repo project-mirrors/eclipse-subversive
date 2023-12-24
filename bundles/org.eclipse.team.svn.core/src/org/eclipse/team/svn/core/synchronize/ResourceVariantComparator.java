@@ -36,7 +36,7 @@ public class ResourceVariantComparator implements IResourceVariantComparator {
 			return false;
 		}
 		ILocalResource resource = SVNRemoteStorage.instance().asLocalResource(local);
-		return resource.getRevision() == ((ResourceVariant)remote).getResource().getRevision();
+		return resource.getRevision() == ((ResourceVariant) remote).getResource().getRevision();
 	}
 
 	public boolean compare(IResourceVariant base, IResourceVariant remote) {
@@ -44,7 +44,7 @@ public class ResourceVariantComparator implements IResourceVariantComparator {
 			return true;
 		}
 		if (base == null || remote == null) {
-		    return false;
+			return false;
 		}
 		return base.getContentIdentifier().equals(remote.getContentIdentifier());
 	}

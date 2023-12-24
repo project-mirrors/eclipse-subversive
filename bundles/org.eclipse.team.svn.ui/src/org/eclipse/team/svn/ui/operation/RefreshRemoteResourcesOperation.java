@@ -32,42 +32,42 @@ import org.eclipse.team.svn.ui.repository.model.IDataTreeNode;
  */
 public class RefreshRemoteResourcesOperation extends AbstractRepositoryOperation {
 
-	public RefreshRemoteResourcesOperation(IRepositoryResource []resources) {
+	public RefreshRemoteResourcesOperation(IRepositoryResource[] resources) {
 		super("Operation_RefreshRemote", SVNUIMessages.class, resources); //$NON-NLS-1$
 	}
 
 	public RefreshRemoteResourcesOperation(IRepositoryResourceProvider provider) {
 		super("Operation_RefreshRemote", SVNUIMessages.class, provider); //$NON-NLS-1$
 	}
-	
+
 	public int getOperationWeight() {
 		return 0;
 	}
 
 	protected void runImpl(IProgressMonitor monitor) throws Exception {
-		IRepositoryResource []resources = this.operableData();
-		
+		IRepositoryResource[] resources = this.operableData();
+
 		for (int i = 0; i < resources.length; i++) {
 			final IRepositoryResource current = resources[i];
 			this.protectStep(new IUnprotectedOperation() {
 				public void run(IProgressMonitor monitor) throws Exception {
-					if (current instanceof IRepositoryRoot && ((IRepositoryRoot)current).getKind() == IRepositoryRoot.KIND_LOCATION_ROOT) {
+					if (current instanceof IRepositoryRoot
+							&& ((IRepositoryRoot) current).getKind() == IRepositoryRoot.KIND_LOCATION_ROOT) {
 						RepositoriesView.refresh(current.getRepositoryLocation(), new RefreshVisitor());
-					}
-					else {
+					} else {
 						RepositoriesView.refresh(current, new RefreshVisitor());
 					}
 				}
 			}, monitor, resources.length);
 		}
 	}
-	
-    protected class RefreshVisitor implements RepositoryTreeViewer.IRefreshVisitor {
+
+	protected class RefreshVisitor implements RepositoryTreeViewer.IRefreshVisitor {
 		public void visit(Object element) {
 			if (element instanceof IDataTreeNode) {
-				((IDataTreeNode)element).refresh();
+				((IDataTreeNode) element).refresh();
 			}
 		}
 	}
-    
+
 }

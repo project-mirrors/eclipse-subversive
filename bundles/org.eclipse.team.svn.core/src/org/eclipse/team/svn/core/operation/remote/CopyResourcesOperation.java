@@ -27,17 +27,20 @@ import org.eclipse.team.svn.core.resource.IRepositoryResource;
  * @author Alexander Gurov
  */
 public class CopyResourcesOperation extends AbstractCopyMoveResourcesOperation {
-	public CopyResourcesOperation(IRepositoryResource destinationResource, IRepositoryResource[] selectedResources, String message, String name) {
+	public CopyResourcesOperation(IRepositoryResource destinationResource, IRepositoryResource[] selectedResources,
+			String message, String name) {
 		super("Operation_CopyRemote", SVNMessages.class, destinationResource, selectedResources, message, name); //$NON-NLS-1$
 	}
 
-	protected String []getRevisionPaths(String srcUrl, String dstUrl) {
-		return new String [] {dstUrl};
+	protected String[] getRevisionPaths(String srcUrl, String dstUrl) {
+		return new String[] { dstUrl };
 	}
 
-	protected void runCopyMove(ISVNConnector proxy, SVNEntryRevisionReference[] source, String[] sourcePaths, String destinationUrl, IProgressMonitor monitor) throws Exception {
+	protected void runCopyMove(ISVNConnector proxy, SVNEntryRevisionReference[] source, String[] sourcePaths,
+			String destinationUrl, IProgressMonitor monitor) throws Exception {
 		//this.writeToConsole(IConsoleStream.LEVEL_CMD, "svn copy \"" + SVNUtility.decodeURL(sourceUrl) + "\" \"" + SVNUtility.decodeURL(destinationUrl) + "\" -r " + current.getSelectedRevision() + " -m \"" + this.message + "\"" + FileUtility.getUsernameParam(location.getUsername()) + "\n");
-		proxy.copyRemote(source, destinationUrl, this.message, ISVNConnector.CommandMasks.COPY_SERVER, null, ISVNConnector.NO_EXTERNALS_TO_PIN, new SVNProgressMonitor(this, monitor, null));
+		proxy.copyRemote(source, destinationUrl, this.message, ISVNConnector.CommandMasks.COPY_SERVER, null,
+				ISVNConnector.NO_EXTERNALS_TO_PIN, new SVNProgressMonitor(this, monitor, null));
 	}
-	
+
 }

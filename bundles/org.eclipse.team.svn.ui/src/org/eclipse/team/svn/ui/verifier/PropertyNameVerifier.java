@@ -27,47 +27,49 @@ import org.eclipse.team.svn.ui.SVNUIMessages;
  * @author Sergiy Logvin
  */
 public class PropertyNameVerifier extends AbstractFormattedVerifier {
-    protected static String ERROR_MESSAGE_LETTER;
-    protected static String ERROR_MESSAGE_SYMBOLS;
-    protected HashSet<String> ignoreStrings;
-        
-    public PropertyNameVerifier(String fieldName) {
-        super(fieldName);
-        PropertyNameVerifier.ERROR_MESSAGE_LETTER = SVNUIMessages.format(SVNUIMessages.Verifier_PropertyName_Letter, new String[] {AbstractFormattedVerifier.FIELD_NAME});
-        PropertyNameVerifier.ERROR_MESSAGE_SYMBOLS = SVNUIMessages.format(SVNUIMessages.Verifier_PropertyName_Symbols, new String[] {AbstractFormattedVerifier.FIELD_NAME});
-        this.ignoreStrings = new HashSet<String>();
-        this.ignoreStrings.add(SVNUIMessages.AbstractPropertyEditPanel_svn_description);
-        this.ignoreStrings.add(SVNUIMessages.PropertyEditPanel_tsvn_description);
-        this.ignoreStrings.add(SVNUIMessages.PropertyEditPanel_bugtraq_description);
-        this.ignoreStrings.add(SVNUIMessages.AbstractPropertyEditPanel_custom_description);
-        this.ignoreStrings.add("    "  + SVNUIMessages.AbstractPropertyEditPanel_custom_hint); //$NON-NLS-1$
-    }
+	protected static String ERROR_MESSAGE_LETTER;
 
-    protected String getErrorMessageImpl(Control input) {
-        String property = this.getText(input);
-        if (property.trim().length() == 0) {
-            return null;
-        }
-        if (this.ignoreStrings.contains(property)) {
-        	return SVNUIMessages.AbstractPropertyEditPanel_Name_Verifier_IgnoreStrings;
-        }
-        Pattern pattern = Pattern.compile("[a-zA-Z].*"); //$NON-NLS-1$
-        Matcher matcher = pattern.matcher(property);
-        if (!matcher.matches()) {
-        	return PropertyNameVerifier.ERROR_MESSAGE_LETTER;
-        }
-        pattern = Pattern.compile("[a-zA-Z0-9:\\-_.]*"); //$NON-NLS-1$
-        if (!pattern.matcher(property).matches()) {
-        	return PropertyNameVerifier.ERROR_MESSAGE_SYMBOLS;
-        }
-        
-        return null;
-    }
+	protected static String ERROR_MESSAGE_SYMBOLS;
 
-    protected String getWarningMessageImpl(Control input) {
-        return null;
-    }
+	protected HashSet<String> ignoreStrings;
+
+	public PropertyNameVerifier(String fieldName) {
+		super(fieldName);
+		PropertyNameVerifier.ERROR_MESSAGE_LETTER = SVNUIMessages.format(SVNUIMessages.Verifier_PropertyName_Letter,
+				new String[] { AbstractFormattedVerifier.FIELD_NAME });
+		PropertyNameVerifier.ERROR_MESSAGE_SYMBOLS = SVNUIMessages.format(SVNUIMessages.Verifier_PropertyName_Symbols,
+				new String[] { AbstractFormattedVerifier.FIELD_NAME });
+		this.ignoreStrings = new HashSet<String>();
+		this.ignoreStrings.add(SVNUIMessages.AbstractPropertyEditPanel_svn_description);
+		this.ignoreStrings.add(SVNUIMessages.PropertyEditPanel_tsvn_description);
+		this.ignoreStrings.add(SVNUIMessages.PropertyEditPanel_bugtraq_description);
+		this.ignoreStrings.add(SVNUIMessages.AbstractPropertyEditPanel_custom_description);
+		this.ignoreStrings.add("    " + SVNUIMessages.AbstractPropertyEditPanel_custom_hint); //$NON-NLS-1$
+	}
+
+	protected String getErrorMessageImpl(Control input) {
+		String property = this.getText(input);
+		if (property.trim().length() == 0) {
+			return null;
+		}
+		if (this.ignoreStrings.contains(property)) {
+			return SVNUIMessages.AbstractPropertyEditPanel_Name_Verifier_IgnoreStrings;
+		}
+		Pattern pattern = Pattern.compile("[a-zA-Z].*"); //$NON-NLS-1$
+		Matcher matcher = pattern.matcher(property);
+		if (!matcher.matches()) {
+			return PropertyNameVerifier.ERROR_MESSAGE_LETTER;
+		}
+		pattern = Pattern.compile("[a-zA-Z0-9:\\-_.]*"); //$NON-NLS-1$
+		if (!pattern.matcher(property).matches()) {
+			return PropertyNameVerifier.ERROR_MESSAGE_SYMBOLS;
+		}
+
+		return null;
+	}
+
+	protected String getWarningMessageImpl(Control input) {
+		return null;
+	}
 
 }
-
-

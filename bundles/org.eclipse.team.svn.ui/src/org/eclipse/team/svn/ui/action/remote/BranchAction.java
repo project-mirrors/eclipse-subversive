@@ -20,7 +20,7 @@ package org.eclipse.team.svn.ui.action.remote;
  * @author Alexander Gurov
  */
 public class BranchAction extends BranchTagAction {
-	
+
 	public BranchAction() {
 		super(BranchTagAction.BRANCH_ACTION);
 	}

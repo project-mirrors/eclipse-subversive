@@ -35,7 +35,7 @@ import org.junit.runners.Suite.SuiteClasses;
  */
 @RunWith(Suite.class)
 @SuiteClasses({ AbstractOperationTest.class, DecoratorVariablesTest.class, JavaViewMenuEnablementTest.class,
-		 ParameterizedWorkflowTest.class, RepositoryLocationsManagementTest.class,
+		ParameterizedWorkflowTest.class, RepositoryLocationsManagementTest.class,
 		RepositoryViewMenuEnablementTest.class, StateFilterTest.class, SVNTeamMoveDeleteHookTest.class,
 		UIMonitorUtilityTest.class })
 public class AllTests {

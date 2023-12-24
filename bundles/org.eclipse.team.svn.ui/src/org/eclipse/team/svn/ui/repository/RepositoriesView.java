@@ -74,112 +74,122 @@ import org.eclipse.ui.part.DrillDownAdapter;
 import org.eclipse.ui.part.ViewPart;
 
 /**
- * Repository view implementation 
+ * Repository view implementation
  * 
  * @author Alexander Gurov
  */
 public class RepositoriesView extends ViewPart {
 	public static final String VIEW_ID = RepositoriesView.class.getName();
-	
+
 	protected RepositoryTreeViewer repositoryTree;
+
 	protected RepositoriesRoot root;
+
 	protected DrillDownAdapter ddAdapter;
+
 	protected Action showBrowserAction;
+
 	protected IPartListener2 partListener;
-	
+
 	protected IPropertyChangeListener prefsPropertyListener;
-	
+
 	public RepositoriesView() {
 		super();
 	}
-	
+
 	public static MenuManager newMenuInstance(final ISelectionProvider provider) {
 		MenuManager menuMgr = new MenuManager();
-        menuMgr.addMenuListener(new IMenuListener() {
-            public void menuAboutToShow(final IMenuManager manager) {
-        		MenuManager sub = new MenuManager(SVNUIMessages.RepositoriesView_New, "addMenu"); //$NON-NLS-1$
-        		sub.add(new Separator("mainGroup")); //$NON-NLS-1$
-        		sub.add(new Separator("managementGroup")); //$NON-NLS-1$
-        		sub.add(new Separator("repositoryGroup")); //$NON-NLS-1$
-        		sub.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
-        		
-        		//new repository location
-        		Action newRepositoryLocation = new Action(SVNUIMessages.RepositoriesView_RepositoryLocation) {
+		menuMgr.addMenuListener(new IMenuListener() {
+			public void menuAboutToShow(final IMenuManager manager) {
+				MenuManager sub = new MenuManager(SVNUIMessages.RepositoriesView_New, "addMenu"); //$NON-NLS-1$
+				sub.add(new Separator("mainGroup")); //$NON-NLS-1$
+				sub.add(new Separator("managementGroup")); //$NON-NLS-1$
+				sub.add(new Separator("repositoryGroup")); //$NON-NLS-1$
+				sub.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
+
+				//new repository location
+				Action newRepositoryLocation = new Action(SVNUIMessages.RepositoriesView_RepositoryLocation) {
 					public void run() {
 						new NewRepositoryLocationAction().run(this);
 					}
-        		};
-        		newRepositoryLocation.setImageDescriptor(SVNTeamUIPlugin.instance().getImageDescriptor("icons/objects/repository.gif")); //$NON-NLS-1$
-        		sub.add(newRepositoryLocation);
-        		manager.add(sub);
-        		
-        		//new repository
-        		Action newRepository = new Action(SVNUIMessages.RepositoriesView_Repository) {
+				};
+				newRepositoryLocation.setImageDescriptor(
+						SVNTeamUIPlugin.instance().getImageDescriptor("icons/objects/repository.gif")); //$NON-NLS-1$
+				sub.add(newRepositoryLocation);
+				manager.add(sub);
+
+				//new repository
+				Action newRepository = new Action(SVNUIMessages.RepositoriesView_Repository) {
 					public void run() {
 						new NewRepositoryAction().run(this);
-					}					
+					}
+
 					public boolean isEnabled() {
 						return NewRepositoryAction.checkEnablement();
 					}
-        		};
-        		newRepository.setImageDescriptor(SVNTeamUIPlugin.instance().getImageDescriptor("icons/views/repositories/new_repository.gif")); //$NON-NLS-1$        																						
-        		sub.add(newRepository);
-        		manager.add(sub);
-        		
+				};
+				newRepository.setImageDescriptor(
+						SVNTeamUIPlugin.instance().getImageDescriptor("icons/views/repositories/new_repository.gif")); //$NON-NLS-1$        																						
+				sub.add(newRepository);
+				manager.add(sub);
+
 				manager.add(new Separator("checkoutGroup")); //$NON-NLS-1$
-                
-        		sub = new MenuManager(SVNUIMessages.RepositoriesView_OpenWith, "openWithMenu"); //$NON-NLS-1$
-        		sub.add(new Separator("dynamicGroup")); //$NON-NLS-1$
-        		IStructuredSelection selection = (IStructuredSelection)provider.getSelection();
-        		if (selection.size() == 1) {
-        			Object item = selection.getFirstElement();
-        			if (item instanceof RepositoryFile) {
-        				String name = ((RepositoryFile)item).getRepositoryResource().getName();
-        				IEditorDescriptor []editors = SVNTeamUIPlugin.instance().getWorkbench().getEditorRegistry().getEditors(name);
-        				for (int i = 0; i < editors.length; i++) {
-        					if (!editors[i].getId().equals(EditorsUI.DEFAULT_TEXT_EDITOR_ID)) {
-        						final OpenFileWithAction openAction = new OpenFileWithAction(editors[i].getId(), false);
-        		        		Action wrapper = new Action(editors[i].getLabel()) {
-        							public void run() {
-        								openAction.run(this);
-        							}
-        		        		};
-        						openAction.selectionChanged(wrapper, selection);
-        						sub.add(wrapper);
-        					}
-        				}
-        			}
-        		}
-        		sub.add(new Separator("fixedGroup")); //$NON-NLS-1$
-        		sub.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
-        		manager.add(sub);
-                
-                manager.add(new Separator("miscGroup")); //$NON-NLS-1$
-                
-        		sub = new MenuManager(SVNUIMessages.RepositoriesView_Refactor, "refactorMenu"); //$NON-NLS-1$
-        		sub.add(new Separator("mainGroup")); //$NON-NLS-1$
-        		sub.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
-        		manager.add(sub);
-        		
+
+				sub = new MenuManager(SVNUIMessages.RepositoriesView_OpenWith, "openWithMenu"); //$NON-NLS-1$
+				sub.add(new Separator("dynamicGroup")); //$NON-NLS-1$
+				IStructuredSelection selection = (IStructuredSelection) provider.getSelection();
+				if (selection.size() == 1) {
+					Object item = selection.getFirstElement();
+					if (item instanceof RepositoryFile) {
+						String name = ((RepositoryFile) item).getRepositoryResource().getName();
+						IEditorDescriptor[] editors = SVNTeamUIPlugin.instance()
+								.getWorkbench()
+								.getEditorRegistry()
+								.getEditors(name);
+						for (int i = 0; i < editors.length; i++) {
+							if (!editors[i].getId().equals(EditorsUI.DEFAULT_TEXT_EDITOR_ID)) {
+								final OpenFileWithAction openAction = new OpenFileWithAction(editors[i].getId(), false);
+								Action wrapper = new Action(editors[i].getLabel()) {
+									public void run() {
+										openAction.run(this);
+									}
+								};
+								openAction.selectionChanged(wrapper, selection);
+								sub.add(wrapper);
+							}
+						}
+					}
+				}
+				sub.add(new Separator("fixedGroup")); //$NON-NLS-1$
+				sub.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
+				manager.add(sub);
+
+				manager.add(new Separator("miscGroup")); //$NON-NLS-1$
+
+				sub = new MenuManager(SVNUIMessages.RepositoriesView_Refactor, "refactorMenu"); //$NON-NLS-1$
+				sub.add(new Separator("mainGroup")); //$NON-NLS-1$
+				sub.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
+				manager.add(sub);
+
 				manager.add(new Separator("locationGroup")); //$NON-NLS-1$
-				
-                manager.add(new Separator("propertiesGroup")); //$NON-NLS-1$
 
-                manager.add(new Separator("importExportGroup")); //$NON-NLS-1$
-                
+				manager.add(new Separator("propertiesGroup")); //$NON-NLS-1$
+
+				manager.add(new Separator("importExportGroup")); //$NON-NLS-1$
+
 				sub = new MenuManager(SVNUIMessages.RepositoriesView_CompareWith, "compareMenu"); //$NON-NLS-1$
-        		sub.add(new Separator("mainGroup")); //$NON-NLS-1$
-        		sub.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
-        		manager.prependToGroup("importExportGroup", sub); //$NON-NLS-1$
-                
-                manager.add(new Separator("refreshGroup")); //$NON-NLS-1$
-                
-				manager.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
-            }
+				sub.add(new Separator("mainGroup")); //$NON-NLS-1$
+				sub.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
+				manager.prependToGroup("importExportGroup", sub); //$NON-NLS-1$
 
-        });
-        menuMgr.setRemoveAllWhenShown(true);
-        return menuMgr;
+				manager.add(new Separator("refreshGroup")); //$NON-NLS-1$
+
+				manager.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
+			}
+
+		});
+		menuMgr.setRemoveAllWhenShown(true);
+		return menuMgr;
 	}
 
 	public void createPartControl(Composite parent) {
@@ -189,140 +199,151 @@ public class RepositoriesView extends ViewPart {
 		this.getSite().setSelectionProvider(this.repositoryTree);
 		this.repositoryTree.setInput(this.root = new RepositoriesRoot());
 		//this.repositoryTree.setSorter(new ViewSorter())
-		
+
 		this.ddAdapter = new DrillDownAdapter(this.repositoryTree);
-		
+
 		// popup menu
-        Tree tree = this.repositoryTree.getTree();
-        MenuManager menuMgr = RepositoriesView.newMenuInstance(this.repositoryTree);
-        tree.setMenu(menuMgr.createContextMenu(tree));
-        this.getSite().registerContextMenu(menuMgr, this.repositoryTree);
-        
-        // toolbar
-        IActionBars actionBars = getViewSite().getActionBars();
-        IToolBarManager tbm = actionBars.getToolBarManager();
-        this.ddAdapter.addNavigationActions(tbm);
-        Action tAction = null;
-        tbm.add(tAction = new Action(SVNUIMessages.SVNView_Refresh_Label) {
-            public void run() {
-                if (RepositoriesView.this.repositoryTree.getSelection() instanceof IStructuredSelection) {
-                    IStructuredSelection selection = (IStructuredSelection)RepositoriesView.this.repositoryTree.getSelection();
-                    RepositoriesView.this.handleRefresh(selection);
-                }
-            }
-        }); 
-        tAction.setImageDescriptor(SVNTeamUIPlugin.instance().getImageDescriptor("icons/common/refresh.gif")); //$NON-NLS-1$
-        tAction.setToolTipText(SVNUIMessages.SVNView_Refresh_ToolTip);
-        
-		tbm.add(new Separator("collapseAllGroup")); //$NON-NLS-1$
-		
-        tbm.add(tAction = new Action(SVNUIMessages.RepositoriesView_CollapseAll_Label) {
+		Tree tree = this.repositoryTree.getTree();
+		MenuManager menuMgr = RepositoriesView.newMenuInstance(this.repositoryTree);
+		tree.setMenu(menuMgr.createContextMenu(tree));
+		this.getSite().registerContextMenu(menuMgr, this.repositoryTree);
+
+		// toolbar
+		IActionBars actionBars = getViewSite().getActionBars();
+		IToolBarManager tbm = actionBars.getToolBarManager();
+		this.ddAdapter.addNavigationActions(tbm);
+		Action tAction = null;
+		tbm.add(tAction = new Action(SVNUIMessages.SVNView_Refresh_Label) {
 			public void run() {
-			    RepositoriesView.this.repositoryTree.collapseAll();				
+				if (RepositoriesView.this.repositoryTree.getSelection() instanceof IStructuredSelection) {
+					IStructuredSelection selection = (IStructuredSelection) RepositoriesView.this.repositoryTree
+							.getSelection();
+					RepositoriesView.this.handleRefresh(selection);
+				}
 			}
-        }); 
-        tAction.setImageDescriptor(SVNTeamUIPlugin.instance().getImageDescriptor("icons/common/collapseall.gif")); //$NON-NLS-1$
-        tAction.setToolTipText(SVNUIMessages.RepositoriesView_CollapseAll_ToolTip);
-        
+		});
+		tAction.setImageDescriptor(SVNTeamUIPlugin.instance().getImageDescriptor("icons/common/refresh.gif")); //$NON-NLS-1$
+		tAction.setToolTipText(SVNUIMessages.SVNView_Refresh_ToolTip);
+
+		tbm.add(new Separator("collapseAllGroup")); //$NON-NLS-1$
+
+		tbm.add(tAction = new Action(SVNUIMessages.RepositoriesView_CollapseAll_Label) {
+			public void run() {
+				RepositoriesView.this.repositoryTree.collapseAll();
+			}
+		});
+		tAction.setImageDescriptor(SVNTeamUIPlugin.instance().getImageDescriptor("icons/common/collapseall.gif")); //$NON-NLS-1$
+		tAction.setToolTipText(SVNUIMessages.RepositoriesView_CollapseAll_ToolTip);
+
 		tbm.add(new Separator("repositoryGroup")); //$NON-NLS-1$
-        
-        tbm.add(tAction = new Action(SVNUIMessages.RepositoriesView_NewLocation_Label) {
+
+		tbm.add(tAction = new Action(SVNUIMessages.RepositoriesView_NewLocation_Label) {
 			public void run() {
 				new NewRepositoryLocationAction().run(this);
 			}
-        }); 
-        tAction.setImageDescriptor(SVNTeamUIPlugin.instance().getImageDescriptor("icons/views/repositories/new_location.gif")); //$NON-NLS-1$
-        tAction.setToolTipText(SVNUIMessages.RepositoriesView_NewLocation_ToolTip);
-        
-        //new repositoy action
-        final Action tNewRepositoryAction = new Action(SVNUIMessages.RepositoriesView_NewRepository_Label) {
+		});
+		tAction.setImageDescriptor(
+				SVNTeamUIPlugin.instance().getImageDescriptor("icons/views/repositories/new_location.gif")); //$NON-NLS-1$
+		tAction.setToolTipText(SVNUIMessages.RepositoriesView_NewLocation_ToolTip);
+
+		//new repositoy action
+		final Action tNewRepositoryAction = new Action(SVNUIMessages.RepositoriesView_NewRepository_Label) {
 			public void run() {
 				new NewRepositoryAction().run(this);
 			}
-        }; 
-        tbm.add(tNewRepositoryAction);
-        tNewRepositoryAction.setImageDescriptor(SVNTeamUIPlugin.instance().getImageDescriptor("icons/views/repositories/new_repository.gif")); //$NON-NLS-1$
-        tNewRepositoryAction.setToolTipText(SVNUIMessages.RepositoriesView_NewRepository_ToolTip);
-        tNewRepositoryAction.setEnabled(NewRepositoryAction.checkEnablement());
-        //add connector changes listener to track action enablement
-        this.prefsPropertyListener = new IPropertyChangeListener() {
+		};
+		tbm.add(tNewRepositoryAction);
+		tNewRepositoryAction.setImageDescriptor(
+				SVNTeamUIPlugin.instance().getImageDescriptor("icons/views/repositories/new_repository.gif")); //$NON-NLS-1$
+		tNewRepositoryAction.setToolTipText(SVNUIMessages.RepositoriesView_NewRepository_ToolTip);
+		tNewRepositoryAction.setEnabled(NewRepositoryAction.checkEnablement());
+		//add connector changes listener to track action enablement
+		this.prefsPropertyListener = new IPropertyChangeListener() {
 			public void propertyChange(PropertyChangeEvent event) {
-				if (SVNTeamPreferences.fullCoreName(SVNTeamPreferences.CORE_SVNCONNECTOR_NAME).equals(event.getProperty())) {
+				if (SVNTeamPreferences.fullCoreName(SVNTeamPreferences.CORE_SVNCONNECTOR_NAME)
+						.equals(event.getProperty())) {
 					tNewRepositoryAction.setEnabled(NewRepositoryAction.checkEnablement());
-				}						
-			}        	
-        };
-        SVNTeamUIPlugin.instance().getPreferenceStore().addPropertyChangeListener(this.prefsPropertyListener);        
-        
-        tbm.add(this.showBrowserAction = new Action(SVNUIMessages.RepositoriesView_ShowBrowser_Label, Action.AS_CHECK_BOX) {
+				}
+			}
+		};
+		SVNTeamUIPlugin.instance().getPreferenceStore().addPropertyChangeListener(this.prefsPropertyListener);
+
+		tbm.add(this.showBrowserAction = new Action(SVNUIMessages.RepositoriesView_ShowBrowser_Label,
+				Action.AS_CHECK_BOX) {
 			public void run() {
 				if (this.isChecked()) {
 					RepositoriesView.this.showRepositoryBrowser(true);
-				}
-				else {
+				} else {
 					RepositoriesView.this.hideRepositoryBrowser();
 				}
-			}			
-        });        
-        this.showBrowserAction.setImageDescriptor(SVNTeamUIPlugin.instance().getImageDescriptor("icons/views/repositories/browser.gif")); //$NON-NLS-1$
-        this.showBrowserAction.setToolTipText(SVNUIMessages.RepositoriesView_ShowBrowser_ToolTip);
+			}
+		});
+		this.showBrowserAction.setImageDescriptor(
+				SVNTeamUIPlugin.instance().getImageDescriptor("icons/views/repositories/browser.gif")); //$NON-NLS-1$
+		this.showBrowserAction.setToolTipText(SVNUIMessages.RepositoriesView_ShowBrowser_ToolTip);
 
-        this.repositoryTree.getControl().addKeyListener(new KeyAdapter() {
-        	public void keyPressed(KeyEvent event) {
-    			if (RepositoriesView.this.repositoryTree.getSelection() instanceof IStructuredSelection) {
-        			IStructuredSelection selection = (IStructuredSelection)RepositoriesView.this.repositoryTree.getSelection();
-	        		if (event.keyCode == SWT.F5) {
-	    				RepositoriesView.this.handleRefresh(selection);
-	        		}
-	        		else if (event.keyCode == SWT.DEL) {
-	        		    RepositoriesView.this.handleDeleteKey(selection);
-	        		}
-	        		else if (event.keyCode == SWT.F2) {
-	        		    RepositoriesView.this.handleEdit(selection);
-	        		}
-    			}
-        	}
-        });
-        
+		this.repositoryTree.getControl().addKeyListener(new KeyAdapter() {
+			public void keyPressed(KeyEvent event) {
+				if (RepositoriesView.this.repositoryTree.getSelection() instanceof IStructuredSelection) {
+					IStructuredSelection selection = (IStructuredSelection) RepositoriesView.this.repositoryTree
+							.getSelection();
+					if (event.keyCode == SWT.F5) {
+						RepositoriesView.this.handleRefresh(selection);
+					} else if (event.keyCode == SWT.DEL) {
+						RepositoriesView.this.handleDeleteKey(selection);
+					} else if (event.keyCode == SWT.F2) {
+						RepositoriesView.this.handleEdit(selection);
+					}
+				}
+			}
+		});
+
 		this.repositoryTree.addDoubleClickListener(new IDoubleClickListener() {
 			public void doubleClick(DoubleClickEvent e) {
 				ISelection selection = e.getSelection();
 				if (selection instanceof IStructuredSelection) {
-					IStructuredSelection structured = (IStructuredSelection)selection;
+					IStructuredSelection structured = (IStructuredSelection) selection;
 					if (structured.size() == 1) {
 						RepositoriesView.this.handleDoubleClick(structured);
 					}
 				}
 			}
 		});
-		
+
 		this.partListener = new IPartListener2() {
 			public void partVisible(IWorkbenchPartReference partRef) {
 				if (partRef.getId().equals(RepositoriesView.VIEW_ID)) {
 					RepositoriesView.this.refreshRepositoriesImpl(false);
-				}				
+				}
 			}
+
 			public void partHidden(IWorkbenchPartReference partRef) {
 			}
+
 			public void partInputChanged(IWorkbenchPartReference partRef) {
 			}
+
 			public void partOpened(IWorkbenchPartReference partRef) {
 			}
+
 			public void partDeactivated(IWorkbenchPartReference partRef) {
 			}
+
 			public void partClosed(IWorkbenchPartReference partRef) {
 				if (partRef.getId().equals(RepositoryBrowser.VIEW_ID)) {
 					RepositoriesView.this.getViewSite().getPage().removePartListener(this);
 				}
 			}
+
 			public void partBroughtToTop(IWorkbenchPartReference partRef) {
 			}
+
 			public void partActivated(IWorkbenchPartReference partRef) {
 			}
 		};
-		
+
 		this.getViewSite().getPage().addPartListener(this.partListener);
-		
+
 		SVNRemoteStorage.instance().addRepositoriesStateChangedListener(new IRepositoriesStateChangedListener() {
 			public void repositoriesStateChanged(RepositoriesStateChangedEvent event) {
 				if (event.getAction() == RepositoriesStateChangedEvent.ADDED) {
@@ -330,34 +351,34 @@ public class RepositoriesView extends ViewPart {
 				}
 			}
 		});
-		
+
 		//Setting context help
-	    PlatformUI.getWorkbench().getHelpSystem().setHelp(parent, "org.eclipse.team.svn.help.repositoryViewContext"); //$NON-NLS-1$
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(parent, "org.eclipse.team.svn.help.repositoryViewContext"); //$NON-NLS-1$
 	}
-	
-	public void dispose() {		
+
+	public void dispose() {
 		this.getViewSite().getPage().removePartListener(this.partListener);
 		if (this.prefsPropertyListener != null) {
 			SVNTeamUIPlugin.instance().getPreferenceStore().removePropertyChangeListener(this.prefsPropertyListener);
 		}
 		super.dispose();
 	}
-	
+
 	public void setFocus() {
 		this.repositoryTree.getControl().setFocus();
 	}
-	
+
 	public static void refresh(Object where) {
 		RepositoriesView.refresh(where, null);
 	}
-	
+
 	public static void refresh(Object where, RepositoryTreeViewer.IRefreshVisitor visitor) {
 		RepositoriesView instance = RepositoriesView.instance();
 		if (instance != null) {
 			instance.repositoryTree.refresh(where, visitor, false);
 		}
 	}
-	
+
 	public static void refreshRepositories(boolean deep) {
 		RepositoriesView instance = RepositoriesView.instance();
 		if (instance != null) {
@@ -368,31 +389,31 @@ public class RepositoriesView extends ViewPart {
 	public RepositoryTreeViewer getRepositoryTree() {
 		return this.repositoryTree;
 	}
-	
+
 	public void refreshButtonsState() {
 		IPreferenceStore store = SVNTeamUIPlugin.instance().getPreferenceStore();
-		boolean isBrowserVisible = SVNTeamPreferences.getRepositoryBoolean(store, SVNTeamPreferences.REPOSITORY_SHOW_BROWSER_NAME);
+		boolean isBrowserVisible = SVNTeamPreferences.getRepositoryBoolean(store,
+				SVNTeamPreferences.REPOSITORY_SHOW_BROWSER_NAME);
 		this.showBrowserAction.setChecked(isBrowserVisible);
 	}
-	
+
 	public static RepositoriesView instance() {
-		final RepositoriesView []view = new RepositoriesView[1];
+		final RepositoriesView[] view = new RepositoriesView[1];
 		UIMonitorUtility.getDisplay().syncExec(new Runnable() {
 			public void run() {
 				IWorkbenchWindow window = SVNTeamUIPlugin.instance().getWorkbench().getActiveWorkbenchWindow();
 				if (window != null && window.getActivePage() != null) {
-					view[0] = (RepositoriesView)window.getActivePage().findView(RepositoriesView.VIEW_ID);
+					view[0] = (RepositoriesView) window.getActivePage().findView(RepositoriesView.VIEW_ID);
 				}
 			}
 		});
 		return view[0];
 	}
-	
+
 	protected void refreshRepositoriesImpl(boolean deep) {
 		if (deep) {
 			this.root.refresh();
-		}
-		else {
+		} else {
 			this.root.softRefresh();
 		}
 		this.repositoryTree.refresh();
@@ -401,99 +422,100 @@ public class RepositoriesView extends ViewPart {
 	protected void showRepositoryBrowser(final boolean force) {
 		final IWorkbenchPage page = this.getSite().getPage();
 		UIMonitorUtility.doTaskBusyDefault(new AbstractActionOperation("Operation_ShowBrowser", SVNUIMessages.class) { //$NON-NLS-1$
-            protected void runImpl(IProgressMonitor monitor) throws Exception {
-        		RepositoryBrowser browser = (RepositoryBrowser)page.showView(RepositoryBrowser.VIEW_ID);
-    			ISelection selection = RepositoriesView.this.repositoryTree.getSelection();
-    			browser.selectionChanged(new SelectionChangedEvent(RepositoriesView.this.repositoryTree, selection));
-            }
-        });
+			protected void runImpl(IProgressMonitor monitor) throws Exception {
+				RepositoryBrowser browser = (RepositoryBrowser) page.showView(RepositoryBrowser.VIEW_ID);
+				ISelection selection = RepositoriesView.this.repositoryTree.getSelection();
+				browser.selectionChanged(new SelectionChangedEvent(RepositoriesView.this.repositoryTree, selection));
+			}
+		});
 	}
-	
+
 	protected void hideRepositoryBrowser() {
-    	IWorkbenchPage page = this.getSite().getPage();
-    	IViewPart part = page.findView(RepositoryBrowser.VIEW_ID);
-    	if (part != null) {
-        	page.hideView(part);
-    	}
+		IWorkbenchPage page = this.getSite().getPage();
+		IViewPart part = page.findView(RepositoryBrowser.VIEW_ID);
+		if (part != null) {
+			page.hideView(part);
+		}
 	}
 
 	protected void handleRefresh(IStructuredSelection selection) {
-	    Action tmp = new Action() {};
-	    AbstractSVNTeamAction action = null;
-	    
-	    if (selection.isEmpty()) {
-	    	action = new RefreshRepositoryLocationAction();
-		    action.selectionChanged(tmp, selection);
-		    action.setActivePart(tmp, RepositoriesView.this);
-		    action.run(tmp);
-	    }
-	    else {
-		    action = new RefreshAction();
-		    action.selectionChanged(tmp, selection);
-		    action.setActivePart(tmp, RepositoriesView.this);
-		    if (tmp.isEnabled()) {
-			    action.run(tmp);
-		    }
-	    }
+		Action tmp = new Action() {
+		};
+		AbstractSVNTeamAction action = null;
+
+		if (selection.isEmpty()) {
+			action = new RefreshRepositoryLocationAction();
+			action.selectionChanged(tmp, selection);
+			action.setActivePart(tmp, RepositoriesView.this);
+			action.run(tmp);
+		} else {
+			action = new RefreshAction();
+			action.selectionChanged(tmp, selection);
+			action.setActivePart(tmp, RepositoriesView.this);
+			if (tmp.isEnabled()) {
+				action.run(tmp);
+			}
+		}
 	}
 
 	protected void handleDeleteKey(IStructuredSelection selection) {
-	    Action tmp = new Action() {}; 
-	    AbstractSVNTeamAction action = new DeleteAction();
-	    action.selectionChanged(tmp, selection);
-	    action.setActivePart(tmp, RepositoriesView.this);
-	    if (tmp.isEnabled()) {
-		    action.run(tmp);
-	    }
-	    else {
-		    action = new DiscardRevisionLinksAction();
-		    action.selectionChanged(tmp, selection);
-		    action.setActivePart(tmp, RepositoriesView.this);
-		    if (tmp.isEnabled()) {
-			    action.run(tmp);
-		    }
-		    else {
-			    action = new DiscardRepositoryLocationAction();
-			    action.selectionChanged(tmp, selection);
-			    action.setActivePart(tmp, RepositoriesView.this);
-			    if (tmp.isEnabled()) {
-				    action.run(tmp);
-			    }
-		    }
-	    }
+		Action tmp = new Action() {
+		};
+		AbstractSVNTeamAction action = new DeleteAction();
+		action.selectionChanged(tmp, selection);
+		action.setActivePart(tmp, RepositoriesView.this);
+		if (tmp.isEnabled()) {
+			action.run(tmp);
+		} else {
+			action = new DiscardRevisionLinksAction();
+			action.selectionChanged(tmp, selection);
+			action.setActivePart(tmp, RepositoriesView.this);
+			if (tmp.isEnabled()) {
+				action.run(tmp);
+			} else {
+				action = new DiscardRepositoryLocationAction();
+				action.selectionChanged(tmp, selection);
+				action.setActivePart(tmp, RepositoriesView.this);
+				if (tmp.isEnabled()) {
+					action.run(tmp);
+				}
+			}
+		}
 	}
-	
+
 	protected void handleEdit(IStructuredSelection selection) {
-		Action tmp = new Action() {}; 
-	    AbstractSVNTeamAction action = new RenameAction();
-	    action.selectionChanged(tmp, selection);
-	    action.setActivePart(tmp, this);
-	    if (tmp.isEnabled()) {
-		    action.run(tmp);
-	    } else {			
+		Action tmp = new Action() {
+		};
+		AbstractSVNTeamAction action = new RenameAction();
+		action.selectionChanged(tmp, selection);
+		action.setActivePart(tmp, this);
+		if (tmp.isEnabled()) {
+			action.run(tmp);
+		} else {
 			action = new EditRevisionLinkAction();
-		    action.selectionChanged(tmp, selection);
-		    action.setActivePart(tmp, this);
-		    if (tmp.isEnabled()) {
-			    action.run(tmp);
-		    }
-		} 				
+			action.selectionChanged(tmp, selection);
+			action.setActivePart(tmp, this);
+			if (tmp.isEnabled()) {
+				action.run(tmp);
+			}
+		}
 	}
-		
+
 	protected void handleDoubleClick(IStructuredSelection selection) {
-	    Action tmp = new Action() {};
-	    AbstractSVNTeamAction action = new OpenFileAction();
-	    action.selectionChanged(tmp, selection);
-	    action.setActivePart(tmp, RepositoriesView.this);
-	    if (tmp.isEnabled()) {
-		    action.run(tmp);
-	    }
+		Action tmp = new Action() {
+		};
+		AbstractSVNTeamAction action = new OpenFileAction();
+		action.selectionChanged(tmp, selection);
+		action.setActivePart(tmp, RepositoriesView.this);
+		if (tmp.isEnabled()) {
+			action.run(tmp);
+		}
 	}
-	
+
 	public boolean canGoBack() {
 		return this.ddAdapter.canGoBack();
 	}
-	
+
 	public void goBack() {
 		this.ddAdapter.goBack();
 	}

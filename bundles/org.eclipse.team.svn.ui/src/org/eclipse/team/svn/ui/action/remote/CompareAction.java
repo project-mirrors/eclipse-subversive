@@ -32,41 +32,42 @@ import org.eclipse.team.svn.ui.panel.remote.ComparePanel;
  * @author Sergiy Logvin
  */
 public class CompareAction extends AbstractRepositoryTeamAction {
-    public CompareAction() {
-        super();
-    }
+	public CompareAction() {
+		super();
+	}
 
-    public void runImpl(IAction action) {
-        IRepositoryResource first = this.getSelectedRepositoryResources()[0];
-        ComparePanel panel = new ComparePanel(first);
-        panel.setFilterCurrent(true);
-        DefaultDialog dlg = new DefaultDialog(this.getShell(), panel);
-        if (dlg.open() == 0) {
-        	this.doCompare(first, panel.getSelectedResource(), panel.getDiffOptions());
-        }
-    }
+	public void runImpl(IAction action) {
+		IRepositoryResource first = this.getSelectedRepositoryResources()[0];
+		ComparePanel panel = new ComparePanel(first);
+		panel.setFilterCurrent(true);
+		DefaultDialog dlg = new DefaultDialog(this.getShell(), panel);
+		if (dlg.open() == 0) {
+			this.doCompare(first, panel.getSelectedResource(), panel.getDiffOptions());
+		}
+	}
 
-    public boolean isEnabled() {
-		IRepositoryResource []resources = this.getSelectedRepositoryResources();
+	public boolean isEnabled() {
+		IRepositoryResource[] resources = this.getSelectedRepositoryResources();
 		if (resources.length != 1) {
 			return false;
 		}
-		boolean isCompareFoldersAllowed = CoreExtensionsManager.instance().getSVNConnectorFactory().getSVNAPIVersion() >= ISVNConnectorFactory.APICompatibility.SVNAPI_1_5_x;
-        return isCompareFoldersAllowed || resources[0] instanceof IRepositoryFile;
-    }
-    
-    protected void doCompare(IRepositoryResource first, IRepositoryResource second, long options) {
-    	try {
-    		if (second.getRevision() > first.getRevision()) {
-    			IRepositoryResource tmp = second;
-    			second = first;
-    			first = tmp;
-    		}
-    	}
-    	catch (SVNConnectorException ex) {
-    		UILoggedOperation.reportError("Compare", ex);
-    	}
-        this.runScheduled(new CompareRepositoryResourcesOperation(second, first, false, options));
-    }
+		boolean isCompareFoldersAllowed = CoreExtensionsManager.instance()
+				.getSVNConnectorFactory()
+				.getSVNAPIVersion() >= ISVNConnectorFactory.APICompatibility.SVNAPI_1_5_x;
+		return isCompareFoldersAllowed || resources[0] instanceof IRepositoryFile;
+	}
+
+	protected void doCompare(IRepositoryResource first, IRepositoryResource second, long options) {
+		try {
+			if (second.getRevision() > first.getRevision()) {
+				IRepositoryResource tmp = second;
+				second = first;
+				first = tmp;
+			}
+		} catch (SVNConnectorException ex) {
+			UILoggedOperation.reportError("Compare", ex);
+		}
+		this.runScheduled(new CompareRepositoryResourcesOperation(second, first, false, options));
+	}
 
 }

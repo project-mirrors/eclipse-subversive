@@ -26,7 +26,6 @@ import org.eclipse.team.svn.core.resource.IRepositoryResource;
 import org.eclipse.team.svn.core.svnstorage.AbstractSVNStorage;
 import org.eclipse.team.svn.core.utility.SVNUtility;
 
-
 /**
  * SVN storage provider based on java.io.File
  * 
@@ -34,38 +33,38 @@ import org.eclipse.team.svn.core.utility.SVNUtility;
  */
 public class SVNFileStorage extends AbstractSVNStorage implements IFileStorage {
 	/**
-	 * The name of the preferences node in the Subversive Core preferences that contains
-	 * the known repositories as its children (for integrations).
+	 * The name of the preferences node in the Subversive Core preferences that contains the known repositories as its children (for
+	 * integrations).
 	 */
 	public static final String PREF_REPOSITORIES_NODE = "externalRepositories"; //$NON-NLS-1$
-	
+
 	/**
-	 * The name of the preferences node in the Subversive Core preferences that contains
-	 * the flag which determines whether we migrated from Authorization database to Equinox security storage
+	 * The name of the preferences node in the Subversive Core preferences that contains the flag which determines whether we migrated from
+	 * Authorization database to Equinox security storage
 	 */
 	public static final String PREF_MIGRATE_FROM_AUTH_DB_NODE = "externalMigrateFromAuthorizationDatabase"; //$NON-NLS-1$
-	
+
 	/**
-	 * The name of file containing the SVN repository locations information (for integration).
-	 * Deprecated since Subversive 0.7.0 v20080404 - must not be used. The valid information is stored in
-	 * preferences.
+	 * The name of file containing the SVN repository locations information (for integration). Deprecated since Subversive 0.7.0 v20080404 -
+	 * must not be used. The valid information is stored in preferences.
+	 * 
 	 * @see SVNFileStorage.PREF_REPOSITORIES_NODE
 	 */
 	public static final String STATE_INFO_FILE_NAME = ".externalSVNRepositories"; //$NON-NLS-1$
-	
+
 	private static SVNFileStorage instance = new SVNFileStorage();
-	
+
 	public static SVNFileStorage instance() {
 		return SVNFileStorage.instance;
 	}
-    
+
 	public void initialize(Map<String, Object> preferences) throws Exception {
 		preferences.put(AbstractSVNStorage.IPREF_STATE_INFO_FILE, SVNFileStorage.STATE_INFO_FILE_NAME);
 		preferences.put(AbstractSVNStorage.IPREF_REPO_NODE_NAME, SVNFileStorage.PREF_REPOSITORIES_NODE);
 		preferences.put(AbstractSVNStorage.IPREF_AUTH_NODE_NAME, SVNFileStorage.PREF_MIGRATE_FROM_AUTH_DB_NODE);
 		super.initialize(preferences);
 	}
-	
+
 	public IRepositoryResource asRepositoryResource(File file, boolean allowsNull) {
 		// check if this resource is placed in working copy
 		File wcRoot = file;
@@ -85,25 +84,26 @@ public class SVNFileStorage extends AbstractSVNStorage implements IFileStorage {
 					wcRoot = wcRoot.getParentFile();
 				}
 			}
-		}
-		finally {
+		} finally {
 			proxy.dispose();
 		}
-		
+
 		String wcUrl = SVNUtility.decodeURL(info.url);
 		String rootUrl = SVNUtility.decodeURL(info.reposRootUrl);
 		IRepositoryLocation location = this.findLocation(wcUrl, rootUrl);
-		
+
 		if (wcRoot != file) {
 			wcUrl += file.getAbsolutePath().substring(wcRoot.getAbsolutePath().length());
 		}
-		
-		return file.isFile() ? (IRepositoryResource)location.asRepositoryFile(wcUrl, allowsNull) : location.asRepositoryContainer(wcUrl, allowsNull);
+
+		return file.isFile()
+				? (IRepositoryResource) location.asRepositoryFile(wcUrl, allowsNull)
+				: location.asRepositoryContainer(wcUrl, allowsNull);
 	}
-	
+
 	protected IRepositoryLocation findLocation(String resourceUrl, String rootUrl) {
 		IPath url = SVNUtility.createPathForSVNUrl(resourceUrl);
-		IRepositoryLocation []locations = this.getRepositoryLocations();
+		IRepositoryLocation[] locations = this.getRepositoryLocations();
 		for (int i = 0; i < locations.length; i++) {
 			if (SVNUtility.createPathForSVNUrl(locations[i].getUrl()).isPrefixOf(url)) {
 				return locations[i];

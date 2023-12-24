@@ -29,9 +29,9 @@ public class SVNRepositoryBranches extends SVNRepositoryRootBase {
 	public SVNRepositoryBranches(IRepositoryLocation location, String url, SVNRevision selectedRevision) {
 		super(location, url, selectedRevision);
 	}
-	
+
 	public int getKind() {
 		return IRepositoryRoot.KIND_BRANCHES;
 	}
-	
+
 }

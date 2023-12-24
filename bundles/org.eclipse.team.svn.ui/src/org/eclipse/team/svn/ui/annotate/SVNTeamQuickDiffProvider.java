@@ -47,17 +47,24 @@ import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.ui.texteditor.quickdiff.IQuickDiffReferenceProvider;
 
 /**
- * Quick diff provider. Uses BASE working copy revision to compare. 
+ * Quick diff provider. Uses BASE working copy revision to compare.
  * 
  * @author Alexander Gurov
  */
-public class SVNTeamQuickDiffProvider implements IQuickDiffReferenceProvider, IResourceStatesListener, IElementStateListener {
+public class SVNTeamQuickDiffProvider
+		implements IQuickDiffReferenceProvider, IResourceStatesListener, IElementStateListener {
 	protected String id;
+
 	protected ITextEditor editor;
+
 	protected IDocumentProvider documentProvider;
+
 	protected boolean referenceInitialized;
+
 	protected IDocument reference;
+
 	protected ILocalResource savedState;
+
 	protected Job updateJob;
 
 	public void setActiveEditor(ITextEditor editor) {
@@ -78,7 +85,7 @@ public class SVNTeamQuickDiffProvider implements IQuickDiffReferenceProvider, IR
 			this.updateJob.cancel();
 		}
 		this.referenceInitialized = false;
-		
+
 		if (this.documentProvider != null) {
 			this.documentProvider.removeElementStateListener(this);
 		}
@@ -132,69 +139,71 @@ public class SVNTeamQuickDiffProvider implements IQuickDiffReferenceProvider, IR
 
 	public void elementMoved(Object originalElement, Object movedElement) {
 	}
-	
+
 	protected boolean isShared() {
 		ILocalResource local = this.getLocalResource();
 		return IStateFilter.SF_VERSIONED.accept(local);
 	}
-	
+
 	protected ILocalResource getLocalResource() {
 		return SVNRemoteStorage.instance().asLocalResource(this.getFile());
 	}
-	
+
 	protected IFile getFile() {
 		return this.editor == null ? null : ResourceUtil.getFile(this.editor.getEditorInput());
 	}
-	
+
 	protected void backgroundFetch() {
 		if (this.updateJob != null && this.updateJob.getState() != Job.NONE) {
 			this.updateJob.cancel();
 		}
-		this.updateJob = ProgressMonitorUtility.doTaskScheduledDefault(new AbstractActionOperation("Operation_QuickDiff", SVNUIMessages.class) { //$NON-NLS-1$
-			protected void runImpl(IProgressMonitor monitor) throws Exception {
-				SVNTeamQuickDiffProvider.this.readDocument(monitor);
-			}
-		});
+		this.updateJob = ProgressMonitorUtility
+				.doTaskScheduledDefault(new AbstractActionOperation("Operation_QuickDiff", SVNUIMessages.class) { //$NON-NLS-1$
+					protected void runImpl(IProgressMonitor monitor) throws Exception {
+						SVNTeamQuickDiffProvider.this.readDocument(monitor);
+					}
+				});
 	}
-	
+
 	protected void readDocument(IProgressMonitor monitor) {
 		if (this.reference == null) {
 			this.reference = new Document();
 		}
 		if (this.documentProvider instanceof IStorageDocumentProvider) {
-			IStorageDocumentProvider provider = (IStorageDocumentProvider)this.documentProvider;
+			IStorageDocumentProvider provider = (IStorageDocumentProvider) this.documentProvider;
 			String encodingTmp = provider.getEncoding(this.editor.getEditorInput());
 			String encoding = encodingTmp == null ? provider.getDefaultEncoding() : encodingTmp;
-			
+
 			ILocalResource tmp = this.getLocalResource();
-			if (this.savedState == null || !IStateFilter.SF_INTERNAL_INVALID.accept(tmp) && this.savedState.getRevision() != tmp.getRevision()) {
+			if (this.savedState == null || !IStateFilter.SF_INTERNAL_INVALID.accept(tmp)
+					&& this.savedState.getRevision() != tmp.getRevision()) {
 				this.savedState = tmp;
-				final GetLocalFileContentOperation contentOp = new GetLocalFileContentOperation(tmp.getResource(), Kind.BASE);
+				final GetLocalFileContentOperation contentOp = new GetLocalFileContentOperation(tmp.getResource(),
+						Kind.BASE);
 				CompositeOperation op = new CompositeOperation("Operation_PrepareQuickDiff", SVNUIMessages.class); //$NON-NLS-1$
 				op.add(contentOp);
 				op.add(new InitializeDocumentOperation(encoding) {
 					public InputStream getInputStream() {
 						return contentOp.getContent();
 					}
-				}, new IActionOperation[] {contentOp});
+				}, new IActionOperation[] { contentOp });
 				ProgressMonitorUtility.doTaskExternalDefault(op, monitor);
 			}
-		}
-		else if (!monitor.isCanceled()) {
+		} else if (!monitor.isCanceled()) {
 			this.reference.set(""); //$NON-NLS-1$
 		}
 	}
-	
+
 	protected abstract class InitializeDocumentOperation extends AbstractActionOperation {
 		public String encoding;
-		
+
 		public InitializeDocumentOperation(String encoding) {
 			super("Operation_InitializeDocument", SVNUIMessages.class); //$NON-NLS-1$
 			this.encoding = encoding;
 		}
-		
+
 		public abstract InputStream getInputStream() throws Exception;
-		
+
 		protected void runImpl(IProgressMonitor monitor) throws Exception {
 			InputStream content = this.getInputStream();
 			Reader in = null;
@@ -202,7 +211,7 @@ public class SVNTeamQuickDiffProvider implements IQuickDiffReferenceProvider, IR
 			try {
 				in = new BufferedReader(new InputStreamReader(content, this.encoding));
 				store = new CharArrayWriter();
-				char []buf = new char[2048];
+				char[] buf = new char[2048];
 				int len;
 				while ((len = in.read(buf)) > 0 && !monitor.isCanceled()) {
 					store.write(buf, 0, len);
@@ -210,17 +219,25 @@ public class SVNTeamQuickDiffProvider implements IQuickDiffReferenceProvider, IR
 				if (!monitor.isCanceled()) {
 					SVNTeamQuickDiffProvider.this.reference.set(store.toString());
 				}
-			}
-			finally {
+			} finally {
 				if (store != null) {
-					try {store.close();} catch (Exception ex) {}
+					try {
+						store.close();
+					} catch (Exception ex) {
+					}
 				}
 				if (in != null) {
-					try {in.close();} catch (Exception ex) {}
+					try {
+						in.close();
+					} catch (Exception ex) {
+					}
 				}
-				try {content.close();} catch (Exception ex) {}
+				try {
+					content.close();
+				} catch (Exception ex) {
+				}
 			}
 		}
 	}
-	
+
 }

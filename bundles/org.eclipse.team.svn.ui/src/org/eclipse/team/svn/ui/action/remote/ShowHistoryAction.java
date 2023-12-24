@@ -29,7 +29,7 @@ public class ShowHistoryAction extends AbstractRepositoryTeamAction {
 	public ShowHistoryAction() {
 		super();
 	}
-	
+
 	public void runImpl(IAction action) {
 		IRepositoryResource resource = this.getSelectedRepositoryResources()[0];
 		this.runBusy(new ShowHistoryViewOperation(resource, 0, 0));

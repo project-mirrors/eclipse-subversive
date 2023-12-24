@@ -30,12 +30,13 @@ public class CopyToAction extends AbstractCopyMoveAction {
 		super("CopyToAction");
 	}
 
-	protected AbstractCopyMoveResourcesOperation makeCopyOperation(IRepositoryResource destination, IRepositoryResource[] selected, String message, String name) {
+	protected AbstractCopyMoveResourcesOperation makeCopyOperation(IRepositoryResource destination,
+			IRepositoryResource[] selected, String message, String name) {
 		return new CopyResourcesOperation(destination, selected, message, name);
 	}
 
 	public boolean isEnabled() {
-		IRepositoryResource []resources = this.getSelectedRepositoryResources();
+		IRepositoryResource[] resources = this.getSelectedRepositoryResources();
 		if (resources.length == 0) {
 			return false;
 		}
@@ -50,8 +51,9 @@ public class CopyToAction extends AbstractCopyMoveAction {
 		return true;
 	}
 
-	protected RefreshRemoteResourcesOperation makeRefreshOperation(IRepositoryResource destination, IRepositoryResource[] selected) {
-		return new RefreshRemoteResourcesOperation(new IRepositoryResource[] {destination});
+	protected RefreshRemoteResourcesOperation makeRefreshOperation(IRepositoryResource destination,
+			IRepositoryResource[] selected) {
+		return new RefreshRemoteResourcesOperation(new IRepositoryResource[] { destination });
 	}
 
 }

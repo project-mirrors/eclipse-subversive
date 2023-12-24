@@ -48,126 +48,131 @@ import org.eclipse.team.ui.synchronize.ISynchronizePageConfiguration;
  */
 public class MergeActionGroup extends AbstractSynchronizeActionGroup {
 	public static final String GROUP_MERGE_CHANGES = "mergeChanges"; //$NON-NLS-1$
-	
+
 	public void configureMenuGroups(ISynchronizePageConfiguration configuration) {
 		configuration.addMenuGroup(
-				ISynchronizePageConfiguration.P_CONTEXT_MENU, 
-				MergeActionGroup.GROUP_MERGE_CHANGES);
+				ISynchronizePageConfiguration.P_CONTEXT_MENU, MergeActionGroup.GROUP_MERGE_CHANGES);
 		configuration.addMenuGroup(
-				ISynchronizePageConfiguration.P_CONTEXT_MENU, 
-				AbstractSynchronizeActionGroup.GROUP_MANAGE_LOCALS);
+				ISynchronizePageConfiguration.P_CONTEXT_MENU, AbstractSynchronizeActionGroup.GROUP_MANAGE_LOCALS);
 		configuration.addMenuGroup(
-				ISynchronizePageConfiguration.P_CONTEXT_MENU, 
-				AbstractSynchronizeActionGroup.GROUP_TEAM);
+				ISynchronizePageConfiguration.P_CONTEXT_MENU, AbstractSynchronizeActionGroup.GROUP_TEAM);
 		configuration.addMenuGroup(
-				ISynchronizePageConfiguration.P_TOOLBAR_MENU, 
-				AbstractSynchronizeActionGroup.GROUP_PROCESS_ALL);
+				ISynchronizePageConfiguration.P_TOOLBAR_MENU, AbstractSynchronizeActionGroup.GROUP_PROCESS_ALL);
 	}
-	
+
 	public void configureActions(ISynchronizePageConfiguration configuration) {
-		OpenInExternalCompareEditorAction externalCompareAction = new OpenInExternalCompareEditorAction(SVNUIMessages.OpenInExternalCompareEditor_Action, configuration);
+		OpenInExternalCompareEditorAction externalCompareAction = new OpenInExternalCompareEditorAction(
+				SVNUIMessages.OpenInExternalCompareEditor_Action, configuration);
 		this.appendToGroup(
-				ISynchronizePageConfiguration.P_CONTEXT_MENU, 
-				ISynchronizePageConfiguration.FILE_GROUP,
+				ISynchronizePageConfiguration.P_CONTEXT_MENU, ISynchronizePageConfiguration.FILE_GROUP,
 				externalCompareAction);
-		
-		UpdateAction updateAllAction = new UpdateAction(SVNUIMessages.SynchronizeActionGroup_AcceptAllIncomingChanges, configuration, this.getVisibleRootsSelectionProvider());
-		updateAllAction.setImageDescriptor(SVNTeamUIPlugin.instance().getImageDescriptor("icons/common/actions/update.gif")); //$NON-NLS-1$
+
+		UpdateAction updateAllAction = new UpdateAction(SVNUIMessages.SynchronizeActionGroup_AcceptAllIncomingChanges,
+				configuration, this.getVisibleRootsSelectionProvider());
+		updateAllAction
+				.setImageDescriptor(SVNTeamUIPlugin.instance().getImageDescriptor("icons/common/actions/update.gif")); //$NON-NLS-1$
 		this.appendToGroup(
-				ISynchronizePageConfiguration.P_TOOLBAR_MENU, 
-				MergeActionGroup.GROUP_PROCESS_ALL,
-				updateAllAction);
-		ExpandAllAction expandAllAction = new ExpandAllAction(SVNUIMessages.SynchronizeActionGroup_ExpandAll, configuration, this.getVisibleRootsSelectionProvider());
+				ISynchronizePageConfiguration.P_TOOLBAR_MENU, MergeActionGroup.GROUP_PROCESS_ALL, updateAllAction);
+		ExpandAllAction expandAllAction = new ExpandAllAction(SVNUIMessages.SynchronizeActionGroup_ExpandAll,
+				configuration, this.getVisibleRootsSelectionProvider());
 		expandAllAction.setImageDescriptor(SVNTeamUIPlugin.instance().getImageDescriptor("icons/views/expandall.gif")); //$NON-NLS-1$
 		this.appendToGroup(
-				ISynchronizePageConfiguration.P_TOOLBAR_MENU, 
-				ISynchronizePageConfiguration.NAVIGATE_GROUP,
+				ISynchronizePageConfiguration.P_TOOLBAR_MENU, ISynchronizePageConfiguration.NAVIGATE_GROUP,
 				expandAllAction);
 
 		UpdateAction updateAction = new UpdateAction(SVNUIMessages.SynchronizeActionGroup_Accept, configuration);
-		updateAction.setImageDescriptor(SVNTeamUIPlugin.instance().getImageDescriptor("icons/common/actions/update.gif")); //$NON-NLS-1$
+		updateAction
+				.setImageDescriptor(SVNTeamUIPlugin.instance().getImageDescriptor("icons/common/actions/update.gif")); //$NON-NLS-1$
 		this.appendToGroup(
-				ISynchronizePageConfiguration.P_CONTEXT_MENU, 
-				MergeActionGroup.GROUP_MERGE_CHANGES,
-				updateAction);
-		OverrideAndUpdateAction overrideAndUpdateAction = new OverrideAndUpdateAction(SVNUIMessages.MergeActionGroup_OverrideAndUpdate, configuration);
+				ISynchronizePageConfiguration.P_CONTEXT_MENU, MergeActionGroup.GROUP_MERGE_CHANGES, updateAction);
+		OverrideAndUpdateAction overrideAndUpdateAction = new OverrideAndUpdateAction(
+				SVNUIMessages.MergeActionGroup_OverrideAndUpdate, configuration);
 		this.appendToGroup(
-				ISynchronizePageConfiguration.P_CONTEXT_MENU, 
-				MergeActionGroup.GROUP_MERGE_CHANGES,
+				ISynchronizePageConfiguration.P_CONTEXT_MENU, MergeActionGroup.GROUP_MERGE_CHANGES,
 				overrideAndUpdateAction);
-		EditConflictsAction editConflictsAction = new EditConflictsAction(SVNUIMessages.UpdateActionGroup_EditConflicts, configuration);
+		EditConflictsAction editConflictsAction = new EditConflictsAction(SVNUIMessages.UpdateActionGroup_EditConflicts,
+				configuration);
 		this.appendToGroup(
-				ISynchronizePageConfiguration.P_CONTEXT_MENU, 
-				MergeActionGroup.GROUP_MERGE_CHANGES,
+				ISynchronizePageConfiguration.P_CONTEXT_MENU, MergeActionGroup.GROUP_MERGE_CHANGES,
 				editConflictsAction);
-		EditTreeConflictsAction editTreeConflictsAction = new EditTreeConflictsAction(SVNUIMessages.UpdateActionGroup_EditTreeConflicts, configuration);
+		EditTreeConflictsAction editTreeConflictsAction = new EditTreeConflictsAction(
+				SVNUIMessages.UpdateActionGroup_EditTreeConflicts, configuration);
 		this.appendToGroup(
-				ISynchronizePageConfiguration.P_CONTEXT_MENU, 
-				MergeActionGroup.GROUP_MERGE_CHANGES,
+				ISynchronizePageConfiguration.P_CONTEXT_MENU, MergeActionGroup.GROUP_MERGE_CHANGES,
 				editTreeConflictsAction);
-		MergePropertiesAction mergePropertiesAction = new MergePropertiesAction(SVNUIMessages.SynchronizeActionGroup_MergeProperties, configuration);
+		MergePropertiesAction mergePropertiesAction = new MergePropertiesAction(
+				SVNUIMessages.SynchronizeActionGroup_MergeProperties, configuration);
 		this.appendToGroup(
-				ISynchronizePageConfiguration.P_CONTEXT_MENU, 
-				MergeActionGroup.GROUP_MERGE_CHANGES,
+				ISynchronizePageConfiguration.P_CONTEXT_MENU, MergeActionGroup.GROUP_MERGE_CHANGES,
 				mergePropertiesAction);
-		MarkAsMergedAction markAsMergedAction = new MarkAsMergedAction(SVNUIMessages.SynchronizeActionGroup_MarkAsMerged, configuration);
+		MarkAsMergedAction markAsMergedAction = new MarkAsMergedAction(
+				SVNUIMessages.SynchronizeActionGroup_MarkAsMerged, configuration);
 		this.appendToGroup(
-				ISynchronizePageConfiguration.P_CONTEXT_MENU, 
-				MergeActionGroup.GROUP_MERGE_CHANGES,
-				markAsMergedAction);
+				ISynchronizePageConfiguration.P_CONTEXT_MENU, MergeActionGroup.GROUP_MERGE_CHANGES, markAsMergedAction);
 
 		RevertAction revertAction = new RevertAction(SVNUIMessages.SynchronizeActionGroup_Revert, configuration);
-		revertAction.setImageDescriptor(SVNTeamUIPlugin.instance().getImageDescriptor("icons/common/actions/revert.gif")); //$NON-NLS-1$
+		revertAction
+				.setImageDescriptor(SVNTeamUIPlugin.instance().getImageDescriptor("icons/common/actions/revert.gif")); //$NON-NLS-1$
 		this.appendToGroup(
-				ISynchronizePageConfiguration.P_CONTEXT_MENU, 
-				MergeActionGroup.GROUP_MANAGE_LOCALS,
-				revertAction);
-		ShowHistoryAction showHistoryAction = new ShowHistoryAction(SVNUIMessages.SynchronizeActionGroup_ShowResourceHistory, configuration);
-		showHistoryAction.setImageDescriptor(SVNTeamUIPlugin.instance().getImageDescriptor("icons/common/actions/showhistory.gif")); //$NON-NLS-1$
+				ISynchronizePageConfiguration.P_CONTEXT_MENU, MergeActionGroup.GROUP_MANAGE_LOCALS, revertAction);
+		ShowHistoryAction showHistoryAction = new ShowHistoryAction(
+				SVNUIMessages.SynchronizeActionGroup_ShowResourceHistory, configuration);
+		showHistoryAction.setImageDescriptor(
+				SVNTeamUIPlugin.instance().getImageDescriptor("icons/common/actions/showhistory.gif")); //$NON-NLS-1$
 		this.appendToGroup(
-				ISynchronizePageConfiguration.P_CONTEXT_MENU, 
-				MergeActionGroup.GROUP_MANAGE_LOCALS,
-				showHistoryAction);
+				ISynchronizePageConfiguration.P_CONTEXT_MENU, MergeActionGroup.GROUP_MANAGE_LOCALS, showHistoryAction);
 
 		this.addSpecificActions(showHistoryAction, configuration);
 	}
-	
+
 	protected void addLocalActions(IMenuManager manager, ISynchronizePageConfiguration configuration) {
-		ShowOutgoingPropertiesAction showPropertiesAction = new ShowOutgoingPropertiesAction(SVNUIMessages.ShowPropertiesAction_label, configuration);
-		showPropertiesAction.setImageDescriptor(SVNTeamUIPlugin.instance().getImageDescriptor("icons/views/propertiesedit.gif")); //$NON-NLS-1$
+		ShowOutgoingPropertiesAction showPropertiesAction = new ShowOutgoingPropertiesAction(
+				SVNUIMessages.ShowPropertiesAction_label, configuration);
+		showPropertiesAction
+				.setImageDescriptor(SVNTeamUIPlugin.instance().getImageDescriptor("icons/views/propertiesedit.gif")); //$NON-NLS-1$
 		manager.add(showPropertiesAction);
-		SetPropertyAction setPropAction = new SetPropertyAction(SVNUIMessages.SynchronizeActionGroup_SetProperty, configuration);
+		SetPropertyAction setPropAction = new SetPropertyAction(SVNUIMessages.SynchronizeActionGroup_SetProperty,
+				configuration);
 		manager.add(setPropAction);
-		
-		SetKeywordsAction setKeywordsAction = new SetKeywordsAction(SVNUIMessages.SynchronizeActionGroup_SetKeywords, configuration);
+
+		SetKeywordsAction setKeywordsAction = new SetKeywordsAction(SVNUIMessages.SynchronizeActionGroup_SetKeywords,
+				configuration);
 		manager.add(setKeywordsAction);
-		
-		SetExternalDefinitionAction setExternalsAction = new SetExternalDefinitionAction(SVNUIMessages.Action_SetExternals, configuration);
+
+		SetExternalDefinitionAction setExternalsAction = new SetExternalDefinitionAction(
+				SVNUIMessages.Action_SetExternals, configuration);
 		manager.add(setExternalsAction);
-		
-		ShowOutgoingAnnotationAction showAnnotationAction = new ShowOutgoingAnnotationAction(SVNUIMessages.ShowAnnotationCommand_label, configuration);
+
+		ShowOutgoingAnnotationAction showAnnotationAction = new ShowOutgoingAnnotationAction(
+				SVNUIMessages.ShowAnnotationCommand_label, configuration);
 		manager.add(showAnnotationAction);
-		
+
 		manager.add(new Separator());
-		
-		CreatePatchFileAction patchAction = new CreatePatchFileAction(SVNUIMessages.CreatePatchCommand_label, configuration);
+
+		CreatePatchFileAction patchAction = new CreatePatchFileAction(SVNUIMessages.CreatePatchCommand_label,
+				configuration);
 		manager.add(patchAction);
-		CreateBranchAction branchAction = new CreateBranchAction(SVNUIMessages.SynchronizeActionGroup_Branch, configuration);
-		branchAction.setImageDescriptor(SVNTeamUIPlugin.instance().getImageDescriptor("icons/common/actions/branch.gif")); //$NON-NLS-1$
+		CreateBranchAction branchAction = new CreateBranchAction(SVNUIMessages.SynchronizeActionGroup_Branch,
+				configuration);
+		branchAction
+				.setImageDescriptor(SVNTeamUIPlugin.instance().getImageDescriptor("icons/common/actions/branch.gif")); //$NON-NLS-1$
 		manager.add(branchAction);
-		
+
 		manager.add(new Separator());
-		
+
 		CleanUpAction cleanUpAction = new CleanUpAction(SVNUIMessages.SynchronizeActionGroup_Cleanup, configuration);
 		manager.add(cleanUpAction);
 	}
-	
+
 	protected void addRemoteActions(IMenuManager manager, ISynchronizePageConfiguration configuration) {
-		ShowIncomingPropertiesAction showIncomingPropertiesAction = new ShowIncomingPropertiesAction(SVNUIMessages.ShowPropertiesAction_label, configuration);
-		showIncomingPropertiesAction.setImageDescriptor(SVNTeamUIPlugin.instance().getImageDescriptor("icons/views/propertiesedit.gif")); //$NON-NLS-1$
+		ShowIncomingPropertiesAction showIncomingPropertiesAction = new ShowIncomingPropertiesAction(
+				SVNUIMessages.ShowPropertiesAction_label, configuration);
+		showIncomingPropertiesAction
+				.setImageDescriptor(SVNTeamUIPlugin.instance().getImageDescriptor("icons/views/propertiesedit.gif")); //$NON-NLS-1$
 		manager.add(showIncomingPropertiesAction);
-		ShowIncomingAnnotationAction showIncomingAnnotationAction = new ShowIncomingAnnotationAction(SVNUIMessages.ShowAnnotationAction_label, configuration);
+		ShowIncomingAnnotationAction showIncomingAnnotationAction = new ShowIncomingAnnotationAction(
+				SVNUIMessages.ShowAnnotationAction_label, configuration);
 		manager.add(showIncomingAnnotationAction);
 	}
-	
+
 }

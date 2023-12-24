@@ -56,84 +56,85 @@ import org.osgi.service.prefs.BackingStoreException;
  */
 public class SVNTeamUIPlugin extends AbstractUIPlugin {
 	private volatile static SVNTeamUIPlugin instance = null;
-	
+
 	private ProjectCloseListener pcListener;
+
 	private URL baseUrl;
+
 //	private ProblemListener problemListener;
 	private Timer timer;
-	
-    public SVNTeamUIPlugin() {
-        super();
 
-        SVNTeamUIPlugin.instance = this;
-        
-        this.pcListener = new ProjectCloseListener();
+	public SVNTeamUIPlugin() {
+		super();
+
+		SVNTeamUIPlugin.instance = this;
+
+		this.pcListener = new ProjectCloseListener();
 //        this.problemListener = new ProblemListener();
-        this.timer = new Timer();
-    }
-    
-    public static SVNTeamUIPlugin instance() {
-    	return SVNTeamUIPlugin.instance;
-    }
-    
-    /**
-     * @deprecated
-     */
-    public SVNConsole getConsole() {
-    	return SVNConsoleFactory.getConsole();
-    }
-    
-    /**
-     * @deprecated
-     */
-    public IConsoleStream getConsoleStream() {
-    	return SVNConsoleFactory.getConsole().getConsoleStream();
-    }
-    
-    public ImageDescriptor getImageDescriptor(String path) {
-    	try {
+		this.timer = new Timer();
+	}
+
+	public static SVNTeamUIPlugin instance() {
+		return SVNTeamUIPlugin.instance;
+	}
+
+	/**
+	 * @deprecated
+	 */
+	public SVNConsole getConsole() {
+		return SVNConsoleFactory.getConsole();
+	}
+
+	/**
+	 * @deprecated
+	 */
+	public IConsoleStream getConsoleStream() {
+		return SVNConsoleFactory.getConsole().getConsoleStream();
+	}
+
+	public ImageDescriptor getImageDescriptor(String path) {
+		try {
 			return ImageDescriptor.createFromURL(new URL(this.baseUrl, path));
-		} 
-    	catch (MalformedURLException e) {
+		} catch (MalformedURLException e) {
 			LoggedOperation.reportError(SVNUIMessages.getErrorString("Error_GetImageDescriptor"), e); //$NON-NLS-1$
 			return null;
 		}
-    }
-    
-    public String getVersionString() {
-        return (String)this.getBundle().getHeaders().get(org.osgi.framework.Constants.BUNDLE_VERSION);
-    }
-    
+	}
+
+	public String getVersionString() {
+		return (String) this.getBundle().getHeaders().get(org.osgi.framework.Constants.BUNDLE_VERSION);
+	}
+
 	public IEclipsePreferences getPreferences() {
 		return new InstanceScope().getNode(this.getBundle().getSymbolicName());
 	}
-	
+
 	public void savePreferences() {
 		try {
 			SVNTeamUIPlugin.instance().getPreferences().flush();
-		} 
-		catch (BackingStoreException ex) {
+		} catch (BackingStoreException ex) {
 			UILoggedOperation.reportError(SVNUIMessages.getErrorString("Error_SavePreferences"), ex); //$NON-NLS-1$
 		}
 	}
-	
-    /*
-     * Important: Don't call any CoreExtensionsManager's methods here,
-     * because CoreExtensionsManager instantiates some UI classes through extension
-     * points and there could be problems in following case:
-     * Subversive core calls CoreExtensionsManager, where CoreExtensionsManager calls SVNTeamUIPlugin.start
-     * but SVNTeamUIPlugin.start calls CoreExtensionsManager
-     */
+
+	/*
+	 * Important: Don't call any CoreExtensionsManager's methods here,
+	 * because CoreExtensionsManager instantiates some UI classes through extension
+	 * points and there could be problems in following case:
+	 * Subversive core calls CoreExtensionsManager, where CoreExtensionsManager calls SVNTeamUIPlugin.start
+	 * but SVNTeamUIPlugin.start calls CoreExtensionsManager
+	 */
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
-		
+
 //		Platform.addLogListener(this.problemListener);
-		
-        this.baseUrl = context.getBundle().getEntry("/"); //$NON-NLS-1$
-		
+
+		this.baseUrl = context.getBundle().getEntry("/"); //$NON-NLS-1$
+
 		IWorkspace workspace = ResourcesPlugin.getWorkspace();
-		workspace.addResourceChangeListener(SVNTeamUIPlugin.this.pcListener, IResourceChangeEvent.PRE_CLOSE | IResourceChangeEvent.PRE_DELETE);
-		
+		workspace.addResourceChangeListener(SVNTeamUIPlugin.this.pcListener,
+				IResourceChangeEvent.PRE_CLOSE | IResourceChangeEvent.PRE_DELETE);
+
 		IPreferenceStore store = this.getPreferenceStore();
 		if (store.getBoolean(SVNTeamPreferences.FIRST_STARTUP)) {
 			store.setValue(SVNTeamPreferences.FIRST_STARTUP, false);
@@ -146,19 +147,19 @@ public class SVNTeamUIPlugin extends AbstractUIPlugin {
 			// we will not re-enable since we only enable automatically on the first startup.
 			PlatformUI.getWorkbench().getDecoratorManager().setEnabled(SVNLightweightDecorator.ID, true);
 		}
-		
+
 		if (this.connectorsAreRequired()) {
 			//run connectors discovery feature
 			this.discoveryConnectors();
 		}
-		
+
 		this.timer.scheduleAtFixedRate(new TimerTask() {
 			public void run() {
 				SVNRemoteStorage.instance().checkForExternalChanges();
 			}
 		}, 1000, 1000);
 	}
-	
+
 	protected boolean connectorsAreRequired() {
 		if (!CoreExtensionsManager.isExtensionsRegistered(CoreExtensionsManager.SVN_CONNECTOR)) {
 			for (IProject project : ResourcesPlugin.getWorkspace().getRoot().getProjects()) {
@@ -169,7 +170,7 @@ public class SVNTeamUIPlugin extends AbstractUIPlugin {
 		}
 		return false;
 	}
-	
+
 	public void discoveryConnectors() {
 		/*
 		 * We can't run Discovery Connectors through IActionOperation, because
@@ -179,11 +180,11 @@ public class SVNTeamUIPlugin extends AbstractUIPlugin {
 		Job job = new Job(SVNUIMessages.Operation_DiscoveryConnectors) {
 			protected IStatus run(IProgressMonitor monitor) {
 				try {
-					DiscoveryConnectorsHelper discovery = new DiscoveryConnectorsHelper();														
-					discovery.run(monitor);																
+					DiscoveryConnectorsHelper discovery = new DiscoveryConnectorsHelper();
+					discovery.run(monitor);
 				} catch (Throwable t) {
 					//shouldn't prevent plug-in start 
-					LoggedOperation.reportError(SVNUIMessages.Operation_DiscoveryConnectors_Error, t); 
+					LoggedOperation.reportError(SVNUIMessages.Operation_DiscoveryConnectors_Error, t);
 				}
 				return Status.OK_STATUS;
 			}
@@ -192,17 +193,17 @@ public class SVNTeamUIPlugin extends AbstractUIPlugin {
 		job.setUser(false);
 		job.schedule();
 	}
-	
+
 	public void stop(BundleContext context) throws Exception {
 		this.timer.cancel();
 		SVNConsoleFactory.destroyConsole();
-		
+
 		IWorkspace workspace = ResourcesPlugin.getWorkspace();
-		
+
 		workspace.removeResourceChangeListener(this.pcListener);
-		
+
 //		Platform.removeLogListener(this.problemListener);
 		super.stop(context);
 	}
-	
+
 }

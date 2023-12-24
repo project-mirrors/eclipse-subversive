@@ -41,22 +41,26 @@ import org.eclipse.team.svn.ui.verifier.ExistingResourceVerifier;
  */
 public class ImportPanel extends AbstractDialogPanel {
 	protected Text locationField;
+
 	protected String location;
+
 	protected Button recursiveButton;
+
 	protected DepthSelectionComposite depthSelector;
+
 	protected CommentComposite comment;
-	
+
 	public ImportPanel(String importToUrl) {
 		super();
 		this.dialogTitle = SVNUIMessages.ImportPanel_Title;
 		this.dialogDescription = SVNUIMessages.ImportPanel_Description;
-		this.defaultMessage = SVNUIMessages.format(SVNUIMessages.ImportPanel_Message, new String[] {importToUrl});
-    }
-	
+		this.defaultMessage = SVNUIMessages.format(SVNUIMessages.ImportPanel_Message, new String[] { importToUrl });
+	}
+
 	public void createControlsImpl(Composite parent) {
 		GridLayout layout = null;
 		GridData data = null;
-		
+
 		Composite folderSelectionComposite = new Composite(parent, SWT.NULL);
 		layout = new GridLayout();
 		layout.numColumns = 3;
@@ -65,15 +69,15 @@ public class ImportPanel extends AbstractDialogPanel {
 		folderSelectionComposite.setLayout(layout);
 		data = new GridData(GridData.FILL_HORIZONTAL);
 		folderSelectionComposite.setLayoutData(data);
-		
+
 		Label folder = new Label(folderSelectionComposite, SWT.NONE);
 		folder.setText(SVNUIMessages.ImportPanel_Folder);
-		
-		this.locationField = new Text(folderSelectionComposite,  SWT.SINGLE | SWT.BORDER);
+
+		this.locationField = new Text(folderSelectionComposite, SWT.SINGLE | SWT.BORDER);
 		data = new GridData(GridData.FILL_HORIZONTAL);
 		this.locationField.setLayoutData(data);
 		this.attachTo(this.locationField, new ExistingResourceVerifier(folder.getText(), false));
-		
+
 		Button browseButton = new Button(folderSelectionComposite, SWT.PUSH);
 		browseButton.setText(SVNUIMessages.Button_Browse);
 		data = new GridData();
@@ -90,59 +94,59 @@ public class ImportPanel extends AbstractDialogPanel {
 				}
 			}
 		});
-		
+
 		Group group = new Group(parent, SWT.NONE);
 		group.setLayout(new GridLayout());
 		data = new GridData(GridData.FILL_BOTH);
 		group.setLayoutData(data);
 		group.setText(SVNUIMessages.ImportPanel_Comment);
-		
+
 		this.comment = new CommentComposite(group, this);
 		data = new GridData(GridData.FILL_BOTH);
 		this.comment.setLayoutData(data);
-		
+
 		Label separator = new Label(parent, SWT.HORIZONTAL | SWT.SEPARATOR);
 		separator.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		separator.setVisible(false);
-		
+
 		this.depthSelector = new DepthSelectionComposite(parent, SWT.NONE, false);
 		data = new GridData(GridData.FILL_HORIZONTAL);
 		data.horizontalSpan = 2;
 		this.depthSelector.setLayoutData(data);
-    }
-	
-	public String getHelpId() {
-    	return "org.eclipse.team.svn.help.remote_importDialogContext"; //$NON-NLS-1$
 	}
-	
-    public Point getPrefferedSizeImpl() {
-    	return new Point(525, SWT.DEFAULT);
-    }
-    
+
+	public String getHelpId() {
+		return "org.eclipse.team.svn.help.remote_importDialogContext"; //$NON-NLS-1$
+	}
+
+	public Point getPrefferedSizeImpl() {
+		return new Point(525, SWT.DEFAULT);
+	}
+
 	public void postInit() {
 		super.postInit();
 		this.comment.postInit(this.manager);
 	}
-		
+
 	protected void saveChangesImpl() {
 		this.location = this.locationField.getText();
 		this.comment.saveChanges();
 	}
 
-    protected void cancelChangesImpl() {
-    	this.comment.cancelChanges();
-    }
-    
-    public String getLocation() {
-    	return this.location;
-    }
-    
-    public String getMessage() {
-    	return this.comment.getMessage();
-    }
-    
-    public SVNDepth getDepth() {
-    	return this.depthSelector.getDepth();
-    }
-    
+	protected void cancelChangesImpl() {
+		this.comment.cancelChanges();
+	}
+
+	public String getLocation() {
+		return this.location;
+	}
+
+	public String getMessage() {
+		return this.comment.getMessage();
+	}
+
+	public SVNDepth getDepth() {
+		return this.depthSelector.getDepth();
+	}
+
 }

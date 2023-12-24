@@ -44,39 +44,47 @@ import org.eclipse.team.svn.ui.preferences.SVNTeamPreferences;
  */
 public class ReplaceWithBranchTagAction extends AbstractWorkingCopyAction {
 	protected int type;
-	
+
 	public ReplaceWithBranchTagAction(int type) {
 		super();
 		this.type = type;
 	}
-	
+
 	public boolean isEnabled() {
 		return this.getSelectedResources().length == 1 && this.checkForResourcesPresence(IStateFilter.SF_ONREPOSITORY);
 	}
 
 	public void runImpl(IAction action) {
-		IResource []resources = this.getSelectedResources(IStateFilter.SF_ONREPOSITORY);
+		IResource[] resources = this.getSelectedResources(IStateFilter.SF_ONREPOSITORY);
 		IActionOperation op = ReplaceWithBranchTagAction.getReplaceOperation(resources, this.getShell(), this.type);
 		if (op != null) {
 			this.runScheduled(op);
 		}
 	}
 
-	public static IActionOperation getReplaceOperation(IResource []resources, Shell shell, int type) {
+	public static IActionOperation getReplaceOperation(IResource[] resources, Shell shell, int type) {
 		ILocalResource local = SVNRemoteStorage.instance().asLocalResourceAccessible(resources[0]);
-		IRepositoryResource remote = local.isCopied() ? SVNUtility.getCopiedFrom(resources[0]) : SVNRemoteStorage.instance().asRepositoryResource(resources[0]);
-		
+		IRepositoryResource remote = local.isCopied()
+				? SVNUtility.getCopiedFrom(resources[0])
+				: SVNRemoteStorage.instance().asRepositoryResource(resources[0]);
+
 		boolean considerStructure = BranchTagSelectionComposite.considerStructure(remote);
-		IRepositoryResource[] branchTagResources = considerStructure ? BranchTagSelectionComposite.calculateBranchTagResources(remote, type) : new IRepositoryResource[0];
+		IRepositoryResource[] branchTagResources = considerStructure
+				? BranchTagSelectionComposite.calculateBranchTagResources(remote, type)
+				: new IRepositoryResource[0];
 		if (!(considerStructure && branchTagResources.length == 0)) {
-			ReplaceBranchTagPanel panel = new ReplaceBranchTagPanel(remote, local.getRevision(), type, branchTagResources);
+			ReplaceBranchTagPanel panel = new ReplaceBranchTagPanel(remote, local.getRevision(), type,
+					branchTagResources);
 			DefaultDialog dlg = new DefaultDialog(shell, panel);
-			if (dlg.open() == 0){
+			if (dlg.open() == 0) {
 				ReplaceWarningDialog dialog = new ReplaceWarningDialog(shell);
 				if (dialog.open() == 0 && panel.getResourceToReplaceWith() != null) {
 					IRepositoryResource selected = panel.getResourceToReplaceWith();
-					boolean ignoreExternals = SVNTeamPreferences.getBehaviourBoolean(SVNTeamUIPlugin.instance().getPreferenceStore(), SVNTeamPreferences.BEHAVIOUR_IGNORE_EXTERNALS_NAME);
-					CompositeOperation op = new CompositeOperation("Operation_ReplaceWithRevision", SVNUIMessages.class); //$NON-NLS-1$
+					boolean ignoreExternals = SVNTeamPreferences.getBehaviourBoolean(
+							SVNTeamUIPlugin.instance().getPreferenceStore(),
+							SVNTeamPreferences.BEHAVIOUR_IGNORE_EXTERNALS_NAME);
+					CompositeOperation op = new CompositeOperation("Operation_ReplaceWithRevision", //$NON-NLS-1$
+							SVNUIMessages.class);
 					SaveProjectMetaOperation saveOp = new SaveProjectMetaOperation(resources);
 					op.add(saveOp);
 					op.add(new ReplaceWithRemoteOperation(resources[0], selected, ignoreExternals));
@@ -84,9 +92,9 @@ public class ReplaceWithBranchTagAction extends AbstractWorkingCopyAction {
 					op.add(new RefreshResourcesOperation(resources));
 					return op;
 				}
-			}	
+			}
 		}
 		return null;
 	}
-	
+
 }

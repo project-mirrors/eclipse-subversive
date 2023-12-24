@@ -21,9 +21,9 @@ import java.util.List;
 /**
  * LogEntry information container
  * 
- * The JavaHL API's is the only way to interact between SVN and Java-based tools. At the same time JavaHL connector
- * library is not EPL compatible and we won't to pin plug-in with concrete connector implementation. So, the only way to
- * do this is providing our own connector interface which will be covered by concrete connector implementation.
+ * The JavaHL API's is the only way to interact between SVN and Java-based tools. At the same time JavaHL connector library is not EPL
+ * compatible and we won't to pin plug-in with concrete connector implementation. So, the only way to do this is providing our own connector
+ * interface which will be covered by concrete connector implementation.
  * 
  * @author Alexander Gurov
  */
@@ -34,8 +34,7 @@ public class SVNLogEntry {
 	public final long revision;
 
 	/**
-	 * The date of the commit. Could be zero if the user who requested the log has no access rights to the specified
-	 * resource.
+	 * The date of the commit. Could be zero if the user who requested the log has no access rights to the specified resource.
 	 */
 	public final long date;
 
@@ -50,9 +49,8 @@ public class SVNLogEntry {
 	public final String message;
 
 	/**
-	 * The set of the items changed by this commit. Could be <code>null</code> when {@link ISVNConnector#logMessages}
-	 * is called with discoverPaths set to false or if the user who requested the log has no access rights to the
-	 * specified resource.
+	 * The set of the items changed by this commit. Could be <code>null</code> when {@link ISVNConnector#logMessages} is called with
+	 * discoverPaths set to false or if the user who requested the log has no access rights to the specified resource.
 	 */
 	public final SVNLogPath[] changedPaths;
 
@@ -72,10 +70,11 @@ public class SVNLogEntry {
 	 * @param changedPaths
 	 *            the set of the items changed by this commit
 	 * @param hasChildren
-	 *            if <code>true</code> then log entry will allocate memory for a child entries. Directly mapped to
-	 *            the hasChildren() method return value.
+	 *            if <code>true</code> then log entry will allocate memory for a child entries. Directly mapped to the hasChildren() method
+	 *            return value.
 	 */
-	public SVNLogEntry(long revision, long date, String author, String message, SVNLogPath[] changedPaths, boolean hasChildren) {
+	public SVNLogEntry(long revision, long date, String author, String message, SVNLogPath[] changedPaths,
+			boolean hasChildren) {
 		this.message = message;
 		this.date = date;
 		this.revision = revision;
@@ -110,7 +109,7 @@ public class SVNLogEntry {
 		}
 		return false;
 	}
-	
+
 	public String toString() {
 		return this.revision + ", author: " + String.valueOf(this.author) + ", has children: " + this.hasChildren(); //$NON-NLS-1$ //$NON-NLS-2$
 	}

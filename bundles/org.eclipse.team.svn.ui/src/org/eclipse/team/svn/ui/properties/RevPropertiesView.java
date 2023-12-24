@@ -46,66 +46,73 @@ import org.eclipse.ui.part.ViewPart;
  * 
  * @author Alexei Goncharov
  */
-public class RevPropertiesView extends ViewPart implements IRepositoriesStateChangedListener, IRevisionPropertyChangeListener {
+public class RevPropertiesView extends ViewPart
+		implements IRepositoriesStateChangedListener, IRevisionPropertyChangeListener {
 
 	public static final String VIEW_ID = RevPropertiesView.class.getName();
-	
+
 	protected IRepositoryLocation location;
+
 	protected SVNRevision revision;
+
 	protected IRevisionPropertiesProvider provider;
+
 	protected IActionOperation toPerform;
+
 	protected RevisionPropertiesComposite revPropComposite;
-	
+
 	public RevPropertiesView() {
 		super();
 		SVNRemoteStorage.instance().addRepositoriesStateChangedListener(this);
 		SVNRemoteStorage.instance().addRevisionPropertyChangeListener(this);
 	}
-	
+
 	public void setLocationAndRevision(IRepositoryLocation location, SVNRevision revision) {
 		this.location = location;
 		this.revision = revision;
 		this.revPropComposite.setLocationAndRevision(location, revision);
 		this.refreshView();
 	}
-	
+
 	public void refreshView() {
 		if (this.location == null || this.revision == null) {
 			this.setContentDescription(""); //$NON-NLS-1$
 			return;
 		}
-		this.setContentDescription(SVNUIMessages.format(SVNUIMessages.RevisionPropertyView_Decript, new String [] {String.valueOf(this.location), String.valueOf(this.revision)}));
+		this.setContentDescription(SVNUIMessages.format(SVNUIMessages.RevisionPropertyView_Decript,
+				new String[] { String.valueOf(this.location), String.valueOf(this.revision) }));
 		this.revPropComposite.setPending(true);
 		CompositeOperation op = new CompositeOperation("ShowRevProp", SVNUIMessages.class); //$NON-NLS-1$
-		op.add((IActionOperation)(this.provider = new GetRevisionPropertiesOperation(this.location, this.revision)));
+		op.add((IActionOperation) (this.provider = new GetRevisionPropertiesOperation(this.location, this.revision)));
 		op.add(new AbstractActionOperation("ShowRevProp", SVNUIMessages.class) { //$NON-NLS-1$
 			protected void runImpl(IProgressMonitor monitor) throws Exception {
-				RevPropertiesView.this.revPropComposite.setInput(RevPropertiesView.this.provider.getRevisionProperties());
+				RevPropertiesView.this.revPropComposite
+						.setInput(RevPropertiesView.this.provider.getRevisionProperties());
 				RevPropertiesView.this.revPropComposite.setPending(false);
 			}
 		});
 		UIMonitorUtility.doTaskScheduledDefault(op);
 	}
-	
+
 	public void createPartControl(Composite parent) {
 		IToolBarManager tbm = this.getViewSite().getActionBars().getToolBarManager();
 		tbm.removeAll();
-        Action action = new Action(SVNUIMessages.SVNView_Refresh_Label) {
-        	public void run() {
-	    		RevPropertiesView.this.refreshView();
-	    	}
-        };
-        action.setImageDescriptor(SVNTeamUIPlugin.instance().getImageDescriptor("icons/common/refresh.gif")); //$NON-NLS-1$
-        tbm.add(action);
-        tbm.update(true);
-		
+		Action action = new Action(SVNUIMessages.SVNView_Refresh_Label) {
+			public void run() {
+				RevPropertiesView.this.refreshView();
+			}
+		};
+		action.setImageDescriptor(SVNTeamUIPlugin.instance().getImageDescriptor("icons/common/refresh.gif")); //$NON-NLS-1$
+		tbm.add(action);
+		tbm.update(true);
+
 		this.revPropComposite = new RevisionPropertiesComposite(parent);
 		this.refreshView();
 
 		//Setting context help
-	    PlatformUI.getWorkbench().getHelpSystem().setHelp(parent, "org.eclipse.team.svn.help.revPropertiesViewContext"); //$NON-NLS-1$
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(parent, "org.eclipse.team.svn.help.revPropertiesViewContext"); //$NON-NLS-1$
 	}
-	
+
 	protected void disconnectView() {
 		this.location = null;
 		this.revision = null;
@@ -113,7 +120,7 @@ public class RevPropertiesView extends ViewPart implements IRepositoriesStateCha
 		UIMonitorUtility.getDisplay().syncExec(new Runnable() {
 			public void run() {
 				RevPropertiesView.this.setContentDescription(""); //$NON-NLS-1$
-			}			
+			}
 		});
 	}
 
@@ -122,7 +129,7 @@ public class RevPropertiesView extends ViewPart implements IRepositoriesStateCha
 		SVNRemoteStorage.instance().removeRevisionPropertyChangeListener(this);
 		super.dispose();
 	}
-	
+
 	public void setFocus() {
 	}
 
@@ -150,7 +157,7 @@ public class RevPropertiesView extends ViewPart implements IRepositoriesStateCha
 		if (isNewProp) {
 			props.add(event.getProperty());
 		}
-		final SVNProperty [] toSet = props.toArray(new SVNProperty[props.size()]);
+		final SVNProperty[] toSet = props.toArray(new SVNProperty[props.size()]);
 		UIMonitorUtility.getDisplay().syncExec(new Runnable() {
 			public void run() {
 				RevPropertiesView.this.revPropComposite.setInput(toSet);

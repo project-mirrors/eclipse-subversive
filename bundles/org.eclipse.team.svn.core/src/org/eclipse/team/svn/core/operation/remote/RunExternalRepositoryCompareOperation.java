@@ -38,82 +38,87 @@ import org.eclipse.team.svn.core.resource.IRepositoryResourceProvider.DefaultRep
 public class RunExternalRepositoryCompareOperation extends CompositeOperation implements IExecutable {
 
 	protected ExternalCompareRepositoryOperation externalCompareOperation;
-	
-	public RunExternalRepositoryCompareOperation(final IRepositoryResourceProvider provider, DiffViewerSettings diffSettings) {
+
+	public RunExternalRepositoryCompareOperation(final IRepositoryResourceProvider provider,
+			DiffViewerSettings diffSettings) {
 		super("Operation_ExternalRepositoryCompare", SVNMessages.class); //$NON-NLS-1$
-		
-		final DetectExternalCompareOperation detectOperation = new DetectExternalCompareOperation(provider, diffSettings);
+
+		final DetectExternalCompareOperation detectOperation = new DetectExternalCompareOperation(provider,
+				diffSettings);
 		this.add(detectOperation);
-		
-		this.externalCompareOperation = new ExternalCompareRepositoryOperation(provider, detectOperation); 
-		this.add(this.externalCompareOperation, new IActionOperation[]{detectOperation});
+
+		this.externalCompareOperation = new ExternalCompareRepositoryOperation(provider, detectOperation);
+		this.add(this.externalCompareOperation, new IActionOperation[] { detectOperation });
 	}
 
 	public boolean isExecuted() {
 		return this.externalCompareOperation.isExecuted();
 	}
-	
+
 	/**
 	 * Prepare files and run external compare editor
 	 *
 	 * @author Igor Burilo
 	 */
 	public static class ExternalCompareRepositoryOperation extends CompositeOperation {
-				
+
 		protected IExternalProgramParametersProvider parametersProvider;
+
 		protected ExternalProgramParameters externalProgramParams;
+
 		protected boolean isExecuted;
-		
-		public ExternalCompareRepositoryOperation(IRepositoryResource left, IRepositoryResource right, IExternalProgramParametersProvider parametersProvider) {
-			this(new DefaultRepositoryResourceProvider(new IRepositoryResource[]{right, left}), parametersProvider);																	
+
+		public ExternalCompareRepositoryOperation(IRepositoryResource left, IRepositoryResource right,
+				IExternalProgramParametersProvider parametersProvider) {
+			this(new DefaultRepositoryResourceProvider(new IRepositoryResource[] { right, left }), parametersProvider);
 		}
-		
-		public ExternalCompareRepositoryOperation(final IRepositoryResourceProvider resourcesProvider, IExternalProgramParametersProvider parametersProvider) {
+
+		public ExternalCompareRepositoryOperation(final IRepositoryResourceProvider resourcesProvider,
+				IExternalProgramParametersProvider parametersProvider) {
 			super("Operation_ExternalRepositoryCompare", SVNMessages.class); //$NON-NLS-1$
 			this.parametersProvider = parametersProvider;
-			
+
 			//get files operations
-			final AbstractGetFileContentOperation nextFileGetOp = new GetFileContentOperation(new IRepositoryResourceProvider() {
-				public IRepositoryResource[] getRepositoryResources() {
-					return new IRepositoryResource[]{resourcesProvider.getRepositoryResources()[1]};
-				}				
-			});				
+			final AbstractGetFileContentOperation nextFileGetOp = new GetFileContentOperation(
+					new IRepositoryResourceProvider() {
+						public IRepositoryResource[] getRepositoryResources() {
+							return new IRepositoryResource[] { resourcesProvider.getRepositoryResources()[1] };
+						}
+					});
 			this.add(nextFileGetOp);
-			
-			final AbstractGetFileContentOperation prevFileGetOp = new GetFileContentOperation(new IRepositoryResourceProvider() {
-				public IRepositoryResource[] getRepositoryResources() {
-					return new IRepositoryResource[]{resourcesProvider.getRepositoryResources()[0]};
-				}				
-			});				
-			this.add(prevFileGetOp, new IActionOperation[] {nextFileGetOp});
-			
+
+			final AbstractGetFileContentOperation prevFileGetOp = new GetFileContentOperation(
+					new IRepositoryResourceProvider() {
+						public IRepositoryResource[] getRepositoryResources() {
+							return new IRepositoryResource[] { resourcesProvider.getRepositoryResources()[0] };
+						}
+					});
+			this.add(prevFileGetOp, new IActionOperation[] { nextFileGetOp });
+
 			//Run external program operation
 			this.add(new AbstractActionOperation("Operation_ExternalRepositoryCompare", SVNMessages.class) { //$NON-NLS-1$
-				protected void runImpl(IProgressMonitor monitor) throws Exception {					
+				protected void runImpl(IProgressMonitor monitor) throws Exception {
 					ExternalCompareOperationHelper externalRunHelper = new ExternalCompareOperationHelper(
-							prevFileGetOp.getTemporaryPath(),
-							nextFileGetOp.getTemporaryPath(),							
-							null,
-							null,
+							prevFileGetOp.getTemporaryPath(), nextFileGetOp.getTemporaryPath(), null, null,
 							ExternalCompareRepositoryOperation.this.externalProgramParams);
-					externalRunHelper.execute(monitor);										
-				}				
-			}, new IActionOperation[] {nextFileGetOp, prevFileGetOp});	
+					externalRunHelper.execute(monitor);
+				}
+			}, new IActionOperation[] { nextFileGetOp, prevFileGetOp });
 		}
-		
+
 		protected void runImpl(IProgressMonitor monitor) throws Exception {
 			this.externalProgramParams = this.parametersProvider.getExternalProgramParameters();
-			if (this.externalProgramParams != null) {	
+			if (this.externalProgramParams != null) {
 				this.isExecuted = true;
-				super.runImpl(monitor);	
+				super.runImpl(monitor);
 			} else {
 				this.isExecuted = false;
 			}
 		}
-		
+
 		public boolean isExecuted() {
 			return this.isExecuted;
 		}
 	}
-	
+
 }

@@ -32,20 +32,21 @@ public class SetExternalDefinitionModelAction extends AbstractSynchronizeLogical
 	public SetExternalDefinitionModelAction(String text, ISynchronizePageConfiguration configuration) {
 		super(text, configuration);
 	}
-	
+
 	@Override
-	protected IActionOperation getOperation() {				
-		return org.eclipse.team.svn.ui.action.local.SetExternalDefinitionAction.getAction(this.getSelectedResource(), this.getConfiguration().getSite().getShell());
+	protected IActionOperation getOperation() {
+		return org.eclipse.team.svn.ui.action.local.SetExternalDefinitionAction.getAction(this.getSelectedResource(),
+				this.getConfiguration().getSite().getShell());
 	}
-	
+
 	protected boolean updateSelection(IStructuredSelection selection) {
 		if (super.updateSelection(selection) && selection.size() == 1) {
 			ILocalResource local = SVNRemoteStorage.instance().asLocalResource(this.getSelectedResource());
-			return IStateFilter.SF_VERSIONED_FOLDERS.accept(local); 						
+			return IStateFilter.SF_VERSIONED_FOLDERS.accept(local);
 		}
 		return false;
 	}
-	
+
 	protected boolean needsToSaveDirtyEditors() {
 		return false;
 	}

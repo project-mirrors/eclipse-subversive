@@ -25,7 +25,7 @@ import org.eclipse.team.svn.ui.extension.ExtensionsManager;
 import org.eclipse.team.svn.ui.extension.factory.IReportingDescriptor;
 
 public class SVNTeamSupportHandler extends AbstractSupportHandler {
-	
+
 	@Override
 	public void preProcess(ISupportRequest request) {
 		super.preProcess(request);
@@ -34,7 +34,7 @@ public class SVNTeamSupportHandler extends AbstractSupportHandler {
 			this.appendToDescription(contribution);
 		}
 	}
-	
+
 	@Override
 	public void process(ITaskContribution contribution, IProgressMonitor monitor) {
 		super.process(contribution, monitor);
@@ -42,37 +42,37 @@ public class SVNTeamSupportHandler extends AbstractSupportHandler {
 //			this.appendToDescription(contribution);
 //		}
 	}
-	
+
 	@Override
 	public void postProcess(ISupportResponse response, IProgressMonitor monitor) {
 		super.postProcess(response, monitor);
 	}
-	
+
 	protected boolean isSubversiveReport(ITaskContribution contribution) {
 		return SVNTeamPlugin.NATURE_ID.equals(contribution.getStatus().getPlugin());
 	}
-	
+
 	protected void appendToDescription(ITaskContribution contribution) {
 		IStatus status = contribution.getStatus();
 		String plugin = status.getPlugin();
 		if (!SVNTeamPlugin.NATURE_ID.equals(plugin)) {
 			return;
 		}
-		
-		IReportingDescriptor []providers = ExtensionsManager.getInstance().getReportingDescriptors();
+
+		IReportingDescriptor[] providers = ExtensionsManager.getInstance().getReportingDescriptors();
 		String report = "";
 		for (int i = 0; i < providers.length; i++) {
 			report += ReportPartsFactory.getProductPart(providers[i]);
 			report += ReportPartsFactory.getVersionPart(providers[i]);
 		}
 		report += ReportPartsFactory.getSVNClientPart();
-		
+
 		if (status.getSeverity() != IStatus.OK) {
 			report += ReportPartsFactory.getJVMPropertiesPart();
 		}
-		
+
 		report = ReportPartsFactory.removeHTMLTags(report);
-		
+
 		contribution.appendToDescription(report);
 	}
 }

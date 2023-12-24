@@ -38,8 +38,8 @@ import org.eclipse.team.svn.core.utility.SVNUtility;
  */
 public class RelocateOperation extends AbstractFileOperation {
 	protected String toUrl;
-	
-	public RelocateOperation(File []folders, String toUrl) {
+
+	public RelocateOperation(File[] folders, String toUrl) {
 		super("Operation_RelocateFile", SVNMessages.class, folders); //$NON-NLS-1$
 		this.toUrl = toUrl;
 	}
@@ -50,8 +50,8 @@ public class RelocateOperation extends AbstractFileOperation {
 	}
 
 	protected void runImpl(IProgressMonitor monitor) throws Exception {
-		File []files = FileUtility.shrinkChildNodes(this.operableData(), true);
-		
+		File[] files = FileUtility.shrinkChildNodes(this.operableData(), true);
+
 		for (int i = 0; i < files.length && !monitor.isCanceled(); i++) {
 			final File current = files[i];
 			final IRepositoryResource remote = SVNFileStorage.instance().asRepositoryResource(current, false);
@@ -60,8 +60,13 @@ public class RelocateOperation extends AbstractFileOperation {
 			this.protectStep(new IUnprotectedOperation() {
 				public void run(IProgressMonitor monitor) throws Exception {
 					String path = current.getAbsolutePath();
-					RelocateOperation.this.writeToConsole(IConsoleStream.LEVEL_CMD, "svn switch --relocate \"" + remote.getUrl() + "\" \"" + RelocateOperation.this.toUrl + "\" \"" + FileUtility.normalizePath(path) + "\"" + FileUtility.getUsernameParam(location.getUsername()) + "\n"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
-					proxy.relocate(SVNUtility.encodeURL(remote.getUrl()), SVNUtility.encodeURL(RelocateOperation.this.toUrl), path, SVNDepth.INFINITY, new SVNProgressMonitor(RelocateOperation.this, monitor, null));
+					RelocateOperation.this.writeToConsole(IConsoleStream.LEVEL_CMD,
+							"svn switch --relocate \"" + remote.getUrl() + "\" \"" + RelocateOperation.this.toUrl //$NON-NLS-1$//$NON-NLS-2$
+									+ "\" \"" + FileUtility.normalizePath(path) + "\"" //$NON-NLS-1$//$NON-NLS-2$
+									+ FileUtility.getUsernameParam(location.getUsername()) + "\n"); //$NON-NLS-1$
+					proxy.relocate(SVNUtility.encodeURL(remote.getUrl()),
+							SVNUtility.encodeURL(RelocateOperation.this.toUrl), path, SVNDepth.INFINITY,
+							new SVNProgressMonitor(RelocateOperation.this, monitor, null));
 				}
 			}, monitor, files.length);
 			location.releaseSVNProxy(proxy);

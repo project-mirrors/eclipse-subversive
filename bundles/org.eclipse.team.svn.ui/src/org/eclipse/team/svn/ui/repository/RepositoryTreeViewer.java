@@ -83,22 +83,28 @@ import org.eclipse.team.svn.ui.utility.UIMonitorUtility;
 public class RepositoryTreeViewer extends TreeViewer {
 
 	public static final String FMT_REPOSITORY_RESOURCE = "{" + ToolTipVariableSetProvider.NAME_OF_NAME + "}" + //$NON-NLS-1$ //$NON-NLS-2$
-	                                                     "{" + ToolTipVariableSetProvider.NAME_OF_LAST_CHANGE_DATE + "}" + //$NON-NLS-1$ //$NON-NLS-2$
-	                                                     "{" + ToolTipVariableSetProvider.NAME_OF_LAST_AUTHOR + "}"; //$NON-NLS-1$ //$NON-NLS-2$
-	public static final String FMT_REPOSITORY_FILE = RepositoryTreeViewer.FMT_REPOSITORY_RESOURCE +  
-												     "{" + ToolTipVariableSetProvider.NAME_OF_SIZE + "}" + //$NON-NLS-1$ //$NON-NLS-2$
-												     "{" + ToolTipVariableSetProvider.NAME_OF_LOCK_OWNER + "}" + //$NON-NLS-1$ //$NON-NLS-2$
-												     "{" + ToolTipVariableSetProvider.NAME_OF_LOCK_CREATION_DATE + "}" + //$NON-NLS-1$ //$NON-NLS-2$
-												     "{" + ToolTipVariableSetProvider.NAME_OF_LOCK_EXPIRATION_DATE + "}" + //$NON-NLS-1$ //$NON-NLS-2$
-												     "{" + ToolTipVariableSetProvider.NAME_OF_LOCK_COMMENT + "}"; //$NON-NLS-1$ //$NON-NLS-2$
-	public static final String FMT_REPOSITORY_FOLDER =  RepositoryTreeViewer.FMT_REPOSITORY_RESOURCE;
+			"{" + ToolTipVariableSetProvider.NAME_OF_LAST_CHANGE_DATE + "}" + //$NON-NLS-1$ //$NON-NLS-2$
+			"{" + ToolTipVariableSetProvider.NAME_OF_LAST_AUTHOR + "}"; //$NON-NLS-1$ //$NON-NLS-2$
+
+	public static final String FMT_REPOSITORY_FILE = RepositoryTreeViewer.FMT_REPOSITORY_RESOURCE + "{" //$NON-NLS-1$
+			+ ToolTipVariableSetProvider.NAME_OF_SIZE + "}" + //$NON-NLS-1$
+			"{" + ToolTipVariableSetProvider.NAME_OF_LOCK_OWNER + "}" + //$NON-NLS-1$ //$NON-NLS-2$
+			"{" + ToolTipVariableSetProvider.NAME_OF_LOCK_CREATION_DATE + "}" + //$NON-NLS-1$ //$NON-NLS-2$
+			"{" + ToolTipVariableSetProvider.NAME_OF_LOCK_EXPIRATION_DATE + "}" + //$NON-NLS-1$ //$NON-NLS-2$
+			"{" + ToolTipVariableSetProvider.NAME_OF_LOCK_COMMENT + "}"; //$NON-NLS-1$ //$NON-NLS-2$
+
+	public static final String FMT_REPOSITORY_FOLDER = RepositoryTreeViewer.FMT_REPOSITORY_RESOURCE;
+
 	public static final String FMT_REPOSITORY_BRANCHES = RepositoryTreeViewer.FMT_REPOSITORY_FOLDER;
+
 	public static final String FMT_REPOSITORY_ROOT = RepositoryTreeViewer.FMT_REPOSITORY_FOLDER;
+
 	public static final String FMT_REPOSITORY_TAGS = RepositoryTreeViewer.FMT_REPOSITORY_FOLDER;
+
 	public static final String FMT_REPOSITORY_TRUNK = RepositoryTreeViewer.FMT_REPOSITORY_FOLDER;
-	
+
 	private static final Map<Class<?>, String> class2Format = new HashMap<Class<?>, String>();
-	
+
 	static {
 		RepositoryTreeViewer.class2Format.put(RepositoryResource.class, RepositoryTreeViewer.FMT_REPOSITORY_RESOURCE);
 		RepositoryTreeViewer.class2Format.put(RepositoryFile.class, RepositoryTreeViewer.FMT_REPOSITORY_FILE);
@@ -113,11 +119,11 @@ public class RepositoryTreeViewer extends TreeViewer {
 	public static interface IRefreshVisitor {
 		public void visit(Object data);
 	}
-	
+
 	public static interface IRefreshListener {
 		public void refreshed(Object element);
 	}
-	
+
 	protected List<IRefreshListener> refreshListeners = new ArrayList<IRefreshListener>();
 
 	public RepositoryTreeViewer(Composite parent) {
@@ -134,48 +140,47 @@ public class RepositoryTreeViewer extends TreeViewer {
 		super(tree);
 		this.initialize();
 	}
-	
+
 	public synchronized void addRefreshListener(IRefreshListener listener) {
 		if (!this.refreshListeners.contains(listener)) {
 			this.refreshListeners.add(listener);
 		}
 	}
-	
+
 	public synchronized void removeRefreshListener(IRefreshListener listener) {
 		this.refreshListeners.remove(listener);
 	}
-	
+
 	public void setExpandedState(Object element, boolean expanded) {
-		TreeItem []items = this.getIdenticalNodes(element, true);
+		TreeItem[] items = this.getIdenticalNodes(element, true);
 		if (items != null && items.length > 0) {
-            if (expanded) {
-                createChildren(items[0]);
-            }
-    		this.setExpanded(items[0], expanded);
-		}
-		else {
-			TreeItem []nodes = this.getIdenticalNodes(element, false);
+			if (expanded) {
+				createChildren(items[0]);
+			}
+			this.setExpanded(items[0], expanded);
+		} else {
+			TreeItem[] nodes = this.getIdenticalNodes(element, false);
 			if (nodes != null && nodes.length > 0) {
 				super.setExpandedState(nodes[0].getData(), expanded);
 			}
 		}
 	}
-	
+
 	public void setSelection(ISelection selection) {
 		if (selection instanceof IStructuredSelection && !selection.isEmpty()) {
-			IStructuredSelection tmp = (IStructuredSelection)selection;
-			TreeItem []nodes = this.getIdenticalNodes(tmp.getFirstElement(), false);
+			IStructuredSelection tmp = (IStructuredSelection) selection;
+			TreeItem[] nodes = this.getIdenticalNodes(tmp.getFirstElement(), false);
 			if (nodes != null && nodes.length > 0) {
 				selection = new StructuredSelection(nodes[0].getData());
 			}
 		}
 		super.setSelection(selection);
 	}
-	
+
 	public void refresh(final Object element, final IRefreshVisitor visitor, final boolean exact) {
 		this.getControl().getDisplay().syncExec(new Runnable() {
 			public void run() {
-				TreeItem []nodes = RepositoryTreeViewer.this.getIdenticalNodes(element, exact);
+				TreeItem[] nodes = RepositoryTreeViewer.this.getIdenticalNodes(element, exact);
 				if (nodes != null && nodes.length != 0) {
 					for (int i = 0; i < nodes.length; i++) {
 						Object data = nodes[i].getData();
@@ -185,11 +190,10 @@ public class RepositoryTreeViewer extends TreeViewer {
 						RepositoryTreeViewer.this.internalRefresh(nodes[i], data, true, true);
 						RepositoryTreeViewer.this.fireRefresh(data);
 					}
-				}
-				else {
+				} else {
 					Object input = RepositoryTreeViewer.this.getInput();
 					if (input instanceof IDataTreeNode) {
-						Object data = ((IDataTreeNode)input).getData();
+						Object data = ((IDataTreeNode) input).getData();
 						if (data != null && data.equals(element) && visitor != null) {
 							visitor.visit(input);
 						}
@@ -199,14 +203,14 @@ public class RepositoryTreeViewer extends TreeViewer {
 			}
 		});
 	}
-	
+
 	public void fireEmptySelectionEvent() {
 		this.fireSelectionChanged(new SelectionChangedEvent(this, StructuredSelection.EMPTY));
 	}
-	
+
 	// fix the problem with refresh of identical nodes in the tree
-    protected void internalRefresh(Widget widget, Object element, boolean doStruct, boolean updateLabels) {
-    	if (widget instanceof Item) {
+	protected void internalRefresh(Widget widget, Object element, boolean doStruct, boolean updateLabels) {
+		if (widget instanceof Item) {
 			if (doStruct) {
 				this.updatePlus((Item) widget, element);
 			}
@@ -218,7 +222,7 @@ public class RepositoryTreeViewer extends TreeViewer {
 		}
 
 		if (doStruct) {
-			this.internalRefreshStruct(widget, element, updateLabels); 
+			this.internalRefreshStruct(widget, element, updateLabels);
 		} else {
 			Item[] children = this.getChildren(widget);
 			if (children != null) {
@@ -233,15 +237,15 @@ public class RepositoryTreeViewer extends TreeViewer {
 		}
 	}
 
-    protected void internalRefreshStruct(Widget widget, Object element, boolean updateLabels) {
+	protected void internalRefreshStruct(Widget widget, Object element, boolean updateLabels) {
 //		this.updateChildren(widget, element, null);
 		try {
 			//updateChildren(Widget widget, Object parent, Object[] elementChildren, boolean updateLabels)
-			Method m = AbstractTreeViewer.class.getDeclaredMethod("updateChildren", new Class[] {Widget.class, Object.class, Object [].class, boolean.class}); //$NON-NLS-1$
+			Method m = AbstractTreeViewer.class.getDeclaredMethod("updateChildren", //$NON-NLS-1$
+					new Class[] { Widget.class, Object.class, Object[].class, boolean.class });
 			m.setAccessible(true);
-			m.invoke(this, new Object[] {widget, element, null, Boolean.valueOf(updateLabels)});
-		}
-		catch (Exception e) {
+			m.invoke(this, new Object[] { widget, element, null, Boolean.valueOf(updateLabels) });
+		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
 		Item[] children = getChildren(widget);
@@ -256,48 +260,48 @@ public class RepositoryTreeViewer extends TreeViewer {
 		}
 	}
 
-    public void refresh() {
+	public void refresh() {
 		this.getControl().getDisplay().syncExec(new Runnable() {
 			public void run() {
-			    RepositoryTreeViewer.super.refresh();
+				RepositoryTreeViewer.super.refresh();
 			}
 		});
-    }
-    
-	public TreeItem []getIdenticalNodes(Object sample, boolean exact) {
+	}
+
+	public TreeItem[] getIdenticalNodes(Object sample, boolean exact) {
 		if (sample != null) {
 			return this.findUnfreshNodes(this.getTree().getItems(), sample, exact);
 		}
 		return null;
 	}
-	
+
 	protected synchronized void fireRefresh(Object data) {
 		Object[] listeners = this.refreshListeners.toArray();
 		for (int i = 0; i < listeners.length; i++) {
-			((IRefreshListener)listeners[i]).refreshed(data);
+			((IRefreshListener) listeners[i]).refreshed(data);
 		}
 	}
-	
-	protected TreeItem []findUnfreshNodes(TreeItem []items, Object obj, boolean exact) {
+
+	protected TreeItem[] findUnfreshNodes(TreeItem[] items, Object obj, boolean exact) {
 		List<TreeItem> retVal = this.findUnfreshNodesImpl(items, obj, exact);
-		return retVal == null ? null : (TreeItem [])retVal.toArray(new TreeItem[retVal.size()]);
+		return retVal == null ? null : (TreeItem[]) retVal.toArray(new TreeItem[retVal.size()]);
 	}
-	
+
 	protected List<TreeItem> findUnfreshNodes(TreeItem item, Object obj, boolean exact) {
 		Object data = item.getData();
 		if (obj == data || !exact && obj.equals(data)) {
-			return Arrays.asList(new TreeItem[] {item});
+			return Arrays.asList(new TreeItem[] { item });
 		}
 		if (data instanceof IDataTreeNode) {
-			IDataTreeNode dataNode = (IDataTreeNode)data;
+			IDataTreeNode dataNode = (IDataTreeNode) data;
 			if (obj == dataNode.getData() || !exact && obj.equals(dataNode.getData())) {
-				return Arrays.asList(new TreeItem[] {item});
+				return Arrays.asList(new TreeItem[] { item });
 			}
 		}
 		return this.findUnfreshNodesImpl(item.getItems(), obj, exact);
 	}
-	
-	protected List<TreeItem> findUnfreshNodesImpl(TreeItem []items, Object obj, boolean exact) {
+
+	protected List<TreeItem> findUnfreshNodesImpl(TreeItem[] items, Object obj, boolean exact) {
 		if (items != null) {
 			List<TreeItem> retVal = new ArrayList<TreeItem>();
 			for (int i = 0; i < items.length; i++) {
@@ -310,19 +314,19 @@ public class RepositoryTreeViewer extends TreeViewer {
 		}
 		return null;
 	}
-	
+
 	protected void handleDoubleClick(IStructuredSelection selection) {
-    	Object node = selection.getFirstElement();
-    	if (node instanceof IParentTreeNode) {
-    		TreeItem []items = this.getIdenticalNodes(node, true);
-    		if (items != null && items.length > 0) {
-    			boolean expanded = !this.getExpanded(items[0]);
-                if (expanded) {
-                    createChildren(items[0]);
-                }
-        		this.setExpanded(items[0], expanded);
-    		}
-    	}
+		Object node = selection.getFirstElement();
+		if (node instanceof IParentTreeNode) {
+			TreeItem[] items = this.getIdenticalNodes(node, true);
+			if (items != null && items.length > 0) {
+				boolean expanded = !this.getExpanded(items[0]);
+				if (expanded) {
+					createChildren(items[0]);
+				}
+				this.setExpanded(items[0], expanded);
+			}
+		}
 	}
 
 	private void initialize() {
@@ -330,133 +334,152 @@ public class RepositoryTreeViewer extends TreeViewer {
 			public void doubleClick(DoubleClickEvent e) {
 				ISelection selection = e.getSelection();
 				if (selection instanceof IStructuredSelection) {
-					IStructuredSelection structured = (IStructuredSelection)selection;
+					IStructuredSelection structured = (IStructuredSelection) selection;
 					if (structured.size() == 1) {
 						RepositoryTreeViewer.this.handleDoubleClick(structured);
 					}
 				}
 			}
 		});
-		
-		this.addDragSupport(DND.DROP_COPY | DND.DROP_NONE | DND.DROP_MOVE | DND.DROP_LINK, new Transfer [] {RemoteResourceTransfer.getInstance()}, new TransferDragSourceListener() {
 
-			public void dragFinished(DragSourceEvent event) {}
+		this.addDragSupport(DND.DROP_COPY | DND.DROP_NONE | DND.DROP_MOVE | DND.DROP_LINK,
+				new Transfer[] { RemoteResourceTransfer.getInstance() }, new TransferDragSourceListener() {
 
-			public void dragSetData(DragSourceEvent event) {
-				if (RemoteResourceTransfer.getInstance().isSupportedType(event.dataType)) {
-					IStructuredSelection selection = (IStructuredSelection)RepositoryTreeViewer.this.getSelection();
-					ArrayList<IRepositoryResource> resources = new ArrayList<IRepositoryResource>();
-					for (Iterator<?> it = selection.iterator(); it.hasNext();) {
-						resources.add(((RepositoryResource)it.next()).getRepositoryResource());
+					public void dragFinished(DragSourceEvent event) {
 					}
-					event.data = new RemoteResourceTransferrable(resources.toArray(new IRepositoryResource[0]), 0);
-				}
-			}
 
-			public void dragStart(DragSourceEvent event) {
-				IStructuredSelection selection = (IStructuredSelection)RepositoryTreeViewer.this.getSelection();
-				boolean canBeDragged = selection.size() > 0;
-				for (Iterator<?> it = selection.iterator(); it.hasNext();) {
-					if (!(it.next() instanceof RepositoryResource)) {
-						canBeDragged = false;
+					public void dragSetData(DragSourceEvent event) {
+						if (RemoteResourceTransfer.getInstance().isSupportedType(event.dataType)) {
+							IStructuredSelection selection = (IStructuredSelection) RepositoryTreeViewer.this
+									.getSelection();
+							ArrayList<IRepositoryResource> resources = new ArrayList<IRepositoryResource>();
+							for (Iterator<?> it = selection.iterator(); it.hasNext();) {
+								resources.add(((RepositoryResource) it.next()).getRepositoryResource());
+							}
+							event.data = new RemoteResourceTransferrable(resources.toArray(new IRepositoryResource[0]),
+									0);
+						}
 					}
-				}
-				event.doit = canBeDragged;
-			}
 
-			public Transfer getTransfer() {
-				return RemoteResourceTransfer.getInstance();
-			}
-			
-		});
-		
-		this.addDropSupport(DND.DROP_COPY | DND.DROP_MOVE, new Transfer [] {RemoteResourceTransfer.getInstance()}, new DropTargetAdapter() {
-			
-			protected int expectedOperation = DND.DROP_MOVE;
-			
-			public void dragOperationChanged(DropTargetEvent event) {
-				this.expectedOperation = event.detail;
-			}
-			
-			public void dragEnter(DropTargetEvent event) {
-				this.expectedOperation = event.detail;
-			}
-			
-			public void dragOver(DropTargetEvent event) {
-				Tree repositoryTree = (Tree)((DropTarget)event.widget).getControl();
-				TreeItem aboveItem = repositoryTree.getItem(repositoryTree.toControl(event.x, event.y));
-				if (aboveItem == null) {
-					event.detail = DND.DROP_NONE;
-					return;
-				}
-				Object aboveObject = aboveItem.getData();
-				if (!(aboveObject instanceof RepositoryResource) || aboveObject instanceof RepositoryFile) {
-					event.detail = DND.DROP_NONE;
-					return;
-				}
-				RepositoryResource aboveResource = (RepositoryResource)aboveObject;
-				if (aboveResource.getRepositoryResource().getSelectedRevision() != SVNRevision.HEAD) {
-					event.detail = DND.DROP_NONE;
-					return;
-				}
-				IStructuredSelection selection = (IStructuredSelection)RepositoryTreeViewer.this.getSelection();
-				int lastSlashIdx = 0;
-				for (Iterator<?> it = selection.iterator(); it.hasNext();) {
-					RepositoryResource current = (RepositoryResource)it.next();
-					if (lastSlashIdx == 0) {
-						lastSlashIdx = current.getRepositoryResource().getUrl().lastIndexOf("/");  //$NON-NLS-1$
+					public void dragStart(DragSourceEvent event) {
+						IStructuredSelection selection = (IStructuredSelection) RepositoryTreeViewer.this
+								.getSelection();
+						boolean canBeDragged = selection.size() > 0;
+						for (Iterator<?> it = selection.iterator(); it.hasNext();) {
+							if (!(it.next() instanceof RepositoryResource)) {
+								canBeDragged = false;
+							}
+						}
+						event.doit = canBeDragged;
 					}
-					if (current.getRepositoryResource().getUrl().lastIndexOf("/") != lastSlashIdx || aboveResource == current || aboveResource == current.getParent()) { //$NON-NLS-1$
-						event.detail = DND.DROP_NONE;
-						return;
+
+					public Transfer getTransfer() {
+						return RemoteResourceTransfer.getInstance();
 					}
-				}
-				event.detail = this.expectedOperation;
-			}
-			
-			public void drop(DropTargetEvent event) {
-				Tree repositoryTree = (Tree)((DropTarget)event.widget).getControl();
-				RepositoryResource aboveResource = (RepositoryResource)repositoryTree.getItem(repositoryTree.toControl(event.x, event.y)).getData();
-				CommentPanel commentPanel = new CommentPanel(event.detail == DND.DROP_MOVE ? SVNUIMessages.MoveToAction_Select_Title : SVNUIMessages.CopyToAction_Select_Title);
-				DefaultDialog dialog = new DefaultDialog(UIMonitorUtility.getShell(), commentPanel);
-				if (dialog.open() == IDialogConstants.OK_ID) {
-					AbstractCopyMoveResourcesOperation mainOp = event.detail == DND.DROP_MOVE
-							? new MoveResourcesOperation(aboveResource.getRepositoryResource(), ((RemoteResourceTransferrable)event.data).resources, commentPanel.getMessage(), null)
-							: new CopyResourcesOperation(aboveResource.getRepositoryResource(), ((RemoteResourceTransferrable)event.data).resources, commentPanel.getMessage(), null);
-					CompositeOperation op = new CompositeOperation(mainOp.getId(), mainOp.getMessagesClass());
-					op.add(mainOp);
-					ArrayList<IRepositoryResource> toRefresh = new ArrayList<IRepositoryResource>();
-					toRefresh.add(aboveResource.getRepositoryResource());
-					if (event.detail == DND.DROP_MOVE) {
-						toRefresh.addAll(Arrays.asList(((RemoteResourceTransferrable)event.data).resources));
+
+				});
+
+		this.addDropSupport(DND.DROP_COPY | DND.DROP_MOVE, new Transfer[] { RemoteResourceTransfer.getInstance() },
+				new DropTargetAdapter() {
+
+					protected int expectedOperation = DND.DROP_MOVE;
+
+					public void dragOperationChanged(DropTargetEvent event) {
+						this.expectedOperation = event.detail;
 					}
-					op.add(new RefreshRemoteResourcesOperation(SVNUtility.getCommonParents(toRefresh.toArray(new IRepositoryResource[0]))), new IActionOperation [] {mainOp});
-					ProgressMonitorUtility.doTaskScheduled(op);
-				}
-			}
-			
-		});
-		
+
+					public void dragEnter(DropTargetEvent event) {
+						this.expectedOperation = event.detail;
+					}
+
+					public void dragOver(DropTargetEvent event) {
+						Tree repositoryTree = (Tree) ((DropTarget) event.widget).getControl();
+						TreeItem aboveItem = repositoryTree.getItem(repositoryTree.toControl(event.x, event.y));
+						if (aboveItem == null) {
+							event.detail = DND.DROP_NONE;
+							return;
+						}
+						Object aboveObject = aboveItem.getData();
+						if (!(aboveObject instanceof RepositoryResource) || aboveObject instanceof RepositoryFile) {
+							event.detail = DND.DROP_NONE;
+							return;
+						}
+						RepositoryResource aboveResource = (RepositoryResource) aboveObject;
+						if (aboveResource.getRepositoryResource().getSelectedRevision() != SVNRevision.HEAD) {
+							event.detail = DND.DROP_NONE;
+							return;
+						}
+						IStructuredSelection selection = (IStructuredSelection) RepositoryTreeViewer.this
+								.getSelection();
+						int lastSlashIdx = 0;
+						for (Iterator<?> it = selection.iterator(); it.hasNext();) {
+							RepositoryResource current = (RepositoryResource) it.next();
+							if (lastSlashIdx == 0) {
+								lastSlashIdx = current.getRepositoryResource().getUrl().lastIndexOf("/"); //$NON-NLS-1$
+							}
+							if (current.getRepositoryResource().getUrl().lastIndexOf("/") != lastSlashIdx //$NON-NLS-1$
+									|| aboveResource == current || aboveResource == current.getParent()) {
+								event.detail = DND.DROP_NONE;
+								return;
+							}
+						}
+						event.detail = this.expectedOperation;
+					}
+
+					public void drop(DropTargetEvent event) {
+						Tree repositoryTree = (Tree) ((DropTarget) event.widget).getControl();
+						RepositoryResource aboveResource = (RepositoryResource) repositoryTree
+								.getItem(repositoryTree.toControl(event.x, event.y))
+								.getData();
+						CommentPanel commentPanel = new CommentPanel(event.detail == DND.DROP_MOVE
+								? SVNUIMessages.MoveToAction_Select_Title
+								: SVNUIMessages.CopyToAction_Select_Title);
+						DefaultDialog dialog = new DefaultDialog(UIMonitorUtility.getShell(), commentPanel);
+						if (dialog.open() == IDialogConstants.OK_ID) {
+							AbstractCopyMoveResourcesOperation mainOp = event.detail == DND.DROP_MOVE
+									? new MoveResourcesOperation(aboveResource.getRepositoryResource(),
+											((RemoteResourceTransferrable) event.data).resources,
+											commentPanel.getMessage(), null)
+									: new CopyResourcesOperation(aboveResource.getRepositoryResource(),
+											((RemoteResourceTransferrable) event.data).resources,
+											commentPanel.getMessage(), null);
+							CompositeOperation op = new CompositeOperation(mainOp.getId(), mainOp.getMessagesClass());
+							op.add(mainOp);
+							ArrayList<IRepositoryResource> toRefresh = new ArrayList<IRepositoryResource>();
+							toRefresh.add(aboveResource.getRepositoryResource());
+							if (event.detail == DND.DROP_MOVE) {
+								toRefresh.addAll(Arrays.asList(((RemoteResourceTransferrable) event.data).resources));
+							}
+							op.add(new RefreshRemoteResourcesOperation(
+									SVNUtility.getCommonParents(toRefresh.toArray(new IRepositoryResource[0]))),
+									new IActionOperation[] { mainOp });
+							ProgressMonitorUtility.doTaskScheduled(op);
+						}
+					}
+
+				});
+
 		this.getTree().addMouseTrackListener(new MouseTrackAdapter() {
 			public void mouseHover(MouseEvent e) {
 				String tooltipText = ""; //$NON-NLS-1$
 				Tree tree = RepositoryTreeViewer.this.getTree();
 				TreeItem item = tree.getItem(new Point(e.x, e.y));
 				if (item != null) {
-					Object data = item.getData();					
+					Object data = item.getData();
 					if (data != null) {
 						if (data instanceof IToolTipProvider) {
-							tooltipText = ((IToolTipProvider)data).getToolTipMessage(RepositoryTreeViewer.class2Format.get(data.getClass()));
+							tooltipText = ((IToolTipProvider) data)
+									.getToolTipMessage(RepositoryTreeViewer.class2Format.get(data.getClass()));
 						}
 					}
 				}
 				tree.setToolTipText(tooltipText);
 			}
-			
+
 			public void mouseExit(MouseEvent e) {
 				RepositoryTreeViewer.this.getTree().setToolTipText(""); //$NON-NLS-1$
 			}
 		});
 	}
-	
+
 }

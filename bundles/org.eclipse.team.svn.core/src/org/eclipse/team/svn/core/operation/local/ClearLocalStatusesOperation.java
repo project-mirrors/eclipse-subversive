@@ -39,14 +39,14 @@ public class ClearLocalStatusesOperation extends AbstractWorkingCopyOperation {
 	public ISchedulingRule getSchedulingRule() {
 		return null;
 	}
-	
+
 	public int getOperationWeight() {
 		return 0;
 	}
-	
+
 	protected void runImpl(IProgressMonitor monitor) throws Exception {
 		SVNRemoteStorage.instance().refreshLocalResources(this.operableData(), IResource.DEPTH_INFINITE);
 		ProgressMonitorUtility.progress(monitor, 1, 1);
 	}
-	
+
 }

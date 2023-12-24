@@ -19,7 +19,7 @@ import org.eclipse.team.svn.core.resource.IRepositoryResource;
 import org.eclipse.ui.PlatformUI;
 
 /**
- * Repository file node representation 
+ * Repository file node representation
  * 
  * @author Alexander Gurov
  */
@@ -28,7 +28,7 @@ public class RepositoryFile extends RepositoryResource {
 		super(parent, resource);
 	}
 
-	public Object []getChildren(Object o) {
+	public Object[] getChildren(Object o) {
 		return null;
 	}
 

@@ -26,17 +26,22 @@ import org.eclipse.team.svn.core.utility.SVNUtility;
  */
 public class SSHSettings implements Serializable {
 	private static final long serialVersionUID = 300172856661110588L;
-	
+
 	public static final int SSH_PORT_DEFAULT = 22;
-	
+
 	protected int port;
+
 	protected boolean useKeyFile;
+
 	protected String privateKeyPath;
+
 	// Base64 encoded
 	protected String passPhrase;
+
 	protected boolean passPhraseSaved;
-	
+
 	private transient String passPhraseTemporary;
+
 	private transient ISSHSettingsStateListener parentLocation;
 
 	public SSHSettings() {
@@ -53,7 +58,9 @@ public class SSHSettings implements Serializable {
 	}
 
 	public String getPassPhrase() {
-		return this.passPhraseSaved ? SVNUtility.base64Decode(this.passPhrase) : SVNUtility.base64Decode(this.passPhraseTemporary);
+		return this.passPhraseSaved
+				? SVNUtility.base64Decode(this.passPhrase)
+				: SVNUtility.base64Decode(this.passPhraseTemporary);
 	}
 
 	public void setPassPhrase(String passPhrase) {
@@ -61,8 +68,7 @@ public class SSHSettings implements Serializable {
 		oldValue = oldValue != null ? SVNUtility.base64Decode(oldValue) : oldValue;
 		if (this.passPhraseSaved) {
 			this.passPhrase = SVNUtility.base64Encode(passPhrase);
-		}
-		else {
+		} else {
 			this.passPhraseTemporary = SVNUtility.base64Encode(passPhrase);
 		}
 		this.fireSSHChanged(ISSHSettingsStateListener.SSH_PASS_PHRASE, oldValue, passPhrase);
@@ -95,7 +101,8 @@ public class SSHSettings implements Serializable {
 	public void setUseKeyFile(boolean useKeyFile) {
 		boolean oldValue = this.useKeyFile;
 		this.useKeyFile = useKeyFile;
-		this.fireSSHChanged(ISSHSettingsStateListener.SSH_USE_KEY_FILE, Boolean.valueOf(oldValue), Boolean.valueOf(useKeyFile));
+		this.fireSSHChanged(ISSHSettingsStateListener.SSH_USE_KEY_FILE, Boolean.valueOf(oldValue),
+				Boolean.valueOf(useKeyFile));
 	}
 
 	public boolean isPassPhraseSaved() {
@@ -111,17 +118,17 @@ public class SSHSettings implements Serializable {
 		if (!passPhraseSaved) {
 			this.passPhraseTemporary = this.passPhrase;
 			this.passPhrase = null;
-		}
-		else {
+		} else {
 			this.passPhrase = this.passPhraseTemporary;
 		}
-		this.fireSSHChanged(ISSHSettingsStateListener.SSH_PASS_PHRASE_SAVED, Boolean.valueOf(oldValue), Boolean.valueOf(passPhraseSaved));
+		this.fireSSHChanged(ISSHSettingsStateListener.SSH_PASS_PHRASE_SAVED, Boolean.valueOf(oldValue),
+				Boolean.valueOf(passPhraseSaved));
 	}
-	
+
 	protected void fireSSHChanged(String field, Object oldValue, Object newValue) {
 		if (this.parentLocation != null) {
 			this.parentLocation.sshChanged(null, field, oldValue, newValue);
 		}
 	}
-	
+
 }

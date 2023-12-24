@@ -27,19 +27,22 @@ import org.eclipse.team.svn.ui.SVNUIMessages;
 import org.eclipse.team.svn.ui.utility.DateFormatter;
 
 /**
- * Built-in annotate revision model 
+ * Built-in annotate revision model
  * 
  * @author Alexander Gurov
  */
 public class BuiltInAnnotateRevision extends Revision {
 	public static final int END_LINE = -1;
-	
+
 	protected class MergeInfo {
 		public final String line;
+
 		public final String reference;
+
 		public final long date;
+
 		public final String author;
-		
+
 		public MergeInfo(String line, String reference, long date, String author) {
 			this.line = line;
 			this.reference = reference;
@@ -47,51 +50,53 @@ public class BuiltInAnnotateRevision extends Revision {
 			this.author = author;
 		}
 	}
-	
+
 	protected String id;
+
 	protected String author;
+
 	private int startLine;
+
 	private int stopLine;
+
 	protected RGB color;
+
 	protected SVNLogEntry msg;
-	
+
 	protected ArrayList<MergeInfo> mergeInfoList;
-	
+
 	public BuiltInAnnotateRevision(String id, String author, RGB color) {
 		this.id = id;
 		this.color = color;
 		this.author = author;
 		this.startLine = this.stopLine = BuiltInAnnotateRevision.END_LINE;
 	}
-	
+
 	public void setLogMessage(SVNLogEntry msg) {
 		this.msg = msg;
 	}
-	
+
 	public long getRevision() {
 		return Long.parseLong(this.id);
 	}
-	
+
 	public String getId() {
 		return this.mergeInfoList != null ? this.id + "+" : this.id; //$NON-NLS-1$
 	}
-	
+
 	public void addLine(int line) {
 		if (this.startLine == BuiltInAnnotateRevision.END_LINE) {
 			this.startLine = this.stopLine = line;
-		}
-		else if (line == BuiltInAnnotateRevision.END_LINE) {
+		} else if (line == BuiltInAnnotateRevision.END_LINE) {
 			this.addRange(new LineRange(this.startLine - 1, this.stopLine - this.startLine + 1));
-		}
-		else if (line - this.stopLine == 1) {
+		} else if (line - this.stopLine == 1) {
 			this.stopLine = line;
-		}
-		else {
+		} else {
 			this.addRange(new LineRange(this.startLine - 1, this.stopLine - this.startLine + 1));
 			this.startLine = this.stopLine = line;
 		}
 	}
-	
+
 	public void addMergeInfo(int line, long mergedRevision, long mergedDate, String mergedAuthor, String mergedPath) {
 		// Merged lines:
 		// XX with line from path@rev made by ZZZ at YYY
@@ -112,7 +117,8 @@ public class BuiltInAnnotateRevision extends Revision {
 			info += "<b>" + SVNUIMessages.BuiltInAnnotateRevision_Author + " </b>" + this.author; //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		if (this.getDateImpl() != null) {
-			info += "<br><b>" + SVNUIMessages.BuiltInAnnotateRevision_Date + " </b>" + DateFormatter.formatDate(this.getDate()); //$NON-NLS-1$ //$NON-NLS-2$
+			info += "<br><b>" + SVNUIMessages.BuiltInAnnotateRevision_Date + " </b>" //$NON-NLS-1$//$NON-NLS-2$
+					+ DateFormatter.formatDate(this.getDate());
 		}
 		String message = this.msg == null ? null : this.msg.message;
 		if (message != null && message.length() > 0) {
@@ -121,7 +127,9 @@ public class BuiltInAnnotateRevision extends Revision {
 		if (this.mergeInfoList != null) {
 			info += "<br>"; //$NON-NLS-1$
 			for (MergeInfo mergeInfo : this.mergeInfoList) {
-				info += "<br>" + SVNUIMessages.format(SVNUIMessages.BuiltInAnnotateRevision_MergedWith, new String[] {mergeInfo.line, mergeInfo.reference, mergeInfo.author, DateFormatter.formatDate(new Date(mergeInfo.date))}); //$NON-NLS-1$
+				info += "<br>" + SVNUIMessages.format(SVNUIMessages.BuiltInAnnotateRevision_MergedWith, //$NON-NLS-1$
+						new String[] { mergeInfo.line, mergeInfo.reference, mergeInfo.author,
+								DateFormatter.formatDate(new Date(mergeInfo.date)) });
 			}
 		}
 		return info;
@@ -140,5 +148,5 @@ public class BuiltInAnnotateRevision extends Revision {
 		String author = this.author == null ? SVNMessages.SVNInfo_NoAuthor : this.author;
 		return author + " "; // Eclipse IDE does not separate line numbers and author names  //$NON-NLS-1$
 	}
-	
+
 }

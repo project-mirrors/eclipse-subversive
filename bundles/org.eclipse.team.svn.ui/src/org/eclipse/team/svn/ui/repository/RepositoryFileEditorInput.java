@@ -34,28 +34,31 @@ import org.eclipse.ui.model.IWorkbenchAdapter;
  * 
  * @author Alexander Gurov
  */
-public class RepositoryFileEditorInput extends PlatformObject implements IWorkbenchAdapter, IRepositoryEditorInput, IResourceTreeNode {
-	private static final Object []NO_CHILDREN = new Object[0];
+public class RepositoryFileEditorInput extends PlatformObject
+		implements IWorkbenchAdapter, IRepositoryEditorInput, IResourceTreeNode {
+	private static final Object[] NO_CHILDREN = new Object[0];
+
 	protected ResourceContentStorage storage;
-    protected RepositoryFile resource;
+
+	protected RepositoryFile resource;
 
 	public RepositoryFileEditorInput(IRepositoryFile resource) {
 		this.resource = new RepositoryFile(null, resource);
 		this.storage = new ResourceContentStorage(resource);
 	}
-	
-	public Object []getChildren(Object o) {
+
+	public Object[] getChildren(Object o) {
 		return RepositoryFileEditorInput.NO_CHILDREN;
 	}
 
 	public void setViewer(RepositoryTreeViewer repositoryTree) {
-		
+
 	}
 
 	public IRepositoryResource getRepositoryResource() {
 		return this.resource.getRepositoryResource();
 	}
-	
+
 	public Object getData() {
 		return this.getRepositoryResource();
 	}
@@ -79,7 +82,7 @@ public class RepositoryFileEditorInput extends PlatformObject implements IWorkbe
 	public void fetchContents(IProgressMonitor monitor) {
 		this.storage.fetchContents(monitor);
 	}
-	
+
 	public IStorage getStorage() {
 		return this.storage;
 	}
@@ -87,8 +90,7 @@ public class RepositoryFileEditorInput extends PlatformObject implements IWorkbe
 	public boolean exists() {
 		try {
 			return this.resource.getRepositoryResource().exists();
-		}
-		catch (Exception ex) {
+		} catch (Exception ex) {
 			LoggedOperation.reportError(this.getClass().getName(), ex);
 			return false;
 		}
@@ -99,7 +101,9 @@ public class RepositoryFileEditorInput extends PlatformObject implements IWorkbe
 	}
 
 	public String getName() {
-		return SVNUIMessages.format(SVNUIMessages.RepositoryFileViewer_Name, new String[] {this.resource.getRepositoryResource().getName(), String.valueOf(this.resource.getRepositoryResource().getSelectedRevision())});
+		return SVNUIMessages.format(SVNUIMessages.RepositoryFileViewer_Name,
+				new String[] { this.resource.getRepositoryResource().getName(),
+						String.valueOf(this.resource.getRepositoryResource().getSelectedRevision()) });
 	}
 
 	public IPersistableElement getPersistable() {
@@ -120,13 +124,13 @@ public class RepositoryFileEditorInput extends PlatformObject implements IWorkbe
 		return super.getAdapter(adapter);
 	}
 
-    public boolean equals(Object obj) {
-        if (obj != null && obj instanceof RepositoryFileEditorInput) {
-            return this.resource.equals(((RepositoryFileEditorInput)obj).resource);
-        }
-        return false;
-    }
-    
+	public boolean equals(Object obj) {
+		if (obj != null && obj instanceof RepositoryFileEditorInput) {
+			return this.resource.equals(((RepositoryFileEditorInput) obj).resource);
+		}
+		return false;
+	}
+
 	public IPath getPath() {
 		return this.storage.getTemporaryPath();
 	}

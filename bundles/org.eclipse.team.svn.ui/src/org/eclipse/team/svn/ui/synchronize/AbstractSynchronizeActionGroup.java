@@ -35,14 +35,17 @@ import org.eclipse.team.ui.synchronize.SynchronizePageActionGroup;
  */
 public abstract class AbstractSynchronizeActionGroup extends SynchronizePageActionGroup {
 	public static final String GROUP_MANAGE_LOCALS = "manageLocalChanges"; //$NON-NLS-1$
+
 	public static final String GROUP_PROCESS_ALL = "processAllItems"; //$NON-NLS-1$
+
 	public static final String GROUP_TEAM = "team"; //$NON-NLS-1$
-	
+
 	protected ISynchronizePageConfiguration configuration;
-	
+
 	protected MenuManager outgoing;
+
 	protected MenuManager incoming;
-	
+
 	public AbstractSynchronizeActionGroup() {
 		super();
 	}
@@ -51,41 +54,39 @@ public abstract class AbstractSynchronizeActionGroup extends SynchronizePageActi
 		super.initialize(this.configuration = configuration);
 		this.configureActions(configuration);
 	}
-	
-    public ISynchronizePageConfiguration getConfiguration() {
-        return this.configuration;
-    }
+
+	public ISynchronizePageConfiguration getConfiguration() {
+		return this.configuration;
+	}
 
 	public void dispose() {
 		if (this.outgoing != null) {
 			this.outgoing.removeAll();
 			this.outgoing.dispose();
 		}
-		
+
 		if (this.incoming != null) {
 			this.incoming.removeAll();
 			this.incoming.dispose();
 		}
-		
+
 		super.dispose();
 	}
-	
-    public abstract void configureMenuGroups(ISynchronizePageConfiguration configuration);
+
+	public abstract void configureMenuGroups(ISynchronizePageConfiguration configuration);
+
 	protected abstract void configureActions(ISynchronizePageConfiguration configuration);
-	
-	protected void addSpecificActions(final AbstractSynchronizeModelAction selectionProvider, final ISynchronizePageConfiguration configuration) {
+
+	protected void addSpecificActions(final AbstractSynchronizeModelAction selectionProvider,
+			final ISynchronizePageConfiguration configuration) {
 		this.outgoing = new MenuManager(SVNUIMessages.SynchronizeActionGroup_Outgoing);
 		this.appendToGroup(
-				ISynchronizePageConfiguration.P_CONTEXT_MENU, 
-				AbstractSynchronizeActionGroup.GROUP_TEAM, 
-				this.outgoing);
-		
+				ISynchronizePageConfiguration.P_CONTEXT_MENU, AbstractSynchronizeActionGroup.GROUP_TEAM, this.outgoing);
+
 		this.incoming = new MenuManager(SVNUIMessages.SynchronizeActionGroup_Incoming);
 		this.appendToGroup(
-				ISynchronizePageConfiguration.P_CONTEXT_MENU, 
-				AbstractSynchronizeActionGroup.GROUP_TEAM, 
-				this.incoming);
-		
+				ISynchronizePageConfiguration.P_CONTEXT_MENU, AbstractSynchronizeActionGroup.GROUP_TEAM, this.incoming);
+
 		boolean isEuropa = false;
 		String version = (String) Platform.getBundle("org.eclipse.core.runtime").getHeaders().get("Bundle-Version"); //$NON-NLS-1$ //$NON-NLS-2$
 		if (version != null) {
@@ -94,32 +95,34 @@ public abstract class AbstractSynchronizeActionGroup extends SynchronizePageActi
 		if (isEuropa) {
 			this.addLocalActions(this.outgoing, configuration);
 			this.addRemoteActions(this.incoming, configuration);
-		}
-		else {
+		} else {
 			this.outgoing.setRemoveAllWhenShown(true);
 			this.outgoing.addMenuListener(new IMenuListener() {
 				public void menuAboutToShow(IMenuManager manager) {
 					AbstractSynchronizeActionGroup.this.addLocalActions(manager, configuration);
-					AbstractSynchronizeActionGroup.this.updateSelection(manager, selectionProvider.getStructuredSelection());
+					AbstractSynchronizeActionGroup.this.updateSelection(manager,
+							selectionProvider.getStructuredSelection());
 				}
 			});
 			this.incoming.setRemoveAllWhenShown(true);
 			this.incoming.addMenuListener(new IMenuListener() {
 				public void menuAboutToShow(IMenuManager manager) {
 					AbstractSynchronizeActionGroup.this.addRemoteActions(manager, configuration);
-					AbstractSynchronizeActionGroup.this.updateSelection(manager, selectionProvider.getStructuredSelection());
+					AbstractSynchronizeActionGroup.this.updateSelection(manager,
+							selectionProvider.getStructuredSelection());
 				}
 			});
 		}
 	}
 
 	protected void addLocalActions(IMenuManager manager, ISynchronizePageConfiguration configuration) {
-		
+
 	}
+
 	protected void addRemoteActions(IMenuManager manager, ISynchronizePageConfiguration configuration) {
-		
+
 	}
-	
+
 	protected void updateSelection(IMenuManager manager, ISelection selection) {
 		IContributionItem[] items = manager.getItems();
 		for (int i = 0; i < items.length; i++) {

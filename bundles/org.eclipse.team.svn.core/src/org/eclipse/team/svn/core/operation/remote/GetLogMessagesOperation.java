@@ -34,50 +34,56 @@ import org.eclipse.team.svn.core.utility.SVNUtility;
  * @author Alexander Gurov
  */
 public class GetLogMessagesOperation extends AbstractRepositoryOperation {
-	protected SVNLogEntry []msg;
+	protected SVNLogEntry[] msg;
+
 	protected SVNRevision startRevision;
+
 	protected SVNRevision endRevision;
+
 	protected long limit;
+
 	protected boolean isRetryIfMergeInfoNotSupported;
+
 	protected long options;
-	
+
 	public GetLogMessagesOperation(IRepositoryResource resource) {
 		this(resource, false);
 	}
-	
+
 	public GetLogMessagesOperation(IRepositoryResource resource, boolean stopOnCopy) {
-		this(resource, ISVNConnector.Options.DISCOVER_PATHS | (stopOnCopy ? ISVNConnector.Options.STOP_ON_COPY : ISVNConnector.Options.NONE));
+		this(resource, ISVNConnector.Options.DISCOVER_PATHS
+				| (stopOnCopy ? ISVNConnector.Options.STOP_ON_COPY : ISVNConnector.Options.NONE));
 	}
-	
+
 	public GetLogMessagesOperation(IRepositoryResource resource, long options) {
-		super("Operation_GetLogMessages", SVNMessages.class, new IRepositoryResource[] {resource}); //$NON-NLS-1$
+		super("Operation_GetLogMessages", SVNMessages.class, new IRepositoryResource[] { resource }); //$NON-NLS-1$
 		this.options = options & ISVNConnector.CommandMasks.LIST_HISTORY_LOG;
 		this.limit = 0;
-		this.endRevision = SVNRevision.fromNumber(0); 
+		this.endRevision = SVNRevision.fromNumber(0);
 	}
-	
+
 	public boolean getIncludeMerged() {
 		return (this.options & ISVNConnector.Options.INCLUDE_MERGED_REVISIONS) != 0;
 	}
-	
+
 	public void setIncludeMerged(boolean includeMerged) {
 		this.options &= ~ISVNConnector.Options.INCLUDE_MERGED_REVISIONS;
 		this.options |= includeMerged ? ISVNConnector.Options.INCLUDE_MERGED_REVISIONS : ISVNConnector.Options.NONE;
 	}
-	
+
 	public void setRetryIfMergeInfoNotSupported(boolean isRetryIfMergeInfoNotSupported) {
 		this.isRetryIfMergeInfoNotSupported = isRetryIfMergeInfoNotSupported;
 	}
-	
+
 	public boolean getStopOnCopy() {
 		return (this.options & ISVNConnector.Options.STOP_ON_COPY) != 0;
 	}
-	
+
 	public void setStopOnCopy(boolean stopOnCopy) {
 		this.options &= ~ISVNConnector.Options.STOP_ON_COPY;
 		this.options |= stopOnCopy ? ISVNConnector.Options.STOP_ON_COPY : ISVNConnector.Options.NONE;
 	}
-	
+
 	public boolean getDiscoverPaths() {
 		return (this.options & ISVNConnector.Options.DISCOVER_PATHS) != 0;
 	}
@@ -86,15 +92,15 @@ public class GetLogMessagesOperation extends AbstractRepositoryOperation {
 		this.options &= ~ISVNConnector.Options.DISCOVER_PATHS;
 		this.options |= discoverPaths ? ISVNConnector.Options.DISCOVER_PATHS : ISVNConnector.Options.NONE;
 	}
-	
+
 	public long getLimit() {
 		return this.limit;
 	}
-	
+
 	public void setLimit(long limit) {
 		this.limit = limit;
 	}
-	
+
 	public void setStartRevision(SVNRevision revision) {
 		this.startRevision = revision;
 	}
@@ -113,36 +119,38 @@ public class GetLogMessagesOperation extends AbstractRepositoryOperation {
 		try {
 //			this.writeToConsole(IConsoleStream.LEVEL_CMD, "svn log " + SVNUtility.encodeURL(this.resource.getUrl()) + (this.limit != 0 ? (" --limit " + this.limit) : "") + (this.stopOnCopy ? " --stop-on-copy" : "") + " -r " + this.selectedRevision + ":0 --username \"" + location.getUsername() + "\"\n");
 			try {
-				this.msg = SVNUtility.logEntries(proxy, SVNUtility.getEntryReference(resource), this.startRevision, this.endRevision, this.options, ISVNConnector.DEFAULT_LOG_ENTRY_PROPS, this.limit, new SVNProgressMonitor(this, monitor, null));
+				this.msg = SVNUtility.logEntries(proxy, SVNUtility.getEntryReference(resource), this.startRevision,
+						this.endRevision, this.options, ISVNConnector.DEFAULT_LOG_ENTRY_PROPS, this.limit,
+						new SVNProgressMonitor(this, monitor, null));
 			} catch (SVNConnectorException ex) {
 				/*
 				 * If SVN server doesn't support merged revisions, then we re-call without this option
 				 */
-				if (this.isRetryIfMergeInfoNotSupported && 
-					ex.getErrorId() == SVNErrorCodes.unsupportedFeature && 
-					(this.options & Options.INCLUDE_MERGED_REVISIONS) != 0) {
-					this.options &= ~Options.INCLUDE_MERGED_REVISIONS;  
-					this.msg = SVNUtility.logEntries(proxy, SVNUtility.getEntryReference(resource), this.startRevision, this.endRevision, this.options, ISVNConnector.DEFAULT_LOG_ENTRY_PROPS, this.limit, new SVNProgressMonitor(this, monitor, null));
+				if (this.isRetryIfMergeInfoNotSupported && ex.getErrorId() == SVNErrorCodes.unsupportedFeature
+						&& (this.options & Options.INCLUDE_MERGED_REVISIONS) != 0) {
+					this.options &= ~Options.INCLUDE_MERGED_REVISIONS;
+					this.msg = SVNUtility.logEntries(proxy, SVNUtility.getEntryReference(resource), this.startRevision,
+							this.endRevision, this.options, ISVNConnector.DEFAULT_LOG_ENTRY_PROPS, this.limit,
+							new SVNProgressMonitor(this, monitor, null));
 				} else {
 					throw ex;
 				}
 			}
-		}
-		finally {
+		} finally {
 			location.releaseSVNProxy(proxy);
 		}
 	}
-	
-	public SVNLogEntry []getMessages() {
+
+	public SVNLogEntry[] getMessages() {
 		return this.msg;
 	}
-	
+
 	public IRepositoryResource getResource() {
 		return this.operableData()[0];
 	}
-	
+
 	protected String getShortErrorMessage(Throwable t) {
-		return BaseMessages.format(super.getShortErrorMessage(t), new Object[] {this.operableData()[0].getUrl()});
+		return BaseMessages.format(super.getShortErrorMessage(t), new Object[] { this.operableData()[0].getUrl() });
 	}
 
 }

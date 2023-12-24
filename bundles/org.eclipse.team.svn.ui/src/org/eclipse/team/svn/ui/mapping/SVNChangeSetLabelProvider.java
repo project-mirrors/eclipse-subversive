@@ -45,12 +45,13 @@ public class SVNChangeSetLabelProvider extends ResourceModelLabelProvider {
 	}
 
 	public String getText(Object element) {
-		if (element instanceof ActiveChangeSet && SVNTeamPlugin.instance().getModelChangeSetManager().isDefault((ActiveChangeSet)element)) {
+		if (element instanceof ActiveChangeSet
+				&& SVNTeamPlugin.instance().getModelChangeSetManager().isDefault((ActiveChangeSet) element)) {
 			return super.getText(element) + " " + SVNUIMessages.ChangeSet_DefaultDecoration; //$NON-NLS-1$
 		}
 		return super.getText(element);
 	}
-	
+
 	protected String getDelegateText(Object elementOrPath) {
 		Object element = this.internalGetElement(elementOrPath);
 		if (element instanceof ChangeSet) {
@@ -59,7 +60,7 @@ public class SVNChangeSetLabelProvider extends ResourceModelLabelProvider {
 		}
 		return super.getDelegateText(elementOrPath);
 	}
-	
+
 	protected Image getDelegateImage(Object elementOrPath) {
 		Object element = this.internalGetElement(elementOrPath);
 		if (element instanceof ChangeSet) {
@@ -70,18 +71,20 @@ public class SVNChangeSetLabelProvider extends ResourceModelLabelProvider {
 
 	private Image getChangeSetImage() {
 		if (this.changeSetImage == null) {
-			this.changeSetImage = SVNTeamUIPlugin.instance().getImageDescriptor("icons/objects/changeset.gif").createImage(); //$NON-NLS-1$
+			this.changeSetImage = SVNTeamUIPlugin.instance()
+					.getImageDescriptor("icons/objects/changeset.gif") //$NON-NLS-1$
+					.createImage();
 		}
 		return this.changeSetImage;
 	}
-	
+
 	public void dispose() {
 		if (this.changeSetImage != null) {
 			this.changeSetImage.dispose();
 		}
 		super.dispose();
 	}
-	
+
 	protected boolean isBusy(Object elementOrPath) {
 		Object element = this.internalGetElement(elementOrPath);
 		if (element instanceof DiffChangeSet) {
@@ -97,7 +100,7 @@ public class SVNChangeSetLabelProvider extends ResourceModelLabelProvider {
 		}
 		return super.isBusy(elementOrPath);
 	}
-	
+
 	protected boolean hasDecendantConflicts(Object elementOrPath) {
 		Object element = this.internalGetElement(elementOrPath);
 		if (element instanceof DiffChangeSet) {
@@ -105,7 +108,9 @@ public class SVNChangeSetLabelProvider extends ResourceModelLabelProvider {
 			IResource[] resources = dcs.getResources();
 			for (int i = 0; i < resources.length; i++) {
 				IResource resource = resources[i];
-				if (this.getContext().getDiffTree().getProperty(resource.getFullPath(), IDiffTree.P_HAS_DESCENDANT_CONFLICTS))
+				if (this.getContext()
+						.getDiffTree()
+						.getProperty(resource.getFullPath(), IDiffTree.P_HAS_DESCENDANT_CONFLICTS))
 					return true;
 			}
 			return false;
@@ -113,13 +118,14 @@ public class SVNChangeSetLabelProvider extends ResourceModelLabelProvider {
 		if (elementOrPath instanceof TreePath && element instanceof IResource) {
 			DiffChangeSet set = this.internalGetChangeSet(elementOrPath);
 			if (set != null) {
-				ResourceTraversal[] traversals = this.getTraversalCalculator().getTraversals(set, (TreePath)elementOrPath);
+				ResourceTraversal[] traversals = this.getTraversalCalculator()
+						.getTraversals(set, (TreePath) elementOrPath);
 				return (this.getContext().getDiffTree().hasMatchingDiffs(traversals, CONFLICT_FILTER));
 			}
 		}
 		return super.hasDecendantConflicts(elementOrPath);
 	}
-	
+
 	private DiffChangeSet internalGetChangeSet(Object elementOrPath) {
 		if (elementOrPath instanceof TreePath) {
 			TreePath tp = (TreePath) elementOrPath;
@@ -156,7 +162,7 @@ public class SVNChangeSetLabelProvider extends ResourceModelLabelProvider {
 		}
 		return super.getMarkerSeverity(elementOrPath);
 	}
-	
+
 	protected void updateLabels(Object[] elements) {
 		super.updateLabels(this.addSetsContainingElements(elements));
 	}
@@ -183,9 +189,9 @@ public class SVNChangeSetLabelProvider extends ResourceModelLabelProvider {
 	}
 
 	private SVNChangeSetContentProvider getContentProvider() {
-		return (SVNChangeSetContentProvider)this.getExtensionSite().getExtension().getContentProvider();
+		return (SVNChangeSetContentProvider) this.getExtensionSite().getExtension().getContentProvider();
 	}
-	
+
 	private Object internalGetElement(Object elementOrPath) {
 		if (elementOrPath instanceof TreePath) {
 			TreePath tp = (TreePath) elementOrPath;
@@ -193,12 +199,12 @@ public class SVNChangeSetLabelProvider extends ResourceModelLabelProvider {
 		}
 		return elementOrPath;
 	}
-	
+
 	public Font getFont(Object element) {
 		element = this.internalGetElement(element);
-	    if (element instanceof ActiveChangeSet && this.isDefaultActiveSet((ActiveChangeSet)element)) {
+		if (element instanceof ActiveChangeSet && this.isDefaultActiveSet((ActiveChangeSet) element)) {
 			return JFaceResources.getFontRegistry().getBold(JFaceResources.DEFAULT_FONT);
-	    }
+		}
 		return super.getFont(element);
 	}
 

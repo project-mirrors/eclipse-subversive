@@ -23,14 +23,14 @@ import org.eclipse.team.svn.core.utility.StringMatcher;
  * @author Alexei Goncharov
  */
 public class AuthorNameLogEntryFilter implements ILogEntryFilter {
-	
+
 	protected String authorNameToAccept;
-	
+
 	public AuthorNameLogEntryFilter() {
 		this(null);
 	}
-	
-	public AuthorNameLogEntryFilter (String authorNameToAccept) {
+
+	public AuthorNameLogEntryFilter(String authorNameToAccept) {
 		this.authorNameToAccept = authorNameToAccept;
 	}
 
@@ -46,7 +46,7 @@ public class AuthorNameLogEntryFilter implements ILogEntryFilter {
 	public void setAuthorNameToAccept(String authorNameToAccept) {
 		this.authorNameToAccept = authorNameToAccept;
 	}
-	
+
 	public String getAuthorNameToAccept() {
 		return this.authorNameToAccept;
 	}

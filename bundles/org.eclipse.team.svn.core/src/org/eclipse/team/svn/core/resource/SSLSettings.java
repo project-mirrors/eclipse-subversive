@@ -28,13 +28,18 @@ public class SSLSettings implements Serializable {
 	private static final long serialVersionUID = -5649960025841815445L;
 
 	protected boolean authenticationEnabled;
+
 	protected String certificatePath;
+
 	protected boolean passPhraseSaved;
+
 	// Base64 encoded
 	protected String passPhrase;
+
 	private transient String passPhraseTemporary;
+
 	private transient ISSLSettingsStateListener parentLocation;
-	
+
 	public SSLSettings() {
 		this(null);
 	}
@@ -57,7 +62,9 @@ public class SSLSettings implements Serializable {
 	}
 
 	public String getPassPhrase() {
-		return this.passPhraseSaved ? SVNUtility.base64Decode(this.passPhrase) : SVNUtility.base64Decode(this.passPhraseTemporary);
+		return this.passPhraseSaved
+				? SVNUtility.base64Decode(this.passPhrase)
+				: SVNUtility.base64Decode(this.passPhraseTemporary);
 	}
 
 	public void setPassPhrase(String passPhrase) {
@@ -65,8 +72,7 @@ public class SSLSettings implements Serializable {
 		oldValue = oldValue != null ? SVNUtility.base64Decode(oldValue) : oldValue;
 		if (this.passPhraseSaved) {
 			this.passPhrase = SVNUtility.base64Encode(passPhrase);
-		}
-		else {
+		} else {
 			this.passPhraseTemporary = SVNUtility.base64Encode(passPhrase);
 		}
 		this.fireSSLChanged(ISSLSettingsStateListener.SSL_PASS_PHRASE, oldValue, passPhrase);
@@ -85,11 +91,11 @@ public class SSLSettings implements Serializable {
 		if (!passPhraseSaved) {
 			this.passPhraseTemporary = this.passPhrase;
 			this.passPhrase = null;
-		}
-		else {
+		} else {
 			this.passPhrase = this.passPhraseTemporary;
 		}
-		this.fireSSLChanged(ISSLSettingsStateListener.SSL_PASS_PHRASE_SAVED, Boolean.valueOf(oldValue), Boolean.valueOf(passPhraseSaved));
+		this.fireSSLChanged(ISSLSettingsStateListener.SSL_PASS_PHRASE_SAVED, Boolean.valueOf(oldValue),
+				Boolean.valueOf(passPhraseSaved));
 	}
 
 	public boolean isAuthenticationEnabled() {
@@ -99,13 +105,14 @@ public class SSLSettings implements Serializable {
 	public void setAuthenticationEnabled(boolean authenticationEnabled) {
 		boolean oldValue = this.authenticationEnabled;
 		this.authenticationEnabled = authenticationEnabled;
-		this.fireSSLChanged(ISSLSettingsStateListener.SSL_AUTHENTICATION_ENABLED, Boolean.valueOf(oldValue), Boolean.valueOf(authenticationEnabled));
+		this.fireSSLChanged(ISSLSettingsStateListener.SSL_AUTHENTICATION_ENABLED, Boolean.valueOf(oldValue),
+				Boolean.valueOf(authenticationEnabled));
 	}
-	
+
 	protected void fireSSLChanged(String field, Object oldValue, Object newValue) {
 		if (this.parentLocation != null) {
 			this.parentLocation.sslChanged(null, field, oldValue, newValue);
 		}
 	}
-	
+
 }

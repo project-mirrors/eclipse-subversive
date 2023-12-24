@@ -33,17 +33,19 @@ public class EditConflictsActionHelper extends AbstractActionHelper {
 	public EditConflictsActionHelper(IAction action, ISynchronizePageConfiguration configuration) {
 		super(action, configuration);
 	}
-	
+
 	public FastSyncInfoFilter getSyncInfoFilter() {
-		return new FastSyncInfoFilter.SyncInfoDirectionFilter(new int[] {SyncInfo.CONFLICTING}) {
+		return new FastSyncInfoFilter.SyncInfoDirectionFilter(new int[] { SyncInfo.CONFLICTING }) {
 			public boolean select(SyncInfo info) {
-				return super.select(info) && IStateFilter.SF_DATA_CONFLICTING.accept(((AbstractSVNSyncInfo)info).getLocalResource());
+				return super.select(info)
+						&& IStateFilter.SF_DATA_CONFLICTING.accept(((AbstractSVNSyncInfo) info).getLocalResource());
 			}
 		};
 	}
 
 	public IActionOperation getOperation() {
-		return new ShowConflictEditorOperation(this.getSyncInfoSelector().getSelectedResources(IStateFilter.SF_DATA_CONFLICTING), false);
+		return new ShowConflictEditorOperation(
+				this.getSyncInfoSelector().getSelectedResources(IStateFilter.SF_DATA_CONFLICTING), false);
 	}
 
 }

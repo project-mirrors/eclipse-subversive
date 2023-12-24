@@ -37,7 +37,7 @@ public class ChangeSetCompareAdapter extends SynchronizationCompareAdapter imple
 	public ResourceTraversal[] getTraversals(ISynchronizationScope scope) {
 		return scope.getTraversals(ModelProvider.RESOURCE_MODEL_PROVIDER_ID);
 	}
-	
+
 	public String getName(ResourceMapping mapping) {
 		Object modelObject = mapping.getModelObject();
 		if (modelObject instanceof ChangeSet) {

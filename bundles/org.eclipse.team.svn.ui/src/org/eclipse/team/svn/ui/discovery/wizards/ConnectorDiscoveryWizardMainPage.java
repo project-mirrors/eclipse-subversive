@@ -129,16 +129,20 @@ import org.eclipse.ui.progress.WorkbenchJob;
  * @author David Green
  * @author Igor Burilo
  */
-public class ConnectorDiscoveryWizardMainPage extends WizardPage {	
+public class ConnectorDiscoveryWizardMainPage extends WizardPage {
 
 	private static String DISCOVERY_PROPERTIES_FILE = "discovery.properties";
+
 	private static String URL_DISCOVERY_PROPERTY = "url";
-		
+
 	private static final String COLOR_WHITE = "white"; //$NON-NLS-1$
+
 	private static final String COLOR_DARK_GRAY = "DarkGray"; //$NON-NLS-1$
+
 	private static final String COLOR_CATEGORY_GRADIENT_START = "category.gradient.start"; //$NON-NLS-1$
+
 	private static final String COLOR_CATEGORY_GRADIENT_END = "category.gradient.end"; //$NON-NLS-1$ 
-	
+
 	private static Boolean useNativeSearchField;
 
 	private final List<ConnectorDescriptor> installableConnectors = new ArrayList<ConnectorDescriptor>();
@@ -204,7 +208,8 @@ public class ConnectorDiscoveryWizardMainPage extends WizardPage {
 			GridDataFactory.fillDefaults().grab(true, false).applyTo(header);
 
 //			 TODO: refresh button?
-			if (getWizard().isShowConnectorDescriptorKindFilter() || getWizard().isShowConnectorDescriptorTextFilter()) {
+			if (getWizard().isShowConnectorDescriptorKindFilter()
+					|| getWizard().isShowConnectorDescriptorTextFilter()) {
 				Composite filterContainer = new Composite(header, SWT.NULL);
 				GridDataFactory.fillDefaults().grab(true, false).applyTo(filterContainer);
 
@@ -226,14 +231,15 @@ public class ConnectorDiscoveryWizardMainPage extends WizardPage {
 						textFilterContainer = new Composite(filterContainer, SWT.NULL);
 					} else {
 						textFilterContainer = new Composite(filterContainer, SWT.BORDER);
-						textFilterContainer.setBackground(header.getDisplay().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
+						textFilterContainer
+								.setBackground(header.getDisplay().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
 					}
 					GridDataFactory.fillDefaults().grab(true, false).applyTo(textFilterContainer);
 					GridLayoutFactory.fillDefaults().numColumns(2).applyTo(textFilterContainer);
 
 					if (nativeSearch) {
-						filterText = new Text(textFilterContainer, SWT.SINGLE | SWT.BORDER | SWT.SEARCH
-								| SWT.ICON_CANCEL);
+						filterText = new Text(textFilterContainer,
+								SWT.SINGLE | SWT.BORDER | SWT.SEARCH | SWT.ICON_CANCEL);
 					} else {
 						filterText = new Text(textFilterContainer, SWT.SINGLE);
 					}
@@ -289,10 +295,11 @@ public class ConnectorDiscoveryWizardMainPage extends WizardPage {
 		}
 		Dialog.applyDialogFont(container);
 		setControl(container);
-		
 
 		//Setting context help
-        PlatformUI.getWorkbench().getHelpSystem().setHelp(parent, "org.eclipse.team.svn.help.connectorDiscoveryWizContext"); //$NON-NLS-1$
+		PlatformUI.getWorkbench()
+				.getHelpSystem()
+				.setHelp(parent, "org.eclipse.team.svn.help.connectorDiscoveryWizContext"); //$NON-NLS-1$
 	}
 
 	private static boolean useNativeSearchField(Composite composite) {
@@ -347,8 +354,12 @@ public class ConnectorDiscoveryWizardMainPage extends WizardPage {
 	}
 
 	private Label createClearFilterTextControl(Composite filterContainer, final Text filterText) {
-		final Image inactiveImage = SVNTeamUIPlugin.instance().getImageDescriptor("icons/wizards/find-clear-disabled.gif").createImage();
-		final Image activeImage = SVNTeamUIPlugin.instance().getImageDescriptor("icons/wizards/find-clear.gif").createImage();
+		final Image inactiveImage = SVNTeamUIPlugin.instance()
+				.getImageDescriptor("icons/wizards/find-clear-disabled.gif")
+				.createImage();
+		final Image activeImage = SVNTeamUIPlugin.instance()
+				.getImageDescriptor("icons/wizards/find-clear.gif")
+				.createImage();
 		final Image pressedImage = new Image(filterContainer.getDisplay(), activeImage, SWT.IMAGE_GRAY);
 
 		final Label clearButton = new Label(filterContainer, SWT.NONE);
@@ -446,14 +457,14 @@ public class ConnectorDiscoveryWizardMainPage extends WizardPage {
 
 	private String getFilterLabel(ConnectorDescriptorKind kind) {
 		switch (kind) {
-		case DOCUMENT:
-			return SVNUIMessages.ConnectorDiscoveryWizardMainPage_filter_documents;
-		case TASK:
-			return SVNUIMessages.ConnectorDiscoveryWizardMainPage_filter_tasks;
-		case VCS:
-			return SVNUIMessages.ConnectorDiscoveryWizardMainPage_filter_vcs;
-		default:
-			throw new IllegalStateException(kind.name());
+			case DOCUMENT:
+				return SVNUIMessages.ConnectorDiscoveryWizardMainPage_filter_documents;
+			case TASK:
+				return SVNUIMessages.ConnectorDiscoveryWizardMainPage_filter_tasks;
+			case VCS:
+				return SVNUIMessages.ConnectorDiscoveryWizardMainPage_filter_vcs;
+			default:
+				throw new IllegalStateException(kind.name());
 		}
 	}
 
@@ -570,7 +581,7 @@ public class ConnectorDiscoveryWizardMainPage extends WizardPage {
 			}
 			colorDisabled = colorRegistry.get(COLOR_DARK_GRAY);
 		}
-		
+
 		if (colorCategoryGradientStart == null) {
 			ColorRegistry colorRegistry = JFaceResources.getColorRegistry();
 			if (!colorRegistry.hasValueFor(COLOR_CATEGORY_GRADIENT_START)) {
@@ -578,14 +589,14 @@ public class ConnectorDiscoveryWizardMainPage extends WizardPage {
 			}
 			colorCategoryGradientStart = colorRegistry.get(COLOR_CATEGORY_GRADIENT_START);
 		}
-		
+
 		if (colorCategoryGradientEnd == null) {
 			ColorRegistry colorRegistry = JFaceResources.getColorRegistry();
 			if (!colorRegistry.hasValueFor(COLOR_CATEGORY_GRADIENT_END)) {
 				colorRegistry.put(COLOR_CATEGORY_GRADIENT_END, new RGB(220, 220, 220));
 			}
 			colorCategoryGradientEnd = colorRegistry.get(COLOR_CATEGORY_GRADIENT_END);
-		}		
+		}
 	}
 
 	private void initializeFonts() {
@@ -694,8 +705,9 @@ public class ConnectorDiscoveryWizardMainPage extends WizardPage {
 			providerLabel = new Label(connectorContainer, SWT.NULL);
 			configureLook(providerLabel, background);
 			GridDataFactory.fillDefaults().align(SWT.END, SWT.CENTER).applyTo(providerLabel);
-			providerLabel.setText(SVNUIMessages.format(SVNUIMessages.ConnectorDiscoveryWizardMainPage_provider_and_license,
-					new Object[]{connector.getProvider(), connector.getLicense()}));
+			providerLabel
+					.setText(SVNUIMessages.format(SVNUIMessages.ConnectorDiscoveryWizardMainPage_provider_and_license,
+							new Object[] { connector.getProvider(), connector.getLicense() }));
 
 			if (hasTooltip(connector)) {
 				ToolBar toolBar = new ToolBar(connectorContainer, SWT.FLAT);
@@ -759,7 +771,8 @@ public class ConnectorDiscoveryWizardMainPage extends WizardPage {
 				}
 				if (!connector.getAvailable()) {
 					MessageDialog.openWarning(getShell(),
-							SVNUIMessages.ConnectorDiscoveryWizardMainPage_warningTitleConnectorUnavailable, SVNUIMessages.format(
+							SVNUIMessages.ConnectorDiscoveryWizardMainPage_warningTitleConnectorUnavailable,
+							SVNUIMessages.format(
 									SVNUIMessages.ConnectorDiscoveryWizardMainPage_warningMessageConnectorUnavailable,
 									connector.getName()));
 					return false;
@@ -789,7 +802,8 @@ public class ConnectorDiscoveryWizardMainPage extends WizardPage {
 				boolean unavailable = !enabled && connector.getAvailable() != null;
 				if (unavailable) {
 					if (warningIconImage == null) {
-						warningIconImage = new DecorationOverlayIcon(iconImage, SVNTeamUIPlugin.instance().getImageDescriptor("icons/discovery/message_warning.gif"),
+						warningIconImage = new DecorationOverlayIcon(iconImage,
+								SVNTeamUIPlugin.instance().getImageDescriptor("icons/discovery/message_warning.gif"),
 								IDecoration.TOP_LEFT).createImage();
 						disposables.add(warningIconImage);
 					}
@@ -866,14 +880,19 @@ public class ConnectorDiscoveryWizardMainPage extends WizardPage {
 					final GradientCanvas categoryHeaderContainer = new GradientCanvas(container, SWT.NONE);
 					categoryHeaderContainer.setSeparatorVisible(true);
 					categoryHeaderContainer.setSeparatorAlignment(SWT.TOP);
-					categoryHeaderContainer.setBackgroundGradient(new Color[] { colorCategoryGradientStart,
-							colorCategoryGradientEnd }, new int[] { 100 }, true);
+					categoryHeaderContainer.setBackgroundGradient(
+							new Color[] { colorCategoryGradientStart, colorCategoryGradientEnd }, new int[] { 100 },
+							true);
 					categoryHeaderContainer.putColor(IFormColors.H_BOTTOM_KEYLINE1, colorCategoryGradientStart);
 					categoryHeaderContainer.putColor(IFormColors.H_BOTTOM_KEYLINE2, colorCategoryGradientEnd);
 
 					GridDataFactory.fillDefaults().span(2, 1).applyTo(categoryHeaderContainer);
-					GridLayoutFactory.fillDefaults().numColumns(3).margins(5, 5).equalWidth(false).applyTo(
-							categoryHeaderContainer);
+					GridLayoutFactory.fillDefaults()
+							.numColumns(3)
+							.margins(5, 5)
+							.equalWidth(false)
+							.applyTo(
+									categoryHeaderContainer);
 
 					Label iconLabel = new Label(categoryHeaderContainer, SWT.NULL);
 					if (category.getIcon() != null) {
@@ -904,8 +923,12 @@ public class ConnectorDiscoveryWizardMainPage extends WizardPage {
 						new Label(categoryHeaderContainer, SWT.NULL).setText(" "); //$NON-NLS-1$
 					}
 					Label description = new Label(categoryHeaderContainer, SWT.WRAP);
-					GridDataFactory.fillDefaults().grab(true, false).span(2, 1).hint(100, SWT.DEFAULT).applyTo(
-							description);
+					GridDataFactory.fillDefaults()
+							.grab(true, false)
+							.span(2, 1)
+							.hint(100, SWT.DEFAULT)
+							.applyTo(
+									description);
 					description.setBackground(null);
 					description.setText(category.getDescription());
 				}
@@ -956,10 +979,10 @@ public class ConnectorDiscoveryWizardMainPage extends WizardPage {
 		Listener listener = new Listener() {
 			public void handleEvent(Event event) {
 				switch (event.type) {
-				case SWT.Dispose:
-				case SWT.MouseWheel:
-					toolTip.hide();
-					break;
+					case SWT.Dispose:
+					case SWT.MouseWheel:
+						toolTip.hide();
+						break;
 				}
 
 			}
@@ -982,23 +1005,23 @@ public class ConnectorDiscoveryWizardMainPage extends WizardPage {
 		Listener exitListener = new Listener() {
 			public void handleEvent(Event event) {
 				switch (event.type) {
-				case SWT.MouseWheel:
-					toolTip.hide();
-					break;
-				case SWT.MouseExit:
-					/*
-					 * Check if the mouse exit happened because we move over the
-					 * tooltip
-					 */
-					Rectangle containerBounds = exitControl.getBounds();
-					Point displayLocation = exitControl.getParent().toDisplay(containerBounds.x, containerBounds.y);
-					containerBounds.x = displayLocation.x;
-					containerBounds.y = displayLocation.y;
-					if (containerBounds.contains(Display.getCurrent().getCursorLocation())) {
+					case SWT.MouseWheel:
+						toolTip.hide();
 						break;
-					}
-					toolTip.hide();
-					break;
+					case SWT.MouseExit:
+						/*
+						 * Check if the mouse exit happened because we move over the
+						 * tooltip
+						 */
+						Rectangle containerBounds = exitControl.getBounds();
+						Point displayLocation = exitControl.getParent().toDisplay(containerBounds.x, containerBounds.y);
+						containerBounds.x = displayLocation.x;
+						containerBounds.y = displayLocation.y;
+						if (containerBounds.contains(Display.getCurrent().getCursorLocation())) {
+							break;
+						}
+						toolTip.hide();
+						break;
 				}
 			}
 		};
@@ -1086,24 +1109,25 @@ public class ConnectorDiscoveryWizardMainPage extends WizardPage {
 		return text != null && filterPattern.matcher(text).find();
 	}
 
-	private Image computeIconImage(AbstractDiscoverySource discoverySource, Icon icon, int dimension, boolean fallback) {
+	private Image computeIconImage(AbstractDiscoverySource discoverySource, Icon icon, int dimension,
+			boolean fallback) {
 		String imagePath;
 		switch (dimension) {
-		case 64:
-			imagePath = icon.getImage64();
-			if (imagePath != null || !fallback) {
+			case 64:
+				imagePath = icon.getImage64();
+				if (imagePath != null || !fallback) {
+					break;
+				}
+			case 48:
+				imagePath = icon.getImage48();
+				if (imagePath != null || !fallback) {
+					break;
+				}
+			case 32:
+				imagePath = icon.getImage32();
 				break;
-			}
-		case 48:
-			imagePath = icon.getImage48();
-			if (imagePath != null || !fallback) {
-				break;
-			}
-		case 32:
-			imagePath = icon.getImage32();
-			break;
-		default:
-			throw new IllegalArgumentException();
+			default:
+				throw new IllegalArgumentException();
 		}
 		if (imagePath != null && imagePath.length() > 0) {
 			URL resource = discoverySource.getResource(imagePath);
@@ -1144,21 +1168,23 @@ public class ConnectorDiscoveryWizardMainPage extends WizardPage {
 
 						ConnectorDiscovery connectorDiscovery = new ConnectorDiscovery();
 						connectorDiscovery.getDiscoveryStrategies().add(new BundleDiscoveryStrategy());
-											
+
 						//retrieve discovery url from properties file and call remote discovery strategy
-						URL discoveryFileUrl = FileLocator.find(SVNTeamUIPlugin.instance().getBundle(), new Path(ConnectorDiscoveryWizardMainPage.DISCOVERY_PROPERTIES_FILE), null);
+						URL discoveryFileUrl = FileLocator.find(SVNTeamUIPlugin.instance().getBundle(),
+								new Path(ConnectorDiscoveryWizardMainPage.DISCOVERY_PROPERTIES_FILE), null);
 						if (discoveryFileUrl != null) {
 							InputStream in = null;
 							try {
 								Properties props = new Properties();
 								in = discoveryFileUrl.openStream();
-								props.load(in);							
-								String discoveryUrl = props.getProperty(ConnectorDiscoveryWizardMainPage.URL_DISCOVERY_PROPERTY);								
+								props.load(in);
+								String discoveryUrl = props
+										.getProperty(ConnectorDiscoveryWizardMainPage.URL_DISCOVERY_PROPERTY);
 								RemoteBundleDiscoveryStrategy remoteDiscoveryStrategy = new RemoteBundleDiscoveryStrategy();
 								remoteDiscoveryStrategy.setDiscoveryUrl(discoveryUrl);
-								connectorDiscovery.getDiscoveryStrategies().add(remoteDiscoveryStrategy);								
+								connectorDiscovery.getDiscoveryStrategies().add(remoteDiscoveryStrategy);
 							} catch (IOException ie) {
-								LoggedOperation.reportError(this.getClass().getName(), ie);		
+								LoggedOperation.reportError(this.getClass().getName(), ie);
 							} finally {
 								if (in != null) {
 									try {
@@ -1167,9 +1193,9 @@ public class ConnectorDiscoveryWizardMainPage extends WizardPage {
 										//ignore
 									}
 								}
-							}							
-						}						
-						
+							}
+						}
+
 						connectorDiscovery.setEnvironment(environment);
 						connectorDiscovery.setVerifyUpdateSiteAvailability(false);
 						try {
@@ -1186,8 +1212,8 @@ public class ConnectorDiscoveryWizardMainPage extends WizardPage {
 				});
 			} catch (InvocationTargetException e) {
 				IStatus status = computeStatus(e, SVNUIMessages.ConnectorDiscoveryWizardMainPage_unexpectedException);
-				DiscoveryUiUtil.logAndDisplayStatus(getShell(), SVNUIMessages.ConnectorDiscoveryWizardMainPage_errorTitle,
-						status);
+				DiscoveryUiUtil.logAndDisplayStatus(getShell(),
+						SVNUIMessages.ConnectorDiscoveryWizardMainPage_errorTitle, status);
 			} catch (InterruptedException e) {
 				// cancelled by user so nothing to do here.
 				wasCancelled = true;
@@ -1197,13 +1223,14 @@ public class ConnectorDiscoveryWizardMainPage extends WizardPage {
 				if (!discovery.getConnectors().isEmpty()) {
 					try {
 						getContainer().run(true, true, new IRunnableWithProgress() {
-							public void run(IProgressMonitor monitor) throws InvocationTargetException,
-									InterruptedException {
+							public void run(IProgressMonitor monitor)
+									throws InvocationTargetException, InterruptedException {
 								discovery.verifySiteAvailability(monitor);
 							}
 						});
 					} catch (InvocationTargetException e) {
-						IStatus status = computeStatus(e, SVNUIMessages.ConnectorDiscoveryWizardMainPage_unexpectedException);
+						IStatus status = computeStatus(e,
+								SVNUIMessages.ConnectorDiscoveryWizardMainPage_unexpectedException);
 						DiscoveryUiUtil.logAndDisplayStatus(getShell(),
 								SVNUIMessages.ConnectorDiscoveryWizardMainPage_errorTitle, status);
 					} catch (InterruptedException e) {
@@ -1229,8 +1256,8 @@ public class ConnectorDiscoveryWizardMainPage extends WizardPage {
 			statusCause = new Status(IStatus.ERROR, SVNTeamPlugin.NATURE_ID, cause.getMessage(), cause);
 		}
 		if (statusCause.getMessage() != null) {
-			message = SVNUIMessages.format(SVNUIMessages.ConnectorDiscoveryWizardMainPage_message_with_cause, 
-					new Object[]{message, statusCause.getMessage()});
+			message = SVNUIMessages.format(SVNUIMessages.ConnectorDiscoveryWizardMainPage_message_with_cause,
+					new Object[] { message, statusCause.getMessage() });
 		}
 		IStatus status = new MultiStatus(SVNTeamPlugin.NATURE_ID, 0, new IStatus[] { statusCause }, message, cause);
 		return status;
@@ -1258,8 +1285,7 @@ public class ConnectorDiscoveryWizardMainPage extends WizardPage {
 			if (categoryWithConnectorCount == 0) {
 				// nothing was discovered: notify the user
 				MessageDialog.openWarning(
-						getShell(),
-						SVNUIMessages.ConnectorDiscoveryWizardMainPage_noConnectorsFound,
+						getShell(), SVNUIMessages.ConnectorDiscoveryWizardMainPage_noConnectorsFound,
 						SVNUIMessages.ConnectorDiscoveryWizardMainPage_noConnectorsFound_description);
 			}
 		}

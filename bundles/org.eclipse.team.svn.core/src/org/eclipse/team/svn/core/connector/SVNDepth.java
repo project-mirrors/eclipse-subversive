@@ -42,9 +42,9 @@ public enum SVNDepth {
 	 * The folder and all descendants at any depth.
 	 */
 	INFINITY(3);
-	
+
 	public final int id;
-	
+
 	public static final SVNDepth infinityOrEmpty(boolean recurse) {
 		return (recurse ? SVNDepth.INFINITY : SVNDepth.EMPTY);
 	}
@@ -56,7 +56,7 @@ public enum SVNDepth {
 	public static final SVNDepth infinityOrImmediates(boolean recurse) {
 		return (recurse ? SVNDepth.INFINITY : SVNDepth.IMMEDIATES);
 	}
-	
+
 	public static final SVNDepth unknownOrFiles(boolean recurse) {
 		return (recurse ? SVNDepth.UNKNOWN : SVNDepth.FILES);
 	}

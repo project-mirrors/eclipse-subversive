@@ -28,25 +28,26 @@ import org.eclipse.team.svn.core.utility.ProgressMonitorUtility;
  */
 public class DefaultCancellableOperationWrapper implements ICancellableOperationWrapper {
 	protected IProgressMonitor attachedMonitor;
+
 	protected IActionOperation operation;
-	
+
 	public DefaultCancellableOperationWrapper(IActionOperation operation) {
 		this.operation = operation;
 		this.attachedMonitor = new NullProgressMonitor();
 	}
-	
+
 	public void setCancelled(boolean cancelled) {
 		this.attachedMonitor.setCanceled(cancelled);
 	}
-	
+
 	public boolean isCancelled() {
 		return this.attachedMonitor.isCanceled();
 	}
-	
+
 	public IActionOperation getOperation() {
 		return this.operation;
 	}
-	
+
 	public String getOperationName() {
 		return this.operation.getOperationName();
 	}

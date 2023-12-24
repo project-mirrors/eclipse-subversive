@@ -21,7 +21,7 @@ package org.eclipse.team.svn.core.operation;
  */
 public class UnreportableException extends RuntimeException {
 	private static final long serialVersionUID = 1428755738425428674L;
-	
+
 	public UnreportableException() {
 		super();
 	}

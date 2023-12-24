@@ -33,7 +33,7 @@ public class SVNTeamProjectMapper {
 	public static void map(final IProject project, IRepositoryResource resource) throws Exception {
 		SVNTeamProvider.map(project, resource);
 		// initially mark team private members
-    	ResourcesPlugin.getWorkspace().run(new IWorkspaceRunnable() {
+		ResourcesPlugin.getWorkspace().run(new IWorkspaceRunnable() {
 			public void run(final IProgressMonitor monitor) throws CoreException {
 				FileUtility.findAndMarkSVNInternals(project, true);
 			}

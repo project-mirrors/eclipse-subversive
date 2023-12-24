@@ -29,30 +29,62 @@ import org.eclipse.team.svn.ui.utility.OverlayedImageDescriptor;
  */
 public class AffectedPathsLabelProvider extends LabelProvider {
 	protected static Image folderIcon;
+
 	protected static Image overlayedFolderIcon;
+
 	protected static Image rootIcon;
+
 	protected static Image rootAdditionIcon;
+
 	protected static Image overlayedRootIcon;
+
 	protected static Image addedFolderIcon;
+
 	protected static Image modifiedFolderIcon;
+
 	protected static Image deletedFolderIcon;
+
 	protected static Image replacedFolderIcon;
-	
+
 	protected long currentRevision;
-	
+
 	public AffectedPathsLabelProvider() {
 		synchronized (AffectedPathsLabelProvider.class) {
 			if (AffectedPathsLabelProvider.folderIcon == null) {
 				SVNTeamUIPlugin instance = SVNTeamUIPlugin.instance();
-				AffectedPathsLabelProvider.folderIcon = instance.getImageDescriptor("icons/views/history/affected_folder.gif").createImage(); //$NON-NLS-1$
-				AffectedPathsLabelProvider.overlayedFolderIcon = (new OverlayedImageDescriptor(AffectedPathsLabelProvider.folderIcon, instance.getImageDescriptor("icons/overlays/empty.gif"), new Point(22, 16), OverlayedImageDescriptor.RIGHT | OverlayedImageDescriptor.CENTER_V)).createImage(); //$NON-NLS-1$
-				AffectedPathsLabelProvider.rootIcon = instance.getImageDescriptor("icons/objects/repository-root.gif").createImage(); //$NON-NLS-1$
-				AffectedPathsLabelProvider.rootAdditionIcon = (new OverlayedImageDescriptor(AffectedPathsLabelProvider.rootIcon, instance.getImageDescriptor("icons/overlays/addition.gif"), new Point(22, 16), OverlayedImageDescriptor.RIGHT | OverlayedImageDescriptor.CENTER_V)).createImage(); //$NON-NLS-1$
-				AffectedPathsLabelProvider.overlayedRootIcon = (new OverlayedImageDescriptor(AffectedPathsLabelProvider.rootIcon, instance.getImageDescriptor("icons/overlays/empty.gif"), new Point(22, 16), OverlayedImageDescriptor.RIGHT | OverlayedImageDescriptor.CENTER_V)).createImage(); //$NON-NLS-1$
-				AffectedPathsLabelProvider.addedFolderIcon = (new OverlayedImageDescriptor(AffectedPathsLabelProvider.folderIcon, instance.getImageDescriptor("icons/overlays/addition.gif"), new Point(22, 16), OverlayedImageDescriptor.RIGHT | OverlayedImageDescriptor.CENTER_V)).createImage(); //$NON-NLS-1$
-				AffectedPathsLabelProvider.modifiedFolderIcon = (new OverlayedImageDescriptor(AffectedPathsLabelProvider.folderIcon, instance.getImageDescriptor("icons/overlays/change.gif"), new Point(22, 16), OverlayedImageDescriptor.RIGHT | OverlayedImageDescriptor.CENTER_V)).createImage(); //$NON-NLS-1$
-				AffectedPathsLabelProvider.deletedFolderIcon = (new OverlayedImageDescriptor(AffectedPathsLabelProvider.folderIcon, instance.getImageDescriptor("icons/overlays/deletion.gif"), new Point(22, 16), OverlayedImageDescriptor.RIGHT | OverlayedImageDescriptor.CENTER_V)).createImage(); //$NON-NLS-1$
-				AffectedPathsLabelProvider.replacedFolderIcon = (new OverlayedImageDescriptor(AffectedPathsLabelProvider.folderIcon, instance.getImageDescriptor("icons/overlays/replacement.gif"), new Point(22, 16), OverlayedImageDescriptor.RIGHT | OverlayedImageDescriptor.CENTER_V)).createImage(); //$NON-NLS-1$
+				AffectedPathsLabelProvider.folderIcon = instance
+						.getImageDescriptor("icons/views/history/affected_folder.gif") //$NON-NLS-1$
+						.createImage();
+				AffectedPathsLabelProvider.overlayedFolderIcon = (new OverlayedImageDescriptor(
+						AffectedPathsLabelProvider.folderIcon, instance.getImageDescriptor("icons/overlays/empty.gif"), //$NON-NLS-1$
+						new Point(22, 16), OverlayedImageDescriptor.RIGHT | OverlayedImageDescriptor.CENTER_V))
+								.createImage();
+				AffectedPathsLabelProvider.rootIcon = instance.getImageDescriptor("icons/objects/repository-root.gif") //$NON-NLS-1$
+						.createImage();
+				AffectedPathsLabelProvider.rootAdditionIcon = (new OverlayedImageDescriptor(
+						AffectedPathsLabelProvider.rootIcon, instance.getImageDescriptor("icons/overlays/addition.gif"), //$NON-NLS-1$
+						new Point(22, 16), OverlayedImageDescriptor.RIGHT | OverlayedImageDescriptor.CENTER_V))
+								.createImage();
+				AffectedPathsLabelProvider.overlayedRootIcon = (new OverlayedImageDescriptor(
+						AffectedPathsLabelProvider.rootIcon, instance.getImageDescriptor("icons/overlays/empty.gif"), //$NON-NLS-1$
+						new Point(22, 16), OverlayedImageDescriptor.RIGHT | OverlayedImageDescriptor.CENTER_V))
+								.createImage();
+				AffectedPathsLabelProvider.addedFolderIcon = (new OverlayedImageDescriptor(
+						AffectedPathsLabelProvider.folderIcon,
+						instance.getImageDescriptor("icons/overlays/addition.gif"), new Point(22, 16), //$NON-NLS-1$
+						OverlayedImageDescriptor.RIGHT | OverlayedImageDescriptor.CENTER_V)).createImage();
+				AffectedPathsLabelProvider.modifiedFolderIcon = (new OverlayedImageDescriptor(
+						AffectedPathsLabelProvider.folderIcon, instance.getImageDescriptor("icons/overlays/change.gif"), //$NON-NLS-1$
+						new Point(22, 16), OverlayedImageDescriptor.RIGHT | OverlayedImageDescriptor.CENTER_V))
+								.createImage();
+				AffectedPathsLabelProvider.deletedFolderIcon = (new OverlayedImageDescriptor(
+						AffectedPathsLabelProvider.folderIcon,
+						instance.getImageDescriptor("icons/overlays/deletion.gif"), new Point(22, 16), //$NON-NLS-1$
+						OverlayedImageDescriptor.RIGHT | OverlayedImageDescriptor.CENTER_V)).createImage();
+				AffectedPathsLabelProvider.replacedFolderIcon = (new OverlayedImageDescriptor(
+						AffectedPathsLabelProvider.folderIcon,
+						instance.getImageDescriptor("icons/overlays/replacement.gif"), new Point(22, 16), //$NON-NLS-1$
+						OverlayedImageDescriptor.RIGHT | OverlayedImageDescriptor.CENTER_V)).createImage();
 				CompareUI.disposeOnShutdown(AffectedPathsLabelProvider.folderIcon);
 				CompareUI.disposeOnShutdown(AffectedPathsLabelProvider.overlayedFolderIcon);
 				CompareUI.disposeOnShutdown(AffectedPathsLabelProvider.rootIcon);
@@ -65,17 +97,19 @@ public class AffectedPathsLabelProvider extends LabelProvider {
 			}
 		}
 	}
-	
+
 	public void setCurrentRevision(long currentRevision) {
 		this.currentRevision = currentRevision;
 	}
-	
+
 	public Image getImage(Object element) {
-		if (((AffectedPathsNode)element).getParent() == null) {
-			return this.currentRevision == 0 ? AffectedPathsLabelProvider.rootAdditionIcon : AffectedPathsLabelProvider.overlayedRootIcon;
+		if (((AffectedPathsNode) element).getParent() == null) {
+			return this.currentRevision == 0
+					? AffectedPathsLabelProvider.rootAdditionIcon
+					: AffectedPathsLabelProvider.overlayedRootIcon;
 		}
-		if (((AffectedPathsNode)element).getStatus() != null) {
-			switch (((AffectedPathsNode)element).getStatus()) {
+		if (((AffectedPathsNode) element).getStatus() != null) {
+			switch (((AffectedPathsNode) element).getStatus()) {
 				case ADDED: {
 					return AffectedPathsLabelProvider.addedFolderIcon;
 				}

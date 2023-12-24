@@ -33,8 +33,9 @@ import org.eclipse.team.svn.core.utility.SVNUtility;
  */
 public class GetFileContentOperation extends AbstractGetFileContentOperation {
 	protected IRepositoryResource resource;
+
 	protected IRepositoryResourceProvider provider;
-	
+
 	public GetFileContentOperation(IRepositoryResource resource) {
 		super("Revision"); //$NON-NLS-1$
 		this.resource = resource;
@@ -44,12 +45,12 @@ public class GetFileContentOperation extends AbstractGetFileContentOperation {
 		super("Revision"); //$NON-NLS-1$
 		this.provider = provider;
 	}
-	
+
 	protected void runImpl(IProgressMonitor monitor) throws Exception {
 		if (this.provider != null) {
 			this.resource = this.provider.getRepositoryResources()[0];
 		}
-		
+
 		String url = this.resource.getUrl();
 		IRepositoryLocation location = this.resource.getRepositoryLocation();
 		ISVNConnector proxy = location.acquireSVNProxy();
@@ -59,29 +60,29 @@ public class GetFileContentOperation extends AbstractGetFileContentOperation {
 //			this.writeToConsole(IConsoleStream.LEVEL_CMD, "svn cat " + url + "@" + this.resource.getPegRevision() + " -r " + selected + " --username \"" + location.getUsername() + "\"\n");
 			this.tmpFile = this.createTempFile();
 			stream = new FileOutputStream(this.tmpFile);
-			
+
 			proxy.streamFileContent(
-					SVNUtility.getEntryRevisionReference(this.resource), 
-					2048, 
-					stream,
+					SVNUtility.getEntryRevisionReference(this.resource), 2048, stream,
 					new SVNProgressMonitor(GetFileContentOperation.this, monitor, null));
-		}
-		finally {
+		} finally {
 			location.releaseSVNProxy(proxy);
 			if (stream != null) {
-				try {stream.close();} catch (Exception ex) {}
+				try {
+					stream.close();
+				} catch (Exception ex) {
+				}
 			}
 		}
 	}
-	
+
 	protected String getExtension() {
 		String name = this.resource.getName();
 		int idx = name.lastIndexOf('.');
 		return idx == -1 ? "" : name.substring(idx + 1); //$NON-NLS-1$
 	}
-	
+
 	protected String getShortErrorMessage(Throwable t) {
-		return BaseMessages.format(super.getShortErrorMessage(t), new Object[] {this.resource.getUrl()});
+		return BaseMessages.format(super.getShortErrorMessage(t), new Object[] { this.resource.getUrl() });
 	}
 
 }

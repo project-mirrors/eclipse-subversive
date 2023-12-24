@@ -45,11 +45,11 @@ import org.eclipse.ui.PartInitException;
 public class UpdateModelParticipant extends AbstractSVNModelParticipant implements IChangeSetProvider {
 
 	private static final String CTX_CONSULT_CHANGE_SETS = "consultChangeSets"; //$NON-NLS-1$
-	
+
 	protected ChangeSetCapability capability;
-	
+
 	protected boolean isConsultChangeSets;
-	
+
 	public UpdateModelParticipant() {
 		super();
 	}
@@ -57,19 +57,22 @@ public class UpdateModelParticipant extends AbstractSVNModelParticipant implemen
 	public UpdateModelParticipant(SynchronizationContext context) {
 		super(context);
 		try {
-			setInitializationData(TeamUI.getSynchronizeManager().getParticipantDescriptor("org.eclipse.team.svn.ui.synchronize.update.SynchronizeModelParticipant")); //$NON-NLS-1$
-		} catch (CoreException e) {			
+			setInitializationData(TeamUI.getSynchronizeManager()
+					.getParticipantDescriptor(
+							"org.eclipse.team.svn.ui.synchronize.update.SynchronizeModelParticipant")); //$NON-NLS-1$
+		} catch (CoreException e) {
 			UILoggedOperation.reportError(this.getClass().getName(), e);
 		}
 		setSecondaryId(Long.toString(System.currentTimeMillis()));
 		this.isConsultChangeSets = isConsultChangeSets(context.getScopeManager());
 	}
-	
+
 	protected void initializeConfiguration(ISynchronizePageConfiguration configuration) {
-		configuration.setProperty(ISynchronizePageConfiguration.P_VIEWER_ID, "org.eclipse.team.svn.ui.workspaceSynchronization"); //$NON-NLS-1$
-		super.initializeConfiguration(configuration);		
+		configuration.setProperty(ISynchronizePageConfiguration.P_VIEWER_ID,
+				"org.eclipse.team.svn.ui.workspaceSynchronization"); //$NON-NLS-1$
+		super.initializeConfiguration(configuration);
 	}
-	
+
 	protected Collection<AbstractSynchronizeActionGroup> getActionGroups() {
 		//TODO see ExtensionsManager.getInstance().getCurrentSynchronizeActionContributor().getUpdateContributions();		
 		List<AbstractSynchronizeActionGroup> actionGroups = new ArrayList<AbstractSynchronizeActionGroup>();
@@ -77,54 +80,54 @@ public class UpdateModelParticipant extends AbstractSVNModelParticipant implemen
 		return actionGroups;
 	}
 
-	protected ModelSynchronizeParticipantActionGroup createMergeActionGroup() {	
-		return new UpdateModelActionGroup();		
+	protected ModelSynchronizeParticipantActionGroup createMergeActionGroup() {
+		return new UpdateModelActionGroup();
 	}
-	
-    protected int getSupportedModes() {
-        return ISynchronizePageConfiguration.ALL_MODES;
-    }
 
-    protected int getDefaultMode() {
-        return ISynchronizePageConfiguration.BOTH_MODE;
-    }
+	protected int getSupportedModes() {
+		return ISynchronizePageConfiguration.ALL_MODES;
+	}
+
+	protected int getDefaultMode() {
+		return ISynchronizePageConfiguration.BOTH_MODE;
+	}
 
 	public ChangeSetCapability getChangeSetCapability() {
 		if (this.capability == null) {
 			this.capability = new SVNModelParticipantChangeSetCapability();
-        }
-        return this.capability;
+		}
+		return this.capability;
 	}
-	
-	protected MergeContext restoreContext(ISynchronizationScopeManager manager) {		
+
+	protected MergeContext restoreContext(ISynchronizationScopeManager manager) {
 		return UpdateSubscriberContext.createContext(manager, ISynchronizationContext.THREE_WAY);
 	}
-	
+
 	protected ISynchronizationScopeManager createScopeManager(ResourceMapping[] mappings) {
 		return UpdateSubscriberContext.createWorkspaceScopeManager(mappings, true, this.isConsultChangeSets);
 	}
-	
+
 	public void saveState(IMemento memento) {
 		super.saveState(memento);
-	   	memento.putString(CTX_CONSULT_CHANGE_SETS, Boolean.toString(this.isConsultChangeSets));
+		memento.putString(CTX_CONSULT_CHANGE_SETS, Boolean.toString(this.isConsultChangeSets));
 	}
-	
-    public void init(String secondaryId, IMemento memento) throws PartInitException {
-    	try {
-    		String consult = memento.getString(CTX_CONSULT_CHANGE_SETS);
-    		if (consult != null)
-    			this.isConsultChangeSets = Boolean.valueOf(consult).booleanValue();
-    	} finally {
-    		super.init(secondaryId, memento);
-    	}
-    }
-	    
+
+	public void init(String secondaryId, IMemento memento) throws PartInitException {
+		try {
+			String consult = memento.getString(CTX_CONSULT_CHANGE_SETS);
+			if (consult != null)
+				this.isConsultChangeSets = Boolean.valueOf(consult).booleanValue();
+		} finally {
+			super.init(secondaryId, memento);
+		}
+	}
+
 	protected boolean isConsultChangeSets(ISynchronizationScopeManager manager) {
 		if (manager instanceof ChangeSetSubscriberScopeManager) {
 			ChangeSetSubscriberScopeManager man = (ChangeSetSubscriberScopeManager) manager;
 			return man.isConsultSets();
 		}
 		return false;
-	}	
+	}
 
 }

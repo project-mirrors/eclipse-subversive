@@ -27,25 +27,26 @@ import org.eclipse.team.svn.ui.utility.UIMonitorUtility;
  * @author Alexander Gurov
  */
 public class NotifyUnresolvedConflictOperation extends AbstractActionOperation {
-    protected IUnresolvedConflictDetector sign;
+	protected IUnresolvedConflictDetector sign;
 
-    public NotifyUnresolvedConflictOperation(IUnresolvedConflictDetector sign) {
-        super("Operation_NotifyConflicts", SVNUIMessages.class); //$NON-NLS-1$
-        this.sign = sign;
-    }
-    
-    public int getOperationWeight() {
+	public NotifyUnresolvedConflictOperation(IUnresolvedConflictDetector sign) {
+		super("Operation_NotifyConflicts", SVNUIMessages.class); //$NON-NLS-1$
+		this.sign = sign;
+	}
+
+	public int getOperationWeight() {
 		return 0;
 	}
 
-    protected void runImpl(IProgressMonitor monitor) throws Exception {
-        if (this.sign.hasUnresolvedConflicts()) {
-            UIMonitorUtility.getDisplay().syncExec(new Runnable() {
-                public void run() {
-                    new NotifyUnresolvedConflictDialog(UIMonitorUtility.getShell(), NotifyUnresolvedConflictOperation.this.sign.getMessage()).open();
-                }
-            });
-        }
-    }
+	protected void runImpl(IProgressMonitor monitor) throws Exception {
+		if (this.sign.hasUnresolvedConflicts()) {
+			UIMonitorUtility.getDisplay().syncExec(new Runnable() {
+				public void run() {
+					new NotifyUnresolvedConflictDialog(UIMonitorUtility.getShell(),
+							NotifyUnresolvedConflictOperation.this.sign.getMessage()).open();
+				}
+			});
+		}
+	}
 
 }

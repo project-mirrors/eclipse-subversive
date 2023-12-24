@@ -43,38 +43,44 @@ public class CompareWithRevisionAction extends AbstractWorkingCopyAction {
 	public CompareWithRevisionAction() {
 		super();
 	}
-	
+
 	public void runImpl(IAction action) {
 		IResource resource = this.getSelectedResources()[0];
 		ILocalResource local = SVNRemoteStorage.instance().asLocalResourceAccessible(resource);
-		IRepositoryResource remote = local.isCopied() ? SVNUtility.getCopiedFrom(resource) : SVNRemoteStorage.instance().asRepositoryResource(resource);
+		IRepositoryResource remote = local.isCopied()
+				? SVNUtility.getCopiedFrom(resource)
+				: SVNRemoteStorage.instance().asRepositoryResource(resource);
 
 		ComparePanel panel = new ComparePanel(remote, local.getRevision());
 		DefaultDialog dialog = new DefaultDialog(this.getShell(), panel);
 		if (dialog.open() == 0) {
 			remote = panel.getSelectedResource();
 			String diffFile = panel.getDiffFile();
-			CompareResourcesOperation mainOp = new CompareResourcesOperation(local, remote, false, false, panel.getDiffOptions());
+			CompareResourcesOperation mainOp = new CompareResourcesOperation(local, remote, false, false,
+					panel.getDiffOptions());
 			mainOp.setDiffFile(diffFile);
 			CompositeOperation op = new CompositeOperation(mainOp.getId(), mainOp.getMessagesClass());
 			op.add(mainOp);
-			if (SVNTeamPreferences.getHistoryBoolean(SVNTeamUIPlugin.instance().getPreferenceStore(), SVNTeamPreferences.HISTORY_CONNECT_TO_COMPARE_WITH_NAME)) {
-				op.add(new ShowHistoryViewOperation(resource, remote, ISVNHistoryView.COMPARE_MODE, ISVNHistoryView.COMPARE_MODE), new IActionOperation[] {mainOp});
+			if (SVNTeamPreferences.getHistoryBoolean(SVNTeamUIPlugin.instance().getPreferenceStore(),
+					SVNTeamPreferences.HISTORY_CONNECT_TO_COMPARE_WITH_NAME)) {
+				op.add(new ShowHistoryViewOperation(resource, remote, ISVNHistoryView.COMPARE_MODE,
+						ISVNHistoryView.COMPARE_MODE), new IActionOperation[] { mainOp });
 			}
 			this.runScheduled(op);
 		}
 	}
 
 	public boolean isEnabled() {
-		boolean isCompareFoldersAllowed = CoreExtensionsManager.instance().getSVNConnectorFactory().getSVNAPIVersion() >= ISVNConnectorFactory.APICompatibility.SVNAPI_1_5_x;
-		return 
-			this.getSelectedResources().length == 1 && 
-			(isCompareFoldersAllowed || this.getSelectedResources()[0].getType() == IResource.FILE) && 
-			this.checkForResourcesPresence(CompareWithWorkingCopyAction.COMPARE_FILTER);
+		boolean isCompareFoldersAllowed = CoreExtensionsManager.instance()
+				.getSVNConnectorFactory()
+				.getSVNAPIVersion() >= ISVNConnectorFactory.APICompatibility.SVNAPI_1_5_x;
+		return this.getSelectedResources().length == 1
+				&& (isCompareFoldersAllowed || this.getSelectedResources()[0].getType() == IResource.FILE)
+				&& this.checkForResourcesPresence(CompareWithWorkingCopyAction.COMPARE_FILTER);
 	}
 
 	protected boolean needsToSaveDirtyEditors() {
 		return true;
 	}
-	
+
 }

@@ -27,21 +27,23 @@ import org.eclipse.team.svn.core.svnstorage.SVNRemoteStorage;
  * @author Alexander Gurov
  */
 public class NotifyProjectStatesChangedOperation extends AbstractActionOperation {
-	protected IProject []projects;
+	protected IProject[] projects;
+
 	protected int eventType;
 
-	public NotifyProjectStatesChangedOperation(IProject []projects, int eventType) {
+	public NotifyProjectStatesChangedOperation(IProject[] projects, int eventType) {
 		super("Operation_NotifyProjectChange", SVNMessages.class); //$NON-NLS-1$
 		this.projects = projects;
 		this.eventType = eventType;
 	}
-	
+
 	public int getOperationWeight() {
 		return 0;
 	}
 
 	protected void runImpl(IProgressMonitor monitor) throws Exception {
-		SVNRemoteStorage.instance().fireResourceStatesChangedEvent(new ProjectStatesChangedEvent(this.projects, this.eventType));		
+		SVNRemoteStorage.instance()
+				.fireResourceStatesChangedEvent(new ProjectStatesChangedEvent(this.projects, this.eventType));
 	}
 
 }

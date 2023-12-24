@@ -28,34 +28,35 @@ import org.eclipse.team.svn.core.SVNMessages;
  */
 public class SVNURLStreamHandler extends URLStreamHandler {
 	protected URL url;
-	
+
 	public SVNURLStreamHandler() {
 	}
-	
+
 	public URL getURL() {
 		return this.url;
 	}
 
-    protected URLConnection openConnection(URL u) throws IOException {
-        return null;
-    }
-    
-    public void setHost(String host) {
-    	this.setURL(this.url, this.url.getProtocol(), host, this.url.getPort(), this.url.getAuthority(), this.url.getUserInfo(), this.url.getPath(), this.url.getQuery(), this.url.getRef());
-    }
-    
-    protected void parseURL(URL u, String spec, int start, int limit) {
-    	String protocol = u.getProtocol();
-        if (!protocol.equals("file") && //$NON-NLS-1$
-    		!protocol.equals("svn") && //$NON-NLS-1$
-            !protocol.equals("http") && //$NON-NLS-1$
-            !protocol.equals("https") && //$NON-NLS-1$
-            !protocol.equals("svn+ssh")) { //$NON-NLS-1$
-    		String errMessage = SVNMessages.formatErrorString("Error_UnknownProtocol", new String[] {protocol}); //$NON-NLS-1$
-            throw new RuntimeException(errMessage);
-        }
-    	this.url = u;
-        super.parseURL(u, spec, start, limit);
-    }
-    
+	protected URLConnection openConnection(URL u) throws IOException {
+		return null;
+	}
+
+	public void setHost(String host) {
+		this.setURL(this.url, this.url.getProtocol(), host, this.url.getPort(), this.url.getAuthority(),
+				this.url.getUserInfo(), this.url.getPath(), this.url.getQuery(), this.url.getRef());
+	}
+
+	protected void parseURL(URL u, String spec, int start, int limit) {
+		String protocol = u.getProtocol();
+		if (!protocol.equals("file") && //$NON-NLS-1$
+				!protocol.equals("svn") && //$NON-NLS-1$
+				!protocol.equals("http") && //$NON-NLS-1$
+				!protocol.equals("https") && //$NON-NLS-1$
+				!protocol.equals("svn+ssh")) { //$NON-NLS-1$
+			String errMessage = SVNMessages.formatErrorString("Error_UnknownProtocol", new String[] { protocol }); //$NON-NLS-1$
+			throw new RuntimeException(errMessage);
+		}
+		this.url = u;
+		super.parseURL(u, spec, start, limit);
+	}
+
 }

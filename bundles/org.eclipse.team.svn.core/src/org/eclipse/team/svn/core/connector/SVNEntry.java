@@ -14,13 +14,12 @@
 
 package org.eclipse.team.svn.core.connector;
 
-
 /**
  * Directory entry information container
  * 
- * The JavaHL API's is the only way to interact between SVN and Java-based tools. At the same time JavaHL connector library
- * is not EPL compatible and we won't to pin plug-in with concrete connector implementation. So, the only way to do this is
- * providing our own connector interface which will be covered by concrete connector implementation.
+ * The JavaHL API's is the only way to interact between SVN and Java-based tools. At the same time JavaHL connector library is not EPL
+ * compatible and we won't to pin plug-in with concrete connector implementation. So, the only way to do this is providing our own connector
+ * interface which will be covered by concrete connector implementation.
  * 
  * @author Alexander Gurov
  */
@@ -47,12 +46,13 @@ public class SVNEntry {
 		UNKNOWN(3),
 		/**
 		 * The entry kind is a symbolic link
+		 * 
 		 * @since 1.8
 		 */
 		SYMLINK(4);
-		
+
 		public final int id;
-		
+
 		public static Kind fromId(int id) {
 			for (Kind kind : values()) {
 				if (kind.id == id) {
@@ -61,15 +61,14 @@ public class SVNEntry {
 			}
 			throw new IllegalArgumentException("Invalid entry kind: " + id); //$NON-NLS-1$
 		}
-		
+
 		private Kind(int id) {
 			this.id = id;
 		}
 	}
 
 	/**
-	 * The (@link DirEntry} fields acquisition masks. Combined mask could be passed into the {@link ISVNConnector#list}
-	 * method.
+	 * The (@link DirEntry} fields acquisition masks. Combined mask could be passed into the {@link ISVNConnector#list} method.
 	 */
 	public static class Fields {
 
@@ -121,8 +120,7 @@ public class SVNEntry {
 	public final String path;
 
 	/**
-	 * The last change revision. Could be {@link SVNRevision#INVALID_REVISION_NUMBER} if access mask does not specify the
-	 * revision field.
+	 * The last change revision. Could be {@link SVNRevision#INVALID_REVISION_NUMBER} if access mask does not specify the revision field.
 	 */
 	public final long revision;
 
@@ -132,8 +130,8 @@ public class SVNEntry {
 	public final long date;
 
 	/**
-	 * The last change author. Could be <code>null</code> if the last commit is performed with anonymous access or if
-	 * the access mask does not specify the author field.
+	 * The last change author. Could be <code>null</code> if the last commit is performed with anonymous access or if the access mask does
+	 * not specify the author field.
 	 */
 	public final String author;
 
@@ -143,14 +141,12 @@ public class SVNEntry {
 	public final boolean hasProperties;
 
 	/**
-	 * {@link Kind#DIR} for directories or {@link Kind#FILE} for file. Undetermined if access mask does not
-	 * specify the nodeKind field.
+	 * {@link Kind#DIR} for directories or {@link Kind#FILE} for file. Undetermined if access mask does not specify the nodeKind field.
 	 */
 	public final Kind nodeKind;
 
 	/**
-	 * Size in bytes. Valid only for files, for directories always zero. Undetermined if access mask does not specify
-	 * the size field.
+	 * Size in bytes. Valid only for files, for directories always zero. Undetermined if access mask does not specify the size field.
 	 */
 	public final long size;
 
@@ -179,7 +175,8 @@ public class SVNEntry {
 	 * @param lock
 	 *            entry lock information
 	 */
-	public SVNEntry(String path, long revision, long date, String author, boolean hasProperties, Kind nodeKind, long size, SVNLock lock) {
+	public SVNEntry(String path, long revision, long date, String author, boolean hasProperties, Kind nodeKind,
+			long size, SVNLock lock) {
 		this.date = date;
 		this.revision = revision;
 		this.hasProperties = hasProperties;
@@ -193,5 +190,5 @@ public class SVNEntry {
 	public String toString() {
 		return this.path;
 	}
-	
+
 }

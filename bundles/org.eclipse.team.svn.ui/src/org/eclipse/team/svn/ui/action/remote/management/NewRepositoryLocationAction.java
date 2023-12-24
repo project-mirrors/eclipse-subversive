@@ -31,7 +31,7 @@ public class NewRepositoryLocationAction extends TeamAction {
 	public NewRepositoryLocationAction() {
 		super();
 	}
-	
+
 	public void run(IAction action) {
 		NewRepositoryLocationWizard wizard = new NewRepositoryLocationWizard();
 		WizardDialog dialog = new WizardDialog(this.getShell(), wizard);

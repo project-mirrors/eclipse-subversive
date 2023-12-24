@@ -37,42 +37,43 @@ import org.eclipse.team.svn.ui.utility.UIMonitorUtility;
  */
 public class UIOptionProvider extends AbstractOptionProvider {
 	private SVNTeamModificationValidator modificationValidator = new SVNTeamModificationValidator();
+
 	public static final String ID = "org.eclipse.team.svn.ui.optionprovider"; //$NON-NLS-1$
-	
+
 	public String getId() {
 		return UIOptionProvider.ID;
 	}
-	
-	public String []getCoveredProviders() {
-		return new String[] {IOptionProvider.DEFAULT.getId()};
+
+	public String[] getCoveredProviders() {
+		return new String[] { IOptionProvider.DEFAULT.getId() };
 	}
-	
+
 	public ISVNCredentialsPrompt getCredentialsPrompt() {
 		return PromptCredentialsPanel.DEFAULT_PROMPT;
 	}
-	
+
 	public ILoggedOperationFactory getLoggedOperationFactory() {
 		return UIMonitorUtility.DEFAULT_FACTORY;
 	}
-	
+
 	public void addProjectSetCapabilityProcessing(CompositeOperation op) {
 		op.add(new RefreshRepositoryLocationsOperation(false));
 	}
-	
+
 	public FileModificationValidator getFileModificationValidator() {
 		return this.modificationValidator;
 	}
-	
+
 	public SVNProperty[] getAutomaticProperties(String template) {
 		IPreferenceStore store = SVNTeamUIPlugin.instance().getPreferenceStore();
-		Object[] autoProperties = SVNTeamPropsPreferencePage.loadAutoProperties(SVNTeamPreferences.getAutoPropertiesList(store, SVNTeamPreferences.AUTO_PROPERTIES_LIST_NAME));
+		Object[] autoProperties = SVNTeamPropsPreferencePage.loadAutoProperties(
+				SVNTeamPreferences.getAutoPropertiesList(store, SVNTeamPreferences.AUTO_PROPERTIES_LIST_NAME));
 		for (int i = 0; i < autoProperties.length; i++) {
-			SVNTeamPropsPreferencePage.AutoProperty autoProperty =
-				(SVNTeamPropsPreferencePage.AutoProperty)autoProperties[i];
+			SVNTeamPropsPreferencePage.AutoProperty autoProperty = (SVNTeamPropsPreferencePage.AutoProperty) autoProperties[i];
 			if (!autoProperty.enabled) {
 				continue;
 			}
-			
+
 			StringMatcher matcher = new StringMatcher(autoProperty.fileName);
 			if (matcher.match(template)) {
 				if (autoProperty.properties.length() == 0) {
@@ -84,7 +85,8 @@ public class UIOptionProvider extends AbstractOptionProvider {
 					String[] propsNameValue = props[j].split("=", 2); //$NON-NLS-1$
 					String propVal = propsNameValue.length == 1 ? "" : propsNameValue[1];
 					// handle multiline properties (lines are split by \n, if you need to specify such a character sequence, then use masking \\n)
-					propVal = PatternProvider.replaceAll(propVal, "([^\\\\])\\\\n|^\\\\n", "$1" + System.getProperty("line.separator")); //$NON-NLS-1$ //$NON-NLS-2$
+					propVal = PatternProvider.replaceAll(propVal, "([^\\\\])\\\\n|^\\\\n", //$NON-NLS-1$
+							"$1" + System.getProperty("line.separator")); //$NON-NLS-1$
 					// replace masked \\n entries with unmasked ones \n
 					propVal = PatternProvider.replaceAll(propVal, "\\\\n", "n"); //$NON-NLS-1$ //$NON-NLS-2$
 					propertyData[j] = new SVNProperty(propsNameValue[0], propVal);
@@ -94,17 +96,19 @@ public class UIOptionProvider extends AbstractOptionProvider {
 		}
 		return new SVNProperty[0];
 	}
-	
+
 	public String getResource(String key) {
 		return SVNUIMessages.getErrorString(key);
 	}
 
 	protected String getSVNConnectorId() {
-		return SVNTeamPreferences.getCoreString(SVNTeamUIPlugin.instance().getPreferenceStore(), SVNTeamPreferences.CORE_SVNCONNECTOR_NAME);
+		return SVNTeamPreferences.getCoreString(SVNTeamUIPlugin.instance().getPreferenceStore(),
+				SVNTeamPreferences.CORE_SVNCONNECTOR_NAME);
 	}
-	
+
 	protected String getDefaultTrunkName() {
-		String retVal = SVNTeamPreferences.getRepositoryString(SVNTeamUIPlugin.instance().getPreferenceStore(), SVNTeamPreferences.REPOSITORY_HEAD_NAME);
+		String retVal = SVNTeamPreferences.getRepositoryString(SVNTeamUIPlugin.instance().getPreferenceStore(),
+				SVNTeamPreferences.REPOSITORY_HEAD_NAME);
 		if (retVal == null || retVal.length() == 0) {
 			retVal = SVNTeamPreferences.REPOSITORY_HEAD_DEFAULT;
 		}
@@ -112,39 +116,46 @@ public class UIOptionProvider extends AbstractOptionProvider {
 	}
 
 	protected String getDefaultBranchesName() {
-		String retVal = SVNTeamPreferences.getRepositoryString(SVNTeamUIPlugin.instance().getPreferenceStore(), SVNTeamPreferences.REPOSITORY_BRANCHES_NAME);
+		String retVal = SVNTeamPreferences.getRepositoryString(SVNTeamUIPlugin.instance().getPreferenceStore(),
+				SVNTeamPreferences.REPOSITORY_BRANCHES_NAME);
 		if (retVal == null || retVal.length() == 0) {
 			retVal = SVNTeamPreferences.REPOSITORY_BRANCHES_DEFAULT;
 		}
 		return retVal;
 	}
-	
+
 	protected String getDefaultTagsName() {
-		String retVal = SVNTeamPreferences.getRepositoryString(SVNTeamUIPlugin.instance().getPreferenceStore(), SVNTeamPreferences.REPOSITORY_TAGS_NAME);
+		String retVal = SVNTeamPreferences.getRepositoryString(SVNTeamUIPlugin.instance().getPreferenceStore(),
+				SVNTeamPreferences.REPOSITORY_TAGS_NAME);
 		if (retVal == null || retVal.length() == 0) {
 			retVal = SVNTeamPreferences.REPOSITORY_TAGS_DEFAULT;
 		}
 		return retVal;
 	}
-	
+
 	protected boolean isAutomaticProjectShareEnabled() {
-		return SVNTeamPreferences.getBehaviourBoolean(SVNTeamUIPlugin.instance().getPreferenceStore(), SVNTeamPreferences.BEHAVIOUR_ENABLE_AUTO_SHARE_NAME);
+		return SVNTeamPreferences.getBehaviourBoolean(SVNTeamUIPlugin.instance().getPreferenceStore(),
+				SVNTeamPreferences.BEHAVIOUR_ENABLE_AUTO_SHARE_NAME);
 	}
-	
+
 	protected boolean isSVNCacheEnabled() {
-		return SVNTeamPreferences.getDecorationBoolean(SVNTeamUIPlugin.instance().getPreferenceStore(), SVNTeamPreferences.DECORATION_ENABLE_CACHE_NAME);
+		return SVNTeamPreferences.getDecorationBoolean(SVNTeamUIPlugin.instance().getPreferenceStore(),
+				SVNTeamPreferences.DECORATION_ENABLE_CACHE_NAME);
 	}
-	
+
 	protected boolean isTextMIMETypeRequired() {
-		return SVNTeamPreferences.getPropertiesBoolean(SVNTeamUIPlugin.instance().getPreferenceStore(), SVNTeamPreferences.FORCE_TEXT_MIME_NAME);
+		return SVNTeamPreferences.getPropertiesBoolean(SVNTeamUIPlugin.instance().getPreferenceStore(),
+				SVNTeamPreferences.FORCE_TEXT_MIME_NAME);
 	}
-	
+
 	protected boolean isPersistentSSHEnabled() {
-		return SVNTeamPreferences.getDecorationBoolean(SVNTeamUIPlugin.instance().getPreferenceStore(), SVNTeamPreferences.DECORATION_ENABLE_PERSISTENT_SSH_NAME);
+		return SVNTeamPreferences.getDecorationBoolean(SVNTeamUIPlugin.instance().getPreferenceStore(),
+				SVNTeamPreferences.DECORATION_ENABLE_PERSISTENT_SSH_NAME);
 	}
-	
+
 	protected boolean isCommitDerivedEnabled() {
-		return SVNTeamPreferences.getBehaviourBoolean(SVNTeamUIPlugin.instance().getPreferenceStore(), SVNTeamPreferences.BEHAVIOUR_COMMIT_SELECT_DERIVED_RESOURCES_NAME);
+		return SVNTeamPreferences.getBehaviourBoolean(SVNTeamUIPlugin.instance().getPreferenceStore(),
+				SVNTeamPreferences.BEHAVIOUR_COMMIT_SELECT_DERIVED_RESOURCES_NAME);
 	}
-	
+
 }

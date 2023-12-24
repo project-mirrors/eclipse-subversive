@@ -17,17 +17,17 @@ package org.eclipse.team.svn.ui.propfind;
 import org.eclipse.team.svn.core.connector.SVNProperty;
 
 /**
- * Visitor combines another visitors implementing  IPropFindVisitors 
+ * Visitor combines another visitors implementing IPropFindVisitors
  * 
  * @author Alexei Goncharov
  */
 public class CompositePropFindVisitor implements IPropFindVisitor {
-	protected IPropFindVisitor [] visitorsList;
-	
-	public CompositePropFindVisitor(IPropFindVisitor []visitorsListParam) {
+	protected IPropFindVisitor[] visitorsList;
+
+	public CompositePropFindVisitor(IPropFindVisitor[] visitorsListParam) {
 		this.visitorsList = visitorsListParam;
 	}
-	
+
 	public boolean visit(SVNProperty propertyParam) {
 		boolean retVal = false;
 		for (int i = 0; i < this.visitorsList.length; i++) {

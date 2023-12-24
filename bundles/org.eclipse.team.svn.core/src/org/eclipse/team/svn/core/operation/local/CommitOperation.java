@@ -48,98 +48,114 @@ import org.eclipse.team.svn.core.utility.SVNUtility;
  * 
  * @author Alexander Gurov
  */
-public class CommitOperation extends AbstractConflictDetectionOperation implements IRevisionProvider, IPostCommitErrorsProvider {
+public class CommitOperation extends AbstractConflictDetectionOperation
+		implements IRevisionProvider, IPostCommitErrorsProvider {
 	protected SVNDepth depth;
-	protected long options;
-	protected String message;
-	protected ArrayList<RevisionPair> revisionsPairs;
-	protected ArrayList<SVNCommitStatus> postCommitErrors;
-	
-	protected String []paths;
 
-	public CommitOperation(IResource []resources, String message, boolean recursive, boolean keepLocks) {
-		this(resources, message, SVNDepth.infinityOrEmpty(recursive), keepLocks ? ISVNConnector.Options.KEEP_LOCKS : ISVNConnector.Options.NONE);
+	protected long options;
+
+	protected String message;
+
+	protected ArrayList<RevisionPair> revisionsPairs;
+
+	protected ArrayList<SVNCommitStatus> postCommitErrors;
+
+	protected String[] paths;
+
+	public CommitOperation(IResource[] resources, String message, boolean recursive, boolean keepLocks) {
+		this(resources, message, SVNDepth.infinityOrEmpty(recursive),
+				keepLocks ? ISVNConnector.Options.KEEP_LOCKS : ISVNConnector.Options.NONE);
 	}
-	
+
 	public CommitOperation(IResourceProvider provider, String message, boolean recursive, boolean keepLocks) {
-		this(provider, message, SVNDepth.infinityOrEmpty(recursive), keepLocks ? ISVNConnector.Options.KEEP_LOCKS : ISVNConnector.Options.NONE);
+		this(provider, message, SVNDepth.infinityOrEmpty(recursive),
+				keepLocks ? ISVNConnector.Options.KEEP_LOCKS : ISVNConnector.Options.NONE);
 	}
-	
-	public CommitOperation(IResource []resources, String message, SVNDepth depth, long options) {
+
+	public CommitOperation(IResource[] resources, String message, SVNDepth depth, long options) {
 		super("Operation_Commit", SVNMessages.class, resources); //$NON-NLS-1$
 		this.message = message;
 		this.depth = depth;
 		this.options = options & ISVNConnector.CommandMasks.COMMIT;
 	}
-	
+
 	public CommitOperation(IResourceProvider provider, String message, SVNDepth depth, long options) {
 		super("Operation_Commit", SVNMessages.class, provider); //$NON-NLS-1$
 		this.message = message;
 		this.depth = depth;
 		this.options = options & ISVNConnector.CommandMasks.COMMIT;
 	}
-	
+
 	protected void runImpl(IProgressMonitor monitor) throws Exception {
 		this.revisionsPairs = new ArrayList<RevisionPair>();
 		this.postCommitErrors = new ArrayList<SVNCommitStatus>();
-		IResource []resources = this.operableData();
-		
+		IResource[] resources = this.operableData();
+
 		this.defineInitialResourceSet(resources);
 
 		if (this.depth == SVNDepth.INFINITY) {
-		    resources = FileUtility.shrinkChildNodesWithSwitched(resources);
-		}
-		else {
+			resources = FileUtility.shrinkChildNodesWithSwitched(resources);
+		} else {
 			FileUtility.reorder(resources, true);
 		}
-		
-		if ((CoreExtensionsManager.instance().getSVNConnectorFactory().getSupportedFeatures() & ISVNConnectorFactory.OptionalFeatures.ATOMIC_X_COMMIT) != 0) {
+
+		if ((CoreExtensionsManager.instance().getSVNConnectorFactory().getSupportedFeatures()
+				& ISVNConnectorFactory.OptionalFeatures.ATOMIC_X_COMMIT) != 0) {
 			Map proxy2Resources = SVNUtility.splitRepositoryLocations(resources);
-			for (Iterator it = proxy2Resources.entrySet().iterator(); it.hasNext() && !monitor.isCanceled(); ) {
-				Map.Entry entry = (Map.Entry)it.next();
-				IRepositoryLocation location = (IRepositoryLocation)entry.getKey();
-				this.performCommit(location, (List)entry.getValue(), monitor, proxy2Resources.size());
+			for (Iterator it = proxy2Resources.entrySet().iterator(); it.hasNext() && !monitor.isCanceled();) {
+				Map.Entry entry = (Map.Entry) it.next();
+				IRepositoryLocation location = (IRepositoryLocation) entry.getKey();
+				this.performCommit(location, (List) entry.getValue(), monitor, proxy2Resources.size());
 			}
-		}
-		else {
+		} else {
 			Map project2Resources = SVNUtility.splitWorkingCopies(resources);
 			IRemoteStorage storage = SVNRemoteStorage.instance();
-			for (Iterator it = project2Resources.entrySet().iterator(); it.hasNext() && !monitor.isCanceled(); ) {
-				Map.Entry entry = (Map.Entry)it.next();
-				
-				IRepositoryLocation location = storage.getRepositoryLocation((IResource)entry.getKey());
-				this.performCommit(location, (List)entry.getValue(), monitor, project2Resources.size());
+			for (Iterator it = project2Resources.entrySet().iterator(); it.hasNext() && !monitor.isCanceled();) {
+				Map.Entry entry = (Map.Entry) it.next();
+
+				IRepositoryLocation location = storage.getRepositoryLocation((IResource) entry.getKey());
+				this.performCommit(location, (List) entry.getValue(), monitor, project2Resources.size());
 			}
 		}
 	}
-	
-	protected void performCommit(final IRepositoryLocation location, List resources, final IProgressMonitor monitor, int total) {
-		this.paths = FileUtility.asPathArray((IResource [])resources.toArray(new IResource[0]));
-		
+
+	protected void performCommit(final IRepositoryLocation location, List resources, final IProgressMonitor monitor,
+			int total) {
+		this.paths = FileUtility.asPathArray((IResource[]) resources.toArray(new IResource[0]));
+
 		this.complexWriteToConsole(new Runnable() {
 			public void run() {
-				CommitOperation.this.writeToConsole(IConsoleStream.LEVEL_CMD, "svn commit" + ISVNConnector.Options.asCommandLine(CommitOperation.this.options)); //$NON-NLS-1$
+				CommitOperation.this.writeToConsole(IConsoleStream.LEVEL_CMD,
+						"svn commit" + ISVNConnector.Options.asCommandLine(CommitOperation.this.options)); //$NON-NLS-1$
 				for (int i = 0; i < CommitOperation.this.paths.length && !monitor.isCanceled(); i++) {
-					CommitOperation.this.writeToConsole(IConsoleStream.LEVEL_CMD, " \"" + CommitOperation.this.paths[i] + "\""); //$NON-NLS-1$ //$NON-NLS-2$
+					CommitOperation.this.writeToConsole(IConsoleStream.LEVEL_CMD,
+							" \"" + CommitOperation.this.paths[i] + "\""); //$NON-NLS-1$ //$NON-NLS-2$
 				}
-				CommitOperation.this.writeToConsole(IConsoleStream.LEVEL_CMD, (CommitOperation.this.depth == SVNDepth.INFINITY ? "" : " -N") + ((CommitOperation.this.options & ISVNConnector.Options.KEEP_LOCKS) != 0 ? " --no-unlock" : "") + " -m \"" + CommitOperation.this.message + "\"" + FileUtility.getUsernameParam(location.getUsername()) + "\n"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$
+				CommitOperation.this.writeToConsole(IConsoleStream.LEVEL_CMD,
+						(CommitOperation.this.depth == SVNDepth.INFINITY ? "" : " -N") //$NON-NLS-1$//$NON-NLS-2$
+								+ ((CommitOperation.this.options & ISVNConnector.Options.KEEP_LOCKS) != 0
+										? " --no-unlock" //$NON-NLS-1$
+										: "") //$NON-NLS-1$
+								+ " -m \"" + CommitOperation.this.message + "\"" //$NON-NLS-1$//$NON-NLS-2$
+								+ FileUtility.getUsernameParam(location.getUsername()) + "\n"); //$NON-NLS-1$
 			}
 		});
-		
+
 		final ISVNConnector proxy = location.acquireSVNProxy();
 		this.protectStep(new IUnprotectedOperation() {
 			public void run(IProgressMonitor monitor) throws Exception {
 				SVNProgressMonitor svnMonitor = new SVNProgressMonitor(CommitOperation.this, monitor, null);
 				proxy.commit(
-				    CommitOperation.this.paths, 
-					CommitOperation.this.message, 
-					null,
-					CommitOperation.this.depth, CommitOperation.this.options, 
-					null, svnMonitor);
-				SVNCommitStatus status = svnMonitor.getCommitStatuses().isEmpty() ? null : svnMonitor.getCommitStatuses().iterator().next();
+						CommitOperation.this.paths, CommitOperation.this.message, null, CommitOperation.this.depth,
+						CommitOperation.this.options, null, svnMonitor);
+				SVNCommitStatus status = svnMonitor.getCommitStatuses().isEmpty()
+						? null
+						: svnMonitor.getCommitStatuses().iterator().next();
 				if (status != null && status.revision != SVNRevision.INVALID_REVISION_NUMBER) {
-					CommitOperation.this.revisionsPairs.add(new RevisionPair(status.revision, CommitOperation.this.paths, location));						
-					String message = SVNMessages.format(SVNMessages.Console_CommittedRevision, new String[] {String.valueOf(status.revision)});
+					CommitOperation.this.revisionsPairs
+							.add(new RevisionPair(status.revision, CommitOperation.this.paths, location));
+					String message = SVNMessages.format(SVNMessages.Console_CommittedRevision,
+							new String[] { String.valueOf(status.revision) });
 					CommitOperation.this.writeToConsole(IConsoleStream.LEVEL_OK, message);
 				}
 				if (svnMonitor.getPostCommitErrors() != null) {
@@ -149,42 +165,45 @@ public class CommitOperation extends AbstractConflictDetectionOperation implemen
 		}, monitor, total);
 		location.releaseSVNProxy(proxy);
 	}
-	
-	public RevisionPair []getRevisions() {
-		return this.revisionsPairs == null ? null : this.revisionsPairs.toArray(new RevisionPair[this.revisionsPairs.size()]);
+
+	public RevisionPair[] getRevisions() {
+		return this.revisionsPairs == null
+				? null
+				: this.revisionsPairs.toArray(new RevisionPair[this.revisionsPairs.size()]);
 	}
-	
-	public SVNCommitStatus [] getPostCommitErrors() {
-		return this.postCommitErrors == null || this.postCommitErrors.size() == 0 ? null : this.postCommitErrors.toArray(new SVNCommitStatus[this.postCommitErrors.size()]);
+
+	public SVNCommitStatus[] getPostCommitErrors() {
+		return this.postCommitErrors == null || this.postCommitErrors.size() == 0
+				? null
+				: this.postCommitErrors.toArray(new SVNCommitStatus[this.postCommitErrors.size()]);
 	}
-	
+
 	public void reportStatus(int severity, String message, Throwable t) {
-    	if (t instanceof SVNConnectorUnresolvedConflictException) {
-          	this.setUnresolvedConflict(true);
-          	          
-          	StringBuffer messageBuf = new StringBuffer();
-          	if (t.getMessage() != null && t.getMessage().length() > 0) {
-          		messageBuf.append(t.getMessage());
-          	}          	
-          	SVNConnectorUnresolvedConflictException ex = (SVNConnectorUnresolvedConflictException) t; 
-          	if (ex.getErrorId() == SVNErrorCodes.fsConflict) {
-          		messageBuf.append(messageBuf.toString().endsWith("\n") ? "\n" : "\n\n"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-          		messageBuf.append(SVNMessages.CommitOperation_3);
-          	}           	
-          	this.setConflictMessage(messageBuf.toString());
-        	for (int i = 0; i < this.paths.length; i++) {
-                for (IResource res : this.getProcessed()) {                    
-    		        if (FileUtility.getResourcePath(res).equals(new Path(this.paths[i]))) {
-    		        	this.removeProcessed(res);    		        
-    		            this.addUnprocessed(res);
-    		            break;
-    		        }
-                }
-            }
-    	}
-    	else {
-    		super.reportStatus(severity, message, t);
-    	}
-    }	
-	
+		if (t instanceof SVNConnectorUnresolvedConflictException) {
+			this.setUnresolvedConflict(true);
+
+			StringBuffer messageBuf = new StringBuffer();
+			if (t.getMessage() != null && t.getMessage().length() > 0) {
+				messageBuf.append(t.getMessage());
+			}
+			SVNConnectorUnresolvedConflictException ex = (SVNConnectorUnresolvedConflictException) t;
+			if (ex.getErrorId() == SVNErrorCodes.fsConflict) {
+				messageBuf.append(messageBuf.toString().endsWith("\n") ? "\n" : "\n\n"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				messageBuf.append(SVNMessages.CommitOperation_3);
+			}
+			this.setConflictMessage(messageBuf.toString());
+			for (int i = 0; i < this.paths.length; i++) {
+				for (IResource res : this.getProcessed()) {
+					if (FileUtility.getResourcePath(res).equals(new Path(this.paths[i]))) {
+						this.removeProcessed(res);
+						this.addUnprocessed(res);
+						break;
+					}
+				}
+			}
+		} else {
+			super.reportStatus(severity, message, t);
+		}
+	}
+
 }

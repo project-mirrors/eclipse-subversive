@@ -21,7 +21,7 @@ package org.eclipse.team.svn.core.resource;
  */
 public interface IRepositoryResourceFactory {
 	public IRepositoryContainer asRepositoryContainer(String url, boolean allowsNull) throws IllegalArgumentException;
-	
+
 	public IRepositoryFile asRepositoryFile(String url, boolean allowsNull) throws IllegalArgumentException;
-	
+
 }

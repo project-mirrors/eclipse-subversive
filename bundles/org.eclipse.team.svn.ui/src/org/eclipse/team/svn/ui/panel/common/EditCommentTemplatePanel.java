@@ -29,27 +29,31 @@ import org.eclipse.team.svn.ui.verifier.NonEmptyFieldVerifier;
  * @author Sergiy Logvin
  */
 public class EditCommentTemplatePanel extends AbstractDialogPanel {
-	
+
 	protected StyledText templateText;
+
 	protected String template;
-	
+
 	public EditCommentTemplatePanel(String template) {
 		super();
-		this.dialogTitle = template == null ? SVNUIMessages.EditCommentTemplatePanel_Title_New : SVNUIMessages.EditCommentTemplatePanel_Title_Edit;
+		this.dialogTitle = template == null
+				? SVNUIMessages.EditCommentTemplatePanel_Title_New
+				: SVNUIMessages.EditCommentTemplatePanel_Title_Edit;
 		this.defaultMessage = SVNUIMessages.EditCommentTemplatePanel_Message;
 		this.dialogDescription = SVNUIMessages.EditCommentTemplatePanel_Description;
 		this.template = template;
 	}
-	
+
 	public void createControlsImpl(Composite parent) {
 		GridData data = new GridData(GridData.GRAB_HORIZONTAL | GridData.FILL_BOTH);
 		data.heightHint = 180;
 		this.templateText = SpellcheckedTextProvider.getTextWidget(parent, data, SWT.MULTI);
 		this.templateText.setText(this.template == null ? "" : this.template); //$NON-NLS-1$
 		this.templateText.selectAll();
-		this.attachTo(this.templateText, new NonEmptyFieldVerifier(SVNUIMessages.EditCommentTemplatePanel_Template_Verifier));
+		this.attachTo(this.templateText,
+				new NonEmptyFieldVerifier(SVNUIMessages.EditCommentTemplatePanel_Template_Verifier));
 	}
-	
+
 	public String getTemplate() {
 		return this.template;
 	}

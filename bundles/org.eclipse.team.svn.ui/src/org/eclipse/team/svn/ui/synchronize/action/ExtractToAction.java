@@ -24,15 +24,14 @@ import org.eclipse.team.svn.core.synchronize.AbstractSVNSyncInfo;
 import org.eclipse.team.ui.synchronize.ISynchronizePageConfiguration;
 
 /**
- * Extract To action for Synchronize View (both incoming and outgoing - 
- * the conflicting resources are ignored)
+ * Extract To action for Synchronize View (both incoming and outgoing - the conflicting resources are ignored)
  * 
  * @author Alexei Goncharov
  */
 public class ExtractToAction extends AbstractSynchronizeModelAction {
 
 	protected ExtractToActionHelper actionHelper;
-	
+
 	public ExtractToAction(String text, ISynchronizePageConfiguration configuration) {
 		super(text, configuration);
 		this.actionHelper = new ExtractToActionHelper(this, configuration);
@@ -41,10 +40,10 @@ public class ExtractToAction extends AbstractSynchronizeModelAction {
 	protected FastSyncInfoFilter getSyncInfoFilter() {
 		return this.actionHelper.getSyncInfoFilter();
 	}
-	
+
 	protected boolean updateSelection(IStructuredSelection selection) {
 		super.updateSelection(selection);
-		AbstractSVNSyncInfo [] infos = this.getSVNSyncInfos();
+		AbstractSVNSyncInfo[] infos = this.getSVNSyncInfos();
 		for (int i = 0; i < infos.length; i++) {
 			if (SyncInfo.getDirection(infos[i].getKind()) == SyncInfo.CONFLICTING) {
 				return false;
@@ -52,7 +51,7 @@ public class ExtractToAction extends AbstractSynchronizeModelAction {
 		}
 		return infos.length > 0;
 	}
-	
+
 	protected IActionOperation getOperation(ISynchronizePageConfiguration configuration, IDiffElement[] elements) {
 		return this.actionHelper.getOperation();
 	}

@@ -33,9 +33,9 @@ public class SVNTeamProviderType extends RepositoryProviderType {
 	public ProjectSetCapability getProjectSetCapability() {
 		return new SVNTeamProjectSetCapability();
 	}
-		
-	public Subscriber getSubscriber() {		
+
+	public Subscriber getSubscriber() {
 		return UpdateSubscriber.instance();
 	}
-	
+
 }

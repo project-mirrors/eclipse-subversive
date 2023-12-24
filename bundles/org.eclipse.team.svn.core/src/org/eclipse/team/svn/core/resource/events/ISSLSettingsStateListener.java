@@ -21,12 +21,14 @@ import org.eclipse.team.svn.core.resource.IRepositoryLocation;
  * 
  * @author Alexander Gurov
  */
-public interface ISSLSettingsStateListener
-{
+public interface ISSLSettingsStateListener {
 	public final String SSL_CERTIFICATE_PATH = "sslCertificatePath";
+
 	public final String SSL_PASS_PHRASE = "sslPassPhrase";
+
 	public final String SSL_PASS_PHRASE_SAVED = "sslPassPhraseSaved";
+
 	public final String SSL_AUTHENTICATION_ENABLED = "sslAuthenticationEnabled";
-	
+
 	public void sslChanged(IRepositoryLocation where, String field, Object oldValue, Object newValue);
 }

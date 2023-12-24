@@ -42,6 +42,7 @@ import org.eclipse.team.svn.core.utility.ProgressMonitorUtility;
  */
 public class SVNLocalResourceRevision extends FileRevision {
 	protected ILocalResource local;
+
 	protected SVNRevision rev;
 
 	public SVNLocalResourceRevision(ILocalResource local, SVNRevision rev) {
@@ -79,7 +80,7 @@ public class SVNLocalResourceRevision extends FileRevision {
 	public String getComment() {
 		return null;
 	}
-	
+
 	public String getName() {
 		return this.local.getName();
 	}
@@ -89,7 +90,7 @@ public class SVNLocalResourceRevision extends FileRevision {
 			return null;
 		}
 		if (IStateFilter.SF_UNVERSIONED.accept(this.local) && !IStateFilter.SF_PREREPLACED.accept(this.local)) {
-			return (IStorage)this.local.getResource();
+			return (IStorage) this.local.getResource();
 		}
 		return new LocalStorage();
 	}
@@ -117,14 +118,15 @@ public class SVNLocalResourceRevision extends FileRevision {
 		public LocalStorage() {
 			super(SVNRemoteStorage.instance().asRepositoryResource(SVNLocalResourceRevision.this.local.getResource()));
 		}
-		
+
 		public IPath getFullPath() {
 			return SVNLocalResourceRevision.this.local.getResource().getLocation();
 		}
 
 		protected AbstractGetFileContentOperation getLoadContentOperation() {
-		    return new GetLocalFileContentOperation(SVNLocalResourceRevision.this.local.getResource(), SVNLocalResourceRevision.this.rev.getKind());
+			return new GetLocalFileContentOperation(SVNLocalResourceRevision.this.local.getResource(),
+					SVNLocalResourceRevision.this.rev.getKind());
 		}
-		
+
 	}
 }

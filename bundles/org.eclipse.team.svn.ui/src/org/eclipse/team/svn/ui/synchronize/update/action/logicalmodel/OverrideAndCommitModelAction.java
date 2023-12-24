@@ -28,7 +28,7 @@ import org.eclipse.team.ui.synchronize.ISynchronizePageConfiguration;
 public class OverrideAndCommitModelAction extends AbstractSynchronizeLogicalModelAction {
 
 	protected OverrideAndCommitModelActionHelper actionHelper;
-	
+
 	public OverrideAndCommitModelAction(String text, ISynchronizePageConfiguration configuration) {
 		super(text, configuration);
 		this.actionHelper = new OverrideAndCommitModelActionHelper(this, configuration);
@@ -37,7 +37,7 @@ public class OverrideAndCommitModelAction extends AbstractSynchronizeLogicalMode
 	public FastSyncInfoFilter getSyncInfoFilter() {
 		return this.actionHelper.getSyncInfoFilter();
 	}
-	
+
 	protected IActionOperation getOperation() {
 		return this.actionHelper.getOperation();
 	}

@@ -35,8 +35,8 @@ import org.eclipse.team.svn.core.discovery.util.WebUtil;
 import org.eclipse.team.svn.core.operation.LoggedOperation;
 
 /**
- * A discovery strategy that downloads a simple directory of remote jars. The directory is first downloaded, then each
- * remote jar is downloaded.
+ * A discovery strategy that downloads a simple directory of remote jars. The directory is first downloaded, then each remote jar is
+ * downloaded.
  * 
  * @author David Green
  * @author Igor Burilo
@@ -97,7 +97,8 @@ public class RemoteBundleDiscoveryStrategy extends BundleDiscoveryStrategy {
 					registryStrategy.setDiscoveryInfo(bundleFile, this.discoveryUrl);
 					IExtensionRegistry extensionRegistry = new ExtensionRegistry(registryStrategy, this, this);
 					try {
-						IExtensionPoint extensionPoint = extensionRegistry.getExtensionPoint(ConnectorDiscoveryExtensionReader.EXTENSION_POINT_ID);
+						IExtensionPoint extensionPoint = extensionRegistry
+								.getExtensionPoint(ConnectorDiscoveryExtensionReader.EXTENSION_POINT_ID);
 						if (extensionPoint != null) {
 							IExtension[] extensions = extensionPoint.getExtensions();
 							if (extensions.length > 0) {
@@ -136,10 +137,11 @@ public class RemoteBundleDiscoveryStrategy extends BundleDiscoveryStrategy {
 						String errMessage = SVNMessages.format(
 								SVNMessages.RemoteBundleDiscoveryStrategy_unrecognized_discovery_url, bundleUrl);
 						LoggedOperation.reportError(this.getClass().getName(), new Exception(errMessage));
-						
+
 						continue;
 					}
-					String lastPathElement = bundleUrl.lastIndexOf('/') == -1 ? bundleUrl
+					String lastPathElement = bundleUrl.lastIndexOf('/') == -1
+							? bundleUrl
 							: bundleUrl.substring(bundleUrl.lastIndexOf('/'));
 					File target = File.createTempFile(
 							lastPathElement.replaceAll("^[a-zA-Z0-9_.]", "_") + "_", ".jar", temporaryStorage); //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$//$NON-NLS-4$
@@ -159,17 +161,17 @@ public class RemoteBundleDiscoveryStrategy extends BundleDiscoveryStrategy {
 					String errMessage = SVNMessages.format(
 							SVNMessages.RemoteBundleDiscoveryStrategy_cannot_download_bundle, bundleUrl);
 					LoggedOperation.reportError(this.getClass().getName(), new Exception(errMessage, e));
-					
+
 					if (isUnknownHostException(e)) {
 						break;
 					}
 				}
-			}			
+			}
 		}
-		
+
 		public File getFile() {
 			return this.file;
-		}		
+		}
 	}
 
 //	private ExecutorService createExecutorService(int size) {
@@ -178,8 +180,7 @@ public class RemoteBundleDiscoveryStrategy extends BundleDiscoveryStrategy {
 //	}
 
 	/**
-	 * walk the exception chain to determine if the given exception or any of its underlying causes are an
-	 * {@link UnknownHostException}.
+	 * walk the exception chain to determine if the given exception or any of its underlying causes are an {@link UnknownHostException}.
 	 * 
 	 * @return true if the exception or one of its causes are {@link UnknownHostException}.
 	 */
@@ -226,7 +227,7 @@ public class RemoteBundleDiscoveryStrategy extends BundleDiscoveryStrategy {
 	}
 
 	@Override
-	protected AbstractDiscoverySource computeDiscoverySource(IContributor contributor) {		
+	protected AbstractDiscoverySource computeDiscoverySource(IContributor contributor) {
 		JarDiscoverySource discoverySource = new JarDiscoverySource(contributor.getName(),
 				registryStrategy.getJarFile(contributor));
 		return discoverySource;

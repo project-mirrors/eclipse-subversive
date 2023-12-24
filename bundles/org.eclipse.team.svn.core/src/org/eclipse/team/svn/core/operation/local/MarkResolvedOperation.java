@@ -34,34 +34,37 @@ import org.eclipse.team.svn.core.utility.FileUtility;
  */
 public class MarkResolvedOperation extends AbstractWorkingCopyOperation {
 	protected SVNConflictResolution.Choice conflictResult;
+
 	protected SVNDepth depth;
-	
+
 	public MarkResolvedOperation(IResource[] resources, SVNConflictResolution.Choice conflictResult, SVNDepth depth) {
 		super("Operation_MarkResolved", SVNMessages.class, resources); //$NON-NLS-1$
 		this.conflictResult = conflictResult;
 		this.depth = depth;
 	}
 
-	public MarkResolvedOperation(IResourceProvider provider, SVNConflictResolution.Choice conflictResult, SVNDepth depth) {
+	public MarkResolvedOperation(IResourceProvider provider, SVNConflictResolution.Choice conflictResult,
+			SVNDepth depth) {
 		super("Operation_MarkResolved", SVNMessages.class, provider); //$NON-NLS-1$
 		this.conflictResult = conflictResult;
 		this.depth = depth;
 	}
 
 	protected void runImpl(IProgressMonitor monitor) throws Exception {
-		IResource []resources = this.operableData();
-		
+		IResource[] resources = this.operableData();
+
 		for (int i = 0; i < resources.length && !monitor.isCanceled(); i++) {
 			IRepositoryLocation location = SVNRemoteStorage.instance().getRepositoryLocation(resources[i]);
 			final String path = FileUtility.getWorkingCopyPath(resources[i]);
 			final ISVNConnector proxy = location.acquireSVNProxy();
-			
+
 			this.protectStep(new IUnprotectedOperation() {
 				public void run(IProgressMonitor monitor) throws Exception {
-					proxy.resolve(path, MarkResolvedOperation.this.conflictResult, MarkResolvedOperation.this.depth, new SVNProgressMonitor(MarkResolvedOperation.this, monitor, null));
+					proxy.resolve(path, MarkResolvedOperation.this.conflictResult, MarkResolvedOperation.this.depth,
+							new SVNProgressMonitor(MarkResolvedOperation.this, monitor, null));
 				}
 			}, monitor, resources.length);
-			
+
 			location.releaseSVNProxy(proxy);
 		}
 	}

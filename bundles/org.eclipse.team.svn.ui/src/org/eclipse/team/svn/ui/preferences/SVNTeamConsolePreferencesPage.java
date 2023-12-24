@@ -44,31 +44,47 @@ import org.eclipse.ui.PlatformUI;
  */
 public class SVNTeamConsolePreferencesPage extends AbstractSVNTeamPreferencesPage {
 	protected ColorFieldEditor cmdEditor;
+
 	protected ColorFieldEditor okEditor;
+
 	protected ColorFieldEditor wrnEditor;
+
 	protected ColorFieldEditor errEditor;
-	
+
 	protected boolean hyperlinksEnabled;
+
 	protected int autoshow;
+
 	protected boolean wrapEnabled;
+
 	protected boolean limitEnabled;
+
 	protected int wrapWidth;
+
 	protected int limitValue;
-	
+
 	protected Button hyperlinksEnabledButton;
+
 	protected Button showNeverButton;
+
 	protected Button showAlwaysButton;
+
 	protected Button showErrorButton;
+
 	protected Button showWarningErrorButton;
+
 	protected Button wrapEnabledButton;
+
 	protected Button limitEnabledButton;
+
 	protected Text wrapWidthText;
+
 	protected Text limitValueText;
 
 	public SVNTeamConsolePreferencesPage() {
 		super();
 	}
-	
+
 	protected void saveValues(IPreferenceStore store) {
 		this.cmdEditor.store();
 		this.okEditor.store();
@@ -76,72 +92,71 @@ public class SVNTeamConsolePreferencesPage extends AbstractSVNTeamPreferencesPag
 		this.errEditor.store();
 
 		SVNTeamPreferences.setConsoleInt(store, SVNTeamPreferences.CONSOLE_AUTOSHOW_TYPE_NAME, this.autoshow);
-		
-		SVNTeamPreferences.setConsoleBoolean(store, SVNTeamPreferences.CONSOLE_HYPERLINKS_ENABLED_NAME, this.hyperlinksEnabled);
-		
+
+		SVNTeamPreferences.setConsoleBoolean(store, SVNTeamPreferences.CONSOLE_HYPERLINKS_ENABLED_NAME,
+				this.hyperlinksEnabled);
+
 		SVNTeamPreferences.setConsoleBoolean(store, SVNTeamPreferences.CONSOLE_WRAP_ENABLED_NAME, this.wrapEnabled);
 		SVNTeamPreferences.setConsoleInt(store, SVNTeamPreferences.CONSOLE_WRAP_WIDTH_NAME, this.wrapWidth);
-		
+
 		SVNTeamPreferences.setConsoleBoolean(store, SVNTeamPreferences.CONSOLE_LIMIT_ENABLED_NAME, this.limitEnabled);
 		SVNTeamPreferences.setConsoleInt(store, SVNTeamPreferences.CONSOLE_LIMIT_VALUE_NAME, this.limitValue);
 	}
-	
+
 	protected void loadDefaultValues(IPreferenceStore store) {
-		this.autoshow = SVNTeamPreferences.CONSOLE_AUTOSHOW_TYPE_DEFAULT;		
+		this.autoshow = SVNTeamPreferences.CONSOLE_AUTOSHOW_TYPE_DEFAULT;
 		this.hyperlinksEnabled = SVNTeamPreferences.CONSOLE_HYPERLINKS_ENABLED_DEFAULT;
 		this.wrapEnabled = SVNTeamPreferences.CONSOLE_WRAP_ENABLED_DEFAULT;
 		this.wrapWidth = SVNTeamPreferences.CONSOLE_WRAP_WIDTH_DEFAULT;
 		this.limitEnabled = SVNTeamPreferences.CONSOLE_LIMIT_ENABLED_DEFAULT;
 		this.limitValue = SVNTeamPreferences.CONSOLE_LIMIT_VALUE_DEFAULT;
-		
+
 		this.cmdEditor.getColorSelector().setColorValue(SVNTeamPreferences.CONSOLE_CMD_COLOR_DEFAULT);
 		this.okEditor.getColorSelector().setColorValue(SVNTeamPreferences.CONSOLE_OK_COLOR_DEFAULT);
 		this.wrnEditor.getColorSelector().setColorValue(SVNTeamPreferences.CONSOLE_WRN_COLOR_DEFAULT);
 		this.errEditor.getColorSelector().setColorValue(SVNTeamPreferences.CONSOLE_ERR_COLOR_DEFAULT);
 	}
-	
+
 	protected void loadValues(IPreferenceStore store) {
 		this.autoshow = SVNTeamPreferences.getConsoleInt(store, SVNTeamPreferences.CONSOLE_AUTOSHOW_TYPE_NAME);
-		this.hyperlinksEnabled = SVNTeamPreferences.getConsoleBoolean(store, SVNTeamPreferences.CONSOLE_HYPERLINKS_ENABLED_NAME);
+		this.hyperlinksEnabled = SVNTeamPreferences.getConsoleBoolean(store,
+				SVNTeamPreferences.CONSOLE_HYPERLINKS_ENABLED_NAME);
 		this.wrapEnabled = SVNTeamPreferences.getConsoleBoolean(store, SVNTeamPreferences.CONSOLE_WRAP_ENABLED_NAME);
 		this.wrapWidth = SVNTeamPreferences.getConsoleInt(store, SVNTeamPreferences.CONSOLE_WRAP_WIDTH_NAME);
 		this.limitEnabled = SVNTeamPreferences.getConsoleBoolean(store, SVNTeamPreferences.CONSOLE_LIMIT_ENABLED_NAME);
 		this.limitValue = SVNTeamPreferences.getConsoleInt(store, SVNTeamPreferences.CONSOLE_LIMIT_VALUE_NAME);
-		
+
 		this.cmdEditor.load();
 		this.okEditor.load();
 		this.wrnEditor.load();
 		this.errEditor.load();
 	}
-	
+
 	protected void initializeControls() {
 		this.showNeverButton.setSelection(false);
 		this.showAlwaysButton.setSelection(false);
 		this.showErrorButton.setSelection(false);
 		if (this.autoshow == SVNTeamPreferences.CONSOLE_AUTOSHOW_TYPE_NEVER) {
 			this.showNeverButton.setSelection(true);
-		}
-		else if (this.autoshow == SVNTeamPreferences.CONSOLE_AUTOSHOW_TYPE_ALWAYS) {
+		} else if (this.autoshow == SVNTeamPreferences.CONSOLE_AUTOSHOW_TYPE_ALWAYS) {
 			this.showAlwaysButton.setSelection(true);
-		}
-		else if (this.autoshow == SVNTeamPreferences.CONSOLE_AUTOSHOW_TYPE_ERROR) {
+		} else if (this.autoshow == SVNTeamPreferences.CONSOLE_AUTOSHOW_TYPE_ERROR) {
 			this.showErrorButton.setSelection(true);
-		}
-		else {
+		} else {
 			this.showWarningErrorButton.setSelection(true);
 		}
-		
+
 		this.hyperlinksEnabledButton.setSelection(this.hyperlinksEnabled);
-		
+
 		this.wrapEnabledButton.setSelection(this.wrapEnabled);
 		this.wrapWidthText.setEnabled(this.wrapEnabled);
 		this.wrapWidthText.setText(String.valueOf(this.wrapWidth));
-		
+
 		this.limitEnabledButton.setSelection(this.limitEnabled);
 		this.limitValueText.setEnabled(this.limitEnabled);
 		this.limitValueText.setText(String.valueOf(this.limitValue));
 	}
-	
+
 	protected Control createContentsImpl(Composite parent) {
 		Composite composite = new Composite(parent, SWT.FILL);
 		GridLayout layout = new GridLayout();
@@ -151,18 +166,19 @@ public class SVNTeamConsolePreferencesPage extends AbstractSVNTeamPreferencesPag
 		GridData data = new GridData(GridData.FILL_BOTH);
 		data.grabExcessVerticalSpace = false;
 		composite.setLayoutData(data);
-		
+
 		this.hyperlinksEnabledButton = new Button(composite, SWT.CHECK);
 		data = new GridData();
 		data.horizontalSpan = 2;
 		this.hyperlinksEnabledButton.setLayoutData(data);
 		this.hyperlinksEnabledButton.setText(SVNUIMessages.ConsolePreferencePage_hyperlinksIsEnabled);
 		this.hyperlinksEnabledButton.addListener(SWT.Selection, new Listener() {
-			public void handleEvent (Event event) {
-				SVNTeamConsolePreferencesPage.this.hyperlinksEnabled = SVNTeamConsolePreferencesPage.this.hyperlinksEnabledButton.getSelection();
+			public void handleEvent(Event event) {
+				SVNTeamConsolePreferencesPage.this.hyperlinksEnabled = SVNTeamConsolePreferencesPage.this.hyperlinksEnabledButton
+						.getSelection();
 			}
 		});
-		
+
 		Group showType = new Group(composite, SWT.FILL);
 		showType.setText(SVNUIMessages.ConsolePreferencePage_textShowOnGroup);
 		layout = new GridLayout();
@@ -173,7 +189,7 @@ public class SVNTeamConsolePreferencesPage extends AbstractSVNTeamPreferencesPag
 		data.horizontalSpan = 2;
 		data.grabExcessVerticalSpace = false;
 		showType.setLayoutData(data);
-		
+
 		this.showNeverButton = new Button(showType, SWT.RADIO);
 		data = new GridData();
 		this.showNeverButton.setLayoutData(data);
@@ -185,7 +201,7 @@ public class SVNTeamConsolePreferencesPage extends AbstractSVNTeamPreferencesPag
 				}
 			}
 		});
-		
+
 		this.showAlwaysButton = new Button(showType, SWT.RADIO);
 		data = new GridData();
 		this.showAlwaysButton.setLayoutData(data);
@@ -197,7 +213,7 @@ public class SVNTeamConsolePreferencesPage extends AbstractSVNTeamPreferencesPag
 				}
 			}
 		});
-		
+
 		this.showErrorButton = new Button(showType, SWT.RADIO);
 		data = new GridData();
 		this.showErrorButton.setLayoutData(data);
@@ -209,7 +225,7 @@ public class SVNTeamConsolePreferencesPage extends AbstractSVNTeamPreferencesPag
 				}
 			}
 		});
-		
+
 		this.showWarningErrorButton = new Button(showType, SWT.RADIO);
 		data = new GridData();
 		this.showWarningErrorButton.setLayoutData(data);
@@ -221,31 +237,33 @@ public class SVNTeamConsolePreferencesPage extends AbstractSVNTeamPreferencesPag
 				}
 			}
 		});
-		
+
 		Label separator = new Label(composite, SWT.HORIZONTAL | SWT.SEPARATOR);
 		data = new GridData(GridData.FILL_HORIZONTAL);
 		data.horizontalSpan = 2;
 		separator.setLayoutData(data);
 		separator.setVisible(false);
-		
+
 		this.wrapEnabledButton = new Button(composite, SWT.CHECK);
 		data = new GridData();
 		data.horizontalSpan = 2;
 		this.wrapEnabledButton.setLayoutData(data);
 		this.wrapEnabledButton.setText(SVNUIMessages.ConsolePreferencePage_textWrapEnabled);
 		this.wrapEnabledButton.addListener(SWT.Selection, new Listener() {
-			public void handleEvent (Event event) {
-				SVNTeamConsolePreferencesPage.this.wrapEnabled = SVNTeamConsolePreferencesPage.this.wrapEnabledButton.getSelection();
-				SVNTeamConsolePreferencesPage.this.wrapWidthText.setEnabled(SVNTeamConsolePreferencesPage.this.wrapEnabled);
+			public void handleEvent(Event event) {
+				SVNTeamConsolePreferencesPage.this.wrapEnabled = SVNTeamConsolePreferencesPage.this.wrapEnabledButton
+						.getSelection();
+				SVNTeamConsolePreferencesPage.this.wrapWidthText
+						.setEnabled(SVNTeamConsolePreferencesPage.this.wrapEnabled);
 			}
 		});
-		
+
 		Label label = new Label(composite, SWT.NULL);
 		data = new GridData();
 		label.setLayoutData(data);
 		String labelText = SVNUIMessages.ConsolePreferencePage_textWrapWidth;
 		label.setText(labelText);
-		
+
 		this.wrapWidthText = new Text(composite, SWT.SINGLE | SWT.BORDER);
 		data = new GridData(GridData.FILL_HORIZONTAL);
 		data.grabExcessHorizontalSpace = true;
@@ -257,13 +275,13 @@ public class SVNTeamConsolePreferencesPage extends AbstractSVNTeamPreferencesPag
 		this.wrapWidthText.addModifyListener(new ModifyListener() {
 			public void modifyText(ModifyEvent e) {
 				try {
-					SVNTeamConsolePreferencesPage.this.wrapWidth = Integer.parseInt(SVNTeamConsolePreferencesPage.this.wrapWidthText.getText());
-				}
-				catch (Exception ex) {
+					SVNTeamConsolePreferencesPage.this.wrapWidth = Integer
+							.parseInt(SVNTeamConsolePreferencesPage.this.wrapWidthText.getText());
+				} catch (Exception ex) {
 				}
 			}
 		});
-		
+
 		this.limitEnabledButton = new Button(composite, SWT.CHECK);
 		data = new GridData();
 		data.horizontalSpan = 2;
@@ -271,17 +289,19 @@ public class SVNTeamConsolePreferencesPage extends AbstractSVNTeamPreferencesPag
 		this.limitEnabledButton.setText(SVNUIMessages.ConsolePreferencePage_textLimitEnabled);
 		this.limitEnabledButton.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				SVNTeamConsolePreferencesPage.this.limitEnabled = SVNTeamConsolePreferencesPage.this.limitEnabledButton.getSelection();
-				SVNTeamConsolePreferencesPage.this.limitValueText.setEnabled(SVNTeamConsolePreferencesPage.this.limitEnabled);
+				SVNTeamConsolePreferencesPage.this.limitEnabled = SVNTeamConsolePreferencesPage.this.limitEnabledButton
+						.getSelection();
+				SVNTeamConsolePreferencesPage.this.limitValueText
+						.setEnabled(SVNTeamConsolePreferencesPage.this.limitEnabled);
 			}
 		});
-		
+
 		label = new Label(composite, SWT.NULL);
 		data = new GridData();
 		label.setLayoutData(data);
 		labelText = SVNUIMessages.ConsolePreferencePage_textLimitValue;
 		label.setText(labelText);
-		
+
 		this.limitValueText = new Text(composite, SWT.SINGLE | SWT.BORDER);
 		data = new GridData(GridData.FILL_HORIZONTAL);
 		data.grabExcessHorizontalSpace = true;
@@ -293,45 +313,55 @@ public class SVNTeamConsolePreferencesPage extends AbstractSVNTeamPreferencesPag
 		this.limitValueText.addModifyListener(new ModifyListener() {
 			public void modifyText(ModifyEvent e) {
 				try {
-					SVNTeamConsolePreferencesPage.this.limitValue = Integer.parseInt(SVNTeamConsolePreferencesPage.this.limitValueText.getText());
-				}
-				catch (Exception ex) {
+					SVNTeamConsolePreferencesPage.this.limitValue = Integer
+							.parseInt(SVNTeamConsolePreferencesPage.this.limitValueText.getText());
+				} catch (Exception ex) {
 				}
 			}
 		});
-		
+
 		separator = new Label(composite, SWT.HORIZONTAL | SWT.SEPARATOR);
 		data = new GridData(GridData.FILL_HORIZONTAL);
 		data.horizontalSpan = 2;
 		separator.setLayoutData(data);
 		separator.setVisible(false);
-		
+
 		label = new Label(composite, SWT.NULL);
 		data = new GridData();
 		data.horizontalSpan = 2;
 		label.setLayoutData(data);
 		label.setText(SVNUIMessages.ConsolePreferencePage_textColorsGroup);
-		
-		this.cmdEditor = new ColorFieldEditor(SVNTeamPreferences.fullConsoleName(SVNTeamPreferences.CONSOLE_CMD_COLOR_NAME), SVNUIMessages.ConsolePreferencePage_textCmdMessage, composite);
+
+		this.cmdEditor = new ColorFieldEditor(
+				SVNTeamPreferences.fullConsoleName(SVNTeamPreferences.CONSOLE_CMD_COLOR_NAME),
+				SVNUIMessages.ConsolePreferencePage_textCmdMessage, composite);
 		this.cmdEditor.setPage(this);
 		this.cmdEditor.setPreferenceStore(this.getPreferenceStore());
-		
-		this.okEditor = new ColorFieldEditor(SVNTeamPreferences.fullConsoleName(SVNTeamPreferences.CONSOLE_OK_COLOR_NAME), SVNUIMessages.ConsolePreferencePage_textOkMessage, composite);
+
+		this.okEditor = new ColorFieldEditor(
+				SVNTeamPreferences.fullConsoleName(SVNTeamPreferences.CONSOLE_OK_COLOR_NAME),
+				SVNUIMessages.ConsolePreferencePage_textOkMessage, composite);
 		this.okEditor.setPage(this);
 		this.okEditor.setPreferenceStore(this.getPreferenceStore());
 
-		this.wrnEditor = new ColorFieldEditor(SVNTeamPreferences.fullConsoleName(SVNTeamPreferences.CONSOLE_WRN_COLOR_NAME), SVNUIMessages.ConsolePreferencePage_textWrnMessage, composite);
+		this.wrnEditor = new ColorFieldEditor(
+				SVNTeamPreferences.fullConsoleName(SVNTeamPreferences.CONSOLE_WRN_COLOR_NAME),
+				SVNUIMessages.ConsolePreferencePage_textWrnMessage, composite);
 		this.wrnEditor.setPage(this);
 		this.wrnEditor.setPreferenceStore(this.getPreferenceStore());
 
-		this.errEditor = new ColorFieldEditor(SVNTeamPreferences.fullConsoleName(SVNTeamPreferences.CONSOLE_ERR_COLOR_NAME), SVNUIMessages.ConsolePreferencePage_textErrMessage, composite);
+		this.errEditor = new ColorFieldEditor(
+				SVNTeamPreferences.fullConsoleName(SVNTeamPreferences.CONSOLE_ERR_COLOR_NAME),
+				SVNUIMessages.ConsolePreferencePage_textErrMessage, composite);
 		this.errEditor.setPage(this);
 		this.errEditor.setPreferenceStore(this.getPreferenceStore());
-		
+
 //		Setting context help
-		PlatformUI.getWorkbench().getHelpSystem().setHelp(parent, "org.eclipse.team.svn.help.consolePreferencesContext"); //$NON-NLS-1$
-		
+		PlatformUI.getWorkbench()
+				.getHelpSystem()
+				.setHelp(parent, "org.eclipse.team.svn.help.consolePreferencesContext"); //$NON-NLS-1$
+
 		return composite;
 	}
-	
+
 }

@@ -29,7 +29,7 @@ import org.eclipse.team.svn.ui.lock.LocksView;
 public class ScanLocksAction extends AbstractNonRecursiveTeamAction {
 
 	public void runImpl(IAction action) {
-		IResource []resources = this.getSelectedResources(IStateFilter.SF_ONREPOSITORY);
+		IResource[] resources = this.getSelectedResources(IStateFilter.SF_ONREPOSITORY);
 		try {
 			LocksView view = (LocksView) this.getTargetPage().showView(LocksView.VIEW_ID);
 			view.setResourceWithoutActionExecution(resources[0]);
@@ -38,7 +38,7 @@ public class ScanLocksAction extends AbstractNonRecursiveTeamAction {
 			LoggedOperation.reportError(ScanLocksAction.class.getName(), e);
 		}
 	}
-	
+
 	public boolean isEnabled() {
 		return this.getSelectedResources().length == 1 && this.checkForResourcesPresence(IStateFilter.SF_ONREPOSITORY);
 	}

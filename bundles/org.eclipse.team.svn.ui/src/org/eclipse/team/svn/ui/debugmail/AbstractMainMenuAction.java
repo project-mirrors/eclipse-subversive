@@ -21,7 +21,7 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkbenchWindowActionDelegate;
 
 /**
- * Abstract action implementation that can be inserted into Eclipse IDE main menu. 
+ * Abstract action implementation that can be inserted into Eclipse IDE main menu.
  * 
  * @author Alexander Gurov
  */
@@ -41,9 +41,9 @@ public abstract class AbstractMainMenuAction implements IWorkbenchWindowActionDe
 	protected IWorkbenchWindow getWorkbenchWindow() {
 		return this.window;
 	}
-	
+
 	protected Shell getShell() {
 		return this.window.getShell();
 	}
-	
+
 }

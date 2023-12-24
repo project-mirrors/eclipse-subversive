@@ -39,11 +39,11 @@ public class ClearUpdateStatusesOperation extends AbstractWorkingCopyOperation {
 	public ISchedulingRule getSchedulingRule() {
 		return null;
 	}
-	
+
 	public int getOperationWeight() {
 		return 0;
 	}
-	
+
 	protected void runImpl(IProgressMonitor monitor) throws Exception {
 		UpdateSubscriber.instance().clearRemoteStatuses(this.operableData());
 	}

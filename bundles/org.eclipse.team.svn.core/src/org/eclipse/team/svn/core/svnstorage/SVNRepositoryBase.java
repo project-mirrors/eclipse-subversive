@@ -34,33 +34,33 @@ public abstract class SVNRepositoryBase extends PlatformObject implements IRepos
 	protected SVNRepositoryBase() {
 		super();
 	}
-	
+
 	public SVNRepositoryBase(String url) {
 		super();
 		this.url = url;
 	}
-	
+
 	public String getName() {
 		return SVNUtility.createPathForSVNUrl(this.getUrl()).lastSegment();
 	}
-	
+
 	public String getUrl() {
 		return this.url;
 	}
-	
+
 	public String toString() {
 		return this.getUrl();
 	}
-	
+
 	public boolean equals(Object obj) {
 		if (obj != null && obj instanceof IRepositoryBase) {
-			return this.getUrl().equals(((IRepositoryBase)obj).getUrl());
+			return this.getUrl().equals(((IRepositoryBase) obj).getUrl());
 		}
 		return false;
 	}
-	
+
 	public int hashCode() {
 		return this.getUrl().hashCode();
 	}
-	
+
 }

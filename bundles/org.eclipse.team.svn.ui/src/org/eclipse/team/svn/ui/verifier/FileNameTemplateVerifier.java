@@ -30,14 +30,14 @@ public class FileNameTemplateVerifier extends AbstractFormattedVerifier {
 
 	public FileNameTemplateVerifier(String fieldName) {
 		super(fieldName);
-		FileNameTemplateVerifier.ERROR_MESSAGE = SVNUIMessages.format(SVNUIMessages.Verifier_FileNameTemplate, new String[] {AbstractFormattedVerifier.FIELD_NAME});
+		FileNameTemplateVerifier.ERROR_MESSAGE = SVNUIMessages.format(SVNUIMessages.Verifier_FileNameTemplate,
+				new String[] { AbstractFormattedVerifier.FIELD_NAME });
 	}
 
 	protected String getErrorMessageImpl(Control input) {
 		try {
 			new StringMatcher(this.getText(input));
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			return FileNameTemplateVerifier.ERROR_MESSAGE;
 		}
 		return null;

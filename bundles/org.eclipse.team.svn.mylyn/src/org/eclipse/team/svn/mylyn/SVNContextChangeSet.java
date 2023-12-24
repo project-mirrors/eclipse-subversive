@@ -45,11 +45,10 @@ import org.eclipse.team.svn.core.mapping.SVNActiveChangeSet;
 import org.eclipse.ui.PlatformUI;
 import org.osgi.service.prefs.Preferences;
 
-
 public class SVNContextChangeSet extends SVNActiveChangeSet implements IAdaptable, IContextChangeSet {
 
 	// HACK: copied from super
-	protected static final String CTX_TITLE = "title";	 //$NON-NLS-1$
+	protected static final String CTX_TITLE = "title"; //$NON-NLS-1$
 
 	protected boolean suppressInterestContribution = false;
 
@@ -60,11 +59,11 @@ public class SVNContextChangeSet extends SVNActiveChangeSet implements IAdaptabl
 		this.task = task;
 		updateLabel();
 	}
-	
+
 	public boolean isManagedExternally() {
 		return true;
 	}
-	
+
 	public boolean isUserCreated() {
 		return true;
 	}
@@ -96,7 +95,7 @@ public class SVNContextChangeSet extends SVNActiveChangeSet implements IAdaptabl
 			return null;
 		}
 	}
-	
+
 	public String getComment() {
 		return getComment(true);
 	}
@@ -132,16 +131,17 @@ public class SVNContextChangeSet extends SVNActiveChangeSet implements IAdaptabl
 
 			if (unmatchedRepositoryFound) {
 				proceed = MessageDialog.openQuestion(
-						PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(),
-						"Mylyn Change Set Management", //$NON-NLS-1$
+						PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), "Mylyn Change Set Management", //$NON-NLS-1$
 						"You are attempting to commit a resource which is not associated with the selected task repository.  Proceed with creating the commit message?"); //$NON-NLS-1$
 			}
 		}
 
 		if (proceed) {
 			if (template == null) {
-				template = FocusedTeamUiPlugin.getDefault().getPreferenceStore().getString(
-						FocusedTeamUiPlugin.COMMIT_TEMPLATE);
+				template = FocusedTeamUiPlugin.getDefault()
+						.getPreferenceStore()
+						.getString(
+								FocusedTeamUiPlugin.COMMIT_TEMPLATE);
 			}
 			return FocusedTeamUiPlugin.getDefault().getCommitTemplateManager().generateComment(this.task, template);
 		} else {
@@ -196,7 +196,7 @@ public class SVNContextChangeSet extends SVNActiveChangeSet implements IAdaptabl
 			return super.equals(object);
 		}
 	}
-	
+
 	public int hashCode() {
 		if (this.task != null) {
 			return this.task.hashCode();

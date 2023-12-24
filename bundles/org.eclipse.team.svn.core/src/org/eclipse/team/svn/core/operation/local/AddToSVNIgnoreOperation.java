@@ -41,30 +41,31 @@ import org.eclipse.team.svn.core.utility.FileUtility;
  */
 public class AddToSVNIgnoreOperation extends AbstractWorkingCopyOperation {
 	protected int ignoreType;
+
 	protected String pattern;
 
-	public AddToSVNIgnoreOperation(IResource []resources, int ignoreType, String pattern) {
+	public AddToSVNIgnoreOperation(IResource[] resources, int ignoreType, String pattern) {
 		super("Operation_AddToSVNIgnore", SVNMessages.class, resources); //$NON-NLS-1$
-		
+
 		this.ignoreType = ignoreType;
 		this.pattern = pattern;
 	}
 
 	public AddToSVNIgnoreOperation(IResourceProvider provider, int ignoreType, String pattern) {
 		super("Operation_AddToSVNIgnore", SVNMessages.class, provider); //$NON-NLS-1$
-		
+
 		this.ignoreType = ignoreType;
 		this.pattern = pattern;
 	}
 
 	protected void runImpl(IProgressMonitor monitor) throws Exception {
-		IResource []resources = this.operableData();
-		
+		IResource[] resources = this.operableData();
+
 		final IRemoteStorage storage = SVNRemoteStorage.instance();
-		
+
 		for (int i = 0; i < resources.length && !monitor.isCanceled(); i++) {
 			final IResource current = resources[i];
-			
+
 			this.protectStep(new IUnprotectedOperation() {
 				public void run(IProgressMonitor monitor) throws Exception {
 					AddToSVNIgnoreOperation.this.handleResource(storage, current);
@@ -78,15 +79,17 @@ public class AddToSVNIgnoreOperation extends AbstractWorkingCopyOperation {
 		IRepositoryLocation location = storage.getRepositoryLocation(parent);
 		ISVNConnector proxy = location.acquireSVNProxy();
 		try {
-			AddToSVNIgnoreOperation.changeIgnoreProperty(proxy, this.ignoreType, this.pattern, FileUtility.getWorkingCopyPath(parent), current.getName());
-		}
-		finally {
+			AddToSVNIgnoreOperation.changeIgnoreProperty(proxy, this.ignoreType, this.pattern,
+					FileUtility.getWorkingCopyPath(parent), current.getName());
+		} finally {
 			location.releaseSVNProxy(proxy);
 		}
 	}
-	
-	public static void changeIgnoreProperty(ISVNConnector proxy, int ignoreType, String pattern, String path, String name) throws Exception {
-		SVNProperty data = proxy.getProperty(new SVNEntryRevisionReference(path), BuiltIn.IGNORE, null, new SVNNullProgressMonitor());
+
+	public static void changeIgnoreProperty(ISVNConnector proxy, int ignoreType, String pattern, String path,
+			String name) throws Exception {
+		SVNProperty data = proxy.getProperty(new SVNEntryRevisionReference(path), BuiltIn.IGNORE, null,
+				new SVNNullProgressMonitor());
 		String ignoreValue = data == null ? "" : data.value; //$NON-NLS-1$
 		String mask = null;
 		switch (ignoreType) {
@@ -95,10 +98,10 @@ public class AddToSVNIgnoreOperation extends AbstractWorkingCopyOperation {
 				break;
 			}
 			case ISVNStorage.IGNORE_EXTENSION: {
-			    String extension = new Path(path + "/" +name).getFileExtension(); //$NON-NLS-1$
-			    if (extension != null) {
+				String extension = new Path(path + "/" + name).getFileExtension(); //$NON-NLS-1$
+				if (extension != null) {
 					mask = "*." + extension; //$NON-NLS-1$
-			    }
+				}
 				break;
 			}
 			case ISVNStorage.IGNORE_PATTERN: {
@@ -107,13 +110,14 @@ public class AddToSVNIgnoreOperation extends AbstractWorkingCopyOperation {
 			}
 		}
 		ignoreValue = AddToSVNIgnoreOperation.addMask(ignoreValue, mask);
-		proxy.setPropertyLocal(new String[] {path}, new SVNProperty(BuiltIn.IGNORE, ignoreValue), SVNDepth.EMPTY, ISVNConnector.Options.NONE, null, new SVNNullProgressMonitor());
+		proxy.setPropertyLocal(new String[] { path }, new SVNProperty(BuiltIn.IGNORE, ignoreValue), SVNDepth.EMPTY,
+				ISVNConnector.Options.NONE, null, new SVNNullProgressMonitor());
 	}
-	
+
 	protected static String addMask(String ignore, String mask) {
-	    if (mask == null || mask.length() == 0) {
-	        return ignore;
-	    }
+		if (mask == null || mask.length() == 0) {
+			return ignore;
+		}
 		StringTokenizer tok = new StringTokenizer(ignore, "\n", false); //$NON-NLS-1$
 		boolean found = false;
 		while (tok.hasMoreTokens()) {
@@ -122,8 +126,8 @@ public class AddToSVNIgnoreOperation extends AbstractWorkingCopyOperation {
 				break;
 			}
 		}
-		
+
 		return found ? ignore : (ignore + (ignore.length() > 0 ? "\n" : "") + mask); //$NON-NLS-1$ //$NON-NLS-2$
 	}
-	
+
 }

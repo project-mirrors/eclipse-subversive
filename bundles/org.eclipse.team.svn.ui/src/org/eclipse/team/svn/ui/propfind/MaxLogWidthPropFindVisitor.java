@@ -23,11 +23,11 @@ import org.eclipse.team.svn.core.connector.SVNProperty;
  */
 public class MaxLogWidthPropFindVisitor implements IPropFindVisitor {
 	protected int width;
-	
+
 	public MaxLogWidthPropFindVisitor() {
 		this.width = 0;
 	}
-	
+
 	public boolean visit(SVNProperty propertyParam) {
 		if (propertyParam.name.equals("tsvn:logwidthmarker")) { //$NON-NLS-1$
 			try {
@@ -35,14 +35,13 @@ public class MaxLogWidthPropFindVisitor implements IPropFindVisitor {
 				if (this.width > currWidth || this.width == 0) {
 					this.width = currWidth;
 				}
-			}
-			catch (NumberFormatException ex) {
+			} catch (NumberFormatException ex) {
 				//we ignore the exception
 			}
 		}
 		return true;
 	}
-	
+
 	public int getMaxLogWidth() {
 		return this.width;
 	}

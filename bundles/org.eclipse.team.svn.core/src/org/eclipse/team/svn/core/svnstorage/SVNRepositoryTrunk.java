@@ -33,5 +33,5 @@ public class SVNRepositoryTrunk extends SVNRepositoryRootBase {
 	public int getKind() {
 		return IRepositoryRoot.KIND_TRUNK;
 	}
-	
+
 }

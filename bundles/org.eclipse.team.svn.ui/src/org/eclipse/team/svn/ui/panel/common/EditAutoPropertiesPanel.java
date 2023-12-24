@@ -42,24 +42,30 @@ import org.eclipse.team.svn.ui.verifier.NonEmptyFieldVerifier;
 public class EditAutoPropertiesPanel extends AbstractDialogPanel {
 
 	protected SVNTeamPropsPreferencePage.AutoProperty property;
+
 	protected Text txtFileName;
+
 	protected Text txtProperties;
+
 	protected String fileName;
+
 	protected String properties;
-	
+
 	public EditAutoPropertiesPanel(SVNTeamPropsPreferencePage.AutoProperty property) {
 		super();
 		this.property = property;
-		this.dialogTitle = property == null ? SVNUIMessages.EditAutoPropertiesPanel_Title_Add : SVNUIMessages.EditAutoPropertiesPanel_Title_Edit;
+		this.dialogTitle = property == null
+				? SVNUIMessages.EditAutoPropertiesPanel_Title_Add
+				: SVNUIMessages.EditAutoPropertiesPanel_Title_Edit;
 		this.dialogDescription = SVNUIMessages.EditAutoPropertiesPanel_Description;
 		this.defaultMessage = SVNUIMessages.EditAutoPropertiesPanel_Message;
 	}
-	
+
 	public void createControlsImpl(Composite parent) {
 		GridLayout layout;
 		GridData layoutData;
 		Label label;
-		
+
 		Composite composite = new Composite(parent, SWT.NONE);
 		layout = new GridLayout();
 		layout.numColumns = 2;
@@ -69,10 +75,10 @@ public class EditAutoPropertiesPanel extends AbstractDialogPanel {
 		composite.setLayout(layout);
 		layoutData = new GridData(GridData.FILL_HORIZONTAL);
 		composite.setLayoutData(layoutData);
-		
+
 		label = new Label(composite, SWT.NONE);
 		label.setText(SVNUIMessages.EditAutoPropertiesPanel_FileName);
-		
+
 		this.txtFileName = new Text(composite, SWT.BORDER);
 		this.txtFileName.setText((this.property == null) ? "" : this.property.fileName); //$NON-NLS-1$
 		layoutData = new GridData(GridData.FILL_HORIZONTAL);
@@ -86,29 +92,30 @@ public class EditAutoPropertiesPanel extends AbstractDialogPanel {
 			}
 		});
 		this.attachTo(this.txtFileName, verifier);
-		
+
 		Group group = new Group(parent, SWT.NONE);
 		group.setText(SVNUIMessages.EditAutoPropertiesPanel_Properties);
 		layoutData = new GridData(GridData.FILL_BOTH);
 		group.setLayoutData(layoutData);
 		layout = new GridLayout();
 		group.setLayout(layout);
-		
+
 		label = new Label(group, SWT.NONE);
 		label.setText(SVNUIMessages.EditAutoPropertiesPanel_Properties_Hint);
-		
+
 		this.txtProperties = new Text(group, SWT.BORDER | SWT.MULTI | SWT.V_SCROLL | SWT.H_SCROLL);
 		this.txtProperties.setText(this.property == null ? "" : this.property.properties.trim()); //$NON-NLS-1$
 		layoutData = new GridData(GridData.FILL_BOTH);
 		layoutData.heightHint = DefaultDialog.convertHeightInCharsToPixels(this.txtProperties, 7);
 		this.txtProperties.setLayoutData(layoutData);
-		this.attachTo(this.txtProperties, new AbstractVerifierProxy(new MultiLinePropertyVerifier(SVNUIMessages.EditAutoPropertiesPanel_Properties_Verifier)) {
+		this.attachTo(this.txtProperties, new AbstractVerifierProxy(
+				new MultiLinePropertyVerifier(SVNUIMessages.EditAutoPropertiesPanel_Properties_Verifier)) {
 			protected boolean isVerificationEnabled(Control input) {
 				return EditAutoPropertiesPanel.this.txtProperties.getText().trim().length() > 0;
 			}
 		});
 	}
-	
+
 	protected void cancelChangesImpl() {
 	}
 
@@ -116,11 +123,11 @@ public class EditAutoPropertiesPanel extends AbstractDialogPanel {
 		this.fileName = this.txtFileName.getText().trim();
 		this.properties = this.txtProperties.getText().trim();
 	}
-	
+
 	public String getFileName() {
 		return this.fileName;
 	}
-	
+
 	public String getProperties() {
 		return this.properties;
 	}

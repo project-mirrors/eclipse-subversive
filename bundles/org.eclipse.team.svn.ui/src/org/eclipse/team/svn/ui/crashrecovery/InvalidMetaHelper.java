@@ -40,7 +40,7 @@ public class InvalidMetaHelper implements IResolutionHelper {
 
 	public boolean acquireResolution(ErrorDescription description) {
 		if (description.code == ErrorDescription.CANNOT_READ_PROJECT_METAINFORMATION) {
-			final IProject project = (IProject)description.context;
+			final IProject project = (IProject) description.context;
 			IPath location = project.getLocation();
 			if (location == null || !location.append(SVNUtility.getSVNFolderName()).toFile().exists()) {
 				return false;
@@ -61,10 +61,11 @@ public class InvalidMetaHelper implements IResolutionHelper {
 				return false;
 			}
 
-			final boolean []solved = new boolean[] {false};
+			final boolean[] solved = new boolean[] { false };
 			UIMonitorUtility.parallelSyncExec(new Runnable() {
 				public void run() {
-					DefaultDialog dialog = new DefaultDialog(UIMonitorUtility.getShell(), new ValidConnectorsSelectionPanel(project, valid));
+					DefaultDialog dialog = new DefaultDialog(UIMonitorUtility.getShell(),
+							new ValidConnectorsSelectionPanel(project, valid));
 					solved[0] = dialog.open() == 0;
 				}
 			});
@@ -78,17 +79,16 @@ public class InvalidMetaHelper implements IResolutionHelper {
 		try {
 			ISVNConnector proxy = factory.createConnector();
 			try {
-				SVNChangeStatus []st = SVNUtility.status(proxy, path, SVNDepth.IMMEDIATES, ISVNConnector.Options.INCLUDE_UNCHANGED, new SVNNullProgressMonitor());
+				SVNChangeStatus[] st = SVNUtility.status(proxy, path, SVNDepth.IMMEDIATES,
+						ISVNConnector.Options.INCLUDE_UNCHANGED, new SVNNullProgressMonitor());
 				return st != null && st.length > 0;
-			}
-			finally {
+			} finally {
 				proxy.dispose();
 			}
-		}
-		catch (Throwable ex) {
+		} catch (Throwable ex) {
 			// any exception including instantiation problems...
 			return false;
 		}
 	}
-	
+
 }

@@ -24,63 +24,69 @@ import org.eclipse.team.svn.core.resource.ILocalFolder;
 import org.eclipse.team.svn.core.resource.ILocalResource;
 import org.eclipse.team.svn.core.utility.FileUtility;
 
-
 /**
  * Local resource change store
  * 
  * @author Alexander Gurov
  */
 public abstract class ResourceChange {
-    protected ILocalResource local;
-    protected File tmp;
-    protected SVNProperty []properties;
-    
-    public ResourceChange(ResourceChange parent, ILocalResource local, boolean needsTemporary) {
-        this.local = local;
-        if (needsTemporary) {
-        	this.tmp = SVNTeamPlugin.instance().getTemporaryFile(parent == null ? null : parent.getTemporary(), local.getName());
-        }
-		this.properties = null;
-    }
+	protected ILocalResource local;
 
-    public ILocalResource getLocal() {
-        return this.local;
-    }
-    
-	public SVNProperty []getProperties() {
+	protected File tmp;
+
+	protected SVNProperty[] properties;
+
+	public ResourceChange(ResourceChange parent, ILocalResource local, boolean needsTemporary) {
+		this.local = local;
+		if (needsTemporary) {
+			this.tmp = SVNTeamPlugin.instance()
+					.getTemporaryFile(parent == null ? null : parent.getTemporary(), local.getName());
+		}
+		this.properties = null;
+	}
+
+	public ILocalResource getLocal() {
+		return this.local;
+	}
+
+	public SVNProperty[] getProperties() {
 		return this.properties;
 	}
-	
-	public void setProperties(SVNProperty []properties) {
+
+	public void setProperties(SVNProperty[] properties) {
 		this.properties = properties;
 	}
-	
-    public File getTemporary() {
-        return this.tmp;
-    }
-    
-    public void disposeChangeModel(IProgressMonitor monitor) throws Exception {
-    	if (this.tmp != null) {
-        	FileUtility.deleteRecursive(this.tmp, monitor);
-    	}
-    }
-    
-    public void traverse(IResourceChangeVisitor visitor, int depth, IActionOperationProcessor processor, IProgressMonitor monitor) throws Exception {
-    	this.preTraverse(visitor, depth, processor, monitor);
-    	this.postTraverse(visitor, depth, processor, monitor);
-    }
-    
-    protected abstract void preTraverse(IResourceChangeVisitor visitor, int depth, IActionOperationProcessor processor, IProgressMonitor monitor) throws Exception;
-    protected abstract void postTraverse(IResourceChangeVisitor visitor, int depth, IActionOperationProcessor processor, IProgressMonitor monitor) throws Exception;
-    
-    public static ResourceChange wrapLocalResource(ResourceChange parent, ILocalResource local, boolean needsTemporary) {
-    	if (local == null) {
-    		return null;
-    	}
-        return 
-        	local instanceof ILocalFile ?
-            new FileChange(parent, (ILocalFile)local, needsTemporary) :
-            (ResourceChange)new FolderChange(parent, (ILocalFolder)local, needsTemporary);
-    }
-   
+
+	public File getTemporary() {
+		return this.tmp;
+	}
+
+	public void disposeChangeModel(IProgressMonitor monitor) throws Exception {
+		if (this.tmp != null) {
+			FileUtility.deleteRecursive(this.tmp, monitor);
+		}
+	}
+
+	public void traverse(IResourceChangeVisitor visitor, int depth, IActionOperationProcessor processor,
+			IProgressMonitor monitor) throws Exception {
+		this.preTraverse(visitor, depth, processor, monitor);
+		this.postTraverse(visitor, depth, processor, monitor);
+	}
+
+	protected abstract void preTraverse(IResourceChangeVisitor visitor, int depth, IActionOperationProcessor processor,
+			IProgressMonitor monitor) throws Exception;
+
+	protected abstract void postTraverse(IResourceChangeVisitor visitor, int depth, IActionOperationProcessor processor,
+			IProgressMonitor monitor) throws Exception;
+
+	public static ResourceChange wrapLocalResource(ResourceChange parent, ILocalResource local,
+			boolean needsTemporary) {
+		if (local == null) {
+			return null;
+		}
+		return local instanceof ILocalFile
+				? new FileChange(parent, (ILocalFile) local, needsTemporary)
+				: (ResourceChange) new FolderChange(parent, (ILocalFolder) local, needsTemporary);
+	}
+
 }

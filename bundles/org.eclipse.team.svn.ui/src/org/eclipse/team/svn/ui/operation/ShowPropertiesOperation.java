@@ -34,22 +34,27 @@ import org.eclipse.ui.PartInitException;
  */
 public class ShowPropertiesOperation extends AbstractActionOperation {
 	protected IAdaptable resource;
+
 	protected IRepositoryResourceProvider provider;
+
 	protected IWorkbenchPage page;
+
 	protected IResourcePropertyProvider propertyProvider;
 
-	public ShowPropertiesOperation(IWorkbenchPage page, IRepositoryResourceProvider provider, IResourcePropertyProvider propertyProvider) {
-		this(page, (IRepositoryResource)null, propertyProvider);
+	public ShowPropertiesOperation(IWorkbenchPage page, IRepositoryResourceProvider provider,
+			IResourcePropertyProvider propertyProvider) {
+		this(page, (IRepositoryResource) null, propertyProvider);
 		this.provider = provider;
 	}
-	
-	public ShowPropertiesOperation(IWorkbenchPage page, IAdaptable resource, IResourcePropertyProvider propertyProvider) {
+
+	public ShowPropertiesOperation(IWorkbenchPage page, IAdaptable resource,
+			IResourcePropertyProvider propertyProvider) {
 		super("Operation_ShowProperties", SVNUIMessages.class); //$NON-NLS-1$
 		this.resource = resource;
 		this.page = page;
 		this.propertyProvider = propertyProvider;
 	}
-	
+
 	public int getOperationWeight() {
 		return 0;
 	}
@@ -58,18 +63,20 @@ public class ShowPropertiesOperation extends AbstractActionOperation {
 		if (this.provider != null) {
 			this.resource = this.provider.getRepositoryResources()[0];
 		}
-				
+
 		UIMonitorUtility.getDisplay().syncExec(new Runnable() {
 			public void run() {
 				ShowPropertiesOperation.this.protectStep(new IUnprotectedOperation() {
 					public void run(IProgressMonitor monitor) throws PartInitException {
-						PropertiesView view = (PropertiesView)ShowPropertiesOperation.this.page.showView(PropertiesView.VIEW_ID);
-						view.setResource(ShowPropertiesOperation.this.resource, ShowPropertiesOperation.this.propertyProvider, false);
+						PropertiesView view = (PropertiesView) ShowPropertiesOperation.this.page
+								.showView(PropertiesView.VIEW_ID);
+						view.setResource(ShowPropertiesOperation.this.resource,
+								ShowPropertiesOperation.this.propertyProvider, false);
 					}
 				}, monitor, 1);
-				
+
 			}
 		});
 	}
-	
+
 }

@@ -40,7 +40,9 @@ public class SVNSynchronizationResourceMappingContext extends RemoteResourceMapp
 
 	/**
 	 * Create a resource mapping context for the given synchronization context
-	 * @param context the synchronization context
+	 * 
+	 * @param context
+	 *            the synchronization context
 	 */
 	public SVNSynchronizationResourceMappingContext(ISynchronizationContext context) {
 		this.context = context;
@@ -134,7 +136,7 @@ public class SVNSynchronizationResourceMappingContext extends RemoteResourceMapp
 			if (delta == null) {
 				// the path has descendent deltas so it must be a folder
 				if (path.segmentCount() == 1) {
-					child = ((IWorkspaceRoot)container).getProject(path.lastSegment());
+					child = ((IWorkspaceRoot) container).getProject(path.lastSegment());
 				} else {
 					child = container.getFolder(new Path(path.lastSegment()));
 				}

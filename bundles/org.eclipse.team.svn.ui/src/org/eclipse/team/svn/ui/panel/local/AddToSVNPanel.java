@@ -61,90 +61,114 @@ import org.eclipse.ui.IWorkbenchActionConstants;
 public class AddToSVNPanel extends AbstractResourceSelectionPanel {
 
 	protected boolean actionTookEffect;
+
 	protected IResourceStatesListener resourceStatesListener;
-	
-    public AddToSVNPanel(IResource []resources) {
-    	this(resources, null);
-    }
-    
-    public AddToSVNPanel(IResource []resources, IResource []userSelectedResources) {
-        super(resources, userSelectedResources, new String[] {IDialogConstants.OK_LABEL, IDialogConstants.CANCEL_LABEL});
-        this.actionTookEffect = false;
-        this.dialogTitle = SVNUIMessages.AddToSVNPanel_Title;
-        
-        boolean isParticipantPane = this.paneParticipantHelper.isParticipantPane();
-                
-        this.dialogDescription = isParticipantPane ? SVNUIMessages.AddToSVNPanel_Pane_Description : SVNUIMessages.AddToSVNPanel_Description;        
-        if (resources.length == 1) {
-        	this.defaultMessage = isParticipantPane ? SVNUIMessages.AddToSVNPanel_Pane_Message_Single : SVNUIMessages.AddToSVNPanel_Message_Single;
-        }
-        else {
-        	String defaultMessage = isParticipantPane ? SVNUIMessages.AddToSVNPanel_Pane_Message_Multi : SVNUIMessages.AddToSVNPanel_Message_Multi;
-        	this.defaultMessage = SVNUIMessages.format(defaultMessage, new String[] {String.valueOf(resources.length)});
-        }
-    }
-    
-    protected void addContextMenu() {
+
+	public AddToSVNPanel(IResource[] resources) {
+		this(resources, null);
+	}
+
+	public AddToSVNPanel(IResource[] resources, IResource[] userSelectedResources) {
+		super(resources, userSelectedResources,
+				new String[] { IDialogConstants.OK_LABEL, IDialogConstants.CANCEL_LABEL });
+		this.actionTookEffect = false;
+		this.dialogTitle = SVNUIMessages.AddToSVNPanel_Title;
+
+		boolean isParticipantPane = this.paneParticipantHelper.isParticipantPane();
+
+		this.dialogDescription = isParticipantPane
+				? SVNUIMessages.AddToSVNPanel_Pane_Description
+				: SVNUIMessages.AddToSVNPanel_Description;
+		if (resources.length == 1) {
+			this.defaultMessage = isParticipantPane
+					? SVNUIMessages.AddToSVNPanel_Pane_Message_Single
+					: SVNUIMessages.AddToSVNPanel_Message_Single;
+		} else {
+			String defaultMessage = isParticipantPane
+					? SVNUIMessages.AddToSVNPanel_Pane_Message_Multi
+					: SVNUIMessages.AddToSVNPanel_Message_Multi;
+			this.defaultMessage = SVNUIMessages.format(defaultMessage,
+					new String[] { String.valueOf(resources.length) });
+		}
+	}
+
+	protected void addContextMenu() {
 		final TableViewer tableViewer = this.selectionComposite.getTableViewer();
 		MenuManager menuMgr = new MenuManager();
 		Menu menu = menuMgr.createContextMenu(tableViewer.getTable());
 		menuMgr.addMenuListener(new IMenuListener() {
 			public void menuAboutToShow(IMenuManager manager) {
 				manager.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
-				final IStructuredSelection tSelection = (IStructuredSelection)tableViewer.getSelection();
-				final IResource[] selectedResources = (IResource[])tSelection.toList().toArray(new IResource[tSelection.size()]);
+				final IStructuredSelection tSelection = (IStructuredSelection) tableViewer.getSelection();
+				final IResource[] selectedResources = (IResource[]) tSelection.toList()
+						.toArray(new IResource[tSelection.size()]);
 				Action tAction = null;
 				if (selectedResources.length == 1) {
-					manager.add(tAction = new Action(BaseMessages.format(SVNUIMessages.AddToSVNPanel_Ignore_Single, new String[]{selectedResources[0].getName()})) {
+					manager.add(tAction = new Action(BaseMessages.format(SVNUIMessages.AddToSVNPanel_Ignore_Single,
+							new String[] { selectedResources[0].getName() })) {
 						public void run() {
-							CompositeOperation op = new CompositeOperation("Operation_AddToSVNIgnore", SVNMessages.class); //$NON-NLS-1$
+							CompositeOperation op = new CompositeOperation("Operation_AddToSVNIgnore", //$NON-NLS-1$
+									SVNMessages.class);
 							op.add(new AddToSVNIgnoreOperation(selectedResources, IRemoteStorage.IGNORE_NAME, null));
-							op.add(new RefreshResourcesOperation(new ResourcesParentsProvider(selectedResources), IResource.DEPTH_INFINITE, RefreshResourcesOperation.REFRESH_ALL));
-							UIMonitorUtility.doTaskNowDefault(op, true);							
+							op.add(new RefreshResourcesOperation(new ResourcesParentsProvider(selectedResources),
+									IResource.DEPTH_INFINITE, RefreshResourcesOperation.REFRESH_ALL));
+							UIMonitorUtility.doTaskNowDefault(op, true);
 						}
 					});
-					tAction.setEnabled(FileUtility.checkForResourcesPresence(selectedResources, AddToSVNIgnoreAction.SF_NEW_AND_PARENT_VERSIONED, IResource.DEPTH_ZERO));
+					tAction.setEnabled(FileUtility.checkForResourcesPresence(selectedResources,
+							AddToSVNIgnoreAction.SF_NEW_AND_PARENT_VERSIONED, IResource.DEPTH_ZERO));
 					String name = selectedResources[0].getName();
-					String [] parts = name.split("\\."); //$NON-NLS-1$
+					String[] parts = name.split("\\."); //$NON-NLS-1$
 					if ((parts.length != 0)) {
-						manager.add(tAction = new Action(BaseMessages.format(SVNUIMessages.AddToSVNPanel_Ignore_Single, new String[]{"*." + parts[parts.length-1]})) { //$NON-NLS-1$
+						manager.add(tAction = new Action(BaseMessages.format(SVNUIMessages.AddToSVNPanel_Ignore_Single,
+								new String[] { "*." + parts[parts.length - 1] })) { //$NON-NLS-1$
 							public void run() {
-								CompositeOperation op = new CompositeOperation("Operation_AddToSVNIgnore", SVNMessages.class); //$NON-NLS-1$
-								op.add(new AddToSVNIgnoreOperation(selectedResources, IRemoteStorage.IGNORE_EXTENSION, null));
-								op.add(new RefreshResourcesOperation(new ResourcesParentsProvider(selectedResources), IResource.DEPTH_INFINITE, RefreshResourcesOperation.REFRESH_ALL));
+								CompositeOperation op = new CompositeOperation("Operation_AddToSVNIgnore", //$NON-NLS-1$
+										SVNMessages.class);
+								op.add(new AddToSVNIgnoreOperation(selectedResources, IRemoteStorage.IGNORE_EXTENSION,
+										null));
+								op.add(new RefreshResourcesOperation(new ResourcesParentsProvider(selectedResources),
+										IResource.DEPTH_INFINITE, RefreshResourcesOperation.REFRESH_ALL));
 								UIMonitorUtility.doTaskNowDefault(op, true);
 							}
 						});
-						tAction.setEnabled(FileUtility.checkForResourcesPresence(selectedResources, AddToSVNIgnoreAction.SF_NEW_AND_PARENT_VERSIONED, IResource.DEPTH_ZERO));
+						tAction.setEnabled(FileUtility.checkForResourcesPresence(selectedResources,
+								AddToSVNIgnoreAction.SF_NEW_AND_PARENT_VERSIONED, IResource.DEPTH_ZERO));
 					}
-				}
-				else {
+				} else {
 					manager.add(tAction = new Action(SVNUIMessages.AddToSVNPanel_IgnoreByNames_Multiple) {
 						public void run() {
-							CompositeOperation op = new CompositeOperation("Operation_AddToSVNIgnore", SVNMessages.class); //$NON-NLS-1$
+							CompositeOperation op = new CompositeOperation("Operation_AddToSVNIgnore", //$NON-NLS-1$
+									SVNMessages.class);
 							op.add(new AddToSVNIgnoreOperation(selectedResources, IRemoteStorage.IGNORE_NAME, null));
-							op.add(new RefreshResourcesOperation(new ResourcesParentsProvider(selectedResources), IResource.DEPTH_INFINITE, RefreshResourcesOperation.REFRESH_ALL));
+							op.add(new RefreshResourcesOperation(new ResourcesParentsProvider(selectedResources),
+									IResource.DEPTH_INFINITE, RefreshResourcesOperation.REFRESH_ALL));
 							UIMonitorUtility.doTaskNowDefault(op, true);
 						}
 					});
 					tAction.setEnabled(tSelection.size() > 0);
 					manager.add(tAction = new Action(SVNUIMessages.AddToSVNPanel_IgnoreByExtension_Multiple) {
 						public void run() {
-							CompositeOperation op = new CompositeOperation("Operation_AddToSVNIgnore", SVNMessages.class); //$NON-NLS-1$
-							op.add(new AddToSVNIgnoreOperation(selectedResources, IRemoteStorage.IGNORE_EXTENSION, null));
-							op.add(new RefreshResourcesOperation(new ResourcesParentsProvider(selectedResources), IResource.DEPTH_INFINITE, RefreshResourcesOperation.REFRESH_ALL));
-							UIMonitorUtility.doTaskNowDefault(op, true);							
+							CompositeOperation op = new CompositeOperation("Operation_AddToSVNIgnore", //$NON-NLS-1$
+									SVNMessages.class);
+							op.add(new AddToSVNIgnoreOperation(selectedResources, IRemoteStorage.IGNORE_EXTENSION,
+									null));
+							op.add(new RefreshResourcesOperation(new ResourcesParentsProvider(selectedResources),
+									IResource.DEPTH_INFINITE, RefreshResourcesOperation.REFRESH_ALL));
+							UIMonitorUtility.doTaskNowDefault(op, true);
 						}
 					});
 					tAction.setEnabled(tSelection.size() > 0);
 				}
 				manager.add(new Separator());
 				manager.add(tAction = new Action(SVNUIMessages.AddToSVNPanel_Delete_Action_Lable) {
-					public void run () {
-						DiscardConfirmationDialog dialog = new DiscardConfirmationDialog(UIMonitorUtility.getShell(), selectedResources.length == 1, DiscardConfirmationDialog.MSG_RESOURCE);
+					public void run() {
+						DiscardConfirmationDialog dialog = new DiscardConfirmationDialog(UIMonitorUtility.getShell(),
+								selectedResources.length == 1, DiscardConfirmationDialog.MSG_RESOURCE);
 						if (dialog.open() == 0) {
 							DeleteResourceOperation deleteOperation = new DeleteResourceOperation(selectedResources);
-							CompositeOperation op = new CompositeOperation(deleteOperation.getId(), deleteOperation.getMessagesClass());
+							CompositeOperation op = new CompositeOperation(deleteOperation.getId(),
+									deleteOperation.getMessagesClass());
 							SaveProjectMetaOperation saveOp = new SaveProjectMetaOperation(selectedResources);
 							RestoreProjectMetaOperation restoreOp = new RestoreProjectMetaOperation(saveOp);
 							op.add(saveOp);
@@ -159,34 +183,38 @@ public class AddToSVNPanel extends AbstractResourceSelectionPanel {
 				tAction.setEnabled(tSelection.size() > 0);
 			}
 		});
-        menuMgr.setRemoveAllWhenShown(true);
-        tableViewer.getTable().setMenu(menu);
-    }
-    
-    public void postInit() {
+		menuMgr.setRemoveAllWhenShown(true);
+		tableViewer.getTable().setMenu(menu);
+	}
+
+	public void postInit() {
 		super.postInit();
 		this.resourceStatesListener = new IResourceStatesListener() {
 			public void resourcesStateChanged(ResourceStatesChangedEvent event) {
 				AddToSVNPanel.this.updateResources();
 			}
 		};
-		SVNRemoteStorage.instance().addResourceStatesListener(ResourceStatesChangedEvent.class, AddToSVNPanel.this.resourceStatesListener);
+		SVNRemoteStorage.instance()
+				.addResourceStatesListener(ResourceStatesChangedEvent.class, AddToSVNPanel.this.resourceStatesListener);
 	}
-    
-    public boolean ifActionTookEffect() {
-    	return this.actionTookEffect;
-    }
-    
-    public void updateResources() {    	
+
+	public boolean ifActionTookEffect() {
+		return this.actionTookEffect;
+	}
+
+	public void updateResources() {
 		HashSet<IResource> toDeleteSet = new HashSet<IResource>();
 		toDeleteSet.addAll(Arrays.asList(this.resources));
 		HashSet<IResource> newResourcesSet = new HashSet<IResource>();
-		newResourcesSet.addAll(Arrays.asList(FileUtility.getResourcesRecursive(this.resources, IStateFilter.SF_UNVERSIONED, IResource.DEPTH_ZERO)));
-		List<IResource> ignored = Arrays.asList(FileUtility.getResourcesRecursive(this.resources, IStateFilter.SF_IGNORED, IResource.DEPTH_ZERO));
-		if (ignored.size() != 0){
+		newResourcesSet.addAll(Arrays.asList(
+				FileUtility.getResourcesRecursive(this.resources, IStateFilter.SF_UNVERSIONED, IResource.DEPTH_ZERO)));
+		List<IResource> ignored = Arrays.asList(
+				FileUtility.getResourcesRecursive(this.resources, IStateFilter.SF_IGNORED, IResource.DEPTH_ZERO));
+		if (ignored.size() != 0) {
 			this.actionTookEffect = true;
 		}
-		newResourcesSet.removeAll(Arrays.asList(FileUtility.getResourcesRecursive(this.resources, IStateFilter.SF_IGNORED, IResource.DEPTH_ZERO)));
+		newResourcesSet.removeAll(Arrays.asList(
+				FileUtility.getResourcesRecursive(this.resources, IStateFilter.SF_IGNORED, IResource.DEPTH_ZERO)));
 		for (int i = 0; i < this.resources.length; i++) {
 			if (!this.resources[i].exists()) {
 				newResourcesSet.remove(this.resources[i]);
@@ -196,9 +224,9 @@ public class AddToSVNPanel extends AbstractResourceSelectionPanel {
 		final IResource[] newResources = newResourcesSet.toArray(new IResource[newResourcesSet.size()]);
 		toDeleteSet.removeAll(newResourcesSet);
 		final IResource[] toDeleteResources = toDeleteSet.toArray(new IResource[toDeleteSet.size()]);
-		
+
 		if (!this.paneParticipantHelper.isParticipantPane()) {
-			final TableViewer tableViewer = this.selectionComposite.getTableViewer();		
+			final TableViewer tableViewer = this.selectionComposite.getTableViewer();
 			UIMonitorUtility.getDisplay().syncExec(new Runnable() {
 				public void run() {
 					AddToSVNPanel.this.selectionComposite.setResources(newResources);
@@ -210,23 +238,24 @@ public class AddToSVNPanel extends AbstractResourceSelectionPanel {
 				}
 			});
 		}
-		
+
 		this.resources = newResources;
-    }
-    
-    public void dispose() {
-    	super.dispose();
-    	SVNRemoteStorage.instance().removeResourceStatesListener(ResourceStatesChangedEvent.class, this.resourceStatesListener);
-    }
-    
+	}
+
+	public void dispose() {
+		super.dispose();
+		SVNRemoteStorage.instance()
+				.removeResourceStatesListener(ResourceStatesChangedEvent.class, this.resourceStatesListener);
+	}
+
 	public String getHelpId() {
-    	return "org.eclipse.team.svn.help.addToVCDialogContext"; //$NON-NLS-1$
-    }
+		return "org.eclipse.team.svn.help.addToVCDialogContext"; //$NON-NLS-1$
+	}
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.team.svn.ui.panel.local.AbstractResourceSelectionPanel#createPaneParticipant()
-	 */	
-	protected BasePaneParticipant createPaneParticipant() {		
+	 */
+	protected BasePaneParticipant createPaneParticipant() {
 		return new AddToSVNPaneParticipant(new ResourceScope(this.resources), this);
 	}
 

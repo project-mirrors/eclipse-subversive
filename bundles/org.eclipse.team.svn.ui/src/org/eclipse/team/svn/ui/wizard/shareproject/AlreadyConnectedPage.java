@@ -55,40 +55,46 @@ import org.eclipse.ui.PlatformUI;
  */
 public class AlreadyConnectedPage extends AbstractVerifiedWizardPage {
 	protected boolean useProjectSettings;
+
 	protected boolean createUsingProjectSettings;
+
 	protected String url;
+
 	protected Text urlText;
+
 	protected TableViewer repositoryRootsView;
-	protected IRepositoryRoot []repositoryRoots;
+
+	protected IRepositoryRoot[] repositoryRoots;
+
 	protected IRepositoryRoot selectedRoot;
+
 	protected Button useProjectSettingsButton;
+
 	protected Button createProjectLocationButton;
+
 	protected Button reconnectButton;
 
 	public AlreadyConnectedPage() {
 		super(
-			AlreadyConnectedPage.class.getName(), 
-			SVNUIMessages.AlreadyConnectedPage_Title, 
-			SVNTeamUIPlugin.instance().getImageDescriptor("icons/wizards/newconnect.gif")); //$NON-NLS-1$
-		
+				AlreadyConnectedPage.class.getName(), SVNUIMessages.AlreadyConnectedPage_Title,
+				SVNTeamUIPlugin.instance().getImageDescriptor("icons/wizards/newconnect.gif")); //$NON-NLS-1$
+
 		this.setDescription(SVNUIMessages.AlreadyConnectedPage_Description);
 	}
-	
-	public void setProjects(IProject []projects) {
+
+	public void setProjects(IProject[] projects) {
 		this.url = null;
 		for (int i = 0; i < projects.length; i++) {
 			SVNChangeStatus info = SVNUtility.getSVNInfoForNotConnected(projects[i]);
 			String tmp = SVNUtility.decodeURL(info.url);
 			if (this.url == null) {
 				this.url = tmp;
-			}
-			else {
+			} else {
 				IPath tPath = SVNUtility.createPathForSVNUrl(this.url);
 				IPath tPath2 = SVNUtility.createPathForSVNUrl(tmp);
 				if (tPath2.isPrefixOf(tPath)) {
 					this.url = tmp;
-				}
-				else {
+				} else {
 					while (!tPath.isPrefixOf(tPath2)) {
 						tPath = tPath.removeLastSegments(1);
 					}
@@ -97,14 +103,14 @@ public class AlreadyConnectedPage extends AbstractVerifiedWizardPage {
 			}
 		}
 		this.repositoryRoots = SVNUtility.findRoots(this.url, false);
-		
+
 		this.initControls();
 	}
-	
+
 	public IRepositoryRoot getSelectedRoot() {
 		return this.selectedRoot;
 	}
-	
+
 	public String getResourceUrl() {
 		return this.url;
 	}
@@ -120,7 +126,7 @@ public class AlreadyConnectedPage extends AbstractVerifiedWizardPage {
 	public boolean canFlipToNextPage() {
 		return !this.useProjectSettings();
 	}
-	
+
 	public Composite createControlImpl(Composite parent) {
 		Composite composite = new Composite(parent, SWT.NONE);
 		GridLayout layout = new GridLayout();
@@ -129,23 +135,23 @@ public class AlreadyConnectedPage extends AbstractVerifiedWizardPage {
 		data.verticalAlignment = GridData.FILL;
 		data.horizontalAlignment = GridData.FILL;
 		composite.setLayoutData(data);
-		
+
 		this.initializeDialogUnits(parent);
-		
+
 		Label description = new Label(composite, SWT.WRAP);
 		description.setLayoutData(this.makeGridData());
 		description.setText(SVNUIMessages.AlreadyConnectedPage_ProjectURL);
-		
+
 		this.urlText = new Text(composite, SWT.SINGLE | SWT.BORDER);
 		data = new GridData(GridData.FILL_HORIZONTAL);
 		data.widthHint = IDialogConstants.ENTRY_FIELD_WIDTH;
 		this.urlText.setLayoutData(data);
 		this.urlText.setEditable(false);
-		
+
 		description = new Label(composite, SWT.WRAP);
 		description.setLayoutData(this.makeGridData());
 		description.setText(SVNUIMessages.AlreadyConnectedPage_RepositoryLocation);
-		
+
 		Table table = new Table(composite, SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER | SWT.SINGLE | SWT.FULL_SELECTION);
 		table.setLayoutData(new GridData(GridData.FILL_BOTH));
 		table.setHeaderVisible(true);
@@ -161,25 +167,30 @@ public class AlreadyConnectedPage extends AbstractVerifiedWizardPage {
 			public Image getColumnImage(Object element, int columnIndex) {
 				return null;
 			}
+
 			public String getColumnText(Object element, int columnIndex) {
-				IRepositoryRoot root = (IRepositoryRoot)element;
+				IRepositoryRoot root = (IRepositoryRoot) element;
 				if (columnIndex == 0) {
 					return root.getRepositoryLocation().getLabel();
 				}
 				return root.getRepositoryLocation().getUrl();
 			}
+
 			public void addListener(ILabelProviderListener listener) {
 			}
+
 			public void dispose() {
 			}
+
 			public boolean isLabelProperty(Object element, String property) {
 				return true;
 			}
+
 			public void removeListener(ILabelProviderListener listener) {
 			}
 		};
 		this.repositoryRootsView.setLabelProvider(labelProvider);
-		
+
 		ColumnedViewerComparator comparator = new ColumnedViewerComparator(this.repositoryRootsView) {
 			public int compareImpl(Viewer viewer, Object row1, Object row2) {
 				String val1 = labelProvider.getColumnText(row1, this.column);
@@ -189,22 +200,23 @@ public class AlreadyConnectedPage extends AbstractVerifiedWizardPage {
 		};
 		this.repositoryRootsView.addSelectionChangedListener(new ISelectionChangedListener() {
 			public void selectionChanged(SelectionChangedEvent event) {
-				IStructuredSelection selection = (IStructuredSelection)AlreadyConnectedPage.this.repositoryRootsView.getSelection();
-				AlreadyConnectedPage.this.selectedRoot = (IRepositoryRoot)selection.getFirstElement();
+				IStructuredSelection selection = (IStructuredSelection) AlreadyConnectedPage.this.repositoryRootsView
+						.getSelection();
+				AlreadyConnectedPage.this.selectedRoot = (IRepositoryRoot) selection.getFirstElement();
 				AlreadyConnectedPage.this.setPageComplete(true);
 			}
 		});
-		
+
 		TableColumn col = new TableColumn(table, SWT.LEFT);
 		col.setResizable(true);
 		col.setText(SVNUIMessages.AlreadyConnectedPage_LocationLabel);
 		col.addSelectionListener(comparator);
-		
+
 		col = new TableColumn(table, SWT.LEFT);
 		col.setResizable(true);
 		col.setText(SVNUIMessages.AlreadyConnectedPage_URL);
 		col.addSelectionListener(comparator);
-		
+
 		this.repositoryRootsView.getTable().setSortDirection(SWT.UP);
 		this.repositoryRootsView.getTable().setSortColumn(this.repositoryRootsView.getTable().getColumn(0));
 
@@ -216,14 +228,14 @@ public class AlreadyConnectedPage extends AbstractVerifiedWizardPage {
 		data.verticalAlignment = GridData.FILL;
 		data.horizontalAlignment = GridData.FILL;
 		btnComposite.setLayoutData(data);
-		
+
 		description = new Label(btnComposite, SWT.WRAP);
 		data = new GridData(GridData.FILL_HORIZONTAL);
 		data.widthHint = IDialogConstants.ENTRY_FIELD_WIDTH;
 		data.heightHint = this.convertHeightInCharsToPixels(2);
 		description.setLayoutData(data);
 		description.setText(SVNUIMessages.AlreadyConnectedPage_Hint);
-		
+
 		this.useProjectSettingsButton = new Button(btnComposite, SWT.RADIO);
 		this.useProjectSettingsButton.setLayoutData(this.makeGridData());
 		this.useProjectSettingsButton.addSelectionListener(new SelectionAdapter() {
@@ -234,32 +246,34 @@ public class AlreadyConnectedPage extends AbstractVerifiedWizardPage {
 				AlreadyConnectedPage.this.setPageComplete(true);
 			}
 		});
-		this.useProjectSettingsButton.setText(SVNUIMessages.AlreadyConnectedPage_UseProjectSettings); 
-		
+		this.useProjectSettingsButton.setText(SVNUIMessages.AlreadyConnectedPage_UseProjectSettings);
+
 		this.createProjectLocationButton = new Button(btnComposite, SWT.RADIO);
 		this.createProjectLocationButton.setLayoutData(this.makeGridData());
 		this.createProjectLocationButton.setText(SVNUIMessages.AlreadyConnectedPage_CreateLocation);
 		this.createProjectLocationButton.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				Button button = (Button)e.widget;
+				Button button = (Button) e.widget;
 				AlreadyConnectedPage.this.createUsingProjectSettings = button.getSelection();
 				AlreadyConnectedPage.this.repositoryRootsView.getTable().setEnabled(false);
 				AlreadyConnectedPage.this.setPageComplete(true);
 			}
 		});
-		
+
 		this.reconnectButton = new Button(btnComposite, SWT.RADIO);
 		this.reconnectButton.setLayoutData(this.makeGridData());
-		this.reconnectButton.setText(SVNUIMessages.AlreadyConnectedPage_ReconnectToAnother); 
-		
+		this.reconnectButton.setText(SVNUIMessages.AlreadyConnectedPage_ReconnectToAnother);
+
 		this.initControls();
-		
+
 //		Setting context help
-        PlatformUI.getWorkbench().getHelpSystem().setHelp(composite, "org.eclipse.team.svn.help.alreadyConnectedContext"); //$NON-NLS-1$
-		
+		PlatformUI.getWorkbench()
+				.getHelpSystem()
+				.setHelp(composite, "org.eclipse.team.svn.help.alreadyConnectedContext"); //$NON-NLS-1$
+
 		return composite;
 	}
-	
+
 	protected void initControls() {
 		if (this.urlText != null && this.url != null) {
 			this.urlText.setText(this.url);
@@ -273,8 +287,7 @@ public class AlreadyConnectedPage extends AbstractVerifiedWizardPage {
 				this.useProjectSettingsButton.setSelection(true);
 				this.reconnectButton.setSelection(false);
 				//this.createProjectLocationButton.setEnabled(false);
-			}
-			else {
+			} else {
 				this.repositoryRootsView.getTable().setEnabled(false);
 				this.useProjectSettingsButton.setSelection(false);
 				this.useProjectSettingsButton.setEnabled(false);
@@ -285,7 +298,7 @@ public class AlreadyConnectedPage extends AbstractVerifiedWizardPage {
 			}
 		}
 	}
-	
+
 	protected GridData makeGridData() {
 		GridData data = new GridData(GridData.FILL_HORIZONTAL | GridData.VERTICAL_ALIGN_CENTER);
 		data.widthHint = IDialogConstants.ENTRY_FIELD_WIDTH;

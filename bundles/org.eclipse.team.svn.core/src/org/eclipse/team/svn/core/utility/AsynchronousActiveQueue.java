@@ -25,16 +25,19 @@ import org.eclipse.team.svn.core.operation.AbstractActionOperation;
 import org.eclipse.team.svn.core.operation.IActionOperation;
 
 public class AsynchronousActiveQueue<Data extends IQueuedElement<Data>> {
-	
-	public static interface IRecordHandler<Data extends IQueuedElement<Data>>{
+
+	public static interface IRecordHandler<Data extends IQueuedElement<Data>> {
 		public void process(IProgressMonitor monitor, IActionOperation op, Data record);
 	}
-	
+
 	protected final String name;
+
 	protected final LinkedList<Data> queue;
+
 	protected final IRecordHandler<Data> handler;
+
 	protected final boolean system;
-	
+
 	static final boolean DEBUG = SVNTeamPlugin.instance().isDebugging();
 
 	public AsynchronousActiveQueue(String queueName, IRecordHandler<Data> handler, boolean system) {
@@ -43,7 +46,7 @@ public class AsynchronousActiveQueue<Data extends IQueuedElement<Data>> {
 		this.handler = handler;
 		this.system = system;
 	}
-	
+
 	public void push(Data data) {
 		synchronized (this.queue) {
 			// avoid duplicated events, Start search from the end, the possibility
@@ -77,12 +80,12 @@ public class AsynchronousActiveQueue<Data extends IQueuedElement<Data>> {
 			if (DEBUG) {
 				logDebug("added " + data);
 			}
-	    	if (this.queue.size() == 1) {
+			if (this.queue.size() == 1) {
 				ProgressMonitorUtility.doTaskScheduledDefault(new QueuedOperation(this.name), this.system);
-	    	}
-		}		
+			}
+		}
 	}
-	
+
 	private final class QueuedOperation extends AbstractActionOperation {
 		private QueuedOperation(String operationName) {
 			super(operationName, SVNMessages.class);
@@ -117,8 +120,8 @@ public class AsynchronousActiveQueue<Data extends IQueuedElement<Data>> {
 			}
 		}
 	}
-	
-	private void logDebug(String message){
+
+	private void logDebug(String message) {
 		if (DEBUG) {
 			System.out.println("[" + this.name + "] size: " + this.queue.size() + ", " + message);
 		}

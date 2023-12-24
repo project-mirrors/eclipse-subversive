@@ -38,79 +38,92 @@ import org.eclipse.team.svn.ui.composite.PropertiesComposite;
  */
 public class ResourcePropertyEditPanel extends AbstractPropertyEditPanel {
 	public static int SINGLE_FILE = 0;
+
 	public static int MULTIPLE_FILES = 1;
+
 	public static int MIXED_RESOURCES = 2;
-	
+
 	protected Button recursiveButton;
+
 	protected ApplyPropertyMethodComposite applyComposite;
+
 	protected int resourcesType;
-	
+
 	protected boolean recursiveSelected;
+
 	protected boolean applyToAll;
+
 	protected boolean applyToFiles;
+
 	protected boolean applyToFolders;
-	protected IResource []selectedResources;
+
+	protected IResource[] selectedResources;
+
 	protected boolean strict;
+
 	protected int mask;
 
-	public ResourcePropertyEditPanel(SVNProperty[] data, IResource []selectedResources, boolean strict) {
-		super(data, data != null ? SVNUIMessages.PropertyEditPanel_Title_Edit : SVNUIMessages.PropertyEditPanel_Title_Add, SVNUIMessages.PropertyEditPanel_Description);
-		this.strict = strict;	
+	public ResourcePropertyEditPanel(SVNProperty[] data, IResource[] selectedResources, boolean strict) {
+		super(data,
+				data != null ? SVNUIMessages.PropertyEditPanel_Title_Edit : SVNUIMessages.PropertyEditPanel_Title_Add,
+				SVNUIMessages.PropertyEditPanel_Description);
+		this.strict = strict;
 		this.selectedResources = selectedResources;
 		this.resourcesType = this.computeResourcesType();
 		this.mask = PredefinedProperty.TYPE_NONE;
 		for (IResource resource : this.selectedResources) {
 			if (resource.getType() == IResource.FOLDER || resource.getType() == IResource.PROJECT) {
 				this.mask |= PredefinedProperty.TYPE_COMMON;
-			}
-			else if (resource.getType() == IResource.FILE) {
+			} else if (resource.getType() == IResource.FILE) {
 				this.mask |= PredefinedProperty.TYPE_FILE;
 			}
 		}
 		this.fillVerifiersMap();
 	}
-	
+
 	protected boolean isPropertyAccepted(PredefinedProperty property) {
 		// is there any properties that could be used for both: revisions and resources?
-		return (property.type & PredefinedProperty.TYPE_REVISION) == PredefinedProperty.TYPE_NONE && (property.type & this.mask) != PredefinedProperty.TYPE_NONE;
+		return (property.type & PredefinedProperty.TYPE_REVISION) == PredefinedProperty.TYPE_NONE
+				&& (property.type & this.mask) != PredefinedProperty.TYPE_NONE;
 	}
 
 	protected IRepositoryResource getRepostioryResource() {
 		return SVNRemoteStorage.instance().asRepositoryResource(this.selectedResources[0]);
 	}
-	
+
 	public boolean isStrict() {
 		return this.strict;
 	}
-	
+
 	public boolean isRecursiveSelected() {
 		return this.recursiveSelected;
 	}
-	
+
 	public int getApplyMethod() {
 		return this.applyComposite == null ? PropertiesComposite.APPLY_TO_ALL : this.applyComposite.getApplyMethod();
 	}
-	
+
 	public String getFilterMask() {
 		return this.applyComposite == null ? "" : this.applyComposite.getFilterMask(); //$NON-NLS-1$
 	}
-	
+
 	public boolean useMask() {
 		return this.applyComposite == null ? false : this.applyComposite.useMask();
 	}
-		
-	public void createControlsImpl (Composite parent) {
+
+	public void createControlsImpl(Composite parent) {
 		super.createControlsImpl(parent);
 		if (this.resourcesType != ResourcePropertyEditPanel.SINGLE_FILE) {
 			if (this.resourcesType == ResourcePropertyEditPanel.MIXED_RESOURCES && !this.strict) {
 				this.recursiveButton = new Button(parent, SWT.CHECK);
 				this.recursiveButton.setText(SVNUIMessages.PropertyEditPanel_Recursively);
-			
+
 				this.recursiveButton.addSelectionListener(new SelectionListener() {
 					public void widgetSelected(SelectionEvent e) {
 						ResourcePropertyEditPanel.this.refreshControlsEnablement();
 						ResourcePropertyEditPanel.this.validateContent();
 					}
+
 					public void widgetDefaultSelected(SelectionEvent e) {
 					}
 				});
@@ -118,16 +131,16 @@ public class ResourcePropertyEditPanel extends AbstractPropertyEditPanel {
 			this.applyComposite = new ApplyPropertyMethodComposite(parent, SWT.NONE, this, this.resourcesType);
 			this.applyComposite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		}
-		
+
 		if (this.resourcesType == ResourcePropertyEditPanel.MIXED_RESOURCES && !this.strict) {
 			this.refreshControlsEnablement();
 		}
 	}
-	
-    public String getHelpId() {
-    	return "org.eclipse.team.svn.help.setPropsDialogContext"; //$NON-NLS-1$
-    }
-	
+
+	public String getHelpId() {
+		return "org.eclipse.team.svn.help.setPropsDialogContext"; //$NON-NLS-1$
+	}
+
 	protected int computeResourcesType() {
 		boolean singleResource = this.selectedResources.length == 1;
 		boolean allFiles = true;
@@ -138,11 +151,11 @@ public class ResourcePropertyEditPanel extends AbstractPropertyEditPanel {
 			}
 		}
 		if (allFiles) {
-			return singleResource ? ResourcePropertyEditPanel.SINGLE_FILE : ResourcePropertyEditPanel.MULTIPLE_FILES; 
+			return singleResource ? ResourcePropertyEditPanel.SINGLE_FILE : ResourcePropertyEditPanel.MULTIPLE_FILES;
 		}
 		return ResourcePropertyEditPanel.MIXED_RESOURCES;
 	}
-	
+
 	protected void saveChangesImpl() {
 		super.saveChangesImpl();
 		if (this.resourcesType != ResourcePropertyEditPanel.SINGLE_FILE) {
@@ -154,12 +167,12 @@ public class ResourcePropertyEditPanel extends AbstractPropertyEditPanel {
 			}
 		}
 	}
-	
+
 	protected void refreshControlsEnablement() {
 		this.applyComposite.setEnabled(this.recursiveButton.getSelection());
 	}
-	
+
 	protected Point getPrefferedSizeImpl() {
-        return new Point(590, SWT.DEFAULT);
-    }	
+		return new Point(590, SWT.DEFAULT);
+	}
 }

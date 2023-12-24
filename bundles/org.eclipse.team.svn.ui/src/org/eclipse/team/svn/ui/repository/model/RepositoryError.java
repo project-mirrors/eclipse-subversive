@@ -21,27 +21,27 @@ import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
 
 /**
- * Unaccessible node representation 
+ * Unaccessible node representation
  * 
  * @author Alexander Gurov
  */
 public class RepositoryError extends RepositoryFictiveNode {
 	public static final String ERROR_MSG = "RepositoriesView_Model_Error"; //$NON-NLS-1$
-	
+
 	protected IStatus errorStatus;
-	
+
 	public RepositoryError(IStatus errorStatus) {
 		this.errorStatus = errorStatus;
 	}
-	
+
 	public IStatus getErrorStatus() {
 		return this.errorStatus;
 	}
-	
+
 	public boolean hasChildren() {
 		return false;
 	}
-	
+
 	public Object[] getChildren(Object o) {
 		return null;
 	}

@@ -42,20 +42,16 @@ public class TagModifyWarningDialog extends MessageDialog {
 
 	//projects which contain tag modifications
 	protected final IProject[] projects;
-	
+
 	protected boolean dontAskAnyMore;
-	
+
 	public TagModifyWarningDialog(Shell parentShell, IProject[] projects) {
-		super(parentShell,
-			SVNUIMessages.TagModifyWarningDialog_Title, 
-			null, 
-			SVNUIMessages.TagModifyWarningDialog_Message,
-			MessageDialog.QUESTION, 
-			new String[] {IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL}, 
-			0);
+		super(parentShell, SVNUIMessages.TagModifyWarningDialog_Title, null,
+				SVNUIMessages.TagModifyWarningDialog_Message, MessageDialog.QUESTION,
+				new String[] { IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL }, 0);
 		this.projects = projects;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.dialogs.MessageDialog#createCustomArea(org.eclipse.swt.widgets.Composite)
 	 */
@@ -64,36 +60,37 @@ public class TagModifyWarningDialog extends MessageDialog {
 		Composite composite = new Composite(parent, SWT.NONE);
 		composite.setLayout(new GridLayout());
 		composite.setLayoutData(new GridData(GridData.FILL_BOTH));
-		
+
 		final Button dontAskButton = new Button(composite, SWT.CHECK);
-		dontAskButton.setLayoutData(new GridData());		
+		dontAskButton.setLayoutData(new GridData());
 		dontAskButton.setText(SVNUIMessages.TagModifyWarningDialog_CustomText);
 		dontAskButton.addListener(SWT.Selection, new Listener() {
 			public void handleEvent(Event event) {
-				TagModifyWarningDialog.this.dontAskAnyMore = dontAskButton.getSelection();														
+				TagModifyWarningDialog.this.dontAskAnyMore = dontAskButton.getSelection();
 			}
-		});		
+		});
 		dontAskButton.setSelection(this.dontAskAnyMore = false);
-		
+
 		return composite;
-	}	
-	
+	}
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.dialogs.Dialog#close()
 	 */
 	@Override
 	public boolean close() {
 		if (this.dontAskAnyMore) {
-			for (IProject project : this.projects) {						
-				SVNTeamProvider provider = (SVNTeamProvider)RepositoryProvider.getProvider(project, SVNTeamPlugin.NATURE_ID);
+			for (IProject project : this.projects) {
+				SVNTeamProvider provider = (SVNTeamProvider) RepositoryProvider.getProvider(project,
+						SVNTeamPlugin.NATURE_ID);
 				try {
 					provider.setVerifyTagOnCommit(!this.dontAskAnyMore);
 				} catch (CoreException e) {
 					LoggedOperation.reportError(TagModifyWarningDialog.this.getClass().getName(), e);
 				}
-			}			
-		}			
-		
+			}
+		}
+
 		return super.close();
 	}
 }

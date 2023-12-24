@@ -63,86 +63,109 @@ import org.eclipse.team.svn.core.utility.SVNUtility;
  */
 public class UpdateSubscriber extends AbstractSVNSubscriber {
 	private static UpdateSubscriber instance = null;
-	
+
 	protected Map<SVNRevision, String> comments;
-	
+
 	public static synchronized UpdateSubscriber instance() {
 		if (UpdateSubscriber.instance == null) {
 			UpdateSubscriber.instance = new UpdateSubscriber();
 		}
 		return UpdateSubscriber.instance;
 	}
-	
+
 	public void refresh(IResource[] resources, int depth, IProgressMonitor monitor) throws TeamException {
 		this.comments.clear();
 		super.refresh(resources, depth, monitor);
 	}
 
-    protected IRemoteStatusOperation addStatusOperation(CompositeOperation op, IResource[] resources, int depth) {
-    	RemoteStatusOperation rStatus = new RemoteStatusOperation(resources);
-    	op.add(rStatus);
-        return rStatus;
-    }
+	protected IRemoteStatusOperation addStatusOperation(CompositeOperation op, IResource[] resources, int depth) {
+		RemoteStatusOperation rStatus = new RemoteStatusOperation(resources);
+		op.add(rStatus);
+		return rStatus;
+	}
 
-    protected SyncInfo getSVNSyncInfo(ILocalResource localStatus, IResourceChange remoteStatus) {
-        return new UpdateSyncInfo(localStatus, remoteStatus, this.getResourceComparator());
-    }
+	protected SyncInfo getSVNSyncInfo(ILocalResource localStatus, IResourceChange remoteStatus) {
+		return new UpdateSyncInfo(localStatus, remoteStatus, this.getResourceComparator());
+	}
 
 	protected IResourceChange handleResourceChange(IRemoteStatusOperation rStatusOp, final SVNEntryStatus status) {
-		final SVNChangeStatus current = (SVNChangeStatus)status; 
+		final SVNChangeStatus current = (SVNChangeStatus) status;
 		if (current.textStatus == SVNEntryStatus.Kind.EXTERNAL) {
 			return null;
 		}
-		final IResource []scope = rStatusOp.getScope();
+		final IResource[] scope = rStatusOp.getScope();
 		IChangeStateProvider provider = new IChangeStateProvider() {
 			private SVNEntry.Kind kind;
+
 			private SVNRevision rev;
+
 			private IResource exact;
-			
+
 			public long getChangeDate() {
-				return current.reposLastCmtRevision == SVNRevision.INVALID_REVISION_NUMBER ? current.lastChangedDate : current.reposLastCmtDate;
+				return current.reposLastCmtRevision == SVNRevision.INVALID_REVISION_NUMBER
+						? current.lastChangedDate
+						: current.reposLastCmtDate;
 			}
+
 			public String getChangeAuthor() {
-				return current.reposLastCmtRevision == SVNRevision.INVALID_REVISION_NUMBER ? current.lastCommitAuthor : current.reposLastCmtAuthor;
+				return current.reposLastCmtRevision == SVNRevision.INVALID_REVISION_NUMBER
+						? current.lastCommitAuthor
+						: current.reposLastCmtAuthor;
 			}
+
 			public SVNRevision.Number getChangeRevision() {
 				if (this.rev == null) {
-					long changeRev = current.reposLastCmtRevision == SVNRevision.INVALID_REVISION_NUMBER ? current.lastChangedRevision : current.reposLastCmtRevision;
-					this.rev = changeRev == SVNRevision.INVALID_REVISION_NUMBER ? SVNRevision.INVALID_REVISION : (SVNRevision.Number)SVNRevision.fromNumber(changeRev);
+					long changeRev = current.reposLastCmtRevision == SVNRevision.INVALID_REVISION_NUMBER
+							? current.lastChangedRevision
+							: current.reposLastCmtRevision;
+					this.rev = changeRev == SVNRevision.INVALID_REVISION_NUMBER
+							? SVNRevision.INVALID_REVISION
+							: (SVNRevision.Number) SVNRevision.fromNumber(changeRev);
 				}
-				return this.rev == SVNRevision.INVALID_REVISION ? null : (SVNRevision.Number)this.rev;
+				return this.rev == SVNRevision.INVALID_REVISION ? null : (SVNRevision.Number) this.rev;
 			}
+
 			public Kind getTextChangeType() {
 				return current.repositoryTextStatus;
 			}
+
 			public SVNEntryStatus.Kind getPropertiesChangeType() {
 				return current.repositoryPropStatus;
 			}
+
 			public SVNEntry.Kind getNodeKind() {
 				if (this.kind == null) {
 					this.kind = SVNUtility.getNodeKind(current.path, current.nodeKind, true);
-					this.kind = this.kind == SVNEntry.Kind.NONE ? SVNUtility.getNodeKind(current.path, current.reposKind, true) : this.kind;
+					this.kind = this.kind == SVNEntry.Kind.NONE
+							? SVNUtility.getNodeKind(current.path, current.reposKind, true)
+							: this.kind;
 				}
 				return this.kind;
 			}
+
 			public String getLocalPath() {
 				return current.path;
 			}
+
 			public String getComment() {
 				return null;
 			}
+
 			public boolean isCopied() {
 				return current.isCopied;
 			}
+
 			public boolean isSwitched() {
 				return current.isSwitched;
 			}
-			public IResource getExact(IResource []set) {
+
+			public IResource getExact(IResource[] set) {
 				if (this.exact == null) {
 					this.exact = FileUtility.selectOneOf(scope, set);
 				}
 				return this.exact;
 			}
+
 			public SVNConflictDescriptor getTreeConflictDescriptor() {
 				return current.treeConflicts == null ? null : current.treeConflicts[0];
 			}
@@ -151,17 +174,18 @@ public class UpdateSubscriber extends AbstractSVNSubscriber {
 			return null;
 		}
 		IResourceChange resourceChange = SVNRemoteStorage.instance().asResourceChange(provider, true);
-		if ((resourceChange == null || resourceChange.getRevision() == SVNRevision.INVALID_REVISION_NUMBER)/* && !resourceChange.hasTreeConflict()*/) {
+		if ((resourceChange == null || resourceChange
+				.getRevision() == SVNRevision.INVALID_REVISION_NUMBER)/* && !resourceChange.hasTreeConflict()*/) {
 			return null;
 		}
 		IResourceChange checkForReplacement = null;
 		try {
-			checkForReplacement = SVNRemoteStorage.instance().resourceChangeFromBytes(this.statusCache.getBytes(resourceChange.getResource()));
+			checkForReplacement = SVNRemoteStorage.instance()
+					.resourceChangeFromBytes(this.statusCache.getBytes(resourceChange.getResource()));
 		} catch (TeamException e) {
-			LoggedOperation.reportError(this.getClass().getName(), e);			
+			LoggedOperation.reportError(this.getClass().getName(), e);
 		}
-		if (checkForReplacement != null)
-		{
+		if (checkForReplacement != null) {
 			if (IStateFilter.SF_ADDED.accept(checkForReplacement)) {
 				if (IStateFilter.SF_DELETED.accept(resourceChange)) {
 					checkForReplacement.treatAsReplacement();
@@ -172,13 +196,15 @@ public class UpdateSubscriber extends AbstractSVNSubscriber {
 				resourceChange.treatAsReplacement();
 			}
 		}
-		
+
 		rStatusOp.setPegRevision(resourceChange);
 		IRepositoryResource originator = SVNRemoteStorage.instance().asRepositoryResource(resourceChange.getResource());
 		if (originator != null) {
 			// for case sensitive name changes, nulls allowed for externals roots
 			String url = SVNUtility.decodeURL(current.url);
-			IRepositoryResource tOriginator = resourceChange instanceof IFileChange ? (IRepositoryResource)originator.asRepositoryFile(url, true) : (IRepositoryResource)originator.asRepositoryContainer(url, true);
+			IRepositoryResource tOriginator = resourceChange instanceof IFileChange
+					? (IRepositoryResource) originator.asRepositoryFile(url, true)
+					: (IRepositoryResource) originator.asRepositoryContainer(url, true);
 			if (tOriginator != null) {
 				originator = tOriginator;
 			}
@@ -186,7 +212,7 @@ public class UpdateSubscriber extends AbstractSVNSubscriber {
 			originator.setPegRevision(resourceChange.getPegRevision());
 			resourceChange.setOriginator(originator);
 		}
-		
+
 		resourceChange.setCommentProvider(new ICommentProvider() {
 			public String getComment(IResource resource, SVNRevision rev, SVNRevision peg) {
 				//Null is also valid value if no comment was specified for revision. So, check for key presence.
@@ -195,7 +221,7 @@ public class UpdateSubscriber extends AbstractSVNSubscriber {
 				}
 				return UpdateSubscriber.this.comments.get(rev);
 			}
-			
+
 			public void cacheComments(IResource resource, SVNRevision rev, SVNRevision peg) {
 				if (rev == SVNRevision.INVALID_REVISION || peg != null && peg == SVNRevision.INVALID_REVISION) {
 					return;
@@ -218,12 +244,13 @@ public class UpdateSubscriber extends AbstractSVNSubscriber {
 		});
 		return resourceChange;
 	}
-	
+
 	protected boolean isIncoming(SVNEntryStatus status) {
-		SVNChangeStatus st = (SVNChangeStatus)status;
-		return st.repositoryPropStatus == SVNEntryStatus.Kind.MODIFIED || st.repositoryTextStatus != SVNEntryStatus.Kind.NONE || st.hasConflict;
+		SVNChangeStatus st = (SVNChangeStatus) status;
+		return st.repositoryPropStatus == SVNEntryStatus.Kind.MODIFIED
+				|| st.repositoryTextStatus != SVNEntryStatus.Kind.NONE || st.hasConflict;
 	}
-	
+
 	/* 
 	 * Override method from super class in order to not contact the server
 	 * if we're interested only in outgoing changes, see 'autoRefresh' param from SubscriberResourceMappingContext
@@ -235,7 +262,8 @@ public class UpdateSubscriber extends AbstractSVNSubscriber {
 	public int getState(ResourceMapping mapping, int stateMask, IProgressMonitor monitor) throws CoreException {
 		if ((stateMask & IThreeWayDiff.INCOMING) == 0) {
 			// If we're only interested in outgoing changes, used the cached modified state
-			ResourceTraversal[] traversals = mapping.getTraversals(new SubscriberResourceMappingContext(this, false), monitor);
+			ResourceTraversal[] traversals = mapping.getTraversals(new SubscriberResourceMappingContext(this, false),
+					monitor);
 			final int[] direction = new int[] { 0 };
 			final int[] kind = new int[] { 0 };
 			accept(traversals, new IDiffVisitor() {
@@ -260,7 +288,7 @@ public class UpdateSubscriber extends AbstractSVNSubscriber {
 			return super.getState(mapping, stateMask, monitor);
 		}
 	}
-	
+
 	private UpdateSubscriber() {
 		super(true, SVNMessages.UpdateSubscriber_Name);
 		this.comments = new HashMap<SVNRevision, String>();

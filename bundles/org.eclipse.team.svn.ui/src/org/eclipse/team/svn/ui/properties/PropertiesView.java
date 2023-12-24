@@ -48,42 +48,48 @@ import org.eclipse.ui.PlatformUI;
  * @author Alexander Gurov
  */
 public class PropertiesView extends AbstractSVNView {
-	
+
 	public static final String VIEW_ID = PropertiesView.class.getName();
 
 	protected PropertiesComposite propertiesComposite;
+
 	protected IResourcePropertyProvider propertyProvider;
+
 	protected IAdaptable adaptable;
+
 	protected Action linkWithEditorAction;
+
 	protected Action linkWithEditorDropDownAction;
+
 	protected boolean backgroundExecution;
-	
+
 	public PropertiesView() {
 		super(SVNUIMessages.PropertiesView_Description);
 	}
-	
+
 	public void setFocus() {
 	}
-	
-	public void setResource(IAdaptable resource, IResourcePropertyProvider propertyProvider, boolean backgroundExecution) {
+
+	public void setResource(IAdaptable resource, IResourcePropertyProvider propertyProvider,
+			boolean backgroundExecution) {
 		if (resource instanceof IRepositoryResource) {
-			this.repositoryResource = (IRepositoryResource)resource;
+			this.repositoryResource = (IRepositoryResource) resource;
 			this.wcResource = null;
-		}
-		else if(resource instanceof IResource) {
-			this.wcResource = (IResource)resource;
+		} else if (resource instanceof IResource) {
+			this.wcResource = (IResource) resource;
 			this.repositoryResource = null;
 		}
 		this.adaptable = resource;
-		this.propertyProvider = propertyProvider;		
+		this.propertyProvider = propertyProvider;
 		this.backgroundExecution = backgroundExecution;
-		
+
 		this.propertiesComposite.setResource(resource, propertyProvider);
 		this.refresh();
 	}
-	
+
 	public void refresh() {
-		boolean operationToFollow = this.propertyProvider != null && this.propertyProvider.getExecutionState() != IStatus.OK;
+		boolean operationToFollow = this.propertyProvider != null
+				&& this.propertyProvider.getExecutionState() != IStatus.OK;
 		this.propertiesComposite.setPending(operationToFollow);
 		this.getSite().getShell().getDisplay().syncExec(new Runnable() {
 			public void run() {
@@ -94,16 +100,15 @@ public class PropertiesView extends AbstractSVNView {
 		CompositeOperation composite = new CompositeOperation("Operation_ShowProperties", SVNUIMessages.class); //$NON-NLS-1$
 		if (this.propertyProvider != null && this.propertyProvider.getExecutionState() != IStatus.OK) {
 			composite.add(this.propertyProvider);
-			composite.add(this.propertiesComposite.getRefreshViewOperation(), new IActionOperation[] {this.propertyProvider});
-		}
-		else {
+			composite.add(this.propertiesComposite.getRefreshViewOperation(),
+					new IActionOperation[] { this.propertyProvider });
+		} else {
 			composite.add(this.propertiesComposite.getRefreshViewOperation());
 		}
-		
+
 		if (this.backgroundExecution) {
 			UIMonitorUtility.doTaskScheduledDefault(composite);
-		}		
-		else {
+		} else {
 			UIMonitorUtility.doTaskScheduledDefault(this, composite);
 		}
 	}
@@ -111,85 +116,90 @@ public class PropertiesView extends AbstractSVNView {
 	public void createPartControl(Composite parent) {
 		super.createPartControl(parent);
 		IPreferenceStore store = SVNTeamUIPlugin.instance().getPreferenceStore();
-	    this.isLinkWithEditorEnabled = SVNTeamPreferences.getPropertiesBoolean(store, SVNTeamPreferences.PROPERTY_LINK_WITH_EDITOR_NAME);
-		this.propertiesComposite = new PropertiesComposite(parent); 
+		this.isLinkWithEditorEnabled = SVNTeamPreferences.getPropertiesBoolean(store,
+				SVNTeamPreferences.PROPERTY_LINK_WITH_EDITOR_NAME);
+		this.propertiesComposite = new PropertiesComposite(parent);
 		this.propertiesComposite.setLayoutData(new GridData(GridData.FILL_BOTH));
 		this.propertiesComposite.setPropertiesView(this);
 		this.refresh();
-		
+
 		//drop-down menu
-        IActionBars actionBars = this.getViewSite().getActionBars();	    
-	    IMenuManager actionBarsMenu = actionBars.getMenuManager();
-	    
-	    this.linkWithEditorDropDownAction = new Action(SVNUIMessages.SVNView_LinkWith_Label, Action.AS_CHECK_BOX) {
-	    	public void run() {
-	    		PropertiesView.this.linkWithEditor();
-	    		PropertiesView.this.linkWithEditorAction.setChecked(PropertiesView.this.isLinkWithEditorEnabled);
-	    	}
-	    };
-	    this.linkWithEditorDropDownAction.setChecked(this.isLinkWithEditorEnabled);
-	    
-	    actionBarsMenu.add(this.linkWithEditorDropDownAction);
+		IActionBars actionBars = this.getViewSite().getActionBars();
+		IMenuManager actionBarsMenu = actionBars.getMenuManager();
 
-	    IToolBarManager tbm = actionBars.getToolBarManager();
-        tbm.removeAll();
-        Action action = new Action(SVNUIMessages.SVNView_Refresh_Label) {
-        	public void run() {
-	    		PropertiesView.this.refreshAction();
-	    	}
-        };
-        action.setImageDescriptor(SVNTeamUIPlugin.instance().getImageDescriptor("icons/common/refresh.gif")); //$NON-NLS-1$
-        tbm.add(action);        
-        tbm.add(this.getLinkWithEditorAction());
-        
-        tbm.update(true);
-        
-        this.getSite().getPage().addSelectionListener(this.selectionListener);
+		this.linkWithEditorDropDownAction = new Action(SVNUIMessages.SVNView_LinkWith_Label, Action.AS_CHECK_BOX) {
+			public void run() {
+				PropertiesView.this.linkWithEditor();
+				PropertiesView.this.linkWithEditorAction.setChecked(PropertiesView.this.isLinkWithEditorEnabled);
+			}
+		};
+		this.linkWithEditorDropDownAction.setChecked(this.isLinkWithEditorEnabled);
 
-        //Setting context help
-	    PlatformUI.getWorkbench().getHelpSystem().setHelp(parent, "org.eclipse.team.svn.help.propertiesViewContext"); //$NON-NLS-1$
+		actionBarsMenu.add(this.linkWithEditorDropDownAction);
+
+		IToolBarManager tbm = actionBars.getToolBarManager();
+		tbm.removeAll();
+		Action action = new Action(SVNUIMessages.SVNView_Refresh_Label) {
+			public void run() {
+				PropertiesView.this.refreshAction();
+			}
+		};
+		action.setImageDescriptor(SVNTeamUIPlugin.instance().getImageDescriptor("icons/common/refresh.gif")); //$NON-NLS-1$
+		tbm.add(action);
+		tbm.add(this.getLinkWithEditorAction());
+
+		tbm.update(true);
+
+		this.getSite().getPage().addSelectionListener(this.selectionListener);
+
+		//Setting context help
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(parent, "org.eclipse.team.svn.help.propertiesViewContext"); //$NON-NLS-1$
 	}
 
 	protected void disconnectView() {
 		this.propertiesComposite.disconnectComposite();
 		this.wcResource = null;
 	}
-	
+
 	protected void refreshAction() {
 		if (PropertiesView.this.repositoryResource != null) {
-			PropertiesView.this.propertyProvider = new GetRemotePropertiesOperation(PropertiesView.this.repositoryResource);
-			PropertiesView.this.propertiesComposite.setResource(PropertiesView.this.adaptable, PropertiesView.this.propertyProvider);
+			PropertiesView.this.propertyProvider = new GetRemotePropertiesOperation(
+					PropertiesView.this.repositoryResource);
+			PropertiesView.this.propertiesComposite.setResource(PropertiesView.this.adaptable,
+					PropertiesView.this.propertyProvider);
 		}
 		PropertiesView.this.refresh();
 	}
-	
+
 	protected Action getLinkWithEditorAction() {
 		this.linkWithEditorAction = new Action(SVNUIMessages.SVNView_LinkWith_Label, IAction.AS_CHECK_BOX) {
-	        public void run() {
-	            PropertiesView.this.linkWithEditor();
-	            PropertiesView.this.linkWithEditorDropDownAction.setChecked(PropertiesView.this.isLinkWithEditorEnabled);
-	        }
-	    };
-	    this.linkWithEditorAction.setToolTipText(SVNUIMessages.SVNView_LinkWith_ToolTip);
-	    this.linkWithEditorAction.setDisabledImageDescriptor(SVNTeamUIPlugin.instance().getImageDescriptor("icons/views/history/link_with_disabled.gif")); //$NON-NLS-1$
-	    this.linkWithEditorAction.setImageDescriptor(SVNTeamUIPlugin.instance().getImageDescriptor("icons/views/history/link_with.gif")); //$NON-NLS-1$
-	    
-	    
-	    this.linkWithEditorAction.setChecked(this.isLinkWithEditorEnabled);
-	    
-	    return this.linkWithEditorAction;
+			public void run() {
+				PropertiesView.this.linkWithEditor();
+				PropertiesView.this.linkWithEditorDropDownAction
+						.setChecked(PropertiesView.this.isLinkWithEditorEnabled);
+			}
+		};
+		this.linkWithEditorAction.setToolTipText(SVNUIMessages.SVNView_LinkWith_ToolTip);
+		this.linkWithEditorAction.setDisabledImageDescriptor(
+				SVNTeamUIPlugin.instance().getImageDescriptor("icons/views/history/link_with_disabled.gif")); //$NON-NLS-1$
+		this.linkWithEditorAction
+				.setImageDescriptor(SVNTeamUIPlugin.instance().getImageDescriptor("icons/views/history/link_with.gif")); //$NON-NLS-1$
+
+		this.linkWithEditorAction.setChecked(this.isLinkWithEditorEnabled);
+
+		return this.linkWithEditorAction;
 	}
-	
-	
+
 	protected void linkWithEditor() {
 		this.isLinkWithEditorEnabled = !this.isLinkWithEditorEnabled;
-        IPreferenceStore store = SVNTeamUIPlugin.instance().getPreferenceStore();
-        SVNTeamPreferences.setPropertiesBoolean(store, SVNTeamPreferences.PROPERTY_LINK_WITH_EDITOR_NAME, this.isLinkWithEditorEnabled);
-        if (this.isLinkWithEditorEnabled) {
-        	this.editorActivated(this.getSite().getPage().getActiveEditor());
+		IPreferenceStore store = SVNTeamUIPlugin.instance().getPreferenceStore();
+		SVNTeamPreferences.setPropertiesBoolean(store, SVNTeamPreferences.PROPERTY_LINK_WITH_EDITOR_NAME,
+				this.isLinkWithEditorEnabled);
+		if (this.isLinkWithEditorEnabled) {
+			this.editorActivated(this.getSite().getPage().getActiveEditor());
 		}
 	}
-	
+
 	protected void updateViewInput(IRepositoryResource resource) {
 		if (this.repositoryResource != null && this.repositoryResource.equals(resource)) {
 			return;
@@ -198,7 +208,7 @@ public class PropertiesView extends AbstractSVNView {
 			this.setResource(resource, new GetRemotePropertiesOperation(resource), true);
 		}
 	}
-	
+
 	protected void updateViewInput(IResource resource) {
 		ILocalResource local = SVNRemoteStorage.instance().asLocalResource(resource);
 		if (IStateFilter.SF_EXCLUDE_PREREPLACED_AND_DELETED.accept(local)) {

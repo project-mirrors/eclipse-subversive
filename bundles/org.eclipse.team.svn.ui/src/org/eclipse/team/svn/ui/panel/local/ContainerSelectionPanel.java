@@ -52,22 +52,31 @@ import org.eclipse.ui.internal.ide.misc.ContainerSelectionGroup;
  */
 public class ContainerSelectionPanel extends AbstractDialogPanel {
 	protected ContainerSelectionGroup group;
+
 	protected Button copyWithHistoryButton;
+
 	protected IContainer initialRoot;
+
 	protected Text nameBox;
+
 	protected Button overrideResourceNameButton;
-	
-	protected IResource []resources;
-	
+
+	protected IResource[] resources;
+
 	protected IPath selectedPath;
+
 	protected String defaultConflictMessage;
+
 	protected int numConflicts;
+
 	protected boolean copyWithHistorySelected;
+
 	protected String name;
+
 	protected boolean overrideResourceName;
-    
-	public ContainerSelectionPanel(IResource []resources, HashSet conflicts) {
-	 	super();
+
+	public ContainerSelectionPanel(IResource[] resources, HashSet conflicts) {
+		super();
 		this.dialogTitle = SVNUIMessages.ContainerSelectionPanel_Title;
 		this.dialogDescription = SVNUIMessages.ContainerSelectionPanel_Description;
 		this.selectedPath = null;
@@ -77,117 +86,121 @@ public class ContainerSelectionPanel extends AbstractDialogPanel {
 		this.defaultConflictMessage = ""; //$NON-NLS-1$
 		this.getDefaultConflictMessage(conflicts);
 		this.defaultConflictMessage = this.getDefaultConflictMessage(conflicts);
-		this.defaultMessage = conflicts.size() == 0 ? SVNUIMessages.ContainerSelectionPanel_Message : this.defaultConflictMessage;
-    }
+		this.defaultMessage = conflicts.size() == 0
+				? SVNUIMessages.ContainerSelectionPanel_Message
+				: this.defaultConflictMessage;
+	}
 
-    public IPath getSelectedPath() {
-    	return this.selectedPath;
-    }
-    
-    public boolean isOverrideResourceName() {
-    	return this.overrideResourceName;
-    }
-    
-    public String getOverridenName() {
-    	return this.name;
-    }
-    
-    public boolean isCopyWithHistorySelected() {
-    	return this.copyWithHistorySelected;
-    }
-    
-    public void createControlsImpl(Composite parent) {
-        GridData data = null;
-        
-        this.group = new SVNContainerSelectionGroup(parent, new Listener() {
-            public void handleEvent(Event event) {
-            	ContainerSelectionPanel.this.validateContent();
-            }
-        });
-        this.group.setLayoutData(new GridData(GridData.FILL_BOTH));
-        this.attachTo(this.group, new ContainerSelectionVerifier(this.defaultConflictMessage));
-        
-    	this.overrideResourceNameButton = new Button(parent, SWT.CHECK);
-    	this.overrideResourceNameButton.setLayoutData(new GridData());
-    	this.overrideResourceNameButton.setText(SVNUIMessages.ContainerSelectionPanel_NewName);
-    	this.overrideResourceNameButton.addSelectionListener(new SelectionAdapter() {
-			public void widgetSelected(SelectionEvent e) {
-				ContainerSelectionPanel.this.nameBox.setEnabled(((Button)e.widget).getSelection());
+	public IPath getSelectedPath() {
+		return this.selectedPath;
+	}
+
+	public boolean isOverrideResourceName() {
+		return this.overrideResourceName;
+	}
+
+	public String getOverridenName() {
+		return this.name;
+	}
+
+	public boolean isCopyWithHistorySelected() {
+		return this.copyWithHistorySelected;
+	}
+
+	public void createControlsImpl(Composite parent) {
+		GridData data = null;
+
+		this.group = new SVNContainerSelectionGroup(parent, new Listener() {
+			public void handleEvent(Event event) {
 				ContainerSelectionPanel.this.validateContent();
 			}
 		});
-    	this.overrideResourceNameButton.setSelection(false);
-    	
-    	this.nameBox = new Text(parent, SWT.BORDER | SWT.SINGLE);
-    	data = new GridData(GridData.FILL_HORIZONTAL);
-    	this.nameBox.setLayoutData(data);
-    	this.nameBox.setText(this.resources[0].getName());
-    	this.nameBox.setEnabled(false);
-    	CompositeVerifier verifier = new CompositeVerifier();
-    	String name = SVNUIMessages.ContainerSelectionPanel_NewName_Verifier;
-    	verifier.add(new NonEmptyFieldVerifier(name));
-    	verifier.add(new ResourceNameVerifier(name, true));
-    	verifier.add(new AbstractFormattedVerifier(name) {
+		this.group.setLayoutData(new GridData(GridData.FILL_BOTH));
+		this.attachTo(this.group, new ContainerSelectionVerifier(this.defaultConflictMessage));
+
+		this.overrideResourceNameButton = new Button(parent, SWT.CHECK);
+		this.overrideResourceNameButton.setLayoutData(new GridData());
+		this.overrideResourceNameButton.setText(SVNUIMessages.ContainerSelectionPanel_NewName);
+		this.overrideResourceNameButton.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				ContainerSelectionPanel.this.nameBox.setEnabled(((Button) e.widget).getSelection());
+				ContainerSelectionPanel.this.validateContent();
+			}
+		});
+		this.overrideResourceNameButton.setSelection(false);
+
+		this.nameBox = new Text(parent, SWT.BORDER | SWT.SINGLE);
+		data = new GridData(GridData.FILL_HORIZONTAL);
+		this.nameBox.setLayoutData(data);
+		this.nameBox.setText(this.resources[0].getName());
+		this.nameBox.setEnabled(false);
+		CompositeVerifier verifier = new CompositeVerifier();
+		String name = SVNUIMessages.ContainerSelectionPanel_NewName_Verifier;
+		verifier.add(new NonEmptyFieldVerifier(name));
+		verifier.add(new ResourceNameVerifier(name, true));
+		verifier.add(new AbstractFormattedVerifier(name) {
 			protected String getWarningMessageImpl(Control input) {
 				return null;
 			}
+
 			protected String getErrorMessageImpl(Control input) {
 				IPath path = ContainerSelectionPanel.this.group.getContainerFullPath();
-				if (path != null && ResourcesPlugin.getWorkspace().getRoot().findMember(path.append(this.getText(input))) != null) {
+				if (path != null && ResourcesPlugin.getWorkspace()
+						.getRoot()
+						.findMember(path.append(this.getText(input))) != null) {
 					return SVNUIMessages.ContainerSelectionPanel_NewName_Verifier_Error;
 				}
 				return null;
 			}
 		});
-        this.attachTo(this.nameBox, new AbstractVerifierProxy(verifier) {
+		this.attachTo(this.nameBox, new AbstractVerifierProxy(verifier) {
 			protected boolean isVerificationEnabled(Control input) {
 				return ContainerSelectionPanel.this.overrideResourceNameButton.getSelection();
 			}
 		});
-        
-        this.copyWithHistoryButton = new Button(parent, SWT.RADIO);
-        this.copyWithHistoryButton.setLayoutData(new GridData());
-        this.copyWithHistoryButton.setText(SVNUIMessages.ContainerSelectionPanel_PerformSVNCopy);
-        this.copyWithHistoryButton.setSelection(true);
-        this.copyWithHistoryButton.addSelectionListener(new SelectionAdapter() {
+
+		this.copyWithHistoryButton = new Button(parent, SWT.RADIO);
+		this.copyWithHistoryButton.setLayoutData(new GridData());
+		this.copyWithHistoryButton.setText(SVNUIMessages.ContainerSelectionPanel_PerformSVNCopy);
+		this.copyWithHistoryButton.setSelection(true);
+		this.copyWithHistoryButton.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				ContainerSelectionPanel.this.validateContent();
 			}
 		});
-        
-        Button noSVNCopyButton = new Button(parent, SWT.RADIO);
-        noSVNCopyButton.setLayoutData(new GridData());
-        noSVNCopyButton.setText(SVNUIMessages.ContainerSelectionPanel_CopyResourcesWithoutSVNHistory);
-        noSVNCopyButton.setSelection(false);
-    }
-    
-    public void postInit() {
-    	super.postInit();
-        if (this.initialRoot != null) {
-     		this.group.setSelectedContainer(this.initialRoot);
-     	}
-        if (this.numConflicts == 0) {
-        	this.manager.setMessage(IDialogManager.LEVEL_OK, null);
-        }
-        else {
-        	this.manager.setMessage(IDialogManager.LEVEL_WARNING, null);
-        }
-    }
-    
-	public String getHelpId() {
-    	return "org.eclipse.team.svn.help.copyMoveToDialogContext"; //$NON-NLS-1$
-	}
-    
-    protected void saveChangesImpl() {
-    	this.selectedPath = this.group.getContainerFullPath();
-    	this.copyWithHistorySelected = this.copyWithHistoryButton.getSelection();
-    	this.name = this.nameBox.getText().trim();
-    	this.overrideResourceName = this.overrideResourceNameButton.getSelection();
-    }
 
-    protected void cancelChangesImpl() {
-    }
-    
+		Button noSVNCopyButton = new Button(parent, SWT.RADIO);
+		noSVNCopyButton.setLayoutData(new GridData());
+		noSVNCopyButton.setText(SVNUIMessages.ContainerSelectionPanel_CopyResourcesWithoutSVNHistory);
+		noSVNCopyButton.setSelection(false);
+	}
+
+	public void postInit() {
+		super.postInit();
+		if (this.initialRoot != null) {
+			this.group.setSelectedContainer(this.initialRoot);
+		}
+		if (this.numConflicts == 0) {
+			this.manager.setMessage(IDialogManager.LEVEL_OK, null);
+		} else {
+			this.manager.setMessage(IDialogManager.LEVEL_WARNING, null);
+		}
+	}
+
+	public String getHelpId() {
+		return "org.eclipse.team.svn.help.copyMoveToDialogContext"; //$NON-NLS-1$
+	}
+
+	protected void saveChangesImpl() {
+		this.selectedPath = this.group.getContainerFullPath();
+		this.copyWithHistorySelected = this.copyWithHistoryButton.getSelection();
+		this.name = this.nameBox.getText().trim();
+		this.overrideResourceName = this.overrideResourceNameButton.getSelection();
+	}
+
+	protected void cancelChangesImpl() {
+	}
+
 	protected String getDefaultConflictMessage(HashSet conflicts) {
 		if (conflicts.size() == 0) {
 			return null;
@@ -203,82 +216,88 @@ public class ContainerSelectionPanel extends AbstractDialogPanel {
 		}
 		if (numberOfConflicts >= 4) {
 			message += "..."; //$NON-NLS-1$
-    	}
-		return SVNUIMessages.format(SVNUIMessages.ContainerSelectionPanel_ConflictMessage, new String[] {message});
+		}
+		return SVNUIMessages.format(SVNUIMessages.ContainerSelectionPanel_ConflictMessage, new String[] { message });
 	}
-	
-    public class ContainerSelectionVerifier extends SVNContainerSelectionGroup.SVNContainerSelectionVerifier {
-    	protected String SOME_RESOURCES_IN_CONFLICT_MESSAGE;
-    	protected String SOME_RESOURCE_IN_CONFLICT_MESSAGE;
-    	protected String ALL_RESOURCES_IN_CONFLICT_MESSAGE;
-    	protected String conflictedResources;
-    	protected String defaultConflictingResourcesNames;
-    	
-    	public ContainerSelectionVerifier(String conflictingResourcesNames) {
-            super();
-            this.conflictedResources = ""; //$NON-NLS-1$
-            this.defaultConflictingResourcesNames = conflictingResourcesNames;
-            this.ALL_RESOURCES_IN_CONFLICT_MESSAGE = SVNUIMessages.ContainerSelectionPanel_Selection_Verifier_AllInConflict;
-            this.SOME_RESOURCE_IN_CONFLICT_MESSAGE = SVNUIMessages.ContainerSelectionPanel_Selection_Verifier_SomeInConflict_Single;
-            this.SOME_RESOURCES_IN_CONFLICT_MESSAGE = SVNUIMessages.ContainerSelectionPanel_Selection_Verifier_SomeInConflict_Multi;
-        }
-    	
-        protected String getErrorMessageImpl(Control input) {
-        	SVNContainerSelectionGroup control = (SVNContainerSelectionGroup)input;
-        	if (this.findConflicts(control) == ContainerSelectionPanel.this.resources.length) {
-        		return this.ALL_RESOURCES_IN_CONFLICT_MESSAGE;	
-        	}
-            return super.getErrorMessageImpl(input);
-        }
-        
-        protected String getWarningMessageImpl(Control input) {
-        	SVNContainerSelectionGroup control = (SVNContainerSelectionGroup)input;
-        	int numberconflicts = this.findConflicts(control);
-        	if (numberconflicts == 1) {
-        		return BaseMessages.format(this.SOME_RESOURCE_IN_CONFLICT_MESSAGE, new Object[] {this.conflictedResources});
-        	}
-        	if (numberconflicts > 1) {
-        		return BaseMessages.format(this.SOME_RESOURCES_IN_CONFLICT_MESSAGE, new Object[] {this.conflictedResources});
-        	}
-        	if (this.defaultConflictingResourcesNames != null) {
-        		return this.defaultConflictingResourcesNames;
-        	}
-        	
-        	return null;
-        }
-        
-        protected int findConflicts(SVNContainerSelectionGroup control) {
-        	IPath containerPath = control.getContainerFullPath();
-        	if (containerPath == null) {
-        		return 0;
-        	}
-        	if (ContainerSelectionPanel.this.overrideResourceNameButton.getSelection()) {
-        		containerPath = containerPath.append(ContainerSelectionPanel.this.nameBox.getText().trim());
-        		if (ContainerSelectionPanel.this.resources.length == 1) {
-        			if (ResourcesPlugin.getWorkspace().getRoot().findMember(containerPath) != null) {
-        	        	this.conflictedResources = containerPath.lastSegment();
-        				return 1;
-        			}
-        		}
-        	}
-        	ArrayList<IResource> destResources = new ArrayList<IResource>();
-        	int numberOfConflictedResources = 0;
-        	for (int i = 0; i < ContainerSelectionPanel.this.resources.length; i++) {
-    			IPath dest = containerPath.append(ContainerSelectionPanel.this.resources[i].getName());
-    			IResource destinationResource = ResourcesPlugin.getWorkspace().getRoot().findMember(dest);
-    			if (destinationResource != null) {
-    				numberOfConflictedResources++;
-    				destResources.add(destinationResource);
-    			}
-        	}
-        	this.conflictedResources = FileUtility.getNamesListAsString(destResources.toArray());
-        	return numberOfConflictedResources;
-        }
-        
-        protected boolean isNonSVNCheckDisabled() {
-        	return ContainerSelectionPanel.this.copyWithHistoryButton.getSelection();
-        }
-	
-    }
-	    
+
+	public class ContainerSelectionVerifier extends SVNContainerSelectionGroup.SVNContainerSelectionVerifier {
+		protected String SOME_RESOURCES_IN_CONFLICT_MESSAGE;
+
+		protected String SOME_RESOURCE_IN_CONFLICT_MESSAGE;
+
+		protected String ALL_RESOURCES_IN_CONFLICT_MESSAGE;
+
+		protected String conflictedResources;
+
+		protected String defaultConflictingResourcesNames;
+
+		public ContainerSelectionVerifier(String conflictingResourcesNames) {
+			super();
+			this.conflictedResources = ""; //$NON-NLS-1$
+			this.defaultConflictingResourcesNames = conflictingResourcesNames;
+			this.ALL_RESOURCES_IN_CONFLICT_MESSAGE = SVNUIMessages.ContainerSelectionPanel_Selection_Verifier_AllInConflict;
+			this.SOME_RESOURCE_IN_CONFLICT_MESSAGE = SVNUIMessages.ContainerSelectionPanel_Selection_Verifier_SomeInConflict_Single;
+			this.SOME_RESOURCES_IN_CONFLICT_MESSAGE = SVNUIMessages.ContainerSelectionPanel_Selection_Verifier_SomeInConflict_Multi;
+		}
+
+		protected String getErrorMessageImpl(Control input) {
+			SVNContainerSelectionGroup control = (SVNContainerSelectionGroup) input;
+			if (this.findConflicts(control) == ContainerSelectionPanel.this.resources.length) {
+				return this.ALL_RESOURCES_IN_CONFLICT_MESSAGE;
+			}
+			return super.getErrorMessageImpl(input);
+		}
+
+		protected String getWarningMessageImpl(Control input) {
+			SVNContainerSelectionGroup control = (SVNContainerSelectionGroup) input;
+			int numberconflicts = this.findConflicts(control);
+			if (numberconflicts == 1) {
+				return BaseMessages.format(this.SOME_RESOURCE_IN_CONFLICT_MESSAGE,
+						new Object[] { this.conflictedResources });
+			}
+			if (numberconflicts > 1) {
+				return BaseMessages.format(this.SOME_RESOURCES_IN_CONFLICT_MESSAGE,
+						new Object[] { this.conflictedResources });
+			}
+			if (this.defaultConflictingResourcesNames != null) {
+				return this.defaultConflictingResourcesNames;
+			}
+
+			return null;
+		}
+
+		protected int findConflicts(SVNContainerSelectionGroup control) {
+			IPath containerPath = control.getContainerFullPath();
+			if (containerPath == null) {
+				return 0;
+			}
+			if (ContainerSelectionPanel.this.overrideResourceNameButton.getSelection()) {
+				containerPath = containerPath.append(ContainerSelectionPanel.this.nameBox.getText().trim());
+				if (ContainerSelectionPanel.this.resources.length == 1) {
+					if (ResourcesPlugin.getWorkspace().getRoot().findMember(containerPath) != null) {
+						this.conflictedResources = containerPath.lastSegment();
+						return 1;
+					}
+				}
+			}
+			ArrayList<IResource> destResources = new ArrayList<IResource>();
+			int numberOfConflictedResources = 0;
+			for (int i = 0; i < ContainerSelectionPanel.this.resources.length; i++) {
+				IPath dest = containerPath.append(ContainerSelectionPanel.this.resources[i].getName());
+				IResource destinationResource = ResourcesPlugin.getWorkspace().getRoot().findMember(dest);
+				if (destinationResource != null) {
+					numberOfConflictedResources++;
+					destResources.add(destinationResource);
+				}
+			}
+			this.conflictedResources = FileUtility.getNamesListAsString(destResources.toArray());
+			return numberOfConflictedResources;
+		}
+
+		protected boolean isNonSVNCheckDisabled() {
+			return ContainerSelectionPanel.this.copyWithHistoryButton.getSelection();
+		}
+
+	}
+
 }

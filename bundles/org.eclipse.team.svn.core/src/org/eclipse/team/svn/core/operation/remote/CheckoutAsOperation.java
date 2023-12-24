@@ -54,11 +54,17 @@ import org.eclipse.team.svn.core.utility.SVNUtility;
  */
 public class CheckoutAsOperation extends AbstractActionOperation {
 	protected IProject project;
+
 	protected IRepositoryResource resource;
+
 	protected String projectLocation;
+
 	protected List<IProject> overlappingProjects;
+
 	protected SVNDepth depth;
+
 	protected long options;
+
 	protected RestoreProjectMetaOperation restoreOp;
 
 	public CheckoutAsOperation(String projectName, IRepositoryResource resource, SVNDepth depth,
@@ -69,7 +75,8 @@ public class CheckoutAsOperation extends AbstractActionOperation {
 	public CheckoutAsOperation(String projectName, IRepositoryResource resource, boolean respectHierarchy,
 			String location, SVNDepth depth, boolean ignoreExternals) {
 		this(projectName, resource,
-				location == null ? Platform.getLocation().toString()
+				location == null
+						? Platform.getLocation().toString()
 						: location + (respectHierarchy ? SVNUtility.getResourceParent(resource) : ""), //$NON-NLS-1$
 				depth, ignoreExternals);
 	}
@@ -97,7 +104,8 @@ public class CheckoutAsOperation extends AbstractActionOperation {
 					projectToCheckOut = projects[i];
 				}
 			}
-			this.project = projectToCheckOut != null ? projectToCheckOut
+			this.project = projectToCheckOut != null
+					? projectToCheckOut
 					: ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
 		} else {
 			this.project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
@@ -109,8 +117,9 @@ public class CheckoutAsOperation extends AbstractActionOperation {
 		this.overlappingProjects = new ArrayList<IProject>();
 		IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
 		for (int i = 0; i < projects.length; i++) {
-			if (!FileUtility.isRemoteProject(projects[i]) && new Path(this.projectLocation)
-					.append(this.project.getName()).isPrefixOf(projects[i].getLocation())) {
+			if (!FileUtility.isRemoteProject(projects[i])
+					&& new Path(this.projectLocation).append(this.project.getName())
+							.isPrefixOf(projects[i].getLocation())) {
 				this.overlappingProjects.add(projects[i]);
 			}
 		}
@@ -138,7 +147,8 @@ public class CheckoutAsOperation extends AbstractActionOperation {
 	@Override
 	protected void runImpl(IProgressMonitor monitor) throws Exception {
 		String projectName = this.project.isAccessible() && !FileUtility.isRemoteProject(this.project)
-				? this.project.getLocation().toString()
+				? this.project.getLocation()
+						.toString()
 						.substring(this.project.getLocation().toString().lastIndexOf("/") + 1) //$NON-NLS-1$
 				: this.project.getName();
 		final IPath destination = new Path(this.projectLocation).append(projectName);

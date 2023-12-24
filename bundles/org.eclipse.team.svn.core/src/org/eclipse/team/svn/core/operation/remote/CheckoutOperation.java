@@ -36,18 +36,22 @@ import org.eclipse.team.svn.core.utility.ProgressMonitorUtility;
  * @author Alexander Gurov
  */
 public class CheckoutOperation extends AbstractActionOperation implements IResourceProvider {
-	protected IProject []projects;
-	protected CheckoutAsOperation []operations;
+	protected IProject[] projects;
+
+	protected CheckoutAsOperation[] operations;
+
 	protected ISchedulingRule rule;
 
-	public CheckoutOperation(Map<String, IRepositoryResource> checkoutMap, boolean respectHierarchy, String location, SVNDepth recureDepth, boolean ignoreExternals) {
+	public CheckoutOperation(Map<String, IRepositoryResource> checkoutMap, boolean respectHierarchy, String location,
+			SVNDepth recureDepth, boolean ignoreExternals) {
 		super("Operation_CheckOut", SVNMessages.class); //$NON-NLS-1$
-		
+
 		ArrayList<IProject> projects = new ArrayList<IProject>();
 		ArrayList<CheckoutAsOperation> operations = new ArrayList<CheckoutAsOperation>();
 		ArrayList<ISchedulingRule> rules = new ArrayList<ISchedulingRule>();
 		for (Map.Entry<String, IRepositoryResource> entry : checkoutMap.entrySet()) {
-			CheckoutAsOperation coOp = CheckoutOperation.getCheckoutAsOperation(entry.getKey(), entry.getValue(), respectHierarchy, location, recureDepth, ignoreExternals);
+			CheckoutAsOperation coOp = CheckoutOperation.getCheckoutAsOperation(entry.getKey(), entry.getValue(),
+					respectHierarchy, location, recureDepth, ignoreExternals);
 			operations.add(coOp);
 			projects.add(coOp.getProject());
 			rules.add(coOp.getSchedulingRule());
@@ -56,32 +60,35 @@ public class CheckoutOperation extends AbstractActionOperation implements IResou
 		this.projects = projects.toArray(new IProject[projects.size()]);
 		this.operations = operations.toArray(new CheckoutAsOperation[operations.size()]);
 	}
-	
+
 	public int getOperationWeight() {
 		return 19;
 	}
-	
-	public IResource []getResources() {
+
+	public IResource[] getResources() {
 		return this.projects;
 	}
-	
+
 	public ISchedulingRule getSchedulingRule() {
 		return this.rule;
 	}
-	
+
 	protected void runImpl(IProgressMonitor monitor) throws Exception {
 		for (int i = 0; i < this.operations.length && !monitor.isCanceled(); i++) {
 			this.operations[i].setConsoleStream(this.getConsoleStream());
-			ProgressMonitorUtility.doTask(this.operations[i], monitor, IActionOperation.DEFAULT_WEIGHT * this.projects.length, IActionOperation.DEFAULT_WEIGHT);
+			ProgressMonitorUtility.doTask(this.operations[i], monitor,
+					IActionOperation.DEFAULT_WEIGHT * this.projects.length, IActionOperation.DEFAULT_WEIGHT);
 			this.reportStatus(this.operations[i].getStatus());
 		}
 	}
-	
-	public static CheckoutAsOperation getCheckoutAsOperation(String name, IRepositoryResource currentResource, boolean respectHierarchy, String location, SVNDepth recureDepth, boolean ignoreExternals) {
+
+	public static CheckoutAsOperation getCheckoutAsOperation(String name, IRepositoryResource currentResource,
+			boolean respectHierarchy, String location, SVNDepth recureDepth, boolean ignoreExternals) {
 		if (location != null && location.trim().length() > 0) {
-			return new CheckoutAsOperation(name, currentResource, respectHierarchy, location, recureDepth, ignoreExternals);
+			return new CheckoutAsOperation(name, currentResource, respectHierarchy, location, recureDepth,
+					ignoreExternals);
 		}
 		return new CheckoutAsOperation(name, currentResource, recureDepth, ignoreExternals);
 	}
-	
+
 }

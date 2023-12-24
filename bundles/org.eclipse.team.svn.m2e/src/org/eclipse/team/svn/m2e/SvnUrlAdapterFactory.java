@@ -36,7 +36,7 @@ public class SvnUrlAdapterFactory implements IAdapterFactory {
 	public Object getAdapter(Object adaptable, Class adapterType) {
 		// IResourceTreeNode is common interface for both UI objects: RepositoryFolder and RepositoryLocation
 		if (ScmUrl.class.equals(adapterType) && (adaptable instanceof IResourceTreeNode)) {
-			IRepositoryResource repositoryResource = ((IResourceTreeNode)adaptable).getRepositoryResource();
+			IRepositoryResource repositoryResource = ((IResourceTreeNode) adaptable).getRepositoryResource();
 
 			String scmUrl = SVNScmHandler.SVN_SCM_ID + repositoryResource.getUrl();
 			String scmParentUrl = null;

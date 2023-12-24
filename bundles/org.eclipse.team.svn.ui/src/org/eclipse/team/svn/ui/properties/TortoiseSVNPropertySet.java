@@ -24,15 +24,21 @@ import org.eclipse.team.svn.ui.SVNUIMessages;
  * @author Alexander Gurov
  */
 public class TortoiseSVNPropertySet extends PredefinedPropertySet {
-	
+
 	protected void init() {
-		this.registerProperty(new PredefinedProperty(SVNUIMessages.PropertyEditPanel_tsvn_description, PredefinedProperty.TYPE_GROUP | PredefinedProperty.TYPE_COMMON));
+		this.registerProperty(new PredefinedProperty(SVNUIMessages.PropertyEditPanel_tsvn_description,
+				PredefinedProperty.TYPE_GROUP | PredefinedProperty.TYPE_COMMON));
 		this.registerProperty(new PredefinedProperty("tsvn:logtemplate", SVNUIMessages.Property_TSVN_LogTemplate, "")); //$NON-NLS-1$ //$NON-NLS-2$
-		this.registerProperty(new PredefinedProperty("tsvn:logwidthmarker", SVNUIMessages.Property_TSVN_LogWidthMarker, "", "(\\d+)")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-		this.registerProperty(new PredefinedProperty("tsvn:logminsize", SVNUIMessages.Property_TSVN_LogMinSize, "", "(\\d+)")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-		this.registerProperty(new PredefinedProperty("tsvn:lockmsgminsize", SVNUIMessages.Property_TSVN_LockMsgMinSize, "", "(\\d+)")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-		this.registerProperty(new PredefinedProperty("tsvn:logfilelistenglish", SVNUIMessages.Property_TSVN_LogFileListEnglish, "", "((true)|(false))")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-		this.registerProperty(new PredefinedProperty("tsvn:projectlanguage", SVNUIMessages.Property_TSVN_ProjectLanguage, "")); //$NON-NLS-1$ //$NON-NLS-2$
+		this.registerProperty(new PredefinedProperty("tsvn:logwidthmarker", SVNUIMessages.Property_TSVN_LogWidthMarker, //$NON-NLS-1$
+				"", "(\\d+)")); //$NON-NLS-1$ //$NON-NLS-2$
+		this.registerProperty(
+				new PredefinedProperty("tsvn:logminsize", SVNUIMessages.Property_TSVN_LogMinSize, "", "(\\d+)")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		this.registerProperty(new PredefinedProperty("tsvn:lockmsgminsize", SVNUIMessages.Property_TSVN_LockMsgMinSize, //$NON-NLS-1$
+				"", "(\\d+)")); //$NON-NLS-1$ //$NON-NLS-2$
+		this.registerProperty(new PredefinedProperty("tsvn:logfilelistenglish", //$NON-NLS-1$
+				SVNUIMessages.Property_TSVN_LogFileListEnglish, "", "((true)|(false))")); //$NON-NLS-1$ //$NON-NLS-2$
+		this.registerProperty(
+				new PredefinedProperty("tsvn:projectlanguage", SVNUIMessages.Property_TSVN_ProjectLanguage, "")); //$NON-NLS-1$ //$NON-NLS-2$
 	}
-	
+
 }

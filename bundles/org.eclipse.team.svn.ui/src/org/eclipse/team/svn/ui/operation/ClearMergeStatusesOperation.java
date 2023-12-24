@@ -39,11 +39,11 @@ public class ClearMergeStatusesOperation extends AbstractWorkingCopyOperation {
 	public ISchedulingRule getSchedulingRule() {
 		return null;
 	}
-	
+
 	public int getOperationWeight() {
 		return 0;
 	}
-	
+
 	protected void runImpl(IProgressMonitor monitor) throws Exception {
 		MergeSubscriber.instance().clearRemoteStatuses(this.operableData());
 	}

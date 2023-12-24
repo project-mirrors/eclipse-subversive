@@ -23,9 +23,9 @@ import org.eclipse.team.svn.core.resource.IRepositoryResource;
  * @author Alexander Gurov
  */
 public class MergeSetReintegrate extends AbstractMergeSet {
-    public final IRepositoryResource []from;
+	public final IRepositoryResource[] from;
 
-	public MergeSetReintegrate(IResource[] to, IRepositoryResource []from) {
+	public MergeSetReintegrate(IResource[] to, IRepositoryResource[] from) {
 		super(to);
 		this.from = from;
 	}

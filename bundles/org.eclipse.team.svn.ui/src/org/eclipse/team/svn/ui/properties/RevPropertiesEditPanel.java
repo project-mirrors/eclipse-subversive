@@ -43,17 +43,18 @@ import org.eclipse.team.svn.ui.utility.UIMonitorUtility;
 public class RevPropertiesEditPanel extends AbstractPropertyEditPanel {
 
 	protected SVNRevision revision;
-	
+
 	/**
-	 * Creates a panel. 
+	 * Creates a panel.
 	 * 
-	 * @param revProperties - existent revision properties
-	 * @param revision - the revision to edit properties for
+	 * @param revProperties
+	 *            - existent revision properties
+	 * @param revision
+	 *            - the revision to edit properties for
 	 */
 	public RevPropertiesEditPanel(SVNProperty[] revProperties, SVNRevision revision) {
-		super(revProperties,
-				SVNUIMessages.RevisionPropertyEditPanel_Title,
-				SVNUIMessages.format(SVNUIMessages.RevisionPropertyEditPanel_Description, new String [] {String.valueOf(revision)}));
+		super(revProperties, SVNUIMessages.RevisionPropertyEditPanel_Title, SVNUIMessages.format(
+				SVNUIMessages.RevisionPropertyEditPanel_Description, new String[] { String.valueOf(revision) }));
 		this.revision = revision;
 		this.fillVerifiersMap();
 	}
@@ -61,10 +62,10 @@ public class RevPropertiesEditPanel extends AbstractPropertyEditPanel {
 	protected void saveChangesImpl() {
 		super.saveChangesImpl();
 	}
-	
+
 	protected void cancelChangesImpl() {
 	}
-	
+
 	protected List<PredefinedProperty> getPredefinedProperties() {
 		List<PredefinedProperty> properties = super.getPredefinedProperties();
 		for (SVNProperty current : this.source) {
@@ -79,56 +80,55 @@ public class RevPropertiesEditPanel extends AbstractPropertyEditPanel {
 		// is there any properties that could be used for both: revisions and resources?
 		return (property.type & PredefinedProperty.TYPE_REVISION) != PredefinedProperty.TYPE_NONE;
 	}
-	
+
 	protected IRepositoryResource getRepostioryResource() {
 		return null;
 	}
-	
-	public static void doSetRevisionProperty(RevPropertiesEditPanel panel, final IRepositoryLocation location, final SVNRevision revision) {
-		final SVNProperty []data = new SVNProperty[] {new SVNProperty(panel.getPropertyName(), panel.getPropertyValue())};
+
+	public static void doSetRevisionProperty(RevPropertiesEditPanel panel, final IRepositoryLocation location,
+			final SVNRevision revision) {
+		final SVNProperty[] data = new SVNProperty[] {
+				new SVNProperty(panel.getPropertyName(), panel.getPropertyValue()) };
 		SetRevisionPropertyOperation setPropOp = null;
 		CompositeOperation op = new CompositeOperation("", SVNUIMessages.class); //$NON-NLS-1$
 		if (panel.isFileSelected()) {
 			final File f = new File(panel.getPropertyFile());
-			AbstractActionOperation loadOp = new AbstractActionOperation("Operation_SLoadFileContent", SVNUIMessages.class) { //$NON-NLS-1$
-	            protected void runImpl(IProgressMonitor monitor) throws Exception {
-	                FileInputStream input = null;
-	                try {
-	                    input = new FileInputStream(f);
-	                    byte []binary = new byte[(int)f.length()];
-	                    input.read(binary);
-	                    data[0] = new SVNProperty(data[0].name, new String(binary));
-	                }
-	                finally {
-	                    if (input != null) {
-	                        input.close();
-	                    }
-	                }
-	            }
-	        };
-	        op.add(loadOp);
+			AbstractActionOperation loadOp = new AbstractActionOperation("Operation_SLoadFileContent", //$NON-NLS-1$
+					SVNUIMessages.class) {
+				protected void runImpl(IProgressMonitor monitor) throws Exception {
+					FileInputStream input = null;
+					try {
+						input = new FileInputStream(f);
+						byte[] binary = new byte[(int) f.length()];
+						input.read(binary);
+						data[0] = new SVNProperty(data[0].name, new String(binary));
+					} finally {
+						if (input != null) {
+							input.close();
+						}
+					}
+				}
+			};
+			op.add(loadOp);
 			IRevisionPropertiesProvider provider = new IRevisionPropertiesProvider() {
 				public SVNProperty[] getRevisionProperties() {
 					return data;
 				}
 			};
 			setPropOp = new SetRevisionPropertyOperation(location, revision, provider);
-		}
-		else {
+		} else {
 			setPropOp = new SetRevisionPropertyOperation(location, revision, data[0]);
 		}
 		op.setOperationName(setPropOp.getOperationName());
 		op.add(setPropOp);
 		op.add(new AbstractActionOperation(setPropOp.getOperationName(), SVNMessages.class) {
 			protected void runImpl(IProgressMonitor monitor) throws Exception {
-				SVNRemoteStorage.instance().fireRevisionPropertyChangeEvent(new RevisonPropertyChangeEvent(
-						RevisonPropertyChangeEvent.SET, 
-						revision,
-						location,
-						data[0]));
-			}			
-		}, new IActionOperation [] {setPropOp});
+				SVNRemoteStorage.instance()
+						.fireRevisionPropertyChangeEvent(new RevisonPropertyChangeEvent(
+								RevisonPropertyChangeEvent.SET, revision, location, data[0]));
+			}
+		}, new IActionOperation[] { setPropOp });
 		UIMonitorUtility.doTaskNowDefault(op, true);
 	}
-	
+
 }

@@ -42,31 +42,31 @@ public class ScanLocksModelAction extends AbstractSynchronizeLogicalModelAction 
 
 	protected boolean updateSelection(IStructuredSelection selection) {
 		if (super.updateSelection(selection)) {
-			if (selection.size() == 1) {						
+			if (selection.size() == 1) {
 				IResource resource = this.getSelectedResource();
 				ILocalResource local = SVNRemoteStorage.instance().asLocalResource(resource);
 				if (local != null) {
-					return IStateFilter.SF_ONREPOSITORY.accept(local);	
-				}				
-			}	
+					return IStateFilter.SF_ONREPOSITORY.accept(local);
+				}
+			}
 		}
-	    return false;
+		return false;
 	}
-	
+
 	protected IActionOperation getOperation() {
-		IResource resource = this.getSelectedResource();				
+		IResource resource = this.getSelectedResource();
 		IWorkbenchPage page = UIMonitorUtility.getActivePage();
-		if (page != null) { 
+		if (page != null) {
 			try {
 				LocksView view = (LocksView) page.showView(LocksView.VIEW_ID);
 				if (view != null) {
 					view.setResourceWithoutActionExecution(resource);
 					IActionOperation op = view.getUpdateViewOperation();
-					return op;		
-				}	
+					return op;
+				}
 			} catch (PartInitException pe) {
 				LoggedOperation.reportError(ScanLocksAction.class.getName(), pe);
-			}		
+			}
 		}
 		return null;
 	}

@@ -34,15 +34,15 @@ public class UpgradeProjectsAction extends AbstractLocalTeamAction {
 	public UpgradeProjectsAction() {
 		super();
 	}
-	
+
 	public void runImpl(IAction action) {
-		IProject []projects = this.getProjectsToUpgrade();
+		IProject[] projects = this.getProjectsToUpgrade();
 		UIMonitorUtility.doTaskScheduledWorkspaceModify(new UpgradeWorkingCopyOperation(projects));
 	}
 
-	protected IProject []getProjectsToUpgrade() {
+	protected IProject[] getProjectsToUpgrade() {
 		HashSet<IProject> projects = new HashSet<IProject>(Arrays.asList(this.getSelectedProjects()));
-		for (Iterator<IProject> it = projects.iterator(); it.hasNext(); ) {
+		for (Iterator<IProject> it = projects.iterator(); it.hasNext();) {
 			IProject project = it.next();
 			if (!project.isAccessible() || !SVNTeamProvider.requiresUpgrade(project)) {
 				it.remove();
@@ -50,9 +50,9 @@ public class UpgradeProjectsAction extends AbstractLocalTeamAction {
 		}
 		return projects.toArray(new IProject[projects.size()]);
 	}
-	
+
 	public boolean isEnabled() {
-		IProject []projects = this.getSelectedProjects();
+		IProject[] projects = this.getSelectedProjects();
 		for (int i = 0; i < projects.length; i++) {
 			if (projects[i].isAccessible() && SVNTeamProvider.requiresUpgrade(projects[i])) {
 				return true;

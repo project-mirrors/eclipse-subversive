@@ -27,6 +27,7 @@ import org.eclipse.team.svn.ui.SVNUIMessages;
  */
 public class GetRemoteResourceRevisionOperation extends AbstractActionOperation {
 	protected IRepositoryResource resource;
+
 	protected long revision;
 
 	public GetRemoteResourceRevisionOperation(IRepositoryResource resource) {

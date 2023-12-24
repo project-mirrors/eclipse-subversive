@@ -36,14 +36,17 @@ import org.eclipse.team.ui.synchronize.ModelSynchronizeParticipantActionGroup;
 public abstract class AbstractSynchronizeModelActionGroup extends ModelSynchronizeParticipantActionGroup {
 
 	public static final String GROUP_MANAGE_LOCALS = "modelManageLocalChanges"; //$NON-NLS-1$
+
 	public static final String GROUP_PROCESS_ALL = "modelProcessAllItems"; //$NON-NLS-1$
+
 	public static final String GROUP_TEAM = "modelTeam"; //$NON-NLS-1$
-	
+
 	protected ISynchronizePageConfiguration configuration;
-	
+
 	protected MenuManager outgoing;
+
 	protected MenuManager incoming;
-	
+
 	public AbstractSynchronizeModelActionGroup() {
 		super();
 	}
@@ -52,40 +55,39 @@ public abstract class AbstractSynchronizeModelActionGroup extends ModelSynchroni
 		super.initialize(this.configuration = configuration);
 		this.configureActions(configuration);
 	}
-	
-    public ISynchronizePageConfiguration getConfiguration() {
-        return this.configuration;
-    }
+
+	public ISynchronizePageConfiguration getConfiguration() {
+		return this.configuration;
+	}
 
 	public void dispose() {
 		if (this.outgoing != null) {
 			this.outgoing.removeAll();
 			this.outgoing.dispose();
 		}
-		
+
 		if (this.incoming != null) {
 			this.incoming.removeAll();
 			this.incoming.dispose();
 		}
-		
+
 		super.dispose();
 	}
-	   
+
 	protected abstract void configureActions(ISynchronizePageConfiguration configuration);
-	
-	protected void addSpecificActions(final AbstractSynchronizeLogicalModelAction selectionProvider, final ISynchronizePageConfiguration configuration) {
+
+	protected void addSpecificActions(final AbstractSynchronizeLogicalModelAction selectionProvider,
+			final ISynchronizePageConfiguration configuration) {
 		this.outgoing = new MenuManager(SVNUIMessages.SynchronizeActionGroup_Outgoing);
 		this.appendToGroup(
-				ISynchronizePageConfiguration.P_CONTEXT_MENU, 
-				AbstractSynchronizeModelActionGroup.GROUP_TEAM, 
+				ISynchronizePageConfiguration.P_CONTEXT_MENU, AbstractSynchronizeModelActionGroup.GROUP_TEAM,
 				this.outgoing);
-		
+
 		this.incoming = new MenuManager(SVNUIMessages.SynchronizeActionGroup_Incoming);
 		this.appendToGroup(
-				ISynchronizePageConfiguration.P_CONTEXT_MENU, 
-				AbstractSynchronizeModelActionGroup.GROUP_TEAM, 
+				ISynchronizePageConfiguration.P_CONTEXT_MENU, AbstractSynchronizeModelActionGroup.GROUP_TEAM,
 				this.incoming);
-		
+
 		boolean isEuropa = false;
 		String version = (String) Platform.getBundle("org.eclipse.core.runtime").getHeaders().get("Bundle-Version"); //$NON-NLS-1$ //$NON-NLS-2$
 		if (version != null) {
@@ -94,32 +96,34 @@ public abstract class AbstractSynchronizeModelActionGroup extends ModelSynchroni
 		if (isEuropa) {
 			this.addLocalActions(this.outgoing, configuration);
 			this.addRemoteActions(this.incoming, configuration);
-		}
-		else {
+		} else {
 			this.outgoing.setRemoveAllWhenShown(true);
 			this.outgoing.addMenuListener(new IMenuListener() {
 				public void menuAboutToShow(IMenuManager manager) {
 					AbstractSynchronizeModelActionGroup.this.addLocalActions(manager, configuration);
-					AbstractSynchronizeModelActionGroup.this.updateSelection(manager, selectionProvider.getStructuredSelection());
+					AbstractSynchronizeModelActionGroup.this.updateSelection(manager,
+							selectionProvider.getStructuredSelection());
 				}
 			});
 			this.incoming.setRemoveAllWhenShown(true);
 			this.incoming.addMenuListener(new IMenuListener() {
 				public void menuAboutToShow(IMenuManager manager) {
 					AbstractSynchronizeModelActionGroup.this.addRemoteActions(manager, configuration);
-					AbstractSynchronizeModelActionGroup.this.updateSelection(manager, selectionProvider.getStructuredSelection());
+					AbstractSynchronizeModelActionGroup.this.updateSelection(manager,
+							selectionProvider.getStructuredSelection());
 				}
 			});
 		}
 	}
 
 	protected void addLocalActions(IMenuManager manager, ISynchronizePageConfiguration configuration) {
-		
+
 	}
+
 	protected void addRemoteActions(IMenuManager manager, ISynchronizePageConfiguration configuration) {
-		
+
 	}
-	
+
 	protected void updateSelection(IMenuManager manager, ISelection selection) {
 		IContributionItem[] items = manager.getItems();
 		for (int i = 0; i < items.length; i++) {

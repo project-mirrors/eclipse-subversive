@@ -20,9 +20,9 @@ import java.util.List;
 /**
  * Parsed SSL server certificate information
  * 
- * The JavaHL API's is the only way to interact between SVN and Java-based tools. At the same time JavaHL connector
- * library is not EPL compatible and we won't to pin plug-in with concrete connector implementation. So, the only way to
- * do this is providing our own connector interface which will be covered by concrete connector implementation.
+ * The JavaHL API's is the only way to interact between SVN and Java-based tools. At the same time JavaHL connector library is not EPL
+ * compatible and we won't to pin plug-in with concrete connector implementation. So, the only way to do this is providing our own connector
+ * interface which will be covered by concrete connector implementation.
  * 
  * @author Alexander Gurov
  */
@@ -30,35 +30,40 @@ public class SSLServerCertificateInfo {
 	/**
 	 * The subject of the certificate.
 	 */
-    public final String subject;
+	public final String subject;
+
 	/**
 	 * The certificate issuer.
 	 */
-    public final String issuer;
+	public final String issuer;
+
 	/**
 	 * The from which the certificate is valid.
 	 */
-    public final Date validFrom;
+	public final Date validFrom;
+
 	/**
 	 * The date after which the certificate is no longer valid.
 	 */
-    public final Date validTo;
+	public final Date validTo;
+
 	/**
 	 * The certificate fingerprint.
 	 */
-    public final byte[] fingerprint;
+	public final byte[] fingerprint;
+
 	/**
 	 * A list of host names that the certificate represents.
 	 */
-    public final List<String> hostnames;
+	public final List<String> hostnames;
+
 	/**
 	 * the Base64-encoded raw certificate data.
 	 */
-    public final String asciiCert;
+	public final String asciiCert;
 
-	public SSLServerCertificateInfo(String subject, String issuer, long validFrom, long validTo, 
-			byte[] fingerprint, List<String> hostnames, String asciiCert)
-	{
+	public SSLServerCertificateInfo(String subject, String issuer, long validFrom, long validTo, byte[] fingerprint,
+			List<String> hostnames, String asciiCert) {
 		this.subject = subject;
 		this.issuer = issuer;
 		this.validFrom = new Date(validFrom);
@@ -67,5 +72,5 @@ public class SSLServerCertificateInfo {
 		this.hostnames = hostnames;
 		this.asciiCert = asciiCert;
 	}
-    
+
 }

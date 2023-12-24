@@ -56,39 +56,45 @@ import org.eclipse.ui.PlatformUI;
  * @author Alexander Gurov
  */
 public class SelectProjectsGroupPage extends AbstractVerifiedWizardPage implements IResourceProvider {
-	protected IProject []allProjects;
+	protected IProject[] allProjects;
+
 	protected Map projectGroups;
+
 	protected int analysisDepth;
+
 	protected int maxURLLength;
-	
+
 	protected String selectedGroup;
-	
+
 	protected Combo groupsCombo;
+
 	protected Combo analysisDepthCombo;
+
 	protected TableViewer viewer;
 
-	public SelectProjectsGroupPage(IProject []projects) {
+	public SelectProjectsGroupPage(IProject[] projects) {
 		super(
-			SelectProjectsGroupPage.class.getName(), 
-			SVNUIMessages.SelectProjectsGroupPage_Title, 
-			SVNTeamUIPlugin.instance().getImageDescriptor("icons/wizards/newconnect.gif")); //$NON-NLS-1$
-		
+				SelectProjectsGroupPage.class.getName(), SVNUIMessages.SelectProjectsGroupPage_Title,
+				SVNTeamUIPlugin.instance().getImageDescriptor("icons/wizards/newconnect.gif")); //$NON-NLS-1$
+
 		this.setDescription(SVNUIMessages.SelectProjectsGroupPage_Description);
 		this.allProjects = projects;
 		this.analysisDepth = 2;
 		this.maxURLLength = 0;
-		
+
 		this.performAnalysis();
-		this.selectedGroup = this.projectGroups.get(null) != null ? null : (String)this.projectGroups.keySet().iterator().next();
+		this.selectedGroup = this.projectGroups.get(null) != null
+				? null
+				: (String) this.projectGroups.keySet().iterator().next();
 	}
-	
+
 	public boolean isGroupSelectionRequired() {
 		return this.allProjects.length > 1;
 	}
-	
-	public IResource []getResources() {
+
+	public IResource[] getResources() {
 		List group = this.getProjectsGroup(this.selectedGroup);
-		return (IProject [])group.toArray(new IProject[group.size()]);
+		return (IProject[]) group.toArray(new IProject[group.size()]);
 	}
 
 	protected void performAnalysis() {
@@ -97,8 +103,7 @@ public class SelectProjectsGroupPage extends AbstractVerifiedWizardPage implemen
 			SVNChangeStatus info = SVNUtility.getSVNInfoForNotConnected(this.allProjects[i]);
 			if (info == null) {
 				this.getProjectsGroup(null).add(this.allProjects[i]);
-			}
-			else {
+			} else {
 				IPath url = SVNUtility.createPathForSVNUrl(SVNUtility.decodeURL(info.url));
 				if (this.maxURLLength < url.segmentCount()) {
 					this.maxURLLength = url.segmentCount();
@@ -113,19 +118,19 @@ public class SelectProjectsGroupPage extends AbstractVerifiedWizardPage implemen
 			this.analysisDepth = this.maxURLLength;
 		}
 	}
-	
+
 	protected List getProjectsGroup(Object key) {
-		List retVal = (List)this.projectGroups.get(key);
+		List retVal = (List) this.projectGroups.get(key);
 		if (retVal == null) {
 			this.projectGroups.put(key, retVal = new ArrayList());
 		}
 		return retVal;
 	}
-	
+
 	protected void setGroupsComboItems() {
 		ArrayList groups = new ArrayList(this.projectGroups.keySet());
 		groups.remove(null);
-		this.groupsCombo.setItems((String [])groups.toArray(new String[groups.size()]));
+		this.groupsCombo.setItems((String[]) groups.toArray(new String[groups.size()]));
 		this.groupsCombo.select(0);
 		if (groups.size() > 0) {
 			this.selectedGroup = this.groupsCombo.getItem(0);
@@ -139,9 +144,9 @@ public class SelectProjectsGroupPage extends AbstractVerifiedWizardPage implemen
 		composite.setLayout(layout);
 		GridData data = new GridData(GridData.FILL_BOTH);
 		composite.setLayoutData(data);
-		
+
 		this.initializeDialogUnits(parent);
-		
+
 		Label label = new Label(composite, SWT.WRAP);
 		data = new GridData(GridData.FILL_HORIZONTAL);
 		data.horizontalSpan = 2;
@@ -149,7 +154,7 @@ public class SelectProjectsGroupPage extends AbstractVerifiedWizardPage implemen
 		data.widthHint = 420;
 		label.setLayoutData(data);
 		label.setText(SVNUIMessages.SelectProjectsGroupPage_Hint);
-		
+
 		Button shareProjectsButton = new Button(composite, SWT.RADIO);
 		data = new GridData();
 		data.horizontalSpan = 2;
@@ -160,7 +165,7 @@ public class SelectProjectsGroupPage extends AbstractVerifiedWizardPage implemen
 		shareProjectsButton.setSelection(newEnabled);
 		shareProjectsButton.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				if (((Button)e.widget).getSelection()) {
+				if (((Button) e.widget).getSelection()) {
 					SelectProjectsGroupPage.this.groupsCombo.setEnabled(false);
 					SelectProjectsGroupPage.this.analysisDepthCombo.setEnabled(false);
 					SelectProjectsGroupPage.this.selectedGroup = null;
@@ -168,7 +173,7 @@ public class SelectProjectsGroupPage extends AbstractVerifiedWizardPage implemen
 				SelectProjectsGroupPage.this.viewer.setInput(SelectProjectsGroupPage.this.projectGroups);
 			}
 		});
-		
+
 		Button reconnectProjectsButton = new Button(composite, SWT.RADIO);
 		data = new GridData();
 		data.horizontalSpan = 2;
@@ -178,10 +183,11 @@ public class SelectProjectsGroupPage extends AbstractVerifiedWizardPage implemen
 		reconnectProjectsButton.setSelection(!newEnabled);
 		reconnectProjectsButton.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				if (((Button)e.widget).getSelection()) {
+				if (((Button) e.widget).getSelection()) {
 					SelectProjectsGroupPage.this.groupsCombo.setEnabled(true);
 					SelectProjectsGroupPage.this.analysisDepthCombo.setEnabled(true);
-					SelectProjectsGroupPage.this.selectedGroup = SelectProjectsGroupPage.this.groupsCombo.getItem(SelectProjectsGroupPage.this.groupsCombo.getSelectionIndex());
+					SelectProjectsGroupPage.this.selectedGroup = SelectProjectsGroupPage.this.groupsCombo
+							.getItem(SelectProjectsGroupPage.this.groupsCombo.getSelectionIndex());
 				}
 				SelectProjectsGroupPage.this.viewer.setInput(SelectProjectsGroupPage.this.projectGroups);
 			}
@@ -194,21 +200,21 @@ public class SelectProjectsGroupPage extends AbstractVerifiedWizardPage implemen
 		this.analysisDepthCombo.setEnabled(!newEnabled);
 		this.analysisDepthCombo.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				SelectProjectsGroupPage.this.analysisDepth = ((Combo)e.widget).getSelectionIndex() + 1;
+				SelectProjectsGroupPage.this.analysisDepth = ((Combo) e.widget).getSelectionIndex() + 1;
 				SelectProjectsGroupPage.this.performAnalysis();
 				SelectProjectsGroupPage.this.setGroupsComboItems();
 				SelectProjectsGroupPage.this.viewer.setInput(SelectProjectsGroupPage.this.projectGroups);
 			}
 		});
-		String []allItems = new String[] {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"}; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$ //$NON-NLS-8$ //$NON-NLS-9$ //$NON-NLS-10$
-		String []items = allItems;
+		String[] allItems = new String[] { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9" }; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$ //$NON-NLS-8$ //$NON-NLS-9$ //$NON-NLS-10$
+		String[] items = allItems;
 		if (this.maxURLLength < 10) {
 			items = new String[this.maxURLLength];
 			System.arraycopy(allItems, 0, items, 0, this.maxURLLength);
 		}
 		this.analysisDepthCombo.setItems(items);
 		this.analysisDepthCombo.select(1);
-		
+
 		this.groupsCombo = new Combo(composite, SWT.BORDER | SWT.READ_ONLY);
 		data = new GridData(GridData.FILL_HORIZONTAL);
 		this.groupsCombo.setLayoutData(data);
@@ -216,19 +222,20 @@ public class SelectProjectsGroupPage extends AbstractVerifiedWizardPage implemen
 		this.groupsCombo.setEnabled(!newEnabled);
 		this.groupsCombo.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				Combo c = (Combo)e.widget;
+				Combo c = (Combo) e.widget;
 				SelectProjectsGroupPage.this.selectedGroup = c.getItem(c.getSelectionIndex());
 				SelectProjectsGroupPage.this.viewer.setInput(SelectProjectsGroupPage.this.projectGroups);
 			}
 		});
-		
+
 		label = new Label(composite, SWT.NONE);
 		data = new GridData();
 		data.horizontalSpan = 2;
 		label.setLayoutData(data);
 		label.setText(SVNUIMessages.SelectProjectsGroupPage_ProjectsList);
-		
-		this.viewer = new TableViewer(composite, SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER | SWT.SINGLE | SWT.FULL_SELECTION);
+
+		this.viewer = new TableViewer(composite,
+				SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER | SWT.SINGLE | SWT.FULL_SELECTION);
 		Table table = this.viewer.getTable();
 		table.setHeaderVisible(true);
 		table.setLinesVisible(true);
@@ -236,32 +243,39 @@ public class SelectProjectsGroupPage extends AbstractVerifiedWizardPage implemen
 		data.widthHint = 420;
 		data.horizontalSpan = 2;
 		table.setLayoutData(data);
-		
+
 		this.viewer.setContentProvider(new IStructuredContentProvider() {
 			public Object[] getElements(Object inputElement) {
 				List group = SelectProjectsGroupPage.this.getProjectsGroup(SelectProjectsGroupPage.this.selectedGroup);
 				return group.toArray();
 			}
+
 			public void dispose() {
 			}
+
 			public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 			}
 		});
 		this.viewer.setLabelProvider(new ITableLabelProvider() {
 			public void removeListener(ILabelProviderListener listener) {
 			}
+
 			public boolean isLabelProperty(Object element, String property) {
 				return false;
 			}
+
 			public void dispose() {
 			}
+
 			public void addListener(ILabelProviderListener listener) {
 			}
+
 			public Image getColumnImage(Object element, int columnIndex) {
 				return null;
 			}
+
 			public String getColumnText(Object element, int columnIndex) {
-				return ((IProject)element).getName();
+				return ((IProject) element).getName();
 			}
 		});
 
@@ -270,7 +284,7 @@ public class SelectProjectsGroupPage extends AbstractVerifiedWizardPage implemen
 				return ColumnedViewerComparator.compare(row1.toString(), row2.toString());
 			}
 		};
-		
+
 		TableColumn col = new TableColumn(table, SWT.NONE);
 		col.setResizable(false);
 		col.setText(SVNUIMessages.SelectProjectsGroupPage_ProjectName);
@@ -278,18 +292,19 @@ public class SelectProjectsGroupPage extends AbstractVerifiedWizardPage implemen
 		TableLayout tLayout = new TableLayout();
 		tLayout.addColumnData(new ColumnWeightData(100));
 		table.setLayout(tLayout);
-		
+
 		this.viewer.getTable().setSortDirection(SWT.UP);
 		this.viewer.getTable().setSortColumn(this.viewer.getTable().getColumn(0));
-		
-		this.selectedGroup = this.projectGroups.get(null) != null ? null : (String)this.projectGroups.keySet().iterator().next();
+
+		this.selectedGroup = this.projectGroups.get(null) != null
+				? null
+				: (String) this.projectGroups.keySet().iterator().next();
 		this.viewer.setInput(this.projectGroups);
-		
+
 //		Setting context help
-        PlatformUI.getWorkbench().getHelpSystem().setHelp(composite, "org.eclipse.team.svn.help.projectGroupContext"); //$NON-NLS-1$
-		
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(composite, "org.eclipse.team.svn.help.projectGroupContext"); //$NON-NLS-1$
+
 		return composite;
 	}
-
 
 }

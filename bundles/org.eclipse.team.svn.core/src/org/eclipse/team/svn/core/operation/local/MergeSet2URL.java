@@ -24,13 +24,15 @@ import org.eclipse.team.svn.core.resource.IRepositoryResource;
  * @author Alexander Gurov
  */
 public class MergeSet2URL extends AbstractMergeSetURL {
-    public final IRepositoryResource []fromStart;
-    public final IRepositoryResource []fromEnd;
+	public final IRepositoryResource[] fromStart;
 
-	public MergeSet2URL(IResource[] to, IRepositoryResource[] fromStart, IRepositoryResource[] fromEnd, boolean ignoreAncestry, boolean recordOnly, SVNDepth depth) {
+	public final IRepositoryResource[] fromEnd;
+
+	public MergeSet2URL(IResource[] to, IRepositoryResource[] fromStart, IRepositoryResource[] fromEnd,
+			boolean ignoreAncestry, boolean recordOnly, SVNDepth depth) {
 		super(to, ignoreAncestry, recordOnly, depth);
-    	this.fromStart = fromStart;
-    	this.fromEnd = fromEnd;
+		this.fromStart = fromStart;
+		this.fromEnd = fromEnd;
 	}
 
 }

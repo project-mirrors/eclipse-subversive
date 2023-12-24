@@ -20,17 +20,17 @@ package org.eclipse.team.svn.core.resource;
  * @author Alexander Gurov
  */
 public interface IRepositoryRoot extends IRepositoryContainer {
-	
+
 	public static final int KIND_ROOT = 4;
-	
+
 	public static final int KIND_LOCATION_ROOT = 0;
-	
+
 	public static final int KIND_TRUNK = 1;
-	
+
 	public static final int KIND_BRANCHES = 2;
-	
+
 	public static final int KIND_TAGS = 3;
-	
+
 	public int getKind();
-	
+
 }

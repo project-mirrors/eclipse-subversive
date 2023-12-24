@@ -23,19 +23,20 @@ import org.eclipse.team.svn.ui.action.AbstractRepositoryTeamAction;
 import org.eclipse.team.svn.ui.dialog.DefaultDialog;
 import org.eclipse.team.svn.ui.panel.remote.ExportPanel;
 import org.eclipse.team.svn.ui.preferences.SVNTeamPreferences;
+
 /**
  * Export Action implementation
  * 
  * @author Sergiy Logvin
  */
 public class ExportAction extends AbstractRepositoryTeamAction {
-	
+
 	public ExportAction() {
 		super();
 	}
-	
+
 	public void runImpl(IAction action) {
-		IRepositoryResource []resources = this.getSelectedRepositoryResources();
+		IRepositoryResource[] resources = this.getSelectedRepositoryResources();
 		ExportPanel panel = new ExportPanel(resources.length > 1 ? null : resources[0]);
 		DefaultDialog dialog = new DefaultDialog(this.getShell(), panel);
 		if (dialog.open() == 0) {
@@ -43,13 +44,15 @@ public class ExportAction extends AbstractRepositoryTeamAction {
 				resources[0] = SVNUtility.copyOf(resources[0]);
 				resources[0].setSelectedRevision(panel.getSelectedRevision());
 			}
-			boolean ignoreExternals = SVNTeamPreferences.getBehaviourBoolean(SVNTeamUIPlugin.instance().getPreferenceStore(), SVNTeamPreferences.BEHAVIOUR_IGNORE_EXTERNALS_NAME);
-	    	this.runScheduled(new ExportOperation(resources, panel.getLocation(), panel.getDepth(), ignoreExternals));
-	    }
+			boolean ignoreExternals = SVNTeamPreferences.getBehaviourBoolean(
+					SVNTeamUIPlugin.instance().getPreferenceStore(),
+					SVNTeamPreferences.BEHAVIOUR_IGNORE_EXTERNALS_NAME);
+			this.runScheduled(new ExportOperation(resources, panel.getLocation(), panel.getDepth(), ignoreExternals));
+		}
 	}
-	
+
 	public boolean isEnabled() {
 		return this.getSelectedRepositoryResources().length > 0;
 	}
-	
+
 }

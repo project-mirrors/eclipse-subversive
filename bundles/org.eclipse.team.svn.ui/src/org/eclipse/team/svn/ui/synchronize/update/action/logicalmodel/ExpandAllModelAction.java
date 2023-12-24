@@ -38,18 +38,19 @@ public class ExpandAllModelAction extends AbstractModelToolbarAction {
 	protected boolean needsToSaveDirtyEditors() {
 		return false;
 	}
-	
+
 	protected IActionOperation getOperation() {
 		return new AbstractActionOperation("Operation_UExpandAll", SVNUIMessages.class) { //$NON-NLS-1$
 			protected void runImpl(IProgressMonitor monitor) throws Exception {
 				UIMonitorUtility.getDisplay().syncExec(new Runnable() {
 					public void run() {
 						Viewer viewer = ExpandAllModelAction.this.getConfiguration().getPage().getViewer();
-						if (viewer == null || viewer.getControl().isDisposed() || !(viewer instanceof AbstractTreeViewer)) {
+						if (viewer == null || viewer.getControl().isDisposed()
+								|| !(viewer instanceof AbstractTreeViewer)) {
 							return;
 						}
-						viewer.getControl().setRedraw(false);		
-						((AbstractTreeViewer)viewer).expandAll();
+						viewer.getControl().setRedraw(false);
+						((AbstractTreeViewer) viewer).expandAll();
 						viewer.getControl().setRedraw(true);
 					}
 				});

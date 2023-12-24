@@ -20,6 +20,7 @@ package org.eclipse.team.svn.ui.panel;
  * @author Sergiy Logvin
  */
 public interface IDialogManagerEx extends IDialogManager {
-    public void setExtendedButtonCaption(int idx, String Caption);
-    public void setExtendedButtonEnabled(int idx, boolean enabled);
+	public void setExtendedButtonCaption(int idx, String Caption);
+
+	public void setExtendedButtonEnabled(int idx, boolean enabled);
 }

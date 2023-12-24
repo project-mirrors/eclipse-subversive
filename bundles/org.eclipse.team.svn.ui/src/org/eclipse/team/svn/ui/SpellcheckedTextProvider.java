@@ -66,7 +66,8 @@ public class SpellcheckedTextProvider {
 
 		AnnotationModel annotationModel = new AnnotationModel();
 		IAnnotationAccess annotationAccess = new DefaultMarkerAnnotationAccess();
-		final SourceViewerDecorationSupport support = new SourceViewerDecorationSupport(sourceViewer, null, annotationAccess, EditorsUI.getSharedTextColors());
+		final SourceViewerDecorationSupport support = new SourceViewerDecorationSupport(sourceViewer, null,
+				annotationAccess, EditorsUI.getSharedTextColors());
 		for (Iterator<?> e = new MarkerAnnotationPreferences().getAnnotationPreferences().iterator(); e.hasNext();) {
 			support.setAnnotationPreference((AnnotationPreference) e.next());
 		}
@@ -86,22 +87,21 @@ public class SpellcheckedTextProvider {
 			sourceViewer.addPainter(painter);
 		}
 		sourceViewer.getTextWidget().setIndent(0);
-		
+
 		sourceViewer.getTextWidget().addKeyListener(new KeyAdapter() {
 			public void keyPressed(KeyEvent e) {
 				if (e.keyCode == 'z' && e.stateMask == SWT.CONTROL) {
 					if (sourceViewer.canDoOperation(SourceViewer.UNDO)) {
 						sourceViewer.doOperation(SourceViewer.UNDO);
 					}
-				}
-				else if (e.keyCode == 'y' && e.stateMask == SWT.CONTROL) {
+				} else if (e.keyCode == 'y' && e.stateMask == SWT.CONTROL) {
 					if (sourceViewer.canDoOperation(SourceViewer.REDO)) {
 						sourceViewer.doOperation(SourceViewer.REDO);
 					}
 				}
 			}
 		});
-		
+
 		return sourceViewer.getTextWidget();
 	}
 

@@ -28,33 +28,35 @@ import org.eclipse.team.svn.ui.utility.UIMonitorUtility;
  * @author Alexander Gurov
  */
 public class ShowPostCommitErrorsOperation extends AbstractActionOperation {
-    protected IPostCommitErrorsProvider provider;
+	protected IPostCommitErrorsProvider provider;
 
-    public ShowPostCommitErrorsOperation(IPostCommitErrorsProvider provider) {
-        super("Operation_ShowPostCommitErrors", SVNUIMessages.class); //$NON-NLS-1$
-        this.provider = provider;
-    }
-    
-    public int getOperationWeight() {
+	public ShowPostCommitErrorsOperation(IPostCommitErrorsProvider provider) {
+		super("Operation_ShowPostCommitErrors", SVNUIMessages.class); //$NON-NLS-1$
+		this.provider = provider;
+	}
+
+	public int getOperationWeight() {
 		return 0;
 	}
 
-    protected void runImpl(IProgressMonitor monitor) throws Exception {
-    	SVNCommitStatus []errors = this.provider.getPostCommitErrors();
-        if (errors != null) {
-        	String tCompleteMessage = null;
-        	for (SVNCommitStatus error : errors) {
-        		tCompleteMessage = tCompleteMessage == null ? error.message : (tCompleteMessage + "\n\n" + error.message); //$NON-NLS-1$
-        	}
-        	if (tCompleteMessage != null) {
-            	final String completeMessage = tCompleteMessage;
-                UIMonitorUtility.getDisplay().syncExec(new Runnable() {
-                    public void run() {
-                        new ShowPostCommitErrorsDialog(UIMonitorUtility.getShell(), completeMessage).open();
-                    }
-                });
-        	}
-        }
-    }
+	protected void runImpl(IProgressMonitor monitor) throws Exception {
+		SVNCommitStatus[] errors = this.provider.getPostCommitErrors();
+		if (errors != null) {
+			String tCompleteMessage = null;
+			for (SVNCommitStatus error : errors) {
+				tCompleteMessage = tCompleteMessage == null
+						? error.message
+						: (tCompleteMessage + "\n\n" + error.message); //$NON-NLS-1$
+			}
+			if (tCompleteMessage != null) {
+				final String completeMessage = tCompleteMessage;
+				UIMonitorUtility.getDisplay().syncExec(new Runnable() {
+					public void run() {
+						new ShowPostCommitErrorsDialog(UIMonitorUtility.getShell(), completeMessage).open();
+					}
+				});
+			}
+		}
+	}
 
 }

@@ -51,16 +51,22 @@ import org.eclipse.team.svn.ui.extension.impl.DefaultSynchronizeViewActionContri
  */
 public class ExtensionsManager {
 	private static final String UI_EXTENSION_NAMESPACE = "org.eclipse.team.svn.ui"; //$NON-NLS-1$
-	
+
 	private ICommitActionFactory currentCommitFactory;
+
 	private IHistoryViewFactory currentMessageFactory;
+
 	private ICheckoutFactory currentCheckoutFactory;
+
 	private IShareProjectFactory currentShareProjectFactory;
+
 	private IDecorationFilter currentDecorationFilter;
+
 	private ISynchronizeViewActionContributor currentActionContributor;
 
-	private IReportingDescriptor []reportingDescriptors;
-	private IReporterFactory []reporterFactories;
+	private IReportingDescriptor[] reportingDescriptors;
+
+	private IReporterFactory[] reporterFactories;
 
 	private static ExtensionsManager instance;
 
@@ -70,25 +76,25 @@ public class ExtensionsManager {
 		}
 		return ExtensionsManager.instance;
 	}
-	
+
 	public ISynchronizeViewActionContributor getCurrentSynchronizeActionContributor() {
 		if (this.currentActionContributor == null) {
 			this.currentActionContributor = ExtensionsManager.getDefaultSynchronizeViewActionContributor();
 		}
 		return this.currentActionContributor;
 	}
-	
+
 	public void setCurrentSynchronizeActionContributor(ISynchronizeViewActionContributor contributor) {
 		this.currentActionContributor = contributor;
 	}
-	
+
 	public IDecorationFilter getCurrentDecorationFilter() {
 		if (this.currentDecorationFilter == null) {
 			this.currentDecorationFilter = ExtensionsManager.getDefaultDecorationFilter();
 		}
 		return this.currentDecorationFilter;
 	}
-	
+
 	public void setCurrentDecorationFilter(IDecorationFilter filter) {
 		this.currentDecorationFilter = filter;
 	}
@@ -99,26 +105,26 @@ public class ExtensionsManager {
 		}
 		return this.currentCheckoutFactory;
 	}
-	
+
 	public void setCurrentCheckoutFactory(ICheckoutFactory factory) {
 		this.currentCheckoutFactory = factory;
 	}
-	
+
 	public IShareProjectFactory getCurrentShareProjectFactory() {
 		if (this.currentShareProjectFactory == null) {
 			this.currentShareProjectFactory = ExtensionsManager.getDefaultShareProjectFactory();
 		}
 		return this.currentShareProjectFactory;
 	}
-	
+
 	public void setCurrentShareProjectFactory(IShareProjectFactory factory) {
 		this.currentShareProjectFactory = factory;
 	}
-	
-	public IReportingDescriptor []getReportingDescriptors() {
+
+	public IReportingDescriptor[] getReportingDescriptors() {
 		return this.reportingDescriptors;
 	}
-	
+
 	public IReporter getReporter(IReportingDescriptor descriptor, ReportType type) {
 		for (int i = 0; i < this.reporterFactories.length; i++) {
 			IReporter reporter = this.reporterFactories[i].newReporter(descriptor, type);
@@ -128,14 +134,14 @@ public class ExtensionsManager {
 		}
 		return null;
 	}
-	
+
 	public ICommitActionFactory getCurrentCommitFactory() {
 		if (this.currentCommitFactory == null) {
 			this.currentCommitFactory = getDefaultTeamCommitFactory();
 		}
 		return this.currentCommitFactory;
 	}
-	
+
 	public void setCurrentCommitFactory(ICommitActionFactory currentFactory) {
 		this.currentCommitFactory = currentFactory;
 	}
@@ -165,64 +171,66 @@ public class ExtensionsManager {
 	public static IHistoryViewFactory getDefaultCommitMessageFactory() {
 		return new DefaultHistoryViewFactory();
 	}
-	
+
 	public static ICheckoutFactory getDefaultCheckoutFactory() {
 		return new DefaultCheckoutFactory();
 	}
-	
+
 	public static IShareProjectFactory getDefaultShareProjectFactory() {
 		return new DefaultShareProjectFactory();
 	}
-	
+
 	public static IDecorationFilter getDefaultDecorationFilter() {
 		return new DefaultDecorationFilter();
 	}
-	
+
 	public static ISynchronizeViewActionContributor getDefaultSynchronizeViewActionContributor() {
 		return new DefaultSynchronizeViewActionContributor();
 	}
-	
+
 	private ExtensionsManager() {
-		this.currentDecorationFilter = (IDecorationFilter)this.loadUIExtension("decoration"); //$NON-NLS-1$
-		this.currentMessageFactory = (IHistoryViewFactory)this.loadUIExtension("history"); //$NON-NLS-1$
-		this.currentCommitFactory = (ICommitActionFactory)this.loadUIExtension("commit"); //$NON-NLS-1$
-		this.currentCheckoutFactory = (ICheckoutFactory)this.loadUIExtension("checkout"); //$NON-NLS-1$
-		this.currentShareProjectFactory = (IShareProjectFactory)this.loadUIExtension("shareproject"); //$NON-NLS-1$
-		this.currentActionContributor = (ISynchronizeViewActionContributor)this.loadUIExtension("synchronizeActionContribution"); //$NON-NLS-1$
-		Object []extensions = this.loadUIExtensions("reportingdescriptor"); //$NON-NLS-1$
+		this.currentDecorationFilter = (IDecorationFilter) this.loadUIExtension("decoration"); //$NON-NLS-1$
+		this.currentMessageFactory = (IHistoryViewFactory) this.loadUIExtension("history"); //$NON-NLS-1$
+		this.currentCommitFactory = (ICommitActionFactory) this.loadUIExtension("commit"); //$NON-NLS-1$
+		this.currentCheckoutFactory = (ICheckoutFactory) this.loadUIExtension("checkout"); //$NON-NLS-1$
+		this.currentShareProjectFactory = (IShareProjectFactory) this.loadUIExtension("shareproject"); //$NON-NLS-1$
+		this.currentActionContributor = (ISynchronizeViewActionContributor) this
+				.loadUIExtension("synchronizeActionContribution"); //$NON-NLS-1$
+		Object[] extensions = this.loadUIExtensions("reportingdescriptor"); //$NON-NLS-1$
 		this.reportingDescriptors = Arrays.asList(extensions).toArray(new IReportingDescriptor[extensions.length]);
 		extensions = this.loadUIExtensions("reporterfactory"); //$NON-NLS-1$
 		this.reporterFactories = Arrays.asList(extensions).toArray(new IReporterFactory[extensions.length]);
 		Arrays.sort(this.reporterFactories, new Comparator<Object>() {
 			public int compare(Object o1, Object o2) {
-				IReporterFactory f1 = (IReporterFactory)o1;
-				IReporterFactory f2 = (IReporterFactory)o2;
-				return f1.isCustomEditorSupported() ^ f2.isCustomEditorSupported() ? (f1.isCustomEditorSupported() ? -1 : 1) : 0;
+				IReporterFactory f1 = (IReporterFactory) o1;
+				IReporterFactory f2 = (IReporterFactory) o2;
+				return f1.isCustomEditorSupported() ^ f2.isCustomEditorSupported()
+						? (f1.isCustomEditorSupported() ? -1 : 1)
+						: 0;
 			}
 		});
 	}
 
 	private Object loadUIExtension(String extensionPoint) {
-		Object []extensions = this.loadUIExtensions(extensionPoint);
+		Object[] extensions = this.loadUIExtensions(extensionPoint);
 		return extensions.length == 0 ? null : extensions[0];
 	}
-	
-	private Object []loadUIExtensions(String extensionPoint) {
+
+	private Object[] loadUIExtensions(String extensionPoint) {
 		return this.loadExtensions(ExtensionsManager.UI_EXTENSION_NAMESPACE, extensionPoint);
 	}
-	
-	private Object []loadExtensions(String namespace, String extensionPoint) {
+
+	private Object[] loadExtensions(String namespace, String extensionPoint) {
 		IExtensionPoint extension = Platform.getExtensionRegistry().getExtensionPoint(namespace, extensionPoint);
-		IExtension []extensions = extension.getExtensions();
+		IExtension[] extensions = extension.getExtensions();
 		ArrayList<Object> retVal = new ArrayList<Object>();
 		for (int i = 0; i < extensions.length; i++) {
 			IConfigurationElement[] configElements = extensions[i].getConfigurationElements();
 			for (int j = 0; j < configElements.length; j++) {
 				try {
 					retVal.add(configElements[j].createExecutableExtension("class")); //$NON-NLS-1$
-				}
-				catch (CoreException ex) {
-				    LoggedOperation.reportError(SVNUIMessages.Error_LoadUIExtension, ex);
+				} catch (CoreException ex) {
+					LoggedOperation.reportError(SVNUIMessages.Error_LoadUIExtension, ex);
 				}
 			}
 		}

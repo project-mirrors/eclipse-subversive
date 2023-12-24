@@ -26,9 +26,9 @@ public class PreviewErrorReportPanel extends PreviewReportPanel {
 	public PreviewErrorReportPanel(String report) {
 		super(SVNUIMessages.PreviewErrorReportPanel_Description, report);
 	}
-	
+
 	public Point getPrefferedSizeImpl() {
 		return new Point(750, 700);
 	}
-	
+
 }

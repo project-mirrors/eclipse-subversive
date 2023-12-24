@@ -27,9 +27,9 @@ import org.eclipse.team.svn.ui.operation.UILoggedOperation;
 public class UILoggedOperationFactory implements ILoggedOperationFactory {
 	public IActionOperation getLogged(IActionOperation operation) {
 		IActionOperation retVal = this.wrappedOperation(operation);
-		
+
 		retVal.setConsoleStream(SVNConsoleFactory.getConsole().getConsoleStream());
-		
+
 		return retVal;
 	}
 

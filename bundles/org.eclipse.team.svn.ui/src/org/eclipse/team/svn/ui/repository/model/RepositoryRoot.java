@@ -21,13 +21,13 @@ import org.eclipse.team.svn.ui.SVNTeamUIPlugin;
 import org.eclipse.team.svn.ui.SVNUIMessages;
 
 /**
- * Repository root node representation 
+ * Repository root node representation
  * 
  * @author Alexander Gurov
  */
 public class RepositoryRoot extends RepositoryFolder {
 	protected static String ROOT_NAME;
-	
+
 	public RepositoryRoot(RepositoryResource parent, IRepositoryResource resource) {
 		super(parent, resource);
 		RepositoryRoot.ROOT_NAME = SVNUIMessages.RepositoriesView_Model_Root;
@@ -35,11 +35,17 @@ public class RepositoryRoot extends RepositoryFolder {
 	}
 
 	public String getLabel() {
-		return this.label == null && ((IRepositoryRoot)this.resource).getKind() == IRepositoryRoot.KIND_ROOT ? RepositoryRoot.ROOT_NAME : super.getLabel();
+		return this.label == null && ((IRepositoryRoot) this.resource).getKind() == IRepositoryRoot.KIND_ROOT
+				? RepositoryRoot.ROOT_NAME
+				: super.getLabel();
 	}
 
 	protected ImageDescriptor getImageDescriptorImpl() {
-		return this.isExternals() ? super.getImageDescriptorImpl() : (((IRepositoryRoot)this.resource).getKind() == IRepositoryRoot.KIND_ROOT ? SVNTeamUIPlugin.instance().getImageDescriptor("icons/objects/repository-root.gif") : SVNTeamUIPlugin.instance().getImageDescriptor("icons/objects/root.gif")); //$NON-NLS-1$ //$NON-NLS-2$
+		return this.isExternals()
+				? super.getImageDescriptorImpl()
+				: (((IRepositoryRoot) this.resource).getKind() == IRepositoryRoot.KIND_ROOT
+						? SVNTeamUIPlugin.instance().getImageDescriptor("icons/objects/repository-root.gif") //$NON-NLS-1$
+						: SVNTeamUIPlugin.instance().getImageDescriptor("icons/objects/root.gif")); //$NON-NLS-1$
 	}
 
 }

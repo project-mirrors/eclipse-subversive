@@ -15,7 +15,7 @@
 package org.eclipse.team.svn.ui.extension.factory;
 
 /**
- * Allows modification of the commit panel parameters 
+ * Allows modification of the commit panel parameters
  * 
  * @author Alexander Gurov
  * 
@@ -23,8 +23,8 @@ package org.eclipse.team.svn.ui.extension.factory;
  */
 public interface IModifiableCommentDialogPanel extends ICommentDialogPanel {
 	/**
-	 * Changes message in the commit panel.
-	 * Be sure to call it from UI thread and before the actual widget is disposed or you'll get an exception.
+	 * Changes message in the commit panel. Be sure to call it from UI thread and before the actual widget is disposed or you'll get an
+	 * exception.
 	 */
 	public void setMessage(String message);
 }

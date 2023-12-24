@@ -13,7 +13,6 @@
  *    Alexander Fedorov (ArSysOp) - ongoing support
  *******************************************************************************/
 
-
 package org.eclipse.team.svn.core.operation.local;
 
 import java.io.File;
@@ -31,25 +30,31 @@ import org.eclipse.team.svn.core.utility.FileUtility;
 import org.eclipse.team.svn.core.utility.ProgressMonitorUtility;
 
 /**
- * Extract selected resources to location (only local resources)
- * Used from synchronize view ExtractTo outgoing action
+ * Extract selected resources to location (only local resources) Used from synchronize view ExtractTo outgoing action
  * 
  * @author Alexei Goncharov
  */
 public class ExtractToOperationLocal extends AbstractActionOperation {
-	private IResource [] outgoingResources;
+	private IResource[] outgoingResources;
+
 	private String path;
+
 	private boolean delitionAllowed;
+
 	private InitExtractLogOperation logger;
-	
+
 	/**
 	 * Operation for extracting local resources to a location
 	 * 
-	 * @param outgoingResources - the resources to extract array
-	 * @param path - path to extract to
-	 * @param delitionAllowed - specifies if deletion allowed if the resource is marked for deletion
+	 * @param outgoingResources
+	 *            - the resources to extract array
+	 * @param path
+	 *            - path to extract to
+	 * @param delitionAllowed
+	 *            - specifies if deletion allowed if the resource is marked for deletion
 	 */
-	public ExtractToOperationLocal(IResource [] outgoingResources, String path, boolean delitionAllowed, InitExtractLogOperation logger) {
+	public ExtractToOperationLocal(IResource[] outgoingResources, String path, boolean delitionAllowed,
+			InitExtractLogOperation logger) {
 		super(SVNMessages.Operation_ExtractTo, SVNMessages.class);
 		this.outgoingResources = outgoingResources;
 		this.path = path;
@@ -69,8 +74,7 @@ public class ExtractToOperationLocal extends AbstractActionOperation {
 				if (current instanceof IContainer) {
 					previousPref = current.getFullPath();
 				}
-			}
-			else {
+			} else {
 				int toRemove = previousPref.removeLastSegments(1).toString().length();
 				if (toRemove < 2) {
 					toRemove = 0;
@@ -80,31 +84,36 @@ public class ExtractToOperationLocal extends AbstractActionOperation {
 			File operatingDirectory = new File(toOperate);
 			ILocalResource localResource = SVNRemoteStorage.instance().asLocalResourceAccessible(current);
 			if (!IStateFilter.SF_NOTMODIFIED.accept(localResource)) {
-				this.logger.log(operatingDirectory.getAbsolutePath().substring(this.path.length() + 1), localResource.getStatus());
+				this.logger.log(operatingDirectory.getAbsolutePath().substring(this.path.length() + 1),
+						localResource.getStatus());
 			}
 			if (IStateFilter.SF_DELETED.accept(localResource)) {
 				if (operatingDirectory.exists() && this.delitionAllowed) {
 					FileUtility.deleteRecursive(operatingDirectory);
 				}
-			}
-			else if (!IStateFilter.SF_NOTMODIFIED.accept(localResource)) {
+			} else if (!IStateFilter.SF_NOTMODIFIED.accept(localResource)) {
 				if (previousPref != null) {
 					File parent = operatingDirectory.getParentFile();
 					if (parent != null) {
-						monitor.subTask(SVNMessages.format(SVNMessages.Operation_ExtractTo_Folders, new String [] {FileUtility.getWorkingCopyPath(current)}));
+						monitor.subTask(SVNMessages.format(SVNMessages.Operation_ExtractTo_Folders,
+								new String[] { FileUtility.getWorkingCopyPath(current) }));
 						parent.mkdirs();
 						operatingDirectory = parent;
 					}
 				}
-				monitor.subTask(SVNMessages.format(SVNMessages.Operation_ExtractTo_LocalFile, new String [] {FileUtility.getWorkingCopyPath(current)}));
-				if (localResource.getResource().getType() == IResource.FILE || IStateFilter.SF_ADDED.accept(localResource)) {
-					FileUtility.copyAll(operatingDirectory, new File(FileUtility.getWorkingCopyPath(current)), FileUtility.COPY_OVERRIDE_EXISTING_FILES | FileUtility.COPY_IGNORE_EXISTING_FOLDERS, null, monitor);
+				monitor.subTask(SVNMessages.format(SVNMessages.Operation_ExtractTo_LocalFile,
+						new String[] { FileUtility.getWorkingCopyPath(current) }));
+				if (localResource.getResource().getType() == IResource.FILE
+						|| IStateFilter.SF_ADDED.accept(localResource)) {
+					FileUtility.copyAll(operatingDirectory, new File(FileUtility.getWorkingCopyPath(current)),
+							FileUtility.COPY_OVERRIDE_EXISTING_FILES | FileUtility.COPY_IGNORE_EXISTING_FOLDERS, null,
+							monitor);
 				}
 			}
 			ProgressMonitorUtility.progress(monitor, processed++, this.outgoingResources.length);
 		}
 	}
-	
+
 	public int getOperationWeight() {
 		if (this.outgoingResources.length == 0) {
 			return 0;

@@ -23,11 +23,11 @@ import org.eclipse.team.svn.core.connector.SVNProperty;
  */
 public class MinLockSizePropFindVisitor implements IPropFindVisitor {
 	protected int minLockSize;
-	
+
 	public MinLockSizePropFindVisitor() {
 		this.minLockSize = 0;
 	}
-	
+
 	public boolean visit(SVNProperty propertyParam) {
 		if (propertyParam.name.equals("tsvn:lockmsgminsize")) { //$NON-NLS-1$
 			try {
@@ -35,14 +35,13 @@ public class MinLockSizePropFindVisitor implements IPropFindVisitor {
 				if (this.minLockSize < currMinSize) {
 					this.minLockSize = currMinSize;
 				}
-			}
-			catch (NumberFormatException ex) {
+			} catch (NumberFormatException ex) {
 				//we ignore the exception
 			}
 		}
 		return true;
 	}
-	
+
 	public int getMinLockSize() {
 		return this.minLockSize;
 	}

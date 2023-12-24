@@ -24,7 +24,7 @@ import org.eclipse.team.svn.core.SVNMessages;
  * @author Alexander Gurov
  */
 public class LocalStatusOperation extends AbstractStatusOperation {
-	public LocalStatusOperation(File []files, boolean recursive) {
+	public LocalStatusOperation(File[] files, boolean recursive) {
 		super("Operation_LocalStatusFile", SVNMessages.class, files, recursive); //$NON-NLS-1$
 	}
 

@@ -23,54 +23,57 @@ import org.eclipse.team.svn.core.resource.IResourceProvider;
  * 
  * @author Alexander Gurov
  */
-public abstract class AbstractConflictDetectionOperation extends AbstractWorkingCopyOperation implements IUnresolvedConflictDetector {
+public abstract class AbstractConflictDetectionOperation extends AbstractWorkingCopyOperation
+		implements IUnresolvedConflictDetector {
 
 	protected UnresolvedConflictDetectorHelper conflictDetectorHelper;
 
-    public AbstractConflictDetectionOperation(String operationName, Class<? extends NLS> messagesClass, IResource []resources) {
-        super(operationName, messagesClass, resources);
-        this.conflictDetectorHelper = new UnresolvedConflictDetectorHelper();
-    }
+	public AbstractConflictDetectionOperation(String operationName, Class<? extends NLS> messagesClass,
+			IResource[] resources) {
+		super(operationName, messagesClass, resources);
+		this.conflictDetectorHelper = new UnresolvedConflictDetectorHelper();
+	}
 
-    public AbstractConflictDetectionOperation(String operationName, Class<? extends NLS> messagesClass, IResourceProvider provider) {
-        super(operationName, messagesClass, provider);
-        this.conflictDetectorHelper = new UnresolvedConflictDetectorHelper();
-    }
-    
-    public void setUnresolvedConflict(boolean hasUnresolvedConflict) {
+	public AbstractConflictDetectionOperation(String operationName, Class<? extends NLS> messagesClass,
+			IResourceProvider provider) {
+		super(operationName, messagesClass, provider);
+		this.conflictDetectorHelper = new UnresolvedConflictDetectorHelper();
+	}
+
+	public void setUnresolvedConflict(boolean hasUnresolvedConflict) {
 		this.conflictDetectorHelper.setUnresolvedConflict(hasUnresolvedConflict);
-	}	
-    
-    public boolean hasUnresolvedConflicts() {
-        return this.conflictDetectorHelper.hasUnresolvedConflicts();
-    }
-    
-    public String getMessage() {
-    	return this.conflictDetectorHelper.getMessage();
-    }
-    
-    public IResource []getUnprocessed() {
-		return this.conflictDetectorHelper.getUnprocessed();
-    }
+	}
 
-	public IResource []getProcessed() {
+	public boolean hasUnresolvedConflicts() {
+		return this.conflictDetectorHelper.hasUnresolvedConflicts();
+	}
+
+	public String getMessage() {
+		return this.conflictDetectorHelper.getMessage();
+	}
+
+	public IResource[] getUnprocessed() {
+		return this.conflictDetectorHelper.getUnprocessed();
+	}
+
+	public IResource[] getProcessed() {
 		return this.conflictDetectorHelper.getProcessed();
 	}
-	
-	public void defineInitialResourceSet(IResource []resources) {
+
+	public void defineInitialResourceSet(IResource[] resources) {
 		this.conflictDetectorHelper.defineInitialResourceSet(resources);
 	}
-	
+
 	public void addUnprocessed(IResource unprocessed) {
 		this.conflictDetectorHelper.addUnprocessed(unprocessed);
 	}
 
 	public void setConflictMessage(String message) {
-		this.conflictDetectorHelper.setConflictMessage(message);		
+		this.conflictDetectorHelper.setConflictMessage(message);
 	}
-	
-	 public void removeProcessed(IResource resource) {
-		 this.conflictDetectorHelper.removeProcessed(resource);
-	 }
-	
+
+	public void removeProcessed(IResource resource) {
+		this.conflictDetectorHelper.removeProcessed(resource);
+	}
+
 }

@@ -23,18 +23,19 @@ import org.eclipse.team.svn.ui.panel.IDialogPanel;
  * @author Andrej Zachar
  */
 public interface ICommentDialogPanel extends IDialogPanel {
-	
+
 	/**
 	 * Returns the comment message from the editor. The call returns valid data outside of the UI thread context too.
-	 * @return 
+	 * 
+	 * @return
 	 */
 	public String getMessage();
-	
+
 	/**
 	 * Adds resources selection change listener
 	 */
 	public void addResourcesSelectionChangedListener(IResourceSelectionChangeListener listener);
-	
+
 	/**
 	 * Removes resources selection change listener
 	 */

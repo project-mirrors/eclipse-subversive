@@ -24,7 +24,7 @@ import org.eclipse.core.resources.team.ResourceRuleFactory;
  */
 public class SVNResourceRuleFactory extends ResourceRuleFactory {
 	public static final IResourceRuleFactory INSTANCE = new SVNResourceRuleFactory();
-	
+
 	// no changes to the default policy.
-	
+
 }

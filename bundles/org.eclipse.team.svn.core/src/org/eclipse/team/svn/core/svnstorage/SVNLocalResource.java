@@ -26,16 +26,26 @@ import org.eclipse.team.svn.core.resource.ILocalResource;
  */
 public abstract class SVNLocalResource implements ILocalResource {
 	protected IResource resource;
+
 	protected long revision;
+
 	protected long baseRevision;
+
 	protected String textStatus;
+
 	protected String propStatus;
+
 	protected int changeMask;
+
 	protected String author;
+
 	protected long lastCommitDate;
+
 	protected SVNConflictDescriptor treeConflictDescriptor;
-	
-	protected SVNLocalResource(IResource resource, long revision, long baseRevision, String textStatus, String propStatus, int changeMask, String author, long lastCommitDate, SVNConflictDescriptor treeConflictDescriptor) {
+
+	protected SVNLocalResource(IResource resource, long revision, long baseRevision, String textStatus,
+			String propStatus, int changeMask, String author, long lastCommitDate,
+			SVNConflictDescriptor treeConflictDescriptor) {
 		this.resource = resource;
 		this.revision = revision;
 		this.baseRevision = baseRevision;
@@ -46,11 +56,11 @@ public abstract class SVNLocalResource implements ILocalResource {
 		this.lastCommitDate = lastCommitDate;
 		this.treeConflictDescriptor = treeConflictDescriptor;
 	}
-	
+
 	public boolean isLocked() {
-	    return (this.changeMask & ILocalResource.IS_LOCKED) != 0;
+		return (this.changeMask & ILocalResource.IS_LOCKED) != 0;
 	}
-	
+
 	public IResource getResource() {
 		return this.resource;
 	}
@@ -66,23 +76,23 @@ public abstract class SVNLocalResource implements ILocalResource {
 	public long getBaseRevision() {
 		return this.baseRevision;
 	}
-	
+
 	public String getTextStatus() {
 		return this.textStatus;
 	}
-	
+
 	public String getPropStatus() {
 		return this.propStatus;
 	}
-	
+
 	public String getStatus() {
 		return SVNRemoteStorage.getCompoundStatusString(this.textStatus, this.propStatus);
 	}
-	
+
 	public int getChangeMask() {
 		return this.changeMask;
 	}
-	
+
 	public boolean isCopied() {
 		return (this.changeMask & ILocalResource.IS_COPIED) != 0;
 	}
@@ -90,28 +100,29 @@ public abstract class SVNLocalResource implements ILocalResource {
 	public String getAuthor() {
 		return this.author;
 	}
-	
+
 	public long getLastCommitDate() {
 		return this.lastCommitDate;
 	}
 
 	public boolean hasTreeConflict() {
-		return this.treeConflictDescriptor != null && this.treeConflictDescriptor.conflictKind == SVNConflictDescriptor.Kind.TREE;
+		return this.treeConflictDescriptor != null
+				&& this.treeConflictDescriptor.conflictKind == SVNConflictDescriptor.Kind.TREE;
 	}
-	
+
 	public SVNConflictDescriptor getTreeConflictDescriptor() {
 		return this.treeConflictDescriptor;
 	}
-	
+
 	public String toString() {
 		return this.resource.toString();
 	}
-	
+
 	public boolean equals(Object obj) {
 		if (obj instanceof ILocalResource) {
-			return this.resource.equals(((ILocalResource)obj).getResource());
+			return this.resource.equals(((ILocalResource) obj).getResource());
 		}
 		return false;
 	}
-	
+
 }

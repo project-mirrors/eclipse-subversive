@@ -43,9 +43,10 @@ import org.eclipse.team.svn.core.utility.SVNUtility;
  */
 public class CopyOperation extends AbstractFileOperation {
 	protected File localTo;
+
 	protected boolean forceNonSVN;
-	
-	public CopyOperation(File []files, File localTo, boolean forceNonSVN) {
+
+	public CopyOperation(File[] files, File localTo, boolean forceNonSVN) {
 		super("Operation_CopyFile", SVNMessages.class, files); //$NON-NLS-1$
 		this.localTo = localTo;
 		this.forceNonSVN = forceNonSVN;
@@ -61,14 +62,14 @@ public class CopyOperation extends AbstractFileOperation {
 		ISchedulingRule parentRule = super.getSchedulingRule();
 		return MultiRule.combine(new LockingRule(this.localTo), parentRule);
 	}
-	
+
 	protected void runImpl(IProgressMonitor monitor) throws Exception {
-		File []files = this.operableData();
+		File[] files = this.operableData();
 
 		IRepositoryResource remoteTo = SVNFileStorage.instance().asRepositoryResource(this.localTo, true);
 		IRepositoryLocation location = remoteTo == null ? null : remoteTo.getRepositoryLocation();
 		final ISVNConnector proxy = location == null ? null : location.acquireSVNProxy();
-		
+
 		for (int i = 0; i < files.length && !monitor.isCanceled(); i++) {
 			final File current = files[i];
 			this.protectStep(new IUnprotectedOperation() {
@@ -77,14 +78,18 @@ public class CopyOperation extends AbstractFileOperation {
 					File checked = CopyOperation.this.getCopyTo(current);
 					if (remote == null || proxy == null || CopyOperation.this.forceNonSVN) {
 						CopyOperation.this.nonSVNCopy(current, monitor);
-					}
-					else {
-						proxy.copyLocal(new SVNEntryRevisionReference[] {new SVNEntryRevisionReference(current.getAbsolutePath(), null, SVNRevision.WORKING)}, checked.getAbsolutePath(), ISVNConnector.Options.NONE, ISVNConnector.NO_EXTERNALS_TO_PIN, new SVNProgressMonitor(CopyOperation.this, monitor, null));
+					} else {
+						proxy.copyLocal(
+								new SVNEntryRevisionReference[] { new SVNEntryRevisionReference(
+										current.getAbsolutePath(), null, SVNRevision.WORKING) },
+								checked.getAbsolutePath(), ISVNConnector.Options.NONE,
+								ISVNConnector.NO_EXTERNALS_TO_PIN,
+								new SVNProgressMonitor(CopyOperation.this, monitor, null));
 					}
 				}
 			}, monitor, files.length);
 		}
-		
+
 		if (location != null) {
 			location.releaseSVNProxy(proxy);
 		}
@@ -94,11 +99,11 @@ public class CopyOperation extends AbstractFileOperation {
 		File checked = new File(this.localTo.getAbsolutePath() + "/" + what.getName()); //$NON-NLS-1$
 		if (checked.exists()) {
 			String message = this.getNationalizedString("Error_AlreadyExists"); //$NON-NLS-1$
-			throw new UnreportableException(BaseMessages.format(message, new Object[] {checked.getAbsolutePath()}));
+			throw new UnreportableException(BaseMessages.format(message, new Object[] { checked.getAbsolutePath() }));
 		}
 		return checked;
 	}
-	
+
 	protected void nonSVNCopy(File what, IProgressMonitor monitor) throws Exception {
 		FileUtility.copyAll(this.localTo, what, FileUtility.COPY_NO_OPTIONS, new FileFilter() {
 			public boolean accept(File pathname) {
@@ -106,5 +111,5 @@ public class CopyOperation extends AbstractFileOperation {
 			}
 		}, monitor);
 	}
-	
+
 }

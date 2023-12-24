@@ -24,9 +24,10 @@ import org.eclipse.team.svn.core.resource.IRevisionLink;
  */
 public class SVNRevisionLink implements IRevisionLink {
 
-	protected IRepositoryResource repositoryResource;	
+	protected IRepositoryResource repositoryResource;
+
 	protected String comment;
-	
+
 	public SVNRevisionLink(IRepositoryResource repositoryResource) {
 		this.repositoryResource = repositoryResource;
 	}
@@ -39,24 +40,24 @@ public class SVNRevisionLink implements IRevisionLink {
 		this.comment = comment;
 	}
 
-	public IRepositoryResource getRepositoryResource() {		
+	public IRepositoryResource getRepositoryResource() {
 		return this.repositoryResource;
 	}
-	
+
 	public boolean equals(Object obj) {
 		if (obj == null || !(obj instanceof IRevisionLink)) {
 			return false;
 		}
-		IRevisionLink link = (IRevisionLink) obj;		
-		return this.repositoryResource.equals(link.getRepositoryResource()) && 
-			   this.getComment().equals(link.getComment());
+		IRevisionLink link = (IRevisionLink) obj;
+		return this.repositoryResource.equals(link.getRepositoryResource())
+				&& this.getComment().equals(link.getComment());
 	}
-	
+
 	public int hashCode() {
 		return this.repositoryResource.hashCode();
 	}
-	
+
 	public String toString() {
 		return this.repositoryResource.toString();
-	}		
+	}
 }

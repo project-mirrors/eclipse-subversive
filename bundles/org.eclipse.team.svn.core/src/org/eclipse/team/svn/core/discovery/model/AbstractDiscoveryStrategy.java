@@ -19,8 +19,8 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 /**
- * An abstraction of a strategy for discovering connectors and categories. Strategy design pattern. Note that strategies
- * are not reusable and must be disposed.
+ * An abstraction of a strategy for discovering connectors and categories. Strategy design pattern. Note that strategies are not reusable
+ * and must be disposed.
  * 
  * @author David Green
  * @author Igor Burilo

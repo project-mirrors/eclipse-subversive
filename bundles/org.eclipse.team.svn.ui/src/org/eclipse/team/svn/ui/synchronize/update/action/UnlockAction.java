@@ -26,9 +26,9 @@ import org.eclipse.team.ui.synchronize.ISynchronizePageConfiguration;
  * @author Alexei Goncharov
  */
 public class UnlockAction extends AbstractSynchronizeModelAction {
-	
+
 	protected UnlockActionHelper actionHelper;
-	
+
 	public UnlockAction(String text, ISynchronizePageConfiguration configuration) {
 		super(text, configuration);
 		this.actionHelper = new UnlockActionHelper(this, configuration);
@@ -37,7 +37,7 @@ public class UnlockAction extends AbstractSynchronizeModelAction {
 	protected boolean needsToSaveDirtyEditors() {
 		return false;
 	}
-	
+
 	protected FastSyncInfoFilter getSyncInfoFilter() {
 		return this.actionHelper.getSyncInfoFilter();
 	}

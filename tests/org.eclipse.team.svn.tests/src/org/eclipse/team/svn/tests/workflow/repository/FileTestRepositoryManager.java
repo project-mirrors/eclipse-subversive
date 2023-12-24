@@ -33,7 +33,9 @@ import org.eclipse.team.svn.tests.TestPlugin;
 
 public class FileTestRepositoryManager implements TestRepositoryManager {
 	protected IRepositoryLocation repositoryLocation;
+
 	protected ISVNStorage svnStorage;
+
 	protected ResourceBundle bundle = TestPlugin.instance().getResourceBundle();
 
 	public FileTestRepositoryManager() {

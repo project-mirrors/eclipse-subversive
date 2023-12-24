@@ -38,15 +38,17 @@ import org.eclipse.team.svn.core.utility.SVNUtility;
  */
 public class SaveProjectMetaOperation extends AbstractWorkingCopyOperation implements IResourceProvider {
 	// exclude .settings folder due large information amount contained in it
-	protected static final String []META_FILES = new String[] {".project", ".classpath"}; //$NON-NLS-1$ //$NON-NLS-2$
+	protected static final String[] META_FILES = new String[] { ".project", ".classpath" }; //$NON-NLS-1$ //$NON-NLS-2$
+
 	protected HashMap<String, File> savedMetas;
+
 	protected String startsWith;
 
-	public SaveProjectMetaOperation(IResource []resources) {
+	public SaveProjectMetaOperation(IResource[] resources) {
 		this(resources, null);
 	}
-	
-	public SaveProjectMetaOperation(IResource []resources, String startsWith) {
+
+	public SaveProjectMetaOperation(IResource[] resources, String startsWith) {
 		super("Operation_SaveMeta", SVNMessages.class, resources); //$NON-NLS-1$
 		this.savedMetas = new HashMap<String, File>();
 		this.startsWith = startsWith;
@@ -55,28 +57,28 @@ public class SaveProjectMetaOperation extends AbstractWorkingCopyOperation imple
 	public SaveProjectMetaOperation(IResourceProvider provider) {
 		this(provider, null);
 	}
-	
+
 	public SaveProjectMetaOperation(IResourceProvider provider, String startsWith) {
 		super("Operation_SaveMeta", SVNMessages.class, provider); //$NON-NLS-1$
 		this.savedMetas = new HashMap<String, File>();
 		this.startsWith = startsWith;
 	}
-	
-	public IResource []getResources() {
+
+	public IResource[] getResources() {
 		return this.operableData();
 	}
-	
+
 	public Map<String, File> getSavedMetas() {
 		return this.savedMetas;
 	}
-	
+
 	public int getOperationWeight() {
 		return 0;
 	}
 
 	protected void runImpl(IProgressMonitor monitor) throws Exception {
-		IResource []changeSet = this.operableData();
-		
+		IResource[] changeSet = this.operableData();
+
 		for (int i = 0; i < changeSet.length && !monitor.isCanceled(); i++) {
 			final IResource change = changeSet[i];
 			this.protectStep(new IUnprotectedOperation() {
@@ -85,13 +87,12 @@ public class SaveProjectMetaOperation extends AbstractWorkingCopyOperation imple
 					if (!project.isAccessible()) {
 						return;
 					}
-					IResource []members = project.members();
+					IResource[] members = project.members();
 					for (int i = 0; i < members.length && !monitor.isCanceled(); i++) {
 						if (SaveProjectMetaOperation.this.shouldBeSaved(members[i])) {
 							try {
 								SaveProjectMetaOperation.this.saveMeta(members[i], monitor);
-							}
-							catch (Exception ex) {
+							} catch (Exception ex) {
 								// disallow error reporting
 							}
 						}
@@ -100,7 +101,7 @@ public class SaveProjectMetaOperation extends AbstractWorkingCopyOperation imple
 			}, monitor, changeSet.length);
 		}
 	}
-	
+
 	protected boolean shouldBeSaved(IResource resource) {
 		String name = resource.getName();
 		if (name.equals(SVNUtility.getSVNFolderName())) {
@@ -131,13 +132,12 @@ public class SaveProjectMetaOperation extends AbstractWorkingCopyOperation imple
 							return !pathname.getName().equals(SVNUtility.getSVNFolderName());
 						}
 					}, monitor);
-				}
-				else {
+				} else {
 					FileUtility.copyFile(target, source, monitor);
 				}
 				this.savedMetas.put(sourceLocation, target);
 			}
 		}
 	}
-	
+
 }

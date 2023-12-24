@@ -48,67 +48,75 @@ public class UpdateAction extends AbstractRecursiveTeamAction {
 	public static IStateFilter SF_MISSING_RESOURCES = new IStateFilter.AbstractStateFilter() {
 		protected boolean acceptImpl(ILocalResource local, IResource resource, String state, int mask) {
 			//we shouldn't take into account resources with tree conflicts here 
-			return IStateFilter.SF_MISSING.accept(resource, state, mask) && !IStateFilter.SF_TREE_CONFLICTING.accept(resource, state, mask);
+			return IStateFilter.SF_MISSING.accept(resource, state, mask)
+					&& !IStateFilter.SF_TREE_CONFLICTING.accept(resource, state, mask);
 		}
+
 		protected boolean allowsRecursionImpl(ILocalResource local, IResource resource, String state, int mask) {
-			return IStateFilter.SF_ONREPOSITORY.accept(resource, state, mask) || IStateFilter.SF_UNVERSIONED_EXTERNAL.accept(resource, state, mask);
-		}			
+			return IStateFilter.SF_ONREPOSITORY.accept(resource, state, mask)
+					|| IStateFilter.SF_UNVERSIONED_EXTERNAL.accept(resource, state, mask);
+		}
 	};
-	
+
 	public UpdateAction() {
 		super();
 	}
 
 	public void runImpl(IAction action) {
-		IResource []resources = UnacceptableOperationNotificator.shrinkResourcesWithNotOnRespositoryParents(this.getShell(), this.getSelectedResources(IStateFilter.SF_ONREPOSITORY));
+		IResource[] resources = UnacceptableOperationNotificator.shrinkResourcesWithNotOnRespositoryParents(
+				this.getShell(), this.getSelectedResources(IStateFilter.SF_ONREPOSITORY));
 		if (resources == null || resources.length == 0) {
 			return;
 		}
-		
+
 		if (this.checkForResourcesPresenceRecursive(IStateFilter.SF_REVERTABLE)) {
-			IResource []missing = this.getSelectedResourcesRecursive(UpdateAction.SF_MISSING_RESOURCES);
+			IResource[] missing = this.getSelectedResourcesRecursive(UpdateAction.SF_MISSING_RESOURCES);
 			if (missing.length > 0 && !UpdateAction.updateMissing(this.getShell(), missing)) {
 				return;
 			}
 		}
-		
+
 		this.runScheduled(UpdateAction.getUpdateOperation(resources, SVNRevision.HEAD));
 	}
-	
+
 	public boolean isEnabled() {
 		return this.checkForResourcesPresence(IStateFilter.SF_ONREPOSITORY);
 	}
-	
-	public static boolean updateMissing(Shell shell, IResource []missing) {
-		ResourceListPanel panel = new ResourceListPanel(missing, SVNUIMessages.UpdateAction_List_Title, SVNUIMessages.UpdateAction_List_Description, SVNUIMessages.UpdateAction_List_Message, new String[] {IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL});
+
+	public static boolean updateMissing(Shell shell, IResource[] missing) {
+		ResourceListPanel panel = new ResourceListPanel(missing, SVNUIMessages.UpdateAction_List_Title,
+				SVNUIMessages.UpdateAction_List_Description, SVNUIMessages.UpdateAction_List_Message,
+				new String[] { IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL });
 		panel.setShowLocalNames(true);
 		return new DefaultDialog(shell, panel).open() == 0;
 	}
-	
-	public static CompositeOperation getUpdateOperation(IResource []updateSet, SVNRevision selectedRevision) {
+
+	public static CompositeOperation getUpdateOperation(IResource[] updateSet, SVNRevision selectedRevision) {
 		return UpdateAction.getUpdateOperation(updateSet, selectedRevision, SVNDepth.INFINITY, false, null);
 	}
-	
-	public static CompositeOperation getUpdateOperation(IResource []updateSet, SVNRevision selectedRevision, SVNDepth depth, boolean isStickyDepth, String updateDepthPath) {
-		boolean ignoreExternals = SVNTeamPreferences.getBehaviourBoolean(SVNTeamUIPlugin.instance().getPreferenceStore(), SVNTeamPreferences.BEHAVIOUR_IGNORE_EXTERNALS_NAME);
+
+	public static CompositeOperation getUpdateOperation(IResource[] updateSet, SVNRevision selectedRevision,
+			SVNDepth depth, boolean isStickyDepth, String updateDepthPath) {
+		boolean ignoreExternals = SVNTeamPreferences.getBehaviourBoolean(
+				SVNTeamUIPlugin.instance().getPreferenceStore(), SVNTeamPreferences.BEHAVIOUR_IGNORE_EXTERNALS_NAME);
 		UpdateOperation mainOp = new UpdateOperation(updateSet, selectedRevision, ignoreExternals);
 		mainOp.setDepthOptions(depth, isStickyDepth, updateDepthPath);
-		
+
 		CompositeOperation op = new CompositeOperation(mainOp.getId(), mainOp.getMessagesClass());
-		
+
 		SaveProjectMetaOperation saveOp = new SaveProjectMetaOperation(updateSet);
 		op.add(saveOp);
 		op.add(mainOp);
 		op.add(new RestoreProjectMetaOperation(saveOp));
-		op.add(new ClearUpdateStatusesOperation(mainOp), new IActionOperation[]{mainOp});
+		op.add(new ClearUpdateStatusesOperation(mainOp), new IActionOperation[] { mainOp });
 		op.add(new RefreshResourcesOperation(mainOp));
 		op.add(new NotifyUnresolvedConflictOperation(mainOp));
-		
+
 		return op;
 	}
-	
+
 	protected boolean needsToSaveDirtyEditors() {
 		return true;
 	}
-	
+
 }

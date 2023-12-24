@@ -32,8 +32,8 @@ import org.eclipse.team.svn.ui.discovery.IConnectorsInstallJob;
 import org.eclipse.team.svn.ui.discovery.util.DiscoveryUiUtil;
 
 /**
- * A wizard for performing discovery of connectors and selecting connectors to install. When finish is pressed, selected
- * connectors are downloaded and installed.
+ * A wizard for performing discovery of connectors and selecting connectors to install. When finish is pressed, selected connectors are
+ * downloaded and installed.
  * 
  * @see ConnectorDiscoveryWizardMainPage
  * 
@@ -45,7 +45,7 @@ public class ConnectorDiscoveryWizard extends Wizard {
 	private ConnectorDiscoveryWizardMainPage mainPage;
 
 	protected IConnectorsInstallJob installJob;
-	
+
 	private final Map<ConnectorDescriptorKind, Boolean> connectorDescriptorKindToVisibility = new HashMap<ConnectorDescriptorKind, Boolean>();
 	{
 		for (ConnectorDescriptorKind kind : ConnectorDescriptorKind.values()) {
@@ -61,7 +61,7 @@ public class ConnectorDiscoveryWizard extends Wizard {
 
 	public ConnectorDiscoveryWizard(IConnectorsInstallJob installJob) {
 		this.installJob = installJob;
-		
+
 		setWindowTitle(SVNUIMessages.ConnectorDiscoveryWizard_connectorDiscovery);
 		setNeedsProgressMonitor(true);
 		setDefaultPageImageDescriptor(SVNTeamUIPlugin.instance().getImageDescriptor("icons/wizards/newconnect.gif"));
@@ -119,16 +119,16 @@ public class ConnectorDiscoveryWizard extends Wizard {
 	}
 
 	/**
-	 * indicate if the connector descriptor filters should be shown in the UI. Changing this setting only has an effect
-	 * before the UI is presented.
+	 * indicate if the connector descriptor filters should be shown in the UI. Changing this setting only has an effect before the UI is
+	 * presented.
 	 */
 	public boolean isShowConnectorDescriptorKindFilter() {
-		return this.showConnectorDescriptorKindFilter & false;	//TODO always disabled
+		return this.showConnectorDescriptorKindFilter & false; //TODO always disabled
 	}
 
 	/**
-	 * indicate if the connector descriptor filters should be shown in the UI. Changing this setting only has an effect
-	 * before the UI is presented.
+	 * indicate if the connector descriptor filters should be shown in the UI. Changing this setting only has an effect before the UI is
+	 * presented.
 	 */
 	public void setShowConnectorDescriptorKindFilter(boolean showConnectorDescriptorKindFilter) {
 		this.showConnectorDescriptorKindFilter = showConnectorDescriptorKindFilter;

@@ -28,7 +28,8 @@ import org.eclipse.team.svn.core.svnstorage.SVNRemoteStorage;
  */
 public class GetAllResourcesOperation extends AbstractActionOperation {
 	protected IContainer container;
-	protected IResource []children;
+
+	protected IResource[] children;
 
 	public GetAllResourcesOperation(IContainer container) {
 		super("Operation_GetResourceList", SVNMessages.class); //$NON-NLS-1$
@@ -37,13 +38,13 @@ public class GetAllResourcesOperation extends AbstractActionOperation {
 	}
 
 	protected void runImpl(IProgressMonitor monitor) throws Exception {
-		IResource []retVal = SVNRemoteStorage.instance().getRegisteredChildren(this.container);
+		IResource[] retVal = SVNRemoteStorage.instance().getRegisteredChildren(this.container);
 		if (retVal != null) {
 			this.children = retVal;
 		}
 	}
-	
-	public IResource []getChildren() {
+
+	public IResource[] getChildren() {
 		return this.children;
 	}
 

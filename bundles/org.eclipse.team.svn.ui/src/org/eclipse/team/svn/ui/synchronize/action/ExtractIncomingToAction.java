@@ -26,18 +26,18 @@ import org.eclipse.team.ui.synchronize.ISynchronizePageConfiguration;
  * @author Alexei Goncharov
  */
 public class ExtractIncomingToAction extends AbstractSynchronizeModelAction {
-	
+
 	protected ExtractIncomingToActionHelper actionHelper;
-	
+
 	public ExtractIncomingToAction(String text, ISynchronizePageConfiguration configuration) {
 		super(text, configuration);
 		this.actionHelper = new ExtractIncomingToActionHelper(this, configuration);
 	}
-	
+
 	protected boolean needsToSaveDirtyEditors() {
 		return false;
 	}
-	
+
 	protected FastSyncInfoFilter getSyncInfoFilter() {
 		return this.actionHelper.getSyncInfoFilter();
 	}
@@ -45,5 +45,5 @@ public class ExtractIncomingToAction extends AbstractSynchronizeModelAction {
 	protected IActionOperation getOperation(ISynchronizePageConfiguration configuration, IDiffElement[] elements) {
 		return this.actionHelper.getOperation();
 	}
-	
+
 }

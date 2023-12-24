@@ -23,26 +23,40 @@ import org.eclipse.team.svn.core.resource.IRevisionLink;
  * 
  * @author Alexander Gurov
  */
-public interface IRepositoryLocationStateListener
-	extends ISSHSettingsStateListener, ISSLSettingsStateListener
-{
+public interface IRepositoryLocationStateListener extends ISSHSettingsStateListener, ISSLSettingsStateListener {
 	public final String LABEL = "label";
+
 	public final String URL = "url";
+
 	public final String STRUCTURE_ENABLED = "structureEnabled";
+
 	public final String TRUNK_LOCATION = "trunkLocation";
+
 	public final String BRANCHES_LOCATION = "branchesLocation";
+
 	public final String TAGS_LOCATION = "tagsLocation";
+
 	public final String USERNAME = "username";
+
 	public final String PASSWORD = "password";
+
 	public final String PASSWORD_SAVED = "passwordSaved";
+
 	public final String AUTHOR_NAME = "authorName";
+
 	public final String AUTHOR_NAME_ENABLED = "authorNameEnabled";
 
 	public void changed(IRepositoryLocation where, String field, Object oldValue, Object newValue);
+
 	public void realmAdded(IRepositoryLocation where, String realm, IRepositoryLocation location);
+
 	public void realmRemoved(IRepositoryLocation where, String realm);
+
 	public void revisionLinkAdded(IRepositoryLocation where, IRevisionLink link);
+
 	public void revisionLinkRemoved(IRepositoryLocation where, IRevisionLink link);
+
 	public void proxyAcquired(IRepositoryLocation where, ISVNConnector proxy);
+
 	public void proxyDisposed(IRepositoryLocation where, ISVNConnector proxy);
 }

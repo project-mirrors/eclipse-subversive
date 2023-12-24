@@ -43,17 +43,18 @@ public class MergePropertiesAction extends AbstractSynchronizeModelAction {
 	public MergePropertiesAction(String text, ISynchronizePageConfiguration configuration) {
 		super(text, configuration);
 	}
-	
+
 	protected boolean needsToSaveDirtyEditors() {
 		return false;
 	}
-	
+
 	protected boolean updateSelection(IStructuredSelection selection) {
 		super.updateSelection(selection);
 		if (selection.size() == 1 && selection.getFirstElement() instanceof SyncInfoModelElement) {
-			ISynchronizeModelElement element = (ISynchronizeModelElement)selection.getFirstElement();
+			ISynchronizeModelElement element = (ISynchronizeModelElement) selection.getFirstElement();
 			if (element instanceof SyncInfoModelElement) {
-				AbstractSVNSyncInfo syncInfo = (AbstractSVNSyncInfo)((SyncInfoModelElement)selection.getFirstElement()).getSyncInfo();
+				AbstractSVNSyncInfo syncInfo = (AbstractSVNSyncInfo) ((SyncInfoModelElement) selection
+						.getFirstElement()).getSyncInfo();
 				ILocalResource incoming;
 				IResourceChange ancestor;
 				if (syncInfo instanceof IMergeSyncInfo) {
@@ -61,23 +62,24 @@ public class MergePropertiesAction extends AbstractSynchronizeModelAction {
 					incoming = ((IMergeSyncInfo) syncInfo).getRemoteResource();
 					ancestor = ((IMergeSyncInfo) syncInfo).getBaseResource();
 				} else {
-					incoming = syncInfo.getRemoteChangeResource();	
-					ancestor = (IResourceChange)syncInfo.getBaseChangeResource();
+					incoming = syncInfo.getRemoteChangeResource();
+					ancestor = (IResourceChange) syncInfo.getBaseChangeResource();
 				}
 				if (!(incoming instanceof IResourceChange) || ancestor == null) {
 					return false;
 				}
-				boolean retVal = IStateFilter.SF_EXCLUDE_DELETED.accept(incoming) & IStateFilter.ST_DELETED != incoming.getStatus();				
+				boolean retVal = IStateFilter.SF_EXCLUDE_DELETED.accept(incoming)
+						& IStateFilter.ST_DELETED != incoming.getStatus();
 				return retVal && (IStateFilter.SF_HAS_PROPERTIES_CHANGES.accept(incoming)
 						|| IStateFilter.SF_HAS_PROPERTIES_CHANGES.accept(syncInfo.getLocalResource()));
 			}
 		}
 		return false;
 	}
-	
+
 	protected IActionOperation getOperation(ISynchronizePageConfiguration configuration, IDiffElement[] elements) {
 		IResource resource = this.getSelectedResource();
-		AbstractSVNSyncInfo syncInfo = (AbstractSVNSyncInfo)((SyncInfoModelElement)elements[0]).getSyncInfo();
+		AbstractSVNSyncInfo syncInfo = (AbstractSVNSyncInfo) ((SyncInfoModelElement) elements[0]).getSyncInfo();
 		IResourceChange right;
 		IResourceChange ancestor;
 		if (syncInfo instanceof IMergeSyncInfo) {
@@ -86,18 +88,16 @@ public class MergePropertiesAction extends AbstractSynchronizeModelAction {
 			right = mergeSyncInfo.getRemoteResource();
 			ancestor = mergeSyncInfo.getBaseResource();
 		} else {
-			right = (IResourceChange)syncInfo.getRemoteChangeResource();
-			ancestor = (IResourceChange)syncInfo.getBaseChangeResource();
+			right = (IResourceChange) syncInfo.getRemoteChangeResource();
+			ancestor = (IResourceChange) syncInfo.getBaseChangeResource();
 		}
-				
-		SVNEntryRevisionReference baseReference = new SVNEntryRevisionReference(ancestor.getOriginator().getUrl(), ancestor.getPegRevision(), SVNRevision.fromNumber(ancestor.getRevision()));
-		SVNEntryRevisionReference remoteReference = new SVNEntryRevisionReference(right.getOriginator().getUrl(), right.getPegRevision(), SVNRevision.fromNumber(right.getRevision()));
-		PropertyCompareInput input = new ThreeWayPropertyCompareInput(new CompareConfiguration(),
-				resource,
-				remoteReference,
-				baseReference,
-				right.getOriginator().getRepositoryLocation(),
-				-1);
+
+		SVNEntryRevisionReference baseReference = new SVNEntryRevisionReference(ancestor.getOriginator().getUrl(),
+				ancestor.getPegRevision(), SVNRevision.fromNumber(ancestor.getRevision()));
+		SVNEntryRevisionReference remoteReference = new SVNEntryRevisionReference(right.getOriginator().getUrl(),
+				right.getPegRevision(), SVNRevision.fromNumber(right.getRevision()));
+		PropertyCompareInput input = new ThreeWayPropertyCompareInput(new CompareConfiguration(), resource,
+				remoteReference, baseReference, right.getOriginator().getRepositoryLocation(), -1);
 		CompareUI.openCompareEditor(input);
 		return null;
 	}

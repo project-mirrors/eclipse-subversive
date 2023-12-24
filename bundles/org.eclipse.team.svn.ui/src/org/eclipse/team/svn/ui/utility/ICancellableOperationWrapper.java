@@ -24,8 +24,10 @@ import org.eclipse.team.svn.core.operation.IActionOperation;
  */
 public interface ICancellableOperationWrapper extends IRunnableWithProgress {
 	public void setCancelled(boolean cancelled);
+
 	public boolean isCancelled();
+
 	public IActionOperation getOperation();
+
 	public String getOperationName();
 }
-

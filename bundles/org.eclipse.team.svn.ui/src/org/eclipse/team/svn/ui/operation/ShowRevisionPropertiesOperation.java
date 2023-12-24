@@ -33,9 +33,11 @@ import org.eclipse.ui.PartInitException;
 public class ShowRevisionPropertiesOperation extends AbstractActionOperation {
 
 	protected IRepositoryLocation location;
+
 	protected SVNRevision revision;
+
 	protected IWorkbenchPage page;
-	
+
 	public ShowRevisionPropertiesOperation(IWorkbenchPage page, IRepositoryLocation location, SVNRevision revision) {
 		super("Operation_ShowRevProperties", SVNUIMessages.class); //$NON-NLS-1$
 		this.page = page;
@@ -48,11 +50,13 @@ public class ShowRevisionPropertiesOperation extends AbstractActionOperation {
 			public void run() {
 				ShowRevisionPropertiesOperation.this.protectStep(new IUnprotectedOperation() {
 					public void run(IProgressMonitor monitor) throws PartInitException {
-						RevPropertiesView view = (RevPropertiesView)ShowRevisionPropertiesOperation.this.page.showView(RevPropertiesView.VIEW_ID);
-						view.setLocationAndRevision(ShowRevisionPropertiesOperation.this.location, ShowRevisionPropertiesOperation.this.revision);
+						RevPropertiesView view = (RevPropertiesView) ShowRevisionPropertiesOperation.this.page
+								.showView(RevPropertiesView.VIEW_ID);
+						view.setLocationAndRevision(ShowRevisionPropertiesOperation.this.location,
+								ShowRevisionPropertiesOperation.this.revision);
 					}
 				}, monitor, 1);
-				
+
 			}
 		});
 	}

@@ -23,22 +23,22 @@ import org.eclipse.swt.widgets.Control;
  * @author Sergiy Logvin
  */
 public class SSLCertificateResourceVerifier extends ExistingResourceVerifier {
-        
-    public SSLCertificateResourceVerifier(String fieldName) {
-        super(fieldName);
-    }
-    
-    public SSLCertificateResourceVerifier(String fieldName, boolean files) {
-        super(fieldName);
-    }
-    
-    protected String getErrorMessageImpl(Control input) {
-    	String fileName = this.getText(input);
-    	if (fileName != null && ("MSCAPI".equals(fileName) || fileName.startsWith("MSCAPI;"))) {
-    		// it's ok - use Microsoft Crypto API
-    	} else {
-	    	return super.getErrorMessageImpl(input);
-        }
-        return null;
-    }
+
+	public SSLCertificateResourceVerifier(String fieldName) {
+		super(fieldName);
+	}
+
+	public SSLCertificateResourceVerifier(String fieldName, boolean files) {
+		super(fieldName);
+	}
+
+	protected String getErrorMessageImpl(Control input) {
+		String fileName = this.getText(input);
+		if (fileName != null && ("MSCAPI".equals(fileName) || fileName.startsWith("MSCAPI;"))) {
+			// it's ok - use Microsoft Crypto API
+		} else {
+			return super.getErrorMessageImpl(input);
+		}
+		return null;
+	}
 }

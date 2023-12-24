@@ -20,18 +20,20 @@ import org.eclipse.team.svn.core.operation.local.change.visitors.RemoveNonVersio
 import org.eclipse.team.svn.core.resource.IResourceProvider;
 
 /**
- * Remove all non-versioned resources in subtree. Should be used in "Override And Update" action.
- * Legacy code, use new ResourcesTraversalOperation(resources, new RemoveNonVersionedVisitor(true), IResource.DEPTH_INFINITE) instead.
+ * Remove all non-versioned resources in subtree. Should be used in "Override And Update" action. Legacy code, use new
+ * ResourcesTraversalOperation(resources, new RemoveNonVersionedVisitor(true), IResource.DEPTH_INFINITE) instead.
  * 
  * @author Alexander Gurov
  */
 public class RemoveNonVersionedResourcesOperation extends ResourcesTraversalOperation {
-    public RemoveNonVersionedResourcesOperation(IResource[] resources, boolean addedAlso) {
-        super("Operation_RemoveNonSVN", SVNMessages.class, resources, new RemoveNonVersionedVisitor(addedAlso), IResource.DEPTH_INFINITE);
-    }
+	public RemoveNonVersionedResourcesOperation(IResource[] resources, boolean addedAlso) {
+		super("Operation_RemoveNonSVN", SVNMessages.class, resources, new RemoveNonVersionedVisitor(addedAlso),
+				IResource.DEPTH_INFINITE);
+	}
 
-    public RemoveNonVersionedResourcesOperation(IResourceProvider provider, boolean addedAlso) {
-        super("Operation_RemoveNonSVN", SVNMessages.class, provider, new RemoveNonVersionedVisitor(addedAlso), IResource.DEPTH_INFINITE);
-    }
+	public RemoveNonVersionedResourcesOperation(IResourceProvider provider, boolean addedAlso) {
+		super("Operation_RemoveNonSVN", SVNMessages.class, provider, new RemoveNonVersionedVisitor(addedAlso),
+				IResource.DEPTH_INFINITE);
+	}
 
 }

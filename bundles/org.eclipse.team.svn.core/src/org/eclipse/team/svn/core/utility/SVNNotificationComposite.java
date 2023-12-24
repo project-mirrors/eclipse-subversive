@@ -27,12 +27,12 @@ import org.eclipse.team.svn.core.connector.SVNNotification;
  * @author Alexander Gurov
  */
 public class SVNNotificationComposite implements ISVNNotificationCallback {
-	protected ISVNNotificationCallback []listeners;
+	protected ISVNNotificationCallback[] listeners;
 
 	public SVNNotificationComposite() {
 		this.listeners = new ISVNNotificationCallback[0];
 	}
-	
+
 	public void add(ISVNNotificationCallback listener) {
 		List<ISVNNotificationCallback> tmp = new ArrayList<ISVNNotificationCallback>(Arrays.asList(this.listeners));
 		if (!tmp.contains(listener)) {
@@ -40,7 +40,7 @@ public class SVNNotificationComposite implements ISVNNotificationCallback {
 		}
 		this.listeners = tmp.toArray(new ISVNNotificationCallback[tmp.size()]);
 	}
-	
+
 	public void remove(ISVNNotificationCallback listener) {
 		List<ISVNNotificationCallback> tmp = new ArrayList<ISVNNotificationCallback>(Arrays.asList(this.listeners));
 		tmp.remove(listener);
@@ -49,7 +49,7 @@ public class SVNNotificationComposite implements ISVNNotificationCallback {
 
 	public void notify(SVNNotification info) {
 		// thread safe...
-	    ISVNNotificationCallback []tmp = this.listeners;
+		ISVNNotificationCallback[] tmp = this.listeners;
 		for (int i = 0; i < tmp.length; i++) {
 			tmp[i].notify(info);
 		}

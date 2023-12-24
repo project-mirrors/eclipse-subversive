@@ -17,9 +17,9 @@ package org.eclipse.team.svn.core.connector;
 /**
  * The change status information container
  * 
- * The JavaHL API's is the only way to interact between SVN and Java-based tools. At the same time JavaHL connector library
- * is not EPL compatible and we won't to pin plug-in with concrete connector implementation. So, the only way to do this is
- * providing our own connector interface which will be covered by concrete connector implementation.
+ * The JavaHL API's is the only way to interact between SVN and Java-based tools. At the same time JavaHL connector library is not EPL
+ * compatible and we won't to pin plug-in with concrete connector implementation. So, the only way to do this is providing our own connector
+ * interface which will be covered by concrete connector implementation.
  * 
  * @author Alexander Gurov
  */
@@ -55,8 +55,7 @@ public class SVNChangeStatus extends SVNEntryStatus {
 	public final String lastCommitAuthor;
 
 	/**
-	 * <code>true/code> if the entry is locked locally by subversion (running or aborted
-	 * operation)
+	 * <code>true/code> if the entry is locked locally by subversion (running or aborted operation)
 	 */
 	public final boolean isLocked;
 
@@ -69,26 +68,27 @@ public class SVNChangeStatus extends SVNEntryStatus {
 	 * <code>true/code> if the entry is switch
 	 */
 	public final boolean isSwitched;
-	
+
 	/**
-	 * @since 1.6 has the item is a file external 
+	 * @since 1.6 has the item is a file external
 	 */
 	public final boolean isFileExternal;
-	
-    /**
-     * The depth of the node as recorded in the working copy
-     * @since 1.9
-     */
-    //public final SVNDepth depth;
 
-    /**
-     * The status of the node, Kind.NONE, unless the
-     * node has restructuring changes.
-     * @since 1.9
-     */
-    //public final Kind repositoryNodeStatus;
+	/**
+	 * The depth of the node as recorded in the working copy
+	 * 
+	 * @since 1.9
+	 */
+	//public final SVNDepth depth;
 
-    /**
+	/**
+	 * The status of the node, Kind.NONE, unless the node has restructuring changes.
+	 * 
+	 * @since 1.9
+	 */
+	//public final Kind repositoryNodeStatus;
+
+	/**
 	 * The entry remote content status in compare to base revision (see {@link SVNEntryStatus.Kind})
 	 */
 	public final Kind repositoryTextStatus;
@@ -109,8 +109,7 @@ public class SVNChangeStatus extends SVNEntryStatus {
 	public final SVNLock reposLock;
 
 	/**
-	 * @since 1.3 Set to the youngest committed revision, or {@link SVNRevision#INVALID_REVISION_NUMBER} if not out of
-	 *        date.
+	 * @since 1.3 Set to the youngest committed revision, or {@link SVNRevision#INVALID_REVISION_NUMBER} if not out of date.
 	 */
 	public final long reposLastCmtRevision;
 
@@ -130,25 +129,27 @@ public class SVNChangeStatus extends SVNEntryStatus {
 	public final String reposLastCmtAuthor;
 
 	/**
-     * @since 1.7 Is this item in a conflicted state or not. Starting from SVN 1.7 all the conflicts-related information were deleted from the status entry.
-     */
-    public final boolean hasConflict;
+	 * @since 1.7 Is this item in a conflicted state or not. Starting from SVN 1.7 all the conflicts-related information were deleted from
+	 *        the status entry.
+	 */
+	public final boolean hasConflict;
 
-    /**
-     * @since 1.6 description of the tree conflict. Is ignored by SVN 1.7 API, so we leave it as non-final field in order to upload the information later. I can hardly understand the reason why it was removed, it sure looks unreasonable.
-     */
-    public SVNConflictDescriptor []treeConflicts;
+	/**
+	 * @since 1.6 description of the tree conflict. Is ignored by SVN 1.7 API, so we leave it as non-final field in order to upload the
+	 *        information later. I can hardly understand the reason why it was removed, it sure looks unreasonable.
+	 */
+	public SVNConflictDescriptor[] treeConflicts;
 
 	/**
 	 * @since 1.7 The entry's change list name
 	 */
 	public final String changeListName;
-	
+
 	/**
 	 * @since 1.8 A path the entry was moved from
 	 */
 	public final String movedFromAbsPath;
-	
+
 	/**
 	 * @since 1.8 A path the entry was moved to
 	 */
@@ -202,23 +203,23 @@ public class SVNChangeStatus extends SVNEntryStatus {
 	 * @param hasConflict
 	 *            is this item in a conflicted state or not
 	 * @param treeConflicts
-	 *            description of the tree conflict. Is ignored by SVN 1.7 API, so we leave it as non-final field in order to upload the information later. I can hardly understand the reason why it was removed, it sure looks unreasonable.
+	 *            description of the tree conflict. Is ignored by SVN 1.7 API, so we leave it as non-final field in order to upload the
+	 *            information later. I can hardly understand the reason why it was removed, it sure looks unreasonable.
 	 * @param changeListName
 	 *            The entry's change list name
 	 */
-	public SVNChangeStatus(String path, String url, SVNEntry.Kind nodeKind, long revision, long lastChangedRevision, long lastChangedDate, String lastCommitAuthor, Kind textStatus,
-			Kind propStatus, Kind repositoryTextStatus, Kind repositoryPropStatus, boolean locked, boolean copied,
-			boolean switched, SVNLock wcLock, SVNLock reposLock,
-			long reposLastCmtRevision, long reposLastCmtDate, SVNEntry.Kind reposKind, String reposLastCmtAuthor,
-			boolean isFileExternal, boolean hasConflict, SVNConflictDescriptor []treeConflicts, String changeListName) {
+	public SVNChangeStatus(String path, String url, SVNEntry.Kind nodeKind, long revision, long lastChangedRevision,
+			long lastChangedDate, String lastCommitAuthor, Kind textStatus, Kind propStatus, Kind repositoryTextStatus,
+			Kind repositoryPropStatus, boolean locked, boolean copied, boolean switched, SVNLock wcLock,
+			SVNLock reposLock, long reposLastCmtRevision, long reposLastCmtDate, SVNEntry.Kind reposKind,
+			String reposLastCmtAuthor, boolean isFileExternal, boolean hasConflict,
+			SVNConflictDescriptor[] treeConflicts, String changeListName) {
 		this(path, url, nodeKind, revision, lastChangedRevision, lastChangedDate, lastCommitAuthor, textStatus,
-				propStatus, repositoryTextStatus, repositoryPropStatus, locked, copied,
-				switched, wcLock, reposLock,
-				reposLastCmtRevision, reposLastCmtDate, reposKind, reposLastCmtAuthor,
-				isFileExternal, hasConflict, treeConflicts, changeListName, null, null);
+				propStatus, repositoryTextStatus, repositoryPropStatus, locked, copied, switched, wcLock, reposLock,
+				reposLastCmtRevision, reposLastCmtDate, reposKind, reposLastCmtAuthor, isFileExternal, hasConflict,
+				treeConflicts, changeListName, null, null);
 	}
 
-	
 	/**
 	 * The {@link SVNChangeStatus} instance could be initialized only once because all fields are final
 	 * 
@@ -267,7 +268,8 @@ public class SVNChangeStatus extends SVNEntryStatus {
 	 * @param hasConflict
 	 *            is this item in a conflicted state or not
 	 * @param treeConflicts
-	 *            description of the tree conflict. Is ignored by SVN 1.7 API, so we leave it as non-final field in order to upload the information later. I can hardly understand the reason why it was removed, it sure looks unreasonable.
+	 *            description of the tree conflict. Is ignored by SVN 1.7 API, so we leave it as non-final field in order to upload the
+	 *            information later. I can hardly understand the reason why it was removed, it sure looks unreasonable.
 	 * @param changeListName
 	 *            The entry's change list name
 	 * @param movedFromAbsPath
@@ -276,11 +278,13 @@ public class SVNChangeStatus extends SVNEntryStatus {
 	 *            A path, the entry was moved to
 	 * @since 1.8
 	 */
-	public SVNChangeStatus(String path, String url, SVNEntry.Kind nodeKind, long revision, long lastChangedRevision, long lastChangedDate, String lastCommitAuthor, Kind textStatus,
-			Kind propStatus, Kind repositoryTextStatus, Kind repositoryPropStatus, boolean locked, boolean copied,
-			boolean switched, SVNLock wcLock, SVNLock reposLock,
-			long reposLastCmtRevision, long reposLastCmtDate, SVNEntry.Kind reposKind, String reposLastCmtAuthor,
-			boolean isFileExternal, boolean hasConflict, SVNConflictDescriptor []treeConflicts, String changeListName, String movedFromAbsPath, String movedToAbsPath) {
+	public SVNChangeStatus(String path, String url, SVNEntry.Kind nodeKind, long revision, long lastChangedRevision,
+			long lastChangedDate, String lastCommitAuthor, Kind textStatus, Kind propStatus, Kind repositoryTextStatus,
+			Kind repositoryPropStatus, boolean locked, boolean copied, boolean switched, SVNLock wcLock,
+			SVNLock reposLock, long reposLastCmtRevision, long reposLastCmtDate, SVNEntry.Kind reposKind,
+			String reposLastCmtAuthor, boolean isFileExternal, boolean hasConflict,
+			SVNConflictDescriptor[] treeConflicts, String changeListName, String movedFromAbsPath,
+			String movedToAbsPath) {
 		super(nodeKind, textStatus, propStatus);
 		this.path = path;
 		this.url = url;
@@ -306,38 +310,36 @@ public class SVNChangeStatus extends SVNEntryStatus {
 		this.movedFromAbsPath = movedFromAbsPath;
 		this.movedToAbsPath = movedToAbsPath;
 	}
-	
-	public void setTreeConflicts(SVNConflictDescriptor []treeConflicts) {
+
+	public void setTreeConflicts(SVNConflictDescriptor[] treeConflicts) {
 		this.treeConflicts = treeConflicts == null || treeConflicts.length == 0 ? null : treeConflicts;
 	}
 
-    /**
-     * Returns the adjusted status of the item's contents, as
-     * compatible with JavaHL 1.8 and older verions.
-     * @return file status property enum of the "textual" component.
-     * @since 1.9
-     */
-    /*public Kind getTextStatus()
-    {
-        if (nodeStatus == Kind.modified || nodeStatus == Kind.conflicted)
-            return textStatus;
-        return nodeStatus;
-    }*/
-	
-    /**
-     * Returns the adjusted status of the item's contents in the
-     * repository, as compatible with JavaHL 1.8 and older verions.
-     * @return file status property enum of the "textual" component in the
-     * repository.
-     * @since 1.9
-     */
-    /*public Kind getRepositoryTextStatus()
-    {
-        if (repositoryNodeStatus == Kind.modified
-            || repositoryNodeStatus == Kind.conflicted)
-            return repositoryTextStatus;
-        return repositoryNodeStatus;
-    }*/
-	
+	/**
+	 * Returns the adjusted status of the item's contents, as compatible with JavaHL 1.8 and older verions.
+	 * 
+	 * @return file status property enum of the "textual" component.
+	 * @since 1.9
+	 */
+	/*public Kind getTextStatus()
+	{
+	    if (nodeStatus == Kind.modified || nodeStatus == Kind.conflicted)
+	        return textStatus;
+	    return nodeStatus;
+	}*/
+
+	/**
+	 * Returns the adjusted status of the item's contents in the repository, as compatible with JavaHL 1.8 and older verions.
+	 * 
+	 * @return file status property enum of the "textual" component in the repository.
+	 * @since 1.9
+	 */
+	/*public Kind getRepositoryTextStatus()
+	{
+	    if (repositoryNodeStatus == Kind.modified
+	        || repositoryNodeStatus == Kind.conflicted)
+	        return repositoryTextStatus;
+	    return repositoryNodeStatus;
+	}*/
 
 }

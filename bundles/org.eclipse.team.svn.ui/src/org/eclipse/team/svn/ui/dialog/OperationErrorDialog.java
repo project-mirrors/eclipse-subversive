@@ -31,32 +31,34 @@ import org.eclipse.team.svn.ui.SVNUIMessages;
  */
 public class OperationErrorDialog extends MessageDialog {
 	public static final int ERR_NONE = -1;
+
 	public static final int ERR_DIFFREPOSITORIES = 0;
+
 	public static final int ERR_DIFFPROJECTS = 1;
-	
-	protected static final String []errorMessages = new String[] {
-		"OperationErrorDialog_Message_DifferentRepositories", //$NON-NLS-1$
-		"OperationErrorDialog_Message_DifferentProjects" //$NON-NLS-1$
+
+	protected static final String[] errorMessages = new String[] { "OperationErrorDialog_Message_DifferentRepositories", //$NON-NLS-1$
+			"OperationErrorDialog_Message_DifferentProjects" //$NON-NLS-1$
 	};
-	
+
 	public OperationErrorDialog(Shell parentShell, String title, int errorCode) {
 		this(parentShell, title, SVNUIMessages.getString(OperationErrorDialog.errorMessages[errorCode]));
 	}
-	
+
 	public OperationErrorDialog(Shell parentShell, String title, String errorMessage) {
-		super(parentShell, title, null, errorMessage, MessageDialog.WARNING, new String[] {IDialogConstants.OK_LABEL}, 0);
+		super(parentShell, title, null, errorMessage, MessageDialog.WARNING, new String[] { IDialogConstants.OK_LABEL },
+				0);
 	}
-	
-	public static boolean isAcceptableAtOnce(IResource []resources, String name, Shell shell) {
-		IRepositoryResource []remoteResources = new IRepositoryResource[resources.length];
+
+	public static boolean isAcceptableAtOnce(IResource[] resources, String name, Shell shell) {
+		IRepositoryResource[] remoteResources = new IRepositoryResource[resources.length];
 		for (int i = 0; i < resources.length; i++) {
 			remoteResources[i] = SVNRemoteStorage.instance().asRepositoryResource(resources[i]);
 		}
 		return OperationErrorDialog.isAcceptableAtOnce(remoteResources, name, shell);
 	}
-	
-	public static boolean isAcceptableAtOnce(IRepositoryResource []resources, String name, Shell shell) {
-		IRepositoryLocation first = resources[0].getRepositoryLocation(); 
+
+	public static boolean isAcceptableAtOnce(IRepositoryResource[] resources, String name, Shell shell) {
+		IRepositoryLocation first = resources[0].getRepositoryLocation();
 		String url = SVNUtility.getTrunkLocation(resources[0]).getUrl();
 		for (int i = 1; i < resources.length; i++) {
 			if (resources[i].getRepositoryLocation() != first) {
@@ -70,5 +72,5 @@ public class OperationErrorDialog extends MessageDialog {
 		}
 		return true;
 	}
-	
+
 }

@@ -38,24 +38,26 @@ import org.eclipse.team.svn.core.utility.FileUtility;
 import org.eclipse.team.svn.core.utility.SVNUtility;
 
 /**
- * Operation for replacement of local resources with remote ones.
- * Deletes the resources, that are not got from remote source.
+ * Operation for replacement of local resources with remote ones. Deletes the resources, that are not got from remote source.
  * 
  * @author Alexei Goncharov
  */
 public class ReplaceWithRemoteOperation extends AbstractActionOperation {
 
 	protected IResource toReplace;
+
 	protected IRepositoryResource remoteRoot;
+
 	protected boolean ignoreExternals;
-	
-	public ReplaceWithRemoteOperation(IResource toReplace, IRepositoryResource remoteResource, boolean ignoreExternals) {
+
+	public ReplaceWithRemoteOperation(IResource toReplace, IRepositoryResource remoteResource,
+			boolean ignoreExternals) {
 		super("Operation_ReplaceWithRemote", SVNMessages.class); //$NON-NLS-1$
 		this.toReplace = toReplace;
 		this.remoteRoot = remoteResource;
 		this.ignoreExternals = ignoreExternals;
 	}
-	
+
 	protected void runImpl(IProgressMonitor monitor) throws Exception {
 		//perform export into temp folder
 		IRepositoryLocation location = this.remoteRoot.getRepositoryLocation();
@@ -63,35 +65,35 @@ public class ReplaceWithRemoteOperation extends AbstractActionOperation {
 		File f = File.createTempFile("svn", "", FileUtility.getResourcePath(this.toReplace.getParent()).toFile()); //$NON-NLS-1$ //$NON-NLS-2$
 		f.delete();
 		f.mkdir();
-		String tempPath = toReplacePath.substring(0, toReplacePath.lastIndexOf("/") + 1) + f.getName() + "/";  //$NON-NLS-1$ //$NON-NLS-2$
+		String tempPath = toReplacePath.substring(0, toReplacePath.lastIndexOf("/") + 1) + f.getName() + "/"; //$NON-NLS-1$ //$NON-NLS-2$
 		final ISVNConnector proxy = location.acquireSVNProxy();
 		final String path = tempPath + this.remoteRoot.getName();
-		final SVNEntryRevisionReference entryRef = SVNUtility.getEntryRevisionReference(this.remoteRoot);		
+		final SVNEntryRevisionReference entryRef = SVNUtility.getEntryRevisionReference(this.remoteRoot);
 		try {
 			long options = ISVNConnector.Options.FORCE;
 			if (this.ignoreExternals) {
 				options |= ISVNConnector.Options.IGNORE_EXTERNALS;
 			}
-			proxy.exportTo(entryRef, path, null, SVNDepth.INFINITY, options, new SVNProgressMonitor(this, monitor, null));
+			proxy.exportTo(entryRef, path, null, SVNDepth.INFINITY, options,
+					new SVNProgressMonitor(this, monitor, null));
 			//perform replacement
 			if (this.toReplace instanceof IFile) {
 				FileUtility.copyFile(new File(toReplacePath), new File(path), monitor);
-			}
-			else {
+			} else {
 				this.performReplacementRecursively(toReplacePath, path, proxy, monitor);
 			}
-		}
-		finally {
+		} finally {
 			location.releaseSVNProxy(proxy);
 			FileUtility.deleteRecursive(new File(tempPath));
 		}
 	}
-	
-	protected void performReplacementRecursively(String pathForReplacement, String sourcePath, ISVNConnector connectorProxy, IProgressMonitor monitor) throws Exception {
+
+	protected void performReplacementRecursively(String pathForReplacement, String sourcePath,
+			ISVNConnector connectorProxy, IProgressMonitor monitor) throws Exception {
 		File dirToReplace = new File(pathForReplacement);
 		File sourceDir = new File(sourcePath);
 		ArrayList<String> toReplaceChildren = new ArrayList<String>();
-		String [] children = dirToReplace.list();
+		String[] children = dirToReplace.list();
 		if (children != null) {
 			toReplaceChildren.addAll(Arrays.asList(children));
 		}
@@ -106,21 +108,23 @@ public class ReplaceWithRemoteOperation extends AbstractActionOperation {
 				pathsToDelete.add(pathForReplacement + "/" + currentToReplace); //$NON-NLS-1$
 			}
 		}
-		connectorProxy.removeRemote(pathsToDelete.toArray(new String [0]), "", ISVNConnector.Options.FORCE, null, new SVNProgressMonitor(this, monitor, null)); //$NON-NLS-1$
-		for (Iterator<String> it = sourceChildren.iterator(); it.hasNext() && !monitor.isCanceled(); ) {
+		connectorProxy.removeRemote(pathsToDelete.toArray(new String[0]), "", ISVNConnector.Options.FORCE, null, //$NON-NLS-1$
+				new SVNProgressMonitor(this, monitor, null));
+		for (Iterator<String> it = sourceChildren.iterator(); it.hasNext() && !monitor.isCanceled();) {
 			String currentFromSource = it.next();
-			File toReplace =  new File(pathForReplacement + "/" + currentFromSource); //$NON-NLS-1$
+			File toReplace = new File(pathForReplacement + "/" + currentFromSource); //$NON-NLS-1$
 			File source = new File(sourcePath + "/" + currentFromSource); //$NON-NLS-1$
 			if (source.isDirectory()) {
 				if (!toReplace.exists()) {
 					toReplace.mkdir();
 				}
-				this.performReplacementRecursively(pathForReplacement + "/" + currentFromSource, sourcePath + "/" + currentFromSource, connectorProxy, monitor); //$NON-NLS-1$ //$NON-NLS-2$
-			}
-			else {
+				this.performReplacementRecursively(pathForReplacement + "/" + currentFromSource, //$NON-NLS-1$
+						sourcePath + "/" + currentFromSource, connectorProxy, monitor); //$NON-NLS-1$
+			} else {
 				// If a file is locked, this fails (a locked file has read-only permissions).
 				// That's perfectly fine, but if the files are identical, ignore the error.
-				if (toReplace.exists() && !toReplace.canWrite() && toReplace.isFile() && source.isFile() && toReplace.length() == source.length()) {
+				if (toReplace.exists() && !toReplace.canWrite() && toReplace.isFile() && source.isFile()
+						&& toReplace.length() == source.length()) {
 					BufferedReader left = null;
 					BufferedReader right = null;
 
@@ -136,13 +140,21 @@ public class ReplaceWithRemoteOperation extends AbstractActionOperation {
 							else if (left.read() != right.read())
 								identical = false;
 						}
-					} 
-					catch (IOException ioe) {
+					} catch (IOException ioe) {
 						identical = false;
-					}
-					finally {
-						if (left != null) {try {left.close();} catch (IOException e1) {}}
-						if (right != null) {try {right.close();} catch (IOException e1) {}}
+					} finally {
+						if (left != null) {
+							try {
+								left.close();
+							} catch (IOException e1) {
+							}
+						}
+						if (right != null) {
+							try {
+								right.close();
+							} catch (IOException e1) {
+							}
+						}
 					}
 					if (identical) {
 						continue;

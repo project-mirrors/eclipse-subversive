@@ -45,9 +45,9 @@ public class ReplaceWithRevisionAction extends AbstractNonRecursiveTeamAction {
 	public ReplaceWithRevisionAction() {
 		super();
 	}
-	
+
 	public void runImpl(IAction action) {
-		IResource []resources = this.getSelectedResources(IStateFilter.SF_ONREPOSITORY);
+		IResource[] resources = this.getSelectedResources(IStateFilter.SF_ONREPOSITORY);
 		IActionOperation op = ReplaceWithRevisionAction.getReplaceOperation(resources, this.getShell());
 		if (op != null) {
 			this.runScheduled(op);
@@ -58,18 +58,20 @@ public class ReplaceWithRevisionAction extends AbstractNonRecursiveTeamAction {
 		return this.getSelectedResources().length == 1 && this.checkForResourcesPresence(IStateFilter.SF_ONREPOSITORY);
 	}
 
-	public static IActionOperation getReplaceOperation(IResource []resources, Shell shell) {
+	public static IActionOperation getReplaceOperation(IResource[] resources, Shell shell) {
 		IRepositoryResource remote = SVNRemoteStorage.instance().asRepositoryResource(resources[0]);
 		ILocalResource local = SVNRemoteStorage.instance().asLocalResourceAccessible(resources[0]);
-		
+
 		ReplaceWithUrlPanel panel = new ReplaceWithUrlPanel(remote, local.getRevision());
 		DefaultDialog selectionDialog = new DefaultDialog(shell, panel);
-		
+
 		if (selectionDialog.open() == Dialog.OK) {
 			ReplaceWarningDialog dialog = new ReplaceWarningDialog(shell);
 			if (dialog.open() == 0) {
 				IRepositoryResource selected = panel.getSelectedResource();
-				boolean ignoreExternals = SVNTeamPreferences.getBehaviourBoolean(SVNTeamUIPlugin.instance().getPreferenceStore(), SVNTeamPreferences.BEHAVIOUR_IGNORE_EXTERNALS_NAME);
+				boolean ignoreExternals = SVNTeamPreferences.getBehaviourBoolean(
+						SVNTeamUIPlugin.instance().getPreferenceStore(),
+						SVNTeamPreferences.BEHAVIOUR_IGNORE_EXTERNALS_NAME);
 				CompositeOperation op = new CompositeOperation("Operation_ReplaceWithRevision", SVNUIMessages.class); //$NON-NLS-1$
 				SaveProjectMetaOperation saveOp = new SaveProjectMetaOperation(resources);
 				op.add(saveOp);
@@ -81,5 +83,5 @@ public class ReplaceWithRevisionAction extends AbstractNonRecursiveTeamAction {
 		}
 		return null;
 	}
-	
+
 }

@@ -29,47 +29,51 @@ import org.eclipse.team.svn.ui.utility.UIMonitorUtility;
 import org.eclipse.team.ui.synchronize.ISynchronizePageConfiguration;
 
 /**
- * Open in compare editor pane's action 
+ * Open in compare editor pane's action
  *
  * @author Igor Burilo
- *     	
- */    	
-public class OpenInComparePaneAction extends Action {	
-	
+ * 
+ */
+public class OpenInComparePaneAction extends Action {
+
 	private final ISynchronizePageConfiguration configuration;
-		
+
 	public OpenInComparePaneAction(ISynchronizePageConfiguration configuration) {
 		this.configuration = configuration;
 		Utils.initAction(this, "action.openInCompareEditor."); //$NON-NLS-1$
-	}    		    	
-		
+	}
+
 	public void run() {
 		ISelection selection = this.configuration.getSite().getSelectionProvider().getSelection();
-		if(selection instanceof IStructuredSelection) {
+		if (selection instanceof IStructuredSelection) {
 			IStructuredSelection strSelection = (IStructuredSelection) selection;
 			if (this.isOkToRun(strSelection)) {
-				IResource resource = this.getResources(strSelection)[0];    					    					
+				IResource resource = this.getResources(strSelection)[0];
 				ILocalResource local = SVNRemoteStorage.instance().asLocalResource(resource);
 				if (!IStateFilter.SF_INTERNAL_INVALID.accept(local)) {
-					IRepositoryResource remote = local.isCopied() ? SVNUtility.getCopiedFrom(resource) : SVNRemoteStorage.instance().asRepositoryResource(resource);
+					IRepositoryResource remote = local.isCopied()
+							? SVNUtility.getCopiedFrom(resource)
+							: SVNRemoteStorage.instance().asRepositoryResource(resource);
 					remote.setSelectedRevision(CompareResourcesOperation.getRemoteResourceRevisionForCompare(resource));
 					UIMonitorUtility.doTaskScheduledDefault(new CompareResourcesOperation(local, remote, false, true));
-				}	    					
+				}
 			}
 		}
 	}
-		
+
 	protected boolean isOkToRun(IStructuredSelection selection) {
 		if (selection.size() == 1) {
 			IResource[] resources = this.getResources(selection);
 			if (resources.length == 1) {
 				IResource resource = resources[0];
-				return resource.getType() == IResource.FILE && !FileUtility.checkForResourcesPresence(new IResource[]{resource}, IStateFilter.SF_NOTONREPOSITORY, IResource.DEPTH_ZERO);	
-			}					 														
+				return resource.getType() == IResource.FILE
+						&& !FileUtility.checkForResourcesPresence(new IResource[] { resource },
+								IStateFilter.SF_NOTONREPOSITORY, IResource.DEPTH_ZERO);
+			}
 		}
 		return false;
 	}
-		
+
 	protected IResource[] getResources(IStructuredSelection selection) {
 		Object[] elements = selection.toArray();
 		IResource[] resources = Utils.getResources(elements);

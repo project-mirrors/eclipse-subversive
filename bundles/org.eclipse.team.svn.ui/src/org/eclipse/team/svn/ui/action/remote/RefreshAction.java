@@ -28,7 +28,7 @@ public class RefreshAction extends AbstractRepositoryTeamAction {
 	public RefreshAction() {
 		super();
 	}
-	
+
 	public void runImpl(IAction action) {
 		this.runBusy(new RefreshRemoteResourcesOperation(this.getSelectedRepositoryResources()));
 	}

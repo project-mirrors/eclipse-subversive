@@ -32,29 +32,32 @@ import org.eclipse.team.svn.ui.dialog.DisconnectDialog;
  * @author Alexander Gurov
  */
 public class DisconnectAction extends AbstractLocalTeamAction {
-	
+
 	protected static final int OP_CANCEL = 0;
+
 	protected static final int OP_DROP = 1;
+
 	protected static final int OP_LEAVE = 2;
-	
+
 	public DisconnectAction() {
 		super();
 	}
-	
+
 	public void runImpl(IAction action) {
 		int opType = this.selectOperationType();
 		if (opType != DisconnectAction.OP_CANCEL) {
-			IProject []projects = this.getSelectedProjects();
+			IProject[] projects = this.getSelectedProjects();
 
 			DisconnectOperation mainOp = new DisconnectOperation(projects, opType == DisconnectAction.OP_DROP);
-			
+
 			CompositeOperation op = new CompositeOperation(mainOp.getId(), mainOp.getMessagesClass());
-			
+
 			op.add(new NotifyProjectStatesChangedOperation(projects, ProjectStatesChangedEvent.ST_PRE_DISCONNECTED));
 			op.add(mainOp);
-			op.add(new RefreshResourcesOperation(projects, IResource.DEPTH_INFINITE, RefreshResourcesOperation.REFRESH_ALL));
+			op.add(new RefreshResourcesOperation(projects, IResource.DEPTH_INFINITE,
+					RefreshResourcesOperation.REFRESH_ALL));
 			op.add(new NotifyProjectStatesChangedOperation(projects, ProjectStatesChangedEvent.ST_POST_DISCONNECTED));
-			
+
 			this.runScheduled(op);
 		}
 	}
@@ -70,5 +73,5 @@ public class DisconnectAction extends AbstractLocalTeamAction {
 		}
 		return DisconnectAction.OP_CANCEL;
 	}
-	
+
 }

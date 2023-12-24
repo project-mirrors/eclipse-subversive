@@ -25,22 +25,25 @@ import org.eclipse.team.svn.ui.operation.UILoggedOperation;
  */
 public class ProblemListener implements ILogListener {
 	protected static PluginIDVisitor idVisitor = new PluginIDVisitor();
+
 	protected static StackTraceVisitor stackVisitor = new StackTraceVisitor();
-	
+
 	public ProblemListener() {
 		super();
 	}
 
 	public void logging(IStatus status, String plugin) {
 		// our problems should be handled in the UILoggedOperation in order to suppress two sequential dialogs 
-		ReportPartsFactory.IStatusVisitor visitor = ReportPartsFactory.checkStatus(status, ProblemListener.idVisitor) ? (ReportPartsFactory.IStatusVisitor)null : ProblemListener.stackVisitor;
+		ReportPartsFactory.IStatusVisitor visitor = ReportPartsFactory.checkStatus(status, ProblemListener.idVisitor)
+				? (ReportPartsFactory.IStatusVisitor) null
+				: ProblemListener.stackVisitor;
 		if (visitor != null && ReportPartsFactory.checkStatus(status, visitor)) {
 			this.sendReport(status, plugin);
 		}
 	}
-	
+
 	protected void sendReport(IStatus status, String plugin) {
 		UILoggedOperation.showError(plugin, "", status); //$NON-NLS-1$
 	}
-	
+
 }

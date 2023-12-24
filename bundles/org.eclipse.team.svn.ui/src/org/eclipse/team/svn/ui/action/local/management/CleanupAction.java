@@ -32,9 +32,9 @@ public class CleanupAction extends AbstractWorkingCopyAction {
 	public CleanupAction() {
 		super();
 	}
-	
+
 	public void runImpl(IAction action) {
-		IResource []resources = this.getSelectedResources(IStateFilter.SF_VERSIONED_FOLDERS);
+		IResource[] resources = this.getSelectedResources(IStateFilter.SF_VERSIONED_FOLDERS);
 
 		CleanupOperation mainOp = new CleanupOperation(resources);
 		CompositeOperation op = new CompositeOperation(mainOp.getId(), mainOp.getMessagesClass());
@@ -47,9 +47,9 @@ public class CleanupAction extends AbstractWorkingCopyAction {
 	public boolean isEnabled() {
 		return this.checkForResourcesPresence(IStateFilter.SF_VERSIONED_FOLDERS);
 	}
-	
+
 	protected boolean needsToSaveDirtyEditors() {
 		return true;
 	}
-	
+
 }

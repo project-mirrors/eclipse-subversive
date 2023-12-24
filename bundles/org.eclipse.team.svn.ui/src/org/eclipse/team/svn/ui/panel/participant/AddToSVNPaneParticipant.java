@@ -50,136 +50,141 @@ public class AddToSVNPaneParticipant extends BasePaneParticipant {
 	public AddToSVNPaneParticipant(ISynchronizeScope scope, IValidationManager validationManager) {
 		super(scope, validationManager);
 	}
-	
+
 	protected Collection<AbstractSynchronizeActionGroup> getActionGroups() {
 		List<AbstractSynchronizeActionGroup> actionGroups = new ArrayList<AbstractSynchronizeActionGroup>();
 		actionGroups.add(new AddToSVNPaneActionGroup(this.validationManager));
 		return actionGroups;
 	}
-	
+
 	/**
-     * Add to SVN pane's action set
-     *
-     * 
-     * @author Igor Burilo
-     */
-    protected static class AddToSVNPaneActionGroup extends BasePaneActionGroup {    
-    	    	
+	 * Add to SVN pane's action set
+	 *
+	 * 
+	 * @author Igor Burilo
+	 */
+	protected static class AddToSVNPaneActionGroup extends BasePaneActionGroup {
+
 		public AddToSVNPaneActionGroup(IValidationManager validationManager) {
-			super(validationManager);		
+			super(validationManager);
 		}
 
 		/**
-    	 * Add to SVN ignore by name
-    	 *
-    	 * @author Igor Burilo
-    	 */
-    	protected static class AddToIgnoreByNameAction extends AbstractSynchronizeModelAction {
-			
+		 * Add to SVN ignore by name
+		 *
+		 * @author Igor Burilo
+		 */
+		protected static class AddToIgnoreByNameAction extends AbstractSynchronizeModelAction {
+
 			public AddToIgnoreByNameAction(String text, ISynchronizePageConfiguration configuration) {
-				super(text, configuration);			
+				super(text, configuration);
 			}
-			
-			protected IActionOperation getOperation(ISynchronizePageConfiguration configuration, IDiffElement[] elements) {
+
+			protected IActionOperation getOperation(ISynchronizePageConfiguration configuration,
+					IDiffElement[] elements) {
 				IResource[] selectedResources = this.getAllSelectedResources();
 				CompositeOperation op = new CompositeOperation("Operation_AddToSVNIgnore", SVNMessages.class); //$NON-NLS-1$
 				op.add(new AddToSVNIgnoreOperation(selectedResources, IRemoteStorage.IGNORE_NAME, null));
-				op.add(new RefreshResourcesOperation(new ResourcesParentsProvider(selectedResources), IResource.DEPTH_INFINITE, RefreshResourcesOperation.REFRESH_ALL));
+				op.add(new RefreshResourcesOperation(new ResourcesParentsProvider(selectedResources),
+						IResource.DEPTH_INFINITE, RefreshResourcesOperation.REFRESH_ALL));
 				return op;
-			}	
-			
+			}
+
 			protected boolean updateSelection(IStructuredSelection selection) {
 				IResource[] selectedResources = this.getAllSelectedResources();
 				if (selectedResources.length == 1) {
-					this.setText(BaseMessages.format(SVNUIMessages.AddToSVNPanel_Ignore_Single, selectedResources[0].getName()));
+					this.setText(BaseMessages.format(SVNUIMessages.AddToSVNPanel_Ignore_Single,
+							selectedResources[0].getName()));
 				} else if (selectedResources.length > 1) {
 					this.setText(SVNUIMessages.AddToSVNPanel_IgnoreByNames_Multiple);
 				}
-				
+
 				return super.updateSelection(selection);
 			}
-    	}
-    	
-    	/**
-    	 * Add to SVN ignore by extension
-    	 *
-    	 * @author Igor Burilo
-    	 */
-    	protected static class AddToIgnoreByExtensionAction extends AbstractSynchronizeModelAction {
-    		
-    		public AddToIgnoreByExtensionAction(String text, ISynchronizePageConfiguration configuration) {
-				super(text, configuration);			
+		}
+
+		/**
+		 * Add to SVN ignore by extension
+		 *
+		 * @author Igor Burilo
+		 */
+		protected static class AddToIgnoreByExtensionAction extends AbstractSynchronizeModelAction {
+
+			public AddToIgnoreByExtensionAction(String text, ISynchronizePageConfiguration configuration) {
+				super(text, configuration);
 			}
-			
-			protected IActionOperation getOperation(ISynchronizePageConfiguration configuration, IDiffElement[] elements) {
+
+			protected IActionOperation getOperation(ISynchronizePageConfiguration configuration,
+					IDiffElement[] elements) {
 				IResource[] selectedResources = this.getAllSelectedResources();
 				CompositeOperation op = new CompositeOperation("Operation_AddToSVNIgnore", SVNMessages.class); //$NON-NLS-1$
 				op.add(new AddToSVNIgnoreOperation(selectedResources, IRemoteStorage.IGNORE_EXTENSION, null));
-				op.add(new RefreshResourcesOperation(new ResourcesParentsProvider(selectedResources), IResource.DEPTH_INFINITE, RefreshResourcesOperation.REFRESH_ALL));
+				op.add(new RefreshResourcesOperation(new ResourcesParentsProvider(selectedResources),
+						IResource.DEPTH_INFINITE, RefreshResourcesOperation.REFRESH_ALL));
 				return op;
 			}
-			
+
 			protected boolean updateSelection(IStructuredSelection selection) {
 				IResource[] selectedResources = this.getAllSelectedResources();
 				if (selectedResources.length == 1) {
 					String[] parts = this.getNameParts(selectedResources);
-					this.setText(BaseMessages.format(SVNUIMessages.AddToSVNPanel_Ignore_Single, "*." + parts[parts.length-1])); //$NON-NLS-1$
+					this.setText(BaseMessages.format(SVNUIMessages.AddToSVNPanel_Ignore_Single,
+							"*." + parts[parts.length - 1])); //$NON-NLS-1$
 				} else if (selectedResources.length > 1) {
 					this.setText(SVNUIMessages.AddToSVNPanel_IgnoreByExtension_Multiple);
 				}
-				
+
 				boolean isUpdate = false;
-				if (super.updateSelection(selection)) {					
+				if (super.updateSelection(selection)) {
 					if (selectedResources.length == 1) {
-						String [] parts = this.getNameParts(selectedResources);
+						String[] parts = this.getNameParts(selectedResources);
 						if (parts.length != 0) {
 							isUpdate = true;
-						}						
+						}
 					} else {
 						isUpdate = true;
 					}
 				}
 				return isUpdate;
 			}
-			
+
 			protected String[] getNameParts(IResource[] selectedResources) {
 				String name = selectedResources[0].getName();
 				String[] parts = name.split("\\."); //$NON-NLS-1$
 				return parts;
 			}
-    	}
-    	
-    	protected void configureActions(ISynchronizePageConfiguration configuration) {
+		}
+
+		protected void configureActions(ISynchronizePageConfiguration configuration) {
 			super.configureActions(configuration);
-			
+
 			//add to ignore by name
-			AddToIgnoreByNameAction addToIgnoreByNameAction = new AddToIgnoreByNameAction(SVNUIMessages.AddToSVNPanel_IgnoreByNames_Multiple, configuration);
+			AddToIgnoreByNameAction addToIgnoreByNameAction = new AddToIgnoreByNameAction(
+					SVNUIMessages.AddToSVNPanel_IgnoreByNames_Multiple, configuration);
 			this.appendToGroup(
-					ISynchronizePageConfiguration.P_CONTEXT_MENU, 
-					CommitPaneActionGroup.GROUP_SYNC_NORMAL,
-					addToIgnoreByNameAction);		
-			
+					ISynchronizePageConfiguration.P_CONTEXT_MENU, CommitPaneActionGroup.GROUP_SYNC_NORMAL,
+					addToIgnoreByNameAction);
+
 			//add to ignore by extension 
-			AddToIgnoreByExtensionAction addToIgnoreByExtensionAction = new AddToIgnoreByExtensionAction(SVNUIMessages.AddToSVNPanel_IgnoreByExtension_Multiple, configuration);
+			AddToIgnoreByExtensionAction addToIgnoreByExtensionAction = new AddToIgnoreByExtensionAction(
+					SVNUIMessages.AddToSVNPanel_IgnoreByExtension_Multiple, configuration);
 			this.appendToGroup(
-					ISynchronizePageConfiguration.P_CONTEXT_MENU, 
-					CommitPaneActionGroup.GROUP_SYNC_NORMAL,
-					addToIgnoreByExtensionAction);		
-			
+					ISynchronizePageConfiguration.P_CONTEXT_MENU, CommitPaneActionGroup.GROUP_SYNC_NORMAL,
+					addToIgnoreByExtensionAction);
+
 			//separator
 			this.appendToGroup(
-					ISynchronizePageConfiguration.P_CONTEXT_MENU, 
-					CommitPaneActionGroup.GROUP_SYNC_NORMAL,
-					new Separator());		
-			
+					ISynchronizePageConfiguration.P_CONTEXT_MENU, CommitPaneActionGroup.GROUP_SYNC_NORMAL,
+					new Separator());
+
 			//delete
-			DeletePaneAction deleteAction = new DeletePaneAction(SVNUIMessages.CommitPanel_Delete_Action, configuration);
+			DeletePaneAction deleteAction = new DeletePaneAction(SVNUIMessages.CommitPanel_Delete_Action,
+					configuration);
 			deleteAction.setImageDescriptor(SVNTeamUIPlugin.instance().getImageDescriptor("icons/common/delete.gif")); //$NON-NLS-1$
 			this.appendToGroup(
-					ISynchronizePageConfiguration.P_CONTEXT_MENU, 
-					CommitPaneActionGroup.GROUP_SYNC_NORMAL,
-					deleteAction);	
-    	}
-    }
+					ISynchronizePageConfiguration.P_CONTEXT_MENU, CommitPaneActionGroup.GROUP_SYNC_NORMAL,
+					deleteAction);
+		}
+	}
 
 }

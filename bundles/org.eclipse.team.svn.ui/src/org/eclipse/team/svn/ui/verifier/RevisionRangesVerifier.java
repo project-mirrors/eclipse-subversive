@@ -26,22 +26,23 @@ import org.eclipse.team.svn.ui.SVNUIMessages;
  * @author Alexander Gurov
  */
 public class RevisionRangesVerifier extends AbstractFormattedVerifier {
-    protected static String ERROR_MESSAGE;
-    
+	protected static String ERROR_MESSAGE;
+
 	protected Pattern pattern;
 
 	public RevisionRangesVerifier(String fieldName) {
 		super(fieldName);
-		RevisionRangesVerifier.ERROR_MESSAGE = SVNUIMessages.format(SVNUIMessages.Verifier_RevisionRanges, new String[] {AbstractFormattedVerifier.FIELD_NAME});
+		RevisionRangesVerifier.ERROR_MESSAGE = SVNUIMessages.format(SVNUIMessages.Verifier_RevisionRanges,
+				new String[] { AbstractFormattedVerifier.FIELD_NAME });
 		this.pattern = Pattern.compile("\\d+(-\\d+)?(\\s*,\\s*\\d+(-\\d+)?)*"); //$NON-NLS-1$
 	}
 
 	protected String getErrorMessageImpl(Control input) {
-        String text = this.getText(input);
-        Matcher matcher = this.pattern.matcher(text);
-        if (!matcher.matches()) {
-        	return RevisionRangesVerifier.ERROR_MESSAGE;
-        }
+		String text = this.getText(input);
+		Matcher matcher = this.pattern.matcher(text);
+		if (!matcher.matches()) {
+			return RevisionRangesVerifier.ERROR_MESSAGE;
+		}
 		return null;
 	}
 

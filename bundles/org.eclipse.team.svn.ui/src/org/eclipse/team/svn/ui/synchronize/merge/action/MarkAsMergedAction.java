@@ -44,19 +44,22 @@ public class MarkAsMergedAction extends AbstractSynchronizeModelAction {
 	protected boolean needsToSaveDirtyEditors() {
 		return false;
 	}
-	
+
 	protected FastSyncInfoFilter getSyncInfoFilter() {
-		return new FastSyncInfoFilter.SyncInfoDirectionFilter(new int[] {SyncInfo.CONFLICTING}) {
-            public boolean select(SyncInfo info) {
-                return super.select(info) && !IStateFilter.SF_OBSTRUCTED.accept(((AbstractSVNSyncInfo)info).getLocalResource()) && IStateFilter.SF_VERSIONED.accept(((AbstractSVNSyncInfo)info).getLocalResource());
-            }
-        };
+		return new FastSyncInfoFilter.SyncInfoDirectionFilter(new int[] { SyncInfo.CONFLICTING }) {
+			public boolean select(SyncInfo info) {
+				return super.select(info)
+						&& !IStateFilter.SF_OBSTRUCTED.accept(((AbstractSVNSyncInfo) info).getLocalResource())
+						&& IStateFilter.SF_VERSIONED.accept(((AbstractSVNSyncInfo) info).getLocalResource());
+			}
+		};
 	}
 
 	protected IActionOperation getOperation(ISynchronizePageConfiguration configuration, IDiffElement[] elements) {
-		IResource []resources = this.syncInfoSelector.getSelectedResources();
+		IResource[] resources = this.syncInfoSelector.getSelectedResources();
 
-		MarkResolvedOperation mainOp = new MarkResolvedOperation(resources, SVNConflictResolution.Choice.CHOOSE_MERGED, SVNDepth.INFINITY);
+		MarkResolvedOperation mainOp = new MarkResolvedOperation(resources, SVNConflictResolution.Choice.CHOOSE_MERGED,
+				SVNDepth.INFINITY);
 		CompositeOperation op = new CompositeOperation(mainOp.getId(), mainOp.getMessagesClass());
 		op.add(mainOp);
 		op.add(new RefreshResourcesOperation(FileUtility.getParents(resources, false)));

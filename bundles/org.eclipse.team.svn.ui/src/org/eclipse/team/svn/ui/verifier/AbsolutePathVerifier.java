@@ -25,33 +25,34 @@ import org.eclipse.team.svn.ui.SVNUIMessages;
  * @author Alexander Gurov
  */
 public class AbsolutePathVerifier extends AbstractFormattedVerifier {
-    protected static String ERROR_MESSAGE;
-        
-    public AbsolutePathVerifier(String fieldName) {
-        super(fieldName);
-        AbsolutePathVerifier.ERROR_MESSAGE = SVNUIMessages.format(SVNUIMessages.Verifier_AbsolutePath, new String[] {AbstractFormattedVerifier.FIELD_NAME});
-    }
-    
-    protected String getErrorMessageImpl(Control input) {
-        String text = this.getText(input);
-        if (this.isRealtive(text)) {
-            return AbsolutePathVerifier.ERROR_MESSAGE;
-        }
-        return null;
-    }
+	protected static String ERROR_MESSAGE;
 
-    protected String getWarningMessageImpl(Control input) {
-        return null;
-    }
+	public AbsolutePathVerifier(String fieldName) {
+		super(fieldName);
+		AbsolutePathVerifier.ERROR_MESSAGE = SVNUIMessages.format(SVNUIMessages.Verifier_AbsolutePath,
+				new String[] { AbstractFormattedVerifier.FIELD_NAME });
+	}
 
-    protected boolean isRealtive(String path) {
-    	StringTokenizer tok = new StringTokenizer(path, "/\\", false); //$NON-NLS-1$
-    	while (tok.hasMoreTokens()) {
-    		String token = tok.nextToken();
-    		if (token.matches("(\\.)+")) { //$NON-NLS-1$
-    			return true;
-    		}
-    	}
-    	return false;
-    }
+	protected String getErrorMessageImpl(Control input) {
+		String text = this.getText(input);
+		if (this.isRealtive(text)) {
+			return AbsolutePathVerifier.ERROR_MESSAGE;
+		}
+		return null;
+	}
+
+	protected String getWarningMessageImpl(Control input) {
+		return null;
+	}
+
+	protected boolean isRealtive(String path) {
+		StringTokenizer tok = new StringTokenizer(path, "/\\", false); //$NON-NLS-1$
+		while (tok.hasMoreTokens()) {
+			String token = tok.nextToken();
+			if (token.matches("(\\.)+")) { //$NON-NLS-1$
+				return true;
+			}
+		}
+		return false;
+	}
 }

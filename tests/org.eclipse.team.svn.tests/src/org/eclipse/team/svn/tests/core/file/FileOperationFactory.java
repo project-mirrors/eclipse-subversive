@@ -71,6 +71,7 @@ import org.eclipse.team.svn.tests.workflow.repository.TestRepositoryManager;
 public class FileOperationFactory {
 
 	private static final String TEST_PROPERTY_NAME = "test-property";
+
 	private static final String TEST_PROPERTY_VALUE = "test-value";
 
 	public FileOperationFactory() throws Exception {

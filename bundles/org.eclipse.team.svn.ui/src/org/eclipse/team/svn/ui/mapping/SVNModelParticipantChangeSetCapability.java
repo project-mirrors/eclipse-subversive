@@ -34,9 +34,9 @@ import org.eclipse.team.ui.synchronize.ISynchronizePageConfiguration;
 
 public class SVNModelParticipantChangeSetCapability extends ChangeSetCapability {
 
-	public static String getProposedComment(IResource []resourcesToCommit) {
+	public static String getProposedComment(IResource[] resourcesToCommit) {
 		String retVal = null;
-		ChangeSet []sets = SVNTeamPlugin.instance().getModelChangeSetManager().getSets();
+		ChangeSet[] sets = SVNTeamPlugin.instance().getModelChangeSetManager().getSets();
 		for (int i = 0; i < sets.length; i++) {
 			if (SVNChangeSetCapability.containsOneOf(sets[i], resourcesToCommit)) {
 				String comment = sets[i].getComment();
@@ -45,34 +45,36 @@ public class SVNModelParticipantChangeSetCapability extends ChangeSetCapability 
 		}
 		return retVal;
 	}
-	
+
 	public boolean supportsCheckedInChangeSets() {
 		return true;
 	}
-	
+
 	public boolean enableCheckedInChangeSetsFor(ISynchronizePageConfiguration configuration) {
-	    return this.supportsCheckedInChangeSets() && configuration.getMode() != ISynchronizePageConfiguration.OUTGOING_MODE;
+		return this.supportsCheckedInChangeSets()
+				&& configuration.getMode() != ISynchronizePageConfiguration.OUTGOING_MODE;
 	}
 
 	public boolean supportsActiveChangeSets() {
 		return true;
 	}
-	
+
 	public boolean enableActiveChangeSetsFor(ISynchronizePageConfiguration configuration) {
-        return this.supportsActiveChangeSets() && configuration.getMode() != ISynchronizePageConfiguration.INCOMING_MODE;
+		return this.supportsActiveChangeSets()
+				&& configuration.getMode() != ISynchronizePageConfiguration.INCOMING_MODE;
 	}
 
 	public ActiveChangeSetManager getActiveChangeSetManager() {
 		return SVNTeamPlugin.instance().getModelChangeSetManager();
-    }
-	
+	}
+
 	public SVNIncomingChangeSetCollector createIncomingChangeSetCollector(ISynchronizePageConfiguration configuration) {
 		return new SVNIncomingChangeSetCollector(configuration, UpdateSubscriber.instance());
 	}
-	
+
 	public ActiveChangeSet createChangeSet(ISynchronizePageConfiguration configuration, IDiff[] infos) {
-        ActiveChangeSet set = this.getActiveChangeSetManager().createSet(SVNUIMessages.ChangeSet_NewSet, new IDiff[0]); 
-		CommitSetPanel panel = new CommitSetPanel(set, this.getResources(infos), CommitSetPanel.MSG_CREATE);  
+		ActiveChangeSet set = this.getActiveChangeSetManager().createSet(SVNUIMessages.ChangeSet_NewSet, new IDiff[0]);
+		CommitSetPanel panel = new CommitSetPanel(set, this.getResources(infos), CommitSetPanel.MSG_CREATE);
 		DefaultDialog dialog = new DefaultDialog(configuration.getSite().getShell(), panel);
 		dialog.open();
 		if (dialog.getReturnCode() != Window.OK) {
@@ -80,24 +82,24 @@ public class SVNModelParticipantChangeSetCapability extends ChangeSetCapability 
 		}
 		set.add(infos);
 		return set;
-    }
-	
+	}
+
 	public void editChangeSet(ISynchronizePageConfiguration configuration, ActiveChangeSet set) {
-		CommitSetPanel panel = new CommitSetPanel(set, set.getResources(), CommitSetPanel.MSG_EDIT);  
+		CommitSetPanel panel = new CommitSetPanel(set, set.getResources(), CommitSetPanel.MSG_EDIT);
 		DefaultDialog dialog = new DefaultDialog(configuration.getSite().getShell(), panel);
-		dialog.open(); 
-    }
-	
+		dialog.open();
+	}
+
 	private IResource[] getResources(IDiff[] diffs) {
-    	HashSet<IResource> result = new HashSet<IResource>();
-    	for (int i = 0; i < diffs.length; i++) {
+		HashSet<IResource> result = new HashSet<IResource>();
+		for (int i = 0; i < diffs.length; i++) {
 			IDiff diff = diffs[i];
 			IResource resource = ResourceDiffTree.getResourceFor(diff);
 			if (resource != null) {
 				result.add(resource);
 			}
 		}
-        return result.toArray(new IResource[result.size()]);
-    }
-	
+		return result.toArray(new IResource[result.size()]);
+	}
+
 }

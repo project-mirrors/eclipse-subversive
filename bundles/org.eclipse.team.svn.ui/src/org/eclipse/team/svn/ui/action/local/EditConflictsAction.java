@@ -30,9 +30,10 @@ public class EditConflictsAction extends AbstractRecursiveTeamAction {
 	}
 
 	public void runImpl(IAction action) {
-		this.runScheduled(new ShowConflictEditorOperation(this.getSelectedResourcesRecursive(IStateFilter.SF_DATA_CONFLICTING), false));
+		this.runScheduled(new ShowConflictEditorOperation(
+				this.getSelectedResourcesRecursive(IStateFilter.SF_DATA_CONFLICTING), false));
 	}
-	
+
 	public boolean isEnabled() {
 		return this.checkForResourcesPresenceRecursive(IStateFilter.SF_DATA_CONFLICTING);
 	}
@@ -40,5 +41,5 @@ public class EditConflictsAction extends AbstractRecursiveTeamAction {
 	protected boolean needsToSaveDirtyEditors() {
 		return true;
 	}
-	
+
 }

@@ -35,31 +35,33 @@ import org.eclipse.team.svn.core.utility.SVNUtility;
  * @author Alexander Gurov
  */
 public class GetPropertiesOperation extends AbstractFileOperation {
-	protected SVNProperty []properties;
+	protected SVNProperty[] properties;
+
 	protected SVNRevision revision;
-	
+
 	public GetPropertiesOperation(File file) {
 		this(file, SVNRevision.WORKING);
 	}
 
 	public GetPropertiesOperation(File file, SVNRevision revision) {
-		super("Operation_GetPropertiesFile", SVNMessages.class, new File[] {file}); //$NON-NLS-1$
+		super("Operation_GetPropertiesFile", SVNMessages.class, new File[] { file }); //$NON-NLS-1$
 		this.revision = revision;
 	}
 
-	public SVNProperty []getProperties() {
+	public SVNProperty[] getProperties() {
 		return this.properties;
 	}
-	
+
 	protected void runImpl(IProgressMonitor monitor) throws Exception {
 		File file = this.operableData()[0];
 		IRepositoryResource remote = SVNFileStorage.instance().asRepositoryResource(file, false);
 		IRepositoryLocation location = remote.getRepositoryLocation();
 		ISVNConnector proxy = location.acquireSVNProxy();
 		try {
-			this.properties = SVNUtility.properties(proxy, new SVNEntryRevisionReference(file.getAbsolutePath(), null, this.revision), ISVNConnector.Options.NONE, new SVNProgressMonitor(this, monitor, null));
-		}
-		finally {
+			this.properties = SVNUtility.properties(proxy,
+					new SVNEntryRevisionReference(file.getAbsolutePath(), null, this.revision),
+					ISVNConnector.Options.NONE, new SVNProgressMonitor(this, monitor, null));
+		} finally {
 			location.releaseSVNProxy(proxy);
 		}
 	}

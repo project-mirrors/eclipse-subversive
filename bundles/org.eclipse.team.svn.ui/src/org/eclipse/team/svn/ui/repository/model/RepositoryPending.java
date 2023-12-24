@@ -26,21 +26,21 @@ import org.eclipse.team.svn.ui.SVNUIMessages;
  */
 public class RepositoryPending extends RepositoryFictiveNode {
 	public static final String PENDING = "RepositoriesView_Model_Pending"; //$NON-NLS-1$
-	
+
 	protected RepositoryResource parent;
-	
+
 	public RepositoryPending(RepositoryResource parent) {
 		this.parent = parent;
 	}
-	
-    public RGB getForeground(Object element) {
-    	return this.parent.getForeground(element);
-    }
-    
+
+	public RGB getForeground(Object element) {
+		return this.parent.getForeground(element);
+	}
+
 	public boolean hasChildren() {
 		return false;
 	}
-	
+
 	public Object[] getChildren(Object o) {
 		return null;
 	}
@@ -48,7 +48,7 @@ public class RepositoryPending extends RepositoryFictiveNode {
 	public String getLabel(Object o) {
 		return SVNUIMessages.getString(RepositoryPending.PENDING);
 	}
-	
+
 	public ImageDescriptor getImageDescriptor(Object object) {
 		return SVNTeamUIPlugin.instance().getImageDescriptor("icons/views/repositories/browser_pending.gif"); //$NON-NLS-1$
 	}

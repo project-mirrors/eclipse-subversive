@@ -17,7 +17,7 @@ package org.eclipse.team.svn.ui.decorator;
 import org.eclipse.team.svn.ui.SVNUIMessages;
 
 /**
- * Predefined decoration variable 
+ * Predefined decoration variable
  * 
  * @author Alexander Gurov
  */

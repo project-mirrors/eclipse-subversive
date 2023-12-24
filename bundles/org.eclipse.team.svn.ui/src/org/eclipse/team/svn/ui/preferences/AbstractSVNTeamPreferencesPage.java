@@ -31,12 +31,13 @@ import org.eclipse.ui.IWorkbenchPreferencePage;
  * 
  * @author Alexander Gurov
  */
-public abstract class AbstractSVNTeamPreferencesPage extends PreferencePage implements IWorkbenchPreferencePage, IValidationManager {
-    private VerificationKeyListener changeListener;
-    
+public abstract class AbstractSVNTeamPreferencesPage extends PreferencePage
+		implements IWorkbenchPreferencePage, IValidationManager {
+	private VerificationKeyListener changeListener;
+
 	public AbstractSVNTeamPreferencesPage() {
 		super();
-        this.changeListener = new VerificationKeyListener();
+		this.changeListener = new VerificationKeyListener();
 	}
 
 	public void init(IWorkbench workbench) {
@@ -45,41 +46,45 @@ public abstract class AbstractSVNTeamPreferencesPage extends PreferencePage impl
 
 	public boolean performOk() {
 		this.saveValues(this.getPreferenceStore());
-		
+
 		SVNTeamUIPlugin.instance().savePreferences();
-		
+
 		return true;
 	}
-	
+
 	protected void performDefaults() {
 		super.performDefaults();
 		this.loadDefaultValues(this.getPreferenceStore());
 		this.initializeControls();
-		
+
 		this.validateContent();
 	}
-	
+
 	protected Control createContents(Composite parent) {
 		Control retVal = this.createContentsImpl(parent);
-		
+
 		this.loadValues(this.getPreferenceStore());
 		this.initializeControls();
-		
+
 		this.addListeners();
-		
+
 		return retVal;
 	}
-	
+
 	protected IPreferenceStore doGetPreferenceStore() {
 		return SVNTeamUIPlugin.instance().getPreferenceStore();
 	}
 
 	protected abstract void loadDefaultValues(IPreferenceStore store);
+
 	protected abstract void loadValues(IPreferenceStore store);
+
 	protected abstract void saveValues(IPreferenceStore store);
+
 	protected abstract void initializeControls();
+
 	protected abstract Control createContentsImpl(Composite parent);
-	
+
 	public boolean isFilledRight() {
 		return this.changeListener.isFilledRight();
 	}
@@ -87,53 +92,54 @@ public abstract class AbstractSVNTeamPreferencesPage extends PreferencePage impl
 	public void attachTo(Control cmp, AbstractVerifier verifier) {
 		this.changeListener.attachTo(cmp, verifier);
 	}
-	
+
 	public void addListeners() {
-		this.changeListener.addListeners();		
+		this.changeListener.addListeners();
 		this.validateContent();
 		this.setMessage(this.getTitle(), IMessageProvider.NONE);
 	}
-	
+
 	public void detachFrom(Control cmp) {
 		this.changeListener.detachFrom(cmp);
 	}
-		
+
 	public void detachAll() {
 		this.changeListener.detachAll();
 	}
-	
+
 	public void validateContent() {
 		this.changeListener.validateContent();
 	}
-	
+
 	public boolean validateControl(Control cmp) {
 		return this.changeListener.validateControl(cmp);
 	}
-	
-    protected class VerificationKeyListener extends AbstractVerificationKeyListener {
-        public VerificationKeyListener() {
-            super();
-        }
-        
-        public void hasError(String errorReason) {
-        	AbstractSVNTeamPreferencesPage.this.setMessage(errorReason, IMessageProvider.ERROR);
-			this.handleButtons();
-        }
 
-        public void hasWarning(String warningReason) {
-        	AbstractSVNTeamPreferencesPage.this.setMessage(warningReason, IMessageProvider.WARNING);
-			this.handleButtons();
-        }
+	protected class VerificationKeyListener extends AbstractVerificationKeyListener {
+		public VerificationKeyListener() {
+			super();
+		}
 
-        public void hasNoError() {
-        	AbstractSVNTeamPreferencesPage.this.setMessage(AbstractSVNTeamPreferencesPage.this.getTitle(), IMessageProvider.NONE);
+		public void hasError(String errorReason) {
+			AbstractSVNTeamPreferencesPage.this.setMessage(errorReason, IMessageProvider.ERROR);
 			this.handleButtons();
-        }
+		}
 
-        protected void handleButtons() {
-        	AbstractSVNTeamPreferencesPage.this.setValid(this.isFilledRight());
-        }
-        
-    }
-    
+		public void hasWarning(String warningReason) {
+			AbstractSVNTeamPreferencesPage.this.setMessage(warningReason, IMessageProvider.WARNING);
+			this.handleButtons();
+		}
+
+		public void hasNoError() {
+			AbstractSVNTeamPreferencesPage.this.setMessage(AbstractSVNTeamPreferencesPage.this.getTitle(),
+					IMessageProvider.NONE);
+			this.handleButtons();
+		}
+
+		protected void handleButtons() {
+			AbstractSVNTeamPreferencesPage.this.setValid(this.isFilledRight());
+		}
+
+	}
+
 }

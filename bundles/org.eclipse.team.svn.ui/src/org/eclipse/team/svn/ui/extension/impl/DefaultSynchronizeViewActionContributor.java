@@ -46,5 +46,4 @@ public class DefaultSynchronizeViewActionContributor implements ISynchronizeView
 		return actionGroups;
 	}
 
-	
 }

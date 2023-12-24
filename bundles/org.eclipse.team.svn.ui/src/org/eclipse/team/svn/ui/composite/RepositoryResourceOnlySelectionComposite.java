@@ -42,8 +42,7 @@ import org.eclipse.team.svn.ui.verifier.URLVerifier;
  * 
  * Repository resource selection composite
  * 
- * In contrast to RepositoryResourceSelectionComposite it 
- * doesn't contain any revision controls
+ * In contrast to RepositoryResourceSelectionComposite it doesn't contain any revision controls
  * 
  * @author Igor Burilo
  *
@@ -57,67 +56,72 @@ public class RepositoryResourceOnlySelectionComposite extends RepositoryResource
 	 */
 	protected boolean isMatchToBaseResource;
 
-	public RepositoryResourceOnlySelectionComposite(Composite parent, int style, IValidationManager validationManager, String historyKey, IRepositoryResource baseResource, String selectionTitle, String selectionDescription) {
-		this(parent, style, validationManager, historyKey, "RepositoryResourceOnlySelectionComposite_URL", baseResource, selectionTitle, selectionDescription); //$NON-NLS-1$
+	public RepositoryResourceOnlySelectionComposite(Composite parent, int style, IValidationManager validationManager,
+			String historyKey, IRepositoryResource baseResource, String selectionTitle, String selectionDescription) {
+		this(parent, style, validationManager, historyKey, "RepositoryResourceOnlySelectionComposite_URL", baseResource, //$NON-NLS-1$
+				selectionTitle, selectionDescription);
 	}
-	
-	public RepositoryResourceOnlySelectionComposite(Composite parent, int style, IValidationManager validationManager, String historyKey, String comboId, IRepositoryResource baseResource, String selectionTitle, String selectionDescription) {
-		super(parent, style, validationManager, historyKey, comboId, baseResource, selectionTitle, selectionDescription);
-		
+
+	public RepositoryResourceOnlySelectionComposite(Composite parent, int style, IValidationManager validationManager,
+			String historyKey, String comboId, IRepositoryResource baseResource, String selectionTitle,
+			String selectionDescription) {
+		super(parent, style, validationManager, historyKey, comboId, baseResource, selectionTitle,
+				selectionDescription);
+
 		this.createControls();
 	}
-	
+
 	public void setMatchToBaseResource(boolean isMatchToBaseResource) {
 		this.isMatchToBaseResource = isMatchToBaseResource;
 	}
-	
+
 	public boolean isMatchToBaseResource() {
 		return this.isMatchToBaseResource;
 	}
-	
+
 	private void createControls() {
 		GridLayout layout = null;
 		GridData data = null;
-		
+
 		layout = new GridLayout();
 		layout.numColumns = 2;
 		layout.marginHeight = layout.marginWidth = 0;
 		this.setLayout(layout);
-		
+
 		Label urlLabel = new Label(this, SWT.NONE);
 		urlLabel.setLayoutData(new GridData());
 		urlLabel.setText(SVNUIMessages.getString(this.comboId));
-		
-		Composite select = new Composite(this, SWT.NONE);	
+
+		Composite select = new Composite(this, SWT.NONE);
 		layout = new GridLayout();
 		layout.numColumns = 2;
 		layout.marginHeight = 0;
 		layout.marginWidth = 0;
 		select.setLayout(layout);
 		data = new GridData(GridData.FILL_HORIZONTAL);
-		select.setLayoutData(data);	
-		
+		select.setLayoutData(data);
+
 		this.urlText = new Combo(select, SWT.NULL);
 		data = new GridData(GridData.FILL_HORIZONTAL);
 		data.widthHint = IDialogConstants.ENTRY_FIELD_WIDTH;
 		this.urlText.setLayoutData(data);
 		this.urlText.setVisibleItemCount(this.urlHistory.getDepth());
 		this.urlText.setItems(this.urlHistory.getHistory());
-		
+
 		if (this.baseResource != null) {
 			this.urlText.setText(this.baseResource.getUrl());
 		}
-		
+
 		this.url = this.urlText.getText();
-		
+
 		Listener urlTextListener = new Listener() {
 			public void handleEvent(Event e) {
-				RepositoryResourceOnlySelectionComposite.this.url = ((Combo)e.widget).getText();
+				RepositoryResourceOnlySelectionComposite.this.url = ((Combo) e.widget).getText();
 			}
 		};
 		this.urlText.addListener(SWT.Selection, urlTextListener);
 		this.urlText.addListener(SWT.Modify, urlTextListener);
-		
+
 		this.verifier = new CompositeVerifier();
 		this.verifier.add(new NonEmptyFieldVerifier(SVNUIMessages.getString(this.comboId + "_Verifier"))); //$NON-NLS-1$
 		this.verifier.add(new URLVerifier(SVNUIMessages.getString(this.comboId + "_Verifier")) { //$NON-NLS-1$
@@ -125,15 +129,23 @@ public class RepositoryResourceOnlySelectionComposite extends RepositoryResource
 				String error = super.getErrorMessage(input);
 				if (RepositoryResourceOnlySelectionComposite.this.baseResource != null && error == null) {
 					String url = this.getText(input);
-					if (RepositoryResourceOnlySelectionComposite.this.getDestination(SVNUtility.asEntryReference(url), true) == null) {
-						error = SVNUIMessages.format(SVNUIMessages.RepositoryResourceOnlySelectionComposite_URL_Verifier_Error, new String[] {url, RepositoryResourceOnlySelectionComposite.this.baseResource.getRepositoryLocation().getUrl()});
+					if (RepositoryResourceOnlySelectionComposite.this.getDestination(SVNUtility.asEntryReference(url),
+							true) == null) {
+						error = SVNUIMessages.format(
+								SVNUIMessages.RepositoryResourceOnlySelectionComposite_URL_Verifier_Error,
+								new String[] { url,
+										RepositoryResourceOnlySelectionComposite.this.baseResource
+												.getRepositoryLocation()
+												.getUrl() });
 					}
-					
+
 					//check that resource starts with location
 					if (error == null && RepositoryResourceOnlySelectionComposite.this.isMatchToBaseResource) {
 						String baseResourceUrl = RepositoryResourceOnlySelectionComposite.this.baseResource.getUrl();
-						if (!url.startsWith(baseResourceUrl)) {							
-							error = SVNUIMessages.format(SVNUIMessages.RepositoryResourceOnlySelectionComposite_URL_Verifier_Error, new String[] {url, baseResourceUrl});
+						if (!url.startsWith(baseResourceUrl)) {
+							error = SVNUIMessages.format(
+									SVNUIMessages.RepositoryResourceOnlySelectionComposite_URL_Verifier_Error,
+									new String[] { url, baseResourceUrl });
 						}
 					}
 				}
@@ -142,7 +154,7 @@ public class RepositoryResourceOnlySelectionComposite extends RepositoryResource
 		});
 		this.verifier.add(new AbsolutePathVerifier(this.comboId));
 		this.validationManager.attachTo(this.urlText, this.verifier);
-		
+
 		this.browse = new Button(select, SWT.PUSH);
 		this.browse.setText(SVNUIMessages.Button_Browse);
 		data = new GridData();
@@ -150,24 +162,27 @@ public class RepositoryResourceOnlySelectionComposite extends RepositoryResource
 		this.browse.setLayoutData(data);
 		this.browse.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				RepositoryTreePanel panel = 
-			        new RepositoryTreePanel(
-			        	SVNUIMessages.RepositoryResourceOnlySelectionComposite_Select_Title, 
+				RepositoryTreePanel panel = new RepositoryTreePanel(
+						SVNUIMessages.RepositoryResourceOnlySelectionComposite_Select_Title,
 						RepositoryResourceOnlySelectionComposite.this.selectionTitle,
-						RepositoryResourceOnlySelectionComposite.this.selectionDescription,
-						null, 
-						true, 
+						RepositoryResourceOnlySelectionComposite.this.selectionDescription, null, true,
 						RepositoryResourceOnlySelectionComposite.this.baseResource, false);
 				panel.setAllowFiles(!RepositoryResourceOnlySelectionComposite.this.foldersOnly);
-				DefaultDialog browser = new DefaultDialog(RepositoryResourceOnlySelectionComposite.this.getShell(), panel);
+				DefaultDialog browser = new DefaultDialog(RepositoryResourceOnlySelectionComposite.this.getShell(),
+						panel);
 				if (browser.open() == 0) {
 					IRepositoryResource selectedResource = panel.getSelectedResource();
-					boolean samePeg = RepositoryResourceOnlySelectionComposite.this.baseResource != null && selectedResource.getPegRevision().equals(RepositoryResourceOnlySelectionComposite.this.baseResource.getPegRevision());
-					RepositoryResourceOnlySelectionComposite.this.urlText.setText(samePeg ? selectedResource.getUrl() : SVNUtility.getEntryReference(selectedResource).toString());
+					boolean samePeg = RepositoryResourceOnlySelectionComposite.this.baseResource != null
+							&& selectedResource.getPegRevision()
+									.equals(RepositoryResourceOnlySelectionComposite.this.baseResource
+											.getPegRevision());
+					RepositoryResourceOnlySelectionComposite.this.urlText.setText(samePeg
+							? selectedResource.getUrl()
+							: SVNUtility.getEntryReference(selectedResource).toString());
 					RepositoryResourceOnlySelectionComposite.this.validationManager.validateContent();
 				}
 			}
-		});		
+		});
 	}
-	
+
 }

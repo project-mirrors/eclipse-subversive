@@ -35,7 +35,7 @@ import org.eclipse.team.svn.core.utility.FileUtility;
 public class RevertOperation extends AbstractFileOperation {
 	protected boolean recursive;
 
-	public RevertOperation(File []files, boolean recursive) {
+	public RevertOperation(File[] files, boolean recursive) {
 		super("Operation_RevertFile", SVNMessages.class, files); //$NON-NLS-1$
 		this.recursive = recursive;
 	}
@@ -46,24 +46,27 @@ public class RevertOperation extends AbstractFileOperation {
 	}
 
 	protected void runImpl(IProgressMonitor monitor) throws Exception {
-		File []files = this.operableData();
-		
+		File[] files = this.operableData();
+
 		if (this.recursive) {
 			files = FileUtility.shrinkChildNodes(files, false);
-		}
-		else {
+		} else {
 			FileUtility.reorder(files, false);
 		}
-		
+
 		for (int i = 0; i < files.length && !monitor.isCanceled(); i++) {
 			final File current = files[i];
 			IRepositoryResource remote = SVNFileStorage.instance().asRepositoryResource(current, false);
 			IRepositoryLocation location = remote.getRepositoryLocation();
 			final ISVNConnector proxy = location.acquireSVNProxy();
-			this.writeToConsole(IConsoleStream.LEVEL_CMD, "svn revert \"" + FileUtility.normalizePath(current.getAbsolutePath()) + "\"" + (this.recursive ? " -R" : "") + "\n"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
+			this.writeToConsole(IConsoleStream.LEVEL_CMD,
+					"svn revert \"" + FileUtility.normalizePath(current.getAbsolutePath()) + "\"" //$NON-NLS-1$//$NON-NLS-2$
+							+ (this.recursive ? " -R" : "") + "\n"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			this.protectStep(new IUnprotectedOperation() {
 				public void run(IProgressMonitor monitor) throws Exception {
-					proxy.revert(new String[] {current.getAbsolutePath()}, SVNDepth.infinityOrEmpty(RevertOperation.this.recursive), null, ISVNConnector.Options.NONE, new SVNProgressMonitor(RevertOperation.this, monitor, null));
+					proxy.revert(new String[] { current.getAbsolutePath() },
+							SVNDepth.infinityOrEmpty(RevertOperation.this.recursive), null, ISVNConnector.Options.NONE,
+							new SVNProgressMonitor(RevertOperation.this, monitor, null));
 				}
 			}, monitor, files.length);
 			location.releaseSVNProxy(proxy);

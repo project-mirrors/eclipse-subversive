@@ -26,95 +26,95 @@ import org.eclipse.team.svn.ui.SVNUIMessages;
  * @author Alexander Gurov
  */
 public class URLVerifier extends AbstractFormattedVerifier {
-    protected static final String ERROR_REASON = "$ERROR_REASON$"; //$NON-NLS-1$
-    protected static String ERROR_MESSAGE_SHORT;
-    protected static String ERROR_MESSAGE_FULL;
+	protected static final String ERROR_REASON = "$ERROR_REASON$"; //$NON-NLS-1$
 
-    public URLVerifier(String fieldName) {
-        super(fieldName);
-        URLVerifier.ERROR_MESSAGE_SHORT = SVNUIMessages.format(SVNUIMessages.Verifier_URL_Short, new String[] {AbstractFormattedVerifier.FIELD_NAME});
-        URLVerifier.ERROR_MESSAGE_FULL = SVNUIMessages.format(SVNUIMessages.Verifier_URL_Full, new String[] {AbstractFormattedVerifier.FIELD_NAME, URLVerifier.ERROR_REASON});
-    }
+	protected static String ERROR_MESSAGE_SHORT;
 
-    protected String getErrorMessageImpl(Control input) {
-        String url = this.getText(input);
-        try {
-        	URL svnUrl = SVNUtility.getSVNUrl(url);
-        	String host = svnUrl.getHost();
-        	if (!this.isIPAddress(host) && !host.matches("[a-zA-Z0-9_\\-]+(?:\\.[a-zA-Z0-9_\\-]+)*") && host.length() > 0 || //$NON-NLS-1$
-        		host.length() == 0 && !"file".equals(svnUrl.getProtocol())) { //$NON-NLS-1$
-        		this.setPlaceHolder(URLVerifier.ERROR_REASON, SVNUIMessages.Verifier_URL_NoHost);
-                return URLVerifier.ERROR_MESSAGE_FULL;
-        	}      	
-            return null;
-        }
-        catch (Exception ex) {
-            this.setPlaceHolder(URLVerifier.ERROR_REASON, ex.getMessage());
-            return ex.getMessage() == null ? URLVerifier.ERROR_MESSAGE_SHORT : URLVerifier.ERROR_MESSAGE_FULL;
-        }
-    }
+	protected static String ERROR_MESSAGE_FULL;
 
-    protected String getWarningMessageImpl(Control input) {
-        return null;
-    }
+	public URLVerifier(String fieldName) {
+		super(fieldName);
+		URLVerifier.ERROR_MESSAGE_SHORT = SVNUIMessages.format(SVNUIMessages.Verifier_URL_Short,
+				new String[] { AbstractFormattedVerifier.FIELD_NAME });
+		URLVerifier.ERROR_MESSAGE_FULL = SVNUIMessages.format(SVNUIMessages.Verifier_URL_Full,
+				new String[] { AbstractFormattedVerifier.FIELD_NAME, URLVerifier.ERROR_REASON });
+	}
 
-    protected boolean isIPAddress(String host) {
-    	int idx = host.indexOf(']');
-    	return idx != -1 && URLVerifier.isIPv6Address(host.substring(1, idx)) || URLVerifier.isIPv4Address(host);
-    }
-    
-    // rewrite an IP address validation code since access to the sun.net.util.IPAddressUtil is restricted
-    protected static boolean isIPv4Address(String address) {
-    	String[] s = address.split("\\.", -1);
-    	try {
-    		if (s.length == 1) {
-    			long val = Long.parseLong(s[0]);
-    			if (val < 0 || val > 0xFFFFFFFFL) {
-    				return false;
-    			}
-    		}
-    		else if (s.length == 2) {
-    			long val = Long.parseLong(s[0]), val1 = Long.parseLong(s[1]);
-    			if (val < 0 || val > 0xFFL || val1 < 0 || val1 > 0xFFFFFFL) {
-    				return false;
-    			}
-    		}
-    		else if (s.length == 3) {
-    			long val = Long.parseLong(s[0]), val1 = Long.parseLong(s[1]), val2 = Long.parseLong(s[2]);
-    			if (val < 0 || val > 0xFFL || val1 < 0 || val1 > 0xFFL || val2 < 0 || val2 > 0xFFFFL) {
-    				return false;
-    			}
-    		}
-    		else if (s.length == 4) {
-    			for (String p : s) {
-    				long val = Long.parseLong(p);
-        			if (val < 0 || val > 0xFFL) {
-        				return false;
-        			}
-    			}
-    		}
-    		else {
-    			return false;
-    		}
-    	}
-    	catch (NumberFormatException ex) {
-    		return false;
-    	}
-    	return true;
-    }
-    
-    private final static int IPV4_SIZE = 4;
-    private final static int IPV6_SIZE = 16;
-    private final static int INT16_SIZE = 2;
-    
-    protected static boolean isIPv6Address(String address) {
-    	if (address.length() < 2) { // :: an empty address is a minimal one
-    		return false;
-    	}
-    	
+	protected String getErrorMessageImpl(Control input) {
+		String url = this.getText(input);
+		try {
+			URL svnUrl = SVNUtility.getSVNUrl(url);
+			String host = svnUrl.getHost();
+			if (!this.isIPAddress(host) && !host.matches("[a-zA-Z0-9_\\-]+(?:\\.[a-zA-Z0-9_\\-]+)*") //$NON-NLS-1$
+					&& host.length() > 0 || host.length() == 0 && !"file".equals(svnUrl.getProtocol())) { //$NON-NLS-1$
+				this.setPlaceHolder(URLVerifier.ERROR_REASON, SVNUIMessages.Verifier_URL_NoHost);
+				return URLVerifier.ERROR_MESSAGE_FULL;
+			}
+			return null;
+		} catch (Exception ex) {
+			this.setPlaceHolder(URLVerifier.ERROR_REASON, ex.getMessage());
+			return ex.getMessage() == null ? URLVerifier.ERROR_MESSAGE_SHORT : URLVerifier.ERROR_MESSAGE_FULL;
+		}
+	}
+
+	protected String getWarningMessageImpl(Control input) {
+		return null;
+	}
+
+	protected boolean isIPAddress(String host) {
+		int idx = host.indexOf(']');
+		return idx != -1 && URLVerifier.isIPv6Address(host.substring(1, idx)) || URLVerifier.isIPv4Address(host);
+	}
+
+	// rewrite an IP address validation code since access to the sun.net.util.IPAddressUtil is restricted
+	protected static boolean isIPv4Address(String address) {
+		String[] s = address.split("\\.", -1);
+		try {
+			if (s.length == 1) {
+				long val = Long.parseLong(s[0]);
+				if (val < 0 || val > 0xFFFFFFFFL) {
+					return false;
+				}
+			} else if (s.length == 2) {
+				long val = Long.parseLong(s[0]), val1 = Long.parseLong(s[1]);
+				if (val < 0 || val > 0xFFL || val1 < 0 || val1 > 0xFFFFFFL) {
+					return false;
+				}
+			} else if (s.length == 3) {
+				long val = Long.parseLong(s[0]), val1 = Long.parseLong(s[1]), val2 = Long.parseLong(s[2]);
+				if (val < 0 || val > 0xFFL || val1 < 0 || val1 > 0xFFL || val2 < 0 || val2 > 0xFFFFL) {
+					return false;
+				}
+			} else if (s.length == 4) {
+				for (String p : s) {
+					long val = Long.parseLong(p);
+					if (val < 0 || val > 0xFFL) {
+						return false;
+					}
+				}
+			} else {
+				return false;
+			}
+		} catch (NumberFormatException ex) {
+			return false;
+		}
+		return true;
+	}
+
+	private final static int IPV4_SIZE = 4;
+
+	private final static int IPV6_SIZE = 16;
+
+	private final static int INT16_SIZE = 2;
+
+	protected static boolean isIPv6Address(String address) {
+		if (address.length() < 2) { // :: an empty address is a minimal one
+			return false;
+		}
+
 		char[] addressChars = address.toCharArray();
 		int addressLength = addressChars.length;
-		
+
 		int scopePos = address.indexOf("%"); //check for scope presence (network interface specifier) 
 		if (scopePos == addressLength - 1) { // check if scope format is proper or not
 			return false;
@@ -156,8 +156,7 @@ public class URLVerifier extends AbstractFormattedVerifier {
 					}
 					lastColonPosition = j;
 					continue;
-				} 
-				else if (i == addressLength) {
+				} else if (i == addressLength) {
 					return false;
 				}
 				if (j + INT16_SIZE > IPV6_SIZE) {
@@ -197,7 +196,7 @@ public class URLVerifier extends AbstractFormattedVerifier {
 			}
 			j = IPV6_SIZE;
 		}
-    	
-    	return j == IPV6_SIZE;
-    }
+
+		return j == IPV6_SIZE;
+	}
 }

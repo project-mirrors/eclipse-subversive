@@ -53,46 +53,53 @@ import org.eclipse.team.svn.ui.properties.bugtraq.LinkList.LinkPlacement;
  */
 public class DefaultCommentView implements ICommentView {
 	protected StyledText multilineComment;
+
 	protected Cursor handCursor;
+
 	protected Cursor busyCursor;
-	
+
 	protected Color black;
+
 	protected Color blue;
-	
+
 	protected boolean mouseDown;
+
 	protected boolean dragEvent;
-	
+
 	protected BugtraqModel model;
+
 	protected IssueList linkList = new IssueList();
+
 	protected IssueList hyperList = new IssueList();
-	
+
 	protected final static String linkRegExp = "(?:http|https|file|svn|svn\\+[\\w]+)\\:/(?:/)?(?:/[^\\s\\|\\{\\}\"><#\\^\\~\\[\\]`]+)+"; //$NON-NLS-1$
 
 	public void createCommentView(Composite parent) {
 		this.createCommentView(parent, SWT.V_SCROLL | SWT.MULTI | SWT.BORDER | SWT.WRAP);
 	}
-	
+
 	public void createCommentView(Composite parent, int style) {
 		this.multilineComment = new StyledText(parent, style);
 		this.multilineComment.setEditable(false);
 		// set system color
 		this.multilineComment.setBackground(this.multilineComment.getBackground());
-		
+
 		this.handCursor = new Cursor(parent.getDisplay(), SWT.CURSOR_HAND);
 		this.busyCursor = new Cursor(parent.getDisplay(), SWT.CURSOR_WAIT);
-		
+
 		this.blue = new Color(parent.getDisplay(), 0, 0, 192);
 		this.black = new Color(parent.getDisplay(), 2, 200, 30);
-		
+
 		this.multilineComment.addMouseListener(new MouseAdapter() {
 			public void mouseDown(MouseEvent e) {
 				if (e.button == 1) {
 					DefaultCommentView.this.mouseDown = true;
 				}
 			}
+
 			public void mouseUp(MouseEvent e) {
 				DefaultCommentView.this.mouseDown = false;
-				StyledText text = (StyledText)e.widget;
+				StyledText text = (StyledText) e.widget;
 				int offset = text.getCaretOffset();
 				LinkPlacement issue = DefaultCommentView.this.linkList.getLinkAt(offset);
 				LinkPlacement hIssue = DefaultCommentView.this.hyperList.getLinkAt(offset);
@@ -101,13 +108,11 @@ public class DefaultCommentView implements ICommentView {
 					if (issue != null) {
 						text.setCursor(DefaultCommentView.this.handCursor);
 						text.getStyleRangeAtOffset(offset).background = DefaultCommentView.this.blue;
-					}
-					else if (hIssue != null) {
+					} else if (hIssue != null) {
 						text.setCursor(DefaultCommentView.this.handCursor);
 						text.getStyleRangeAtOffset(offset).background = DefaultCommentView.this.blue;
-					} 
-				}
-				else if (issue != null) {
+					}
+				} else if (issue != null) {
 					text.setCursor(DefaultCommentView.this.busyCursor);
 					String url = DefaultCommentView.this.getModel().getResultingURL(issue);
 					if (url != null) {
@@ -115,8 +120,7 @@ public class DefaultCommentView implements ICommentView {
 					}
 					text.setCursor(null);
 					text.getStyleRangeAtOffset(offset).background = DefaultCommentView.this.black;
-				}
-				else if (hIssue != null) {
+				} else if (hIssue != null) {
 					text.setCursor(DefaultCommentView.this.busyCursor);
 					String url = hIssue.getURL();
 					if (url != null) {
@@ -142,21 +146,18 @@ public class DefaultCommentView implements ICommentView {
 				int offset = -1;
 				try {
 					offset = text.getOffsetAtLocation(new Point(e.x, e.y));
-				}
-				catch (IllegalArgumentException ex) {
+				} catch (IllegalArgumentException ex) {
 					// ok
 				}
 				if (offset != -1 && DefaultCommentView.this.linkList.hasLinkAt(offset)) {
 					text.setCursor(DefaultCommentView.this.handCursor);
 					text.getStyleRangeAtOffset(offset).background = DefaultCommentView.this.blue;
 					DefaultCommentView.this.multilineComment.redraw();
-				}
-				else if (offset != -1 && DefaultCommentView.this.hyperList.hasLinkAt(offset)) {
+				} else if (offset != -1 && DefaultCommentView.this.hyperList.hasLinkAt(offset)) {
 					text.setCursor(DefaultCommentView.this.handCursor);
 					text.getStyleRangeAtOffset(offset).background = DefaultCommentView.this.blue;
 					DefaultCommentView.this.multilineComment.redraw();
-				}
-				else {
+				} else {
 					text.setCursor(null);
 				}
 			}
@@ -166,23 +167,24 @@ public class DefaultCommentView implements ICommentView {
 			public void modifyText(ModifyEvent e) {
 				DefaultCommentView.this.linkList.getLinks().clear();
 				DefaultCommentView.this.hyperList.getLinks().clear();
-				StyledText textView = (StyledText)e.getSource();
+				StyledText textView = (StyledText) e.getSource();
 				String text = textView.getText();
 				Pattern linkPattern = Pattern.compile(DefaultCommentView.linkRegExp);
 				Matcher linkMatcher = linkPattern.matcher(text);
 				int start = 0;
 				while (linkMatcher.find(start)) {
 					start = linkMatcher.end();
-					DefaultCommentView.this.hyperList.getLinks().add(new LinkPlacement(linkMatcher.start(), start, text));
+					DefaultCommentView.this.hyperList.getLinks()
+							.add(new LinkPlacement(linkMatcher.start(), start, text));
 				}
-				if (DefaultCommentView.this.getModel().getMessage() != null ||
-					DefaultCommentView.this.getModel().getLogregex() != null) {
+				if (DefaultCommentView.this.getModel().getMessage() != null
+						|| DefaultCommentView.this.getModel().getLogregex() != null) {
 					DefaultCommentView.this.linkList.parseMessage(text, DefaultCommentView.this.getModel());
 				}
 				List<StyleRange> styledRanges = new ArrayList<StyleRange>();
 				for (LinkPlacement issue : DefaultCommentView.this.linkList.getLinks()) {
 					StyleRange range = new StyleRange();
-					range.start  = issue.getStart();
+					range.start = issue.getStart();
 					range.length = issue.getEnd() - issue.getStart();
 					range.foreground = DefaultCommentView.this.blue;
 					range.underline = true;
@@ -190,38 +192,39 @@ public class DefaultCommentView implements ICommentView {
 				}
 				for (LinkList.LinkPlacement issue : DefaultCommentView.this.hyperList.getLinks()) {
 					StyleRange range = new StyleRange();
-					range.start  = issue.getStart();
+					range.start = issue.getStart();
 					range.length = issue.getEnd() - issue.getStart();
 					range.foreground = DefaultCommentView.this.blue;
 					range.underline = true;
 					styledRanges.add(range);
 				}
 				StyleRange[] sorted = styledRanges.toArray(new StyleRange[styledRanges.size()]);
-				for (int i = 0; i < sorted.length-1; i++){
-					for (int j = sorted.length-1; j > i; j--) {
-						if (sorted[j].start < sorted[j-1].start) {
+				for (int i = 0; i < sorted.length - 1; i++) {
+					for (int j = sorted.length - 1; j > i; j--) {
+						if (sorted[j].start < sorted[j - 1].start) {
 							StyleRange tmp = sorted[j];
-							sorted[j] = sorted[j-1];
-							sorted[j-1] = tmp;
+							sorted[j] = sorted[j - 1];
+							sorted[j - 1] = tmp;
 						}
 					}
 				}
 				textView.setStyleRanges(sorted);
 			}
 		});
-		
+
 		this.multilineComment.addDisposeListener(new DisposeListener() {
 			public void widgetDisposed(DisposeEvent e) {
 				DefaultCommentView.this.busyCursor.dispose();
 				DefaultCommentView.this.handCursor.dispose();
 				DefaultCommentView.this.blue.dispose();
-				DefaultCommentView.this.black.dispose();			
+				DefaultCommentView.this.black.dispose();
 			}
 		});
 	}
 
 	public void usedFor(IResource resource) {
-		CommitPanel.CollectPropertiesOperation bugtraqOp = new CommitPanel.CollectPropertiesOperation(new IResource[] {resource});
+		CommitPanel.CollectPropertiesOperation bugtraqOp = new CommitPanel.CollectPropertiesOperation(
+				new IResource[] { resource });
 		bugtraqOp.run(new NullProgressMonitor());
 		this.model = bugtraqOp.getBugtraqModel();
 	}
@@ -233,9 +236,9 @@ public class DefaultCommentView implements ICommentView {
 	public void setComment(String comment) {
 		this.multilineComment.setText(comment);
 	}
-	
+
 	protected BugtraqModel getModel() {
 		return this.model != null ? this.model : new BugtraqModel();
 	}
-	
+
 }

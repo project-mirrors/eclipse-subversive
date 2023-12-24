@@ -57,48 +57,61 @@ public class SVNFolderListener implements IResourceChangeListener {
 
 	public void resourceChanged(final IResourceChangeEvent event) {
 		try {
-	    	ResourcesPlugin.getWorkspace().run(new IWorkspaceRunnable() {
+			ResourcesPlugin.getWorkspace().run(new IWorkspaceRunnable() {
 				public void run(final IProgressMonitor monitor) throws CoreException {
 					event.getDelta().accept(new IResourceDeltaVisitor() {
 						public boolean visit(IResourceDelta delta) throws CoreException {
 							IResource resource = delta.getResource();
-							
-						    if (!resource.isAccessible()) {
+
+							if (!resource.isAccessible()) {
 								return false;
-						    }
-						    
+							}
+
 							if (resource.getType() == IResource.ROOT) {
 								return true;
 							}
-							
-							if (resource.getType() == IResource.PROJECT && delta.getKind() == IResourceDelta.ADDED && delta.getFlags() == IResourceDelta.OPEN &&
-								((IProject)resource).isOpen() && SVNUtility.hasSVNFolderInOrAbove(resource) && // prevent UI plug-in activation when it is unnecessary
-								SVNTeamPlugin.instance().getOptionProvider().is(IOptionProvider.AUTOMATIC_PROJECT_SHARE_ENABLED)) {
-								
+
+							if (resource.getType() == IResource.PROJECT && delta.getKind() == IResourceDelta.ADDED
+									&& delta.getFlags() == IResourceDelta.OPEN && ((IProject) resource).isOpen()
+									&& SVNUtility.hasSVNFolderInOrAbove(resource) && // prevent UI plug-in activation when it is unnecessary
+									SVNTeamPlugin.instance()
+											.getOptionProvider()
+											.is(IOptionProvider.AUTOMATIC_PROJECT_SHARE_ENABLED)) {
+
 								/*
 								 * If project is already connected, then don't reconnect it again. 
 								 * Project may be connected and we can get such event if we just checked out project.
 								 * Also this may cause problem if there are several locations with the same url, see bug 298862.  
 								 */
-								if (RepositoryProvider.getProvider((IProject) resource, SVNTeamPlugin.NATURE_ID) != null) {
+								if (RepositoryProvider.getProvider((IProject) resource,
+										SVNTeamPlugin.NATURE_ID) != null) {
 									return false;
 								}
 
 								SVNChangeStatus info = SVNUtility.getSVNInfoForNotConnected(resource);
 								if (info != null && info.url != null) {
 									String url = SVNUtility.decodeURL(info.url);
-									IRepositoryRoot []roots = SVNUtility.findRoots(url, true);
+									IRepositoryRoot[] roots = SVNUtility.findRoots(url, true);
 									IRepositoryLocation location = null;
 									if (roots.length == 0) {
-										String rootNode = "/" + CoreExtensionsManager.instance().getOptionProvider().getString(IOptionProvider.DEFAULT_TRUNK_NAME); //$NON-NLS-1$
+										String rootNode = "/" + CoreExtensionsManager.instance() //$NON-NLS-1$
+												.getOptionProvider()
+												.getString(IOptionProvider.DEFAULT_TRUNK_NAME);
 										int idx = url.lastIndexOf(rootNode);
-										if (idx == -1 || !url.endsWith(rootNode) && url.charAt(idx + rootNode.length()) != '/') {
-											rootNode = "/" + CoreExtensionsManager.instance().getOptionProvider().getString(IOptionProvider.DEFAULT_BRANCHES_NAME); //$NON-NLS-1$
+										if (idx == -1 || !url.endsWith(rootNode)
+												&& url.charAt(idx + rootNode.length()) != '/') {
+											rootNode = "/" + CoreExtensionsManager.instance() //$NON-NLS-1$
+													.getOptionProvider()
+													.getString(IOptionProvider.DEFAULT_BRANCHES_NAME);
 											idx = url.lastIndexOf(rootNode);
-											if (idx == -1 || !url.endsWith(rootNode) && url.charAt(idx + rootNode.length()) != '/') {
-												rootNode = "/" + CoreExtensionsManager.instance().getOptionProvider().getString(IOptionProvider.DEFAULT_TAGS_NAME); //$NON-NLS-1$
+											if (idx == -1 || !url.endsWith(rootNode)
+													&& url.charAt(idx + rootNode.length()) != '/') {
+												rootNode = "/" + CoreExtensionsManager.instance() //$NON-NLS-1$
+														.getOptionProvider()
+														.getString(IOptionProvider.DEFAULT_TAGS_NAME);
 												idx = url.lastIndexOf(rootNode);
-												if (idx != -1 && !url.endsWith(rootNode) && url.charAt(idx + rootNode.length()) != '/') {
+												if (idx != -1 && !url.endsWith(rootNode)
+														&& url.charAt(idx + rootNode.length()) != '/') {
 													idx = -1;
 												}
 											}
@@ -108,12 +121,13 @@ public class SVNFolderListener implements IResourceChangeListener {
 										}
 										location = SVNRemoteStorage.instance().newRepositoryLocation();
 										SVNUtility.initializeRepositoryLocation(location, url);
-									}
-									else {
+									} else {
 										location = roots[0].getRepositoryLocation();
 									}
-									ReconnectProjectOperation mainOp = new ReconnectProjectOperation(new IProject[] {(IProject)resource}, location);
-									CompositeOperation op = new CompositeOperation(mainOp.getId(), mainOp.getMessagesClass());
+									ReconnectProjectOperation mainOp = new ReconnectProjectOperation(
+											new IProject[] { (IProject) resource }, location);
+									CompositeOperation op = new CompositeOperation(mainOp.getId(),
+											mainOp.getMessagesClass());
 									if (roots.length == 0) {
 										// important! location doubles when it is added asynchronously and several projects for the same location are imported
 										//	that is why we're doing it here and now
@@ -126,21 +140,20 @@ public class SVNFolderListener implements IResourceChangeListener {
 									return false;
 								}
 							}
-							
-							if (delta.getKind() == IResourceDelta.ADDED && (resource instanceof IContainer) && 
-								!resource.isTeamPrivateMember() && FileUtility.isSVNInternals(resource)) {
+
+							if (delta.getKind() == IResourceDelta.ADDED && (resource instanceof IContainer)
+									&& !resource.isTeamPrivateMember() && FileUtility.isSVNInternals(resource)) {
 								FileUtility.findAndMarkSVNInternals(resource, true);
 								return false;
 							}
-							
+
 							return true;
 						}
 					});
 				}
 			}, null, IWorkspace.AVOID_UPDATE, new NullProgressMonitor());
-		}
-		catch (CoreException ex) {
-		    LoggedOperation.reportError(this.getClass().getName(), ex);
+		} catch (CoreException ex) {
+			LoggedOperation.reportError(this.getClass().getName(), ex);
 		}
 	}
 

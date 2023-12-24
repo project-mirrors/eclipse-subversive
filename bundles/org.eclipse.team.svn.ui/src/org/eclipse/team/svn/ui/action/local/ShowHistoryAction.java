@@ -30,16 +30,14 @@ public class ShowHistoryAction extends AbstractWorkingCopyAction {
 	public ShowHistoryAction() {
 		super();
 	}
-	
+
 	public void runImpl(IAction action) {
 		IResource resource = this.getSelectedResources()[0];
 		this.runBusy(new ShowHistoryViewOperation(resource, 0, 0));
 	}
 
 	public boolean isEnabled() {
-		return 
-			this.getSelectedResources().length == 1 &&
-			this.checkForResourcesPresence(IStateFilter.SF_VERSIONED);
+		return this.getSelectedResources().length == 1 && this.checkForResourcesPresence(IStateFilter.SF_VERSIONED);
 	}
 
 }

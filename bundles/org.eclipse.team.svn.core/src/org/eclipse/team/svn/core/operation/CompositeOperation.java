@@ -32,34 +32,36 @@ import org.eclipse.team.svn.core.utility.ProgressMonitorUtility;
  */
 public class CompositeOperation extends AbstractActionOperation implements IConsoleStream {
 	protected List<Pair> operations;
+
 	protected boolean checkWarnings;
+
 	protected int totalWeight;
 
 	public CompositeOperation(String operationName, Class<? extends NLS> messagesClass) {
 		this(operationName, messagesClass, false);
 	}
-	
+
 	public CompositeOperation(String operationName, Class<? extends NLS> messagesClass, boolean checkWarnings) {
 		super(operationName, messagesClass);
 		this.operations = new ArrayList<Pair>();
 		this.checkWarnings = checkWarnings;
 		this.totalWeight = 0;
 	}
-	
+
 	public boolean isEmpty() {
 		return this.operations.size() == 0;
 	}
-	
+
 	public void add(IActionOperation operation) {
 		this.add(operation, null);
 	}
-	
-	public void add(IActionOperation operation, IActionOperation []dependsOnOperation) {
+
+	public void add(IActionOperation operation, IActionOperation[] dependsOnOperation) {
 		operation.setConsoleStream(this);
 		this.operations.add(new Pair(operation, dependsOnOperation));
 		this.totalWeight += operation.getOperationWeight();
 	}
-			
+
 	public void remove(IActionOperation operation) {
 		for (Iterator<Pair> it = this.operations.iterator(); it.hasNext();) {
 			Pair pair = it.next();
@@ -73,33 +75,35 @@ public class CompositeOperation extends AbstractActionOperation implements ICons
 			}
 		}
 	}
-	
+
 	public ISchedulingRule getSchedulingRule() {
 		ISchedulingRule retVal = null;
-		for (Iterator<Pair> it = this.operations.iterator(); it.hasNext(); ) {
+		for (Iterator<Pair> it = this.operations.iterator(); it.hasNext();) {
 			Pair pair = it.next();
 			retVal = MultiRule.combine(retVal, pair.operation.getSchedulingRule());
 		}
 		return retVal;
 	}
-	
+
 	protected void runImpl(IProgressMonitor monitor) throws Exception {
-		for (Iterator<Pair> it = this.operations.iterator(); it.hasNext() && !monitor.isCanceled(); ) {
+		for (Iterator<Pair> it = this.operations.iterator(); it.hasNext() && !monitor.isCanceled();) {
 			Pair pair = it.next();
-			
+
 			boolean errorFound = false;
 			if (pair.dependsOnOperation != null) {
 				for (int i = 0; i < pair.dependsOnOperation.length; i++) {
-					if (pair.dependsOnOperation[i].getStatus().getSeverity() == IStatus.ERROR ||
-						this.checkWarnings && pair.dependsOnOperation[i].getStatus().getSeverity() == IStatus.WARNING || 
-						pair.dependsOnOperation[i].getExecutionState() == IActionOperation.NOTEXECUTED) {
+					if (pair.dependsOnOperation[i].getStatus().getSeverity() == IStatus.ERROR
+							|| this.checkWarnings
+									&& pair.dependsOnOperation[i].getStatus().getSeverity() == IStatus.WARNING
+							|| pair.dependsOnOperation[i].getExecutionState() == IActionOperation.NOTEXECUTED) {
 						errorFound = true;
 						break;
 					}
 				}
 			}
 			if (!errorFound) {
-				ProgressMonitorUtility.doTask(pair.operation, monitor, this.totalWeight, pair.operation.getOperationWeight());
+				ProgressMonitorUtility.doTask(pair.operation, monitor, this.totalWeight,
+						pair.operation.getOperationWeight());
 				this.reportStatus(pair.operation.getStatus());
 			}
 		}
@@ -107,9 +111,10 @@ public class CompositeOperation extends AbstractActionOperation implements ICons
 
 	protected class Pair {
 		public IActionOperation operation;
-		public IActionOperation []dependsOnOperation;
-		
-		public Pair(IActionOperation operation, IActionOperation []dependsOnOperation) {
+
+		public IActionOperation[] dependsOnOperation;
+
+		public Pair(IActionOperation operation, IActionOperation[] dependsOnOperation) {
 			this.operation = operation;
 			this.dependsOnOperation = dependsOnOperation;
 		}
@@ -130,7 +135,7 @@ public class CompositeOperation extends AbstractActionOperation implements ICons
 	public void doComplexWrite(Runnable runnable) {
 		this.complexWriteToConsole(runnable);
 	}
-	
+
 	public void markCancelled() {
 		this.writeCancelledToConsole();
 	}

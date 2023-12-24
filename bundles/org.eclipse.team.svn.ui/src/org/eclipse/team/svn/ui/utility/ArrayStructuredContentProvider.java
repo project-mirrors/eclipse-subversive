@@ -24,7 +24,7 @@ import org.eclipse.jface.viewers.Viewer;
  */
 public class ArrayStructuredContentProvider implements IStructuredContentProvider {
 	public Object[] getElements(Object inputElement) {
-		return (Object[])inputElement;
+		return (Object[]) inputElement;
 	}
 
 	public void dispose() {

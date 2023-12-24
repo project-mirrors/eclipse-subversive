@@ -22,5 +22,5 @@ import org.eclipse.core.resources.IProject;
  * @author Sergiy Logvin
  */
 public interface IShareProjectPrompt {
-	public boolean prompt(IProject []projects);
+	public boolean prompt(IProject[] projects);
 }

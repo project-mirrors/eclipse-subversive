@@ -31,14 +31,17 @@ import org.eclipse.ui.IWorkbench;
  */
 public class NewRepositoryLocationWizard extends AbstractSVNWizard implements INewWizard {
 	protected AddRepositoryLocationPage locationPage;
+
 	protected IRepositoryLocation editable;
+
 	protected boolean performAction;
+
 	protected IRepositoryLocation backup;
-	
+
 	public NewRepositoryLocationWizard() {
 		this(null, true);
 	}
-	
+
 	public NewRepositoryLocationWizard(IRepositoryLocation editable, boolean performAction) {
 		super();
 		this.performAction = performAction;
@@ -47,20 +50,19 @@ public class NewRepositoryLocationWizard extends AbstractSVNWizard implements IN
 			this.setWindowTitle(SVNUIMessages.NewRepositoryLocationWizard_Title_Edit);
 			this.backup = SVNRemoteStorage.instance().newRepositoryLocation();
 			SVNRemoteStorage.instance().copyRepositoryLocation(this.backup, editable);
-		}
-		else {
+		} else {
 			this.setWindowTitle(SVNUIMessages.NewRepositoryLocationWizard_Title_New);
 		}
 	}
-	
+
 	public void addPages() {
 		this.addPage(this.locationPage = new AddRepositoryLocationPage(this.editable));
 	}
-	
+
 	public IActionOperation getOperationToPerform() {
 		return this.locationPage.getOperationToPeform();
 	}
-	
+
 	public boolean performCancel() {
 		if (this.editable != null) {
 			SVNRemoteStorage.instance().copyRepositoryLocation(this.editable, this.backup);
@@ -76,15 +78,15 @@ public class NewRepositoryLocationWizard extends AbstractSVNWizard implements IN
 					UIMonitorUtility.doTaskBusyDefault(op);
 				}
 			}
-			
+
 			return true;
 		}
-		
+
 		return false;
 	}
-	
+
 	public void init(IWorkbench workbench, IStructuredSelection selection) {
-		
+
 	}
 
 }

@@ -45,17 +45,25 @@ import org.eclipse.team.svn.ui.verifier.ResourceNameVerifier;
  */
 public class RepositoryRootsComposite extends Composite implements IPropertiesPanel {
 	protected Button structureCheckBox;
+
 	protected Text trunkRight;
+
 	protected Text branchesRight;
+
 	protected Text tagsRight;
-	
+
 	protected boolean createLocation;
+
 	protected String trunkLocation;
+
 	protected String branchesLocation;
+
 	protected String tagsLocation;
+
 	protected boolean structureEnabled;
+
 	protected boolean forceDisableRoots;
-	
+
 	protected IValidationManager validationManager;
 
 	public RepositoryRootsComposite(Composite parent, int style, IValidationManager validationManager) {
@@ -65,7 +73,7 @@ public class RepositoryRootsComposite extends Composite implements IPropertiesPa
 
 	public void saveChanges() {
 		this.structureEnabled = this.structureCheckBox.getSelection();
-		
+
 		this.trunkLocation = this.trunkRight.getText();
 		this.branchesLocation = this.branchesRight.getText();
 		this.tagsLocation = this.tagsRight.getText();
@@ -76,21 +84,22 @@ public class RepositoryRootsComposite extends Composite implements IPropertiesPa
 
 		if (this.createLocation) {
 			this.trunkLocation = SVNTeamPreferences.getRepositoryString(store, SVNTeamPreferences.REPOSITORY_HEAD_NAME);
-			this.branchesLocation = SVNTeamPreferences.getRepositoryString(store, SVNTeamPreferences.REPOSITORY_BRANCHES_NAME);
+			this.branchesLocation = SVNTeamPreferences.getRepositoryString(store,
+					SVNTeamPreferences.REPOSITORY_BRANCHES_NAME);
 			this.tagsLocation = SVNTeamPreferences.getRepositoryString(store, SVNTeamPreferences.REPOSITORY_TAGS_NAME);
 			this.structureEnabled = !this.forceDisableRoots;
 		}
 		this.structureCheckBox.setSelection(this.structureEnabled);
-		
+
 		this.trunkRight.setText(this.trunkLocation);
 		this.branchesRight.setText(this.branchesLocation);
 		this.tagsRight.setText(this.tagsLocation);
-		
+
 		this.refreshButtons();
 	}
 
 	public void cancelChanges() {
-		
+
 	}
 
 	public void initialize() {
@@ -108,16 +117,17 @@ public class RepositoryRootsComposite extends Composite implements IPropertiesPa
 		data = new GridData();
 		this.structureCheckBox.setLayoutData(data);
 		this.structureCheckBox.setText(SVNUIMessages.RepositoryRootsComposite_EnableDetection);
-		this.structureCheckBox.addSelectionListener(new SelectionListener() {			
+		this.structureCheckBox.addSelectionListener(new SelectionListener() {
 			public void widgetSelected(SelectionEvent e) {
-				boolean enabled = ((Button)e.widget).getSelection();
+				boolean enabled = ((Button) e.widget).getSelection();
 				RepositoryRootsComposite.this.trunkRight.setEnabled(enabled);
 				RepositoryRootsComposite.this.branchesRight.setEnabled(enabled);
 				RepositoryRootsComposite.this.tagsRight.setEnabled(enabled);
 				RepositoryRootsComposite.this.validationManager.validateContent();
 			}
-			public void widgetDefaultSelected(SelectionEvent e) {			
-			}			
+
+			public void widgetDefaultSelected(SelectionEvent e) {
+			}
 		});
 
 		Group standardLocations = new Group(this, SWT.NONE);
@@ -127,12 +137,12 @@ public class RepositoryRootsComposite extends Composite implements IPropertiesPa
 		standardLocations.setLayout(layout);
 		data = new GridData(GridData.FILL_HORIZONTAL);
 		standardLocations.setLayoutData(data);
-		
+
 		this.trunkRight = this.createControl(standardLocations, "RepositoryRootsComposite_Trunk"); //$NON-NLS-1$
 		this.branchesRight = this.createControl(standardLocations, "RepositoryRootsComposite_Branches"); //$NON-NLS-1$
 		this.tagsRight = this.createControl(standardLocations, "RepositoryRootsComposite_Tags"); //$NON-NLS-1$
 	}
-	
+
 	public boolean isStructureEnabled() {
 		return this.structureEnabled;
 	}
@@ -164,7 +174,7 @@ public class RepositoryRootsComposite extends Composite implements IPropertiesPa
 	public void setTrunkLocation(String trunkLocation) {
 		this.trunkLocation = trunkLocation;
 	}
-	
+
 	public boolean isCreateLocation() {
 		return this.createLocation;
 	}
@@ -172,18 +182,18 @@ public class RepositoryRootsComposite extends Composite implements IPropertiesPa
 	public void setCreateLocation(boolean createLocation) {
 		this.createLocation = createLocation;
 	}
-	
+
 	public void setForceDisableRoots(boolean force) {
 		this.forceDisableRoots = force;
 		this.resetChanges();
 	}
-	
+
 	protected Text createControl(Composite standardLocations, String id) {
 		Label label = new Label(standardLocations, SWT.NONE);
 		GridData data = new GridData();
 		label.setLayoutData(data);
 		label.setText(SVNUIMessages.getString(id));
-		
+
 		Text field = new Text(standardLocations, SWT.SINGLE | SWT.BORDER);
 		data = new GridData(GridData.FILL_HORIZONTAL);
 		data.widthHint = IDialogConstants.ENTRY_FIELD_WIDTH;
@@ -193,12 +203,12 @@ public class RepositoryRootsComposite extends Composite implements IPropertiesPa
 		verifier.add(new ResourceNameVerifier(name, false));
 		verifier.add(new NonEmptyFieldVerifier(name));
 		verifier.add(new AbsolutePathVerifier(name));
-		this.validationManager.attachTo(field, new AbstractVerifierProxy(verifier){
+		this.validationManager.attachTo(field, new AbstractVerifierProxy(verifier) {
 			protected boolean isVerificationEnabled(Control input) {
 				return RepositoryRootsComposite.this.structureCheckBox.getSelection();
 			}
 		});
-		
+
 		return field;
 	}
 

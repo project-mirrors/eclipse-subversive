@@ -42,22 +42,28 @@ import org.eclipse.team.svn.core.utility.SVNUtility;
  */
 public class GetRemoteContentsOperation extends AbstractWorkingCopyOperation {
 	protected IRepositoryResourceProvider provider;
+
 	protected HashMap<String, String> remotePath2localPath;
+
 	protected long options;
-	
-	public GetRemoteContentsOperation(IResource [] resources, final IRepositoryResource []remoteResources, HashMap<String, String> remotePath2localPath, boolean ignoreExternals) {
-		this (resources, new IRepositoryResourceProvider() {
+
+	public GetRemoteContentsOperation(IResource[] resources, final IRepositoryResource[] remoteResources,
+			HashMap<String, String> remotePath2localPath, boolean ignoreExternals) {
+		this(resources, new IRepositoryResourceProvider() {
 			public IRepositoryResource[] getRepositoryResources() {
 				return remoteResources;
 			}
 		}, remotePath2localPath, ignoreExternals);
 	}
-	
-	public GetRemoteContentsOperation(IResource [] resources, IRepositoryResourceProvider provider, HashMap<String, String> remotePath2localPath, boolean ignoreExternals) {
-		this(resources, provider, remotePath2localPath, ISVNConnector.Options.FORCE | (ignoreExternals ? ISVNConnector.Options.IGNORE_EXTERNALS : ISVNConnector.Options.NONE));
+
+	public GetRemoteContentsOperation(IResource[] resources, IRepositoryResourceProvider provider,
+			HashMap<String, String> remotePath2localPath, boolean ignoreExternals) {
+		this(resources, provider, remotePath2localPath, ISVNConnector.Options.FORCE
+				| (ignoreExternals ? ISVNConnector.Options.IGNORE_EXTERNALS : ISVNConnector.Options.NONE));
 	}
 
-	public GetRemoteContentsOperation(IResource [] resources, IRepositoryResourceProvider provider, HashMap<String, String> remotePath2localPath, long options) {
+	public GetRemoteContentsOperation(IResource[] resources, IRepositoryResourceProvider provider,
+			HashMap<String, String> remotePath2localPath, long options) {
 		super("Operation_GetContent", SVNMessages.class, resources); //$NON-NLS-1$
 		this.provider = provider;
 		this.remotePath2localPath = remotePath2localPath;
@@ -65,7 +71,7 @@ public class GetRemoteContentsOperation extends AbstractWorkingCopyOperation {
 	}
 
 	protected void runImpl(IProgressMonitor monitor) throws Exception {
-		IRepositoryResource [] remoteResources = this.provider.getRepositoryResources();
+		IRepositoryResource[] remoteResources = this.provider.getRepositoryResources();
 		for (int i = 0; i < remoteResources.length && !monitor.isCanceled(); i++) {
 			final IRepositoryResource remote = remoteResources[i];
 			this.protectStep(new IUnprotectedOperation() {
@@ -75,7 +81,7 @@ public class GetRemoteContentsOperation extends AbstractWorkingCopyOperation {
 			}, monitor, remoteResources.length);
 		}
 	}
-	
+
 	protected void doGet(IRepositoryResource remote, IProgressMonitor monitor) throws Exception {
 		IRepositoryLocation location = remote.getRepositoryLocation();
 		ISVNConnector proxy = location.acquireSVNProxy();
@@ -93,35 +99,42 @@ public class GetRemoteContentsOperation extends AbstractWorkingCopyOperation {
 				}
 				FileOutputStream stream = null;
 				try {
-					this.writeToConsole(IConsoleStream.LEVEL_CMD, "svn cat " + url + "@" + remote.getPegRevision() + " -r " + remote.getSelectedRevision() + FileUtility.getUsernameParam(location.getUsername()) + "\n"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+					this.writeToConsole(IConsoleStream.LEVEL_CMD,
+							"svn cat " + url + "@" + remote.getPegRevision() + " -r " + remote.getSelectedRevision() //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
+									+ FileUtility.getUsernameParam(location.getUsername()) + "\n"); //$NON-NLS-1$
 					stream = new FileOutputStream(wcPath);
-					proxy.streamFileContent(SVNUtility.getEntryRevisionReference(remote), 2048, stream, new SVNProgressMonitor(this, monitor, null));
-				}
-				catch (FileNotFoundException e) {
+					proxy.streamFileContent(SVNUtility.getEntryRevisionReference(remote), 2048, stream,
+							new SVNProgressMonitor(this, monitor, null));
+				} catch (FileNotFoundException e) {
 					//skip read-only files
-				}
-				finally {
+				} finally {
 					if (stream != null) {
-						try {stream.close();} catch (Exception ex) {}
+						try {
+							stream.close();
+						} catch (Exception ex) {
+						}
 					}
 				}
-			}
-			else {
+			} else {
 				File directory = new File(wcPath);
 				if (!directory.exists()) {
 					directory.mkdirs();
 				}
-				this.writeToConsole(IConsoleStream.LEVEL_CMD, "svn export " + url + "@" + remote.getPegRevision() + " -r " + remote.getSelectedRevision() + ISVNConnector.Options.asCommandLine(this.options) + " \"" + wcPath + "\" " + FileUtility.getUsernameParam(location.getUsername()) + "\n"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
-				proxy.exportTo(SVNUtility.getEntryRevisionReference(remote), wcPath, null, SVNDepth.INFINITY, this.options, new SVNProgressMonitor(this, monitor, null));
+				this.writeToConsole(IConsoleStream.LEVEL_CMD,
+						"svn export " + url + "@" + remote.getPegRevision() + " -r " + remote.getSelectedRevision() //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
+								+ ISVNConnector.Options.asCommandLine(this.options) + " \"" + wcPath + "\" " //$NON-NLS-1$//$NON-NLS-2$
+								+ FileUtility.getUsernameParam(location.getUsername()) + "\n"); //$NON-NLS-1$
+				proxy.exportTo(SVNUtility.getEntryRevisionReference(remote), wcPath, null, SVNDepth.INFINITY,
+						this.options, new SVNProgressMonitor(this, monitor, null));
 			}
-		}
-		finally {
-		    location.releaseSVNProxy(proxy);
+		} finally {
+			location.releaseSVNProxy(proxy);
 		}
 	}
-	
+
 	protected String getShortErrorMessage(Throwable t) {
-		return BaseMessages.format(super.getShortErrorMessage(t), new Object[] {FileUtility.getNamesListAsString(this.provider.getRepositoryResources())});
+		return BaseMessages.format(super.getShortErrorMessage(t),
+				new Object[] { FileUtility.getNamesListAsString(this.provider.getRepositoryResources()) });
 	}
 
 }

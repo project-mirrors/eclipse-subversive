@@ -28,12 +28,12 @@ import org.eclipse.team.ui.synchronize.ISynchronizePageConfiguration;
 public class CommitModelAction extends AbstractSynchronizeLogicalModelAction {
 
 	protected CommitActionHelper actionHelper;
-	
-	public CommitModelAction(String text, ISynchronizePageConfiguration configuration) {		
+
+	public CommitModelAction(String text, ISynchronizePageConfiguration configuration) {
 		super(text, configuration);
 		this.actionHelper = new CommitActionHelper(this, configuration);
 	}
-	
+
 	protected FastSyncInfoFilter getSyncInfoFilter() {
 		return this.actionHelper.getSyncInfoFilter();
 	}
@@ -41,5 +41,5 @@ public class CommitModelAction extends AbstractSynchronizeLogicalModelAction {
 	protected IActionOperation getOperation() {
 		return this.actionHelper.getOperation();
 	}
-		
+
 }

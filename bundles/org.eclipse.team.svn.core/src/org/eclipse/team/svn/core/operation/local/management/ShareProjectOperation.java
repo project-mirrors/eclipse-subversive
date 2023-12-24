@@ -55,7 +55,9 @@ import org.eclipse.team.svn.core.utility.SVNUtility;
  */
 public class ShareProjectOperation extends AbstractWorkingCopyOperation {
 	public static final int LAYOUT_DEFAULT = 0;
+
 	public static final int LAYOUT_SINGLE = 1;
+
 	public static final int LAYOUT_MULTIPLE = 2;
 
 	public interface IFolderNameMapper {
@@ -63,12 +65,19 @@ public class ShareProjectOperation extends AbstractWorkingCopyOperation {
 	}
 
 	protected IRepositoryLocation location;
+
 	protected IFolderNameMapper mapper;
+
 	protected int shareLayout;
+
 	protected String rootName;
+
 	protected boolean managementFoldersEnabled;
+
 	protected String commitComment;
+
 	protected IShareProjectPrompt shareProjectPrompt;
+
 	protected boolean ignoreExternals;
 
 	public ShareProjectOperation(IProject[] projects, IRepositoryLocation location, IFolderNameMapper mapper) {
@@ -122,7 +131,8 @@ public class ShareProjectOperation extends AbstractWorkingCopyOperation {
 		HashMap<IResource, IRepositoryContainer> localResourceToRemoteRepoMap = new HashMap<IResource, IRepositoryContainer>();
 		for (int i = 0; i < resources.length; i++) {
 			String url = ShareProjectOperation.getTargetUrl(this.location, this.shareLayout,
-					this.mapper == null ? resources[i].getName()
+					this.mapper == null
+							? resources[i].getName()
 							: this.mapper.getRepositoryFolderName((IProject) resources[i]),
 					this.rootName, this.managementFoldersEnabled);
 			IRepositoryContainer remote = this.location.asRepositoryContainer(url, false);
@@ -141,22 +151,22 @@ public class ShareProjectOperation extends AbstractWorkingCopyOperation {
 
 		Set newRepositoryResources = null;
 		switch (this.shareLayout) {
-		case ShareProjectOperation.LAYOUT_DEFAULT: {
-			newRepositoryResources = this.createDefaultRepositoryResourceSet(localResourceToRemoteRepoMap);
-			break;
-		}
-		case ShareProjectOperation.LAYOUT_SINGLE: {
-			newRepositoryResources = this.doSingleLayout(localResourceToRemoteRepoMap);
-			break;
-		}
-		case ShareProjectOperation.LAYOUT_MULTIPLE: {
-			newRepositoryResources = this.doMultipleLayout(localResourceToRemoteRepoMap);
-			break;
-		}
-		default: {
-			String message = this.getNationalizedString("Error_UnknownProjectLayoutType"); //$NON-NLS-1$
-			throw new Exception(BaseMessages.format(message, new Object[] { String.valueOf(this.shareLayout) }));
-		}
+			case ShareProjectOperation.LAYOUT_DEFAULT: {
+				newRepositoryResources = this.createDefaultRepositoryResourceSet(localResourceToRemoteRepoMap);
+				break;
+			}
+			case ShareProjectOperation.LAYOUT_SINGLE: {
+				newRepositoryResources = this.doSingleLayout(localResourceToRemoteRepoMap);
+				break;
+			}
+			case ShareProjectOperation.LAYOUT_MULTIPLE: {
+				newRepositoryResources = this.doMultipleLayout(localResourceToRemoteRepoMap);
+				break;
+			}
+			default: {
+				String message = this.getNationalizedString("Error_UnknownProjectLayoutType"); //$NON-NLS-1$
+				throw new Exception(BaseMessages.format(message, new Object[] { String.valueOf(this.shareLayout) }));
+			}
 		}
 
 		final HashSet existingRemoteProjects = new HashSet();
@@ -197,7 +207,8 @@ public class ShareProjectOperation extends AbstractWorkingCopyOperation {
 						File tempDir = existingRemoteProjects.contains(project)
 								? ShareProjectOperation.this.createTempDirectory(project)
 								: null;
-						String checkoutTo = tempDir != null ? tempDir.toString()
+						String checkoutTo = tempDir != null
+								? tempDir.toString()
 								: FileUtility.getWorkingCopyPath(project);
 						long options = ShareProjectOperation.this.ignoreExternals
 								? ISVNConnector.Options.IGNORE_EXTERNALS
@@ -335,20 +346,20 @@ public class ShareProjectOperation extends AbstractWorkingCopyOperation {
 			String rootName, boolean managementFoldersEnabled) {
 		String trunkName = managementFoldersEnabled ? ("/" + ShareProjectOperation.getTrunkName(location)) : ""; //$NON-NLS-1$ //$NON-NLS-2$
 		switch (shareLayout) {
-		case ShareProjectOperation.LAYOUT_DEFAULT: {
-			return location.getUrl() + trunkName + "/" + projectName; //$NON-NLS-1$
-		}
-		case ShareProjectOperation.LAYOUT_SINGLE: {
-			return location.getUrl() + "/" + projectName + trunkName; //$NON-NLS-1$
-		}
-		case ShareProjectOperation.LAYOUT_MULTIPLE: {
-			return location.getUrl() + "/" + rootName + trunkName + "/" + projectName; //$NON-NLS-1$ //$NON-NLS-2$
-		}
-		default: {
-			String message = SVNMessages.formatErrorString("Error_UnknownProjectLayoutType", //$NON-NLS-1$
-					new String[] { String.valueOf(shareLayout) });
-			throw new RuntimeException(message);
-		}
+			case ShareProjectOperation.LAYOUT_DEFAULT: {
+				return location.getUrl() + trunkName + "/" + projectName; //$NON-NLS-1$
+			}
+			case ShareProjectOperation.LAYOUT_SINGLE: {
+				return location.getUrl() + "/" + projectName + trunkName; //$NON-NLS-1$
+			}
+			case ShareProjectOperation.LAYOUT_MULTIPLE: {
+				return location.getUrl() + "/" + rootName + trunkName + "/" + projectName; //$NON-NLS-1$ //$NON-NLS-2$
+			}
+			default: {
+				String message = SVNMessages.formatErrorString("Error_UnknownProjectLayoutType", //$NON-NLS-1$
+						new String[] { String.valueOf(shareLayout) });
+				throw new RuntimeException(message);
+			}
 		}
 	}
 

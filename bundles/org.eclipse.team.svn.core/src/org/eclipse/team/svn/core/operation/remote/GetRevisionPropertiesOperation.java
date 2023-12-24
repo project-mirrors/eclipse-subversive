@@ -32,14 +32,18 @@ import org.eclipse.team.svn.core.resource.IRepositoryLocation;
  */
 public class GetRevisionPropertiesOperation extends AbstractActionOperation implements IRevisionPropertiesProvider {
 	protected IRepositoryLocation location;
+
 	protected SVNRevision revision;
+
 	protected SVNProperty[] revProperties;
 
 	/**
 	 * Creates an instance of GetRevisionPropertiesOperation depending on the repository location.
 	 * 
-	 * @param location - repository location to get properties for
-	 * @param revision - revision to get properties for
+	 * @param location
+	 *            - repository location to get properties for
+	 * @param revision
+	 *            - revision to get properties for
 	 * 
 	 * @author Alexei Goncharov
 	 */
@@ -48,7 +52,7 @@ public class GetRevisionPropertiesOperation extends AbstractActionOperation impl
 		this.revision = revision;
 		this.location = location;
 	}
-	
+
 	public SVNProperty[] getRevisionProperties() {
 		if (this.revProperties == null) {
 			return new SVNProperty[0];
@@ -57,12 +61,12 @@ public class GetRevisionPropertiesOperation extends AbstractActionOperation impl
 	}
 
 	protected void runImpl(IProgressMonitor monitor) throws Exception {
-		SVNEntryRevisionReference reference = new SVNEntryRevisionReference(this.location.getUrl(), this.revision, this.revision);
+		SVNEntryRevisionReference reference = new SVNEntryRevisionReference(this.location.getUrl(), this.revision,
+				this.revision);
 		ISVNConnector proxy = this.location.acquireSVNProxy();
 		try {
 			this.revProperties = proxy.listRevisionProperties(reference, new SVNProgressMonitor(this, monitor, null));
-		}
-		finally {
+		} finally {
 			this.location.releaseSVNProxy(proxy);
 		}
 	}

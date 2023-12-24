@@ -25,30 +25,30 @@ import org.eclipse.swt.widgets.Control;
  * @author Alexander Gurov
  */
 public class CompositeVerifier extends AbstractVerifier implements IVerifierListener {
-    protected List<AbstractVerifier> verifiers;
+	protected List<AbstractVerifier> verifiers;
 
-    public CompositeVerifier() {
-        super();
-        this.verifiers = new ArrayList<AbstractVerifier>();
-    }
+	public CompositeVerifier() {
+		super();
+		this.verifiers = new ArrayList<AbstractVerifier>();
+	}
 
 	public List<AbstractVerifier> getVerifiers() {
 		return this.verifiers;
 	}
-	
+
 	public void add(AbstractVerifier verifier) {
 		if (!this.verifiers.contains(verifier)) {
 			verifier.addVerifierListener(this);
 			this.verifiers.add(verifier);
 		}
 	}
-	
+
 	public void remove(AbstractVerifier verifier) {
 		if (this.verifiers.remove(verifier)) {
 			verifier.removeVerifierListener(this);
 		}
 	}
-	
+
 	public void removeAll() {
 		for (AbstractVerifier verifier : this.verifiers) {
 			verifier.removeVerifierListener(this);
@@ -69,24 +69,24 @@ public class CompositeVerifier extends AbstractVerifier implements IVerifierList
 		return true;
 	}
 
-    public void hasError(String errorReason) {
-        this.fireError(errorReason);
-    }
+	public void hasError(String errorReason) {
+		this.fireError(errorReason);
+	}
 
-    public void hasWarning(String warningReason) {
-        this.fireWarning(warningReason);
-    }
+	public void hasWarning(String warningReason) {
+		this.fireWarning(warningReason);
+	}
 
-    public void hasNoError() {
+	public void hasNoError() {
 
-    }
+	}
 
-    protected String getErrorMessage(Control input) {
-        return null;
-    }
+	protected String getErrorMessage(Control input) {
+		return null;
+	}
 
-    protected String getWarningMessage(Control input) {
-        return null;
-    }
+	protected String getWarningMessage(Control input) {
+		return null;
+	}
 
 }

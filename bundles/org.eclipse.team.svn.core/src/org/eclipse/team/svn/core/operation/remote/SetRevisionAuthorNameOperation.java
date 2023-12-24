@@ -33,19 +33,20 @@ import org.eclipse.team.svn.core.resource.IRepositoryLocation;
  * @author Alexei Goncharov
  */
 public class SetRevisionAuthorNameOperation extends AbstractActionOperation {
-	
+
 	protected IRevisionProvider provider;
+
 	protected long options;
 
-	public SetRevisionAuthorNameOperation(final RevisionPair [] revisions, long options) {
+	public SetRevisionAuthorNameOperation(final RevisionPair[] revisions, long options) {
 		this(new IRevisionProvider() {
 			public RevisionPair[] getRevisions() {
 				return revisions;
 			}
 		}, options);
-		
+
 	}
-	
+
 	public SetRevisionAuthorNameOperation(IRevisionProvider provider, long options) {
 		super("Operation_SetRevisionAuthorName", SVNMessages.class); //$NON-NLS-1$
 		this.provider = provider;
@@ -53,7 +54,7 @@ public class SetRevisionAuthorNameOperation extends AbstractActionOperation {
 	}
 
 	protected void runImpl(IProgressMonitor monitor) throws Exception {
-		final RevisionPair [] revisions = this.provider.getRevisions();
+		final RevisionPair[] revisions = this.provider.getRevisions();
 		if (revisions == null) {
 			return;
 		}
@@ -65,14 +66,16 @@ public class SetRevisionAuthorNameOperation extends AbstractActionOperation {
 			if (!location.isAuthorNameEnabled()) {
 				continue;
 			}
-			final ISVNConnector proxy =  location.acquireSVNProxy();
-			final SVNRevision rev =  SVNRevision.fromNumber(revisions[i].revision);
+			final ISVNConnector proxy = location.acquireSVNProxy();
+			final SVNRevision rev = SVNRevision.fromNumber(revisions[i].revision);
 			this.protectStep(new IUnprotectedOperation() {
 				public void run(IProgressMonitor monitor) throws Exception {
-					proxy.setRevisionProperty(new SVNEntryReference(location.getUrl(), rev) , new SVNProperty(SVNProperty.BuiltIn.REV_AUTHOR, location.getAuthorName()), null, SetRevisionAuthorNameOperation.this.options, new SVNProgressMonitor(SetRevisionAuthorNameOperation.this, monitor, null)); //$NON-NLS-1$
+					proxy.setRevisionProperty(new SVNEntryReference(location.getUrl(), rev),
+							new SVNProperty(SVNProperty.BuiltIn.REV_AUTHOR, location.getAuthorName()), null,
+							SetRevisionAuthorNameOperation.this.options,
+							new SVNProgressMonitor(SetRevisionAuthorNameOperation.this, monitor, null)); //$NON-NLS-1$
 				}
-			}
-			, monitor, 1);			
+			}, monitor, 1);
 			location.releaseSVNProxy(proxy);
 		}
 	}

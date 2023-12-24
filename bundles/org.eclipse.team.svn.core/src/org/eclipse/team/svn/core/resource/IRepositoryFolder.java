@@ -14,7 +14,6 @@
 
 package org.eclipse.team.svn.core.resource;
 
-
 /**
  * Remote repository folder
  * 

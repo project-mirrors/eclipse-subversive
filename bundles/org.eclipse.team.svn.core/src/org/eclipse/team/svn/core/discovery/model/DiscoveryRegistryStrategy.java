@@ -52,8 +52,9 @@ class DiscoveryRegistryStrategy extends RegistryStrategy {
 	private final Object token;
 
 	private File bundleFile;
+
 	private String discoveryUrl;
-	
+
 	public DiscoveryRegistryStrategy(File[] storageDirs, boolean[] cacheReadOnly, Object token) {
 		super(storageDirs, cacheReadOnly);
 		this.token = token;
@@ -71,10 +72,10 @@ class DiscoveryRegistryStrategy extends RegistryStrategy {
 	private void processDiscoveryCoreBundle(IExtensionRegistry registry) {
 		// we must add a contribution from the core bundle so that we get the
 		// extension point itself
-		try {			
+		try {
 			Bundle bundle = Platform.getBundle(CoreExtensionsManager.EXTENSION_NAMESPACE);
-			IContributor contributor = new RegistryContributor(bundle.getSymbolicName(), bundle.getSymbolicName(),
-					null, null);
+			IContributor contributor = new RegistryContributor(bundle.getSymbolicName(), bundle.getSymbolicName(), null,
+					null);
 
 			InputStream inputStream = bundle.getEntry("plugin.xml").openStream(); //$NON-NLS-1$
 			try {
@@ -91,15 +92,15 @@ class DiscoveryRegistryStrategy extends RegistryStrategy {
 		if (this.bundleFile == null || this.discoveryUrl == null) {
 			throw new IllegalStateException();
 		}
-		
+
 		try {
 			processBundle(registry);
 		} catch (Exception e) {
 			String errMessage = SVNMessages.format(
-					SVNMessages.DiscoveryRegistryStrategy_cannot_load_bundle, new Object[] {
-							this.bundleFile.getName(), this.discoveryUrl, e.getMessage() }); 
-			LoggedOperation.reportError(this.getClass().getName(), new Exception(errMessage, e));						
-		}		
+					SVNMessages.DiscoveryRegistryStrategy_cannot_load_bundle,
+					new Object[] { this.bundleFile.getName(), this.discoveryUrl, e.getMessage() });
+			LoggedOperation.reportError(this.getClass().getName(), new Exception(errMessage, e));
+		}
 	}
 
 	private void processBundle(IExtensionRegistry registry) throws IOException {

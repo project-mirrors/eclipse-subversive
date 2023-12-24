@@ -31,22 +31,22 @@ public class RepositoryBrowserContentProvider extends BaseWorkbenchContentProvid
 	public boolean hasChildren(Object element) {
 		IWorkbenchAdapter adapter = this.getAdapter(element);
 		if (adapter instanceof IParentTreeNode) {
-			return ((IParentTreeNode)adapter).hasChildren();
-		}				
+			return ((IParentTreeNode) adapter).hasChildren();
+		}
 		return false;
 	}
-	
+
 	public Object[] getChildren(Object parentElement) {
 		IWorkbenchAdapter adapter = this.getAdapter(parentElement);
-		
+
 		if (adapter instanceof RepositoryFolder) {
-			RepositoryFolder folder = (RepositoryFolder)adapter;
+			RepositoryFolder folder = (RepositoryFolder) adapter;
 			Object[] children = folder.peekChildren(parentElement);
 			if (folder.getParent() == null) {
 				return children;
 			}
-			if (children.length != 0 && children[0] != null &&
-				(children[0] instanceof RepositoryError || children[0] instanceof RepositoryPending)) {
+			if (children.length != 0 && children[0] != null
+					&& (children[0] instanceof RepositoryError || children[0] instanceof RepositoryPending)) {
 				return children;
 			}
 			Object[] childrenWithParent = new Object[children.length + 1];
@@ -56,5 +56,5 @@ public class RepositoryBrowserContentProvider extends BaseWorkbenchContentProvid
 		}
 		return super.getChildren(parentElement);
 	}
-	
+
 }

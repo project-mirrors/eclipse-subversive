@@ -39,39 +39,40 @@ import org.eclipse.team.svn.ui.verifier.IValidationManager;
 public class SelectProjectNamePageSimpleModeComposite extends Composite implements ISelectProjectNamePageData {
 
 	protected RepositoryResourceOnlySelectionComposite resourceSelectionComposite;
-	
+
 	protected IValidationManager validationManager;
-			
+
 	protected IRepositoryLocation location;
+
 	protected boolean multiProject;
-	
+
 	protected List<Control> controls = new ArrayList<Control>();
-	
+
 	public SelectProjectNamePageSimpleModeComposite(Composite parent, int style, IValidationManager validationManager) {
 		super(parent, style);
 		this.validationManager = validationManager;
 		this.createControls();
 	}
-	
-	public void setProjectsAndLocation(IProject []projects, IRepositoryLocation location, boolean multiProject) {
+
+	public void setProjectsAndLocation(IProject[] projects, IRepositoryLocation location, boolean multiProject) {
 		this.location = location;
 		this.multiProject = multiProject;
-		
+
 		/*
 		 * Set picker URL as repository location plus project name
 		 */
-		IRepositoryResource baseResource = location.asRepositoryContainer(location.getUrl(), false);			
+		IRepositoryResource baseResource = location.asRepositoryContainer(location.getUrl(), false);
 		this.resourceSelectionComposite.setBaseResource(baseResource);
 		this.resourceSelectionComposite.setMatchToBaseResource(true);
-		
+
 		IProject pr = projects[0];
 		String url = baseResource.getUrl();
 		if (!this.multiProject) {
-			url += "/" + pr.getName();	 //$NON-NLS-1$
-		}		
+			url += "/" + pr.getName(); //$NON-NLS-1$
+		}
 		this.resourceSelectionComposite.setUrl(url);
 	}
-	
+
 	protected void createControls() {
 		GridLayout layout = new GridLayout();
 		this.setLayout(layout);
@@ -79,43 +80,41 @@ public class SelectProjectNamePageSimpleModeComposite extends Composite implemen
 		this.setLayoutData(gridData);
 
 		IRepositoryResource baseResource = null;
-		
+
 		this.resourceSelectionComposite = new RepositoryResourceOnlySelectionComposite(
-				this,
-				SWT.NONE,
-				this.validationManager, 
-				"selectProjectNamePage",  //$NON-NLS-1$
-				baseResource,				
-				SVNUIMessages.SelectProjectNamePage_Select_Title,
-				SVNUIMessages.SelectProjectNamePage_Select_Description);				
-				
+				this, SWT.NONE, this.validationManager, "selectProjectNamePage", //$NON-NLS-1$
+				baseResource, SVNUIMessages.SelectProjectNamePage_Select_Title,
+				SVNUIMessages.SelectProjectNamePage_Select_Description);
+
 		GridData data = new GridData(GridData.FILL_HORIZONTAL);
 		data.widthHint = 550;
 		this.resourceSelectionComposite.setLayoutData(data);
 		this.controls.add(this.resourceSelectionComposite);
 	}
 
-	public ShareProjectOperation.IFolderNameMapper getSelectedNames() {				
+	public ShareProjectOperation.IFolderNameMapper getSelectedNames() {
 		return new ShareProjectOperation.IFolderNameMapper() {
 			public String getRepositoryFolderName(IProject project) {
 				String folderName = null;
-				
-				String toTrim = SelectProjectNamePageSimpleModeComposite.this.location.getUrl();					
-				String selectedUrl = SelectProjectNamePageSimpleModeComposite.this.resourceSelectionComposite.getSelectedResource().getUrl();
+
+				String toTrim = SelectProjectNamePageSimpleModeComposite.this.location.getUrl();
+				String selectedUrl = SelectProjectNamePageSimpleModeComposite.this.resourceSelectionComposite
+						.getSelectedResource()
+						.getUrl();
 				selectedUrl = SVNUtility.normalizeURL(selectedUrl);
 				if (selectedUrl.startsWith(toTrim)) {
-					folderName = selectedUrl.equals(toTrim) ? "" : selectedUrl.substring(toTrim.length() + 1);																				 //$NON-NLS-1$
+					folderName = selectedUrl.equals(toTrim) ? "" : selectedUrl.substring(toTrim.length() + 1); //$NON-NLS-1$
 					if (SelectProjectNamePageSimpleModeComposite.this.multiProject) {
 						folderName += "/" + project.getName(); //$NON-NLS-1$
-					}						
+					}
 				} else {
 					throw new RuntimeException("Inconsistent repository location and selected repository url. "
-						+ "Selected url: " + selectedUrl + ", repository location: " + toTrim);
+							+ "Selected url: " + selectedUrl + ", repository location: " + toTrim);
 				}
 
 				return folderName;
-			}					
-		};						
+			}
+		};
 	}
 
 	public String getRootProjectName() {
@@ -123,13 +122,13 @@ public class SelectProjectNamePageSimpleModeComposite extends Composite implemen
 	}
 
 	public void save() {
-		this.resourceSelectionComposite.saveHistory();		
+		this.resourceSelectionComposite.saveHistory();
 	}
-	
-	public int getLayoutType() {	
+
+	public int getLayoutType() {
 		return ShareProjectOperation.LAYOUT_DEFAULT;
 	}
-	
+
 	public boolean isManagementFoldersEnabled() {
 		return false;
 	}
@@ -141,14 +140,14 @@ public class SelectProjectNamePageSimpleModeComposite extends Composite implemen
 	public IRepositoryLocation getRepositoryLocation() {
 		return this.location;
 	}
-	
-	public void setEnabled (boolean enabled) {
+
+	public void setEnabled(boolean enabled) {
 		super.setEnabled(enabled);
 		if (this.controls != null && !this.controls.isEmpty()) {
 			for (Control control : this.controls) {
 				control.setEnabled(enabled);
-			} 							
+			}
 		}
 	}
-	
+
 }

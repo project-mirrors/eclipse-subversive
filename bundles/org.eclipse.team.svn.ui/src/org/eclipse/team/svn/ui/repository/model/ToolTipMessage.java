@@ -21,15 +21,15 @@ import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
 
 /**
- * Tooltip message container
- * Provides the way to create tooltip like decoration
+ * Tooltip message container Provides the way to create tooltip like decoration
  *
  * @author Alexey Mikoyan
  *
  */
 public class ToolTipMessage implements IDecoration {
-	
+
 	public String prefix = ""; //$NON-NLS-1$
+
 	public String suffix = ""; //$NON-NLS-1$
 
 	public void addOverlay(ImageDescriptor overlay) {
@@ -45,11 +45,11 @@ public class ToolTipMessage implements IDecoration {
 	public void addSuffix(String suffix) {
 		this.suffix = suffix;
 	}
-	
+
 	public String getMessage() {
 		return this.prefix + this.suffix;
 	}
-	
+
 	public IDecorationContext getDecorationContext() {
 		return null;
 	}

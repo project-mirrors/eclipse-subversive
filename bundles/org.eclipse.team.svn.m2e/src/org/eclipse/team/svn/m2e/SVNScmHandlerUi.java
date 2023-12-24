@@ -51,10 +51,15 @@ public class SVNScmHandlerUi extends ScmHandlerUi {
 		IRepositoryResource repositoryResource = this.getRepositoryResource(scmUrl);
 
 		// if no URL selected (repositoryResource == null) then existing repository locations must be shown...
-		RepositoryTreePanel panel = new RepositoryTreePanel(SVNUIMessages.RepositoryResourceSelectionComposite_Select_Title, M2ESVNPlugin.instance()
-				.getResource("CheckoutAsMavenProjectWizard.OptionsPage.Selection.Title"), M2ESVNPlugin.instance().getResource(
-				"CheckoutAsMavenProjectWizard.OptionsPage.Selection.Description"),
-				repositoryResource == null ? new IRepositoryResource[0] : new IRepositoryResource[] { repositoryResource }, 
+		RepositoryTreePanel panel = new RepositoryTreePanel(
+				SVNUIMessages.RepositoryResourceSelectionComposite_Select_Title,
+				M2ESVNPlugin.instance().getResource("CheckoutAsMavenProjectWizard.OptionsPage.Selection.Title"),
+				M2ESVNPlugin.instance()
+						.getResource(
+								"CheckoutAsMavenProjectWizard.OptionsPage.Selection.Description"),
+				repositoryResource == null
+						? new IRepositoryResource[0]
+						: new IRepositoryResource[] { repositoryResource },
 				true /* allowSourcesInTree */, false);
 		panel.setAllowFiles(false);
 
@@ -74,18 +79,18 @@ public class SVNScmHandlerUi extends ScmHandlerUi {
 		}
 
 		GetLogMessagesOperation msgsOp = SelectRevisionPanel.getMsgsOp(repositoryResource, true /* stopOnCopy */);
-		if (!UIMonitorUtility.doTaskNowDefault(shell, msgsOp, true).isCancelled() && msgsOp.getExecutionState() == IActionOperation.OK) {
+		if (!UIMonitorUtility.doTaskNowDefault(shell, msgsOp, true).isCancelled()
+				&& msgsOp.getExecutionState() == IActionOperation.OK) {
 			long currentRevision = SVNRevision.INVALID_REVISION_NUMBER;
 			try {
 				//NOTE initially revision number is empty. Is it correct behaviour or not?
 				if (scmRevision != null && scmRevision.length() > 0) {
 					SVNRevision rev = SVNRevision.fromString(scmRevision);
 					if (rev.getKind() == SVNRevision.Kind.NUMBER) {
-						currentRevision = ((SVNRevision.Number)rev).getNumber();
+						currentRevision = ((SVNRevision.Number) rev).getNumber();
 					}
 				}
-			}
-			catch (IllegalArgumentException ex) {
+			} catch (IllegalArgumentException ex) {
 				UILoggedOperation.reportError("SVNScmHandlerUi.selectRevision", ex);
 			}
 
@@ -114,14 +119,15 @@ public class SVNScmHandlerUi extends ScmHandlerUi {
 	}
 
 	public boolean isValidUrl(String scmUrl) {
-		return scmUrl != null && scmUrl.startsWith(SVNScmHandler.SVN_SCM_ID) && SVNUtility.isValidSVNURL(scmUrl.substring(SVNScmHandler.SVN_SCM_ID.length()));
+		return scmUrl != null && scmUrl.startsWith(SVNScmHandler.SVN_SCM_ID)
+				&& SVNUtility.isValidSVNURL(scmUrl.substring(SVNScmHandler.SVN_SCM_ID.length()));
 	}
 
 	public boolean isValidRevision(ScmUrl scmUrl, String scmRevision) {
 		try {
 			SVNRevision revision = SVNRevision.fromString(scmRevision);
 			SVNRevision.Kind kind = revision.getKind();
-			return kind == SVNRevision.Kind.HEAD || kind == SVNRevision.Kind.NUMBER;	
+			return kind == SVNRevision.Kind.HEAD || kind == SVNRevision.Kind.NUMBER;
 		} catch (Exception e) {
 			return false;
 		}

@@ -28,9 +28,9 @@ import org.eclipse.team.ui.synchronize.ISynchronizePageConfiguration;
  * @author Alexei Goncharov
  */
 public class SetPropertyAction extends AbstractSynchronizeModelAction {
-	
+
 	protected SetPropertyActionHelper actionHelper;
-	
+
 	public SetPropertyAction(String text, ISynchronizePageConfiguration configuration) {
 		super(text, configuration);
 		this.actionHelper = new SetPropertyActionHelper(this, configuration);
@@ -39,18 +39,18 @@ public class SetPropertyAction extends AbstractSynchronizeModelAction {
 	protected boolean needsToSaveDirtyEditors() {
 		return false;
 	}
-	
+
 	protected boolean updateSelection(IStructuredSelection selection) {
 		super.updateSelection(selection);
-		
+
 		IResource[] selectedResources = this.getAllSelectedResources();
 		if (FileUtility.checkForResourcesPresence(selectedResources, IStateFilter.SF_VERSIONED, IResource.DEPTH_ZERO)) {
 			return true;
 		}
-		
-	    return false;
+
+		return false;
 	}
-	
+
 	protected IActionOperation getOperation(ISynchronizePageConfiguration configuration, IDiffElement[] elements) {
 		return this.actionHelper.getOperation();
 	}

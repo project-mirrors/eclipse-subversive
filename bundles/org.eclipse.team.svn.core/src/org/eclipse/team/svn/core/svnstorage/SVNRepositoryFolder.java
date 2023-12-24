@@ -25,16 +25,16 @@ import org.eclipse.team.svn.core.resource.IRepositoryLocation;
  */
 public class SVNRepositoryFolder extends SVNRepositoryContainer implements IRepositoryFolder {
 	private static final long serialVersionUID = -8790962415969490733L;
-	
+
 	public SVNRepositoryFolder(IRepositoryLocation location, String url, SVNRevision selectedRevision) {
 		super(location, url, selectedRevision);
 	}
-	
+
 	public boolean equals(Object obj) {
 		if (obj == null || !(obj instanceof IRepositoryFolder)) {
 			return false;
 		}
 		return super.equals(obj);
 	}
-	
+
 }

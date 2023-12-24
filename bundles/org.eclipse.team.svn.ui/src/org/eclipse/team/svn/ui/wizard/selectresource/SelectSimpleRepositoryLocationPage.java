@@ -36,72 +36,79 @@ import org.eclipse.team.svn.ui.wizard.shareproject.SelectRepositoryLocationPage;
 import org.eclipse.ui.PlatformUI;
 
 /**
- * Select repository location wizard page
- * It doesn't allow to create a new location in contrast to SelectRepositoryLocationPage
+ * Select repository location wizard page It doesn't allow to create a new location in contrast to SelectRepositoryLocationPage
  * 
  * @author Igor Burilo
  */
 public class SelectSimpleRepositoryLocationPage extends AbstractVerifiedWizardPage {
-	
+
 	protected IRepositoryLocation location;
+
 	protected TableViewer repositoriesView;
-	protected IRepositoryLocation []repositories;
-	
-	public SelectSimpleRepositoryLocationPage(IRepositoryLocation []repositories) {
-		super(SelectSimpleRepositoryLocationPage.class.getName(), SVNUIMessages.SelectSimpleRepositoryLocationPage_Title, SVNTeamUIPlugin.instance().getImageDescriptor("icons/wizards/newconnect.gif")); //$NON-NLS-1$
+
+	protected IRepositoryLocation[] repositories;
+
+	public SelectSimpleRepositoryLocationPage(IRepositoryLocation[] repositories) {
+		super(SelectSimpleRepositoryLocationPage.class.getName(),
+				SVNUIMessages.SelectSimpleRepositoryLocationPage_Title,
+				SVNTeamUIPlugin.instance().getImageDescriptor("icons/wizards/newconnect.gif")); //$NON-NLS-1$
 		this.setDescription(SVNUIMessages.SelectSimpleRepositoryLocationPage_Description);
-		this.repositories = repositories;;
+		this.repositories = repositories;
+		;
 	}
-	
+
 	protected Composite createControlImpl(Composite parent) {
 		GridLayout layout = null;
 		GridData data = null;
 		this.initializeDialogUnits(parent);
-		
+
 		Composite composite = new Composite(parent, SWT.NONE);
 		layout = new GridLayout();
 		composite.setLayout(layout);
 		data = new GridData(GridData.FILL_BOTH);
 		composite.setLayoutData(data);
-		
+
 		Label description = new Label(composite, SWT.WRAP);
 		data = new GridData(GridData.FILL_HORIZONTAL);
 		data.widthHint = IDialogConstants.ENTRY_FIELD_WIDTH;
 		data.heightHint = this.convertHeightInCharsToPixels(2);
 		description.setLayoutData(data);
 		description.setText(SVNUIMessages.SelectSimpleRepositoryLocationPage_Details);
-		
-		this.repositoriesView = SelectRepositoryLocationPage.createRepositoriesListTable(composite, this.repositories);		
-		
+
+		this.repositoriesView = SelectRepositoryLocationPage.createRepositoriesListTable(composite, this.repositories);
+
 		this.repositoriesView.addDoubleClickListener(new IDoubleClickListener() {
 			public void doubleClick(DoubleClickEvent event) {
 				IWizard wizard = SelectSimpleRepositoryLocationPage.this.getWizard();
 				IWizardPage nextPage = wizard.getNextPage(SelectSimpleRepositoryLocationPage.this);
 				if (nextPage != null) {
-					wizard.getContainer().showPage(nextPage);	
-				}				
-			}			
+					wizard.getContainer().showPage(nextPage);
+				}
+			}
 		});
-		
+
 		this.repositoriesView.addSelectionChangedListener(new ISelectionChangedListener() {
 			public void selectionChanged(SelectionChangedEvent event) {
-				IStructuredSelection selection = (IStructuredSelection)SelectSimpleRepositoryLocationPage.this.repositoriesView.getSelection();
-				SelectSimpleRepositoryLocationPage.this.location = (IRepositoryLocation)selection.getFirstElement();
+				IStructuredSelection selection = (IStructuredSelection) SelectSimpleRepositoryLocationPage.this.repositoriesView
+						.getSelection();
+				SelectSimpleRepositoryLocationPage.this.location = (IRepositoryLocation) selection.getFirstElement();
 				SelectSimpleRepositoryLocationPage.this.setPageComplete(true);
 			}
 		});
-		
-		IStructuredSelection selection = (IStructuredSelection)this.repositoriesView.getSelection();
-		this.location = (IRepositoryLocation)selection.getFirstElement();
-		
+
+		IStructuredSelection selection = (IStructuredSelection) this.repositoriesView.getSelection();
+		this.location = (IRepositoryLocation) selection.getFirstElement();
+
 		//Setting context help
-        PlatformUI.getWorkbench().getHelpSystem().setHelp(composite, "org.eclipse.team.svn.help.selectRepositoryLocationContext"); //$NON-NLS-1$
-		
+		PlatformUI.getWorkbench()
+				.getHelpSystem()
+				.setHelp(composite, "org.eclipse.team.svn.help.selectRepositoryLocationContext"); //$NON-NLS-1$
+
 		return composite;
 	}
-	
+
 	public IRepositoryLocation getRepositoryLocation() {
 		return this.location;
 	}
-	
+
 }

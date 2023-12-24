@@ -26,19 +26,25 @@ import org.eclipse.team.svn.ui.wizard.AbstractSVNWizard;
  */
 public class CopyMoveWizard extends AbstractSVNWizard {
 	protected SelectDestinationPage destinationPage;
+
 	protected CommentWizardPage commentPage;
-	
+
 	protected IRepositoryResource[] selectedResources;
+
 	protected boolean isMove;
-	
+
 	protected IRepositoryResource destination;
+
 	protected String comment;
+
 	protected String newName;
 
 	public CopyMoveWizard(IRepositoryResource[] selectedResources, boolean isMove) {
 		super();
 		this.selectedResources = selectedResources;
-		this.setWindowTitle((this.isMove = isMove) ? SVNUIMessages.MoveToAction_Select_Title : SVNUIMessages.CopyToAction_Select_Title);
+		this.setWindowTitle((this.isMove = isMove)
+				? SVNUIMessages.MoveToAction_Select_Title
+				: SVNUIMessages.CopyToAction_Select_Title);
 	}
 
 	public void addPages() {

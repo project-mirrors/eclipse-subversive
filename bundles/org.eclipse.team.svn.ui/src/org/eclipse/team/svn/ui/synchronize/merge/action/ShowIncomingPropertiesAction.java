@@ -44,42 +44,43 @@ public class ShowIncomingPropertiesAction extends AbstractSynchronizeModelAction
 		super(text, configuration);
 	}
 
-	public ShowIncomingPropertiesAction(String text, ISynchronizePageConfiguration configuration, ISelectionProvider selectionProvider) {
+	public ShowIncomingPropertiesAction(String text, ISynchronizePageConfiguration configuration,
+			ISelectionProvider selectionProvider) {
 		super(text, configuration, selectionProvider);
 	}
-	
+
 	protected boolean needsToSaveDirtyEditors() {
 		return false;
 	}
-	
+
 	protected boolean updateSelection(IStructuredSelection selection) {
 		super.updateSelection(selection);
 		if (selection.size() == 1 && selection.getFirstElement() instanceof SyncInfoModelElement) {
-			ISynchronizeModelElement element = (ISynchronizeModelElement)selection.getFirstElement();
+			ISynchronizeModelElement element = (ISynchronizeModelElement) selection.getFirstElement();
 			if (element instanceof SyncInfoModelElement) {
-				SyncInfo syncInfo = ((SyncInfoModelElement)selection.getFirstElement()).getSyncInfo();
+				SyncInfo syncInfo = ((SyncInfoModelElement) selection.getFirstElement()).getSyncInfo();
 				if (syncInfo instanceof IMergeSyncInfo) {
-					IMergeSyncInfo mergeSyncInfo = (IMergeSyncInfo) syncInfo; 
-					IResourceChange change = mergeSyncInfo.getRemoteResource();		
+					IMergeSyncInfo mergeSyncInfo = (IMergeSyncInfo) syncInfo;
+					IResourceChange change = mergeSyncInfo.getRemoteResource();
 					if (change != null) {
-						return IStateFilter.ST_DELETED != change.getStatus();	
-					}					
+						return IStateFilter.ST_DELETED != change.getStatus();
+					}
 				}
 			}
 		}
 		return false;
 	}
-	
-	
-	protected IActionOperation getOperation(ISynchronizePageConfiguration configuration, IDiffElement[] elements) {		
+
+	protected IActionOperation getOperation(ISynchronizePageConfiguration configuration, IDiffElement[] elements) {
 		AbstractSVNSyncInfo syncInfo = this.getSelectedSVNSyncInfo();
 		if (syncInfo instanceof IMergeSyncInfo) {
-			IResourceChange change = ((IMergeSyncInfo) syncInfo).getRemoteResource();					    
-		    IRepositoryResource remote = change.getOriginator();
+			IResourceChange change = ((IMergeSyncInfo) syncInfo).getRemoteResource();
+			IRepositoryResource remote = change.getOriginator();
 			IResourcePropertyProvider provider = new GetRemotePropertiesOperation(remote);
-			ShowPropertiesOperation op = new ShowPropertiesOperation(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage(), remote, provider);
+			ShowPropertiesOperation op = new ShowPropertiesOperation(
+					PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage(), remote, provider);
 			return op;
-		}				
+		}
 		return null;
 	}
 

@@ -17,14 +17,13 @@ package org.eclipse.team.svn.ui.extension.impl;
 import org.eclipse.team.svn.ui.extension.factory.ICommentView;
 import org.eclipse.team.svn.ui.extension.factory.IHistoryViewFactory;
 
-
 /**
  * Default team history components factory
  * 
  * @author Andrej Zachar
  */
 public class DefaultHistoryViewFactory implements IHistoryViewFactory {
-	
+
 	public ICommentView getCommentView() {
 		return new DefaultCommentView();
 	}

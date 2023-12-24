@@ -17,8 +17,7 @@ import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.team.svn.core.SVNMessages;
 
 /**
- * Connector Discovery extension point reader, for extension points of type
- * <tt>org.eclipse.team.svn.core.connectorDiscovery</tt>
+ * Connector Discovery extension point reader, for extension points of type <tt>org.eclipse.team.svn.core.connectorDiscovery</tt>
  * 
  * @author David Green
  * @author Igor Burilo
@@ -62,16 +61,16 @@ public class ConnectorDiscoveryExtensionReader {
 			}
 		} catch (IllegalArgumentException e) {
 			throw new ValidationException(SVNMessages.ConnectorDiscoveryExtensionReader_unexpected_value_kind);
-		}		
-		
+		}
+
 		String ids = element.getAttribute("id"); //$NON-NLS-1$
 		if (ids != null) {
 			String[] aids = ids.split("\\s*,\\s*"); //$NON-NLS-1$
 			for (String id : aids) {
 				connectorDescriptor.getInstallableUnits().add(id);
 			}
-		}		
-		
+		}
+
 		connectorDescriptor.setName(element.getAttribute("name")); //$NON-NLS-1$
 		connectorDescriptor.setProvider(element.getAttribute("provider")); //$NON-NLS-1$
 		connectorDescriptor.setLicense(element.getAttribute("license")); //$NON-NLS-1$
@@ -98,7 +97,8 @@ public class ConnectorDiscoveryExtensionReader {
 			Overview overviewItem = readOverview(child);
 			overviewItem.setConnectorDescriptor(connectorDescriptor);
 			if (connectorDescriptor.getOverview() != null) {
-				throw new ValidationException(SVNMessages.ConnectorDiscoveryExtensionReader_unexpected_element_overview);
+				throw new ValidationException(
+						SVNMessages.ConnectorDiscoveryExtensionReader_unexpected_element_overview);
 			}
 			connectorDescriptor.setOverview(overviewItem);
 		}
@@ -138,7 +138,8 @@ public class ConnectorDiscoveryExtensionReader {
 			Overview overviewItem = readOverview(child);
 			overviewItem.setConnectorCategory(connectorCategory);
 			if (connectorCategory.getOverview() != null) {
-				throw new ValidationException(SVNMessages.ConnectorDiscoveryExtensionReader_unexpected_element_overview);
+				throw new ValidationException(
+						SVNMessages.ConnectorDiscoveryExtensionReader_unexpected_element_overview);
 			}
 			connectorCategory.setOverview(overviewItem);
 		}

@@ -27,15 +27,15 @@ import org.eclipse.team.svn.core.connector.SVNLogEntry;
 public class CompositeLogEntryFilter implements ILogEntryFilter {
 
 	protected HashSet<ILogEntryFilter> filtersSet;
-	
+
 	public CompositeLogEntryFilter() {
 		this.filtersSet = new HashSet<ILogEntryFilter>();
 	}
-	
-	public CompositeLogEntryFilter(ILogEntryFilter [] filters) {
+
+	public CompositeLogEntryFilter(ILogEntryFilter[] filters) {
 		this.filtersSet = new HashSet<ILogEntryFilter>(Arrays.asList(filters));
 	}
-	
+
 	public boolean accept(SVNLogEntry logEntry) {
 		for (ILogEntryFilter current : this.filtersSet) {
 			if (!current.accept(logEntry)) {
@@ -51,7 +51,7 @@ public class CompositeLogEntryFilter implements ILogEntryFilter {
 	public void addFilter(ILogEntryFilter filter) {
 		this.filtersSet.add(filter);
 	}
-	
+
 	/**
 	 * Removes a filter from filters set
 	 */

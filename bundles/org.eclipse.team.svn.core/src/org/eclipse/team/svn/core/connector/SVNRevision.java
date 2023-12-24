@@ -21,9 +21,9 @@ import java.util.Locale;
 /**
  * Revision information container
  * 
- * The JavaHL API's is the only way to interact between SVN and Java-based tools. At the same time JavaHL connector library
- * is not EPL compatible and we won't to pin plug-in with concrete connector implementation. So, the only way to do this is
- * providing our own connector interface which will be covered by concrete connector implementation.
+ * The JavaHL API's is the only way to interact between SVN and Java-based tools. At the same time JavaHL connector library is not EPL
+ * compatible and we won't to pin plug-in with concrete connector implementation. So, the only way to do this is providing our own connector
+ * interface which will be covered by concrete connector implementation.
  * 
  * @author Alexander Gurov
  */
@@ -64,15 +64,16 @@ public class SVNRevision {
 		 * The latest repository revision
 		 */
 		HEAD(7, "HEAD"); //$NON-NLS-1$
-		
+
 		public final int id;
+
 		private final String name;
-		
+
 		public String toString() {
 			// and there is no need for named representations of numeric/date kinds. So, they're empty.
 			return this.name;
 		}
-		
+
 		public static Kind fromId(int id) {
 			for (Kind kind : values()) {
 				if (kind.id == id) {
@@ -81,7 +82,7 @@ public class SVNRevision {
 			}
 			throw new IllegalArgumentException("Invalid revision kind: " + id); //$NON-NLS-1$
 		}
-		
+
 		private Kind(int id, String name) {
 			this.id = id;
 			this.name = name;
@@ -183,7 +184,8 @@ public class SVNRevision {
 		}
 
 		public String toString() {
-			DateFormat dateTimeFormat = DateFormat.getDateTimeInstance(DateFormat.DEFAULT, DateFormat.DEFAULT, Locale.getDefault());
+			DateFormat dateTimeFormat = DateFormat.getDateTimeInstance(DateFormat.DEFAULT, DateFormat.DEFAULT,
+					Locale.getDefault());
 			return dateTimeFormat.format(new java.util.Date(this.revDate));
 		}
 
@@ -278,7 +280,7 @@ public class SVNRevision {
 		}
 		return new SVNRevision.Date(revisionDate);
 	}
-	
+
 	/**
 	 * Creates revision object by revision string
 	 * 
@@ -310,14 +312,13 @@ public class SVNRevision {
 		}
 		try {
 			return SVNRevision.fromNumber(Long.parseLong(revisionString));
-		}
-		catch (NumberFormatException ex) {
+		} catch (NumberFormatException ex) {
 			// check if revision specified as date (always locale-specific)
-			DateFormat dateTimeFormat = DateFormat.getDateTimeInstance(DateFormat.DEFAULT, DateFormat.DEFAULT, Locale.getDefault());
+			DateFormat dateTimeFormat = DateFormat.getDateTimeInstance(DateFormat.DEFAULT, DateFormat.DEFAULT,
+					Locale.getDefault());
 			try {
 				return SVNRevision.fromDate(dateTimeFormat.parse(revisionString).getTime());
-			}
-			catch (ParseException e) {
+			} catch (ParseException e) {
 				// do nothing
 			}
 		}

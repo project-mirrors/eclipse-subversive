@@ -44,24 +44,30 @@ import org.eclipse.team.svn.core.utility.SVNUtility;
  * @author Alexander Gurov
  */
 public class SwitchOperation extends AbstractRepositoryOperation implements IUnresolvedConflictDetector {
-	protected IResource []resources;
+	protected IResource[] resources;
+
 	protected SVNDepth depth;
+
 	protected long options;
-	protected UnresolvedConflictDetectorHelper conflictDetectorHelper; 
 
-	public SwitchOperation(IResource []resources, IRepositoryResourceProvider destination, SVNDepth depth, boolean isStickyDepth, boolean ignoreExternals) {
-		this(resources, destination, depth, 
-			(ignoreExternals ? ISVNConnector.Options.IGNORE_EXTERNALS : ISVNConnector.Options.NONE) | 
-			(isStickyDepth ? ISVNConnector.Options.DEPTH_IS_STICKY : ISVNConnector.Options.NONE));
+	protected UnresolvedConflictDetectorHelper conflictDetectorHelper;
+
+	public SwitchOperation(IResource[] resources, IRepositoryResourceProvider destination, SVNDepth depth,
+			boolean isStickyDepth, boolean ignoreExternals) {
+		this(resources, destination, depth,
+				(ignoreExternals ? ISVNConnector.Options.IGNORE_EXTERNALS : ISVNConnector.Options.NONE)
+						| (isStickyDepth ? ISVNConnector.Options.DEPTH_IS_STICKY : ISVNConnector.Options.NONE));
 	}
 
-	public SwitchOperation(IResource []resources, IRepositoryResource []destination, SVNDepth depth, boolean isStickyDepth, boolean ignoreExternals) {
-		this(resources, destination, depth, 
-			(ignoreExternals ? ISVNConnector.Options.IGNORE_EXTERNALS : ISVNConnector.Options.NONE) | 
-			(isStickyDepth ? ISVNConnector.Options.DEPTH_IS_STICKY : ISVNConnector.Options.NONE));
+	public SwitchOperation(IResource[] resources, IRepositoryResource[] destination, SVNDepth depth,
+			boolean isStickyDepth, boolean ignoreExternals) {
+		this(resources, destination, depth,
+				(ignoreExternals ? ISVNConnector.Options.IGNORE_EXTERNALS : ISVNConnector.Options.NONE)
+						| (isStickyDepth ? ISVNConnector.Options.DEPTH_IS_STICKY : ISVNConnector.Options.NONE));
 	}
-	
-	public SwitchOperation(IResource []resources, IRepositoryResourceProvider destination, SVNDepth depth, long options) {
+
+	public SwitchOperation(IResource[] resources, IRepositoryResourceProvider destination, SVNDepth depth,
+			long options) {
 		super("Operation_Switch", SVNMessages.class, destination); //$NON-NLS-1$
 		this.resources = resources;
 		this.depth = depth;
@@ -69,92 +75,100 @@ public class SwitchOperation extends AbstractRepositoryOperation implements IUnr
 		this.conflictDetectorHelper = new UnresolvedConflictDetectorHelper();
 	}
 
-	public SwitchOperation(IResource []resources, IRepositoryResource []destination, SVNDepth depth, long options) {
+	public SwitchOperation(IResource[] resources, IRepositoryResource[] destination, SVNDepth depth, long options) {
 		super("Operation_Switch", SVNMessages.class, destination); //$NON-NLS-1$
 		this.resources = resources;
 		this.depth = depth;
 		this.options = options & ISVNConnector.CommandMasks.SWITCH;
 		this.conflictDetectorHelper = new UnresolvedConflictDetectorHelper();
 	}
-	
+
 	public int getOperationWeight() {
 		return 19;
 	}
-	
+
 	public ISchedulingRule getSchedulingRule() {
-    	HashSet<IResource> ruleSet = new HashSet<IResource>();
-    	for (int i = 0; i < this.resources.length; i++) {
+		HashSet<IResource> ruleSet = new HashSet<IResource>();
+		for (int i = 0; i < this.resources.length; i++) {
 			ruleSet.add(this.resources[i] instanceof IProject ? this.resources[i] : this.resources[i].getParent());
-    	}
-    	return new MultiRule(ruleSet.toArray(new IResource[ruleSet.size()]));
+		}
+		return new MultiRule(ruleSet.toArray(new IResource[ruleSet.size()]));
 	}
-	
+
 	protected void runImpl(IProgressMonitor monitor) throws Exception {
-		IRepositoryResource []destinations = this.operableData();
+		IRepositoryResource[] destinations = this.operableData();
 		for (int i = 0; i < this.resources.length; i++) {
 			final IResource resource = this.resources[i];
 			final IRepositoryResource destination = destinations[i];
 			final IRepositoryLocation location = destination.getRepositoryLocation();
 			final ISVNConnector proxy = location.acquireSVNProxy();
-			
+
 			this.protectStep(new IUnprotectedOperation() {
 				public void run(IProgressMonitor monitor) throws Exception {
 					String wcPath = FileUtility.getWorkingCopyPath(resource);
-					SwitchOperation.this.writeToConsole(IConsoleStream.LEVEL_CMD, "svn switch \"" + destination.getUrl() + "\" \"" + FileUtility.normalizePath(wcPath) + "\" -r " + destination.getSelectedRevision() + ISVNConnector.Options.asCommandLine(SwitchOperation.this.options) + SVNUtility.getDepthArg(SwitchOperation.this.depth, SwitchOperation.this.options) + FileUtility.getUsernameParam(location.getUsername()) + "\n"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-					proxy.switchTo(wcPath, SVNUtility.getEntryRevisionReference(destination), SwitchOperation.this.depth,
-							SwitchOperation.this.options, new ConflictDetectionProgressMonitor(SwitchOperation.this, monitor, null));
-					
+					SwitchOperation.this.writeToConsole(IConsoleStream.LEVEL_CMD,
+							"svn switch \"" + destination.getUrl() + "\" \"" + FileUtility.normalizePath(wcPath) //$NON-NLS-1$//$NON-NLS-2$
+									+ "\" -r " + destination.getSelectedRevision() //$NON-NLS-1$
+									+ ISVNConnector.Options.asCommandLine(SwitchOperation.this.options)
+									+ SVNUtility.getDepthArg(SwitchOperation.this.depth, SwitchOperation.this.options)
+									+ FileUtility.getUsernameParam(location.getUsername()) + "\n"); //$NON-NLS-1$
+					proxy.switchTo(wcPath, SVNUtility.getEntryRevisionReference(destination),
+							SwitchOperation.this.depth, SwitchOperation.this.options,
+							new ConflictDetectionProgressMonitor(SwitchOperation.this, monitor, null));
+
 					if (resource instanceof IProject) {
-						SVNTeamProvider provider = (SVNTeamProvider)RepositoryProvider.getProvider((IProject)resource);
+						SVNTeamProvider provider = (SVNTeamProvider) RepositoryProvider
+								.getProvider((IProject) resource);
 						provider.switchResource(destination);
 					}
 				}
 			}, monitor, this.resources.length);
-			
-			location.releaseSVNProxy(proxy);		
+
+			location.releaseSVNProxy(proxy);
 		}
 	}
 
-    public void setUnresolvedConflict(boolean hasUnresolvedConflict) {
+	public void setUnresolvedConflict(boolean hasUnresolvedConflict) {
 		this.conflictDetectorHelper.setUnresolvedConflict(hasUnresolvedConflict);
-	}	
-    
-    public boolean hasUnresolvedConflicts() {
-        return this.conflictDetectorHelper.hasUnresolvedConflicts();
-    }
-    
-    public String getMessage() {
-    	return this.conflictDetectorHelper.getMessage();
-    }
-    
-    public IResource []getUnprocessed() {
-		return this.conflictDetectorHelper.getUnprocessed();
-    }
+	}
 
-	public IResource []getProcessed() {
+	public boolean hasUnresolvedConflicts() {
+		return this.conflictDetectorHelper.hasUnresolvedConflicts();
+	}
+
+	public String getMessage() {
+		return this.conflictDetectorHelper.getMessage();
+	}
+
+	public IResource[] getUnprocessed() {
+		return this.conflictDetectorHelper.getUnprocessed();
+	}
+
+	public IResource[] getProcessed() {
 		return this.conflictDetectorHelper.getProcessed();
 	}
-	
-	protected void defineInitialResourceSet(IResource []resources) {
+
+	protected void defineInitialResourceSet(IResource[] resources) {
 		this.conflictDetectorHelper.defineInitialResourceSet(resources);
 	}
-	
+
 	public void addUnprocessed(IResource unprocessed) {
 		this.conflictDetectorHelper.addUnprocessed(unprocessed);
 	}
 
 	public void setConflictMessage(String message) {
-		this.conflictDetectorHelper.setConflictMessage(message);		
+		this.conflictDetectorHelper.setConflictMessage(message);
 	}
-	
+
 	public void removeProcessed(IResource resource) {
 		this.conflictDetectorHelper.removeProcessed(resource);
 	}
-	
+
 	protected class ConflictDetectionProgressMonitor extends SVNConflictDetectionProgressMonitor {
 		public ConflictDetectionProgressMonitor(IActionOperation parent, IProgressMonitor monitor, IPath root) {
 			super(parent, monitor, root);
 		}
+
 		protected void processConflict(ItemState state) {
 			SwitchOperation.this.setUnresolvedConflict(true);
 		}

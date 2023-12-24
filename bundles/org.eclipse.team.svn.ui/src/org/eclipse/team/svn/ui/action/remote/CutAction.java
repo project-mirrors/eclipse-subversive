@@ -36,14 +36,12 @@ public class CutAction extends AbstractRepositoryTeamAction {
 
 	public void runImpl(IAction action) {
 		this.runBusy(new PrepareRemoteResourcesTransferrableOperation(
-			this.getSelectedRepositoryResources(),
-			RemoteResourceTransferrable.OP_CUT, 
-			this.getShell().getDisplay()
+				this.getSelectedRepositoryResources(), RemoteResourceTransferrable.OP_CUT, this.getShell().getDisplay()
 		));
 	}
-	
+
 	public boolean isEnabled() {
-		IRepositoryResource []resources = this.getSelectedRepositoryResources();
+		IRepositoryResource[] resources = this.getSelectedRepositoryResources();
 		if (resources.length == 0) {
 			return false;
 		}
@@ -51,10 +49,10 @@ public class CutAction extends AbstractRepositoryTeamAction {
 		IRepositoryLocation first = resources[0].getRepositoryLocation();
 		for (int i = 0; i < resources.length; i++) {
 			IRepositoryLocation location = resources[i].getRepositoryLocation();
-			if (first != location || 
-				resources[i].getSelectedRevision().getKind() != Kind.HEAD ||
-				resources[i] instanceof IRepositoryRoot && 
-				(((IRepositoryRoot)resources[i]).getKind() == IRepositoryRoot.KIND_ROOT || ((IRepositoryRoot)resources[i]).getKind() == IRepositoryRoot.KIND_LOCATION_ROOT)) {
+			if (first != location || resources[i].getSelectedRevision().getKind() != Kind.HEAD
+					|| resources[i] instanceof IRepositoryRoot && (((IRepositoryRoot) resources[i])
+							.getKind() == IRepositoryRoot.KIND_ROOT
+							|| ((IRepositoryRoot) resources[i]).getKind() == IRepositoryRoot.KIND_LOCATION_ROOT)) {
 				return false;
 			}
 		}

@@ -30,23 +30,24 @@ import org.eclipse.team.ui.synchronize.ISynchronizePageConfiguration;
  * @author Igor Burilo
  */
 public class SetPropertyActionHelper extends AbstractActionHelper {
-	
+
 	public SetPropertyActionHelper(IAction action, ISynchronizePageConfiguration configuration) {
 		super(action, configuration);
 	}
-	
+
 	public IActionOperation getOperation() {
 		/*
 		 * Set property for all versioned selected resources 
 		 */
 		IResource[] selectedResources = this.getAllSelectedResources();
-		IResource[] filteredResources = FileUtility.filterResources(selectedResources, IStateFilter.SF_VERSIONED, IResource.DEPTH_ZERO);									
+		IResource[] filteredResources = FileUtility.filterResources(selectedResources, IStateFilter.SF_VERSIONED,
+				IResource.DEPTH_ZERO);
 		ResourcePropertyEditPanel panel = new ResourcePropertyEditPanel(null, filteredResources, true);
 		DefaultDialog dialog = new DefaultDialog(this.configuration.getSite().getShell(), panel);
 		if (dialog.open() == Dialog.OK) {
 			org.eclipse.team.svn.ui.action.local.SetPropertyAction.doSetProperty(filteredResources, panel, null);
 		}
-		return null;		
+		return null;
 	}
 
 }

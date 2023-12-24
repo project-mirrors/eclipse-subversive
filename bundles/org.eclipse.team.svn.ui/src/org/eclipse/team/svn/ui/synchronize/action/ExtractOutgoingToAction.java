@@ -26,20 +26,20 @@ import org.eclipse.team.ui.synchronize.ISynchronizePageConfiguration;
  * @author Alexei Goncharov
  */
 public class ExtractOutgoingToAction extends AbstractSynchronizeModelAction {
-	
+
 	protected ExtractOutgoingToActionHelper actionHelper;
-	
+
 	public ExtractOutgoingToAction(String text, ISynchronizePageConfiguration configuration) {
 		super(text, configuration);
 		this.actionHelper = new ExtractOutgoingToActionHelper(this, configuration);
 	}
-	
+
 	protected FastSyncInfoFilter getSyncInfoFilter() {
 		return this.actionHelper.getSyncInfoFilter();
 	}
-	
+
 	protected IActionOperation getOperation(ISynchronizePageConfiguration configuration, IDiffElement[] elements) {
 		return this.actionHelper.getOperation();
 	}
-	
+
 }

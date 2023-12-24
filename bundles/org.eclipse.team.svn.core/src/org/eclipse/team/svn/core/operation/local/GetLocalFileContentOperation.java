@@ -37,6 +37,7 @@ import org.eclipse.team.svn.core.utility.FileUtility;
  */
 public class GetLocalFileContentOperation extends AbstractGetFileContentOperation {
 	protected IResource resource;
+
 	protected SVNRevision revision;
 
 	public GetLocalFileContentOperation(IResource resource, SVNRevision.Kind revisionKind) {
@@ -44,43 +45,43 @@ public class GetLocalFileContentOperation extends AbstractGetFileContentOperatio
 		this.resource = resource;
 		this.revision = revisionKind == Kind.BASE ? SVNRevision.BASE : SVNRevision.WORKING;
 	}
-	
+
 	public int getOperationWeight() {
 		return 0;
 	}
 
 	protected void runImpl(IProgressMonitor monitor) throws Exception {
 		if (this.revision.getKind() == Kind.BASE) {
-		    IRepositoryLocation location = SVNRemoteStorage.instance().getRepositoryLocation(this.resource);
+			IRepositoryLocation location = SVNRemoteStorage.instance().getRepositoryLocation(this.resource);
 			ISVNConnector proxy = location.acquireSVNProxy();
 			FileOutputStream stream = null;
 			try {
 				this.tmpFile = this.createTempFile();
 				stream = new FileOutputStream(this.tmpFile);
 				proxy.streamFileContent(
-						new SVNEntryRevisionReference(FileUtility.getWorkingCopyPath(this.resource), null, this.revision), 
-						2048, 
-						stream, 
-						new SVNProgressMonitor(GetLocalFileContentOperation.this, monitor, null));
+						new SVNEntryRevisionReference(FileUtility.getWorkingCopyPath(this.resource), null,
+								this.revision),
+						2048, stream, new SVNProgressMonitor(GetLocalFileContentOperation.this, monitor, null));
+			} finally {
+				location.releaseSVNProxy(proxy);
+				if (stream != null) {
+					try {
+						stream.close();
+					} catch (Exception ex) {
+					}
+				}
 			}
-			finally {
-			    location.releaseSVNProxy(proxy);
-			    if (stream != null) {
-			    	try {stream.close();} catch (Exception ex) {}
-			    }
-			}
-		}
-		else {
+		} else {
 			this.tmpFile = new File(FileUtility.getWorkingCopyPath(this.resource));
 		}
 	}
-	
+
 	protected String getExtension() {
 		return this.resource.getFileExtension();
 	}
-	
+
 	protected String getShortErrorMessage(Throwable t) {
-		return BaseMessages.format(super.getShortErrorMessage(t), new Object[] {this.resource.getName()});
+		return BaseMessages.format(super.getShortErrorMessage(t), new Object[] { this.resource.getName() });
 	}
-	
+
 }

@@ -65,28 +65,28 @@ public class CheckoutAction extends AbstractRepositoryModifyWorkspaceAction {
 	}
 
 	public void runImpl(IAction action) {
-		final IRepositoryResource []resources = this.getSelectedRepositoryResources();
-		if (SVNTeamPreferences.getCheckoutBoolean(SVNTeamUIPlugin.instance().getPreferenceStore(), SVNTeamPreferences.CHECKOUT_RESPECT_PROJECT_STRUCTURE_NAME)) {
+		final IRepositoryResource[] resources = this.getSelectedRepositoryResources();
+		if (SVNTeamPreferences.getCheckoutBoolean(SVNTeamUIPlugin.instance().getPreferenceStore(),
+				SVNTeamPreferences.CHECKOUT_RESPECT_PROJECT_STRUCTURE_NAME)) {
 			this.runScheduled(new AbstractActionOperation("Operation_CheckLayout", SVNUIMessages.class) { //$NON-NLS-1$
 				protected void runImpl(IProgressMonitor monitor) throws Exception {
 					final HashSet<IRepositoryResource> toCheckout = new HashSet<IRepositoryResource>();
 					for (int i = 0; i < resources.length && !monitor.isCanceled(); i++) {
-						int kind = ((IRepositoryRoot)resources[i].getRoot()).getKind();
-						if (!resources[i].getRepositoryLocation().isStructureEnabled() || kind != IRepositoryRoot.KIND_LOCATION_ROOT && kind != IRepositoryRoot.KIND_ROOT) {
+						int kind = ((IRepositoryRoot) resources[i].getRoot()).getKind();
+						if (!resources[i].getRepositoryLocation().isStructureEnabled()
+								|| kind != IRepositoryRoot.KIND_LOCATION_ROOT && kind != IRepositoryRoot.KIND_ROOT) {
 							toCheckout.add(resources[i]);
-						}
-						else {
-							IRepositoryContainer trunk = resources[i].asRepositoryContainer(resources[i].getRepositoryLocation().getTrunkLocation(), false);
+						} else {
+							IRepositoryContainer trunk = resources[i].asRepositoryContainer(
+									resources[i].getRepositoryLocation().getTrunkLocation(), false);
 							if (!trunk.exists()) {
 								toCheckout.add(resources[i]);
-							}
-							else {
+							} else {
 								IRepositoryFile projectFile = trunk.asRepositoryFile(".project", false); //$NON-NLS-1$
 								if (projectFile.exists()) {
 									toCheckout.add(trunk);
-								}
-								else {
-									IRepositoryResource []children = trunk.getChildren();
+								} else {
+									IRepositoryResource[] children = trunk.getChildren();
 									for (IRepositoryResource child : children) {
 										if (child instanceof IRepositoryContainer) {
 											toCheckout.add(child);
@@ -99,8 +99,14 @@ public class CheckoutAction extends AbstractRepositoryModifyWorkspaceAction {
 					if (!monitor.isCanceled()) {
 						UIMonitorUtility.getDisplay().syncExec(new Runnable() {
 							public void run() {
-								boolean ignoreExternals = SVNTeamPreferences.getBehaviourBoolean(SVNTeamUIPlugin.instance().getPreferenceStore(), SVNTeamPreferences.BEHAVIOUR_IGNORE_EXTERNALS_NAME);
-								IActionOperation op = ExtensionsManager.getInstance().getCurrentCheckoutFactory().getCheckoutOperation(UIMonitorUtility.getShell(), toCheckout.toArray(new IRepositoryResource[toCheckout.size()]), null, false, null, SVNDepth.INFINITY, ignoreExternals);
+								boolean ignoreExternals = SVNTeamPreferences.getBehaviourBoolean(
+										SVNTeamUIPlugin.instance().getPreferenceStore(),
+										SVNTeamPreferences.BEHAVIOUR_IGNORE_EXTERNALS_NAME);
+								IActionOperation op = ExtensionsManager.getInstance()
+										.getCurrentCheckoutFactory()
+										.getCheckoutOperation(UIMonitorUtility.getShell(),
+												toCheckout.toArray(new IRepositoryResource[toCheckout.size()]), null,
+												false, null, SVNDepth.INFINITY, ignoreExternals);
 								if (op != null) {
 									UIMonitorUtility.doTaskScheduledWorkspaceModify(op);
 								}
@@ -108,75 +114,86 @@ public class CheckoutAction extends AbstractRepositoryModifyWorkspaceAction {
 						});
 					}
 				}
+
 				public int getOperationWeight() {
 					return 2;
 				}
 			});
-		}
-		else {
-			boolean ignoreExternals = SVNTeamPreferences.getBehaviourBoolean(SVNTeamUIPlugin.instance().getPreferenceStore(), SVNTeamPreferences.BEHAVIOUR_IGNORE_EXTERNALS_NAME);
-			IActionOperation op = ExtensionsManager.getInstance().getCurrentCheckoutFactory().getCheckoutOperation(this.getShell(), resources, null, false, null, SVNDepth.INFINITY, ignoreExternals);
+		} else {
+			boolean ignoreExternals = SVNTeamPreferences.getBehaviourBoolean(
+					SVNTeamUIPlugin.instance().getPreferenceStore(),
+					SVNTeamPreferences.BEHAVIOUR_IGNORE_EXTERNALS_NAME);
+			IActionOperation op = ExtensionsManager.getInstance()
+					.getCurrentCheckoutFactory()
+					.getCheckoutOperation(this.getShell(), resources, null, false, null, SVNDepth.INFINITY,
+							ignoreExternals);
 			if (op != null) {
 				this.runScheduled(op);
 			}
 		}
 	}
-	
+
 	public static class NameSet {
 		public final boolean caseInsensitiveOS;
+
 		public final HashMap<String, String> existing;
-		
+
 		public NameSet() {
 			this.existing = new HashMap<String, String>();
 			this.caseInsensitiveOS = FileUtility.isCaseInsensitiveOS();
 		}
-		
+
 	}
-	
+
 	public static NameSet getExistingProjectNames() {
-		IProject []projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();		
-		NameSet set = new NameSet(); 
-		for (int i = 0; i < projects.length; i++) {			
-			IProject project = projects[i];			
-			String path = !FileUtility.isRemoteProject(project) ? FileUtility.getWorkingCopyPath(project) : project.getName();
+		IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
+		NameSet set = new NameSet();
+		for (int i = 0; i < projects.length; i++) {
+			IProject project = projects[i];
+			String path = !FileUtility.isRemoteProject(project)
+					? FileUtility.getWorkingCopyPath(project)
+					: project.getName();
 			//if (FileUtility.isRemoteProject(project)) {
-				set.existing.put(set.caseInsensitiveOS ? project.getName().toLowerCase() : project.getName(), path);
+			set.existing.put(set.caseInsensitiveOS ? project.getName().toLowerCase() : project.getName(), path);
 			//} 				
 		}
 		return set;
 	}
-	
-	public static ArrayList getOperateResources(HashMap names2resources, final HashMap resources2names, Shell shell, final String location, boolean checkProjectExistance) {
+
+	public static ArrayList getOperateResources(HashMap names2resources, final HashMap resources2names, Shell shell,
+			final String location, boolean checkProjectExistance) {
 		NameSet set = CheckoutAction.getExistingProjectNames();
 		final HashMap existingResources = new HashMap();
 		final HashMap existingFolders = new HashMap();
 		ArrayList operateResources = new ArrayList();
 		File folder;
-		
+
 		for (Iterator iter = names2resources.keySet().iterator(); iter.hasNext();) {
-			String key = (String)iter.next();
+			String key = (String) iter.next();
 			String resourceName = FileUtility.formatResourceName(key);
 			Object currentResource = names2resources.get(key);
 			folder = new File(location + "/" + resourceName); //$NON-NLS-1$
-			
-			if (set.existing.keySet().contains(set.caseInsensitiveOS ? resourceName.toLowerCase() : resourceName) && checkProjectExistance) {
+
+			if (set.existing.keySet().contains(set.caseInsensitiveOS ? resourceName.toLowerCase() : resourceName)
+					&& checkProjectExistance) {
 				existingResources.put(resourceName, currentResource);
-				if (!FileUtility.formatPath(folder.getAbsolutePath()).equals(set.existing.get(set.caseInsensitiveOS ? resourceName.toLowerCase() : resourceName))) {
-					if (folder.exists() && (folder.listFiles() != null && folder.listFiles().length > 0 || folder.isFile())) {
+				if (!FileUtility.formatPath(folder.getAbsolutePath())
+						.equals(set.existing.get(set.caseInsensitiveOS ? resourceName.toLowerCase() : resourceName))) {
+					if (folder.exists()
+							&& (folder.listFiles() != null && folder.listFiles().length > 0 || folder.isFile())) {
 						existingFolders.put(resourceName, currentResource);
 					}
 				}
-			}
-			else {
-				if (folder.exists() && (folder.listFiles() != null && folder.listFiles().length > 0 || folder.isFile())) {
+			} else {
+				if (folder.exists()
+						&& (folder.listFiles() != null && folder.listFiles().length > 0 || folder.isFile())) {
 					existingFolders.put(resourceName, currentResource);
-				}
-				else {
+				} else {
 					operateResources.add(currentResource);
 				}
 			}
 		}
-		
+
 //		if some of chosen projects already exist in workspace - let the user decide which of them should be overriden
 		if (existingResources.size() > 0 || existingFolders.size() > 0) {
 			IStructuredContentProvider contentProvider = new IStructuredContentProvider() {
@@ -184,12 +201,14 @@ public class CheckoutAction extends AbstractRepositoryModifyWorkspaceAction {
 					Set existingSet = new HashSet();
 					existingSet.addAll(existingResources.keySet());
 					existingSet.addAll(existingFolders.keySet());
-					String []retVal = (String [])existingSet.toArray(new String[existingSet.size()]);
+					String[] retVal = (String[]) existingSet.toArray(new String[existingSet.size()]);
 					Arrays.sort(retVal);
 					return retVal;
 				}
+
 				public void dispose() {
 				}
+
 				public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 				}
 			};
@@ -198,63 +217,77 @@ public class CheckoutAction extends AbstractRepositoryModifyWorkspaceAction {
 				public Image getColumnImage(Object element, int columnIndex) {
 					return null;
 				}
+
 				public String getColumnText(Object element, int columnIndex) {
 					if (columnIndex == 0) {
-						return (String)element;
-					}
-					else if (columnIndex == 1) {
+						return (String) element;
+					} else if (columnIndex == 1) {
 						boolean project = existingResources.keySet().contains(element);
 						boolean folder = existingFolders.keySet().contains(element);
-						
+
 						if (project && folder) {
 							return SVNUIMessages.CheckoutAction_Type2;
-						}
-						else if (project) {
+						} else if (project) {
 							return SVNUIMessages.CheckoutAction_Type1;
-						}
-						else if (folder) {
-							return new File(location + "/" + element).isDirectory() ? SVNUIMessages.CheckoutAction_Type3 : SVNUIMessages.CheckoutAction_Type4; //$NON-NLS-1$
+						} else if (folder) {
+							return new File(location + "/" + element).isDirectory() //$NON-NLS-1$
+									? SVNUIMessages.CheckoutAction_Type3
+									: SVNUIMessages.CheckoutAction_Type4;
 						}
 						return ""; //$NON-NLS-1$
 					}
 					return null;
 				}
+
 				public void addListener(ILabelProviderListener listener) {
 				}
+
 				public void dispose() {
 				}
+
 				public boolean isLabelProperty(Object element, String property) {
 					return false;
 				}
+
 				public void removeListener(ILabelProviderListener listener) {
 				}
 			};
-			String message = existingResources.size() > 1 ? SVNUIMessages.CheckoutAction_Selection_Description_Multi : SVNUIMessages.CheckoutAction_Selection_Description_Single;
-			ListSelectionPanel panel = new ListSelectionPanel(existingResources, contentProvider, labelProvider, message, existingResources.size() > 1 ? SVNUIMessages.CheckoutAction_Selection_Message_Multi : SVNUIMessages.CheckoutAction_Selection_Message_Single, existingResources.size() > 1 ? SVNUIMessages.CheckoutAction_Selection_Title_Multi : SVNUIMessages.CheckoutAction_Selection_Title_Single, true);
+			String message = existingResources.size() > 1
+					? SVNUIMessages.CheckoutAction_Selection_Description_Multi
+					: SVNUIMessages.CheckoutAction_Selection_Description_Single;
+			ListSelectionPanel panel = new ListSelectionPanel(existingResources, contentProvider, labelProvider,
+					message,
+					existingResources.size() > 1
+							? SVNUIMessages.CheckoutAction_Selection_Message_Multi
+							: SVNUIMessages.CheckoutAction_Selection_Message_Single,
+					existingResources.size() > 1
+							? SVNUIMessages.CheckoutAction_Selection_Title_Multi
+							: SVNUIMessages.CheckoutAction_Selection_Title_Single,
+					true);
 			if (new DefaultDialog(shell, panel).open() == 0) {
-				Object []selection = panel.getResultSelections();
+				Object[] selection = panel.getResultSelections();
 				for (int i = 0; i < selection.length; i++) {
 					Object selected = existingResources.get(selection[i]);
 					selected = selected == null ? existingFolders.get(selection[i]) : selected;
 					operateResources.add(selected);
 				}
-			}
-			else {
+			} else {
 				operateResources.clear();
 			}
 		}
 
 		return operateResources;
 	}
-	
-	public static IActionOperation getCheckoutOperation(Shell shell, IRepositoryResource []resources, HashMap checkoutMap, boolean respectHierarchy, String location, SVNDepth depth, boolean ignoreExternals) {
+
+	public static IActionOperation getCheckoutOperation(Shell shell, IRepositoryResource[] resources,
+			HashMap checkoutMap, boolean respectHierarchy, String location, SVNDepth depth, boolean ignoreExternals) {
 		List resourceList = new ArrayList(Arrays.asList(resources));
 		if (checkoutMap != null && checkoutMap.keySet().size() != resources.length) {
 			for (Iterator iter = checkoutMap.entrySet().iterator(); iter.hasNext();) {
-				 IRepositoryResource currentProject = (IRepositoryResource)((Map.Entry)iter.next()).getValue();
-				 if (!resourceList.contains(currentProject)) {
-					 iter.remove();
-				 }
+				IRepositoryResource currentProject = (IRepositoryResource) ((Map.Entry) iter.next()).getValue();
+				if (!resourceList.contains(currentProject)) {
+					iter.remove();
+				}
 			}
 		}
 		if (checkoutMap == null) {
@@ -266,32 +299,34 @@ public class CheckoutAction extends AbstractRepositoryModifyWorkspaceAction {
 			checkoutMap = obtainOperation.getNames2Resources();
 		}
 		HashMap resources2names = CheckoutAction.getResources2Names(checkoutMap);
-		ArrayList operateResources = CheckoutAction.getOperateResources(checkoutMap, resources2names, shell, ResourcesPlugin.getWorkspace().getRoot().getLocation().toString(), true);
+		ArrayList operateResources = CheckoutAction.getOperateResources(checkoutMap, resources2names, shell,
+				ResourcesPlugin.getWorkspace().getRoot().getLocation().toString(), true);
 
 		if (operateResources.size() > 0) {
-			IRepositoryResource []checkoutSet = (IRepositoryResource [])operateResources.toArray(new IRepositoryResource[operateResources.size()]);
+			IRepositoryResource[] checkoutSet = (IRepositoryResource[]) operateResources
+					.toArray(new IRepositoryResource[operateResources.size()]);
 			HashMap operateMap = new HashMap();
 			for (int i = 0; i < checkoutSet.length; i++) {
 				operateMap.put(resources2names.get(checkoutSet[i]), checkoutSet[i]);
 			}
-			
+
 			return new CheckoutOperation(operateMap, respectHierarchy, location, depth, ignoreExternals);
 		}
 		return null;
 	}
-	
+
 	public boolean isEnabled() {
 		return true;
 	}
-	
+
 	public static HashMap getResources2Names(HashMap names2resources) {
 		HashMap resources2Names = new HashMap();
 		for (Iterator iter = names2resources.keySet().iterator(); iter.hasNext();) {
 			String name = (String) iter.next();
 			resources2Names.put(names2resources.get(name), name);
 		}
-		
+
 		return resources2Names;
 	}
-	
+
 }

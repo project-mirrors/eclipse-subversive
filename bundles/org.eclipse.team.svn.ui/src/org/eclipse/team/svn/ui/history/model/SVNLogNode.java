@@ -30,12 +30,12 @@ import org.eclipse.team.svn.ui.utility.DateFormatter;
  */
 public class SVNLogNode extends AbstractLogNode {
 	protected SVNLogEntry entry;
-	
+
 	public SVNLogNode(SVNLogEntry entry, ILogNode parent) {
 		super(parent);
 		this.entry = entry;
 	}
-	
+
 	public Object getAdapter(Class adapter) {
 		if (adapter.equals(SVNLogEntry.class)) {
 			return this.entry;
@@ -44,8 +44,8 @@ public class SVNLogNode extends AbstractLogNode {
 	}
 
 	public ILogNode[] getChildren() {
-		SVNLogEntry []entries = this.entry.getChildren();
-		ILogNode []children = new ILogNode[entries.length];
+		SVNLogEntry[] entries = this.entry.getChildren();
+		ILogNode[] children = new ILogNode[entries.length];
 		for (int i = 0; i < entries.length; i++) {
 			children[i] = new SVNLogNode(entries[i], this);
 		}
@@ -53,13 +53,16 @@ public class SVNLogNode extends AbstractLogNode {
 	}
 
 	public ImageDescriptor getImageDescriptor() {
-		return SVNTeamUIPlugin.instance().getImageDescriptor(this.parent instanceof SVNLogNode ? "icons/objects/repository-gray.gif" : "icons/objects/repository.gif"); //$NON-NLS-1$ //$NON-NLS-2$
+		return SVNTeamUIPlugin.instance()
+				.getImageDescriptor(this.parent instanceof SVNLogNode
+						? "icons/objects/repository-gray.gif" //$NON-NLS-1$
+						: "icons/objects/repository.gif"); //$NON-NLS-1$
 	}
-	
+
 	public boolean requiresBoldFont(long currentRevision) {
 		return currentRevision != SVNRevision.INVALID_REVISION_NUMBER && this.entry.revision == currentRevision;
 	}
-	
+
 	public String getLabel(int columnIndex, int labelType, long currentRevision) {
 		switch (columnIndex) {
 			case ILogNode.COLUMN_REVISION: {
@@ -76,7 +79,9 @@ public class SVNLogNode extends AbstractLogNode {
 				return String.valueOf(this.entry.changedPaths != null ? this.entry.changedPaths.length : 0);
 			}
 			case ILogNode.COLUMN_AUTHOR: {
-				return this.entry.author == null || this.entry.author.length() == 0 ? SVNMessages.SVNInfo_NoAuthor : this.entry.author;
+				return this.entry.author == null || this.entry.author.length() == 0
+						? SVNMessages.SVNInfo_NoAuthor
+						: this.entry.author;
 			}
 			case ILogNode.COLUMN_COMMENT: {
 				String retVal = this.entry.message;
@@ -85,8 +90,7 @@ public class SVNLogNode extends AbstractLogNode {
 				}
 				if (labelType == ILogNode.LABEL_TRIM) {
 					return FileUtility.formatMultilineText(retVal);
-				}
-				else if (labelType == ILogNode.LABEL_FLAT) {
+				} else if (labelType == ILogNode.LABEL_FLAT) {
 					return AbstractLogNode.flattenMultiLineText(retVal, " "); //$NON-NLS-1$
 				}
 				return retVal;
@@ -94,7 +98,7 @@ public class SVNLogNode extends AbstractLogNode {
 		}
 		return ""; //$NON-NLS-1$
 	}
-	
+
 	public Object getEntity() {
 		return this.entry;
 	}
@@ -106,7 +110,7 @@ public class SVNLogNode extends AbstractLogNode {
 	public boolean hasChildren() {
 		return this.entry.hasChildren();
 	}
-	
+
 	public String getAuthor() {
 		return this.entry.author;
 	}
@@ -126,16 +130,16 @@ public class SVNLogNode extends AbstractLogNode {
 	public long getTimeStamp() {
 		return this.entry.date;
 	}
-	
+
 	public int hashCode() {
-		return (int)this.entry.revision;
+		return (int) this.entry.revision;
 	}
-	
+
 	public boolean equals(Object obj) {
 		if (obj instanceof SVNLogNode) {
-			return this.entry.revision == ((SVNLogNode)obj).entry.revision;
+			return this.entry.revision == ((SVNLogNode) obj).entry.revision;
 		}
 		return false;
 	}
-	
+
 }

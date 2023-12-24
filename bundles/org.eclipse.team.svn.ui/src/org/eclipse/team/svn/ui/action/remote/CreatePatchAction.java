@@ -41,18 +41,19 @@ public class CreatePatchAction extends AbstractRepositoryModifyWorkspaceAction {
 	}
 
 	public void runImpl(IAction action) {
-		IRepositoryResource []resources = this.getSelectedRepositoryResources();
+		IRepositoryResource[] resources = this.getSelectedRepositoryResources();
 		CreatePatchWizard wizard = null;
 		if (resources.length == 1) {
 			wizard = new CreatePatchRemoteWizard(resources[0], true);
-		}
-		else {
+		} else {
 			wizard = new CreatePatchWizard(resources[0].getName(), null, true);
 		}
-		
+
 		WizardDialog dialog = new WizardDialog(this.getShell(), wizard);
 		if (dialog.open() == 0) {
-			IRepositoryResource second = resources.length == 1 ? ((CreatePatchRemoteWizard)wizard).getSelectedResource() : resources[1];
+			IRepositoryResource second = resources.length == 1
+					? ((CreatePatchRemoteWizard) wizard).getSelectedResource()
+					: resources[1];
 			try {
 				if (resources[0].getRevision() > second.getRevision()) {
 					IRepositoryResource tmp = second;
@@ -60,34 +61,37 @@ public class CreatePatchAction extends AbstractRepositoryModifyWorkspaceAction {
 					resources[0] = tmp;
 				}
 				this.runScheduled(CreatePatchAction.getCreatePatchOperation(resources[0], second, wizard));
-			}
-			catch (SVNConnectorException ex) {
+			} catch (SVNConnectorException ex) {
 				UILoggedOperation.reportError(SVNMessages.Operation_CreatePatchRemote, ex);
 			}
 		}
 	}
-	
-	public static IActionOperation getCreatePatchOperation(IRepositoryResource first, IRepositoryResource second, CreatePatchWizard wizard) {
-		CreatePatchOperation mainOp = new CreatePatchOperation(first, second, wizard.getFileName(), wizard.isRecursive(), wizard.getDiffOptions(), wizard.getDiffOutputOptions());
+
+	public static IActionOperation getCreatePatchOperation(IRepositoryResource first, IRepositoryResource second,
+			CreatePatchWizard wizard) {
+		CreatePatchOperation mainOp = new CreatePatchOperation(first, second, wizard.getFileName(),
+				wizard.isRecursive(), wizard.getDiffOptions(), wizard.getDiffOutputOptions());
 		CompositeOperation op = new CompositeOperation(mainOp.getId(), mainOp.getMessagesClass());
 		op.add(mainOp);
 		switch (wizard.getWriteMode()) {
 			case CreatePatchWizard.WRITE_TO_WORKSPACE_FILE: {
-				op.add(new RefreshResourcesOperation(new IResource[] {wizard.getTargetFolder()}, IResource.DEPTH_ONE, RefreshResourcesOperation.REFRESH_CHANGES), new IActionOperation[] {mainOp});
+				op.add(new RefreshResourcesOperation(new IResource[] { wizard.getTargetFolder() }, IResource.DEPTH_ONE,
+						RefreshResourcesOperation.REFRESH_CHANGES), new IActionOperation[] { mainOp });
 				break;
 			}
 			case CreatePatchWizard.WRITE_TO_CLIPBOARD: {
-				op.add(new FileToClipboardOperation(wizard.getFileName(), wizard.getCharset(), true), new IActionOperation[] {mainOp});
+				op.add(new FileToClipboardOperation(wizard.getFileName(), wizard.getCharset(), true),
+						new IActionOperation[] { mainOp });
 				break;
 			}
 		}
 		return op;
-		
+
 	}
-	
+
 	public boolean isEnabled() {
-		IRepositoryResource []resources = this.getSelectedRepositoryResources();
-        return resources.length == 1 || resources.length == 2 ;
+		IRepositoryResource[] resources = this.getSelectedRepositoryResources();
+		return resources.length == 1 || resources.length == 2;
 	}
 
 }

@@ -29,8 +29,8 @@ public abstract class AbstractWorkingCopyAction extends AbstractLocalTeamAction 
 		super();
 	}
 
-	protected IResource []getSelectedResources(IStateFilter filter) {
+	protected IResource[] getSelectedResources(IStateFilter filter) {
 		return FileUtility.getResourcesRecursive(this.getSelectedResources(), filter, IResource.DEPTH_ZERO);
 	}
-	
+
 }

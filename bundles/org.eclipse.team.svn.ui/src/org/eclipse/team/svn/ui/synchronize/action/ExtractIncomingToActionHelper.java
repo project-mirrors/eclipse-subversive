@@ -51,19 +51,21 @@ public class ExtractIncomingToActionHelper extends AbstractActionHelper {
 	}
 
 	public FastSyncInfoFilter getSyncInfoFilter() {
-		return new FastSyncInfoFilter.SyncInfoDirectionFilter(new int[] {SyncInfo.INCOMING, SyncInfo.CONFLICTING}) {
+		return new FastSyncInfoFilter.SyncInfoDirectionFilter(new int[] { SyncInfo.INCOMING, SyncInfo.CONFLICTING }) {
 			public boolean select(SyncInfo info) {
 				if (super.select(info)) {
 					AbstractSVNSyncInfo syncInfo = (AbstractSVNSyncInfo) info;
 					ILocalResource local = syncInfo.getLocalResource();
 					//for resources with tree conflicts check that they exist remotely
-					return IStateFilter.SF_TREE_CONFLICTING.accept(local) ? IStateFilter.SF_ONREPOSITORY.accept(local) : true;
+					return IStateFilter.SF_TREE_CONFLICTING.accept(local)
+							? IStateFilter.SF_ONREPOSITORY.accept(local)
+							: true;
 				}
 				return false;
 			}
 		};
 	}
-	
+
 	public IActionOperation getOperation() {
 		DirectoryDialog fileDialog = new DirectoryDialog(this.configuration.getSite().getShell());
 		fileDialog.setText(SVNUIMessages.ExtractToAction_Select_Title);
@@ -72,14 +74,16 @@ public class ExtractIncomingToActionHelper extends AbstractActionHelper {
 		if (path == null) {
 			return null;
 		}
-		
-		IResource []incomingChanges = this.getSyncInfoSelector().getSelectedResources(new ISyncStateFilter.StateFilterWrapper(IStateFilter.SF_ALL, true));
+
+		IResource[] incomingChanges = this.getSyncInfoSelector()
+				.getSelectedResources(new ISyncStateFilter.StateFilterWrapper(IStateFilter.SF_ALL, true));
 		HashSet<IResource> incomingWithProjects = new HashSet<IResource>(Arrays.asList(incomingChanges));
 		for (IResource current : incomingChanges) {
 			incomingWithProjects.add(current.getProject());
 		}
 		incomingChanges = incomingWithProjects.toArray(new IResource[incomingWithProjects.size()]);
-		HashSet<IResource> deletionsOnly = new HashSet<IResource>(Arrays.asList(this.getSyncInfoSelector().getSelectedResources(new ISyncStateFilter.StateFilterWrapper(null, IStateFilter.SF_DELETED, false))));
+		HashSet<IResource> deletionsOnly = new HashSet<IResource>(Arrays.asList(this.getSyncInfoSelector()
+				.getSelectedResources(new ISyncStateFilter.StateFilterWrapper(null, IStateFilter.SF_DELETED, false))));
 		HashSet<IRepositoryResource> incomingResourcesToOperate = new HashSet<IRepositoryResource>();
 		HashSet<String> markedForDelition = new HashSet<String>();
 		HashMap<String, String> resource2project = new HashMap<String, String>();
@@ -89,16 +93,17 @@ public class ExtractIncomingToActionHelper extends AbstractActionHelper {
 			IRepositoryResource projectRemote = SVNRemoteStorage.instance().asRepositoryResource(current.getProject());
 			if (current instanceof IProject) {
 				resource2project.put(remote.getUrl(), current.getName());
-			}
-			else if (!SVNUtility.createPathForSVNUrl(projectRemote.getUrl()).isPrefixOf(SVNUtility.createPathForSVNUrl(remote.getUrl()))) {
+			} else if (!SVNUtility.createPathForSVNUrl(projectRemote.getUrl())
+					.isPrefixOf(SVNUtility.createPathForSVNUrl(remote.getUrl()))) {
 				//external reference
 				resource2project.put(remote.getUrl(), current.getFullPath().toString().substring(1));
 			}
 			incomingResourcesToOperate.add(remote);
 			AbstractSVNSyncInfo[] syncInfos = this.getSVNSyncInfos();
 			for (AbstractSVNSyncInfo info : syncInfos) {
-				if (SyncInfo.getDirection(info.getKind()) == SyncInfo.INCOMING || SyncInfo.getDirection(info.getKind()) == SyncInfo.CONFLICTING) {					
-					IResourceChange change = (IResourceChange)info.getRemoteChangeResource();
+				if (SyncInfo.getDirection(info.getKind()) == SyncInfo.INCOMING
+						|| SyncInfo.getDirection(info.getKind()) == SyncInfo.CONFLICTING) {
+					IResourceChange change = (IResourceChange) info.getRemoteChangeResource();
 					if (remote.getUrl().equals(change.getOriginator().getUrl())) {
 						url2status.put(remote.getUrl(), change.getStatus());
 					}
@@ -109,7 +114,9 @@ public class ExtractIncomingToActionHelper extends AbstractActionHelper {
 			}
 		}
 		InitExtractLogOperation logger = new InitExtractLogOperation(path);
-		ExtractToOperationRemote mainOp = new ExtractToOperationRemote(incomingResourcesToOperate.toArray(new IRepositoryResource[incomingResourcesToOperate.size()]), url2status, markedForDelition, path,  resource2project, logger, true);
+		ExtractToOperationRemote mainOp = new ExtractToOperationRemote(
+				incomingResourcesToOperate.toArray(new IRepositoryResource[incomingResourcesToOperate.size()]),
+				url2status, markedForDelition, path, resource2project, logger, true);
 		CompositeOperation op = new CompositeOperation(mainOp.getId(), mainOp.getMessagesClass());
 		op.add(logger);
 		op.add(mainOp);

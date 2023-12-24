@@ -33,14 +33,18 @@ public class UpgradeWorkingCopyHelper implements IResolutionHelper {
 
 	public boolean acquireResolution(ErrorDescription description) {
 		if (description.code == ErrorDescription.WORKING_COPY_REQUIRES_UPGRADE) {
-			final IProject project = (IProject)description.context;
-			final boolean []solved = new boolean[] {false};
+			final IProject project = (IProject) description.context;
+			final boolean[] solved = new boolean[] { false };
 			UIMonitorUtility.parallelSyncExec(new Runnable() {
 				public void run() {
-					String title = SVNUIMessages.format(SVNUIMessages.UpgradeWorkingCopyDialog_Title, new String[] {project.getName()});
-					MessageDialog dlg = new MessageDialog(UIMonitorUtility.getShell(), title, null, SVNUIMessages.UpgradeWorkingCopyDialog_Message, MessageDialog.QUESTION, new String[] {IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL}, 0);
+					String title = SVNUIMessages.format(SVNUIMessages.UpgradeWorkingCopyDialog_Title,
+							new String[] { project.getName() });
+					MessageDialog dlg = new MessageDialog(UIMonitorUtility.getShell(), title, null,
+							SVNUIMessages.UpgradeWorkingCopyDialog_Message, MessageDialog.QUESTION,
+							new String[] { IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL }, 0);
 					if (dlg.open() == 0) {
-						UIMonitorUtility.doTaskNowDefault(UIMonitorUtility.getShell(), new UpgradeWorkingCopyOperation(new IResource[] {project}), false);
+						UIMonitorUtility.doTaskNowDefault(UIMonitorUtility.getShell(),
+								new UpgradeWorkingCopyOperation(new IResource[] { project }), false);
 						solved[0] = true;
 					}
 				}
@@ -49,5 +53,5 @@ public class UpgradeWorkingCopyHelper implements IResolutionHelper {
 		}
 		return false;
 	}
-	
+
 }

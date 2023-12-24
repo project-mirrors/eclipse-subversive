@@ -34,22 +34,24 @@ import org.eclipse.ui.IWorkbenchPart;
  */
 public class DefaultCommitActionFactory implements ICommitActionFactory {
 
-	public ICommitDialog getCommitDialog(final Shell shell, Collection allFilesToCommit, final ICommentDialogPanel commentPanel) {
-		return new ICommitDialog(){
-			
+	public ICommitDialog getCommitDialog(final Shell shell, Collection allFilesToCommit,
+			final ICommentDialogPanel commentPanel) {
+		return new ICommitDialog() {
+
 			public String getMessage() {
 				return commentPanel.getMessage();
 			}
-			
+
 			public int open() {
 				DefaultDialog dialog = new DefaultDialog(shell, commentPanel);
 				return dialog.open();
 			}
-			
+
 		};
 	}
 
-	public void performAfterCommitTasks(CompositeOperation operation, IRevisionProvider revisionProvider, IActionOperation[] dependsOn, IWorkbenchPart part) {
+	public void performAfterCommitTasks(CompositeOperation operation, IRevisionProvider revisionProvider,
+			IActionOperation[] dependsOn, IWorkbenchPart part) {
 
 	}
 
@@ -57,13 +59,11 @@ public class DefaultCommitActionFactory implements ICommitActionFactory {
 	}
 
 	public void confirmMessage(ICommentManager commentManager) {
-		
+
 	}
 
 	public void cancelMessage(ICommentManager commentManager) {
-		
-	}
 
-	
+	}
 
 }

@@ -39,9 +39,11 @@ import org.eclipse.team.svn.core.utility.SVNUtility;
  */
 public class BranchTagOperation extends AbstractWorkingCopyOperation {
 	protected IRepositoryResource destination;
+
 	protected String message;
-	
-	public BranchTagOperation(String operationName, IResource[] resources, IRepositoryResource destination, String message) {
+
+	public BranchTagOperation(String operationName, IResource[] resources, IRepositoryResource destination,
+			String message) {
 		super("Operation_" + operationName, SVNMessages.class, resources); //$NON-NLS-1$
 		this.destination = destination;
 		this.message = message;
@@ -49,7 +51,7 @@ public class BranchTagOperation extends AbstractWorkingCopyOperation {
 
 	protected void runImpl(IProgressMonitor monitor) throws Exception {
 		IResource[] resources = this.operableData();
-		
+
 		ProgressMonitorUtility.setTaskInfo(monitor, this, FileUtility.getNamesListAsString(resources));
 		IRepositoryLocation location = this.destination.getRepositoryLocation();
 		final ISVNConnector proxy = location.acquireSVNProxy();
@@ -57,29 +59,38 @@ public class BranchTagOperation extends AbstractWorkingCopyOperation {
 			final String destinationUrl = SVNUtility.encodeURL(this.destination.getUrl());
 			for (int i = 0; i < resources.length; i++) {
 				final String wcPath = FileUtility.getWorkingCopyPath(resources[i]);
-				
+
 				ISVNNotificationCallback notify = new ISVNNotificationCallback() {
 					public void notify(SVNNotification info) {
 						if (info.revision != -1) {
-							String message = SVNMessages.format(SVNMessages.Console_CommittedRevision, new String[] {String.valueOf(info.revision)});
+							String message = SVNMessages.format(SVNMessages.Console_CommittedRevision,
+									new String[] { String.valueOf(info.revision) });
 							BranchTagOperation.this.writeToConsole(IConsoleStream.LEVEL_OK, message);
 						}
 					}
 				};
 				SVNUtility.addSVNNotifyListener(proxy, notify);
-				
+
 				this.protectStep(new IUnprotectedOperation() {
 					public void run(IProgressMonitor monitor) throws Exception {
-						BranchTagOperation.this.writeToConsole(IConsoleStream.LEVEL_CMD, "svn copy \"" + wcPath + "\" \"" + destinationUrl + "\" -r " + SVNRevision.WORKING + " -m \"" + BranchTagOperation.this.message + "\"" + ISVNConnector.Options.asCommandLine(ISVNConnector.Options.INCLUDE_PARENTS) + FileUtility.getUsernameParam(BranchTagOperation.this.destination.getRepositoryLocation().getUsername()) + "\n"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
-						SVNEntryRevisionReference []src = new SVNEntryRevisionReference[] {new SVNEntryRevisionReference(wcPath, SVNRevision.WORKING, SVNRevision.WORKING)};
-						proxy.copyRemote(src, destinationUrl, BranchTagOperation.this.message, ISVNConnector.Options.INCLUDE_PARENTS, null, ISVNConnector.NO_EXTERNALS_TO_PIN, new SVNProgressMonitor(BranchTagOperation.this, monitor, null));
+						BranchTagOperation.this.writeToConsole(IConsoleStream.LEVEL_CMD, "svn copy \"" + wcPath //$NON-NLS-1$
+								+ "\" \"" + destinationUrl + "\" -r " + SVNRevision.WORKING + " -m \"" //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
+								+ BranchTagOperation.this.message + "\"" //$NON-NLS-1$
+								+ ISVNConnector.Options.asCommandLine(ISVNConnector.Options.INCLUDE_PARENTS)
+								+ FileUtility.getUsernameParam(
+										BranchTagOperation.this.destination.getRepositoryLocation().getUsername())
+								+ "\n"); //$NON-NLS-1$
+						SVNEntryRevisionReference[] src = new SVNEntryRevisionReference[] {
+								new SVNEntryRevisionReference(wcPath, SVNRevision.WORKING, SVNRevision.WORKING) };
+						proxy.copyRemote(src, destinationUrl, BranchTagOperation.this.message,
+								ISVNConnector.Options.INCLUDE_PARENTS, null, ISVNConnector.NO_EXTERNALS_TO_PIN,
+								new SVNProgressMonitor(BranchTagOperation.this, monitor, null));
 					}
 				}, monitor, resources.length);
-				
+
 				SVNUtility.removeSVNNotifyListener(proxy, notify);
 			}
-		}
-		finally {
+		} finally {
 			location.releaseSVNProxy(proxy);
 		}
 	}

@@ -25,10 +25,10 @@ import org.eclipse.team.ui.history.IHistoryPageSource;
  * @author Alexander Gurov
  */
 public class SVNHistoryAdapterFactory implements IAdapterFactory {
-	private static final Class []ADAPTED_TYPES = new Class[] {IHistoryPageSource.class, SVNLogEntry.class};
-	
+	private static final Class[] ADAPTED_TYPES = new Class[] { IHistoryPageSource.class, SVNLogEntry.class };
+
 	private SVNHistoryPageSource pageSource = new SVNHistoryPageSource();
-	
+
 	public Class[] getAdapterList() {
 		return SVNHistoryAdapterFactory.ADAPTED_TYPES;
 	}
@@ -38,7 +38,7 @@ public class SVNHistoryAdapterFactory implements IAdapterFactory {
 			return this.pageSource;
 		}
 		if (adaptableObject instanceof ILogNode) {
-			return ((ILogNode)adaptableObject).getAdapter(adapterType);
+			return ((ILogNode) adaptableObject).getAdapter(adapterType);
 		}
 		return null;
 	}

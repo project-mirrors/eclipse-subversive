@@ -33,23 +33,22 @@ import org.eclipse.team.svn.ui.SVNUIMessages;
  * @author Alexander Gurov
  */
 public class RemovePropertyDialog extends MessageDialog {
-	
+
 	protected boolean recursive;
+
 	protected boolean isFile;
 
 	public RemovePropertyDialog(Shell parentShell, boolean oneProperty, boolean isFile) {
-		super(parentShell, 
-			oneProperty ? SVNUIMessages.RemoveProperty_Title_Single : SVNUIMessages.RemoveProperty_Title_Multi, 
-			null, 
-			oneProperty ? SVNUIMessages.RemoveProperty_Message_Single : SVNUIMessages.RemoveProperty_Message_Multi,
-			MessageDialog.QUESTION, 
-			new String[] {IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL}, 
-			0);
-		
+		super(parentShell,
+				oneProperty ? SVNUIMessages.RemoveProperty_Title_Single : SVNUIMessages.RemoveProperty_Title_Multi,
+				null,
+				oneProperty ? SVNUIMessages.RemoveProperty_Message_Single : SVNUIMessages.RemoveProperty_Message_Multi,
+				MessageDialog.QUESTION, new String[] { IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL }, 0);
+
 		this.recursive = false;
 		this.isFile = isFile;
 	}
-	
+
 	public boolean isRecursive() {
 		return this.recursive;
 	}
@@ -66,13 +65,13 @@ public class RemovePropertyDialog extends MessageDialog {
 			recursive.setText(SVNUIMessages.RemoveProperty_Recursively);
 			recursive.addListener(SWT.Selection, new Listener() {
 				public void handleEvent(Event event) {
-					Button button = (Button)event.widget;
+					Button button = (Button) event.widget;
 					RemovePropertyDialog.this.recursive = button.getSelection();
 				}
 			});
 		}
-		
+
 		return composite;
 	}
-	
+
 }

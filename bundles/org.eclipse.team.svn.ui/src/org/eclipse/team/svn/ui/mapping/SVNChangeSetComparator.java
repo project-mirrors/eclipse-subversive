@@ -19,7 +19,7 @@ import java.util.Comparator;
 import org.eclipse.team.internal.core.subscribers.ChangeSet;
 
 public class SVNChangeSetComparator implements Comparator<ChangeSet> {
-	private SVNChangeSetSorter fSorter= new SVNChangeSetSorter();
+	private SVNChangeSetSorter fSorter = new SVNChangeSetSorter();
 
 	public int compare(ChangeSet o1, ChangeSet o2) {
 		return this.fSorter.compare(null, o1, o2);

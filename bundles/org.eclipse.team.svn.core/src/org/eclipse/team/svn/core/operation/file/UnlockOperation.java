@@ -40,7 +40,7 @@ import org.eclipse.team.svn.core.utility.SVNUtility;
  * @author Alexander Gurov
  */
 public class UnlockOperation extends AbstractFileOperation {
-	public UnlockOperation(File []files) {
+	public UnlockOperation(File[] files) {
 		super("Operation_UnlockFile", SVNMessages.class, files); //$NON-NLS-1$
 	}
 
@@ -49,51 +49,54 @@ public class UnlockOperation extends AbstractFileOperation {
 	}
 
 	protected void runImpl(final IProgressMonitor monitor) throws Exception {
-		File []files = this.operableData();
-		
+		File[] files = this.operableData();
+
 		final List<SVNNotification> problems = new ArrayList<SVNNotification>();
 		Map<?, ?> wc2Resources = SVNUtility.splitWorkingCopies(files);
-		for (Iterator<?> it = wc2Resources.entrySet().iterator(); it.hasNext() && !monitor.isCanceled(); ) {
-			Map.Entry entry = (Map.Entry)it.next();
-			
-			IRepositoryResource wcRoot = SVNFileStorage.instance().asRepositoryResource((File)entry.getKey(), false);
+		for (Iterator<?> it = wc2Resources.entrySet().iterator(); it.hasNext() && !monitor.isCanceled();) {
+			Map.Entry entry = (Map.Entry) it.next();
+
+			IRepositoryResource wcRoot = SVNFileStorage.instance().asRepositoryResource((File) entry.getKey(), false);
 			final IRepositoryLocation location = wcRoot.getRepositoryLocation();
-			
-			final String []paths = FileUtility.asPathArray(((List<?>)entry.getValue()).toArray(new File[0]));
+
+			final String[] paths = FileUtility.asPathArray(((List<?>) entry.getValue()).toArray(new File[0]));
 
 			this.complexWriteToConsole(new Runnable() {
 				public void run() {
-					UnlockOperation.this.writeToConsole(IConsoleStream.LEVEL_CMD, "svn unlock" + ISVNConnector.Options.asCommandLine(ISVNConnector.Options.FORCE)); //$NON-NLS-1$
+					UnlockOperation.this.writeToConsole(IConsoleStream.LEVEL_CMD,
+							"svn unlock" + ISVNConnector.Options.asCommandLine(ISVNConnector.Options.FORCE)); //$NON-NLS-1$
 					for (int i = 0; i < paths.length && !monitor.isCanceled(); i++) {
 						UnlockOperation.this.writeToConsole(IConsoleStream.LEVEL_CMD, " \"" + paths[i] + "\""); //$NON-NLS-1$ //$NON-NLS-2$
 					}
-					UnlockOperation.this.writeToConsole(IConsoleStream.LEVEL_CMD, " --force" + FileUtility.getUsernameParam(location.getUsername()) + "\n"); //$NON-NLS-1$ //$NON-NLS-2$
+					UnlockOperation.this.writeToConsole(IConsoleStream.LEVEL_CMD,
+							" --force" + FileUtility.getUsernameParam(location.getUsername()) + "\n"); //$NON-NLS-1$ //$NON-NLS-2$
 				}
 			});
-			
+
 			final ISVNConnector proxy = location.acquireSVNProxy();
-			this.protectStep(new IUnprotectedOperation() {				
+			this.protectStep(new IUnprotectedOperation() {
 				public void run(IProgressMonitor monitor) throws Exception {
 					ISVNNotificationCallback listener = new ISVNNotificationCallback() {
-						public void notify(SVNNotification info) {					
-							if (SVNNotification.PerformedAction.FAILED_UNLOCK == info.action) {									
-								problems.add(info);				
-							}					
-						}						
+						public void notify(SVNNotification info) {
+							if (SVNNotification.PerformedAction.FAILED_UNLOCK == info.action) {
+								problems.add(info);
+							}
+						}
 					};
-					
-					SVNUtility.addSVNNotifyListener(proxy, listener);		
+
+					SVNUtility.addSVNNotifyListener(proxy, listener);
 					try {
-						proxy.unlock(paths, ISVNConnector.Options.FORCE, new SVNProgressMonitor(UnlockOperation.this, monitor, null));
+						proxy.unlock(paths, ISVNConnector.Options.FORCE,
+								new SVNProgressMonitor(UnlockOperation.this, monitor, null));
 					} finally {
 						SVNUtility.removeSVNNotifyListener(proxy, listener);
 					}
 				}
 			}, monitor, wc2Resources.size());
-			
+
 			location.releaseSVNProxy(proxy);
 		}
-		
+
 		//check problems
 		if (!problems.isEmpty()) {
 			StringBuffer res = new StringBuffer();

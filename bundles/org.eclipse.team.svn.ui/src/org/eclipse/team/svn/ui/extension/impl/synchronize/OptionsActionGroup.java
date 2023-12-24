@@ -29,17 +29,17 @@ import org.eclipse.team.ui.synchronize.ISynchronizePageConfiguration;
  */
 public class OptionsActionGroup extends AbstractSynchronizeActionGroup {
 	public static final String GROUP_SYNCH_OPTIONS = "synchronizeViewOptions"; //$NON-NLS-1$
-	
+
 	protected IAction contiguousOptionAction;
 
 	public void configureMenuGroups(ISynchronizePageConfiguration configuration) {
 		configuration.addMenuGroup(
-				ISynchronizePageConfiguration.P_VIEW_MENU, 
-				OptionsActionGroup.GROUP_SYNCH_OPTIONS);
+				ISynchronizePageConfiguration.P_VIEW_MENU, OptionsActionGroup.GROUP_SYNCH_OPTIONS);
 	}
-	
+
 	protected void configureActions(ISynchronizePageConfiguration configuration) {
-		this.contiguousOptionAction = new Action(SVNUIMessages.OptionsActionGroup_ShowInfoContiguous, IAction.AS_CHECK_BOX) {
+		this.contiguousOptionAction = new Action(SVNUIMessages.OptionsActionGroup_ShowInfoContiguous,
+				IAction.AS_CHECK_BOX) {
 			public void run() {
 				boolean fastReportMode = AbstractSVNSubscriber.getSynchInfoContigous();
 				AbstractSVNSubscriber.setSynchInfoContigous(!fastReportMode);
@@ -48,12 +48,11 @@ public class OptionsActionGroup extends AbstractSynchronizeActionGroup {
 		};
 		this.refreshOptionButtons();
 		this.appendToGroup(
-				ISynchronizePageConfiguration.P_VIEW_MENU, 
-				OptionsActionGroup.GROUP_SYNCH_OPTIONS,
+				ISynchronizePageConfiguration.P_VIEW_MENU, OptionsActionGroup.GROUP_SYNCH_OPTIONS,
 				this.contiguousOptionAction);
 	}
-	
-    protected void refreshOptionButtons() {
+
+	protected void refreshOptionButtons() {
 		this.contiguousOptionAction.setChecked(AbstractSVNSubscriber.getSynchInfoContigous());
-    }
+	}
 }

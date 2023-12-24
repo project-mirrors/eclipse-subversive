@@ -20,14 +20,15 @@ import org.eclipse.team.svn.ui.SVNTeamUIPlugin;
 import org.eclipse.team.svn.ui.preferences.SVNTeamPreferences;
 
 /**
- * Utility class for format date with the good preference. 
+ * Utility class for format date with the good preference.
+ * 
  * @author Thomas Champagne
  */
-public final class DateFormatter {	
-	
+public final class DateFormatter {
+
 	private DateFormatter() {
 	}
-	
+
 	public static String formatDate(long date) {
 		return DateFormatter.formatDate(new Date(date));
 	}

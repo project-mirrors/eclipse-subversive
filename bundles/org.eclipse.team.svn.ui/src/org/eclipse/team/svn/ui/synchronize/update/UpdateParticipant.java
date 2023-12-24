@@ -37,16 +37,16 @@ public class UpdateParticipant extends AbstractSVNParticipant {
 	public static final String PARTICIPANT_ID = "org.eclipse.team.svn.ui.synchronize.update.SynchronizeParticipant";
 
 	public UpdateParticipant() {
-        super();
-    }
+		super();
+	}
 
 	public UpdateParticipant(ISynchronizeScope scope) {
 		super(scope);
 	}
-	
-    public AbstractSVNSubscriber getMatchingSubscriber() {
-        return UpdateSubscriber.instance();
-    }
+
+	public AbstractSVNSubscriber getMatchingSubscriber() {
+		return UpdateSubscriber.instance();
+	}
 
 	public String getName() {
 		String name = SVNUIMessages.SynchronizeParticipant;
@@ -54,7 +54,7 @@ public class UpdateParticipant extends AbstractSVNParticipant {
 		String scopeName = scope.getName();
 		if (scope instanceof ResourceScope) {
 			StringBuffer buffer = new StringBuffer();
-			IResource []resources = scope.getRoots();
+			IResource[] resources = scope.getRoots();
 			for (int i = 0; i < resources.length; i++) {
 				if (i > 0) {
 					buffer.append(", "); //$NON-NLS-1$
@@ -63,23 +63,23 @@ public class UpdateParticipant extends AbstractSVNParticipant {
 			}
 			scopeName = buffer.toString();
 		}
-		return SVNUIMessages.format(TeamUIMessages.SubscriberParticipant_namePattern, new String[] { name, scopeName }); 
+		return SVNUIMessages.format(TeamUIMessages.SubscriberParticipant_namePattern, new String[] { name, scopeName });
 	}
-	
-    protected String getParticipantId() {
-        return UpdateParticipant.PARTICIPANT_ID;
-    }
+
+	protected String getParticipantId() {
+		return UpdateParticipant.PARTICIPANT_ID;
+	}
 
 	protected Collection<AbstractSynchronizeActionGroup> getActionGroups() {
 		return ExtensionsManager.getInstance().getCurrentSynchronizeActionContributor().getUpdateContributions();
 	}
 
-    protected int getSupportedModes() {
-        return ISynchronizePageConfiguration.ALL_MODES;
-    }
+	protected int getSupportedModes() {
+		return ISynchronizePageConfiguration.ALL_MODES;
+	}
 
-    protected int getDefaultMode() {
-        return ISynchronizePageConfiguration.BOTH_MODE;
-    }
-    
+	protected int getDefaultMode() {
+		return ISynchronizePageConfiguration.BOTH_MODE;
+	}
+
 }

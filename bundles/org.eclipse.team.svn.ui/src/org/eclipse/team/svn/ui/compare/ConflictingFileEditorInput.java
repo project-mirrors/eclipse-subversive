@@ -38,13 +38,17 @@ import org.eclipse.team.svn.ui.SVNUIMessages;
  */
 public class ConflictingFileEditorInput extends CompareEditorInput {
 	protected IFile target;
+
 	protected IFile left;
+
 	protected IFile right;
+
 	protected IFile ancestor;
-	
+
 	protected MergeElement targetElement;
-	
-	public ConflictingFileEditorInput(CompareConfiguration configuration, IFile target, IFile left, IFile right, IFile ancestor) {
+
+	public ConflictingFileEditorInput(CompareConfiguration configuration, IFile target, IFile left, IFile right,
+			IFile ancestor) {
 		super(configuration);
 		this.target = target;
 		this.left = left;
@@ -61,44 +65,43 @@ public class ConflictingFileEditorInput extends CompareEditorInput {
 		cc.setLeftLabel(this.target.getName() + " " + SVNUIMessages.ConflictingFileEditorInput_Working); //$NON-NLS-1$
 		cc.setRightLabel(this.target.getName() + " " + SVNUIMessages.ConflictingFileEditorInput_Repository); //$NON-NLS-1$
 		cc.setAncestorLabel(this.target.getName() + " " + SVNUIMessages.ConflictingFileEditorInput_Base); //$NON-NLS-1$
-		
+
 		this.setTitle(this.target.getName() + " " + SVNUIMessages.ConflictingFileEditorInput_EditConflicts); //$NON-NLS-1$
-		
+
 		InputStream stream = null;
 		try {
 			stream = this.left.getContents();
-			byte []buf = new byte[2048];
+			byte[] buf = new byte[2048];
 			int len = 0;
 			ByteArrayOutputStream output = new ByteArrayOutputStream();
 			while ((len = stream.read(buf)) > 0) {
 				output.write(buf, 0, len);
 			}
 			this.targetElement = new MergeElement(this.target, output.toByteArray(), true);
-		} 
-		catch (RuntimeException e) {
+		} catch (RuntimeException e) {
 			throw e;
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			throw new InvocationTargetException(e);
-		}
-		finally {
+		} finally {
 			if (stream != null) {
-				try {stream.close();} catch (Exception ex) {}
+				try {
+					stream.close();
+				} catch (Exception ex) {
+				}
 			}
 		}
-		
+
 		try {
 			MergeElement rightRef = new MergeElement(this.right);
 			rightRef.setCharsetReference(this.targetElement);
 			MergeElement ancestorRef = new MergeElement(this.ancestor);
 			ancestorRef.setCharsetReference(this.targetElement);
 			return new Differencer().findDifferences(true, monitor, null, ancestorRef, this.targetElement, rightRef);
-		}
-		finally {
+		} finally {
 			monitor.done();
 		}
 	}
-	
+
 	public Object getAdapter(Class adapter) {
 		if (IFile.class.equals(adapter)) {
 			// disallow auto-flush of editor content
@@ -106,20 +109,21 @@ public class ConflictingFileEditorInput extends CompareEditorInput {
 		}
 		return super.getAdapter(adapter);
 	}
-	
+
 	public void saveChanges(IProgressMonitor pm) throws CoreException {
 		// flush editor content...
 		super.saveChanges(pm);
 		// ...and save it
 		this.targetElement.commit(pm);
-		
+
 		this.setDirty(false);
 	}
-	
+
 	protected class MergeElement extends BufferedResourceNode {
 		protected boolean editable;
+
 		protected BufferedResourceNode charsetReference;
-		
+
 		public BufferedResourceNode getCharsetReference() {
 			return this.charsetReference;
 		}
@@ -131,8 +135,8 @@ public class ConflictingFileEditorInput extends CompareEditorInput {
 		public MergeElement(IResource resource) {
 			this(resource, null, false);
 		}
-		
-		public MergeElement(IResource resource, byte []initialContent, boolean editable) {
+
+		public MergeElement(IResource resource, byte[] initialContent, boolean editable) {
 			super(resource);
 			this.editable = editable;
 			if (initialContent != null) {
@@ -143,7 +147,7 @@ public class ConflictingFileEditorInput extends CompareEditorInput {
 		public String getCharset() {
 			return this.charsetReference != null ? this.charsetReference.getCharset() : super.getCharset();
 		}
-		
+
 		public String getType() {
 			String extension = ConflictingFileEditorInput.this.target.getFileExtension();
 			return extension == null ? ITypedElement.UNKNOWN_TYPE : extension;
@@ -153,5 +157,5 @@ public class ConflictingFileEditorInput extends CompareEditorInput {
 			return this.editable;
 		}
 	}
-	
+
 }

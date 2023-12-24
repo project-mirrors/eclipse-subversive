@@ -37,7 +37,7 @@ import org.eclipse.team.svn.core.utility.ProgressMonitorUtility;
  * @author Alexander Gurov
  */
 public class CleanupOperation extends AbstractFileOperation {
-	public CleanupOperation(File []files) {
+	public CleanupOperation(File[] files) {
 		super("Operation_CleanupFile", SVNMessages.class, files); //$NON-NLS-1$
 	}
 
@@ -46,24 +46,27 @@ public class CleanupOperation extends AbstractFileOperation {
 	}
 
 	protected void runImpl(IProgressMonitor monitor) throws Exception {
-		File []files = this.operableData();
+		File[] files = this.operableData();
 
 		IFileStorage storage = SVNFileStorage.instance();
-		
+
 		for (int i = 0; i < files.length && !monitor.isCanceled(); i++) {
 			IRepositoryResource remote = storage.asRepositoryResource(files[i], false);
-			
+
 			IRepositoryLocation location = remote.getRepositoryLocation();
 			final ISVNConnector proxy = location.acquireSVNProxy();
 			final String current = files[i].getAbsolutePath();
-			
+
 			ProgressMonitorUtility.setTaskInfo(monitor, this, current);
 
-			this.writeToConsole(IConsoleStream.LEVEL_CMD, "svn cleanup \"" + FileUtility.normalizePath(current) + "\"\n"); //$NON-NLS-1$ //$NON-NLS-2$
-			
+			this.writeToConsole(IConsoleStream.LEVEL_CMD,
+					"svn cleanup \"" + FileUtility.normalizePath(current) + "\"\n"); //$NON-NLS-1$ //$NON-NLS-2$
+
 			this.protectStep(new IUnprotectedOperation() {
 				public void run(IProgressMonitor monitor) throws Exception {
-					proxy.cleanup(current, ISVNConnector.Options.BREAK_LOCKS | ISVNConnector.Options.INCLUDE_TIMESTAMPS | ISVNConnector.Options.INCLUDE_DAVCACHE | ISVNConnector.Options.INCLUDE_UNUSED_PRISTINES, new SVNProgressMonitor(CleanupOperation.this, monitor, null));
+					proxy.cleanup(current, ISVNConnector.Options.BREAK_LOCKS | ISVNConnector.Options.INCLUDE_TIMESTAMPS
+							| ISVNConnector.Options.INCLUDE_DAVCACHE | ISVNConnector.Options.INCLUDE_UNUSED_PRISTINES,
+							new SVNProgressMonitor(CleanupOperation.this, monitor, null));
 				}
 			}, monitor, files.length);
 			location.releaseSVNProxy(proxy);

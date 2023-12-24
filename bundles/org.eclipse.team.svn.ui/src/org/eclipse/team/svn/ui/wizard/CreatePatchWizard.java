@@ -33,51 +33,58 @@ import org.eclipse.team.svn.ui.wizard.createpatch.SelectPatchFilePage;
  */
 public class CreatePatchWizard extends AbstractSVNWizard {
 	public static final int WRITE_TO_CLIPBOARD = 0;
+
 	public static final int WRITE_TO_EXTERNAL_FILE = 1;
+
 	public static final int WRITE_TO_WORKSPACE_FILE = 2;
-	
+
 	protected String targetName;
+
 	protected boolean showIgnoreAncestry;
-	
+
 	protected SelectPatchFilePage selectFile;
+
 	protected PatchOptionsPage options;
-	protected IResource []roots;
+
+	protected IResource[] roots;
 
 	public CreatePatchWizard(String targetName) {
 		this(targetName, null);
 	}
-	
-	public CreatePatchWizard(String targetName, IResource []roots) {
+
+	public CreatePatchWizard(String targetName, IResource[] roots) {
 		this(targetName, roots, false);
 	}
-	
-	public CreatePatchWizard(String targetName, IResource []roots, boolean showIgnoreAncestry) {
+
+	public CreatePatchWizard(String targetName, IResource[] roots, boolean showIgnoreAncestry) {
 		super();
 		this.setWindowTitle(SVNUIMessages.CreatePatchWizard_Title);
 		this.targetName = targetName;
 		this.roots = roots;
 		this.showIgnoreAncestry = showIgnoreAncestry;
 	}
-	
+
 	public String getCharset() {
 		return this.selectFile.getCharset();
 	}
-	
+
 	public int getRootPoint() {
 		return this.options.getRootPoint();
 	}
-	
+
 	public IResource getTargetFolder() {
 		if (this.selectFile.getFile() != null) {
 			return this.selectFile.getFile().getParent();
 		}
-		return ResourcesPlugin.getWorkspace().getRoot().getContainerForLocation(new Path(this.getFileName()).removeLastSegments(1));
+		return ResourcesPlugin.getWorkspace()
+				.getRoot()
+				.getContainerForLocation(new Path(this.getFileName()).removeLastSegments(1));
 	}
-	
+
 	public String getFileName() {
 		return this.selectFile.getFileName();
 	}
-	
+
 	public int getWriteMode() {
 		return this.selectFile.getWriteMode();
 	}
@@ -99,20 +106,19 @@ public class CreatePatchWizard extends AbstractSVNWizard {
 	}
 
 	public long getDiffOptions() {
-		return 
-			(this.isIgnoreAncestry() ? ISVNConnector.Options.IGNORE_ANCESTRY : ISVNConnector.Options.NONE) | 
-			(this.isIgnoreDeleted() ? ISVNConnector.Options.SKIP_DELETED : ISVNConnector.Options.NONE) | 
-			(this.isProcessBinary() ? ISVNConnector.Options.FORCE : ISVNConnector.Options.NONE);
+		return (this.isIgnoreAncestry() ? ISVNConnector.Options.IGNORE_ANCESTRY : ISVNConnector.Options.NONE)
+				| (this.isIgnoreDeleted() ? ISVNConnector.Options.SKIP_DELETED : ISVNConnector.Options.NONE)
+				| (this.isProcessBinary() ? ISVNConnector.Options.FORCE : ISVNConnector.Options.NONE);
 	}
-	
+
 	public long getDiffOutputOptions() {
 		return this.options.getDiffOutputOptions();
 	}
 
-	public IResource []getSelection() {
+	public IResource[] getSelection() {
 		return this.selectFile.isRecursive() ? this.roots : this.selectFile.getSelection();
 	}
-	
+
 	public boolean isIgnoreAncestry() {
 		return this.options.isIgnoreAncestry();
 	}
@@ -121,7 +127,7 @@ public class CreatePatchWizard extends AbstractSVNWizard {
 		this.addPage(this.selectFile = new SelectPatchFilePage(this.targetName, this.roots));
 		this.addPage(this.options = new PatchOptionsPage(this.roots != null, this.showIgnoreAncestry));
 	}
-	
+
 	public IWizardPage getNextPage(IWizardPage page) {
 		if (this.roots != null) {
 			HashSet<IProject> projects = new HashSet<IProject>();
@@ -132,9 +138,9 @@ public class CreatePatchWizard extends AbstractSVNWizard {
 		}
 		return super.getNextPage(page);
 	}
-	
+
 	public boolean performFinish() {
 		return true;
 	}
-	
+
 }

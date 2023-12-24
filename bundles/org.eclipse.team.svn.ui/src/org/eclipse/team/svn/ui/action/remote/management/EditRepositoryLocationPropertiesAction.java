@@ -40,14 +40,14 @@ public class EditRepositoryLocationPropertiesAction extends AbstractRepositoryMo
 	public EditRepositoryLocationPropertiesAction() {
 		super();
 	}
-	
+
 	public void runImpl(IAction action) {
-		final IRepositoryLocation []locations = this.getSelectedRepositoryLocations();
+		final IRepositoryLocation[] locations = this.getSelectedRepositoryLocations();
 		String oldRootUrl = locations[0].getRepositoryRootUrl();
-		
+
 		final IRepositoryLocation backup = SVNRemoteStorage.instance().newRepositoryLocation();
 		SVNRemoteStorage.instance().copyRepositoryLocation(backup, locations[0]);
-		
+
 		NewRepositoryLocationWizard wizard = new NewRepositoryLocationWizard(locations[0], false);
 		WizardDialog dialog = new WizardDialog(this.getShell(), wizard);
 		if (dialog.open() == 0) {
@@ -67,15 +67,15 @@ public class EditRepositoryLocationPropertiesAction extends AbstractRepositoryMo
 				});
 				op.add(wizard.getOperationToPerform());
 				op.add(new RefreshResourcesOperation(mainOp));
-				
-				this.runScheduled(op); 
-			}
-			else {
-				CompositeOperation op = (CompositeOperation)wizard.getOperationToPerform();
+
+				this.runScheduled(op);
+			} else {
+				CompositeOperation op = (CompositeOperation) wizard.getOperationToPerform();
 				FindRelatedProjectsOperation findOp = new FindRelatedProjectsOperation(locations[0]);
 				op.add(findOp);
-				op.add(new RefreshResourcesOperation(findOp, IResource.DEPTH_ZERO, RefreshResourcesOperation.REFRESH_CACHE));
-				
+				op.add(new RefreshResourcesOperation(findOp, IResource.DEPTH_ZERO,
+						RefreshResourcesOperation.REFRESH_CACHE));
+
 				this.runScheduled(op);
 			}
 		}

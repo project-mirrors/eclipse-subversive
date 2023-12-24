@@ -25,7 +25,6 @@ import org.eclipse.team.svn.core.operation.local.GetLocalFileContentOperation;
 import org.eclipse.team.svn.core.resource.ILocalResource;
 import org.eclipse.team.svn.core.utility.ProgressMonitorUtility;
 
-
 /**
  * Base WC revision file variant
  * 

@@ -23,8 +23,7 @@ import org.eclipse.team.svn.core.utility.FileUtility;
 import org.eclipse.team.svn.tests.core.misc.TestUtil;
 
 /**
- * This class manages a {@link IRepositoryLocation} for a
- * {@link SVNRemoteStorage}.
+ * This class manages a {@link IRepositoryLocation} for a {@link SVNRemoteStorage}.
  * 
  * @author Nicolas Peifer
  */

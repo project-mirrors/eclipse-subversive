@@ -27,7 +27,7 @@ import org.eclipse.team.svn.core.connector.SVNCommitStatus;
  */
 public class SVNNullProgressMonitor implements ISVNProgressMonitor {
 	protected ArrayList<SVNCommitStatus> commitStatuses = new ArrayList<SVNCommitStatus>();
-	
+
 	public Collection<SVNCommitStatus> getCommitStatuses() {
 		return this.commitStatuses;
 	}
@@ -51,5 +51,5 @@ public class SVNNullProgressMonitor implements ISVNProgressMonitor {
 	public void commitStatus(SVNCommitStatus status) {
 		this.commitStatuses.add(status);
 	}
-	
+
 }

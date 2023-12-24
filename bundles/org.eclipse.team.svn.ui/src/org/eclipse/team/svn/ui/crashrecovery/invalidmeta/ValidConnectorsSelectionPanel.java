@@ -44,31 +44,34 @@ import org.eclipse.team.svn.ui.preferences.SVNTeamPreferences;
  */
 public class ValidConnectorsSelectionPanel extends AbstractDialogPanel {
 	protected Combo svnConnectorField;
-	protected ISVNConnectorFactory []factories;
+
+	protected ISVNConnectorFactory[] factories;
+
 	protected String svnConnector;
 
 	public ValidConnectorsSelectionPanel(IProject project, List validClients) {
 		super();
-		this.dialogTitle = SVNUIMessages.format(SVNUIMessages.ValidConnectorsSelectionPanel_Title, new String[] {project.getName()});
+		this.dialogTitle = SVNUIMessages.format(SVNUIMessages.ValidConnectorsSelectionPanel_Title,
+				new String[] { project.getName() });
 		this.dialogDescription = SVNUIMessages.ValidConnectorsSelectionPanel_Description;
 		this.defaultMessage = SVNUIMessages.ValidConnectorsSelectionPanel_Message;
-		
-		this.factories = (ISVNConnectorFactory [])validClients.toArray(new ISVNConnectorFactory[validClients.size()]);
+
+		this.factories = (ISVNConnectorFactory[]) validClients.toArray(new ISVNConnectorFactory[validClients.size()]);
 	}
-	
-    public Point getPrefferedSizeImpl() {
-        return new Point(500, 60);
-    }
-    
-    public void postInit() {
-    	super.postInit();
+
+	public Point getPrefferedSizeImpl() {
+		return new Point(500, 60);
+	}
+
+	public void postInit() {
+		super.postInit();
 		this.svnConnector = this.factories[this.svnConnectorField.getSelectionIndex()].getId();
-    }
-    
+	}
+
 	protected void createControlsImpl(Composite parent) {
 		GridLayout layout = null;
 		GridData data = null;
-		
+
 		Composite composite = new Composite(parent, SWT.NONE);
 		layout = new GridLayout();
 		layout.numColumns = 2;
@@ -76,21 +79,21 @@ public class ValidConnectorsSelectionPanel extends AbstractDialogPanel {
 		composite.setLayout(layout);
 		data = new GridData(GridData.FILL_BOTH);
 		composite.setLayoutData(data);
-		
+
 		Label label = new Label(composite, SWT.NULL);
 		data = new GridData();
 		label.setLayoutData(data);
 		label.setText(SVNUIMessages.ValidConnectorsSelectionPanel_Clients);
-		
+
 		this.svnConnectorField = new Combo(composite, SWT.READ_ONLY);
 		data = new GridData(GridData.FILL_HORIZONTAL);
 		this.svnConnectorField.setLayoutData(data);
 		Arrays.sort(this.factories, new Comparator() {
 			public int compare(Object o1, Object o2) {
-				return ((ISVNConnectorFactory)o1).getName().compareTo(((ISVNConnectorFactory)o2).getName());
+				return ((ISVNConnectorFactory) o1).getName().compareTo(((ISVNConnectorFactory) o2).getName());
 			}
 		});
-		String []items = new String[this.factories.length];
+		String[] items = new String[this.factories.length];
 		for (int i = 0; i < items.length; i++) {
 			items[i] = SVNConnectorHelper.getConnectorName(this.factories[i]);
 		}
@@ -98,7 +101,8 @@ public class ValidConnectorsSelectionPanel extends AbstractDialogPanel {
 		this.svnConnectorField.select(0);
 		this.svnConnectorField.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				ValidConnectorsSelectionPanel.this.svnConnector = ValidConnectorsSelectionPanel.this.factories[ValidConnectorsSelectionPanel.this.svnConnectorField.getSelectionIndex()].getId();
+				ValidConnectorsSelectionPanel.this.svnConnector = ValidConnectorsSelectionPanel.this.factories[ValidConnectorsSelectionPanel.this.svnConnectorField
+						.getSelectionIndex()].getId();
 			}
 		});
 	}
@@ -109,7 +113,8 @@ public class ValidConnectorsSelectionPanel extends AbstractDialogPanel {
 	protected void saveChangesImpl() {
 		String oldId = CoreExtensionsManager.instance().getSVNConnectorFactory().getId();
 		if (!oldId.equals(this.svnConnector)) {
-			SVNTeamPreferences.setCoreString(SVNTeamUIPlugin.instance().getPreferenceStore(), SVNTeamPreferences.CORE_SVNCONNECTOR_NAME, this.svnConnector);
+			SVNTeamPreferences.setCoreString(SVNTeamUIPlugin.instance().getPreferenceStore(),
+					SVNTeamPreferences.CORE_SVNCONNECTOR_NAME, this.svnConnector);
 			SVNTeamUIPlugin.instance().savePreferences();
 			// destroy all cached proxies
 			SVNRemoteStorage.instance().dispose();

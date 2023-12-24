@@ -37,46 +37,48 @@ import org.eclipse.team.svn.core.utility.SVNUtility;
  * @author Alexander Gurov
  */
 public class InfoOperation extends AbstractActionOperation {
-    protected IResource resource;
-    protected ILocalResource local;
-    protected SVNEntryInfo info;
+	protected IResource resource;
 
-    public InfoOperation(IResource resource) {
-        super("Operation_Info", SVNMessages.class); //$NON-NLS-1$
-        this.resource = resource;
-    }
+	protected ILocalResource local;
 
-    public SVNEntryInfo getInfo() {
-        return this.info;
-    }
+	protected SVNEntryInfo info;
 
-    public ILocalResource getLocal() {
-        return this.local;
-    }
+	public InfoOperation(IResource resource) {
+		super("Operation_Info", SVNMessages.class); //$NON-NLS-1$
+		this.resource = resource;
+	}
 
-    protected void runImpl(IProgressMonitor monitor) throws Exception {
-        this.info = null;
-        this.local = SVNRemoteStorage.instance().asLocalResourceAccessible(this.resource);
-        
-        if (IStateFilter.SF_ONREPOSITORY.accept(this.local)) {
-            IRepositoryLocation location = SVNRemoteStorage.instance().getRepositoryLocation(this.resource);
-            ISVNConnector proxy = location.acquireSVNProxy();
-            try {
+	public SVNEntryInfo getInfo() {
+		return this.info;
+	}
+
+	public ILocalResource getLocal() {
+		return this.local;
+	}
+
+	protected void runImpl(IProgressMonitor monitor) throws Exception {
+		this.info = null;
+		this.local = SVNRemoteStorage.instance().asLocalResourceAccessible(this.resource);
+
+		if (IStateFilter.SF_ONREPOSITORY.accept(this.local)) {
+			IRepositoryLocation location = SVNRemoteStorage.instance().getRepositoryLocation(this.resource);
+			ISVNConnector proxy = location.acquireSVNProxy();
+			try {
 //    			this.writeToConsole(IConsoleStream.LEVEL_CMD, "svn info \"" + this.local.getWorkingCopyPath() + "\"\n");
-            	String path = FileUtility.getWorkingCopyPath(this.resource);
-                SVNEntryInfo []infos = SVNUtility.info(proxy, new SVNEntryRevisionReference(path), SVNDepth.EMPTY, new SVNProgressMonitor(this, monitor, null));
-                if (infos != null && infos.length > 0) {
-                    this.info = infos[0];
-                }	
-            }
-            finally {
-                location.releaseSVNProxy(proxy);
-            }
-        }
-    }
-    
-    protected String getShortErrorMessage(Throwable t) {
-		return BaseMessages.format(super.getShortErrorMessage(t), new Object[] {this.resource.getName()});
+				String path = FileUtility.getWorkingCopyPath(this.resource);
+				SVNEntryInfo[] infos = SVNUtility.info(proxy, new SVNEntryRevisionReference(path), SVNDepth.EMPTY,
+						new SVNProgressMonitor(this, monitor, null));
+				if (infos != null && infos.length > 0) {
+					this.info = infos[0];
+				}
+			} finally {
+				location.releaseSVNProxy(proxy);
+			}
+		}
+	}
+
+	protected String getShortErrorMessage(Throwable t) {
+		return BaseMessages.format(super.getShortErrorMessage(t), new Object[] { this.resource.getName() });
 	}
 
 }

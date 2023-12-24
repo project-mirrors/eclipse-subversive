@@ -34,7 +34,6 @@ import org.eclipse.team.svn.ui.extension.factory.IReportingDescriptor;
 import org.eclipse.team.svn.ui.extension.factory.IReporterFactory.ReportType;
 import org.eclipse.team.svn.ui.utility.UIMonitorUtility;
 
-
 /**
  * Allows to post a product bug or tip directly to Eclipse.org Bugzilla
  * 
@@ -42,19 +41,25 @@ import org.eclipse.team.svn.ui.utility.UIMonitorUtility;
  */
 public class MylynReporter extends AbstractActionOperation implements IReporter {
 	protected TaskRepository repository;
+
 	protected AbstractTaskDataHandler taskDataHandler;
-	
+
 	protected IReportingDescriptor settings;
+
 	protected ReportType type;
-	
+
 	protected IStatus problemStatus;
+
 	protected String summary;
+
 	protected String reportId;
+
 	protected String userComment;
-	
-	public MylynReporter(TaskRepository repository, AbstractTaskDataHandler taskDataHandler, IReportingDescriptor settings, ReportType type) {
+
+	public MylynReporter(TaskRepository repository, AbstractTaskDataHandler taskDataHandler,
+			IReportingDescriptor settings, ReportType type) {
 		super(MylynMessages.getErrorString("Operation_OpenReportEditor"), MylynMessages.class); //$NON-NLS-1$
-		
+
 		this.settings = settings;
 		this.type = type;
 		this.repository = repository;
@@ -66,42 +71,46 @@ public class MylynReporter extends AbstractActionOperation implements IReporter 
 		String kind = this.repository.getConnectorKind();
 		TaskAttributeMapper attributeFactory = this.taskDataHandler.getAttributeMapper(this.repository);
 		final TaskData taskData = new TaskData(attributeFactory, kind, this.repository.getRepositoryUrl(), ""); // ID must be empty (but not null) for new task
-		
-		boolean isInitializedSuccessfully = this.taskDataHandler.initializeTaskData(this.repository, taskData, new TaskMapping() {
-			public String getSummary() {
-				return MylynReporter.this.buildSubject();
-			}
-			public String getTaskKind() {
-				return MylynReporter.this.type == ReportType.BUG ? "normal" : "enhancement";
-			}
-			public String getDescription() {
-				return MylynReporter.this.buildReport();
-			}
-			public String getProduct() {
-				return MylynReporter.this.settings.getProductName();
-			}
-		}, monitor);
-		
+
+		boolean isInitializedSuccessfully = this.taskDataHandler.initializeTaskData(this.repository, taskData,
+				new TaskMapping() {
+					public String getSummary() {
+						return MylynReporter.this.buildSubject();
+					}
+
+					public String getTaskKind() {
+						return MylynReporter.this.type == ReportType.BUG ? "normal" : "enhancement";
+					}
+
+					public String getDescription() {
+						return MylynReporter.this.buildReport();
+					}
+
+					public String getProduct() {
+						return MylynReporter.this.settings.getProductName();
+					}
+				}, monitor);
+
 		if (!isInitializedSuccessfully) {
 			throw new CoreException(new RepositoryStatus(IStatus.ERROR, SVNMylynIntegrationPlugin.ID,
-					RepositoryStatus.ERROR_REPOSITORY,
-					"The selected repository does not support creating new tasks."));
+					RepositoryStatus.ERROR_REPOSITORY, "The selected repository does not support creating new tasks."));
 		}
 
 		//does not work for Bugzilla connector
 		taskData.getRoot().getMappedAttribute(TaskAttribute.SUMMARY).setValue(this.buildSubject());
 		taskData.getRoot().getMappedAttribute(TaskAttribute.DESCRIPTION).setValue(this.buildReport());
-		
+
 		// has no public key
-		taskData.getRoot().getAttribute(BugzillaAttribute.BUG_SEVERITY.getKey()).setValue(this.type == ReportType.BUG ? "normal" : "enhancement");
-		
+		taskData.getRoot()
+				.getAttribute(BugzillaAttribute.BUG_SEVERITY.getKey())
+				.setValue(this.type == ReportType.BUG ? "normal" : "enhancement");
+
 		// open task editor
 		UIMonitorUtility.getDisplay().syncExec(new Runnable() {
 			public void run() {
 				try {
 					TasksUiInternal.createAndOpenNewTask(taskData);
-				}
-				catch (CoreException e) {
+				} catch (CoreException e) {
 					MylynReporter.this.reportStatus(IStatus.ERROR, null, e);
 				}
 			}
@@ -114,14 +123,14 @@ public class MylynReporter extends AbstractActionOperation implements IReporter 
 			report += ReportPartsFactory.getUserCommentPart(this.userComment);
 		}
 		report += ReportPartsFactory.getSVNClientPart();
-		
+
 		if (this.type == ReportType.BUG) {
 			report += ReportPartsFactory.getJVMPropertiesPart();
 			if (this.problemStatus != null) {
 				report += ReportPartsFactory.getStatusPart(this.problemStatus);
 			}
 		}
-		
+
 		if (!this.settings.isTrackerSupportsHTML()) {
 			report = ReportPartsFactory.removeHTMLTags(report);
 		}
