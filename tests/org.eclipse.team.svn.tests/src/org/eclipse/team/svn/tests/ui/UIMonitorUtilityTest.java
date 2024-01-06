@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2023 Polarion Software and others.
+ * Copyright (c) 2005, 2024 Polarion Software and others.
  * 
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -20,11 +20,11 @@ import org.eclipse.team.svn.core.SVNMessages;
 import org.eclipse.team.svn.core.operation.AbstractActionOperation;
 import org.eclipse.team.svn.core.operation.IActionOperation;
 import org.eclipse.team.svn.core.operation.LoggedOperation;
-import org.eclipse.team.svn.tests.TestPlugin;
 import org.eclipse.team.svn.ui.utility.DefaultOperationWrapperFactory;
 import org.eclipse.team.svn.ui.utility.UIMonitorUtility;
 import org.eclipse.team.svn.ui.utility.WorkspaceModifyOperationWrapperFactory;
 import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.ui.PlatformUI;
 import org.junit.Test;
 
 /**
@@ -35,27 +35,19 @@ import org.junit.Test;
 public class UIMonitorUtilityTest {
 	@Test
 	public void testDoTaskScheduledAsTeamWorkspaceModify() {
-		IWorkbenchPart part = TestPlugin.instance()
-				.getWorkbench()
-				.getActiveWorkbenchWindow()
-				.getPartService()
-				.getActivePart();
+		IWorkbenchPart part = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getPartService().getActivePart();
 		UIMonitorUtility.doTaskScheduled(part, new TestFailureOperation(),
 				new WorkspaceModifyOperationWrapperFactory() {
-					@Override
-					public IActionOperation getLogged(IActionOperation operation) {
-						return new LoggedOperation(operation);
-					}
-				});
+			@Override
+			public IActionOperation getLogged(IActionOperation operation) {
+				return new LoggedOperation(operation);
+			}
+		});
 	}
 
 	@Test
 	public void testDoTaskScheduledAsTeamDefault() {
-		IWorkbenchPart part = TestPlugin.instance()
-				.getWorkbench()
-				.getActiveWorkbenchWindow()
-				.getPartService()
-				.getActivePart();
+		IWorkbenchPart part = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getPartService().getActivePart();
 		UIMonitorUtility.doTaskScheduled(part, new TestFailureOperation(), new DefaultOperationWrapperFactory() {
 			@Override
 			public IActionOperation getLogged(IActionOperation operation) {
@@ -86,19 +78,19 @@ public class UIMonitorUtilityTest {
 
 	@Test
 	public void testDoTaskNowWorkspaceModify() {
-		Shell shell = TestPlugin.instance().getWorkbench().getDisplay().getActiveShell();
+		Shell shell = PlatformUI.getWorkbench().getDisplay().getActiveShell();
 		UIMonitorUtility.doTaskNow(shell, new TestFailureOperation(), false,
 				new WorkspaceModifyOperationWrapperFactory() {
-					@Override
-					public IActionOperation getLogged(IActionOperation operation) {
-						return new LoggedOperation(operation);
-					}
-				});
+			@Override
+			public IActionOperation getLogged(IActionOperation operation) {
+				return new LoggedOperation(operation);
+			}
+		});
 	}
 
 	@Test
 	public void testDoTaskNowDefault() {
-		Shell shell = TestPlugin.instance().getWorkbench().getDisplay().getActiveShell();
+		Shell shell = PlatformUI.getWorkbench().getDisplay().getActiveShell();
 		UIMonitorUtility.doTaskNow(shell, new TestFailureOperation(), false, new DefaultOperationWrapperFactory() {
 			@Override
 			public IActionOperation getLogged(IActionOperation operation) {

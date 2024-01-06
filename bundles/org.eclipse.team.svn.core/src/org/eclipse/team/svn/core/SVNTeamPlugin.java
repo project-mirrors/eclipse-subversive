@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2023 Polarion Software and others.
+ * Copyright (c) 2005, 2024 Polarion Software and others.
  * 
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -18,6 +18,7 @@ package org.eclipse.team.svn.core;
 import java.io.File;
 import java.io.FileFilter;
 import java.util.HashMap;
+import java.util.Map;
 
 import org.eclipse.core.net.proxy.IProxyService;
 import org.eclipse.core.resources.IProject;
@@ -97,7 +98,7 @@ public class SVNTeamPlugin extends Plugin {
 	public File getTemporaryFile(File parent, String fileName) {
 		File retVal = parent == null
 				? getStateLocation().append(".tmp" + System.currentTimeMillis()).append(fileName).toFile() //$NON-NLS-1$
-				: new File(parent, fileName);
+						: new File(parent, fileName);
 		retVal.deleteOnExit();
 		parent = retVal.getParentFile();
 		if (!parent.exists()) {
@@ -130,29 +131,29 @@ public class SVNTeamPlugin extends Plugin {
 	// FIXME remove later after Integration API is changed
 	public void setOptionProvider(IOptionProvider optionProvider) {
 		CoreExtensionsManager.instance()
-				.setOptionProvider(optionProvider == null ? IOptionProvider.DEFAULT : optionProvider);
+		.setOptionProvider(optionProvider == null ? IOptionProvider.DEFAULT : optionProvider);
 
 		SVNRemoteStorage.instance().reconfigureLocations();
 
 		// remove temporary files if IDE is crached time ago...
 		ProgressMonitorUtility
-				.doTaskScheduledDefault(new AbstractActionOperation("Remove Temporary Files", SVNMessages.class) {
-					@Override
-					protected void runImpl(IProgressMonitor monitor) throws Exception {
-						SVNTeamPlugin.instance().getStateLocation().toFile().listFiles((FileFilter) pathname -> {
-							String name = pathname.getName();
-							if (!name.equals(SVNRemoteStorage.STATE_INFO_FILE_NAME)
-									&& !name.equals(SVNFileStorage.STATE_INFO_FILE_NAME)) {
-								FileUtility.deleteRecursive(pathname);
-							}
-							return false;
-						});
+		.doTaskScheduledDefault(new AbstractActionOperation("Remove Temporary Files", SVNMessages.class) {
+			@Override
+			protected void runImpl(IProgressMonitor monitor) throws Exception {
+				SVNTeamPlugin.instance().getStateLocation().toFile().listFiles((FileFilter) pathname -> {
+					String name = pathname.getName();
+					if (!name.equals(SVNRemoteStorage.STATE_INFO_FILE_NAME)
+							&& !name.equals(SVNFileStorage.STATE_INFO_FILE_NAME)) {
+						FileUtility.deleteRecursive(pathname);
 					}
+					return false;
 				});
+			}
+		});
 	}
 
 	public IEclipsePreferences getPreferences() {
-		return new InstanceScope().getNode(getBundle().getSymbolicName());
+		return InstanceScope.INSTANCE.getNode(getBundle().getSymbolicName());
 	}
 
 	public void savePreferences() {
@@ -170,7 +171,7 @@ public class SVNTeamPlugin extends Plugin {
 		tracker = new ServiceTracker(context, IProxyService.class.getName(), null);
 		tracker.open();
 
-		HashMap preferences = new HashMap();
+		Map<String, Object> preferences = new HashMap<>();
 		preferences.put(ISVNStorage.PREF_STATE_INFO_LOCATION, getStateLocation());
 		SVNFileStorage.instance().initialize(preferences);
 		SVNRemoteStorage.instance().initialize(preferences);

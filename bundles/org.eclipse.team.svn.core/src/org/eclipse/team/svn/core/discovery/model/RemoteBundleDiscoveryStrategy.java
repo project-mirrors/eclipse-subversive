@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2023 Tasktop Technologies, Polarion Software and others.
+ * Copyright (c) 2009, 2024 Tasktop Technologies, Polarion Software and others.
  * 
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -54,7 +54,7 @@ public class RemoteBundleDiscoveryStrategy extends BundleDiscoveryStrategy {
 
 	@Override
 	public void performDiscovery(IProgressMonitor monitor) throws CoreException {
-		if (connectors == null || categories == null || discoveryUrl == null || (registryStrategy != null)) {
+		if (connectors == null || categories == null || discoveryUrl == null || registryStrategy != null) {
 			throw new IllegalStateException();
 		}
 
@@ -171,11 +171,6 @@ public class RemoteBundleDiscoveryStrategy extends BundleDiscoveryStrategy {
 			return file;
 		}
 	}
-
-//	private ExecutorService createExecutorService(int size) {
-//		final int maxThreads = 4;
-//		return Executors.newFixedThreadPool(Math.min(size, maxThreads));
-//	}
 
 	/**
 	 * walk the exception chain to determine if the given exception or any of its underlying causes are an {@link UnknownHostException}.

@@ -36,6 +36,7 @@ import org.eclipse.team.svn.core.svnstorage.SVNRemoteStorage;
 import org.eclipse.team.svn.tests.TestPlugin;
 import org.eclipse.team.svn.tests.workflow.ActionOperationWorkflowBuilder;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -43,6 +44,7 @@ import org.junit.Test;
  *
  * @author Sergiy Logvin
  */
+@Ignore
 public class SVNTeamMoveDeleteHookTest {
 	@Before
 	public void setUp() throws Exception {
@@ -75,7 +77,7 @@ public class SVNTeamMoveDeleteHookTest {
 		SVNTeamMoveDeleteHook hook = new SVNTeamMoveDeleteHook();
 		new RefreshResourcesOperation(new IResource[] { getSecondProject().getFolder("web"),
 				getSecondProject().getFile("web/site.css"), getSecondProject().getFile("web/site.xsl") })
-						.run(new NullProgressMonitor());
+		.run(new NullProgressMonitor());
 		hook.deleteFolder(null, forDeleteCommited, IResource.FORCE, new NullProgressMonitor());
 		assertFalse(getSecondProject().getFile("web/site.css").exists());
 

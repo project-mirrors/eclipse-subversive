@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2023 Polarion Software and others.
+ * Copyright (c) 2005, 2024 Polarion Software and others.
  * 
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -15,6 +15,7 @@
 package org.eclipse.team.svn.core.svnstorage;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 import org.eclipse.core.runtime.PlatformObject;
 import org.eclipse.team.svn.core.resource.IRepositoryBase;
@@ -54,16 +55,23 @@ public abstract class SVNRepositoryBase extends PlatformObject implements IRepos
 	}
 
 	@Override
-	public boolean equals(Object obj) {
-		if (obj != null && obj instanceof IRepositoryBase) {
-			return getUrl().equals(((IRepositoryBase) obj).getUrl());
-		}
-		return false;
+	public int hashCode() {
+		return Objects.hash(url);
 	}
 
 	@Override
-	public int hashCode() {
-		return getUrl().hashCode();
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
+		if (getClass() != obj.getClass()) {
+			return false;
+		}
+		SVNRepositoryBase other = (SVNRepositoryBase) obj;
+		return Objects.equals(url, other.url);
 	}
 
 }

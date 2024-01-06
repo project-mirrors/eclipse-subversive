@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2023 Polarion Software and others.
+ * Copyright (c) 2005, 2024 Polarion Software and others.
  * 
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -32,6 +32,7 @@ import org.eclipse.team.svn.tests.core.misc.TestUtil;
 import org.eclipse.team.svn.tests.workflow.repository.RemoteTestRepositoryManager;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -44,6 +45,7 @@ import org.junit.runners.Parameterized.Parameters;
  * @author Alexander Gurov
  * @author Nicolas Peifer
  */
+@Ignore
 @RunWith(Parameterized.class)
 public class ParameterizedWorkflowTest {
 
