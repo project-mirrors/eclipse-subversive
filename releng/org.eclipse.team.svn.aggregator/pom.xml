@@ -28,15 +28,13 @@
 
 		<module>../../bundles/org.eclipse.team.svn</module>
 		<module>../../bundles/org.eclipse.team.svn.core</module>
-		<module>../../features/org.eclipse.team.svn.core-feature</module>
+		<module>../../features/org.eclipse.team.svn.core.feature</module>
 		<module>../../bundles/org.eclipse.team.svn.discovery</module>
 		<module>../../bundles/org.eclipse.team.svn.help</module>
 		<module>../../bundles/org.eclipse.team.svn.ui</module>
-		<module>../../bundles/org.eclipse.team.svn.ui.startup</module>
-		<module>../../features/org.eclipse.team.svn-feature</module>
-
 		<module>../../bundles/org.eclipse.team.svn.ui.capabilities</module>
-		<module>../../features/org.eclipse.team.svn.ui-feature.capabilities</module>
+		<module>../../bundles/org.eclipse.team.svn.ui.startup</module>
+		<module>../../features/org.eclipse.team.svn.feature</module>
 
 		<module>../../nls/org.eclipse.team.svn.nl1</module>
 		<module>../../nls/org.eclipse.team.svn.core.nl1</module>
@@ -44,13 +42,13 @@
 		<module>../../nls/org.eclipse.team.svn.nl1.feature</module>
 
 		<module>../../bundles/org.eclipse.team.svn.m2e</module>
-		<module>../../features/org.eclipse.team.svn.m2e-feature</module>
+		<module>../../features/org.eclipse.team.svn.m2e.feature</module>
 
 		<module>../../bundles/org.eclipse.team.svn.mylyn</module>
-		<module>../../features/org.eclipse.team.svn.mylyn-feature</module>
+		<module>../../features/org.eclipse.team.svn.mylyn.feature</module>
 
 		<module>../../bundles/org.eclipse.team.svn.pde.build</module>
-		<module>../../features/org.eclipse.team.svn.pde.build-feature</module>
+		<module>../../features/org.eclipse.team.svn.pde.build.feature</module>
 
 		<module>../../releng/org.eclipse.team.svn.repository</module>
 	</modules>

@@ -1,10 +1,10 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-RequiredExecutionEnvironment: JavaSE-11
-Bundle-Name: Subversive Test Plug-in
+Bundle-Name: Eclipse Subversive SVN Team Provider Tests
 Bundle-SymbolicName: org.eclipse.team.svn.tests;singleton:=true
-Bundle-Version: 0.0.1
-Bundle-Vendor: Polarion Software
+Bundle-Version: 5.0.0
+Bundle-Vendor: Eclipse Subversive
 Bundle-Activator: org.eclipse.team.svn.tests.TestPlugin
 Bundle-Localization: plugin
 Bundle-ClassPath: .
