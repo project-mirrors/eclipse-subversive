@@ -1,8 +1,10 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-RequiredExecutionEnvironment: JavaSE-11
+Automatic-Module-Name: org.eclipse.team.svn.discovery
 Bundle-SymbolicName: org.eclipse.team.svn.discovery;singleton:=true
 Bundle-Version: 5.0.0
 Bundle-Name: %pluginName
 Bundle-Vendor: %providerName
+Bundle-RequiredExecutionEnvironment: JavaSE-11
+Export-Package: org.eclipse.team.svn.internal.discovery;x-internal:=true
 Bundle-Localization: plugin

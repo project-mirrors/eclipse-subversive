@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-	Copyright (c) 2022 ArSysOp
+	Copyright (c) 2022, 2024 ArSysOp
 
 	This program and the accompanying materials are made available under the
 	terms of the Eclipse Public License 2.0 which is available at
@@ -12,130 +12,80 @@
 		Alexander Fedorov (ArSysOp) - initial API and implementation
 -->
 <site>
-	<category-def
-		name="org.eclipse.team.svn.core.category"
-		label="Subversive SVN Team Provider Core">
-		<description>
-			Headless part of the Eclipse Subversive Team Provider for the Subversion version control system.
-		</description>
-	</category-def>
-	<feature
-		id="org.eclipse.team.svn.core">
-		<category name="org.eclipse.team.svn.core.category" />
-	</feature>
-	<category-def
-		name="org.eclipse.team.svn.category"
-		label="Subversive">
-		<description>
-			Eclipse Subversive Team Provider for the Subversion version control system.
-		</description>
-	</category-def>
-	<feature
-		id="org.eclipse.team.svn">
-		<category name="org.eclipse.team.svn.category" />
-	</feature>
-	<feature
-		id="org.eclipse.team.svn.nl1.feature">
-		<category name="org.eclipse.team.svn.category" />
-	</feature>
-	<category-def
-		name="org.eclipse.team.svn.ui.capabilities.category"
-		label="Subversive UI Capabilites">
-		<description>
-			Subversive SVN Team Provider UI Capabilities.
-		</description>
-	</category-def>
-	<feature
-		id="org.eclipse.team.svn.ui.capabilities">
-		<category name="org.eclipse.team.svn.ui.capabilities.category" />
-	</feature>
-	<category-def
-		name="org.eclipse.team.svn.integrations.category"
-		label="Subversive Integrations">
-		<description>
-			Eclipse Subversive Team Provider integration for third party tools.
-		</description>
-	</category-def>
-	<feature
-		id="org.eclipse.team.svn.mylyn">
-		<category name="org.eclipse.team.svn.integrations.category" />
-	</feature>
-	<feature
-		id="org.eclipse.team.svn.m2e">
-		<category name="org.eclipse.team.svn.integrations.category" />
-	</feature>
-	<category-def
-		name="org.eclipse.team.svn.pde.build.category"
-		label="SVN PDE Build Extension">
-		<description>
-			SVN fetch task implementation for the Eclipse PDE build.
-		</description>
-	</category-def>
-	<feature
-		id="org.eclipse.team.svn.pde.build">
-		<category name="org.eclipse.team.svn.pde.build.category" />
-	</feature>
-	<category-def
-		name="org.eclipse.team.svn.core.category.source"
-		label="Subversive SVN Team Provider Core Developer Resources">
-		<description>
-			Headless part of the Eclipse Subversive Team Provider for the Subversion version control system Developer Resources.
-		</description>
-	</category-def>
-	<feature
-		id="org.eclipse.team.svn.core.source">
-		<category name="org.eclipse.team.svn.core.category.source" />
-	</feature>
-	<category-def
-		name="org.eclipse.team.svn.category.source"
-		label="Subversive Developer Resources">
-		<description>
-			Eclipse Subversive Team Provider for the Subversion version control system Developer Resources.
-		</description>
-	</category-def>
-	<feature
-		id="org.eclipse.team.svn.source">
-		<category name="org.eclipse.team.svn.category.source" />
-	</feature>
-	<feature
-		id="org.eclipse.team.svn.nl1.feature.source">
-		<category name="org.eclipse.team.svn.category.source" />
-	</feature>
-	<category-def
-		name="org.eclipse.team.svn.ui.capabilities.category.source"
-		label="Subversive UI Capabilites Developer Resources">
-		<description>
-			Subversive SVN Team Provider UI Capabilities Developer Resources.
-		</description>
-	</category-def>
-	<feature
-		id="org.eclipse.team.svn.ui.capabilities.source">
-		<category name="org.eclipse.team.svn.ui.capabilities.category.source" />
-	</feature>
-	<category-def
-		name="org.eclipse.team.svn.integrations.category.source"
-		label="Subversive Integrations Developer Resources">
-		<description>
-			Eclipse Subversive Team Provider integration for third party tools Developer Resources.
-		</description>
-	</category-def>
-	<feature
-		id="org.eclipse.team.svn.mylyn.source">
-		<category name="org.eclipse.team.svn.integrations.category.source" />
-	</feature>
-	<feature
-		id="org.eclipse.team.svn.m2e.source">
-		<category name="org.eclipse.team.svn.integrations.category.source" />
-	</feature>
-	<category-def
-		name="org.eclipse.team.svn.pde.build.category.source"
-		label="SVN PDE Build Extension Developer Resources">
-		<description>
-			SVN fetch task implementation for the Eclipse PDE build Developer Resources.
-		</description>
-	</category-def>
-	<feature
-		id="org.eclipse.team.svn.pde.build.source">
-		<category name="org.eclipse.team.svn.pde.build.category.source" />
-	</feature>
+   <feature id="org.eclipse.team.svn.core">
+      <category name="org.eclipse.team.svn.core.category"/>
+   </feature>
+   <feature id="org.eclipse.team.svn">
+      <category name="org.eclipse.team.svn.category"/>
+   </feature>
+   <feature id="org.eclipse.team.svn.nl1.feature">
+      <category name="org.eclipse.team.svn.category"/>
+   </feature>
+   <feature id="org.eclipse.team.svn.mylyn">
+      <category name="org.eclipse.team.svn.integrations.category"/>
+   </feature>
+   <feature id="org.eclipse.team.svn.m2e">
+      <category name="org.eclipse.team.svn.integrations.category"/>
+   </feature>
+   <feature id="org.eclipse.team.svn.pde.build">
+      <category name="org.eclipse.team.svn.pde.build.category"/>
+   </feature>
+   <feature id="org.eclipse.team.svn.core.source">
+      <category name="org.eclipse.team.svn.core.category.source"/>
+   </feature>
+   <feature id="org.eclipse.team.svn.source">
+      <category name="org.eclipse.team.svn.category.source"/>
+   </feature>
+   <feature id="org.eclipse.team.svn.nl1.feature.source">
+      <category name="org.eclipse.team.svn.category.source"/>
+   </feature>
+   <feature id="org.eclipse.team.svn.mylyn.source">
+      <category name="org.eclipse.team.svn.integrations.category.source"/>
+   </feature>
+   <feature id="org.eclipse.team.svn.m2e.source">
+      <category name="org.eclipse.team.svn.integrations.category.source"/>
+   </feature>
+   <feature id="org.eclipse.team.svn.pde.build.source">
+      <category name="org.eclipse.team.svn.pde.build.category.source"/>
+   </feature>
+   <category-def name="org.eclipse.team.svn.core.category" label="Eclipse Subversive SVN Team Provider Core">
+      <description>
+         Headless part of the Eclipse Subversive Team Provider for the Subversion version control system.
+      </description>
+   </category-def>
+   <category-def name="org.eclipse.team.svn.category" label="Eclipse Subversive SVN Team Provider">
+      <description>
+         Eclipse Subversive Team Provider for the Subversion version control system.
+      </description>
+   </category-def>
+   <category-def name="org.eclipse.team.svn.integrations.category" label="Eclipse Subversive Integrations">
+      <description>
+         Eclipse Subversive Team Provider integration for third party tools.
+      </description>
+   </category-def>
+   <category-def name="org.eclipse.team.svn.pde.build.category" label="Eclipse Subversive SVN PDE Build">
+      <description>
+         SVN fetch task implementation for the Eclipse PDE build.
+      </description>
+   </category-def>
+   <category-def name="org.eclipse.team.svn.core.category.source" label="Eclipse Subversive SVN Team Provider Core Developer Resources">
+      <description>
+         Headless part of the Eclipse Subversive Team Provider for the Subversion version control system Developer Resources.
+      </description>
+   </category-def>
+   <category-def name="org.eclipse.team.svn.category.source" label="Eclipse Subversive SVN Team Provider Developer Resources">
+      <description>
+         Eclipse Subversive Team Provider for the Subversion version control system Developer Resources.
+      </description>
+   </category-def>
+   <category-def name="org.eclipse.team.svn.integrations.category.source" label="Eclipse Subversive Integrations Developer Resources">
+      <description>
+         Eclipse Subversive Team Provider integration for third party tools Developer Resources.
+      </description>
+   </category-def>
+   <category-def name="org.eclipse.team.svn.pde.build.category.source" label="Eclipse Subversive SVN PDE Build Extension Developer Resources">
+      <description>
+         SVN fetch task implementation for the Eclipse PDE build Developer Resources.
+      </description>
+   </category-def>
 </site>
