@@ -556,8 +556,8 @@ public interface IStateFilter {
 	IStateFilter SF_NEW = new AbstractStateFilter() {
 		@Override
 		protected boolean acceptImpl(ILocalResource local, IResource resource, String state, int mask) {
-			return (state == IStateFilter.ST_PREREPLACED || state == IStateFilter.ST_NEW)
-					&& !IStateFilter.SF_IGNORED.accept(resource, state, mask);
+			return state == IStateFilter.ST_NEW
+					|| state == IStateFilter.ST_PREREPLACED && !IStateFilter.SF_IGNORED.accept(resource, state, mask);
 		}
 
 		@Override

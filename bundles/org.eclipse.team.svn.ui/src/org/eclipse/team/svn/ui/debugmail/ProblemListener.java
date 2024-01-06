@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2023 Polarion Software and others.
+ * Copyright (c) 2005, 2024 Polarion Software and others.
  * 
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -23,6 +23,7 @@ import org.eclipse.team.svn.ui.operation.UILoggedOperation;
  * 
  * @author Alexander Gurov
  */
+//FIXME: AF: currently not used: restore or remove
 public class ProblemListener implements ILogListener {
 	protected static PluginIDVisitor idVisitor = new PluginIDVisitor();
 
@@ -36,7 +37,7 @@ public class ProblemListener implements ILogListener {
 		// our problems should be handled in the UILoggedOperation in order to suppress two sequential dialogs
 		ReportPartsFactory.IStatusVisitor visitor = ReportPartsFactory.checkStatus(status, ProblemListener.idVisitor)
 				? (ReportPartsFactory.IStatusVisitor) null
-				: ProblemListener.stackVisitor;
+						: ProblemListener.stackVisitor;
 		if (visitor != null && ReportPartsFactory.checkStatus(status, visitor)) {
 			sendReport(status, plugin);
 		}

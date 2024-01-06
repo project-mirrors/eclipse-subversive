@@ -31,7 +31,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.MissingResourceException;
@@ -142,7 +141,7 @@ public final class FileUtility {
 	public static boolean relatesTo(IResource set, IResource resource) {
 		return set.equals(resource)
 				? true
-				: resource == null ? false : FileUtility.relatesTo(set, resource.getParent());
+						: resource == null ? false : FileUtility.relatesTo(set, resource.getParent());
 	}
 
 	/**
@@ -259,7 +258,7 @@ public final class FileUtility {
 	public static boolean isCaseInsensitiveOS() {
 		return !(Platform.OS_MACOSX.equals(Platform.getOS())
 				? false
-				: new java.io.File("a").compareTo(new java.io.File("A")) != 0); //$NON-NLS-1$ //$NON-NLS-2$
+						: new java.io.File("a").compareTo(new java.io.File("A")) != 0); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 	public static boolean isLinked(IResource resource) {
@@ -409,7 +408,7 @@ public final class FileUtility {
 			IContainer container = (IContainer) resource;
 			IResource[] children = useCache
 					? SVNRemoteStorage.instance().getRegisteredChildren(container)
-					: FileUtility.resourceMembers(container, true);
+							: FileUtility.resourceMembers(container, true);
 			if (useAlphabeticalOrder) {
 				FileUtility.reorder(children, true);
 			}
@@ -449,8 +448,8 @@ public final class FileUtility {
 
 		// no resources accepted, check recursively (performance optimizations)
 		if (depth != IResource.DEPTH_ZERO) {
-			for (Iterator<IResource> it = recursiveCheck.iterator(); it.hasNext();) {
-				IContainer local = (IContainer) it.next();
+			for (IResource iResource : recursiveCheck) {
+				IContainer local = (IContainer) iResource;
 				if (FileUtility.checkForResourcesPresence(FileUtility.getAllMembers(local), filter, nextDepth)) {
 					return true;
 				}
@@ -541,7 +540,7 @@ public final class FileUtility {
 			} else {
 				while ((parent = parent.getParent()) != null && !(parent instanceof IWorkspaceRoot)
 						&& parents.add(parent)) {
-					;
+
 				}
 			}
 		}
@@ -613,7 +612,7 @@ public final class FileUtility {
 			throws Exception {
 		FileUtility.copyAll(to, what,
 				ignoreExistingFolders ? FileUtility.COPY_IGNORE_EXISTING_FOLDERS : FileUtility.COPY_NO_OPTIONS, null,
-				monitor);
+						monitor);
 	}
 
 	public static void copyAll(File to, File what, int options, FileFilter filter, IProgressMonitor monitor)

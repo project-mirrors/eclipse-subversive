@@ -28,8 +28,16 @@
 		<qualifier.format>'v'yyyyMMdd-HHmm</qualifier.format>
 		<required-java-version>11</required-java-version>
 		<required-maven-version>3.6.3</required-maven-version>
-		<tycho.version>2.7.5</tycho.version>
+		<test.args>-eclipse.keyring ${test.keyring.file} -eclipse.password ${test.keyring.password} ${test.userargs}</test.args>
+		<test.keyring.file>${project.build.directory}/.eclipse.keyring</test.keyring.file>
+		<test.keyring.password>${project.build.directory}/work/configuration/config.ini</test.keyring.password>
+		<test.osvmargs></test.osvmargs>
+		<test.skip>${maven.test.skip}</test.skip>
+		<test.uservmargs></test.uservmargs>
+		<test.vmargs>-ea ${test.osvmargs} ${test.uservmargs}</test.vmargs>
 		<tycho.scmUrl>https://gitlab.eclipse.org/eclipse/subversive/subversive.git</tycho.scmUrl>
+		<tycho.testArgLine></tycho.testArgLine>
+		<tycho.version>2.7.5</tycho.version>
 	</properties>
 
 	<organization>
@@ -289,6 +297,24 @@
 							</includes>
 						</fileSet>
 					</additionalFileSets>
+				</configuration>
+			</plugin>
+			<!-- common test configuration -->
+			<plugin>
+				<groupId>org.eclipse.tycho</groupId>
+				<artifactId>tycho-surefire-plugin</artifactId>
+				<version>${tycho.version}</version>
+				<configuration>
+					<skip>${test.skip}</skip>
+					<useUIThread>${test.useUIThread}</useUIThread>
+					<useUIHarness>true</useUIHarness>
+					<failIfNoTests>true</failIfNoTests>
+					<forkedProcessTimeoutInSeconds>10800</forkedProcessTimeoutInSeconds>
+					<product>org.eclipse.sdk.ide</product>
+					<application>org.eclipse.ui.ide.workbench</application>
+					<argLine>${tycho.testArgLine} -Djava.io.tmpdir=${project.build.directory} ${test.vmargs}</argLine>
+					<appArgLine>${test.args}</appArgLine>
+					<application>org.eclipse.ui.ide.workbench</application>
 				</configuration>
 			</plugin>
 		</plugins>

@@ -51,6 +51,8 @@
 		<module>../../features/org.eclipse.team.svn.pde.build.feature</module>
 
 		<module>../../releng/org.eclipse.team.svn.repository</module>
+
+		<module>../../tests/org.eclipse.team.svn.tests</module>
 	</modules>
 
 </project>

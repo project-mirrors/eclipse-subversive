@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2023 Polarion Software and others.
+ * Copyright (c) 2005, 2024 Polarion Software and others.
  * 
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -22,8 +22,8 @@ import java.util.TimerTask;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResourceChangeEvent;
-import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -32,6 +32,7 @@ import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.team.svn.core.extension.CoreExtensionsManager;
 import org.eclipse.team.svn.core.operation.IConsoleStream;
 import org.eclipse.team.svn.core.operation.LoggedOperation;
@@ -46,6 +47,7 @@ import org.eclipse.team.svn.ui.operation.UILoggedOperation;
 import org.eclipse.team.svn.ui.preferences.SVNTeamPreferences;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
+import org.eclipse.ui.progress.WorkbenchJob;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.prefs.BackingStoreException;
 
@@ -61,14 +63,11 @@ public class SVNTeamUIPlugin extends AbstractUIPlugin {
 
 	private URL baseUrl;
 
-//	private ProblemListener problemListener;
 	private Timer timer;
 
 	public SVNTeamUIPlugin() {
 		SVNTeamUIPlugin.instance = this;
-
 		pcListener = new ProjectCloseListener();
-//        this.problemListener = new ProblemListener();
 		timer = new Timer();
 	}
 
@@ -106,7 +105,7 @@ public class SVNTeamUIPlugin extends AbstractUIPlugin {
 	}
 
 	public IEclipsePreferences getPreferences() {
-		return new InstanceScope().getNode(getBundle().getSymbolicName());
+		return InstanceScope.INSTANCE.getNode(getBundle().getSymbolicName());
 	}
 
 	public void savePreferences() {
@@ -127,15 +126,23 @@ public class SVNTeamUIPlugin extends AbstractUIPlugin {
 	@Override
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
-
-//		Platform.addLogListener(this.problemListener);
-
 		baseUrl = context.getBundle().getEntry("/"); //$NON-NLS-1$
-
-		IWorkspace workspace = ResourcesPlugin.getWorkspace();
-		workspace.addResourceChangeListener(SVNTeamUIPlugin.this.pcListener,
+		ResourcesPlugin.getWorkspace()
+		.addResourceChangeListener(SVNTeamUIPlugin.this.pcListener,
 				IResourceChangeEvent.PRE_CLOSE | IResourceChangeEvent.PRE_DELETE);
+		checkFirstStartup();
+		if (connectorsAreRequired()) {
+			discoveryConnectors();
+		}
+		timer.scheduleAtFixedRate(new TimerTask() {
+			@Override
+			public void run() {
+				SVNRemoteStorage.instance().checkForExternalChanges();
+			}
+		}, 1000, 1000);
+	}
 
+	private void checkFirstStartup() throws CoreException {
 		IPreferenceStore store = getPreferenceStore();
 		if (store.getBoolean(SVNTeamPreferences.FIRST_STARTUP)) {
 			store.setValue(SVNTeamPreferences.FIRST_STARTUP, false);
@@ -146,20 +153,22 @@ public class SVNTeamUIPlugin extends AbstractUIPlugin {
 			// the user has done something with SVN. Subsequent startups will load
 			// the SVN plug-in unless the user disables the decorator. In this case,
 			// we will not re-enable since we only enable automatically on the first startup.
-			PlatformUI.getWorkbench().getDecoratorManager().setEnabled(SVNLightweightDecorator.ID, true);
-		}
+			WorkbenchJob job = new WorkbenchJob(Display.getDefault(), "Enable SVN Decorator") {
 
-		if (connectorsAreRequired()) {
-			//run connectors discovery feature
-			discoveryConnectors();
-		}
+				@Override
+				public IStatus runInUIThread(IProgressMonitor monitor) {
+					try {
+						PlatformUI.getWorkbench().getDecoratorManager().setEnabled(SVNLightweightDecorator.ID, true);
+						return Status.OK_STATUS;
 
-		timer.scheduleAtFixedRate(new TimerTask() {
-			@Override
-			public void run() {
-				SVNRemoteStorage.instance().checkForExternalChanges();
-			}
-		}, 1000, 1000);
+					} catch (CoreException e) {
+						return e.getStatus();
+					}
+				}
+			};
+			job.setSystem(true);
+			job.schedule();
+		}
 	}
 
 	protected boolean connectorsAreRequired() {
@@ -201,12 +210,7 @@ public class SVNTeamUIPlugin extends AbstractUIPlugin {
 	public void stop(BundleContext context) throws Exception {
 		timer.cancel();
 		SVNConsoleFactory.destroyConsole();
-
-		IWorkspace workspace = ResourcesPlugin.getWorkspace();
-
-		workspace.removeResourceChangeListener(pcListener);
-
-//		Platform.removeLogListener(this.problemListener);
+		ResourcesPlugin.getWorkspace().removeResourceChangeListener(pcListener);
 		super.stop(context);
 	}
 
