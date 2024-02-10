@@ -71,7 +71,7 @@ import org.eclipse.ui.navigator.INavigatorSorterService;
 public class SVNChangeSetContentProvider extends ResourceModelContentProvider implements ITreePathContentProvider {
 
 	private final class CollectorListener
-			implements IChangeSetChangeListener, BatchingChangeSetManager.IChangeSetCollectorChangeListener {
+	implements IChangeSetChangeListener, BatchingChangeSetManager.IChangeSetCollectorChangeListener {
 
 		@Override
 		public void setAdded(final ChangeSet set) {
@@ -616,16 +616,14 @@ public class SVNChangeSetContentProvider extends ResourceModelContentProvider im
 			return null;
 		}
 		boolean hasDiff = tree.getDiff(resource) == null;
-		if ((hasDiff && tree.members(resource).length == 0) || (resource.getType() == IResource.ROOT)) {
+		if (hasDiff && tree.members(resource).length == 0 || resource.getType() == IResource.ROOT) {
 			return null;
 		}
 		ArrayList<Object> result = new ArrayList<>();
 		result.add(resource.getProject());
 		if (resource.getType() != IResource.PROJECT) {
 			String layout = getTraversalCalculator().getLayout();
-			if (layout.equals(IPreferenceIds.FLAT_LAYOUT)) {
-				result.add(resource);
-			} else if (layout.equals(IPreferenceIds.COMPRESSED_LAYOUT) && resource.getType() == IResource.FOLDER) {
+			if (layout.equals(IPreferenceIds.FLAT_LAYOUT) || layout.equals(IPreferenceIds.COMPRESSED_LAYOUT) && resource.getType() == IResource.FOLDER) {
 				result.add(resource);
 			} else if (layout.equals(IPreferenceIds.COMPRESSED_LAYOUT) && resource.getType() == IResource.FILE) {
 				IContainer parent = resource.getParent();
@@ -663,15 +661,16 @@ public class SVNChangeSetContentProvider extends ResourceModelContentProvider im
 	}
 
 	private SVNChangeSetSorter getSorter() {
-		INavigatorContentService contentService = getExtensionSite().getService();
-		INavigatorSorterService sortingService = contentService.getSorterService();
+		INavigatorContentService content = getExtensionSite().getService();
+		INavigatorSorterService sorting = content.getSorterService();
 		INavigatorContentExtension extension = getExtensionSite().getExtension();
 		if (extension != null) {
-			ViewerSorter sorter = sortingService.findSorter(extension.getDescriptor(), getModelProvider(),
+			ViewerSorter sorter = sorting.findSorter(extension.getDescriptor(), getModelProvider(),
 					new DiffChangeSet(), new DiffChangeSet());
-			if (sorter instanceof SVNChangeSetSorter) {
-				return (SVNChangeSetSorter) sorter;
-			}
+			//FIXME: AF: not a case anymore, need to find another way
+//			if (sorter instanceof SVNChangeSetSorter) {
+//				return (SVNChangeSetSorter) sorter;
+//			}
 		}
 		return null;
 	}

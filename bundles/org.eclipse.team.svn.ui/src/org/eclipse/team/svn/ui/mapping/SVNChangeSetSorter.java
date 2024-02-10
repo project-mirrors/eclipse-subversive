@@ -14,16 +14,18 @@
 
 package org.eclipse.team.svn.ui.mapping;
 
+import java.text.Collator;
+
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.team.internal.core.subscribers.ActiveChangeSet;
 import org.eclipse.team.internal.core.subscribers.ChangeSet;
-import org.eclipse.team.internal.ui.mapping.ResourceModelSorter;
 import org.eclipse.team.svn.core.mapping.SVNIncomingChangeSet;
 import org.eclipse.team.ui.synchronize.ISynchronizePageConfiguration;
+import org.eclipse.ui.views.navigator.ResourceComparator;
 
-public class SVNChangeSetSorter extends ResourceModelSorter implements IPropertyChangeListener {
+public class SVNChangeSetSorter extends ResourceComparator implements IPropertyChangeListener {
 
 	// Comment sorting options
 	public final static int DATE = 1;
@@ -37,6 +39,7 @@ public class SVNChangeSetSorter extends ResourceModelSorter implements IProperty
 	private int reorderingCriteria = SVNChangeSetSorter.DATE;
 
 	public SVNChangeSetSorter() {
+		super(NAME);
 	}
 
 	@Override
@@ -70,11 +73,10 @@ public class SVNChangeSetSorter extends ResourceModelSorter implements IProperty
 		return super.compare(viewer, o1, o2);
 	}
 
-	@SuppressWarnings({ "deprecation", "unqualified-field-access" })
 	private int compareNames(String s1, String s2) {
 		s1 = s1 == null ? "" : s1; //$NON-NLS-1$
 		s2 = s2 == null ? "" : s2; //$NON-NLS-1$
-		return collator.compare(s1, s2);
+		return Collator.getInstance().compare(s1, s2);
 	}
 
 	public void setConfiguration(ISynchronizePageConfiguration configuration) {
