@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2023 Polarion Software and others.
+ * Copyright (c) 2005, 2024 Polarion Software and others.
  * 
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -11,6 +11,7 @@
  *    Sergiy Logvin - Initial API and implementation
  *    Sergey Vasilchenko - [patch] bug fix: Trunk, branches and tags default values are not stored if they are disabled while creating new location
  *    Alexander Fedorov (ArSysOp) - ongoing support
+ *    Nikifor Fedorov (ArSysOp) - issue subversive/#245
  *******************************************************************************/
 
 package org.eclipse.team.svn.ui.composite;
@@ -20,7 +21,6 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 
-import org.eclipse.compare.internal.TabFolderLayout;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.SWT;
@@ -46,6 +46,7 @@ import org.eclipse.team.svn.core.resource.IRepositoryLocation;
 import org.eclipse.team.svn.core.resource.SSHSettings;
 import org.eclipse.team.svn.core.resource.SSLSettings;
 import org.eclipse.team.svn.core.svnstorage.SVNRemoteStorage;
+import org.eclipse.team.svn.internal.ui.TabFolderLayout;
 import org.eclipse.team.svn.ui.SVNTeamUIPlugin;
 import org.eclipse.team.svn.ui.SVNUIMessages;
 import org.eclipse.team.svn.ui.dialog.DefaultDialog;

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2023 Polarion Software and others.
+ * Copyright (c) 2005, 2024 Polarion Software and others.
  * 
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -10,13 +10,13 @@
  * Contributors:
  *    Alexander Gurov - Initial API and implementation
  *    Alexander Fedorov (ArSysOp) - ongoing support
+ *    Nikifor Fedorov (ArSysOp) - issue subversive/#245
  *******************************************************************************/
 
 package org.eclipse.team.svn.ui.panel.callback;
 
 import java.net.MalformedURLException;
 
-import org.eclipse.compare.internal.TabFolderLayout;
 import org.eclipse.core.net.proxy.IProxyData;
 import org.eclipse.core.net.proxy.IProxyService;
 import org.eclipse.swt.SWT;
@@ -40,6 +40,7 @@ import org.eclipse.team.svn.core.svnstorage.SVNCachedProxyCredentialsManager;
 import org.eclipse.team.svn.core.svnstorage.SVNRemoteStorage;
 import org.eclipse.team.svn.core.svnstorage.SVNRepositoryLocation;
 import org.eclipse.team.svn.core.utility.SVNUtility;
+import org.eclipse.team.svn.internal.ui.TabFolderLayout;
 import org.eclipse.team.svn.ui.SVNUIMessages;
 import org.eclipse.team.svn.ui.composite.CredentialsComposite;
 import org.eclipse.team.svn.ui.composite.ProxyComposite;
@@ -532,7 +533,7 @@ public class PromptCredentialsPanel extends AbstractDialogPanel {
 		protected boolean showPanel(IRepositoryLocation inputLocation, final int connectionType, final String realm) {
 			final IRepositoryLocation location = inputLocation.getLocationForRealm(realm) != null
 					? inputLocation.getLocationForRealm(realm)
-					: inputLocation;
+							: inputLocation;
 			final int[] retVal = new int[1];
 			final SSLSettings settings = location.getSSLSettings();
 

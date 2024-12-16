@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2023 Polarion Software and others.
+ * Copyright (c) 2005, 2024 Polarion Software and others.
  * 
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -11,6 +11,7 @@
  *    Alexander Gurov - Initial API and implementation
  *    Thomas Champagne - Bug 217561 : additional date formats for label decorations
  *    Alexander Fedorov (ArSysOp) - ongoing support
+ *    Nikifor Fedorov (ArSysOp) - issue subversive/#245
  *******************************************************************************/
 
 package org.eclipse.team.svn.ui.preferences;
@@ -24,7 +25,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-import org.eclipse.compare.internal.TabFolderLayout;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -53,6 +53,7 @@ import org.eclipse.team.svn.core.resource.events.ResourceStatesChangedEvent;
 import org.eclipse.team.svn.core.svnstorage.SVNRemoteStorage;
 import org.eclipse.team.svn.core.synchronize.AbstractSVNSubscriber;
 import org.eclipse.team.svn.core.synchronize.UpdateSubscriber;
+import org.eclipse.team.svn.internal.ui.TabFolderLayout;
 import org.eclipse.team.svn.ui.SVNTeamUIPlugin;
 import org.eclipse.team.svn.ui.SVNUIMessages;
 import org.eclipse.team.svn.ui.dialog.DefaultDialog;

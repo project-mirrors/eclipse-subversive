@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2023 IBM Corporation and others.
+ * Copyright (c) 2000, 2024 IBM Corporation and others.
  * 
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -13,6 +13,7 @@
  *    Dann Martens - [patch] Text decorations 'ascendant' variable, More decoration options
  *    Thomas Champagne - Bug 217561 : additional date formats for label decorations
  *    Alexander Fedorov (ArSysOp) - ongoing support
+ *    Nikifor Fedorov (ArSysOp) - issue subversive/#245
  *******************************************************************************/
 
 package org.eclipse.team.svn.ui.preferences;
@@ -28,7 +29,6 @@ import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
 
-import org.eclipse.compare.internal.TabFolderLayout;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -57,6 +57,7 @@ import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.team.svn.core.operation.LoggedOperation;
+import org.eclipse.team.svn.internal.ui.TabFolderLayout;
 import org.eclipse.team.svn.ui.SVNTeamUIPlugin;
 import org.eclipse.team.svn.ui.SVNUIMessages;
 import org.eclipse.team.svn.ui.decorator.DecoratorVariables;
@@ -565,9 +566,7 @@ public class SVNTeamDecorationPreferencesPage extends AbstractSVNTeamPreferences
 			List<Object> result = new ArrayList<>();
 			List<Object> newSelection = Arrays.asList(panel.getResultSelections());
 			for (IVariable realVar : realVars) {
-				if (TextVariableSetProvider.instance.getVariable(realVar.getName()) == null) {
-					result.add(realVar);
-				} else if (newSelection.contains(realVar)) {
+				if ((TextVariableSetProvider.instance.getVariable(realVar.getName()) == null) || newSelection.contains(realVar)) {
 					result.add(realVar);
 				}
 			}
@@ -958,9 +957,7 @@ public class SVNTeamDecorationPreferencesPage extends AbstractSVNTeamPreferences
 			String value = ""; //$NON-NLS-1$
 			for (IVariable variable : variables) {
 				String variableValue = provider.getValue(variable);
-				if (!variable.equals(var)) {
-					value += variableValue;
-				} else if (variableValue.equals(variable.getName())) {
+				if (!variable.equals(var) || variableValue.equals(variable.getName())) {
 					value += variableValue;
 				} else {
 					value += "?{" + variable.getName() + "}?"; //$NON-NLS-1$ //$NON-NLS-2$
