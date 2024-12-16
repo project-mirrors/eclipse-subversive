@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2023 Polarion Software and others.
+ * Copyright (c) 2005, 2024 Polarion Software and others.
  * 
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -10,6 +10,7 @@
  * Contributors:
  *    Alexey Mikoyan - Initial implementation
  *    Alexander Fedorov (ArSysOp) - ongoing support
+ *    Nikifor Fedorov (ArSysOp) - issue subversive/#245
  *******************************************************************************/
 
 package org.eclipse.team.svn.ui.preferences;
@@ -24,7 +25,6 @@ import java.nio.file.FileSystems;
 import java.util.ArrayList;
 import java.util.regex.Pattern;
 
-import org.eclipse.compare.internal.TabFolderLayout;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.ColumnPixelData;
@@ -55,6 +55,7 @@ import org.eclipse.team.svn.core.extension.CoreExtensionsManager;
 import org.eclipse.team.svn.core.extension.properties.PredefinedProperty;
 import org.eclipse.team.svn.core.operation.LoggedOperation;
 import org.eclipse.team.svn.core.utility.FileUtility;
+import org.eclipse.team.svn.internal.ui.TabFolderLayout;
 import org.eclipse.team.svn.ui.SVNUIMessages;
 import org.eclipse.team.svn.ui.SpellcheckedTextProvider;
 import org.eclipse.team.svn.ui.dialog.DefaultDialog;

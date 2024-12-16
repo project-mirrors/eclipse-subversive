@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2023 Polarion Software and others.
+ * Copyright (c) 2005, 2024 Polarion Software and others.
  * 
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -10,6 +10,7 @@
  * Contributors:
  *    Alexander Gurov - Initial API and implementation
  *    Alexander Fedorov (ArSysOp) - ongoing support
+ *    Nikifor Fedorov (ArSysOp) - issue subversive/#245
  *******************************************************************************/
 
 package org.eclipse.team.svn.ui.panel.local;
@@ -17,7 +18,6 @@ package org.eclipse.team.svn.ui.panel.local;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.eclipse.compare.internal.TabFolderLayout;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.swt.SWT;
@@ -47,6 +47,7 @@ import org.eclipse.team.svn.core.resource.IRepositoryResource;
 import org.eclipse.team.svn.core.resource.IRepositoryResourceProvider;
 import org.eclipse.team.svn.core.svnstorage.SVNRemoteStorage;
 import org.eclipse.team.svn.core.utility.SVNUtility;
+import org.eclipse.team.svn.internal.ui.TabFolderLayout;
 import org.eclipse.team.svn.ui.SVNUIMessages;
 import org.eclipse.team.svn.ui.composite.DepthSelectionComposite;
 import org.eclipse.team.svn.ui.composite.RepositoryResourceSelectionComposite;
