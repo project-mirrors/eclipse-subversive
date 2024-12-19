@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-	Copyright (c) 2022, 2023 ArSysOp
+	Copyright (c) 2022, 2024 ArSysOp
 
 	This program and the accompanying materials are made available under the
 	terms of the Eclipse Public License 2.0 which is available at
@@ -37,7 +37,7 @@
 		<test.vmargs>-ea ${test.osvmargs} ${test.uservmargs}</test.vmargs>
 		<tycho.scmUrl>https://gitlab.eclipse.org/eclipse/subversive/subversive.git</tycho.scmUrl>
 		<tycho.testArgLine></tycho.testArgLine>
-		<tycho.version>2.7.5</tycho.version>
+		<tycho.version>4.0.9</tycho.version>
 	</properties>
 
 	<organization>
@@ -201,43 +201,18 @@
 				<groupId>org.eclipse.tycho</groupId>
 				<artifactId>tycho-source-plugin</artifactId>
 				<version>${tycho.version}</version>
-				<configuration>
-					<distinctSourceRoots>true</distinctSourceRoots>
-					<strictSrcIncludes>false</strictSrcIncludes>
-					<archive>
-						<addMavenDescriptor>false</addMavenDescriptor>
-					</archive>
-				</configuration>
 				<executions>
 					<execution>
-						<id>attach-source</id>
+						<id>plugin-source</id>
 						<goals>
 							<goal>plugin-source</goal>
 						</goals>
 					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.eclipse.tycho.extras</groupId>
-				<artifactId>tycho-source-feature-plugin</artifactId>
-				<version>${tycho.version}</version>
-				<configuration>
-					<archive>
-						<addMavenDescriptor>false</addMavenDescriptor>
-					</archive>
-					<reuseBrandingPlugin>false</reuseBrandingPlugin>
-				</configuration>
-				<executions>
 					<execution>
-						<id>source-feature</id>
-						<phase>package</phase>
+						<id>feature-source</id>
 						<goals>
-							<goal>source-feature</goal>
+							<goal>feature-source</goal>
 						</goals>
-						<configuration>
-							<excludes>
-							</excludes>
-						</configuration>
 					</execution>
 				</executions>
 			</plugin>
@@ -261,7 +236,7 @@
 				<version>${tycho.version}</version>
 				<dependencies>
 					<dependency>
-						<groupId>org.eclipse.tycho.extras</groupId>
+						<groupId>org.eclipse.tycho</groupId>
 						<artifactId>tycho-buildtimestamp-jgit</artifactId>
 						<version>${tycho.version}</version>
 					</dependency>
