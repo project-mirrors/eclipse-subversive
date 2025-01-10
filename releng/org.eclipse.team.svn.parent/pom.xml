@@ -27,7 +27,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<qualifier.format>'v'yyyyMMdd-HHmm</qualifier.format>
 		<required-java-version>11</required-java-version>
-		<required-maven-version>3.6.3</required-maven-version>
+		<required-maven-version>3.9.0</required-maven-version>
 		<test.args>-eclipse.keyring ${test.keyring.file} -eclipse.password ${test.keyring.password} ${test.userargs}</test.args>
 		<test.keyring.file>${project.build.directory}/.eclipse.keyring</test.keyring.file>
 		<test.keyring.password>${project.build.directory}/work/configuration/config.ini</test.keyring.password>
