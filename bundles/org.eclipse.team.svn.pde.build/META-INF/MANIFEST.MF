@@ -1,4 +1,5 @@
 Manifest-Version: 1.0
+Automatic-Module-Name: org.eclipse.team.svn.pde.build
 Bundle-ManifestVersion: 2
 Bundle-RequiredExecutionEnvironment: JavaSE-11
 Bundle-Name: %pluginName
@@ -7,7 +8,7 @@ Bundle-Version: 5.0.0.qualifier
 Bundle-Vendor: %providerName
 Bundle-Localization: plugin
 Bundle-ClassPath: .
-Require-Bundle: org.eclipse.core.runtime,
- org.eclipse.pde.build,
- org.apache.ant
+Require-Bundle: org.apache.ant,
+ org.eclipse.core.runtime,
+ org.eclipse.pde.build
 Bundle-ActivationPolicy: lazy
