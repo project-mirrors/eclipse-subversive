@@ -380,28 +380,6 @@
          
 		</objectContribution>
 
-		<objectContribution
-			adaptable="true"
-			objectClass="org.eclipse.core.resources.IProject"
-			id="org.eclipse.team.svn.ui.ConnectedProjectContributions">
-            
-			<filter
-				name="projectPersistentProperty"
-				value="org.eclipse.team.core.repository=org.eclipse.team.svn.core.svnnature">
-			</filter>
-
-			<action
-				label="%DisconnectAction.label"
-				helpContextId="org.eclipse.team.svn.ui.team_disconnect_action_context"
-				class="org.eclipse.team.svn.ui.action.local.management.DisconnectAction"
-				tooltip="%DisconnectAction.tooltip"
-				menubarPath="team.main/projectGroup"
-				definitionId="org.eclipse.team.svn.ui.command.DisconnectCommand"
-				id="org.eclipse.team.svn.ui.action.local.management.DisconnectAction">
-			</action>
-         
-		</objectContribution>
-
        <objectContribution
             adaptable="true"
             objectClass="org.eclipse.ui.IWorkingSet"
@@ -413,14 +391,6 @@
            </adapt>
 		</enablement>
 		
-		<action 
-               label="%DisconnectAction.label"
-               helpContextId="org.eclipse.team.svn.ui.team_disconnect_action_context"
-               class="org.eclipse.team.svn.ui.action.local.management.DisconnectAction"
-               tooltip="%DisconnectAction.tooltip"
-               menubarPath="team.main/projectGroup"
-               id="org.eclipse.team.svn.ui.action.local.management.DisconnectAction">
-		</action>
 		<action
                label="%CleanupAction.label"
                helpContextId="org.eclipse.team.svn.ui.team_cleanup_action_context"
@@ -2266,6 +2236,7 @@
           name="%CreatePatchCommand.label"/>
     <command
           categoryId="org.eclipse.team.svn.ui.command.category"
+          defaultHandler="org.eclipse.team.svn.ui.action.local.management.DisconnectAction"
           id="org.eclipse.team.svn.ui.command.DisconnectCommand"
           name="%DisconnectCommand.label"/>
     <command
@@ -2552,6 +2523,58 @@
             importer="org.eclipse.team.svn.core.importer"
             page="org.eclipse.team.svn.ui.SVNScmUrlImportWizardPage">
       </scmUrlImportPage>
+   </extension>
+   <extension
+         point="org.eclipse.ui.menus">
+      <menuContribution
+            allPopups="false"
+            locationURI="popup:team.main?after=projectGroup">
+         <command
+               commandId="org.eclipse.team.svn.ui.command.DisconnectCommand"
+               helpContextId="org.eclipse.team.svn.ui.team_disconnect_action_context"
+               id="org.eclipse.team.svn.ui.action.local.management.DisconnectAction"
+               label="%DisconnectAction.label"
+               style="push"
+               tooltip="%DisconnectAction.tooltip">
+            <visibleWhen
+                  checkEnabled="false">
+               <reference
+                     definitionId="org.eclipse.team.svn.ui.resource.connected">
+               </reference>
+            </visibleWhen>
+         </command>
+      </menuContribution>
+   </extension>
+   <extension
+         point="org.eclipse.core.expressions.definitions">
+      <definition
+            id="org.eclipse.team.svn.ui.resource.connected">
+         <or>
+            <with
+                  variable="selection">
+               <iterate
+                     ifEmpty="false"
+                     operator="or">
+                  <or>
+                     <adapt
+                           type="org.eclipse.core.resources.IProject">
+                        <test
+                              args="org.eclipse.team.core.repository,org.eclipse.team.svn.core.svnnature"
+                              property="org.eclipse.core.resources.projectPersistentProperty">
+                        </test>
+                     </adapt>
+                     <adapt
+                           type="org.eclipse.core.resources.mapping.ResourceMapping">
+                        <test
+                              args="org.eclipse.team.core.repository,org.eclipse.team.svn.core.svnnature"
+                              property="org.eclipse.core.resources.projectPersistentProperty">
+                        </test>
+                     </adapt>
+                  </or>
+               </iterate>
+            </with>
+         </or>
+      </definition>
    </extension>
 
  </plugin>
