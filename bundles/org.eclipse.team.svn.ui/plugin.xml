@@ -393,16 +393,6 @@
          
          <action
                helpContextId="org.eclipse.team.svn.ui.team_update_action_context"
-               label="%UpdateToRevisionAction.label"
-               tooltip="%UpdateToRevisionAction.tooltip"
-               class="org.eclipse.team.svn.ui.action.local.UpdateToRevisionAction"
-               menubarPath="team.main/group1"
-               id="org.eclipse.team.svn.ui.action.local.UpdateToRevisionAction"
-               definitionId="org.eclipse.team.svn.ui.command.UpdateToRevisionCommand"
-               icon="icons/common/actions/update.gif">
-         </action>         
-         <action
-               helpContextId="org.eclipse.team.svn.ui.team_update_action_context"
                label="%UpdateAction.label"
                tooltip="%UpdateAction.tooltip"
                class="org.eclipse.team.svn.ui.action.local.UpdateAction"
@@ -2483,6 +2473,30 @@
    </extension>
    <extension
          point="org.eclipse.ui.menus">
+      <menuContribution
+            allPopups="false"
+            locationURI="popup:team.main?after=group1">
+         <command
+               commandId="org.eclipse.team.svn.ui.command.UpdateToRevisionCommand"
+               helpContextId="org.eclipse.team.svn.ui.team_update_action_context"
+               icon="icons/common/actions/update.gif"
+               id="org.eclipse.team.svn.ui.action.local.UpdateToRevisionAction"
+               label="%UpdateToRevisionAction.label"
+               style="push"
+               tooltip="%UpdateToRevisionAction.tooltip">
+            <visibleWhen
+                  checkEnabled="false">
+               <or>
+                  <reference
+                        definitionId="org.eclipse.team.svn.ui.mapping.connected">
+                  </reference>
+                  <reference
+                        definitionId="org.eclipse.team.svn.ui.project.connected">
+                  </reference>
+               </or>
+            </visibleWhen>
+         </command>
+      </menuContribution>
       <menuContribution
             allPopups="false"
             locationURI="popup:team.main?after=projectGroup">
