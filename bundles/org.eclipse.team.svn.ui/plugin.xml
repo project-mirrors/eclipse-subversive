@@ -421,17 +421,6 @@
                icon="icons/common/actions/lock.gif">
          </action>
          <action
-               helpContextId="org.eclipse.team.svn.ui.team_merge_action_context"
-               label="%MergeAction.label"
-               tooltip="%MergeAction.tooltip"
-               class="org.eclipse.team.svn.ui.action.local.MergeAction"
-               menubarPath="team.main/group3"
-               enablesFor="1"
-               id="org.eclipse.team.svn.ui.action.local.MergeAction"
-               definitionId="org.eclipse.team.svn.ui.command.MergeCommand"
-               icon="icons/common/actions/merge.gif">
-         </action>                 
-         <action
                helpContextId="org.eclipse.team.svn.ui.team_tag_action_context"
                label="%TagAction.label"
                tooltip="%TagAction.tooltip"
@@ -2572,6 +2561,21 @@
                label="%SwitchAction.label"
                style="push"
                tooltip="%SwitchAction.tooltip">
+            <visibleWhen
+                  checkEnabled="false">
+               <reference
+                        definitionId="org.eclipse.team.svn.ui.mapping.connected">
+               </reference>
+            </visibleWhen>
+         </command>
+         <command
+               commandId="org.eclipse.team.svn.ui.command.MergeCommand"
+               helpContextId="org.eclipse.team.svn.ui.team_merge_action_context"
+               icon="icons/common/actions/merge.gif"
+               id="org.eclipse.team.svn.ui.action.local.MergeAction"
+               label="%MergeAction.label"
+               style="push"
+               tooltip="%MergeAction.tooltip">
             <visibleWhen
                   checkEnabled="false">
                <reference
