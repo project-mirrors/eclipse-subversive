@@ -392,17 +392,6 @@
          </enablement>
          
          <action
-               label="%EditPropertiesAction.label"
-               helpContextId="org.eclipse.team.svn.ui.team_edit_properties_action_context"
-               class="org.eclipse.team.svn.ui.action.local.EditPropertiesAction"
-               tooltip="%EditPropertiesAction.tooltip"
-               menubarPath="team.main/group6"
-               id="org.eclipse.team.svn.ui.action.local.EditPropertiesAction"
-               definitionId="org.eclipse.team.svn.ui.command.EditPropertiesCommand"
-               icon="icons/views/propertiesedit.gif">               
-         </action>
-
-         <action
               helpContextId="org.eclipse.team.svn.ui.export_working_copy"
               label="%ExportCommand.label"
               tooltip="%ExportAction.tooltip"
@@ -2641,6 +2630,21 @@
                label="%SetPropertyAction.label"
                style="push"
                tooltip="%SetPropertyAction.tooltip">
+            <visibleWhen
+                  checkEnabled="false">
+               <reference
+                        definitionId="org.eclipse.team.svn.ui.mapping.connected">
+               </reference>
+            </visibleWhen>
+         </command>
+         <command
+               commandId="org.eclipse.team.svn.ui.command.EditPropertiesCommand"
+               helpContextId="org.eclipse.team.svn.ui.team_edit_properties_action_context"
+               icon="icons/views/propertiesedit.gif"
+               id="org.eclipse.team.svn.ui.action.local.EditPropertiesAction"
+               label="%EditPropertiesAction.label"
+               style="push"
+               tooltip="%EditPropertiesAction.tooltip">
             <visibleWhen
                   checkEnabled="false">
                <reference
