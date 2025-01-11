@@ -392,15 +392,6 @@
          </enablement>
          
          <action
-               helpContextId="org.eclipse.team.svn.ui.team_scanlocks_action_context"
-               label="%ScanLocksAction.label"
-               tooltip="%ScanLocksAction.tooltip"
-               class="org.eclipse.team.svn.ui.action.local.ScanLocksAction"
-               menubarPath="team.main/group5"
-               definitionId="org.eclipse.team.svn.ui.command.ScanLocksCommand"
-               id="org.eclipse.team.svn.ui.action.local.ScanLocksAction">
-         </action>         
-         <action
                helpContextId="org.eclipse.team.svn.ui.team_unlock_action_context"
                label="%UnlockAction.label"
                tooltip="%UnlockAction.tooltip"
@@ -2145,6 +2136,7 @@
           name="%UnlockCommand.label"/>
     <command
           categoryId="org.eclipse.team.svn.ui.command.category"
+          defaultHandler="org.eclipse.team.svn.ui.action.local.ScanLocksAction"
           id="org.eclipse.team.svn.ui.command.ScanLocksCommand"
           name="%ScanLocksCommand.label"/>          
     <command
@@ -2594,6 +2586,24 @@
                label="%ShowResourceHistoryAction.label"
                style="push"
                tooltip="%ShowResourceHistoryAction.tooltip">
+            <visibleWhen
+                  checkEnabled="false">
+               <reference
+                        definitionId="org.eclipse.team.svn.ui.mapping.connected">
+               </reference>
+            </visibleWhen>
+         </command>
+      </menuContribution>
+      <menuContribution
+            allPopups="false"
+            locationURI="popup:team.main?after=group5">
+         <command
+               commandId="org.eclipse.team.svn.ui.command.ScanLocksCommand"
+               helpContextId="org.eclipse.team.svn.ui.team_scanlocks_action_context"
+               id="org.eclipse.team.svn.ui.action.local.ScanLocksAction"
+               label="%ScanLocksAction.label"
+               style="push"
+               tooltip="%ScanLocksAction.tooltip">
             <visibleWhen
                   checkEnabled="false">
                <reference
