@@ -392,17 +392,6 @@
          </enablement>
          
          <action
-               helpContextId="org.eclipse.team.svn.ui.team_lock_action_context"
-               label="%LockAction.label"
-               tooltip="%LockAction.tooltip"
-               class="org.eclipse.team.svn.ui.action.local.LockAction"
-               menubarPath="team.main/group5"
-               id="org.eclipse.team.svn.ui.action.local.LockAction"
-               definitionId="org.eclipse.team.svn.ui.command.LockCommand"
-               icon="icons/common/actions/lock.gif">
-         </action>
-         
-         <action
                helpContextId="org.eclipse.team.svn.ui.team_create_patch_action_context"
                label="%CreatePatchAction.label"
                tooltip="%CreatePatchAction.tooltip"
@@ -2610,6 +2599,21 @@
                label="%UnlockAction.label"
                style="push"
                tooltip="%UnlockAction.tooltip">
+            <visibleWhen
+                  checkEnabled="false">
+               <reference
+                        definitionId="org.eclipse.team.svn.ui.mapping.connected">
+               </reference>
+            </visibleWhen>
+         </command>
+         <command
+               commandId="org.eclipse.team.svn.ui.command.LockCommand"
+               helpContextId="org.eclipse.team.svn.ui.team_lock_action_context"
+               icon="icons/common/actions/lock.gif"
+               id="org.eclipse.team.svn.ui.action.local.LockAction"
+               label="%LockAction.label"
+               style="push"
+               tooltip="%LockAction.tooltip">
             <visibleWhen
                   checkEnabled="false">
                <reference
