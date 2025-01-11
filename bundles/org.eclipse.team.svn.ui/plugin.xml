@@ -393,15 +393,6 @@
          
          
          <action
-               helpContextId="org.eclipse.team.svn.ui.team_mark_as_merged_action_context"
-               label="%MarkAsMergedAction.label"
-               tooltip="%MarkAsMergedAction.tooltip"
-               class="org.eclipse.team.svn.ui.action.local.MarkAsMergedAction"
-               menubarPath="team.main/group2"
-               definitionId="org.eclipse.team.svn.ui.command.MarkAsMergedCommand"
-               id="org.eclipse.team.svn.ui.action.local.MarkAsMergedAction">
-         </action>
-         <action
                helpContextId="org.eclipse.team.svn.ui.team_edit_tree_conflicts_action_context"
                label="%EditTreeConflictsAction.label"
                tooltip="%EditTreeConflictsAction.tooltip"
@@ -2188,6 +2179,7 @@
           name="%AddRevisionLinkCommand.label"/>          
     <command
           categoryId="org.eclipse.team.svn.ui.command.category"
+          defaultHandler="org.eclipse.team.svn.ui.action.local.MarkAsMergedAction"
           id="org.eclipse.team.svn.ui.command.MarkAsMergedCommand"
           name="%MarkAsMergedCommand.label"/>
     <command
@@ -2505,6 +2497,26 @@
                label="%SynchronizeAction.label"
                style="push"
                tooltip="%SynchronizeAction.tooltip">
+            <visibleWhen
+                  checkEnabled="false">
+               <or>
+                  <reference
+                        definitionId="org.eclipse.team.svn.ui.mapping.connected">
+                  </reference>
+               </or>
+            </visibleWhen>
+         </command>
+      </menuContribution>
+      <menuContribution
+            allPopups="false"
+            locationURI="popup:team.main?after=group2">
+         <command
+               commandId="org.eclipse.team.svn.ui.command.MarkAsMergedCommand"
+               helpContextId="org.eclipse.team.svn.ui.team_mark_as_merged_action_context"
+               id="org.eclipse.team.svn.ui.action.local.MarkAsMergedAction"
+               label="%MarkAsMergedAction.label"
+               style="push"
+               tooltip="%MarkAsMergedAction.tooltip">
             <visibleWhen
                   checkEnabled="false">
                <or>
