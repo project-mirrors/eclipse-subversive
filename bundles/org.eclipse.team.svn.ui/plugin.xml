@@ -415,15 +415,6 @@
          </enablement>
          
          <action
-               label="%CompareWithLatestRevisionAction.label"
-               helpContextId="org.eclipse.team.svn.ui.compare_with_latest_revision_action_context"
-               class="org.eclipse.team.svn.ui.action.local.CompareWithLatestRevisionAction"
-               tooltip="%CompareWithLatestRevisionAction.tooltip"
-               menubarPath="compareWithMenu/compareWithGroup"
-               definitionId="org.eclipse.team.svn.ui.command.CompareWithLatestRevisionCommand"
-               id="org.eclipse.team.svn.ui.action.local.CompareWithLatestRevisionAction">
-         </action>
-         <action
                label="%CompareWithWorkingCopyAction.label"
                helpContextId="org.eclipse.team.svn.ui.compare_with_working_copy_action_context"
                class="org.eclipse.team.svn.ui.action.local.CompareWithWorkingCopyAction"
@@ -2243,6 +2234,20 @@
                label="%CompareWithRevisionAction.label"
                style="push"
                tooltip="%CompareWithRevisionAction.tooltip">
+            <visibleWhen
+                  checkEnabled="false">
+               <reference
+                        definitionId="org.eclipse.team.svn.ui.mapping.connected">
+               </reference>
+            </visibleWhen>
+         </command>
+         <command
+               commandId="org.eclipse.team.svn.ui.command.CompareWithLatestRevisionCommand"
+               helpContextId="org.eclipse.team.svn.ui.compare_with_latest_revision_action_context"
+               id="org.eclipse.team.svn.ui.action.local.CompareWithLatestRevisionAction"
+               label="%CompareWithLatestRevisionAction.label"
+               style="push"
+               tooltip="%CompareWithLatestRevisionAction.tooltip">
             <visibleWhen
                   checkEnabled="false">
                <reference
