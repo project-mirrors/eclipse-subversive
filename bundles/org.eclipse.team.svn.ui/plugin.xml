@@ -392,15 +392,6 @@
          </enablement>
          
          <action
-               helpContextId="org.eclipse.team.svn.ui.team_add_action_context"
-               label="%AddToSVNAction.label"
-               tooltip="%AddToSVNAction.tooltip"
-               class="org.eclipse.team.svn.ui.action.local.AddToSVNAction"
-               menubarPath="team.main/group2"
-               definitionId="org.eclipse.team.svn.ui.command.AddToSVNCommand"
-               id="org.eclipse.team.svn.ui.action.local.AddToSVNAction">
-         </action>
-         <action
                helpContextId="org.eclipse.team.svn.ui.team_revert_action_context"
                label="%RevertAction.label"
                tooltip="%RevertAction.tooltip"
@@ -2037,6 +2028,7 @@
           name="SVN"/>
     <command
           categoryId="org.eclipse.team.svn.ui.command.category"
+          defaultHandler="org.eclipse.team.svn.ui.action.local.AddToSVNAction"
           id="org.eclipse.team.svn.ui.command.AddToSVNCommand"
           name="%AddToSVNCommand.label"/>
     <command
@@ -2538,6 +2530,22 @@
                label="%AddToSVNIgnoreAction.label"
                style="push"
                tooltip="%AddToSVNIgnoreAction.tooltip">
+            <visibleWhen
+                  checkEnabled="false">
+               <or>
+                  <reference
+                        definitionId="org.eclipse.team.svn.ui.mapping.connected">
+                  </reference>
+               </or>
+            </visibleWhen>
+         </command>
+         <command
+               commandId="org.eclipse.team.svn.ui.command.AddToSVNCommand"
+               helpContextId="org.eclipse.team.svn.ui.team_add_action_context"
+               id="org.eclipse.team.svn.ui.action.local.AddToSVNAction"
+               label="%AddToSVNAction.label"
+               style="push"
+               tooltip="%AddToSVNAction.tooltip">
             <visibleWhen
                   checkEnabled="false">
                <or>
