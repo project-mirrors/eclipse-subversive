@@ -415,15 +415,6 @@
          </enablement>
          
          <action
-               label="%Compare.Branch.Action.Label"
-               helpContextId="org.eclipse.team.svn.ui.compare_with_branch_action_context"
-               class="org.eclipse.team.svn.ui.action.local.CompareWithBranchAction"
-               tooltip="%Compare.Branch.Action.Tooltip"
-               menubarPath="compareWithMenu/compareWithGroup"
-               definitionId="org.eclipse.team.svn.ui.command.CompareWithBranchCommand"
-               id="org.eclipse.team.svn.ui.action.local.CompareWithBranchAction">
-         </action>
-         <action
                label="%CompareWithRevisionAction.label"
                helpContextId="org.eclipse.team.svn.ui.compare_with_revision_action_context"
                class="org.eclipse.team.svn.ui.action.local.CompareWithRevisionAction"
@@ -1902,6 +1893,7 @@
           name="%CompareWithRevisionCommand.label"/>
     <command
           categoryId="org.eclipse.team.svn.ui.command.category"
+          defaultHandler="org.eclipse.team.svn.ui.action.local.CompareWithBranchAction"
           id="org.eclipse.team.svn.ui.command.CompareWithBranchCommand"
           name="%CompareWithBranchCommand.label"/>
 	<command
@@ -2232,6 +2224,20 @@
                label="%Compare.Tag.Action.Label"
                style="push"
                tooltip="%Compare.Tag.Action.Tooltip">
+            <visibleWhen
+                  checkEnabled="false">
+               <reference
+                        definitionId="org.eclipse.team.svn.ui.mapping.connected">
+               </reference>
+            </visibleWhen>
+         </command>
+         <command
+               commandId="org.eclipse.team.svn.ui.command.CompareWithBranchCommand"
+               helpContextId="org.eclipse.team.svn.ui.compare_with_branch_action_context"
+               id="org.eclipse.team.svn.ui.action.local.CompareWithBranchAction"
+               label="%Compare.Branch.Action.Label"
+               style="push"
+               tooltip="%Compare.Branch.Action.Tooltip">
             <visibleWhen
                   checkEnabled="false">
                <reference
