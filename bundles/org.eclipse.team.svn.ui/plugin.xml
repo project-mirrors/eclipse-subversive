@@ -392,15 +392,6 @@
          </enablement>
          
          <action
-			   label="%SetKeywordsAction.label"
-               helpContextId="org.eclipse.team.svn.ui.team_set_keywords_action_context"
-               class="org.eclipse.team.svn.ui.action.local.SetKeywordsAction"
-               tooltip="%SetKeywordsAction.tooltip"
-               menubarPath="team.main/group6"
-               definitionId="org.eclipse.team.svn.ui.command.SetKeywordsCommand"
-               id="org.eclipse.team.svn.ui.action.local.SetKeywordsAction">               
-         </action>
-         <action
                label="%SetPropertyAction.label"
                helpContextId="org.eclipse.team.svn.ui.team_set_property_action_context"
                class="org.eclipse.team.svn.ui.action.local.SetPropertyAction"
@@ -2060,6 +2051,7 @@
           name="%SetPropertyCommand.label"/>          
     <command
           categoryId="org.eclipse.team.svn.ui.command.category"
+          defaultHandler="org.eclipse.team.svn.ui.action.local.SetKeywordsAction"
           id="org.eclipse.team.svn.ui.command.SetKeywordsCommand"
           name="%SetKeywordsCommand.label"/>
     <command
@@ -2629,6 +2621,20 @@
                label="%SetExternalDefinitionAction.label"
                style="push"
                tooltip="%SetExternalDefinitionAction.tooltip">
+            <visibleWhen
+                  checkEnabled="false">
+               <reference
+                        definitionId="org.eclipse.team.svn.ui.mapping.connected">
+               </reference>
+            </visibleWhen>
+         </command>
+         <command
+               commandId="org.eclipse.team.svn.ui.command.SetKeywordsCommand"
+               helpContextId="org.eclipse.team.svn.ui.team_set_keywords_action_context"
+               id="org.eclipse.team.svn.ui.action.local.SetKeywordsAction"
+               label="%SetKeywordsAction.label"
+               style="push"
+               tooltip="%SetKeywordsAction.tooltip">
             <visibleWhen
                   checkEnabled="false">
                <reference
