@@ -421,15 +421,6 @@
                icon="icons/common/actions/lock.gif">
          </action>
          <action
-               label="%AddRevisionLinkAction.label"
-               helpContextId="org.eclipse.team.svn.ui.team_add_revision_link_action_context"
-               class="org.eclipse.team.svn.ui.action.local.AddRevisionLinkAction"
-               tooltip="%AddRevisionLinkAction.tooltip"
-               menubarPath="team.main/group3"
-               id="org.eclipse.team.svn.ui.action.local.AddRevisionLinkAction"
-               definitionId="org.eclipse.team.svn.ui.command.AddRevisionLinkCommand">
-         </action>          
-         <action
                label="%SwitchAction.label"
                helpContextId="org.eclipse.team.svn.ui.team_switch_action_context"
                class="org.eclipse.team.svn.ui.action.local.SwitchAction"
@@ -2130,6 +2121,7 @@
           name="%LockCommand.label"/>
     <command
           categoryId="org.eclipse.team.svn.ui.command.category"
+          defaultHandler="org.eclipse.team.svn.ui.action.local.AddRevisionLinkAction"
           id="org.eclipse.team.svn.ui.command.AddRevisionLinkCommand"
           name="%AddRevisionLinkCommand.label"/>          
     <command
@@ -2561,6 +2553,24 @@
                         definitionId="org.eclipse.team.svn.ui.mapping.connected">
                   </reference>
                </or>
+            </visibleWhen>
+         </command>
+      </menuContribution>
+      <menuContribution
+            allPopups="false"
+            locationURI="popup:team.main?after=group3">
+         <command
+               commandId="org.eclipse.team.svn.ui.command.AddRevisionLinkCommand"
+               helpContextId="org.eclipse.team.svn.ui.team_add_revision_link_action_context"
+               id="org.eclipse.team.svn.ui.action.local.AddRevisionLinkAction"
+               label="%AddRevisionLinkAction.label"
+               style="push"
+               tooltip="%AddRevisionLinkAction.tooltip">
+            <visibleWhen
+                  checkEnabled="false">
+               <reference
+                        definitionId="org.eclipse.team.svn.ui.mapping.connected">
+               </reference>
             </visibleWhen>
          </command>
       </menuContribution>
