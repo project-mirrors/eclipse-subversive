@@ -392,15 +392,6 @@
          </enablement>
          
          <action
-               helpContextId="org.eclipse.team.svn.ui.team_create_patch_action_context"
-               label="%CreatePatchAction.label"
-               tooltip="%CreatePatchAction.tooltip"
-               class="org.eclipse.team.svn.ui.action.local.CreatePatchAction"
-               menubarPath="team.main/group6"
-               definitionId="org.eclipse.team.svn.ui.command.CreatePatchCommand"
-               id="org.eclipse.team.svn.ui.action.local.CreatePatchAction">
-         </action>
-         <action
 			   label="%SetExternalDefinitionAction.label"
                helpContextId="org.eclipse.team.svn.ui.team_set_external_definition_action_context"
                class="org.eclipse.team.svn.ui.action.local.SetExternalDefinitionAction"
@@ -2614,6 +2605,24 @@
                label="%LockAction.label"
                style="push"
                tooltip="%LockAction.tooltip">
+            <visibleWhen
+                  checkEnabled="false">
+               <reference
+                        definitionId="org.eclipse.team.svn.ui.mapping.connected">
+               </reference>
+            </visibleWhen>
+         </command>
+      </menuContribution>
+      <menuContribution
+            allPopups="false"
+            locationURI="popup:team.main?after=group6">
+         <command
+               commandId="org.eclipse.team.svn.ui.command.CreatePatchCommand"
+               helpContextId="org.eclipse.team.svn.ui.team_create_patch_action_context"
+               id="org.eclipse.team.svn.ui.action.local.CreatePatchAction"
+               label="%CreatePatchAction.label"
+               style="push"
+               tooltip="%CreatePatchAction.tooltip">
             <visibleWhen
                   checkEnabled="false">
                <reference
