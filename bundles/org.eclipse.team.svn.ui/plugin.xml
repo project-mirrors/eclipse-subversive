@@ -391,16 +391,6 @@
            </adapt>
          </enablement>
          
-         <action
-               helpContextId="org.eclipse.team.svn.ui.team_synchronize_action_context"
-               label="%SynchronizeAction.label"
-               tooltip="%SynchronizeAction.tooltip"
-               class="org.eclipse.team.svn.ui.action.local.SynchronizeAction"
-               menubarPath="team.main/group1"
-               id="org.eclipse.team.svn.ui.action.local.SynchronizeAction"
-               definitionId="org.eclipse.team.svn.ui.command.SynchronizeCommand"
-               icon="icons/common/actions/synch.gif">
-		 </action>
          
          <action
                helpContextId="org.eclipse.team.svn.ui.team_mark_as_merged_action_context"
@@ -2498,6 +2488,23 @@
                label="%CommitAction.label"
                style="push"
                tooltip="%CommitAction.tooltip">
+            <visibleWhen
+                  checkEnabled="false">
+               <or>
+                  <reference
+                        definitionId="org.eclipse.team.svn.ui.mapping.connected">
+                  </reference>
+               </or>
+            </visibleWhen>
+         </command>
+         <command
+               commandId="org.eclipse.team.svn.ui.command.SynchronizeCommand"
+               helpContextId="org.eclipse.team.svn.ui.team_synchronize_action_context"
+               icon="icons/common/actions/synch.gif"
+               id="org.eclipse.team.svn.ui.action.local.SynchronizeAction"
+               label="%SynchronizeAction.label"
+               style="push"
+               tooltip="%SynchronizeAction.tooltip">
             <visibleWhen
                   checkEnabled="false">
                <or>
