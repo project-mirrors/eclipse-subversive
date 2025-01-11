@@ -392,16 +392,6 @@
          </enablement>
          
          <action
-               helpContextId="org.eclipse.team.svn.ui.team_update_action_context"
-               label="%UpdateAction.label"
-               tooltip="%UpdateAction.tooltip"
-               class="org.eclipse.team.svn.ui.action.local.UpdateAction"
-               menubarPath="team.main/group1"
-               id="org.eclipse.team.svn.ui.action.local.UpdateAction"
-               definitionId="org.eclipse.team.svn.ui.command.UpdateCommand"
-               icon="icons/common/actions/update.gif">
-         </action>
-         <action
                helpContextId="org.eclipse.team.svn.ui.team_commit_action_context"
                label="%CommitAction.label"
                tooltip="%CommitAction.tooltip"
@@ -2490,8 +2480,22 @@
                   <reference
                         definitionId="org.eclipse.team.svn.ui.mapping.connected">
                   </reference>
+               </or>
+            </visibleWhen>
+         </command>
+         <command
+               commandId="org.eclipse.team.svn.ui.command.UpdateCommand"
+               helpContextId="org.eclipse.team.svn.ui.team_update_action_context"
+               icon="icons/common/actions/update.gif"
+               id="org.eclipse.team.svn.ui.action.local.UpdateAction"
+               label="%UpdateAction.label"
+               style="push"
+               tooltip="%UpdateAction.tooltip">
+            <visibleWhen
+                  checkEnabled="false">
+               <or>
                   <reference
-                        definitionId="org.eclipse.team.svn.ui.project.connected">
+                        definitionId="org.eclipse.team.svn.ui.mapping.connected">
                   </reference>
                </or>
             </visibleWhen>
