@@ -392,15 +392,6 @@
          </enablement>
          
          <action
-               label="%SetPropertyAction.label"
-               helpContextId="org.eclipse.team.svn.ui.team_set_property_action_context"
-               class="org.eclipse.team.svn.ui.action.local.SetPropertyAction"
-               tooltip="%SetPropertyAction.tooltip"
-               menubarPath="team.main/group6"
-               definitionId="org.eclipse.team.svn.ui.command.SetPropertyCommand"
-               id="org.eclipse.team.svn.ui.action.local.SetPropertyAction">               
-         </action>
-         <action
                label="%EditPropertiesAction.label"
                helpContextId="org.eclipse.team.svn.ui.team_edit_properties_action_context"
                class="org.eclipse.team.svn.ui.action.local.EditPropertiesAction"
@@ -2047,6 +2038,7 @@
           name="%RevertCommand.label"/>
     <command
           categoryId="org.eclipse.team.svn.ui.command.category"
+          defaultHandler="org.eclipse.team.svn.ui.action.local.SetPropertyAction"
           id="org.eclipse.team.svn.ui.command.SetPropertyCommand"
           name="%SetPropertyCommand.label"/>          
     <command
@@ -2635,6 +2627,20 @@
                label="%SetKeywordsAction.label"
                style="push"
                tooltip="%SetKeywordsAction.tooltip">
+            <visibleWhen
+                  checkEnabled="false">
+               <reference
+                        definitionId="org.eclipse.team.svn.ui.mapping.connected">
+               </reference>
+            </visibleWhen>
+         </command>
+         <command
+               commandId="org.eclipse.team.svn.ui.command.SetPropertyCommand"
+               helpContextId="org.eclipse.team.svn.ui.team_set_property_action_context"
+               id="org.eclipse.team.svn.ui.action.local.SetPropertyAction"
+               label="%SetPropertyAction.label"
+               style="push"
+               tooltip="%SetPropertyAction.tooltip">
             <visibleWhen
                   checkEnabled="false">
                <reference
