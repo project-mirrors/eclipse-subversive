@@ -415,14 +415,6 @@
          </enablement>
          
 		<action
-               helpContextId="org.eclipse.team.svn.ui.replace_tag_action_context"
-               label="%ReplaceWithTagAction.label"
-               tooltip="%ReplaceWithTagAction.tooltip"
-               class="org.eclipse.team.svn.ui.action.local.ReplaceWithTagAction"
-               menubarPath="replaceWithMenu/replaceWithGroup"
-               definitionId="org.eclipse.team.svn.ui.command.ReplaceWithTagCommand"
-               id="org.eclipse.team.svn.ui.action.local.ReplaceWithTagAction"/>
-		<action
                helpContextId="org.eclipse.team.svn.ui.replace_branch_action_context"
                label="%ReplaceWithBranchAction.label"
                tooltip="%ReplaceWithBranchAction.tooltip"
@@ -1931,6 +1923,7 @@
           name="%ReplaceWithBranchCommand.label"/>
     <command
           categoryId="org.eclipse.team.svn.ui.command.category"
+          defaultHandler="org.eclipse.team.svn.ui.action.local.ReplaceWithTagAction"
           id="org.eclipse.team.svn.ui.command.ReplaceWithTagCommand"
           name="%ReplaceWithTagCommand.label"/>
     <command
@@ -2247,6 +2240,9 @@
             </visibleWhen>
          </command>
       </menuContribution>
+   </extension>
+   <extension
+         point="org.eclipse.ui.menus">
       <menuContribution
             allPopups="false"
             locationURI="popup:team.main?after=group1">
