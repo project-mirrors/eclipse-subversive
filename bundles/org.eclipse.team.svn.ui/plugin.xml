@@ -393,15 +393,6 @@
          
          
          <action
-               helpContextId="org.eclipse.team.svn.ui.team_edit_tree_conflicts_action_context"
-               label="%EditTreeConflictsAction.label"
-               tooltip="%EditTreeConflictsAction.tooltip"
-               class="org.eclipse.team.svn.ui.action.local.EditTreeConflictsAction"
-               menubarPath="team.main/group2"
-               definitionId="org.eclipse.team.svn.ui.command.EditTreeConflictsCommand"
-               id="org.eclipse.team.svn.ui.action.local.EditTreeConflictsAction">
-         </action>          
-         <action
                helpContextId="org.eclipse.team.svn.ui.team_edit_conflicts_action_context"
                label="%EditConflictsAction.label"
                tooltip="%EditConflictsAction.tooltip"
@@ -2161,6 +2152,7 @@
           name="%EditConflictsCommand.label"/>
     <command
           categoryId="org.eclipse.team.svn.ui.command.category"
+          defaultHandler="org.eclipse.team.svn.ui.action.local.EditTreeConflictsAction"
           id="org.eclipse.team.svn.ui.command.EditTreeConflictsCommand"
           name="%EditTreeConflictsCommand.label"/>          
     <command
@@ -2517,6 +2509,22 @@
                label="%MarkAsMergedAction.label"
                style="push"
                tooltip="%MarkAsMergedAction.tooltip">
+            <visibleWhen
+                  checkEnabled="false">
+               <or>
+                  <reference
+                        definitionId="org.eclipse.team.svn.ui.mapping.connected">
+                  </reference>
+               </or>
+            </visibleWhen>
+         </command>
+         <command
+               commandId="org.eclipse.team.svn.ui.command.EditTreeConflictsCommand"
+               helpContextId="org.eclipse.team.svn.ui.team_edit_tree_conflicts_action_context"
+               id="org.eclipse.team.svn.ui.action.local.EditTreeConflictsAction"
+               label="%EditTreeConflictsAction.label"
+               style="push"
+               tooltip="%EditTreeConflictsAction.tooltip">
             <visibleWhen
                   checkEnabled="false">
                <or>
