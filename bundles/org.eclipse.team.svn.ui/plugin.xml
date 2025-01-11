@@ -392,16 +392,6 @@
          </enablement>
          
          <action
-               helpContextId="org.eclipse.team.svn.ui.team_unlock_action_context"
-               label="%UnlockAction.label"
-               tooltip="%UnlockAction.tooltip"
-               class="org.eclipse.team.svn.ui.action.local.UnlockAction"
-               menubarPath="team.main/group5"
-               definitionId="org.eclipse.team.svn.ui.command.UnlockCommand"
-               id="org.eclipse.team.svn.ui.action.local.UnlockAction"
-               icon="icons/common/actions/unlock.gif">
-         </action>
-         <action
                helpContextId="org.eclipse.team.svn.ui.team_lock_action_context"
                label="%LockAction.label"
                tooltip="%LockAction.tooltip"
@@ -2132,6 +2122,7 @@
           name="%TagCommand.label"/>
     <command
           categoryId="org.eclipse.team.svn.ui.command.category"
+          defaultHandler="org.eclipse.team.svn.ui.action.local.UnlockAction"
           id="org.eclipse.team.svn.ui.command.UnlockCommand"
           name="%UnlockCommand.label"/>
     <command
@@ -2604,6 +2595,21 @@
                label="%ScanLocksAction.label"
                style="push"
                tooltip="%ScanLocksAction.tooltip">
+            <visibleWhen
+                  checkEnabled="false">
+               <reference
+                        definitionId="org.eclipse.team.svn.ui.mapping.connected">
+               </reference>
+            </visibleWhen>
+         </command>
+         <command
+               commandId="org.eclipse.team.svn.ui.command.UnlockCommand"
+               helpContextId="org.eclipse.team.svn.ui.team_unlock_action_context"
+               icon="icons/common/actions/unlock.gif"
+               id="org.eclipse.team.svn.ui.action.local.UnlockAction"
+               label="%UnlockAction.label"
+               style="push"
+               tooltip="%UnlockAction.tooltip">
             <visibleWhen
                   checkEnabled="false">
                <reference
