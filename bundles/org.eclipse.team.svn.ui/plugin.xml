@@ -382,28 +382,6 @@
 
       <objectContribution
             adaptable="true"
-            objectClass="org.eclipse.core.resources.mapping.ResourceMapping"
-            id="org.eclipse.team.svn.ui.ResourceContributions">
-            
-         <enablement>
-           <adapt type="org.eclipse.core.resources.mapping.ResourceMapping">
-              <test property="org.eclipse.core.resources.projectPersistentProperty" args="org.eclipse.team.core.repository,org.eclipse.team.svn.core.svnnature" />
-           </adapt>
-         </enablement>
-         
-         <action
-              helpContextId="org.eclipse.team.svn.ui.copy_working_copy"
-              label="%CopyAction.label"
-              tooltip="%CopyAction.tooltip"
-              class="org.eclipse.team.svn.ui.action.local.CopyAction"
-              menubarPath="team.main/group7"
-              definitionId="org.eclipse.team.svn.ui.command.CopyCommand"
-              id="org.eclipse.team.svn.ui.action.local.CopyAction">
-         </action> 
-
-      </objectContribution>
-      <objectContribution
-            adaptable="true"
             objectClass="org.eclipse.core.resources.IFile"
             id="org.eclipse.team.svn.ui.IFileContributions">
 
@@ -1888,6 +1866,7 @@
           name="%ExportCommand.label"/>
     <command
           categoryId="org.eclipse.team.svn.ui.command.category"
+          defaultHandler="org.eclipse.team.svn.ui.action.local.CopyAction"
           id="org.eclipse.team.svn.ui.command.CopyCommand"
           name="%CopyCommand.label"/>
     <command
@@ -2655,6 +2634,21 @@
                label="%ExportCommand.label"
                style="push"
                tooltip="%ExportAction.tooltip">
+            <visibleWhen
+                  checkEnabled="false">
+               <reference
+                        definitionId="org.eclipse.team.svn.ui.mapping.connected">
+               </reference>
+            </visibleWhen>
+         </command>
+         <command
+               commandId="org.eclipse.team.svn.ui.command.CopyCommand"
+               helpContextId="org.eclipse.team.svn.ui.copy_working_copy"
+               icon="icons/common/copy.gif"
+               id="org.eclipse.team.svn.ui.action.local.CopyAction"
+               label="%CopyAction.label"
+               style="push"
+               tooltip="%CopyAction.tooltip">
             <visibleWhen
                   checkEnabled="false">
                <reference
