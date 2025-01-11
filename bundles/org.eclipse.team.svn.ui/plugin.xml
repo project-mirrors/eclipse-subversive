@@ -421,17 +421,6 @@
                icon="icons/common/actions/lock.gif">
          </action>
          <action
-               helpContextId="org.eclipse.team.svn.ui.team_tag_action_context"
-               label="%TagAction.label"
-               tooltip="%TagAction.tooltip"
-               class="org.eclipse.team.svn.ui.action.local.TagAction"
-               menubarPath="team.main/group3"
-               enablesFor="1"
-               id="org.eclipse.team.svn.ui.action.local.TagAction"
-               definitionId="org.eclipse.team.svn.ui.command.TagCommand"
-               icon="icons/common/actions/tag.gif">
-         </action> 
-         <action
                helpContextId="org.eclipse.team.svn.ui.team_branch_action_context"
                label="%BranchAction.label"
                tooltip="%BranchAction.tooltip"
@@ -2168,6 +2157,7 @@
           name="%SwitchCommand.label"/>
     <command
           categoryId="org.eclipse.team.svn.ui.command.category"
+          defaultHandler="org.eclipse.team.svn.ui.action.local.TagAction"
           id="org.eclipse.team.svn.ui.command.TagCommand"
           name="%TagCommand.label"/>
     <command
@@ -2576,6 +2566,21 @@
                label="%MergeAction.label"
                style="push"
                tooltip="%MergeAction.tooltip">
+            <visibleWhen
+                  checkEnabled="false">
+               <reference
+                        definitionId="org.eclipse.team.svn.ui.mapping.connected">
+               </reference>
+            </visibleWhen>
+         </command>
+         <command
+               commandId="org.eclipse.team.svn.ui.command.TagCommand"
+               helpContextId="org.eclipse.team.svn.ui.team_tag_action_context"
+               icon="icons/common/actions/tag.gif"
+               id="org.eclipse.team.svn.ui.action.local.TagAction"
+               label="%TagAction.label"
+               style="push"
+               tooltip="%TagAction.tooltip">
             <visibleWhen
                   checkEnabled="false">
                <reference
