@@ -391,17 +391,6 @@
            </adapt>
          </enablement>
          
-         
-         <action
-               helpContextId="org.eclipse.team.svn.ui.team_edit_conflicts_action_context"
-               label="%EditConflictsAction.label"
-               tooltip="%EditConflictsAction.tooltip"
-               class="org.eclipse.team.svn.ui.action.local.EditConflictsAction"
-               menubarPath="team.main/group2"
-               definitionId="org.eclipse.team.svn.ui.command.EditConflictsCommand"
-               id="org.eclipse.team.svn.ui.action.local.EditConflictsAction">
-         </action>
-         
          <action
                helpContextId="org.eclipse.team.svn.ui.team_ignore_action_context"
                label="%AddToSVNIgnoreAction.label"
@@ -2148,6 +2137,7 @@
           name="%UpgradeProjectsCommand.label"/>
     <command
           categoryId="org.eclipse.team.svn.ui.command.category"
+          defaultHandler="org.eclipse.team.svn.ui.action.local.EditConflictsAction"
           id="org.eclipse.team.svn.ui.command.EditConflictsCommand"
           name="%EditConflictsCommand.label"/>
     <command
@@ -2525,6 +2515,22 @@
                label="%EditTreeConflictsAction.label"
                style="push"
                tooltip="%EditTreeConflictsAction.tooltip">
+            <visibleWhen
+                  checkEnabled="false">
+               <or>
+                  <reference
+                        definitionId="org.eclipse.team.svn.ui.mapping.connected">
+                  </reference>
+               </or>
+            </visibleWhen>
+         </command>
+         <command
+               commandId="org.eclipse.team.svn.ui.command.EditConflictsCommand"
+               helpContextId="org.eclipse.team.svn.ui.team_edit_conflicts_action_context"
+               id="org.eclipse.team.svn.ui.action.local.EditConflictsAction"
+               label="%EditConflictsAction.label"
+               style="push"
+               tooltip="%EditConflictsAction.tooltip">
             <visibleWhen
                   checkEnabled="false">
                <or>
