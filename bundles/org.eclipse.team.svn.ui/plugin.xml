@@ -421,16 +421,6 @@
                icon="icons/common/actions/lock.gif">
          </action>
          <action
-               label="%SwitchAction.label"
-               helpContextId="org.eclipse.team.svn.ui.team_switch_action_context"
-               class="org.eclipse.team.svn.ui.action.local.SwitchAction"
-               tooltip="%SwitchAction.tooltip"
-               menubarPath="team.main/group3"
-               id="org.eclipse.team.svn.ui.action.local.SwitchAction"
-               definitionId="org.eclipse.team.svn.ui.command.SwitchCommand"
-               icon="icons/common/actions/switch.gif">
-         </action>    
-         <action
                helpContextId="org.eclipse.team.svn.ui.team_merge_action_context"
                label="%MergeAction.label"
                tooltip="%MergeAction.tooltip"
@@ -2184,6 +2174,7 @@
           name="%SynchronizeCommand.label"/>
     <command
           categoryId="org.eclipse.team.svn.ui.command.category"
+          defaultHandler="org.eclipse.team.svn.ui.action.local.SwitchAction"
           id="org.eclipse.team.svn.ui.command.SwitchCommand"
           name="%SwitchCommand.label"/>
     <command
@@ -2566,6 +2557,21 @@
                label="%AddRevisionLinkAction.label"
                style="push"
                tooltip="%AddRevisionLinkAction.tooltip">
+            <visibleWhen
+                  checkEnabled="false">
+               <reference
+                        definitionId="org.eclipse.team.svn.ui.mapping.connected">
+               </reference>
+            </visibleWhen>
+         </command>
+         <command
+               commandId="org.eclipse.team.svn.ui.command.SwitchCommand"
+               helpContextId="org.eclipse.team.svn.ui.team_switch_action_context"
+               icon="icons/common/actions/switch.gif"
+               id="org.eclipse.team.svn.ui.action.local.SwitchAction"
+               label="%SwitchAction.label"
+               style="push"
+               tooltip="%SwitchAction.tooltip">
             <visibleWhen
                   checkEnabled="false">
                <reference
