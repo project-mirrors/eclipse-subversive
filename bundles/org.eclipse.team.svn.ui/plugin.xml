@@ -392,15 +392,6 @@
          </enablement>
          
          <action
-			   label="%SetExternalDefinitionAction.label"
-               helpContextId="org.eclipse.team.svn.ui.team_set_external_definition_action_context"
-               class="org.eclipse.team.svn.ui.action.local.SetExternalDefinitionAction"
-               tooltip="%SetExternalDefinitionAction.tooltip"
-               menubarPath="team.main/group6"
-               definitionId="org.eclipse.team.svn.ui.command.SetExternalDefinitionCommand"
-               id="org.eclipse.team.svn.ui.action.local.SetExternalDefinitionAction">               
-         </action>         
-         <action
 			   label="%SetKeywordsAction.label"
                helpContextId="org.eclipse.team.svn.ui.team_set_keywords_action_context"
                class="org.eclipse.team.svn.ui.action.local.SetKeywordsAction"
@@ -2073,6 +2064,7 @@
           name="%SetKeywordsCommand.label"/>
     <command
           categoryId="org.eclipse.team.svn.ui.command.category"
+          defaultHandler="org.eclipse.team.svn.ui.action.local.SetExternalDefinitionAction"
           id="org.eclipse.team.svn.ui.command.SetExternalDefinitionCommand"
           name="%SetExternalDefinitionCommand.label"/>                    
     <command
@@ -2623,6 +2615,20 @@
                label="%CreatePatchAction.label"
                style="push"
                tooltip="%CreatePatchAction.tooltip">
+            <visibleWhen
+                  checkEnabled="false">
+               <reference
+                        definitionId="org.eclipse.team.svn.ui.mapping.connected">
+               </reference>
+            </visibleWhen>
+         </command>
+         <command
+               commandId="org.eclipse.team.svn.ui.command.SetExternalDefinitionCommand"
+               helpContextId="org.eclipse.team.svn.ui.team_set_external_definition_action_context"
+               id="org.eclipse.team.svn.ui.action.local.SetExternalDefinitionAction"
+               label="%SetExternalDefinitionAction.label"
+               style="push"
+               tooltip="%SetExternalDefinitionAction.tooltip">
             <visibleWhen
                   checkEnabled="false">
                <reference
