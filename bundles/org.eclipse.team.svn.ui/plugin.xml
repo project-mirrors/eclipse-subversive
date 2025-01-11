@@ -422,17 +422,6 @@
          </action>
          
          <action
-              helpContextId="org.eclipse.team.svn.ui.show_resource_history_action_context"
-              label="%ShowResourceHistoryAction.label"
-              tooltip="%ShowResourceHistoryAction.tooltip"
-              class="org.eclipse.team.svn.ui.action.local.ShowHistoryAction"
-              menubarPath="team.main/group4"
-              id="org.eclipse.team.svn.ui.action.local.ShowHistoryAction"
-              definitionId="org.eclipse.team.svn.ui.command.ShowResourceHistoryCommand"
-              icon="icons/common/actions/showhistory.gif">
-         </action>
-             
-         <action
                helpContextId="org.eclipse.team.svn.ui.team_create_patch_action_context"
                label="%CreatePatchAction.label"
                tooltip="%CreatePatchAction.tooltip"
@@ -2586,6 +2575,25 @@
                label="%BranchAction.label"
                style="push"
                tooltip="%BranchAction.tooltip">
+            <visibleWhen
+                  checkEnabled="false">
+               <reference
+                        definitionId="org.eclipse.team.svn.ui.mapping.connected">
+               </reference>
+            </visibleWhen>
+         </command>
+      </menuContribution>
+      <menuContribution
+            allPopups="false"
+            locationURI="popup:team.main?after=group4">
+         <command
+               commandId="org.eclipse.team.svn.ui.command.ShowResourceHistoryCommand"
+               helpContextId="org.eclipse.team.svn.ui.show_resource_history_action_context"
+               icon="icons/common/actions/showhistory.gif"
+               id="org.eclipse.team.svn.ui.action.local.ShowHistoryAction"
+               label="%ShowResourceHistoryAction.label"
+               style="push"
+               tooltip="%ShowResourceHistoryAction.tooltip">
             <visibleWhen
                   checkEnabled="false">
                <reference
