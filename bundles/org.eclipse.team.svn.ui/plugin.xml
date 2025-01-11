@@ -392,16 +392,6 @@
          </enablement>
          
          <action
-              helpContextId="org.eclipse.team.svn.ui.export_working_copy"
-              label="%ExportCommand.label"
-              tooltip="%ExportAction.tooltip"
-              class="org.eclipse.team.svn.ui.action.local.ExportAction"
-              menubarPath="team.main/group7"
-              definitionId="org.eclipse.team.svn.ui.command.ExportCommand"
-              id="org.eclipse.team.svn.ui.action.local.ExportAction"
-              icon="icons/common/export.gif">
-         </action>
-         <action
               helpContextId="org.eclipse.team.svn.ui.copy_working_copy"
               label="%CopyAction.label"
               tooltip="%CopyAction.tooltip"
@@ -1893,6 +1883,7 @@
           name="%BranchCommand.label"/>
     <command
           categoryId="org.eclipse.team.svn.ui.command.category"
+          defaultHandler="org.eclipse.team.svn.ui.action.local.ExportAction"
           id="org.eclipse.team.svn.ui.command.ExportCommand"
           name="%ExportCommand.label"/>
     <command
@@ -2645,6 +2636,25 @@
                label="%EditPropertiesAction.label"
                style="push"
                tooltip="%EditPropertiesAction.tooltip">
+            <visibleWhen
+                  checkEnabled="false">
+               <reference
+                        definitionId="org.eclipse.team.svn.ui.mapping.connected">
+               </reference>
+            </visibleWhen>
+         </command>
+      </menuContribution>
+      <menuContribution
+            allPopups="false"
+            locationURI="popup:team.main?after=group7">
+         <command
+               commandId="org.eclipse.team.svn.ui.command.ExportCommand"
+               helpContextId="org.eclipse.team.svn.ui.export_working_copy"
+               icon="icons/common/export.gif"
+               id="org.eclipse.team.svn.ui.action.local.ExportAction"
+               label="%ExportCommand.label"
+               style="push"
+               tooltip="%ExportAction.tooltip">
             <visibleWhen
                   checkEnabled="false">
                <reference
