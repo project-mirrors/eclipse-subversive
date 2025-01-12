@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2023 Tasktop Technologies, Polarion Software and others.
+ * Copyright (c) 2009, 2025 Tasktop Technologies, Polarion Software and others.
  * 
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -110,7 +110,7 @@ public class ConnectorDiscovery {
 				discoveryStrategy.setCategories(categories);
 				discoveryStrategy.setConnectors(connectors);
 				discoveryStrategy
-						.performDiscovery(new SubProgressMonitor(monitor, discoveryTicks / discoveryStrategies.size()));
+				.performDiscovery(new SubProgressMonitor(monitor, discoveryTicks / discoveryStrategies.size()));
 			}
 
 			filterDescriptors();
@@ -370,7 +370,10 @@ public class ConnectorDiscovery {
 		@Override
 		public VerifyUpdateSiteJob call() throws Exception {
 			URL baseUrl = new URL(url);
-			URL[] locations = { new URL(baseUrl, "content.jar"), new URL(baseUrl, "content.xml"), //$NON-NLS-1$//$NON-NLS-2$
+			URL[] locations = { //
+					new URL(baseUrl, "compositeContent.xml"), //$NON-NLS-1$
+					new URL(baseUrl, "content.jar"), //$NON-NLS-1$
+					new URL(baseUrl, "content.xml"), //$NON-NLS-1$
 					new URL(baseUrl, "site.xml") }; //$NON-NLS-1$
 			ok = WebUtil.verifyAvailability(locations, true, new NullProgressMonitor());
 			return this;

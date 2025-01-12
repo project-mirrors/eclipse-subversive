@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.4"?>
 <!--
-	Copyright (c) 2023 Contributors to the Eclipse Foundation
+	Copyright (c) 2023, 2025 Contributors to the Eclipse Foundation
 
 	This program and the accompanying materials are made available under the
 	terms of the Eclipse Public License 2.0 which is available at
@@ -37,12 +37,12 @@
             categoryId="org.eclipse.team.svn.discovery.svn.connectors"
             description="SVN connector based on SVNKit 1.10.4 library (http://svnkit.com/). Compatible with SVN from version 1.7 up to 1.10. Pure Java. Supported platforms: All."
             groupId="org.eclipse.team.svn.discovery-svnkit"
-            id="org.polarion.eclipse.team.svn.connector,org.polarion.eclipse.team.svn.connector.svnkit1_10"
+            id="ru.arsysop.svn.connectors.svnkit1_10.feature"
             kind="task"
             license="TMate Open Source License"
             name="SVN Kit 1.10.4"
-            provider="osspit.org"
-            siteUrl="https://osspit.org/eclipse/subversive-connectors/">
+            provider="ArSysOp"
+            siteUrl="https://arsysop.github.io/svn/release/">
          <icon image32="images/Subversive.png">
          </icon>
          <overview

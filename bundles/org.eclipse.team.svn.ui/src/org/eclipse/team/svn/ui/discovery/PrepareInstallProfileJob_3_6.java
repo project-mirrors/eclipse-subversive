@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2023 Tasktop Technologies and others.
+ * Copyright (c) 2009, 2025 Tasktop Technologies and others.
  * 
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -138,29 +138,6 @@ public class PrepareInstallProfileJob_3_6 implements IConnectorsInstallJob {
 			removeOldVersions(installableUnits);
 			checkForUnavailable(installableUnits);
 			return installableUnits.toArray(new IInstallableUnit[installableUnits.size()]);
-
-//			MultiStatus status = new MultiStatus(DiscoveryUi.ID_PLUGIN, 0, Messages.PrepareInstallProfileJob_ok, null);
-//			ius = installableUnits.toArray(new IInstallableUnit[installableUnits.size()]);
-//			ProfileChangeRequest profileChangeRequest = InstallAction.computeProfileChangeRequest(ius, profileId,
-//					status, new SubProgressMonitor(monitor, installableConnectors.size()));
-//			if (status.getSeverity() > IStatus.WARNING) {
-//				throw new CoreException(status);
-//			}
-//			if (profileChangeRequest == null) {
-//				// failed but no indication as to why
-//				throw new CoreException(new Status(IStatus.ERROR, DiscoveryUi.ID_PLUGIN,
-//						Messages.PrepareInstallProfileJob_computeProfileChangeRequestFailed, null));
-//			}
-//			PlannerResolutionOperation operation = new PlannerResolutionOperation(
-//					Messages.PrepareInstallProfileJob_calculatingRequirements, profileId, profileChangeRequest, null,
-//					status, true);
-//			IStatus operationStatus = operation.execute(new SubProgressMonitor(monitor, installableConnectors.size()));
-//			if (operationStatus.getSeverity() > IStatus.WARNING) {
-//				throw new CoreException(operationStatus);
-//			}
-//
-//			plannerResolutionOperation = operation;
-
 		} catch (URISyntaxException | MalformedURLException e) {
 			// should never happen, since we already validated URLs.
 			throw new CoreException(new Status(IStatus.ERROR, SVNTeamPlugin.NATURE_ID,
@@ -261,7 +238,7 @@ public class PrepareInstallProfileJob_3_6 implements IConnectorsInstallJob {
 			final Set<String> installableUnitIdsThisRepository = getDescriptorIds(repository);
 			IQuery<IInstallableUnit> query = QueryUtil.createMatchQuery( //
 					"id ~= /*.feature.group/ && " + //$NON-NLS-1$
-							"properties['org.eclipse.equinox.p2.type.group'] == true ");//$NON-NLS-1$
+					"properties['org.eclipse.equinox.p2.type.group'] == true ");//$NON-NLS-1$
 			IQueryResult<IInstallableUnit> result = repository.query(query, monitor.newChild(1));
 			for (IInstallableUnit iu : result) {
 				String id = iu.getId();

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2023 Polarion Software and others.
+ * Copyright (c) 2005, 2025 Polarion Software and others.
  * 
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -25,9 +25,9 @@ import org.eclipse.team.svn.core.operation.UnreportableException;
  * @author Alexander Gurov
  */
 public interface ISVNConnectorFactory {
-	String DEFAULT_ID = "org.eclipse.team.svn.connector.svnkit18"; //$NON-NLS-1$
+	String DEFAULT_ID = "org.eclipse.team.svn.connector.svnkit1_10"; //$NON-NLS-1$
 
-	String CURRENT_COMPATIBILITY_VERSION = "4.0.0.I20160427-1700"; //$NON-NLS-1$
+	String CURRENT_COMPATIBILITY_VERSION = "5.0.0"; //$NON-NLS-1$
 
 	/**
 	 * Enumeration of connector API compatibility levels

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2023 Polarion Software and others.
+ * Copyright (c) 2005, 2025 Polarion Software and others.
  * 
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -14,14 +14,12 @@
 
 package org.eclipse.team.svn.ui.discovery;
 
-import java.lang.reflect.Constructor;
 import java.net.Authenticator;
 import java.net.PasswordAuthentication;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.wizard.WizardDialog;
-import org.eclipse.osgi.service.resolver.VersionRange;
 import org.eclipse.team.svn.core.discovery.util.WebUtil;
 import org.eclipse.team.svn.core.extension.CoreExtensionsManager;
 import org.eclipse.team.svn.core.operation.UnreportableException;
@@ -32,7 +30,6 @@ import org.eclipse.team.svn.ui.dialog.DefaultDialog;
 import org.eclipse.team.svn.ui.discovery.wizards.ConnectorDiscoveryWizard;
 import org.eclipse.team.svn.ui.panel.callback.PromptCredentialsPanel;
 import org.eclipse.team.svn.ui.utility.UIMonitorUtility;
-import org.osgi.framework.Bundle;
 
 /**
  * Operation which checks whether connectors are installed and if they're not, it provides a wizard to installing them.
@@ -80,7 +77,7 @@ public class DiscoveryConnectorsHelper {
 		if (CoreExtensionsManager.instance().getAccessibleClients().isEmpty()
 				&& Platform.getBundle("org.eclipse.equinox.p2.repository") != null) { //$NON-NLS-1$
 			try {
-				final IConnectorsInstallJob installJob = getInstallJob();
+				IConnectorsInstallJob installJob = new PrepareInstallProfileJob_3_6();
 
 				if (installJob != null) {
 					//set proxy authenticator to WebUtil for accessing Internet files
@@ -101,26 +98,4 @@ public class DiscoveryConnectorsHelper {
 		}
 	}
 
-	/*
-	 * If there's a problem during creating job, exception is thrown which indicates the reason
-	 * 
-	 * Note that job can be null, e.g. for Eclipse 3.4
-	 */
-	protected IConnectorsInstallJob getInstallJob() throws Exception {
-		IConnectorsInstallJob runnable = null;
-		Bundle bundle = Platform.getBundle("org.eclipse.equinox.p2.engine"); //$NON-NLS-1$
-		if (bundle != null) {
-			Class<?> clazz = null;
-			if (new VersionRange("[1.0.0,1.1.0)").isIncluded(bundle.getVersion())) { //$NON-NLS-1$
-				//for Eclipse 3.5
-				clazz = Class.forName("org.eclipse.team.svn.ui.discovery.PrepareInstallProfileJob_3_5"); //$NON-NLS-1$
-			} else {
-				//for Eclipse 3.6
-				clazz = Class.forName("org.eclipse.team.svn.ui.discovery.PrepareInstallProfileJob_3_6"); //$NON-NLS-1$
-			}
-			Constructor<?> c = clazz.getConstructor();
-			runnable = (IConnectorsInstallJob) c.newInstance();
-		}
-		return runnable;
-	}
 }
