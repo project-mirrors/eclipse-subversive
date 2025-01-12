@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-	Copyright (c) 2022, 2024 ArSysOp
+	Copyright (c) 2022, 2025 ArSysOp
 
 	This program and the accompanying materials are made available under the
 	terms of the Eclipse Public License 2.0 which is available at
@@ -10,42 +10,43 @@
 
 	Contributors:
 		Alexander Fedorov (ArSysOp) - initial API and implementation
+		Alexander Fedorov (ArSysOp) - ongoing support
 -->
 <site>
-   <feature id="org.eclipse.team.svn.core">
+   <feature id="org.eclipse.team.svn.core.feature">
       <category name="org.eclipse.team.svn.core.category"/>
    </feature>
-   <feature id="org.eclipse.team.svn">
+   <feature id="org.eclipse.team.svn.feature">
       <category name="org.eclipse.team.svn.category"/>
    </feature>
    <feature id="org.eclipse.team.svn.nl1.feature">
       <category name="org.eclipse.team.svn.category"/>
    </feature>
-   <feature id="org.eclipse.team.svn.mylyn">
+   <feature id="org.eclipse.team.svn.mylyn.feature">
       <category name="org.eclipse.team.svn.integrations.category"/>
    </feature>
-   <feature id="org.eclipse.team.svn.m2e">
+   <feature id="org.eclipse.team.svn.m2e.feature">
       <category name="org.eclipse.team.svn.integrations.category"/>
    </feature>
-   <feature id="org.eclipse.team.svn.pde.build">
+   <feature id="org.eclipse.team.svn.pde.build.feature">
       <category name="org.eclipse.team.svn.pde.build.category"/>
    </feature>
-   <feature id="org.eclipse.team.svn.core.source">
+   <feature id="org.eclipse.team.svn.core.feature.source">
       <category name="org.eclipse.team.svn.core.category.source"/>
    </feature>
-   <feature id="org.eclipse.team.svn.source">
+   <feature id="org.eclipse.team.svn.feature.source">
       <category name="org.eclipse.team.svn.category.source"/>
    </feature>
    <feature id="org.eclipse.team.svn.nl1.feature.source">
       <category name="org.eclipse.team.svn.category.source"/>
    </feature>
-   <feature id="org.eclipse.team.svn.mylyn.source">
+   <feature id="org.eclipse.team.svn.mylyn.feature.source">
       <category name="org.eclipse.team.svn.integrations.category.source"/>
    </feature>
-   <feature id="org.eclipse.team.svn.m2e.source">
+   <feature id="org.eclipse.team.svn.m2e.feature.source">
       <category name="org.eclipse.team.svn.integrations.category.source"/>
    </feature>
-   <feature id="org.eclipse.team.svn.pde.build.source">
+   <feature id="org.eclipse.team.svn.pde.build.feature.source">
       <category name="org.eclipse.team.svn.pde.build.category.source"/>
    </feature>
    <category-def name="org.eclipse.team.svn.core.category" label="Eclipse Subversive SVN Team Provider Core">

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-	Copyright (c) 2023, 2024 Contributors to the Eclipse Foundation
+	Copyright (c) 2023, 2025 Contributors to the Eclipse Foundation
 
 	This program and the accompanying materials are made available under the
 	terms of the Eclipse Public License 2.0 which is available at
@@ -12,7 +12,7 @@
 		See git history
 -->
 <feature
-      id="org.eclipse.team.svn.core"
+      id="org.eclipse.team.svn.core.feature"
       label="%featureName"
       version="5.0.0.qualifier"
       provider-name="%providerName"
@@ -34,9 +34,6 @@
 
    <plugin
          id="org.eclipse.team.svn.core"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
+         version="0.0.0"/>
 
 </feature>
