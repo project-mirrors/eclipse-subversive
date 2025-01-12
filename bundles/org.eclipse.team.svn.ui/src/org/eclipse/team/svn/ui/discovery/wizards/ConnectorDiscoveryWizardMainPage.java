@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2023 Tasktop Technologies and others.
+ * Copyright (c) 2009, 2025 Tasktop Technologies and others.
  * 
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -19,8 +19,6 @@ package org.eclipse.team.svn.ui.discovery.wizards;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.io.IOException;
-import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -28,18 +26,15 @@ import java.util.Collections;
 import java.util.Dictionary;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Properties;
 import java.util.Set;
 import java.util.regex.Pattern;
 
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IBundleGroup;
 import org.eclipse.core.runtime.IBundleGroupProvider;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
-import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.Dialog;
@@ -107,10 +102,8 @@ import org.eclipse.team.svn.core.discovery.model.DiscoveryCategory;
 import org.eclipse.team.svn.core.discovery.model.DiscoveryConnector;
 import org.eclipse.team.svn.core.discovery.model.Icon;
 import org.eclipse.team.svn.core.discovery.model.Overview;
-import org.eclipse.team.svn.core.discovery.model.RemoteBundleDiscoveryStrategy;
 import org.eclipse.team.svn.core.discovery.util.DiscoveryCategoryComparator;
 import org.eclipse.team.svn.core.discovery.util.DiscoveryConnectorComparator;
-import org.eclipse.team.svn.core.operation.LoggedOperation;
 import org.eclipse.team.svn.ui.SVNTeamUIPlugin;
 import org.eclipse.team.svn.ui.SVNUIMessages;
 import org.eclipse.team.svn.ui.discovery.GradientCanvas;
@@ -126,10 +119,6 @@ import org.eclipse.ui.progress.WorkbenchJob;
  * @author Igor Burilo
  */
 public class ConnectorDiscoveryWizardMainPage extends WizardPage {
-
-	private static String DISCOVERY_PROPERTIES_FILE = "discovery.properties";
-
-	private static String URL_DISCOVERY_PROPERTY = "url";
 
 	private static final String COLOR_WHITE = "white"; //$NON-NLS-1$
 
@@ -225,7 +214,7 @@ public class ConnectorDiscoveryWizardMainPage extends WizardPage {
 					} else {
 						textFilterContainer = new Composite(filterContainer, SWT.BORDER);
 						textFilterContainer
-								.setBackground(header.getDisplay().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
+						.setBackground(header.getDisplay().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
 					}
 					GridDataFactory.fillDefaults().grab(true, false).applyTo(textFilterContainer);
 					GridLayoutFactory.fillDefaults().numColumns(2).applyTo(textFilterContainer);
@@ -289,8 +278,8 @@ public class ConnectorDiscoveryWizardMainPage extends WizardPage {
 
 		//Setting context help
 		PlatformUI.getWorkbench()
-				.getHelpSystem()
-				.setHelp(parent, "org.eclipse.team.svn.help.connectorDiscoveryWizContext"); //$NON-NLS-1$
+		.getHelpSystem()
+		.setHelp(parent, "org.eclipse.team.svn.help.connectorDiscoveryWizContext"); //$NON-NLS-1$
 	}
 
 	private static boolean useNativeSearchField(Composite composite) {
@@ -346,10 +335,10 @@ public class ConnectorDiscoveryWizardMainPage extends WizardPage {
 
 	private Label createClearFilterTextControl(Composite filterContainer, final Text filterText) {
 		final Image inactiveImage = SVNTeamUIPlugin.instance()
-				.getImageDescriptor("icons/wizards/find-clear-disabled.gif")
+				.getImageDescriptor("icons/wizards/find-clear-disabled.gif") //$NON-NLS-1$
 				.createImage();
 		final Image activeImage = SVNTeamUIPlugin.instance()
-				.getImageDescriptor("icons/wizards/find-clear.gif")
+				.getImageDescriptor("icons/wizards/find-clear.gif") //$NON-NLS-1$
 				.createImage();
 		final Image pressedImage = new Image(filterContainer.getDisplay(), activeImage, SWT.IMAGE_GRAY);
 
@@ -554,7 +543,7 @@ public class ConnectorDiscoveryWizardMainPage extends WizardPage {
 
 	private void initializeImages() {
 		if (infoImage == null) {
-			infoImage = SVNTeamUIPlugin.instance().getImageDescriptor("icons/discovery/message_info.gif").createImage();
+			infoImage = SVNTeamUIPlugin.instance().getImageDescriptor("icons/discovery/message_info.gif").createImage(); //$NON-NLS-1$
 			disposables.add(infoImage);
 		}
 	}
@@ -699,8 +688,8 @@ public class ConnectorDiscoveryWizardMainPage extends WizardPage {
 			configureLook(providerLabel, background);
 			GridDataFactory.fillDefaults().align(SWT.END, SWT.CENTER).applyTo(providerLabel);
 			providerLabel
-					.setText(BaseMessages.format(SVNUIMessages.ConnectorDiscoveryWizardMainPage_provider_and_license,
-							new Object[] { connector.getProvider(), connector.getLicense() }));
+			.setText(BaseMessages.format(SVNUIMessages.ConnectorDiscoveryWizardMainPage_provider_and_license,
+					new Object[] { connector.getProvider(), connector.getLicense() }));
 
 			if (hasTooltip(connector)) {
 				ToolBar toolBar = new ToolBar(connectorContainer, SWT.FLAT);
@@ -798,7 +787,7 @@ public class ConnectorDiscoveryWizardMainPage extends WizardPage {
 				if (unavailable) {
 					if (warningIconImage == null) {
 						warningIconImage = new DecorationOverlayIcon(iconImage,
-								SVNTeamUIPlugin.instance().getImageDescriptor("icons/discovery/message_warning.gif"),
+								SVNTeamUIPlugin.instance().getImageDescriptor("icons/discovery/message_warning.gif"), //$NON-NLS-1$
 								IDecoration.TOP_LEFT).createImage();
 						disposables.add(warningIconImage);
 					}
@@ -883,11 +872,11 @@ public class ConnectorDiscoveryWizardMainPage extends WizardPage {
 
 					GridDataFactory.fillDefaults().span(2, 1).applyTo(categoryHeaderContainer);
 					GridLayoutFactory.fillDefaults()
-							.numColumns(3)
-							.margins(5, 5)
-							.equalWidth(false)
-							.applyTo(
-									categoryHeaderContainer);
+					.numColumns(3)
+					.margins(5, 5)
+					.equalWidth(false)
+					.applyTo(
+							categoryHeaderContainer);
 
 					Label iconLabel = new Label(categoryHeaderContainer, SWT.NULL);
 					if (category.getIcon() != null) {
@@ -919,11 +908,11 @@ public class ConnectorDiscoveryWizardMainPage extends WizardPage {
 					}
 					Label description = new Label(categoryHeaderContainer, SWT.WRAP);
 					GridDataFactory.fillDefaults()
-							.grab(true, false)
-							.span(2, 1)
-							.hint(100, SWT.DEFAULT)
-							.applyTo(
-									description);
+					.grab(true, false)
+					.span(2, 1)
+					.hint(100, SWT.DEFAULT)
+					.applyTo(
+							description);
 					description.setBackground(null);
 					description.setText(category.getDescription());
 				}
@@ -1080,7 +1069,9 @@ public class ConnectorDiscoveryWizardMainPage extends WizardPage {
 				break;
 			}
 		}
-		if (kindFiltered || (installedFeatures != null && installedFeatures.contains(descriptor.getInstallableUnits()))) {
+		if (kindFiltered || installedFeatures != null //
+				//FIXME: AF: not sure here, but definitely more sense than before
+				&& installedFeatures.containsAll(descriptor.getInstallableUnits())) {
 			// always filter installed features per bug 275777
 			return true;
 		}
@@ -1157,34 +1148,6 @@ public class ConnectorDiscoveryWizardMainPage extends WizardPage {
 
 						ConnectorDiscovery connectorDiscovery = new ConnectorDiscovery();
 						connectorDiscovery.getDiscoveryStrategies().add(new BundleDiscoveryStrategy());
-
-						//retrieve discovery url from properties file and call remote discovery strategy
-						URL discoveryFileUrl = FileLocator.find(SVNTeamUIPlugin.instance().getBundle(),
-								new Path(ConnectorDiscoveryWizardMainPage.DISCOVERY_PROPERTIES_FILE), null);
-						if (discoveryFileUrl != null) {
-							InputStream in = null;
-							try {
-								Properties props = new Properties();
-								in = discoveryFileUrl.openStream();
-								props.load(in);
-								String discoveryUrl = props
-										.getProperty(ConnectorDiscoveryWizardMainPage.URL_DISCOVERY_PROPERTY);
-								RemoteBundleDiscoveryStrategy remoteDiscoveryStrategy = new RemoteBundleDiscoveryStrategy();
-								remoteDiscoveryStrategy.setDiscoveryUrl(discoveryUrl);
-								connectorDiscovery.getDiscoveryStrategies().add(remoteDiscoveryStrategy);
-							} catch (IOException ie) {
-								LoggedOperation.reportError(this.getClass().getName(), ie);
-							} finally {
-								if (in != null) {
-									try {
-										in.close();
-									} catch (IOException e) {
-										//ignore
-									}
-								}
-							}
-						}
-
 						connectorDiscovery.setEnvironment(environment);
 						connectorDiscovery.setVerifyUpdateSiteAvailability(false);
 						try {
