@@ -4,7 +4,7 @@ Bundle-ManifestVersion: 2
 Bundle-RequiredExecutionEnvironment: JavaSE-11
 Bundle-Name: Eclipse Subversive SVN Team Provider Tests
 Bundle-SymbolicName: org.eclipse.team.svn.tests;singleton:=true
-Bundle-Version: 5.0.0
+Bundle-Version: 5.0.1
 Bundle-Vendor: Eclipse Subversive
 Bundle-Activator: org.eclipse.team.svn.tests.TestPlugin
 Bundle-Localization: plugin
