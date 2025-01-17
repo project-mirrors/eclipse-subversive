@@ -4,6 +4,6 @@ Bundle-ManifestVersion: 2
 Bundle-RequiredExecutionEnvironment: JavaSE-11
 Bundle-Name: %pluginName
 Bundle-SymbolicName: org.eclipse.team.svn.nl1;singleton:=true
-Bundle-Version: 5.0.0.qualifier
+Bundle-Version: 5.0.1.qualifier
 Bundle-Vendor: %providerName
 Bundle-Localization: plugin
