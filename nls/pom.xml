@@ -25,7 +25,7 @@
     <parent>
         <groupId>org.eclipse.team.svn</groupId>
         <artifactId>org.eclipse.team.svn.parent</artifactId>
-        <version>5.0.1-SNAPSHOT</version>
+        <version>5.1.0-SNAPSHOT</version>
         <relativePath>../releng/org.eclipse.team.svn.parent</relativePath>
     </parent>
 </project>
