@@ -7,7 +7,7 @@ Copyright © 2007, 2025 Contributors to the Eclipse Foundation
 
 ###### Build instructions:
 
-* [JDK 11+](https://adoptium.net/)
+* [JDK 17+](https://adoptium.net/)
 * [Apache Maven 3.9.0+](https://maven.apache.org/)
 * git
 * Internet access
