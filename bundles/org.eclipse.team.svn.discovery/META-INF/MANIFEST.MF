@@ -5,6 +5,6 @@ Bundle-SymbolicName: org.eclipse.team.svn.discovery;singleton:=true
 Bundle-Version: 5.1.0
 Bundle-Name: %pluginName
 Bundle-Vendor: %providerName
-Bundle-RequiredExecutionEnvironment: JavaSE-11
+Bundle-RequiredExecutionEnvironment: JavaSE-17
 Export-Package: org.eclipse.team.svn.internal.discovery;x-internal:=true
 Bundle-Localization: plugin
