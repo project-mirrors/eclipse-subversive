@@ -68,7 +68,7 @@ public class SVNFolderListener implements IResourceChangeListener {
 				}
 
 				if (resource.getType() == IResource.PROJECT && delta.getKind() == IResourceDelta.ADDED
-						&& delta.getFlags() == IResourceDelta.OPEN && ((IProject) resource).isOpen()
+						&& (delta.getFlags() & IResourceDelta.OPEN) != 0 && ((IProject) resource).isOpen()
 						&& SVNUtility.hasSVNFolderInOrAbove(resource) && // prevent UI plug-in activation when it is unnecessary
 						SVNTeamPlugin.instance()
 								.getOptionProvider()
