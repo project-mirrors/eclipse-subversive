@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-RequiredExecutionEnvironment: JavaSE-17
 Bundle-Name: %pluginName
 Bundle-SymbolicName: org.eclipse.team.svn.ui.capabilities;singleton:=true
-Bundle-Version: 5.1.0.qualifier
+Bundle-Version: 5.2.0.qualifier
 Bundle-Vendor: %providerName
 Require-Bundle: org.eclipse.ui
 Bundle-Localization: plugin
