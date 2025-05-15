@@ -14,7 +14,7 @@
 <feature
       id="org.eclipse.team.svn.feature"
       label="%featureName"
-      version="5.1.0.qualifier"
+      version="5.2.0.qualifier"
       provider-name="%providerName"
       plugin="org.eclipse.team.svn"
       license-feature="org.eclipse.license"
@@ -33,7 +33,7 @@
    </license>
 
    <requires>
-      <import feature="org.eclipse.team.svn.core.feature" version="5.1.0.qualifier"/>
+      <import feature="org.eclipse.team.svn.core.feature" version="5.2.0.qualifier"/>
    </requires>
 
    <plugin
